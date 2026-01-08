@@ -25,8 +25,8 @@ export default async function ArticleDetailPage({ params }: PageProps) {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <Link 
-        href="/fr/actualites" 
+      <Link
+        href="/fr/actualites"
         className="text-cjblue hover:underline mb-4 inline-block"
       >
         ← Retour aux actualités
@@ -34,15 +34,15 @@ export default async function ArticleDetailPage({ params }: PageProps) {
 
       <article className="mt-6">
         <h1 className="text-4xl font-bold text-cjblue mb-4">{article.title}</h1>
-        
+
         <div className="text-sm text-gray-500 mb-6">
-          Publié le {new Date(article.publishedAt).toLocaleDateString('fr-FR', {
+          Publié le {new Date(article.createdAt).toLocaleDateString('fr-FR', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
           })}
         </div>
-        
+
         <div className="prose max-w-none">
           <div className="text-gray-700 leading-relaxed whitespace-pre-line">
             {article.content || article.excerpt || 'Aucun contenu disponible pour cet article.'}
