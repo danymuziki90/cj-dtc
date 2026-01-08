@@ -29,7 +29,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         href="/fr/actualites"
         className="text-cjblue hover:underline mb-4 inline-block"
       >
-        ← Retour aux actualités
+        ← Retour
       </Link>
 
       <article className="mt-6">
