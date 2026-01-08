@@ -2,15 +2,15 @@ import { prisma } from '../../../lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CertificatesPage(){
-  let list = []
-  
+export default async function CertificatesPage() {
+  let list: any[] = []
+
   try {
     list = await prisma.certificate.findMany({ orderBy: { issuedAt: 'desc' }, include: { formation: true, user: true } })
   } catch (error: any) {
     console.error('Erreur de connexion à la base de données:', error.message)
   }
-  
+
   return (
     <div>
       <h2 className="text-2xl font-bold text-cjblue">Certificats émis</h2>

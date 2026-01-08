@@ -4,8 +4,8 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function EnrollmentsPage() {
-  let enrollments = []
-  
+  let enrollments: any[] = []
+
   try {
     enrollments = await prisma.enrollment.findMany({
       include: {

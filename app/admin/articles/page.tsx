@@ -3,15 +3,15 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ArticlesPage(){
-  let list = []
-  
+export default async function ArticlesPage() {
+  let list: any[] = []
+
   try {
     list = await prisma.article.findMany({ orderBy: { createdAt: 'desc' } })
   } catch (error: any) {
     console.error('Erreur de connexion à la base de données:', error.message)
   }
-  
+
   return (
     <div>
       <div className="flex justify-between items-center">
