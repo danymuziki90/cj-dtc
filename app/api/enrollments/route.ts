@@ -3,7 +3,7 @@ import { prisma } from '../../../lib/prisma'
 
 export async function GET(req: Request) {
   try {
-    const url = new URL(req.url)
+    const url = new URL(req.url, 'http://localhost')
     const formationId = url.searchParams.get('formationId')
 
     const where = formationId ? { formationId: parseInt(formationId) } : {}

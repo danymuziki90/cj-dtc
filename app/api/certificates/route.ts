@@ -3,7 +3,7 @@ import { prisma } from '../../../lib/prisma'
 
 export async function GET(req: Request) {
   try {
-    const url = new URL(req.url)
+    const url = new URL(req.url, 'http://localhost')
     const code = url.searchParams.get('code')
     if (!code) {
       return NextResponse.json({ valid: false, error: 'Code requis' }, { status: 400 })
