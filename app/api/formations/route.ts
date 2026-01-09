@@ -3,6 +3,10 @@ import { prisma } from '../../../lib/prisma'
 
 export async function GET() {
   try {
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json([])
+    }
+
     const list = await prisma.formation.findMany({ orderBy: { createdAt: 'desc' } })
     return NextResponse.json(list)
   } catch (error) {

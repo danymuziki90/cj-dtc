@@ -3,6 +3,12 @@ import { prisma } from '../../../lib/prisma'
 
 export async function GET(req: Request) {
   try {
+    // If DATABASE_URL is not set (e.g. during certain build environments),
+    // return an empty list to avoid build-time failures on platforms like Vercel.
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json([])
+    }
+
     const url = new URL(req.url, 'http://localhost')
     const { searchParams } = url
     const limit = parseInt(searchParams.get('limit') || '10')

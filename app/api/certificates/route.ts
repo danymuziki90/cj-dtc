@@ -3,6 +3,10 @@ import { prisma } from '../../../lib/prisma'
 
 export async function GET(req: Request) {
   try {
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json({ valid: false })
+    }
+
     const url = new URL(req.url, 'http://localhost')
     const code = url.searchParams.get('code')
     if (!code) {
