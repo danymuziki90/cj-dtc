@@ -109,7 +109,7 @@ export default async function EnrollmentsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {formationEnrollments.map((enrollment) => (
+                    {formationEnrollments.map((enrollment: any) => (
                       <tr key={enrollment.id} className="border-b hover:bg-gray-50">
                         <td className="p-2">
                           {enrollment.firstName} {enrollment.lastName}
@@ -150,7 +150,7 @@ export default async function EnrollmentsPage() {
                   })} ({dateEnrollments.length})
                 </h4>
                 <div className="space-y-2">
-                  {dateEnrollments.map((enrollment) => (
+                  {dateEnrollments.map((enrollment: any) => (
                     <div key={enrollment.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
                       <div>
                         <span className="font-medium">
