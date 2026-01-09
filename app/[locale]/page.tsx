@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import HomeSections from '../../components/HomeSections'
+import RecentFormations from '../../components/RecentFormations'
+import RecentArticles from '../../components/RecentArticles'
 
 export default function HomePage() {
   return (
@@ -57,6 +59,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Recent Formations Section */}
+      <RecentFormations />
+
+      {/* Recent Articles Section */}
+      <RecentArticles />
 
       {/* CTA Section */}
       <section className="bg-gray-100 py-16">

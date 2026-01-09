@@ -12,15 +12,32 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-    if (!body.title || !body.slug) {
+    const formData = await req.formData()
+    const title = formData.get('title') as string
+    const slug = formData.get('slug') as string
+    const description = formData.get('description') as string
+    const imageFile = formData.get('image') as File | null
+
+    if (!title || !slug) {
       return NextResponse.json({ error: 'Titre et slug requis' }, { status: 400 })
     }
+
+    let imageUrl = null
+
+    // If an image file is provided, convert to base64 data URL
+    if (imageFile && imageFile.size > 0) {
+      const buffer = await imageFile.arrayBuffer()
+      const base64 = Buffer.from(buffer).toString('base64')
+      const mimeType = imageFile.type || 'image/jpeg'
+      imageUrl = `data:${mimeType};base64,${base64}`
+    }
+
     const created = await prisma.formation.create({
       data: {
-        title: body.title,
-        slug: body.slug,
-        description: body.description || ''
+        title,
+        slug,
+        description: description || '',
+        imageUrl
       }
     })
     return NextResponse.json(created, { status: 201 })
@@ -28,6 +45,8 @@ export async function POST(req: Request) {
     if (error.code === 'P2002') {
       return NextResponse.json({ error: 'Ce slug existe déjà' }, { status: 409 })
     }
+    console.error('Formation creation error:', error)
     return NextResponse.json({ error: 'Erreur lors de la création' }, { status: 500 })
   }
 }
+

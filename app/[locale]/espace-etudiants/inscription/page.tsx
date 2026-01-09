@@ -16,12 +16,14 @@ export default function InscriptionPage() {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [motivationFile, setMotivationFile] = useState<File | null>(null)
 
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
+    address: '',
     formationId: '',
     startDate: '',
     notes: ''
@@ -36,7 +38,6 @@ export default function InscriptionPage() {
         return res.json()
       })
       .then(data => {
-        // S'assurer que data est un tableau
         if (Array.isArray(data)) {
           setFormations(data)
         } else {
@@ -48,10 +49,24 @@ export default function InscriptionPage() {
       .catch(err => {
         console.error('Erreur:', err)
         setError('Erreur lors du chargement des formations')
-        setFormations([]) // S'assurer que formations reste un tableau
+        setFormations([])
         setLoading(false)
       })
   }, [])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      setMotivationFile(e.target.files[0])
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -60,16 +75,29 @@ export default function InscriptionPage() {
     setSuccess(false)
 
     try {
+      const data = new FormData()
+      data.append('firstName', formData.firstName)
+      data.append('lastName', formData.lastName)
+      data.append('email', formData.email)
+      data.append('phone', formData.phone)
+      data.append('address', formData.address)
+      data.append('formationId', formData.formationId)
+      data.append('startDate', formData.startDate)
+      data.append('notes', formData.notes)
+
+      if (motivationFile) {
+        data.append('motivation', motivationFile)
+      }
+
       const response = await fetch('/api/enrollments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: data
       })
 
-      const data = await response.json()
+      const responseData = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de l\'inscription')
+        throw new Error(responseData.error || 'Erreur lors de l\'inscription')
       }
 
       setSuccess(true)
@@ -78,10 +106,12 @@ export default function InscriptionPage() {
         lastName: '',
         email: '',
         phone: '',
+        address: '',
         formationId: '',
         startDate: '',
         notes: ''
       })
+      setMotivationFile(null)
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue')
     } finally {
@@ -91,8 +121,8 @@ export default function InscriptionPage() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <Link 
-        href="/fr/espace-etudiants" 
+      <Link
+        href="/fr/espace-etudiants"
         className="text-cjblue hover:underline mb-4 inline-block"
       >
         ← Retour à l'espace étudiants
@@ -101,7 +131,7 @@ export default function InscriptionPage() {
       <div className="mt-6">
         <h1 className="text-4xl font-bold text-cjblue mb-4">Inscription aux formations</h1>
         <p className="text-lg text-gray-600 mb-8">
-          Inscrivez-vous à nos formations et programmes certifiants. 
+          Inscrivez-vous à nos formations et programmes certifiants.
           Remplissez le formulaire ci-dessous et nous vous contacterons pour confirmer votre inscription.
         </p>
 
@@ -175,12 +205,29 @@ export default function InscriptionPage() {
               <input
                 id="phone"
                 type="tel"
+                name="phone"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cjblue"
                 placeholder="+243 XXX XXX XXX"
               />
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium mb-2">
+              Adresse <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="address"
+              type="text"
+              required
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cjblue"
+              placeholder="Rue, numéro, ville, pays"
+            />
           </div>
 
           <div>
@@ -195,8 +242,9 @@ export default function InscriptionPage() {
               <select
                 id="formationId"
                 required
+                name="formationId"
                 value={formData.formationId}
-                onChange={(e) => setFormData({ ...formData, formationId: e.target.value })}
+                onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cjblue"
               >
                 <option value="">Sélectionnez une formation</option>
@@ -217,11 +265,31 @@ export default function InscriptionPage() {
               id="startDate"
               type="date"
               required
+              name="startDate"
               value={formData.startDate}
-              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+              onChange={handleChange}
               min={new Date().toISOString().split('T')[0]}
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cjblue"
             />
+          </div>
+
+          <div>
+            <label htmlFor="motivation" className="block text-sm font-medium mb-2">
+              Lettre de motivation (PDF ou document) - Optionnel
+            </label>
+            <input
+              id="motivation"
+              type="file"
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={handleFileChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cjblue"
+            />
+            {motivationFile && (
+              <p className="text-sm text-green-600 mt-2">
+                ✓ Fichier sélectionné: {motivationFile.name}
+              </p>
+            )}
+            <p className="text-xs text-gray-500 mt-1">Formats acceptés : PDF, DOC, DOCX, TXT</p>
           </div>
 
           <div>
@@ -230,9 +298,10 @@ export default function InscriptionPage() {
             </label>
             <textarea
               id="notes"
-              rows={4}
+              name="notes"
               value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              onChange={handleChange}
+              rows={4}
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cjblue"
               placeholder="Informations supplémentaires, questions, etc."
             />

@@ -64,6 +64,7 @@ model Formation {
   title       String
   slug        String   @unique
   description String
+  imageUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   certificates Certificate[]
@@ -76,6 +77,7 @@ model Article {
   slug      String   @unique
   excerpt   String?
   content   String
+  imageUrl  String?
   published Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -104,18 +106,20 @@ model LMSConfig {
 }
 
 model Enrollment {
-  id          Int      @id @default(autoincrement())
-  firstName   String
-  lastName    String
-  email       String
-  phone       String?
-  formationId Int
-  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
-  startDate   DateTime
-  status      String   @default("pending") // pending, confirmed, cancelled
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  firstName           String
+  lastName            String
+  email               String
+  phone               String?
+  address             String?
+  formationId         Int
+  formation           Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  startDate           DateTime
+  status              String   @default("pending") // pending, accepted, rejected, cancelled
+  motivationLetter    String?
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@index([formationId])
   @@index([email])

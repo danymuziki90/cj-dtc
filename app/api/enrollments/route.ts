@@ -5,9 +5,9 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url)
     const formationId = url.searchParams.get('formationId')
-    
+
     const where = formationId ? { formationId: parseInt(formationId) } : {}
-    
+
     const enrollments = await prisma.enrollment.findMany({
       where,
       include: {
@@ -24,7 +24,7 @@ export async function GET(req: Request) {
         { createdAt: 'desc' }
       ]
     })
-    
+
     return NextResponse.json(enrollments)
   } catch (error) {
     return NextResponse.json(
@@ -36,24 +36,46 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-    
-    if (!body.firstName || !body.lastName || !body.email || !body.formationId || !body.startDate) {
+    const formData = await req.formData()
+
+    const firstName = formData.get('firstName') as string
+    const lastName = formData.get('lastName') as string
+    const email = formData.get('email') as string
+    const phone = formData.get('phone') as string | null
+    const address = formData.get('address') as string | null
+    const formationId = formData.get('formationId') as string
+    const startDate = formData.get('startDate') as string
+    const notes = formData.get('notes') as string | null
+    const motivationFile = formData.get('motivation') as File | null
+
+    if (!firstName || !lastName || !email || !formationId || !startDate) {
       return NextResponse.json(
         { error: 'Tous les champs obligatoires doivent être remplis' },
         { status: 400 }
       )
     }
 
+    let motivationLetter = null
+
+    // If a motivation letter file is provided, convert to base64 data URL
+    if (motivationFile && motivationFile.size > 0) {
+      const buffer = await motivationFile.arrayBuffer()
+      const base64 = Buffer.from(buffer).toString('base64')
+      const mimeType = motivationFile.type || 'application/pdf'
+      motivationLetter = `data:${mimeType};base64,${base64}`
+    }
+
     const enrollment = await prisma.enrollment.create({
       data: {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        email: body.email,
-        phone: body.phone || null,
-        formationId: parseInt(body.formationId),
-        startDate: new Date(body.startDate),
-        notes: body.notes || null,
+        firstName,
+        lastName,
+        email,
+        phone: phone || null,
+        address: address || null,
+        formationId: parseInt(formationId),
+        startDate: new Date(startDate),
+        motivationLetter,
+        notes: notes || null,
         status: 'pending'
       },
       include: {
@@ -67,6 +89,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(enrollment, { status: 201 })
   } catch (error: any) {
+    console.error('Enrollment error:', error)
     if (error.code === 'P2002') {
       return NextResponse.json(
         { error: 'Une inscription avec cet email existe déjà pour cette formation' },

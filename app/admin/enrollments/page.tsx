@@ -1,5 +1,7 @@
 import { prisma } from '../../../lib/prisma'
 import Link from 'next/link'
+import AdminEnrollmentTable from '../../../components/AdminEnrollmentTable'
+import BulkEmailSender from '../../../components/BulkEmailSender'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,44 +42,6 @@ export default async function EnrollmentsPage() {
     )
   }
 
-  // Grouper par formation
-  const byFormation = enrollments.reduce((acc, enrollment) => {
-    const formationTitle = enrollment.formation.title
-    if (!acc[formationTitle]) {
-      acc[formationTitle] = []
-    }
-    acc[formationTitle].push(enrollment)
-    return acc
-  }, {} as Record<string, typeof enrollments>)
-
-  // Grouper par date de début
-  const byStartDate = enrollments.reduce((acc, enrollment) => {
-    const dateKey = enrollment.startDate.toISOString().split('T')[0]
-    if (!acc[dateKey]) {
-      acc[dateKey] = []
-    }
-    acc[dateKey].push(enrollment)
-    return acc
-  }, {} as Record<string, typeof enrollments>)
-
-  const getStatusBadge = (status: string) => {
-    const styles = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      confirmed: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800'
-    }
-    const labels = {
-      pending: 'En attente',
-      confirmed: 'Confirmée',
-      cancelled: 'Annulée'
-    }
-    return (
-      <span className={`px-2 py-1 rounded text-xs font-medium ${styles[status as keyof typeof styles] || styles.pending}`}>
-        {labels[status as keyof typeof labels] || status}
-      </span>
-    )
-  }
-
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -87,87 +51,21 @@ export default async function EnrollmentsPage() {
         </div>
       </div>
 
+      {/* Section Email en masse */}
+      <BulkEmailSender
+        acceptedEnrollments={enrollments.filter(e => e.status === 'accepted')}
+      />
+
       {/* Vue par formation */}
       <div className="mb-8">
         <h3 className="text-xl font-semibold text-cjblue mb-4">Par formation</h3>
-        <div className="space-y-6">
-          {Object.entries(byFormation).map(([formationTitle, formationEnrollments]: [string, any]) => (
-            <div key={formationTitle} className="border rounded-lg p-4">
-              <h4 className="font-semibold text-lg mb-3">
-                {formationTitle} ({formationEnrollments.length})
-              </h4>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Nom</th>
-                      <th className="text-left p-2">Email</th>
-                      <th className="text-left p-2">Téléphone</th>
-                      <th className="text-left p-2">Date de début</th>
-                      <th className="text-left p-2">Statut</th>
-                      <th className="text-left p-2">Date d'inscription</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {formationEnrollments.map((enrollment: any) => (
-                      <tr key={enrollment.id} className="border-b hover:bg-gray-50">
-                        <td className="p-2">
-                          {enrollment.firstName} {enrollment.lastName}
-                        </td>
-                        <td className="p-2">{enrollment.email}</td>
-                        <td className="p-2">{enrollment.phone || '—'}</td>
-                        <td className="p-2">
-                          {new Date(enrollment.startDate).toLocaleDateString('fr-FR')}
-                        </td>
-                        <td className="p-2">{getStatusBadge(enrollment.status)}</td>
-                        <td className="p-2">
-                          {new Date(enrollment.createdAt).toLocaleDateString('fr-FR')}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ))}
-        </div>
+        <AdminEnrollmentTable enrollments={enrollments} groupBy="formation" />
       </div>
 
       {/* Vue par date de début */}
       <div>
         <h3 className="text-xl font-semibold text-cjblue mb-4">Par date de début</h3>
-        <div className="space-y-6">
-          {Object.entries(byStartDate)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([dateKey, dateEnrollments]: [string, any]) => (
-              <div key={dateKey} className="border rounded-lg p-4">
-                <h4 className="font-semibold text-lg mb-3">
-                  {new Date(dateKey).toLocaleDateString('fr-FR', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })} ({dateEnrollments.length})
-                </h4>
-                <div className="space-y-2">
-                  {dateEnrollments.map((enrollment: any) => (
-                    <div key={enrollment.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                      <div>
-                        <span className="font-medium">
-                          {enrollment.firstName} {enrollment.lastName}
-                        </span>
-                        <span className="text-gray-600 ml-2">
-                          — {enrollment.formation.title}
-                        </span>
-                        <span className="text-gray-500 ml-2">({enrollment.email})</span>
-                      </div>
-                      {getStatusBadge(enrollment.status)}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-        </div>
+        <AdminEnrollmentTable enrollments={enrollments} groupBy="date" />
       </div>
     </div>
   )
