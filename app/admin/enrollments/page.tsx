@@ -91,7 +91,7 @@ export default async function EnrollmentsPage() {
       <div className="mb-8">
         <h3 className="text-xl font-semibold text-cjblue mb-4">Par formation</h3>
         <div className="space-y-6">
-          {Object.entries(byFormation).map(([formationTitle, formationEnrollments]) => (
+          {Object.entries(byFormation).map(([formationTitle, formationEnrollments]: [string, typeof enrollments]) => (
             <div key={formationTitle} className="border rounded-lg p-4">
               <h4 className="font-semibold text-lg mb-3">
                 {formationTitle} ({formationEnrollments.length})
