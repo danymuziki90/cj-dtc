@@ -91,7 +91,7 @@ export default async function EnrollmentsPage() {
       <div className="mb-8">
         <h3 className="text-xl font-semibold text-cjblue mb-4">Par formation</h3>
         <div className="space-y-6">
-          {Object.entries(byFormation).map(([formationTitle, formationEnrollments]: [string, typeof enrollments]) => (
+          {Object.entries(byFormation).map(([formationTitle, formationEnrollments]: [string, any]) => (
             <div key={formationTitle} className="border rounded-lg p-4">
               <h4 className="font-semibold text-lg mb-3">
                 {formationTitle} ({formationEnrollments.length})
@@ -139,7 +139,7 @@ export default async function EnrollmentsPage() {
         <div className="space-y-6">
           {Object.entries(byStartDate)
             .sort(([a], [b]) => a.localeCompare(b))
-            .map(([dateKey, dateEnrollments]) => (
+            .map(([dateKey, dateEnrollments]: [string, any]) => (
               <div key={dateKey} className="border rounded-lg p-4">
                 <h4 className="font-semibold text-lg mb-3">
                   {new Date(dateKey).toLocaleDateString('fr-FR', {
