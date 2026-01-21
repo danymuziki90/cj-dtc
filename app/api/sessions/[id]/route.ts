@@ -4,10 +4,11 @@ import { prisma } from '../../../../lib/prisma'
 // GET /api/sessions/[id] - Récupérer une session spécifique
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const sessionId = parseInt(params.id)
+        const resolvedParams = await params
+        const sessionId = parseInt(resolvedParams.id)
 
         if (isNaN(sessionId)) {
             return NextResponse.json(
@@ -57,10 +58,11 @@ export async function GET(
 // PUT /api/sessions/[id] - Modifier une session
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const sessionId = parseInt(params.id)
+        const resolvedParams = await params
+        const sessionId = parseInt(resolvedParams.id)
 
         if (isNaN(sessionId)) {
             return NextResponse.json(
@@ -134,10 +136,11 @@ export async function PUT(
 // DELETE /api/sessions/[id] - Supprimer une session
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const sessionId = parseInt(params.id)
+        const resolvedParams = await params
+        const sessionId = parseInt(resolvedParams.id)
 
         if (isNaN(sessionId)) {
             return NextResponse.json(

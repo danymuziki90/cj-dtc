@@ -6,10 +6,11 @@ export const dynamic = 'force-dynamic'
 // DELETE /api/sessions/[id]/waitlist/[waitlistId] - Retirer de la liste d'attente
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string; waitlistId: string } }
+  { params }: { params: Promise<{ id: string; waitlistId: string }> }
 ) {
   try {
-    const waitlistId = parseInt(params.waitlistId)
+    const resolvedParams = await params
+    const waitlistId = parseInt(resolvedParams.waitlistId)
 
     const waitlistItem = await prisma.waitlist.findUnique({
       where: { id: waitlistId }

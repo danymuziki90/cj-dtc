@@ -6,10 +6,11 @@ export const dynamic = 'force-dynamic'
 // GET /api/sessions/[id]/waitlist - Récupérer la liste d'attente
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const sessionId = parseInt(params.id)
+    const resolvedParams = await params
+    const sessionId = parseInt(resolvedParams.id)
 
     const waitlist = await prisma.waitlist.findMany({
       where: { sessionId },
@@ -49,10 +50,11 @@ export async function GET(
 // POST /api/sessions/[id]/waitlist - Ajouter à la liste d'attente
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const sessionId = parseInt(params.id)
+    const resolvedParams = await params
+    const sessionId = parseInt(resolvedParams.id)
     const { enrollmentId } = await req.json()
 
     if (!enrollmentId) {

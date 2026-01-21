@@ -4,10 +4,11 @@ import { prisma } from '../../../../lib/prisma'
 // GET /api/instructors/[id] - Récupérer un instructeur
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const instructorId = parseInt(params.id)
+        const resolvedParams = await params
+        const instructorId = parseInt(resolvedParams.id)
 
         const instructor = await prisma.instructor.findUnique({
             where: { id: instructorId },
@@ -44,10 +45,11 @@ export async function GET(
 // PUT /api/instructors/[id] - Modifier un instructeur
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const instructorId = parseInt(params.id)
+        const resolvedParams = await params
+        const instructorId = parseInt(resolvedParams.id)
         const body = await request.json()
         const { firstName, lastName, email, phone, bio, expertise, experience, photoUrl, status } = body
 
@@ -79,10 +81,11 @@ export async function PUT(
 // DELETE /api/instructors/[id] - Supprimer un instructeur
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const instructorId = parseInt(params.id)
+        const resolvedParams = await params
+        const instructorId = parseInt(resolvedParams.id)
 
         // Vérifier si l'instructeur a des sessions actives
         const activeSessions = await prisma.sessionInstructor.count({

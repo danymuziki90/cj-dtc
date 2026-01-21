@@ -3,10 +3,11 @@ import { prisma } from '../../../../lib/prisma'
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const invoiceId = parseInt(params.id)
+    const resolvedParams = await params
+    const invoiceId = parseInt(resolvedParams.id)
 
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
@@ -38,10 +39,11 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const invoiceId = parseInt(params.id)
+    const resolvedParams = await params
+    const invoiceId = parseInt(resolvedParams.id)
     const body = await req.json()
     const { status, paidDate, sentAt, notes } = body
 
@@ -75,10 +77,11 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const invoiceId = parseInt(params.id)
+    const resolvedParams = await params
+    const invoiceId = parseInt(resolvedParams.id)
 
     await prisma.invoice.delete({
       where: { id: invoiceId }

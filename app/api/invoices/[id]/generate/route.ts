@@ -3,10 +3,11 @@ import { prisma } from '../../../../../lib/prisma'
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const invoiceId = parseInt(params.id)
+    const resolvedParams = await params
+    const invoiceId = parseInt(resolvedParams.id)
 
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },

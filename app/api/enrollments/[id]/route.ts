@@ -4,10 +4,11 @@ import { sendAcceptanceEmail, sendRejectionEmail } from '../../../../lib/email'
 
 export async function PUT(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const enrollmentId = parseInt(params.id)
+        const resolvedParams = await params
+        const enrollmentId = parseInt(resolvedParams.id)
         const { status, reason } = await req.json()
 
         if (!status || !['pending', 'accepted', 'rejected', 'cancelled'].includes(status)) {

@@ -6,11 +6,12 @@ export const dynamic = 'force-dynamic'
 // POST /api/sessions/[id]/waitlist/[waitlistId]/promote - Promouvoir depuis la liste d'attente
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string; waitlistId: string } }
+  { params }: { params: Promise<{ id: string; waitlistId: string }> }
 ) {
   try {
-    const sessionId = parseInt(params.id)
-    const enrollmentId = parseInt(params.waitlistId)
+    const resolvedParams = await params
+    const sessionId = parseInt(resolvedParams.id)
+    const enrollmentId = parseInt(resolvedParams.waitlistId)
 
     const session = await prisma.trainingSession.findUnique({
       where: { id: sessionId }

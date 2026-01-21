@@ -6,10 +6,11 @@ export const dynamic = 'force-dynamic'
 // POST /api/sessions/[id]/attendance - Enregistrer les présences
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const sessionId = parseInt(params.id)
+    const resolvedParams = await params
+    const sessionId = parseInt(resolvedParams.id)
     const { date, attendance } = await req.json()
 
     if (!date || !attendance || !Array.isArray(attendance)) {
@@ -64,10 +65,11 @@ export async function POST(
 // GET /api/sessions/[id]/attendance - Récupérer les présences
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const sessionId = parseInt(params.id)
+    const resolvedParams = await params
+    const sessionId = parseInt(resolvedParams.id)
     const { searchParams } = req.nextUrl
     const date = searchParams.get('date')
 
