@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../auth/[...nextauth]/route'
 
+export const runtime = "nodejs"
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)

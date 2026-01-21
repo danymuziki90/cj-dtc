@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../../../../lib/prisma'
 
 export const dynamic = 'force-dynamic'
+export const runtime = "nodejs"
 
 // DELETE /api/sessions/[id]/waitlist/[waitlistId] - Retirer de la liste d'attente
 export async function DELETE(
