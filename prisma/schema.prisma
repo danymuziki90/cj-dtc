@@ -7,15 +7,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum StudentStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+model Student {
+  id            String        @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String        @unique
+  password      String
+  phone         String?
+  studentNumber String        @unique
+  status        StudentStatus @default(PENDING)
+  
+  // Additional fields from registration form
+  dateOfBirth   DateTime?
+  address       String?
+  city          String?
+  country       String?
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  passwordResetTokens PasswordResetToken[]
+}
+
 model User {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String   @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  role          String   @default("student")
-  createdAt     DateTime @default(now())
+  role          Role      @default(STUDENT)
+  createdAt     DateTime  @default(now())
   accounts      Account[]
   sessions      Session[]
   certificates  Certificate[]
@@ -57,6 +91,17 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
 }
 
 model Formation {

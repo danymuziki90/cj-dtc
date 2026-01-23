@@ -45,7 +45,7 @@ export default function StudentRegisterPage() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }))
-    
+
     // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors(prev => {
@@ -86,12 +86,13 @@ export default function StudentRegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       return
     }
 
     setLoading(true)
+    setErrors({})
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -109,13 +110,13 @@ export default function StudentRegisterPage() {
           address: formData.address,
           city: formData.city,
           country: formData.country,
-          role: 'student'
+          role: 'STUDENT'
         })
       })
 
+      const data = await response.json()
+
       if (response.ok) {
-        const result = await response.json()
-        
         // Auto-login after successful registration
         const loginResult = await signIn('credentials', {
           email: formData.email,
@@ -124,13 +125,15 @@ export default function StudentRegisterPage() {
         })
 
         if (loginResult?.ok) {
-          router.push('/student/inscription')
+          // Redirect to success page or dashboard
+          // Ideally we should show a banner about email verification
+          router.push('/student/inscription?verified=false')
         } else {
+          // Login failed despite registration success (rare)
           router.push('/auth/login?message=Compte créé, veuillez vous connecter')
         }
       } else {
-        const error = await response.json()
-        throw new Error(error.error || 'Erreur lors de la création du compte')
+        throw new Error(data.error || 'Erreur lors de la création du compte')
       }
     } catch (error: any) {
       console.error('Erreur lors de l\'inscription:', error)
@@ -143,7 +146,7 @@ export default function StudentRegisterPage() {
 
   const getPasswordStrength = (password: string) => {
     if (!password) return { strength: 0, color: 'bg-gray-300', text: '' }
-    
+
     let strength = 0
     if (password.length >= 8) strength++
     if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++
@@ -152,7 +155,7 @@ export default function StudentRegisterPage() {
 
     const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500']
     const texts = ['', 'Faible', 'Moyen', 'Fort', 'Très fort']
-    
+
     return {
       strength,
       color: colors[Math.min(strength - 1, 3)],
@@ -164,7 +167,7 @@ export default function StudentRegisterPage() {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      
+
       {/* Header */}
       <div className="text-center mb-8 sm:mb-12">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -199,7 +202,7 @@ export default function StudentRegisterPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-8">
-        
+
         {/* General Error */}
         {errors.general && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -210,7 +213,7 @@ export default function StudentRegisterPage() {
         {/* Personal Information */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Informations personnelles</h2>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -222,9 +225,8 @@ export default function StudentRegisterPage() {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.firstName ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.firstName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="Entrez votre prénom"
               />
               {errors.firstName && (
@@ -242,9 +244,8 @@ export default function StudentRegisterPage() {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.lastName ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.lastName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="Entrez votre nom"
               />
               {errors.lastName && (
@@ -262,9 +263,8 @@ export default function StudentRegisterPage() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="votre.email@example.com"
               />
               {errors.email && (
@@ -282,9 +282,8 @@ export default function StudentRegisterPage() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.phone ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.phone ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="+243 XXX XXX XXX"
               />
               {errors.phone && (
@@ -302,9 +301,8 @@ export default function StudentRegisterPage() {
                 name="dateOfBirth"
                 value={formData.dateOfBirth}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
+                  }`}
               />
               {errors.dateOfBirth && (
                 <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>
@@ -322,9 +320,8 @@ export default function StudentRegisterPage() {
               name="address"
               value={formData.address}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.address ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.address ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="123 Rue Example"
             />
             {errors.address && (
@@ -343,9 +340,8 @@ export default function StudentRegisterPage() {
                 name="city"
                 value={formData.city}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.city ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.city ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="Kinshasa"
               />
               {errors.city && (
@@ -363,9 +359,8 @@ export default function StudentRegisterPage() {
                 name="country"
                 value={formData.country}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.country ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.country ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="République Démocratique du Congo"
               />
               {errors.country && (
@@ -378,7 +373,7 @@ export default function StudentRegisterPage() {
         {/* Security */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Sécurité du compte</h2>
-          
+
           <div className="space-y-6">
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
@@ -391,9 +386,8 @@ export default function StudentRegisterPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.password ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="Choisissez un mot de passe sécurisé"
                 />
                 <button
@@ -416,7 +410,7 @@ export default function StudentRegisterPage() {
               {errors.password && (
                 <p className="text-red-500 text-xs mt-1">{errors.password}</p>
               )}
-              
+
               {/* Password Strength Indicator */}
               {formData.password && (
                 <div className="mt-2">
@@ -425,7 +419,7 @@ export default function StudentRegisterPage() {
                     <span className="text-xs font-medium">{passwordStrength.text}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                       style={{ width: `${(passwordStrength.strength / 4) * 100}%` }}
                     ></div>
@@ -445,9 +439,8 @@ export default function StudentRegisterPage() {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="Confirmez votre mot de passe"
                 />
                 <button
