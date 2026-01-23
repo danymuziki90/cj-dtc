@@ -33,9 +33,23 @@ export default function StudentDashboard() {
     fetchStudentData()
   }, [])
 
+  // ... imports
+  import { useRouter } from 'next/navigation'
+
+  // ... inside component
+  const router = useRouter()
+
+  // ... fetch logic
   const fetchStudentData = async () => {
     try {
-      const response = await fetch('/api/student/dashboard')
+      // Changed endpoint to /api/student/me
+      const response = await fetch('/api/student/me')
+
+      if (response.status === 401) {
+        router.push('/auth/login')
+        return
+      }
+
       const data = await response.json()
       setStats(data)
     } catch (error) {
@@ -45,52 +59,45 @@ export default function StudentDashboard() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-cjblue"></div>
-          <p className="mt-4 text-gray-600">Chargement de votre espace...</p>
-        </div>
-      </div>
-    )
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+      router.push('/auth/login')
+    } catch (error) {
+      console.error('Logout error', error)
+    }
   }
 
-  return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      
-      {/* Header Section */}
-      <div className="mb-8 sm:mb-12">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-12 text-white relative overflow-hidden">
-          {/* Background pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-4 left-4 w-20 h-20 bg-white rounded-full"></div>
-            <div className="absolute bottom-4 right-4 w-32 h-32 bg-white rounded-full"></div>
-          </div>
-          
-          <div className="relative z-10">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-                  Bienvenue, {session?.user?.name || 'Étudiant'} !
-                </h1>
-                <p className="text-blue-100 text-sm sm:text-base lg:text-lg">
-                  Accédez à votre parcours d'apprentissage et suivez votre progression
-                </p>
-              </div>
-              <div className="text-center sm:text-right">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1">
-                  {stats?.activeFormations || 0}
-                </div>
-                <div className="text-xs sm:text-sm text-blue-100">Formations actives</div>
-              </div>
-            </div>
-          </div>
+  // ... inside render
+  <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+    <div>
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+        Bienvenue, {stats?.firstName || session?.user?.name || 'Étudiant'} !
+      </h1>
+      <p className="text-blue-100 text-sm sm:text-base lg:text-lg">
+        Accédez à votre parcours d'apprentissage
+      </p>
+    </div>
+    <div className="text-center sm:text-right flex flex-col items-center sm:items-end gap-3">
+      <button
+        onClick={handleLogout}
+        className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg text-sm backdrop-blur-sm transition-colors"
+      >
+        Déconnexion
+      </button>
+      <div>
+        <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1">
+          {stats?.activeFormations || 0}
         </div>
+        <div className="text-xs sm:text-sm text-blue-100">Formations actives</div>
       </div>
+    </div>
+  </div>
+        </div >
+      </div >
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+    {/* Stats Grid */ }
+    < div className = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12" >
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-200 hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between mb-2">
             <span className="text-2xl sm:text-3xl">📚</span>
@@ -134,146 +141,147 @@ export default function StudentDashboard() {
           <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats?.averageGrade || 0}%</div>
           <div className="text-xs sm:text-sm text-gray-500">Note moyenne</div>
         </div>
-      </div>
+      </div >
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12">
-        
-        {/* Left Column - 2/3 width */}
-        <div className="lg:col-span-2 space-y-8 sm:space-y-12">
-          
-          {/* Next Exam */}
-          {stats?.nextExam && (
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Prochain examen</h2>
-                <span className="text-2xl sm:text-3xl">📋</span>
-              </div>
-              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 sm:p-6 border border-orange-200">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-                  {stats.nextExam.title}
-                </h3>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                  <div className="flex items-center text-gray-600">
-                    <span className="text-sm sm:text-base">📅</span>
-                    <span className="text-sm sm:text-base">{stats.nextExam.date}</span>
-                  </div>
-                  <div className="flex items-center text-orange-600 font-semibold">
-                    <span className="text-sm sm:text-base">⏰</span>
-                    <span className="text-sm sm:text-base">{stats.nextExam.timeLeft}</span>
-                  </div>
-                </div>
-              </div>
-              <Link
-                href="/student/exams"
-                className="mt-4 inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm sm:text-base"
-              >
-                Voir les détails
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-          )}
+    {/* Main Content Grid */ }
+    < div className = "grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12" >
 
-          {/* Recent Activity */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Activité récente</h2>
-              <span className="text-2xl sm:text-3xl">📈</span>
-            </div>
-            <div className="space-y-3 sm:space-4">
-              {stats?.recentActivity?.slice(0, 5).map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl">
-                      {activity.type === 'assignment' && '📝'}
-                      {activity.type === 'grade' && '✅'}
-                      {activity.type === 'message' && '💬'}
-                      {activity.type === 'exam' && '📋'}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm sm:text-base">{activity.title}</p>
-                      <p className="text-xs sm:text-sm text-gray-500">{activity.date}</p>
-                    </div>
-                  </div>
-                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs ${
-                    activity.status === 'completed' ? 'bg-green-100 text-green-700' :
-                    activity.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                    'bg-blue-100 text-blue-700'
-                  }`}>
-                    {activity.status === 'completed' ? 'Terminé' :
-                     activity.status === 'pending' ? 'En attente' : 'Nouveau'}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <Link
-              href="/student/activity"
-              className="mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm sm:text-base inline-flex items-center"
-            >
-              Voir toute l'activité
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
+      {/* Left Column - 2/3 width */ }
+      < div className = "lg:col-span-2 space-y-8 sm:space-y-12" >
 
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Actions rapides</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <Link
-                href="/student/assignments"
-                className="flex flex-col items-center p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors group"
-              >
-                <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📝</span>
-                <span className="text-sm font-medium text-gray-700">Devoirs</span>
-              </Link>
-              <Link
-                href="/student/courses"
-                className="flex flex-col items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors group"
-              >
-                <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📚</span>
-                <span className="text-sm font-medium text-gray-700">Cours</span>
-              </Link>
-              <Link
-                href="/student/exams"
-                className="flex flex-col items-center p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors group"
-              >
-                <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📋</span>
-                <span className="text-sm font-medium text-gray-700">Examens</span>
-              </Link>
-              <Link
-                href="/student/certificates"
-                className="flex flex-col items-center p-4 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors group"
-              >
-                <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">🏆</span>
-                <span className="text-sm font-medium text-gray-700">Certificats</span>
-              </Link>
-              <Link
-                href="/student/profile"
-                className="flex flex-col items-center p-4 bg-pink-50 rounded-xl hover:bg-pink-100 transition-colors group"
-              >
-                <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">👤</span>
-                <span className="text-sm font-medium text-gray-700">Profil</span>
-              </Link>
-              <Link
-                href="/student/messages"
-                className="flex flex-col items-center p-4 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors group"
-              >
-                <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">💬</span>
-                <span className="text-sm font-medium text-gray-700">Messages</span>
-              </Link>
+        {/* Next Exam */ }
+  {
+    stats?.nextExam && (
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Prochain examen</h2>
+          <span className="text-2xl sm:text-3xl">📋</span>
+        </div>
+        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 sm:p-6 border border-orange-200">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+            {stats.nextExam.title}
+          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div className="flex items-center text-gray-600">
+              <span className="text-sm sm:text-base">📅</span>
+              <span className="text-sm sm:text-base">{stats.nextExam.date}</span>
+            </div>
+            <div className="flex items-center text-orange-600 font-semibold">
+              <span className="text-sm sm:text-base">⏰</span>
+              <span className="text-sm sm:text-base">{stats.nextExam.timeLeft}</span>
             </div>
           </div>
         </div>
+        <Link
+          href="/student/exams"
+          className="mt-4 inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm sm:text-base"
+        >
+          Voir les détails
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
+    )
+  }
 
-        {/* Right Column - 1/3 width */}
-        <div className="space-y-8 sm:space-12">
-          
-          {/* Progress Overview */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
+  {/* Recent Activity */ }
+  <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Activité récente</h2>
+      <span className="text-2xl sm:text-3xl">📈</span>
+    </div>
+    <div className="space-y-3 sm:space-4">
+      {stats?.recentActivity?.slice(0, 5).map((activity, index) => (
+        <div key={index} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="text-2xl">
+              {activity.type === 'assignment' && '📝'}
+              {activity.type === 'grade' && '✅'}
+              {activity.type === 'message' && '💬'}
+              {activity.type === 'exam' && '📋'}
+            </div>
+            <div>
+              <p className="font-medium text-gray-900 text-sm sm:text-base">{activity.title}</p>
+              <p className="text-xs sm:text-sm text-gray-500">{activity.date}</p>
+            </div>
+          </div>
+          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs ${activity.status === 'completed' ? 'bg-green-100 text-green-700' :
+              activity.status === 'pending' ? 'bg-orange-100 text-orange-700' :
+                'bg-blue-100 text-blue-700'
+            }`}>
+            {activity.status === 'completed' ? 'Terminé' :
+              activity.status === 'pending' ? 'En attente' : 'Nouveau'}
+          </span>
+        </div>
+      ))}
+    </div>
+    <Link
+      href="/student/activity"
+      className="mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm sm:text-base inline-flex items-center"
+    >
+      Voir toute l'activité
+      <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
+    </Link>
+  </div>
+
+  {/* Quick Actions */ }
+  <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
+    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Actions rapides</h2>
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <Link
+        href="/student/assignments"
+        className="flex flex-col items-center p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors group"
+      >
+        <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📝</span>
+        <span className="text-sm font-medium text-gray-700">Devoirs</span>
+      </Link>
+      <Link
+        href="/student/courses"
+        className="flex flex-col items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors group"
+      >
+        <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📚</span>
+        <span className="text-sm font-medium text-gray-700">Cours</span>
+      </Link>
+      <Link
+        href="/student/exams"
+        className="flex flex-col items-center p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors group"
+      >
+        <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📋</span>
+        <span className="text-sm font-medium text-gray-700">Examens</span>
+      </Link>
+      <Link
+        href="/student/certificates"
+        className="flex flex-col items-center p-4 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors group"
+      >
+        <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">🏆</span>
+        <span className="text-sm font-medium text-gray-700">Certificats</span>
+      </Link>
+      <Link
+        href="/student/profile"
+        className="flex flex-col items-center p-4 bg-pink-50 rounded-xl hover:bg-pink-100 transition-colors group"
+      >
+        <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">👤</span>
+        <span className="text-sm font-medium text-gray-700">Profil</span>
+      </Link>
+      <Link
+        href="/student/messages"
+        className="flex flex-col items-center p-4 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors group"
+      >
+        <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">💬</span>
+        <span className="text-sm font-medium text-gray-700">Messages</span>
+      </Link>
+    </div>
+  </div>
+        </div >
+
+    {/* Right Column - 1/3 width */ }
+    < div className = "space-y-8 sm:space-12" >
+
+      {/* Progress Overview */ }
+      < div className = "bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200" >
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Progression globale</h2>
             <div className="space-y-4">
               <div>
@@ -303,10 +311,10 @@ export default function StudentDashboard() {
                 </div>
               </div>
             </div>
-          </div>
+          </div >
 
-          {/* Upcoming Deadlines */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
+    {/* Upcoming Deadlines */ }
+    < div className = "bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200" >
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Échéances à venir</h2>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
@@ -338,10 +346,10 @@ export default function StudentDashboard() {
                 </div>
               </div>
             </div>
-          </div>
+          </div >
 
-          {/* Messages */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
+    {/* Messages */ }
+    < div className = "bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200" >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Messages</h2>
               <span className="relative">
@@ -383,9 +391,9 @@ export default function StudentDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+          </div >
+        </div >
+      </div >
+    </div >
   )
 }
