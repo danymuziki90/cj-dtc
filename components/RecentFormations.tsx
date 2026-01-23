@@ -21,7 +21,11 @@ export default function RecentFormations() {
         async function fetchFormations() {
             try {
                 const res = await fetch('/api/formations')
-                if (!res.ok) throw new Error('Failed to fetch')
+                if (!res.ok) {
+                    const text = await res.text()
+                    console.error('Fetch failed:', res.status, text)
+                    throw new Error(`Failed to fetch: ${res.status}`)
+                }
                 const data = await res.json()
                 // Get last 3 formations
                 setFormations(data.slice(0, 3))

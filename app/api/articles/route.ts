@@ -23,7 +23,8 @@ export async function GET(req: Request) {
     })
     return NextResponse.json(list)
   } catch (error) {
-    return NextResponse.json({ error: 'Erreur lors de la récupération des articles' }, { status: 500 })
+    console.error('Error fetching articles:', error)
+    return NextResponse.json({ error: 'Erreur lors de la récupération des articles', details: String(error) }, { status: 500 })
   }
 }
 
