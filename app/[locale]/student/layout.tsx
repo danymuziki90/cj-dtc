@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 
@@ -22,14 +22,6 @@ export default function StudentLayout({
     }
   }, [status, router])
 
-  const handleLogout = async () => {
-    try {
-      await signOut({ redirect: false })
-      router.push('/auth/login')
-    } catch (error) {
-      console.error('Erreur de déconnexion:', error)
-    }
-  }
 
   if (status === 'loading') {
     return (
@@ -125,15 +117,6 @@ export default function StudentLayout({
               </div>
             </div>
 
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-            >
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Déconnexion
-            </button>
           </div>
         </nav>
       </div>
@@ -202,12 +185,6 @@ export default function StudentLayout({
                           Paramètres
                         </Link>
                         <div className="border-t border-gray-100"></div>
-                        <button
-                          onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                        >
-                          Déconnexion
-                        </button>
                       </div>
                     )}
                   </div>

@@ -36,17 +36,17 @@ const providers: any[] = [
       if (!credentials?.email || !credentials?.password) return null
 
       // Try Student model first (for student login)
-      const student = await prisma.student.findUnique({ 
-        where: { email: credentials.email } 
+      const student = await prisma.student.findUnique({
+        where: { email: credentials.email }
       })
-      
-      if (student) {
+
+      if (student && student.status === 'ACTIVE') {
         const valid = await bcrypt.compare(credentials.password, student.password)
         if (valid) {
-          return { 
-            id: student.id, 
-            name: `${student.firstName} ${student.lastName}`, 
-            email: student.email, 
+          return {
+            id: student.id,
+            name: `${student.firstName} ${student.lastName}`,
+            email: student.email,
             role: 'STUDENT',
             studentId: student.id
           }
@@ -54,18 +54,18 @@ const providers: any[] = [
       }
 
       // Fallback to User model (for admin login)
-      const user = await prisma.user.findUnique({ 
-        where: { email: credentials.email } 
+      const user = await prisma.user.findUnique({
+        where: { email: credentials.email }
       })
       if (!user || !user.password) return null
-      
+
       const valid = await bcrypt.compare(credentials.password, user.password)
       if (!valid) return null
-      
-      return { 
-        id: user.id, 
-        name: user.name, 
-        email: user.email, 
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
         role: user.role || 'STUDENT'
       }
     }

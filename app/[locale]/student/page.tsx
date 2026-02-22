@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { 
@@ -37,14 +37,6 @@ export default function StudentDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [notifications, setNotifications] = useState(3)
 
-  const handleLogout = async () => {
-    try {
-      await signOut({ redirect: false })
-      router.push('/fr/auth/login')
-    } catch (error) {
-      console.error('Erreur de déconnexion:', error)
-    }
-  }
 
   // Mock data - would come from API
   const studentStats = {
@@ -303,14 +295,6 @@ export default function StudentDashboard() {
                     <Link href="/fr/student/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                       Paramètres
                     </Link>
-                    <hr className="my-1" />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Déconnexion</span>
-                    </button>
                   </div>
                 </div>
               </div>

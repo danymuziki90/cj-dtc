@@ -36,15 +36,6 @@ export default function StudentProfile() {
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      const { signOut } = await import('next-auth/react')
-      await signOut({ redirect: false })
-      router.push('/auth/login')
-    } catch (error) {
-      console.error('Erreur de déconnexion:', error)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,12 +63,6 @@ export default function StudentProfile() {
                 {isEditing ? 'Annuler' : 'Modifier'}
               </button>
               
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Déconnexion
-              </button>
             </div>
           </div>
         </div>

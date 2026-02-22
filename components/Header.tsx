@@ -3,15 +3,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 
 export default function Header() {
   const [open, setOpen] = useState(false)
   const { data: session } = useSession()
-
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: '/fr/auth/login' })
-  }
 
   return (
     <header className="header sticky top-0 z-50 bg-transparent">
@@ -26,17 +22,7 @@ export default function Header() {
           <Link href="/fr/about" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">À propos</Link>
           <Link href="/fr/formations" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Formations</Link>
           <Link href="/fr/programmes" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Programmes</Link>
-          {session ? (
-            <>
-              <Link href="/fr/espace-etudiants" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Espace Étudiants</Link>
-              <button onClick={handleLogout} className="text-sm text-red-600 hover:text-red-700 transition-colors duration-200">Déconnexion</button>
-            </>
-          ) : (
-            <>
-              <Link href="/fr/espace-etudiants" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Espace Étudiants</Link>
-              <Link href="/fr/auth/login" className="text-sm text-[var(--cj-blue)] hover:text-blue-700 transition-colors duration-200">Connexion</Link>
-            </>
-          )}
+          <Link href="/fr/espace-etudiants" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Espace Étudiants</Link>
           <Link href="/fr/actualites" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Actualités</Link>
           <Link href="/fr/contact" className="btn-primary">Contact</Link>
         </nav>
@@ -73,17 +59,7 @@ export default function Header() {
           <Link href="/fr/about" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>À propos</Link>
           <Link href="/fr/formations" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Formations</Link>
           <Link href="/fr/programmes" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Programmes</Link>
-          {session ? (
-            <>
-              <Link href="/fr/espace-etudiants" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Espace Étudiants</Link>
-              <button onClick={() => { setOpen(false); handleLogout(); }} className="py-2 text-sm text-red-600 hover:text-red-700 text-left">Déconnexion</button>
-            </>
-          ) : (
-            <>
-              <Link href="/fr/espace-etudiants" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Espace Étudiants</Link>
-              <Link href="/fr/auth/login" className="py-2 text-sm text-[var(--cj-blue)] hover:text-blue-700" onClick={() => setOpen(false)}>Connexion</Link>
-            </>
-          )}
+          <Link href="/fr/espace-etudiants" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Espace Étudiants</Link>
           <Link href="/fr/actualites" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Actualités</Link>
           <Link href="/fr/contact" className="py-2 inline-block btn-primary" onClick={() => setOpen(false)}>Contact</Link>
         </nav>

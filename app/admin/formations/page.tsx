@@ -509,7 +509,7 @@ export default function FormationsPage() {
           </div>
 
           {/* Formations Grid */}
-          <div className="grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredFormations.map((formation) => (
               <div
                 key={formation.id}
@@ -652,13 +652,14 @@ export default function FormationsPage() {
                     </div>
                   </div>
                 </div>
+              </div>
               ))}
             </div>
             {/* No Results */}
             {filteredFormations.length === 0 && (
               <div className="text-center py-16">
                 <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <BookOpen className="w-16 h-16 text-gray-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune formation trouvée</h3>
                 <p className="text-gray-600 mb-4">
@@ -717,8 +718,7 @@ export default function FormationsPage() {
               </div>
             )}
           </div>
-        </div>
-      )
+        </header>
     </div>
   )
 }

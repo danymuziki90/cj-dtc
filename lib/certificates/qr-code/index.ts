@@ -216,8 +216,14 @@ export function shareCertificateQRCode(certificateCode: string): string {
 
 // QR code printing utilities
 export function printCertificateQRCode(qrCode: string): void {
-  const printWindow = window.open('', '', '_blank')
-  printWindow.document.write(`
+  try {
+    const printWindow = window.open('', '', '_blank')
+
+    if (!printWindow) {
+      throw new Error('Unable to open print window')
+    }
+
+    printWindow.document.write(`
     <html>
       <head>
         <title>Certificate Verification - CJ DTC</title>
@@ -277,13 +283,11 @@ export function printCertificateQRCode(qrCode: string): void {
       <body>
         <div class="qr-container">
           <div class="qr-code">
-            <!-- QR code will be generated here -->
+            <img src="${qrCode}" alt="QR code certificat" style="width:100%;height:100%;object-fit:contain;" />
           </div>
         </div>
         <div class="verification-info">
           <p>Scannez ce code QR code avec votre smartphone</p>
-          <p class="certificate-number">${qrCodeData.certificateNumber}</p>
-          <p class="verification-url">${qrData.verificationUrl}</p>
           <p class="instructions">
             1. Ouvrir l'appareil QR code
             2. Scanner avec votre smartphone
@@ -293,6 +297,7 @@ export function printCertificateQRCode(qrCode: string): void {
       </body>
     </html>
     `)
+    printWindow.document.close()
     printWindow.print()
     printWindow.close()
   } catch (error) {

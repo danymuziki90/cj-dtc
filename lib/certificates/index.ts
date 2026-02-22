@@ -442,7 +442,7 @@ export async function searchCertificates(query: string, filters?: {
         { holderName: { contains: query } },
         { holderEmail: { contains: query } },
         { certificateNumber: { contains: query } },
-        { formation: { title: { contains: query } }
+        { formation: { title: { contains: query } } }
       ]
     }
 
@@ -545,7 +545,10 @@ export function generateDigitalSignature(certificateId: string): string {
 
 // Validate Certificate Data
 export function validateCertificateData(data: CertificateData): { 
-  errors: string[] = []
+  isValid: boolean
+  errors: string[]
+} {
+  const errors: string[] = []
   
   if (!data.holderName || data.holderName.trim().length < 2) {
     errors.push('Le nom du titulaire est requis')

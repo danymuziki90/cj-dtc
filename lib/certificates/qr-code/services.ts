@@ -165,6 +165,9 @@ export function cleanupQRCodeData(qrCodeData: string): string {
 
 // Certificate validation utilities
 export function validateCertificateRequest(data: any): {
+  isValid: boolean
+  errors: string[]
+} {
   const errors: string[] = []
   
   if (!data.holderName || data.holderName.trim().length < 2) {

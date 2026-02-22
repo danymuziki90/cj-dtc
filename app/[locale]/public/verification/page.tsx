@@ -475,6 +475,7 @@ export default function VerificationPage() {
               </div>
               </div>
             </div>
+          </div>
         </main>
         {certificateModal}
       <footer className="bg-gray-900 text-white mt-20">

@@ -1,16 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: '/auth/login' })
-  }
 
   const navigation = [
     { name: 'Tableau de bord', href: '/admin/dashboard', icon: '📊' },
@@ -57,14 +53,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
             ))}
           </nav>
-          <div className="p-3 border-t border-gray-200">
-            <button
-              onClick={handleLogout}
-              className="block w-full text-center px-3 py-2 text-sm text-red-600 hover:text-red-700 font-medium"
-            >
-              Déconnexion
-            </button>
-          </div>
         </div>
       </div>
 
@@ -98,12 +86,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p className="text-xs text-gray-500">Administrateur</p>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="mt-2 block w-full text-center px-3 py-1.5 text-xs text-red-600 hover:text-red-700 font-medium"
-            >
-              Déconnexion
-            </button>
           </div>
         </div>
       </div>

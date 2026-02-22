@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 
 interface Formation {
   id: number
@@ -162,14 +162,6 @@ export default function StudentInscriptionPage() {
     setFormData(prev => ({ ...prev, documents: files }))
   }
 
-  const handleLogout = async () => {
-    try {
-      await signOut({ redirect: false })
-      router.push('/auth/login')
-    } catch (error) {
-      console.error('Erreur de déconnexion:', error)
-    }
-  }
 
   if (success) {
     return (
@@ -211,19 +203,6 @@ export default function StudentInscriptionPage() {
           </p>
         </div>
         
-        {session && (
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
-              Connecté: {session.user?.email}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-            >
-              Déconnexion
-            </button>
-          </div>
-        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
