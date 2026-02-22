@@ -125,15 +125,17 @@ export default function StudentRegisterPage() {
         })
 
         if (loginResult?.ok) {
-          // Redirect to success page or dashboard
-          // Ideally we should show a banner about email verification
-          router.push('/student/inscription?verified=false')
+          // Redirect to student dashboard after successful registration and login
+          router.push('/fr/espace-etudiants')
         } else {
           // Login failed despite registration success (rare)
-          router.push('/auth/login?message=Compte créé, veuillez vous connecter')
+          router.push('/fr/auth/login?message=Compte créé, veuillez vous connecter')
         }
       } else {
-        throw new Error(data.error || 'Erreur lors de la création du compte')
+        // Afficher le message serveur (error) et le détail technique si présent (details)
+        const msg = data.error || 'Erreur lors de la création du compte'
+        const detail = data.details && data.details !== msg ? ` (${data.details})` : ''
+        throw new Error(msg + detail)
       }
     } catch (error: any) {
       console.error('Erreur lors de l\'inscription:', error)

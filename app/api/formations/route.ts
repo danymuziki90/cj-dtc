@@ -18,32 +18,43 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const formData = await req.formData()
-    const title = formData.get('title') as string
-    const slug = formData.get('slug') as string
-    const description = formData.get('description') as string
-    const imageFile = formData.get('image') as File | null
+    const body = await req.json()
+    const { 
+      title, 
+      description, 
+      categorie, 
+      duree, 
+      modules, 
+      methodes, 
+      certification, 
+      statut = 'brouillon',
+      imageUrl 
+    } = body
 
-    if (!title || !slug) {
-      return NextResponse.json({ error: 'Titre et slug requis' }, { status: 400 })
+    if (!title) {
+      return NextResponse.json({ error: 'Titre requis' }, { status: 400 })
     }
 
-    let imageUrl = null
-
-    // If an image file is provided, convert to base64 data URL
-    if (imageFile && imageFile.size > 0) {
-      const buffer = await imageFile.arrayBuffer()
-      const base64 = Buffer.from(buffer).toString('base64')
-      const mimeType = imageFile.type || 'image/jpeg'
-      imageUrl = `data:${mimeType};base64,${base64}`
-    }
+    // Générer un slug à partir du titre
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim()
 
     const created = await prisma.formation.create({
       data: {
         title,
         slug,
         description: description || '',
-        imageUrl
+        categorie: categorie || '',
+        duree: duree || '',
+        modules: modules || '',
+        methodes: methodes || '',
+        certification: certification || '',
+        statut,
+        imageUrl: imageUrl || null
       }
     })
     return NextResponse.json(created, { status: 201 })

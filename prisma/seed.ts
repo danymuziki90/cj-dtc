@@ -15,7 +15,7 @@ async function main() {
       email: 'admin@cjdevelopmenttc.com',
       name: 'Admin CJ',
       password,
-      role: 'admin'
+      role: 'ADMIN'
     }
   })
 

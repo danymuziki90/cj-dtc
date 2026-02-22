@@ -168,56 +168,56 @@ export default function AdminDashboard() {
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-gray-900">Actions rapides</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           <Link
-            href="/admin/students"
+            href="/fr/admin/students"
             className="group flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:from-blue-100 hover:to-blue-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">👥</span>
             <span className="text-sm font-medium text-gray-700">Étudiants</span>
           </Link>
           <Link
-            href="/admin/inscriptions"
+            href="/fr/admin/inscriptions"
             className="group flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:from-green-100 hover:to-green-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📝</span>
             <span className="text-sm font-medium text-gray-700">Inscriptions</span>
           </Link>
           <Link
-            href="/admin/courses"
+            href="/fr/admin/courses"
             className="group flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:from-purple-100 hover:to-purple-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📚</span>
             <span className="text-sm font-medium text-gray-700">Cours</span>
           </Link>
           <Link
-            href="/admin/assignments"
+            href="/fr/admin/assignments"
             className="group flex flex-col items-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl hover:from-orange-100 hover:to-orange-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📋</span>
             <span className="text-sm font-medium text-gray-700">Devoirs</span>
           </Link>
           <Link
-            href="/admin/exams"
+            href="/fr/admin/exams"
             className="group flex flex-col items-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl hover:from-red-100 hover:to-red-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">🎯</span>
             <span className="text-sm font-medium text-gray-700">Examens</span>
           </Link>
           <Link
-            href="/admin/certificates"
+            href="/fr/admin/certificates"
             className="group flex flex-col items-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl hover:from-yellow-100 hover:to-yellow-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">🏆</span>
             <span className="text-sm font-medium text-gray-700">Certificats</span>
           </Link>
           <Link
-            href="/admin/reports"
+            href="/fr/admin/reports"
             className="group flex flex-col items-center p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl hover:from-indigo-100 hover:to-indigo-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📊</span>
             <span className="text-sm font-medium text-gray-700">Rapports</span>
           </Link>
           <Link
-            href="/admin/settings"
+            href="/fr/admin/settings"
             className="group flex flex-col items-center p-4 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl hover:from-pink-100 hover:to-pink-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">⚙️</span>
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <Link
-                href="/admin/inscriptions"
+                href="/fr/admin/inscriptions"
                 className="mt-4 text-orange-600 hover:text-orange-700 font-medium text-sm inline-flex items-center"
               >
                 Voir toutes les inscriptions
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
               ))}
             </div>
             <Link
-              href="/admin/activity"
+              href="/fr/admin/activity"
               className="mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center"
             >
               Voir toute l'activité

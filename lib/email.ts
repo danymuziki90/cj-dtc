@@ -26,3 +26,34 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
   return { success: true }
 }
+
+export async function sendEmail(to: string, subject: string, html: string) {
+  console.log('---------------------------------------------------------')
+  console.log(`📧 MOCK EMAIL TO: ${to}`)
+  console.log(`🔑 SUBJECT: ${subject}`)
+  console.log(`📄 CONTENT: ${html.substring(0, 100)}...`)
+  console.log('---------------------------------------------------------')
+
+  return { success: true }
+}
+
+export async function sendAcceptanceEmail(email: string, formationTitle: string) {
+  console.log('---------------------------------------------------------')
+  console.log(`📧 MOCK ACCEPTANCE EMAIL TO: ${email}`)
+  console.log(`🔑 SUBJECT: Félicitations ! Votre inscription a été acceptée`)
+  console.log(`📚 FORMATION: ${formationTitle}`)
+  console.log('---------------------------------------------------------')
+
+  return { success: true }
+}
+
+export async function sendRejectionEmail(email: string, formationTitle: string, reason?: string) {
+  console.log('---------------------------------------------------------')
+  console.log(`📧 MOCK REJECTION EMAIL TO: ${email}`)
+  console.log(`🔑 SUBJECT: Votre inscription n'a pas été retenue`)
+  console.log(`📚 FORMATION: ${formationTitle}`)
+  if (reason) console.log(`📝 RAISON: ${reason}`)
+  console.log('---------------------------------------------------------')
+
+  return { success: true }
+}

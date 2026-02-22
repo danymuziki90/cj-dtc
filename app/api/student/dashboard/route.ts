@@ -8,15 +8,17 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session || session.user?.role !== 'student') {
+    if (!session || (session.user?.role !== 'STUDENT' && session.user?.role !== 'ADMIN')) {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
-    // Données mockées pour le dashboard étudiant
+    // Données mockées pour le dashboard étudiant (totalFormations, completedFormations, certificates, upcomingSessions utilisés par la page espace-etudiants)
     const stats = {
       totalFormations: 5,
-      activeFormations: 2,
       completedFormations: 3,
+      certificates: 0,
+      upcomingSessions: 0,
+      activeFormations: 2,
       pendingAssignments: 5,
       unreadMessages: 2,
       averageGrade: 85,

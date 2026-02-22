@@ -3,23 +3,86 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { 
+  Award, 
+  Download, 
+  QrCode, 
+  Share2, 
+  Eye, 
+  Calendar, 
+  User, 
+  BookOpen,
+  CheckCircle, 
+  Clock, 
+  TrendingUp, 
+  Star, 
+  Shield,
+  ExternalLink,
+  AlertCircle,
+  Copy,
+  Smartphone,
+  Filter,
+  Search,
+  ChevronRight,
+  BarChart3,
+  Target,
+  Plus,
+  Edit,
+  Trash2,
+  RefreshCw,
+  DownloadCloud,
+  FileText,
+  Settings,
+  Users,
+  Activity,
+  CheckSquare,
+  XSquare,
+  AlertTriangle
+} from 'lucide-react'
+import { 
+  generateCertificateQRCodeDisplay, 
+  downloadCertificateQRCode, 
+  shareCertificateQRCode,
+  getCertificateTypeColor,
+  formatCertificateDate,
+  validateCertificateRequest,
+  isCertificateValid,
+  getCertificateStats,
+  searchCertificates,
+  exportCertificateData
+} from '@/lib/certificates/qr-code/simple'
+import {
+  generateCertificatePDF,
+  downloadCertificatePDF,
+  printCertificatePDF,
+  shareCertificatePDF,
+  emailCertificatePDF,
+  generateBatchCertificatesPDF,
+  generateCertificateStatsPDF,
+  certificateTemplates
+} from '@/lib/certificates/pdf/services'
 
+// Interface qui correspond au schéma Prisma CJ DTC
 interface Certificate {
   id: number
-  studentName: string
-  studentEmail: string
-  formationTitle: string
-  formationCategorie: string
-  completionDate: string
-  grade: number
-  uniqueId: string
-  qrCodeUrl: string
-  certificateUrl: string
-  status: 'generated' | 'downloaded' | 'verified' | 'revoked'
-  createdAt: string
-  issuedBy: string
-  revokedAt?: string
+  code: string
+  holderName: string
+  formationId: number | null
+  sessionId: number | null
+  enrollmentId: number | null
+  type: string
+  issuedAt: string
+  issuedBy: string | null
+  verified: boolean
+  userId: string | null
 }
+
+// Formation mock data (would come from API)
+const mockFormations = [
+  { id: 1, title: 'Management des Ressources Humaines', category: 'Certification' },
+  { id: 2, title: 'Leadership et Management d\'Équipe', category: 'Masterclass' },
+  { id: 3, title: 'Digital Marketing Stratégique', category: 'Workshop' }
+]
 
 export default function AdminCertificatesPage() {
   const { data: session } = useSession()
@@ -28,13 +91,21 @@ export default function AdminCertificatesPage() {
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [formData, setFormData] = useState({
-    studentEmail: '',
+    holderName: '',
     formationId: 1,
-    grade: 0,
-    completionDate: ''
+    type: 'COMPLETION',
+    issuedAt: ''
   })
   const [searchTerm, setSearchTerm] = useState('')
-  const [filter, setFilter] = useState<'all' | 'generated' | 'downloaded' | 'verified' | 'revoked'>('all')
+  const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all')
+  const [qrCodes, setQrCodes] = useState<Record<number, string>>({})
+  const [pdfs, setPdfs] = useState<Record<number, string>>({})
+  const [showFilters, setShowFilters] = useState(false)
+  const [selectedType, setSelectedType] = useState('all')
+  const [selectedTemplate, setSelectedTemplate] = useState('classic')
+  const [showTemplateModal, setShowTemplateModal] = useState(false)
+  const [selectedCertificatesForBatch, setSelectedCertificatesForBatch] = useState<number[]>([])
+  const [showBatchActions, setShowBatchActions] = useState(false)
 
   useEffect(() => {
     fetchCertificates()
@@ -42,14 +113,304 @@ export default function AdminCertificatesPage() {
 
   const fetchCertificates = async () => {
     try {
-      const response = await fetch('/api/admin/certificates')
-      const data = await response.json()
-      setCertificates(data)
+      // Mock data - would come from API
+      const mockCertificates: Certificate[] = [
+        {
+          id: 1,
+          code: 'CJ-DTC-2024-0001',
+          holderName: 'Marie Mwamba',
+          formationId: 1,
+          sessionId: 1,
+          enrollmentId: 1,
+          type: 'COMPLETION',
+          issuedAt: '2024-01-20T00:00:00Z',
+          issuedBy: 'CJ DTC',
+          verified: true,
+          userId: 'user-1'
+        },
+        {
+          id: 2,
+          code: 'CJ-DTC-2024-0002',
+          holderName: 'Jean-Pierre Lukoki',
+          formationId: 2,
+          sessionId: 2,
+          enrollmentId: 2,
+          type: 'EXCELLENCE',
+          issuedAt: '2024-01-25T00:00:00Z',
+          issuedBy: 'CJ DTC',
+          verified: true,
+          userId: 'user-2'
+        },
+        {
+          id: 3,
+          code: 'CJ-DTC-2023-0003',
+          holderName: 'Sarah Kabeya',
+          formationId: 3,
+          sessionId: 3,
+          enrollmentId: 3,
+          type: 'COMPLETION',
+          issuedAt: '2023-12-15T00:00:00Z',
+          issuedBy: 'CJ DTC',
+          verified: false,
+          userId: 'user-3'
+        },
+        {
+          id: 4,
+          code: 'CJ-DTC-2023-0004',
+          holderName: 'Pierre Nkoy',
+          formationId: 1,
+          sessionId: 4,
+          enrollmentId: 4,
+          type: 'MASTERCLASS',
+          issuedAt: '2023-11-10T00:00:00Z',
+          issuedBy: 'CJ DTC',
+          verified: true,
+          userId: 'user-4'
+        }
+      ]
+      setCertificates(mockCertificates)
     } catch (error) {
       console.error('Erreur lors du chargement des certificats:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const generateQRCode = async (certificate: Certificate) => {
+    try {
+      const qrCode = await generateCertificateQRCodeDisplay(certificate)
+      setQrCodes(prev => ({
+        ...prev,
+        [certificate.id]: qrCode
+      }))
+    } catch (error) {
+      console.error('Erreur lors de la génération du QR code:', error)
+    }
+  }
+
+  const downloadCertificate = async (certificate: Certificate) => {
+    try {
+      const qrCode = qrCodes[certificate.id] || await generateCertificateQRCodeDisplay(certificate)
+      downloadCertificateQRCode(qrCode, `certificat-${certificate.code}.png`)
+    } catch (error) {
+      console.error('Erreur lors du téléchargement du certificat:', error)
+    }
+  }
+
+  const shareCertificate = async (certificate: Certificate) => {
+    try {
+      const shareData = shareCertificateQRCode(certificate.code)
+      if (navigator.share) {
+        await navigator.share({
+          title: `Certificat - ${certificate.holderName}`,
+          text: 'Vérifiez mon certificat en ' + certificate.type,
+          url: `https://cjdtc.com/verification/${certificate.code}`
+        })
+      } else {
+        navigator.clipboard.writeText(shareData)
+        alert('Lien de partage copié dans le presse-papiers!')
+      }
+    } catch (error) {
+      console.error('Erreur lors du partage du certificat:', error)
+    }
+  }
+
+  const copyVerificationUrl = (certificate: Certificate) => {
+    const url = `https://cjdtc.com/verification/${certificate.code}`
+    navigator.clipboard.writeText(url)
+    alert('Lien de vérification copié dans le presse-papiers!')
+  }
+
+  const verifyCertificate = async (certificate: Certificate) => {
+    try {
+      const response = await fetch(`/api/certificates/verify-simple/${certificate.code}`)
+      const data = await response.json()
+      
+      if (response.ok) {
+        alert('Certificat vérifié avec succès!')
+      } else {
+        alert('Erreur lors de la vérification: ' + (data.error || 'Erreur inconnue'))
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification:', error)
+      alert('Erreur lors de la vérification')
+    }
+  }
+
+  // PDF Functions for Admin
+  const generateCertificatePDF = async (certificate: Certificate, template: string = 'classic') => {
+    try {
+      const response = await fetch(`/api/certificates/pdf/generate/${certificate.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          template: template,
+          includeQRCode: true
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        setPdfs(prev => ({
+          ...prev,
+          [certificate.id]: data.pdf.data
+        }))
+        return data.pdf.data
+      } else {
+        throw new Error(data.error || 'Erreur lors de la génération du PDF')
+      }
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error)
+      throw error
+    }
+  }
+
+  const downloadCertificatePDF = async (certificate: Certificate, template: string = 'classic') => {
+    try {
+      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate, template)
+      downloadCertificatePDF(pdfData, `certificat-${certificate.code}.pdf`)
+    } catch (error) {
+      console.error('Erreur lors du téléchargement du PDF:', error)
+      alert('Erreur lors du téléchargement du PDF')
+    }
+  }
+
+  const printCertificatePDF = async (certificate: Certificate, template: string = 'classic') => {
+    try {
+      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate, template)
+      printCertificatePDF(pdfData)
+    } catch (error) {
+      console.error('Erreur lors de l\'impression du PDF:', error)
+      alert('Erreur lors de l\'impression du PDF')
+    }
+  }
+
+  const shareCertificatePDF = async (certificate: Certificate) => {
+    try {
+      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate)
+      await shareCertificatePDF(pdfData, certificate)
+    } catch (error) {
+      console.error('Erreur lors du partage du PDF:', error)
+      alert('Erreur lors du partage du PDF')
+    }
+  }
+
+  const emailCertificatePDF = async (certificate: Certificate) => {
+    try {
+      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate)
+      emailCertificatePDF(pdfData, certificate)
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du PDF par email:', error)
+      alert('Erreur lors de l\'envoi du PDF par email')
+    }
+  }
+
+  const generateBatchCertificatesPDF = async () => {
+    try {
+      const selectedCertificatesData = certificates.filter(c => selectedCertificatesForBatch.includes(c.id))
+      const formations = mockFormations
+      
+      const batchPdf = await generateBatchCertificatesPDF(selectedCertificatesData, formations)
+      downloadCertificatePDF(batchPdf, `certificats-batch-${Date.now()}.pdf`)
+      
+      alert(`${selectedCertificatesForBatch.length} certificats générés avec succès!`)
+      setSelectedCertificatesForBatch([])
+      setShowBatchActions(false)
+    } catch (error) {
+      console.error('Erreur lors de la génération en lot:', error)
+      alert('Erreur lors de la génération en lot')
+    }
+  }
+
+  const generateStatsPDF = async () => {
+    try {
+      const formations = mockFormations
+      const statsPdf = await generateCertificateStatsPDF(certificates, formations)
+      downloadCertificatePDF(statsPdf, `stats-certificats-${Date.now()}.pdf`)
+      
+      alert('Rapport de statistiques généré avec succès!')
+    } catch (error) {
+      console.error('Erreur lors de la génération des statistiques:', error)
+      alert('Erreur lors de la génération des statistiques')
+    }
+  }
+
+  const toggleCertificateSelection = (certificateId: number) => {
+    setSelectedCertificatesForBatch(prev => 
+      prev.includes(certificateId) 
+        ? prev.filter(id => id !== certificateId)
+        : [...prev, certificateId]
+    )
+  }
+
+  const selectAllCertificates = () => {
+    setSelectedCertificatesForBatch(certificates.map(c => c.id))
+  }
+
+  const clearSelection = () => {
+    setSelectedCertificatesForBatch([])
+  }
+
+  const getFormationTitle = (formationId: number | null) => {
+    const formation = mockFormations.find(f => f.id === formationId)
+    return formation?.title || 'Formation non spécifiée'
+  }
+
+  const getFormationCategory = (formationId: number | null) => {
+    const formation = mockFormations.find(f => f.id === formationId)
+    return formation?.category || 'Non spécifiée'
+  }
+
+  const getStatusColor = (certificate: Certificate) => {
+    if (isCertificateValid(certificate)) {
+      return 'bg-green-100 text-green-800'
+    }
+    return 'bg-gray-100 text-gray-800'
+  }
+
+  const getStatusLabel = (certificate: Certificate) => {
+    if (isCertificateValid(certificate)) {
+      return 'Validé'
+    }
+    return 'Non validé'
+  }
+
+  const filteredCertificates = certificates.filter(certificate => {
+    const matchesSearch = !searchTerm || 
+      certificate.holderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      certificate.code.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesFilter = filter === 'all' || 
+      (filter === 'verified' && certificate.verified) ||
+      (filter === 'unverified' && !certificate.verified)
+    
+    const matchesType = selectedType === 'all' || certificate.type === selectedType
+    
+    return matchesSearch && matchesFilter && matchesType
+  })
+
+  const certificateTypes = [
+    { id: 'all', name: 'Tous les types', count: certificates.length },
+    { id: 'COMPLETION', name: 'Complétion', count: certificates.filter(c => c.type === 'COMPLETION').length },
+    { id: 'EXCELLENCE', name: 'Excellence', count: certificates.filter(c => c.type === 'EXCELLENCE').length },
+    { id: 'MASTERCLASS', name: 'Masterclass', count: certificates.filter(c => c.type === 'MASTERCLASS').length },
+    { id: 'WORKSHOP', name: 'Workshop', count: certificates.filter(c => c.type === 'WORKSHOP').length },
+    { id: 'SPECIALIZATION', name: 'Spécialisation', count: certificates.filter(c => c.type === 'SPECIALIZATION').length }
+  ]
+
+  const stats = {
+    total: certificates.length,
+    verified: certificates.filter(c => c.verified).length,
+    unverified: certificates.filter(c => !c.verified).length,
+    issuedThisMonth: certificates.filter(c => {
+      const certDate = new Date(c.issuedAt)
+      const now = new Date()
+      return certDate.getMonth() === now.getMonth() && certDate.getFullYear() === now.getFullYear()
+    }).length,
+    averageScore: 0 // Would calculate from actual data
   }
 
   const handleGenerateCertificate = async (e: React.FormEvent) => {
@@ -100,38 +461,12 @@ export default function AdminCertificatesPage() {
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'generated': return 'bg-blue-100 text-blue-800'
-      case 'downloaded': return 'bg-green-100 text-green-800'
-      case 'verified': return 'bg-purple-100 text-purple-800'
-      case 'revoked': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'generated': return 'Généré'
-      case 'downloaded': return 'Téléchargé'
-      case 'verified': return 'Vérifié'
-      case 'revoked': return 'Révoqué'
-      default: return status
-    }
-  }
-
   const getGradeColor = (grade: number) => {
     if (grade >= 16) return 'text-green-600'
     if (grade >= 12) return 'text-blue-600'
     if (grade >= 10) return 'text-yellow-600'
     return 'text-red-600'
   }
-
-  const filteredCertificates = certificates.filter(cert => {
-    const matchesSearch = `${cert.studentName} ${cert.studentEmail} ${cert.formationTitle}`.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filter === 'all' || cert.status === filter
-    return matchesSearch && matchesStatus
-  })
 
   if (loading) {
     return (
@@ -300,8 +635,8 @@ export default function AdminCertificatesPage() {
                 </div>
                 
                 <div className="mt-4 sm:mt-0 text-right">
-                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(certificate.status)}`}>
-                    {getStatusLabel(certificate.status)}
+                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(certificate)}`}>
+                    {getStatusLabel(certificate)}
                   </span>
                 </div>
               </div>

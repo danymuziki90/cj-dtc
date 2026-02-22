@@ -15,6 +15,20 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showPassword, setShowPassword] = useState(false)
 
+  // Récupérer callbackUrl et erreur depuis l'URL (NextAuth renvoie ?error=CredentialsSignin en cas d'échec)
+  const callbackUrl = typeof window !== 'undefined' 
+    ? new URLSearchParams(window.location.search).get('callbackUrl') 
+    : null
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const error = params.get('error')
+    if (error === 'CredentialsSignin' || error === 'Callback') {
+      setErrors({ general: 'Email ou mot de passe incorrect' })
+    }
+  }, [])
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
@@ -60,46 +74,18 @@ export default function LoginPage() {
     setErrors({})
 
     try {
-      // Prepare login payload
-      const loginData = {
-        email: formData.email,
-        password: formData.password
-      }
-
-      // Try Custom Student Login First
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginData)
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        // Success! Redirect
-        window.location.href = data.redirect || '/student/dashboard'
-        return
-      }
-
-      // Fallback: Try NextAuth (e.g. for Admins or if custom login fails but NextAuth works)
-      // This supports legacy users or parallel systems
-      // Only try if status was 401/404/etc. If network error, catch block will handle.
-
+      // Redirection gérée par NextAuth pour que le cookie de session soit bien posé avant d'arriver sur la page
+      const redirectUrl = callbackUrl || '/fr/espace-etudiants'
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
-        redirect: false
+        redirect: true,
+        callbackUrl: redirectUrl
       })
 
+      // Si on reste sur la page (redirect: true a pu être ignoré dans certains cas), afficher une erreur
       if (result?.error) {
         setErrors({ general: 'Email ou mot de passe incorrect' })
-      } else if (result?.ok) {
-        // Rediriger selon le rôle de l'utilisateur (via session)
-        const session = await fetch('/api/auth/session').then(res => res.json())
-        if (session?.user?.role === 'admin' || session?.user?.role === 'ADMIN') {
-          router.push('/admin/dashboard')
-        } else {
-          router.push('/student/dashboard')
-        }
       }
     } catch (error) {
       console.error('Erreur lors de la connexion:', error)
@@ -199,7 +185,7 @@ export default function LoginPage() {
             />
             <span className="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
           </label>
-          <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+          <Link href="/fr/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
             Mot de passe oublié?
           </Link>
         </div>
@@ -227,7 +213,7 @@ export default function LoginPage() {
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Pas encore de compte?{' '}
-            <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link href="/fr/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
               Créer un compte
             </Link>
           </p>

@@ -1,7 +1,6 @@
 import { ReactNode } from 'react'
 import type { Metadata } from 'next'
-import Header from '../../components/Header'
-import Footer from '../../components/Footer'
+import ConditionalLayout from '../../components/ConditionalLayout'
 import StructuredData from '../../components/StructuredData'
 import SessionProviderWrapper from '../../components/SessionProviderWrapper'
 import WebVitals from '../_components/WebVitals'
@@ -70,9 +69,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
       <SessionProviderWrapper>
         <StructuredData />
         <WebVitals />
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <ConditionalLayout>{children}</ConditionalLayout>
       </SessionProviderWrapper>
     </I18nProvider>
   )

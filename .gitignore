@@ -9,3 +9,5 @@ coverage
 # Large binaries / installers
 *.exe
 *.msi
+
+.vercel

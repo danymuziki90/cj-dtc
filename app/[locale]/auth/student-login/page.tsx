@@ -63,7 +63,7 @@ export default function StudentLoginPage() {
         setErrors({ general: 'Email ou mot de passe incorrect' })
       } else if (result?.ok) {
         // Rediriger vers l'espace étudiant
-        router.push('/student')
+        router.push('/fr/espace-etudiants')
       }
     } catch (error) {
       console.error('Erreur lors de la connexion:', error)

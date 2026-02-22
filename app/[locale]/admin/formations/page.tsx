@@ -87,6 +87,48 @@ export default function AdminFormationsPage() {
     }
   }
 
+  const handleUpdateStatus = async (id: number, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/formations/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ statut: newStatus })
+      })
+
+      if (response.ok) {
+        const updatedFormation = await response.json()
+        setFormations(prev => 
+          prev.map(f => f.id === id ? updatedFormation : f)
+        )
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error)
+    }
+  }
+
+  const handleDeleteFormation = async (id: number) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette formation ?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/formations/${id}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setFormations(prev => prev.filter(f => f.id !== id))
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Erreur lors de la suppression')
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la formation:', error)
+    }
+  }
+
   const getStatusColor = (statut: string) => {
     switch (statut) {
       case 'brouillon': return 'bg-gray-100 text-gray-800'
@@ -248,12 +290,48 @@ export default function AdminFormationsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button
-                      onClick={() => setSelectedFormation(formation)}
-                      className="text-blue-600 hover:text-blue-900 font-medium"
-                    >
-                      Voir détails
-                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => setSelectedFormation(formation)}
+                        className="text-blue-600 hover:text-blue-900 font-medium"
+                      >
+                        Voir détails
+                      </button>
+                      
+                      {formation.statut === 'brouillon' && (
+                        <button
+                          onClick={() => handleUpdateStatus(formation.id, 'publie')}
+                          className="text-green-600 hover:text-green-900 font-medium"
+                        >
+                          Publier
+                        </button>
+                      )}
+                      
+                      {formation.statut === 'publie' && (
+                        <button
+                          onClick={() => handleUpdateStatus(formation.id, 'archive')}
+                          className="text-orange-600 hover:text-orange-900 font-medium"
+                        >
+                          Archiver
+                        </button>
+                      )}
+                      
+                      {formation.statut === 'archive' && (
+                        <button
+                          onClick={() => handleUpdateStatus(formation.id, 'publie')}
+                          className="text-blue-600 hover:text-blue-900 font-medium"
+                        >
+                          Réactiver
+                        </button>
+                      )}
+                      
+                      <button
+                        onClick={() => handleDeleteFormation(formation.id)}
+                        className="text-red-600 hover:text-red-900 font-medium"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

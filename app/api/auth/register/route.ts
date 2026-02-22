@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server'
 import { prisma } from '../../../../lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { generateVerificationToken } from '../../../../lib/tokens'
-import { sendVerificationEmail } from '../../../../lib/email'
 
 export const runtime = "nodejs"
 
@@ -49,7 +47,7 @@ export async function POST(req: Request) {
       )
     }
 
-    // Check if student exists (by email or explicit student number if provided)
+    // Check if student exists
     const existingStudent = await prisma.student.findUnique({
       where: { email }
     })
@@ -64,13 +62,12 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Generate student number if not provided
-    // Format: STU-YEAR-RANDOM
-    const studentNumber = result.data.studentNumber || `STU-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
+    // Generate student number if not provided (with timestamp to reduce collision risk)
+    const studentNumber = result.data.studentNumber || `STU-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase().slice(-6)}`
 
-    // Transaction to create both Student and User
-    const [student, user] = await prisma.$transaction([
-      prisma.student.create({
+    // Create Student and User in a transaction (all or nothing)
+    const [student, user] = await prisma.$transaction(async (tx) => {
+      const student = await tx.student.create({
         data: {
           firstName,
           lastName,
@@ -82,36 +79,47 @@ export async function POST(req: Request) {
           address: result.data.address,
           city: result.data.city,
           country: result.data.country,
-          status: 'PENDING'
+          status: 'PENDING',
+          role: role as any
         }
-      }),
-      prisma.user.create({
+      })
+      const user = await tx.user.create({
         data: {
           name: `${firstName} ${lastName}`,
           email,
           password: hashedPassword,
-          role: 'STUDENT',
+          role: role as any
         }
       })
-    ])
-
-    // Generate Verification Token
-    const verificationToken = await generateVerificationToken(email)
-
-    // Send Verification Email
-    await sendVerificationEmail(email, verificationToken.token)
+      return [student, user]
+    })
 
     return NextResponse.json({
       success: true,
-      message: 'Compte créé avec succès. Veuillez vérifier votre email.',
+      message: 'Compte créé avec succès.',
       studentId: student.id,
       userId: user.id
     }, { status: 201 })
 
   } catch (error: any) {
     console.error('Registration error:', error)
+
+    // Messages plus explicites pour les erreurs courantes
+    let message = 'Erreur lors de la création du compte'
+    const code = error?.code
+    if (code === 'P2002') {
+      const target = (error?.meta?.target as string[])?.[0]
+      if (target === 'email') message = 'Cet email est déjà utilisé.'
+      else if (target === 'studentNumber') message = 'Numéro étudiant en conflit. Veuillez réessayer.'
+      else message = 'Une donnée est déjà utilisée (email ou numéro étudiant).'
+    } else if (code === 'P2025') {
+      message = 'Enregistrement introuvable.'
+    } else if (error?.message) {
+      message = error.message
+    }
+
     return NextResponse.json(
-      { error: 'Erreur lors de la création du compte', details: error.message },
+      { error: message, details: error?.message },
       { status: 500 }
     )
   }

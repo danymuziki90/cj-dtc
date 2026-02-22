@@ -3,20 +3,46 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { 
+  Award, 
+  Download, 
+  QrCode, 
+  Share2, 
+  Eye, 
+  Calendar, 
+  User, 
+  BookOpen,
+  CheckCircle, 
+  Clock, 
+  TrendingUp, 
+  Star, 
+  Shield,
+  ExternalLink,
+  AlertCircle,
+  Copy,
+  Smartphone
+} from 'lucide-react'
+import { 
+  generateCertificateQRCodeDisplay, 
+  downloadCertificateQRCode, 
+  shareCertificateQRCode,
+  getCertificateTypeColor,
+  getGradeColor,
+  formatCertificateDate
+} from '@/lib/certificates/qr-code/simple'
 
 interface Certificate {
   id: number
-  studentName: string
-  studentEmail: string
-  formationTitle: string
-  formationCategorie: string
-  completionDate: string
-  grade: number
-  uniqueId: string
-  qrCodeUrl: string
-  certificateUrl: string
-  status: 'generated' | 'downloaded' | 'verified'
-  createdAt: string
+  code: string
+  holderName: string
+  formationId: number | null
+  sessionId: number | null
+  enrollmentId: number | null
+  type: string
+  issuedAt: string
+  issuedBy: string | null
+  verified: boolean
+  userId: string | null
 }
 
 export default function StudentCertificatesPage() {
@@ -27,6 +53,7 @@ export default function StudentCertificatesPage() {
   const [verificationCode, setVerificationCode] = useState('')
   const [verificationResult, setVerificationResult] = useState<any>(null)
   const [verifying, setVerifying] = useState(false)
+  const [qrCodes, setQrCodes] = useState<Record<number, string>>({})
 
   useEffect(() => {
     fetchCertificates()
@@ -34,9 +61,49 @@ export default function StudentCertificatesPage() {
 
   const fetchCertificates = async () => {
     try {
-      const response = await fetch('/api/student/certificates')
-      const data = await response.json()
-      setCertificates(data)
+      // Mock data - would come from API
+      const mockCertificates: Certificate[] = [
+        {
+          id: 1,
+          code: 'CJ-DTC-2024-0001',
+          holderName: 'Marie Mwamba',
+          formationId: 1,
+          sessionId: 1,
+          enrollmentId: 1,
+          type: 'COMPLETION',
+          issuedAt: '2024-01-20T00:00:00Z',
+          issuedBy: 'CJ DTC',
+          verified: true,
+          userId: 'user-1'
+        },
+        {
+          id: 2,
+          code: 'CJ-DTC-2024-0002',
+          holderName: 'Jean-Pierre Lukoki',
+          formationId: 2,
+          sessionId: 2,
+          enrollmentId: 2,
+          type: 'EXCELLENCE',
+          issuedAt: '2024-01-25T00:00:00Z',
+          issuedBy: 'CJ DTC',
+          verified: true,
+          userId: 'user-2'
+        },
+        {
+          id: 3,
+          code: 'CJ-DTC-2023-0003',
+          holderName: 'Sarah Kabeya',
+          formationId: 3,
+          sessionId: 3,
+          enrollmentId: 3,
+          type: 'COMPLETION',
+          issuedAt: '2023-12-15T00:00:00Z',
+          issuedBy: 'CJ DTC',
+          verified: true,
+          userId: 'user-3'
+        }
+      ]
+      setCertificates(mockCertificates)
     } catch (error) {
       console.error('Erreur lors du chargement des certificats:', error)
     } finally {
@@ -44,21 +111,49 @@ export default function StudentCertificatesPage() {
     }
   }
 
-  const downloadCertificate = (certificate: Certificate) => {
-    // Simuler le téléchargement (en réalité, viendrait de l'API)
-    const link = document.createElement('a')
-    link.href = certificate.certificateUrl
-    link.download = `certificat-${certificate.uniqueId}.pdf`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const generateQRCode = async (certificate: Certificate) => {
+    try {
+      const qrCode = await generateCertificateQRCodeDisplay(certificate)
+      setQrCodes(prev => ({
+        ...prev,
+        [certificate.id]: qrCode
+      }))
+    } catch (error) {
+      console.error('Erreur lors de la génération du QR code:', error)
+    }
+  }
 
-    // Mettre à jour le statut
-    setCertificates(prev => prev.map(cert => 
-      cert.id === certificate.id 
-        ? { ...cert, status: 'downloaded' as const }
-        : cert
-    ))
+  const downloadCertificate = async (certificate: Certificate) => {
+    try {
+      const qrCode = qrCodes[certificate.id] || await generateCertificateQRCodeDisplay(certificate)
+      downloadCertificateQRCode(qrCode, `certificat-${certificate.code}.png`)
+    } catch (error) {
+      console.error('Erreur lors du téléchargement du certificat:', error)
+    }
+  }
+
+  const shareCertificate = async (certificate: Certificate) => {
+    try {
+      const shareData = shareCertificateQRCode(certificate.code)
+      if (navigator.share) {
+        await navigator.share({
+          title: `Certificat - ${certificate.holderName}`,
+          text: 'Vérifiez mon certificat en ' + certificate.type,
+          url: `https://cjdtc.com/verification/${certificate.code}`
+        })
+      } else {
+        navigator.clipboard.writeText(shareData)
+        alert('Lien de partage copié dans le presse-papiers!')
+      }
+    } catch (error) {
+      console.error('Erreur lors du partage du certificat:', error)
+    }
+  }
+
+  const copyVerificationUrl = (certificate: Certificate) => {
+    const url = `https://cjdtc.com/verification/${certificate.code}`
+    navigator.clipboard.writeText(url)
+    alert('Lien de vérification copié dans le presse-papiers!')
   }
 
   const verifyCertificate = async () => {
@@ -66,7 +161,7 @@ export default function StudentCertificatesPage() {
 
     setVerifying(true)
     try {
-      const response = await fetch(`/api/certificates/verify/${verificationCode}`)
+      const response = await fetch(`/api/certificates/verify-simple/${verificationCode}`)
       const data = await response.json()
       
       if (response.ok) {
