@@ -1,11 +1,11 @@
 
 import { NextResponse } from 'next/server'
-import cookie from 'cookie'
+import { serialize } from 'cookie'
 
 export const runtime = "nodejs"
 
 export async function POST() {
-    const serializedCookie = cookie.serialize('student-token', '', {
+    const serializedCookie = serialize('student-token', '', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',

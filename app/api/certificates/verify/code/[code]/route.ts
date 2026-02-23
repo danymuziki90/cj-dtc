@@ -6,10 +6,11 @@ export const runtime = 'nodejs'
 
 export async function GET(
   request: NextRequest,
-  context: { params: { code: string } }
+  context: { params: Promise<{ code: string }> }
 ): Promise<NextResponse> {
   try {
-    const certificateCode = context.params.code
+    const { code } = await context.params
+    const certificateCode = code
 
     // Validate certificate code
     if (!certificateCode || certificateCode.trim().length === 0) {
@@ -107,10 +108,11 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  context: { params: { code: string } }
+  context: { params: Promise<{ code: string }> }
 ): Promise<NextResponse> {
   try {
-    const certificateCode = context.params.code
+    const { code } = await context.params
+    const certificateCode = code
 
     // Validate certificate code
     if (!certificateCode || certificateCode.trim().length === 0) {

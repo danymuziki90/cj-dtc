@@ -16,7 +16,7 @@ export default function AdminHeader() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <header className="bg-cjblue text-white py-2 shadow-sm sticky top-0 z-50">
+    <header className="bg-white text-black py-2 shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link href="/admin" className="flex items-center gap-2 shrink-0">
           <img src="/logo.png" alt="CJ DTC" className="h-8 w-8 object-contain" />
@@ -39,7 +39,7 @@ export default function AdminHeader() {
         {/* Bouton burger mobile */}
         <button
           type="button"
-          className="md:hidden p-2 rounded-lg hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-expanded={menuOpen}
           aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}

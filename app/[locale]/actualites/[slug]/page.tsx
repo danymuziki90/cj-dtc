@@ -6,12 +6,11 @@ import Breadcrumbs from '../../../../components/Breadcrumbs'
 import { generatePageMetadata } from '../../../../components/PageMetadata'
 
 interface PageProps {
-  params: Promise<{ locale: string; slug: string }> | { locale: string; slug: string }
+  params: Promise<{ locale: string; slug: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const resolvedParams = await Promise.resolve(params)
-  const { slug } = resolvedParams
+  const { slug } = await params
 
   const article = await prisma.article.findUnique({
     where: { slug }
@@ -36,8 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function ArticleDetailPage({ params }: PageProps) {
-  const resolvedParams = await Promise.resolve(params)
-  const { slug } = resolvedParams
+  const { slug } = await params
 
   let article = null
   try {

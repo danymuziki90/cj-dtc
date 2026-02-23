@@ -12,10 +12,11 @@ export const runtime = 'nodejs'
 
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const certificateId = parseInt(context.params.id)
+    const { id } = await context.params
+    const certificateId = parseInt(id)
 
     // Validate certificate ID
     if (isNaN(certificateId)) {
@@ -162,10 +163,11 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const certificateId = parseInt(context.params.id)
+    const { id } = await context.params
+    const certificateId = parseInt(id)
 
     // Validate certificate ID
     if (isNaN(certificateId)) {
