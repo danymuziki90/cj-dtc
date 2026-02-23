@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import HomeSections from '../../components/HomeSections'
@@ -7,25 +8,50 @@ import RecentFormations from '../../components/RecentFormations'
 import RecentArticles from '../../components/RecentArticles'
 
 export default function HomePage() {
+  const heroImages = [
+    '/books-wood.jpg',
+    '/lor-de-formation.jpeg's
+  ];
+  const [currentBg, setCurrentBg] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div>
       {/* Hero Section - Primary Visual Element */}
-      <section className="bg-gradient-to-br from-[#002D72] via-blue-700 to-blue-800 text-white py-24 md:py-32">
-        <div className="container mx-auto px-4 text-center">
+      <section className="relative text-white py-24 md:py-32 overflow-hidden">
+        {/* Background Overlay Carousel */}
+        <div className="absolute inset-0 z-0">
+          {heroImages.map((src, index) => (
+            <div
+              key={src}
+              className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out ${currentBg === index ? 'opacity-100' : 'opacity-0'
+                }`}
+              style={{ backgroundImage: `url('${src}')` }}
+            />
+          ))}
+        </div>
+
+        <div className="container relative z-10 mx-auto px-4 text-center">
           {/* Eyebrow text - smallest, introduces context */}
           <p className="text-blue-200 text-sm md:text-base uppercase tracking-widest mb-4 font-semibold">
             Centre Panafricain de Formation
           </p>
           {/* Main headline - largest, most prominent */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-white max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-white max-w-4xl mx-auto drop-shadow-lg">
             Bienvenue au CJ DEVELOPMENT TRAINING CENTER
           </h1>
           {/* Subheadline - medium size, supporting info */}
-          <p className="text-lg md:text-xl lg:text-2xl mb-4 max-w-3xl mx-auto text-blue-100 font-light">
+          <p className="text-lg md:text-xl lg:text-2xl mb-4 max-w-3xl mx-auto text-blue-100 font-light drop-shadow">
             Le centre qui transforme les diplômes en compétences, et les compétences en opportunités réelles.
           </p>
           {/* Tagline - emphasized but smaller */}
-          <p className="text-base md:text-lg mb-10 max-w-2xl mx-auto text-white font-semibold">
+          <p className="text-base md:text-lg mb-10 max-w-2xl mx-auto text-white font-semibold drop-shadow">
             ✨ Bâtir des compétences. Transformer des destins.
           </p>
           {/* CTA buttons - clear visual hierarchy with primary/secondary */}
@@ -33,7 +59,7 @@ export default function HomePage() {
             <Link href="/fr/formations" className="px-8 py-4 bg-[#E30613] text-white rounded-lg font-bold text-lg hover:bg-red-700 transition-all hover:scale-105 shadow-lg">
               Découvrir nos formations
             </Link>
-            <Link href="/fr/contact" className="px-8 py-4 border-2 border-white rounded-lg font-semibold text-lg hover:bg-white hover:text-[#002D72] transition-all">
+            <Link href="/fr/contact" className="px-8 py-4 border-2 border-white bg-black/20 backdrop-blur-sm rounded-lg font-semibold text-lg hover:bg-white hover:text-[#002D72] transition-all">
               Nous contacter
             </Link>
           </div>
@@ -59,7 +85,7 @@ export default function HomePage() {
             </div>
             <div>
               <Image
-                src="/hero-placeholder.jpg"
+                src="/apropos.jpeg"
                 alt="CJ DTC - Formation et accompagnement"
                 width={600}
                 height={400}
@@ -75,12 +101,12 @@ export default function HomePage() {
       <section className="py-16 sm:py-20 lg:py-24 relative overflow-hidden">
         {/* Background décoratif */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50"></div>
-        
+
         {/* Orbes flottants */}
         <div className="absolute top-10 left-10 w-32 h-32 bg-blue-400 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
         <div className="absolute bottom-10 right-10 w-48 h-48 bg-indigo-400 rounded-full filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/3 w-40 h-40 bg-purple-400 rounded-full filter blur-3xl opacity-10 animate-pulse delay-500"></div>
-        
+
         <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Section */}
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
@@ -88,12 +114,12 @@ export default function HomePage() {
               <span className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mr-2 sm:mr-3 animate-pulse"></span>
               <span className="text-blue-800 font-semibold text-sm sm:text-base">Notre Excellence</span>
             </div>
-            
+
             <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-4 sm:mb-6">
-              Pourquoi choisir 
+              Pourquoi choisir
               <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent"> CJ DTC</span> ?
             </h2>
-            
+
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Découvrez ce qui nous distingue et fait de nous le choix privilégié des professionnels et entreprises en Afrique
             </p>
@@ -105,7 +131,7 @@ export default function HomePage() {
             <div className="group relative">
               {/* Background glow */}
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl sm:rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-              
+
               <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-blue-100">
                 {/* Icon Container */}
                 <div className="relative mb-6 sm:mb-8">
@@ -114,15 +140,15 @@ export default function HomePage() {
                     <span className="text-3xl sm:text-4xl lg:text-5xl">🎓</span>
                   </div>
                 </div>
-                
+
                 <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 group-hover:text-blue-600 transition-colors">
                   Formations Certifiantes
                 </h3>
-                
+
                 <p className="text-gray-600 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6">
                   Des programmes reconnus pour développer vos compétences professionnelles et accélérer votre carrière
                 </p>
-                
+
                 {/* Stats */}
                 <div className="flex items-center justify-between pt-4 sm:pt-6 border-t border-gray-100">
                   <div className="text-center">
@@ -141,7 +167,7 @@ export default function HomePage() {
             <div className="group relative">
               {/* Background glow */}
               <div className="absolute -inset-1 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl sm:rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-              
+
               <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-green-100">
                 {/* Icon Container */}
                 <div className="relative mb-6 sm:mb-8">
@@ -150,15 +176,15 @@ export default function HomePage() {
                     <span className="text-3xl sm:text-4xl lg:text-5xl">🌍</span>
                   </div>
                 </div>
-                
+
                 <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 group-hover:text-green-600 transition-colors">
                   Expertise Panafricaine
                 </h3>
-                
+
                 <p className="text-gray-600 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6">
                   Une approche adaptée aux contextes africains et internationaux avec une présence dans 15+ pays
                 </p>
-                
+
                 {/* Stats */}
                 <div className="flex items-center justify-between pt-4 sm:pt-6 border-t border-gray-100">
                   <div className="text-center">
@@ -177,7 +203,7 @@ export default function HomePage() {
             <div className="group relative">
               {/* Background glow */}
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl sm:rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-              
+
               <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-purple-100">
                 {/* Icon Container */}
                 <div className="relative mb-6 sm:mb-8">
@@ -186,15 +212,15 @@ export default function HomePage() {
                     <span className="text-3xl sm:text-4xl lg:text-5xl">🚀</span>
                   </div>
                 </div>
-                
+
                 <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 group-hover:text-purple-600 transition-colors">
                   Insertion Professionnelle
                 </h3>
-                
+
                 <p className="text-gray-600 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6">
                   Accompagnement personnalisé vers l'emploi et l'entrepreneuriat avec notre réseau de partenaires
                 </p>
-                
+
                 {/* Stats */}
                 <div className="flex items-center justify-between pt-4 sm:pt-6 border-t border-gray-100">
                   <div className="text-center">
@@ -219,7 +245,7 @@ export default function HomePage() {
                 <div className="absolute bottom-4 right-4 w-32 h-32 bg-white rounded-full"></div>
                 <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
               </div>
-              
+
               <div className="relative z-10">
                 <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">
                   Prêt à <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">transformer votre avenir</span> ?
