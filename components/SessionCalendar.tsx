@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FormattedDate } from './FormattedDate'
 
 interface Session {
   id: number
@@ -117,7 +118,7 @@ export default function SessionCalendar({ sessions, onSessionClick }: SessionCal
                 <div>
                   <h4 className="font-semibold">{session.formationTitle}</h4>
                   <p className="text-sm text-gray-600">
-                    {new Date(session.startDate).toLocaleDateString('fr-FR')} - {new Date(session.endDate).toLocaleDateString('fr-FR')}
+                    <FormattedDate date={session.startDate} /> - <FormattedDate date={session.endDate} />
                   </p>
                   <p className="text-sm text-gray-500">{session.location}</p>
                 </div>
@@ -141,7 +142,7 @@ export default function SessionCalendar({ sessions, onSessionClick }: SessionCal
     const today = new Date()
     const currentWeekStart = new Date(today)
     currentWeekStart.setDate(today.getDate() - today.getDay())
-    
+
     const weekDays = Array.from({ length: 7 }, (_, i) => {
       const date = new Date(currentWeekStart)
       date.setDate(currentWeekStart.getDate() + i)

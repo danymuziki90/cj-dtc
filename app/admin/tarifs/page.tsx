@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { FormattedDate } from '@/components/FormattedDate'
 
 interface PricingRule {
     id: number
@@ -116,7 +117,7 @@ export default function TarifsAdminPage() {
         if (code.discountType === 'percentage') {
             return `${code.discountValue}%`
         }
-        return `${code.discountValue.toLocaleString('fr-FR')} FCFA`
+        return `${code.discountValue.toLocaleString('fr-FR')} USD`
     }
 
     if (loading) {
@@ -165,8 +166,8 @@ export default function TarifsAdminPage() {
                             key={key}
                             onClick={() => setActiveTab(key as any)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === key
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
                         >
                             {label}
@@ -248,13 +249,13 @@ export default function TarifsAdminPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {rule.basePrice.toLocaleString('fr-FR')} FCFA
+                                            {rule.basePrice.toLocaleString('fr-FR')} USD
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {rule.reducedPrice ? `${rule.reducedPrice.toLocaleString('fr-FR')} FCFA` : '-'}
+                                            {rule.reducedPrice ? `${rule.reducedPrice.toLocaleString('fr-FR')} USD` : '-'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {rule.enterprisePrice ? `${rule.enterprisePrice.toLocaleString('fr-FR')} FCFA` : '-'}
+                                            {rule.enterprisePrice ? `${rule.enterprisePrice.toLocaleString('fr-FR')} USD` : '-'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {getPaymentOptionsText(rule.paymentOptions)}
@@ -343,8 +344,8 @@ export default function TarifsAdminPage() {
                                             {getDiscountText(code)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <div>Du {new Date(code.validFrom).toLocaleDateString('fr-FR')}</div>
-                                            <div>Au {new Date(code.validUntil).toLocaleDateString('fr-FR')}</div>
+                                            <div>Du <FormattedDate date={code.validFrom} /></div>
+                                            <div>Au <FormattedDate date={code.validUntil} /></div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {code.currentUses}/{code.maxUses || '∞'}

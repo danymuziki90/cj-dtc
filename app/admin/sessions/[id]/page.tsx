@@ -6,6 +6,7 @@ import Link from 'next/link'
 import SessionCapacityManager from '../../../../components/SessionCapacityManager'
 import AttendanceManager from '../../../../components/AttendanceManager'
 import StudentProgressTracker from '../../../../components/StudentProgressTracker'
+import { FormattedDate } from '@/components/FormattedDate'
 
 interface Session {
     id: number
@@ -213,7 +214,7 @@ export default function SessionDetailPage() {
                             <div>
                                 <h3 className="text-sm font-medium text-gray-500 mb-2">Dates et horaires</h3>
                                 <p className="text-gray-900">
-                                    Du {new Date(session.startDate).toLocaleDateString('fr-FR')} au {new Date(session.endDate).toLocaleDateString('fr-FR')}
+                                    Du <FormattedDate date={session.startDate} /> au <FormattedDate date={session.endDate} />
                                 </p>
                                 <p className="text-gray-600 text-sm">
                                     {session.startTime} - {session.endTime}
@@ -242,7 +243,7 @@ export default function SessionDetailPage() {
                             <div>
                                 <h3 className="text-sm font-medium text-gray-500 mb-2">Prix</h3>
                                 <p className="text-gray-900 font-semibold">
-                                    {session.price.toLocaleString('fr-FR')} FCFA
+                                    {session.price.toLocaleString('fr-FR')} USD
                                 </p>
                             </div>
                         </div>
@@ -306,7 +307,7 @@ export default function SessionDetailPage() {
                                 <p className="text-sm text-gray-600">{participant.email}</p>
                                 <p className="text-sm text-gray-600">{participant.phone}</p>
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Inscrit le {new Date(participant.registrationDate).toLocaleDateString('fr-FR')}
+                                    Inscrit le <FormattedDate date={participant.registrationDate} />
                                 </p>
                             </div>
                         ))}

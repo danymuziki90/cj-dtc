@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Breadcrumbs from '../../../../components/Breadcrumbs'
+import { FormattedDate } from '@/components/FormattedDate'
 
 interface Enrollment {
   id: number
@@ -51,7 +52,7 @@ export default function MesFormationsPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'XAF',
+      currency: 'USD',
       minimumFractionDigits: 0
     }).format(amount)
   }
@@ -153,7 +154,7 @@ export default function MesFormationsPage() {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Date de début</p>
                     <p className="font-medium">
-                      {new Date(enrollment.startDate).toLocaleDateString('fr-FR')}
+                      <FormattedDate date={enrollment.startDate} />
                     </p>
                   </div>
                   {enrollment.session && (
@@ -161,7 +162,7 @@ export default function MesFormationsPage() {
                       <div>
                         <p className="text-sm text-gray-600 mb-1">Session</p>
                         <p className="font-medium">
-                          {new Date(enrollment.session.startDate).toLocaleDateString('fr-FR')} - {new Date(enrollment.session.endDate).toLocaleDateString('fr-FR')}
+                          <FormattedDate date={enrollment.session.startDate} /> - <FormattedDate date={enrollment.session.endDate} />
                         </p>
                       </div>
                       <div>

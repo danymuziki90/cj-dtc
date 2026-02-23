@@ -30,7 +30,7 @@ export async function GET(
     // Pour l'instant, on retourne les données de la facture
     // La génération PDF sera implémentée avec une bibliothèque comme pdfkit ou @react-pdf/renderer
     // Pour l'instant, on génère un HTML qui peut être converti en PDF côté client
-    
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -90,13 +90,13 @@ export async function GET(
             <tbody>
               <tr>
                 <td>Formation: ${invoice.enrollment.formation.title}</td>
-                <td>${invoice.amount.toLocaleString('fr-FR')} FCFA</td>
-                <td>${invoice.taxAmount.toLocaleString('fr-FR')} FCFA</td>
-                <td>${invoice.totalAmount.toLocaleString('fr-FR')} FCFA</td>
+                <td>${invoice.amount.toLocaleString('fr-FR')} USD</td>
+                <td>${invoice.taxAmount.toLocaleString('fr-FR')} USD</td>
+                <td>${invoice.totalAmount.toLocaleString('fr-FR')} USD</td>
               </tr>
               <tr class="total-row">
                 <td colspan="3"><strong>TOTAL</strong></td>
-                <td><strong>${invoice.totalAmount.toLocaleString('fr-FR')} FCFA</strong></td>
+                <td><strong>${invoice.totalAmount.toLocaleString('fr-FR')} USD</strong></td>
               </tr>
             </tbody>
           </table>

@@ -132,7 +132,7 @@ export default function NewPricingPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Prix de Base (FCFA) *
+                                Prix de Base (USD) *
                             </label>
                             <input
                                 type="number"
@@ -146,7 +146,7 @@ export default function NewPricingPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Prix Réduit (FCFA)
+                                Prix Réduit (USD)
                             </label>
                             <input
                                 type="number"
@@ -159,7 +159,7 @@ export default function NewPricingPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Prix Entreprise (FCFA)
+                                Prix Entreprise (USD)
                             </label>
                             <input
                                 type="number"

@@ -12,22 +12,26 @@ export async function GET() {
                     select: {
                         id: true,
                         title: true,
-                        slug: true
+                        slug: true,
+                        categorie: true
                     }
                 },
                 enrollments: {
                     select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true
+                        id: true
                     }
                 }
             },
             orderBy: { startDate: 'desc' }
         })
 
-        return NextResponse.json(sessions)
+        // Ajouter le nombre de participants actuels à chaque session
+        const sessionsWithCount = sessions.map(session => ({
+            ...session,
+            currentParticipants: session.enrollments.length
+        }))
+
+        return NextResponse.json(sessionsWithCount)
     } catch (error) {
         console.error('Erreur lors de la récupération des sessions:', error)
         return NextResponse.json(
@@ -53,7 +57,8 @@ export async function POST(request: Request) {
             price,
             description,
             prerequisites,
-            objectives
+            objectives,
+            imageUrl
         } = body
 
         // Validation des données
@@ -91,6 +96,7 @@ export async function POST(request: Request) {
                 description,
                 prerequisites,
                 objectives,
+                imageUrl,
                 status: 'ouverte'
             },
             include: {

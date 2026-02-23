@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { FormattedDate } from './FormattedDate'
 
 interface Session {
   id: number
@@ -170,7 +171,7 @@ export default function SessionCapacityManager({ session, onUpdate }: SessionCap
                     </p>
                     <p className="text-xs text-gray-600">{item.email}</p>
                     <p className="text-xs text-gray-500">
-                      Ajouté le: {new Date(item.addedAt).toLocaleDateString('fr-FR')}
+                      Ajouté le: <FormattedDate date={item.addedAt} />
                     </p>
                   </div>
                   <div className="flex gap-2">

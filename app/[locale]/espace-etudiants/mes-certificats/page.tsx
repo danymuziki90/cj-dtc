@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Breadcrumbs from '../../../../components/Breadcrumbs'
+import { FormattedDate } from '@/components/FormattedDate'
 
 interface Certificate {
   id: number
@@ -106,11 +107,11 @@ export default function MesCertificatsPage() {
 
                 <div className="mb-4 p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-gray-700 mb-1">
-                    <strong>Émis le:</strong> {new Date(certificate.issuedAt).toLocaleDateString('fr-FR')}
+                    <strong>Émis le:</strong> <FormattedDate date={certificate.issuedAt} />
                   </p>
                   {certificate.session && (
                     <p className="text-sm text-gray-700">
-                      <strong>Session:</strong> {new Date(certificate.session.startDate).toLocaleDateString('fr-FR')} - {new Date(certificate.session.endDate).toLocaleDateString('fr-FR')}
+                      <strong>Session:</strong> <FormattedDate date={certificate.session.startDate} /> - <FormattedDate date={certificate.session.endDate} />
                     </p>
                   )}
                 </div>

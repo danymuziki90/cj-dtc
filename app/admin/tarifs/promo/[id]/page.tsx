@@ -103,7 +103,7 @@ export default function PromoDetailPage() {
         if (code.discountType === 'percentage') {
             return `${code.discountValue}%`
         }
-        return `${code.discountValue.toLocaleString('fr-FR')} FCFA`
+        return `${code.discountValue.toLocaleString('fr-FR')} USD`
     }
 
     const getApplicableFormations = (formationIds: number[]) => {

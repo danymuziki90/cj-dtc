@@ -62,7 +62,7 @@ interface Formation {
 function formatCurrency(amount: number): string {
     return new Intl.NumberFormat('fr-FR', {
         style: 'currency',
-        currency: 'XAF',
+        currency: 'USD',
         minimumFractionDigits: 0
     }).format(amount)
 }
@@ -363,7 +363,7 @@ export default function AnalyticsPage() {
                                     <div className="w-24 bg-gray-200 rounded-full h-2">
                                         <div
                                             className={`h-2 rounded-full ${payment.status === 'paid' ? 'bg-green-600' :
-                                                    payment.status === 'partial' ? 'bg-yellow-600' : 'bg-red-600'
+                                                payment.status === 'partial' ? 'bg-yellow-600' : 'bg-red-600'
                                                 }`}
                                             style={{ width: `${payment.percentage}%` }}
                                         ></div>
@@ -423,7 +423,7 @@ export default function AnalyticsPage() {
                                         </div>
                                     </div>
                                     <span className="text-sm font-medium text-gray-900 w-16 text-right">
-                                        {formatCurrency(month.revenue).replace('FCFA', 'F')}
+                                        {formatCurrency(month.revenue).replace('USD', 'U')}
                                     </span>
                                 </div>
                             ))}

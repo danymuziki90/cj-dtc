@@ -3,28 +3,29 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { 
-  Award, 
-  Download, 
-  QrCode, 
-  Share2, 
-  Eye, 
-  Calendar, 
-  User, 
+import {
+  Award,
+  Download,
+  QrCode,
+  Share2,
+  Eye,
+  Calendar,
+  User,
   BookOpen,
-  CheckCircle, 
-  Clock, 
-  TrendingUp, 
-  Star, 
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  Star,
   Shield,
   ExternalLink,
   AlertCircle,
   Copy,
   Smartphone
 } from 'lucide-react'
-import { 
-  generateCertificateQRCodeDisplay, 
-  downloadCertificateQRCode, 
+import { FormattedDate } from '@/components/FormattedDate'
+import {
+  generateCertificateQRCodeDisplay,
+  downloadCertificateQRCode,
   shareCertificateQRCode,
   getCertificateTypeColor,
   getGradeColor,
@@ -163,7 +164,7 @@ export default function StudentCertificatesPage() {
     try {
       const response = await fetch(`/api/certificates/verify-simple/${verificationCode}`)
       const data = await response.json()
-      
+
       if (response.ok) {
         setVerificationResult(data)
       } else {
@@ -215,7 +216,7 @@ export default function StudentCertificatesPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      
+
       {/* Header */}
       <div className="mb-8 sm:mb-12">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -266,11 +267,10 @@ export default function StudentCertificatesPage() {
 
         {/* Verification Result */}
         {verificationResult && (
-          <div className={`mt-6 p-4 rounded-lg ${
-            verificationResult.error 
-              ? 'bg-red-50 border border-red-200' 
+          <div className={`mt-6 p-4 rounded-lg ${verificationResult.error
+              ? 'bg-red-50 border border-red-200'
               : 'bg-green-50 border border-green-200'
-          }`}>
+            }`}>
             {verificationResult.error ? (
               <div className="text-red-700">
                 <p className="font-semibold">❌ Erreur</p>
@@ -283,7 +283,7 @@ export default function StudentCertificatesPage() {
                   <p><strong>Nom:</strong> {verificationResult.studentName}</p>
                   <p><strong>Formation:</strong> {verificationResult.formationTitle}</p>
                   <p><strong>Note:</strong> {verificationResult.grade}/20</p>
-                  <p><strong>Date:</strong> {new Date(verificationResult.completionDate).toLocaleDateString('fr-FR')}</p>
+                  <p><strong>Date:</strong> <FormattedDate date={verificationResult.completionDate} /></p>
                 </div>
               </div>
             )}
@@ -305,11 +305,11 @@ export default function StudentCertificatesPage() {
                   <p className="text-gray-600 mb-2">{certificate.formationCategorie}</p>
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                     <span>👤 {certificate.studentName}</span>
-                    <span>📅 {new Date(certificate.completionDate).toLocaleDateString('fr-FR')}</span>
+                    <span>📅 <FormattedDate date={certificate.completionDate} /></span>
                     <span>📊 Note: <span className={`font-bold ${getGradeColor(certificate.grade)}`}>{certificate.grade}/20</span></span>
                   </div>
                 </div>
-                
+
                 <div className="mt-4 sm:mt-0 text-right">
                   <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(certificate.status)}`}>
                     {getStatusLabel(certificate.status)}
@@ -329,7 +329,7 @@ export default function StudentCertificatesPage() {
                   </div>
                   <div>
                     <span className="text-gray-600">Date de génération:</span>
-                    <p className="font-medium">{new Date(certificate.createdAt).toLocaleDateString('fr-FR')}</p>
+                    <p className="font-medium"><FormattedDate date={certificate.createdAt} /></p>
                   </div>
                 </div>
               </div>
@@ -411,7 +411,7 @@ export default function StudentCertificatesPage() {
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">CERTIFICAT DE RÉUSSITE</h3>
                     <p className="text-gray-600">CJ DTC - Centre de Formation Professionnelle</p>
                   </div>
-                  
+
                   <div className="text-center mb-6">
                     <p className="text-lg text-gray-700 mb-2">
                       <strong>Certifie que</strong>
@@ -445,7 +445,7 @@ export default function StudentCertificatesPage() {
                     <div>
                       <p>Date de complétion</p>
                       <p className="font-medium">
-                        {new Date(selectedCertificate.completionDate).toLocaleDateString('fr-FR')}
+                        <FormattedDate date={selectedCertificate.completionDate} />
                       </p>
                     </div>
                     <div className="text-right">

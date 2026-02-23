@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { FormattedDate } from './FormattedDate'
 
 interface Article {
     id: number
@@ -83,11 +84,6 @@ export default function RecentArticles() {
                 <div className="grid md:grid-cols-3 gap-8">
                     {articles.map((article) => {
                         const excerpt = article.excerpt || article.content.substring(0, 150)
-                        const date = new Date(article.createdAt).toLocaleDateString('fr-FR', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        })
 
                         return (
                             <Link
@@ -120,7 +116,7 @@ export default function RecentArticles() {
                                     <div className="p-6 flex flex-col h-72">
                                         {/* Date */}
                                         <time className="text-xs text-gray-400 uppercase tracking-wider mb-2">
-                                            {date}
+                                            <FormattedDate date={article.createdAt} options={{ year: 'numeric', month: 'long', day: 'numeric' } as any} />
                                         </time>
 
                                         {/* Title */}

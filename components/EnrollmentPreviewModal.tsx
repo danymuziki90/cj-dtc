@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import EnrollmentStatusChanger from './EnrollmentStatusChanger'
+import { FormattedDate } from './FormattedDate'
 
 interface Enrollment {
   id: number
@@ -74,7 +75,7 @@ export default function EnrollmentPreviewModal({
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'XAF',
+      currency: 'USD',
       minimumFractionDigits: 0
     }).format(amount)
   }
@@ -129,7 +130,7 @@ export default function EnrollmentPreviewModal({
               <div>
                 <p className="text-sm text-gray-600">Date de début souhaitée</p>
                 <p className="font-medium">
-                  {new Date(enrollment.startDate).toLocaleDateString('fr-FR')}
+                  <FormattedDate date={enrollment.startDate} />
                 </p>
               </div>
             </div>
@@ -192,7 +193,7 @@ export default function EnrollmentPreviewModal({
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-2">
                 <strong>Inscription créée:</strong>{' '}
-                {new Date(enrollment.createdAt).toLocaleString('fr-FR')}
+                <FormattedDate date={enrollment.createdAt} options={{ dateStyle: 'short', timeStyle: 'short' } as any} />
               </p>
               <p className="text-sm text-gray-600">
                 <strong>Statut actuel:</strong> {enrollment.status}

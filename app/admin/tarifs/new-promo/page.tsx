@@ -156,7 +156,7 @@ export default function NewPromoPage() {
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="percentage">Pourcentage (%)</option>
-                                <option value="fixed">Montant fixe (FCFA)</option>
+                                <option value="fixed">Montant fixe (USD)</option>
                             </select>
                         </div>
                         <div>
@@ -174,7 +174,7 @@ export default function NewPromoPage() {
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                {formData.discountType === 'percentage' ? 'Maximum 100%' : 'Montant en FCFA'}
+                                {formData.discountType === 'percentage' ? 'Maximum 100%' : 'Montant en USD'}
                             </p>
                         </div>
                     </div>
@@ -276,7 +276,7 @@ export default function NewPromoPage() {
                                 formData.discountValue > 0
                                     ? (formData.discountType === 'percentage'
                                         ? `${formData.discountValue}%`
-                                        : `${formData.discountValue.toLocaleString('fr-FR')} FCFA`)
+                                        : `${formData.discountValue.toLocaleString('fr-FR')} USD`)
                                     : 'À définir'
                             }</p>
                             <p><strong>Formations:</strong> {

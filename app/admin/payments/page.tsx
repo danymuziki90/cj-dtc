@@ -128,7 +128,7 @@ export default function PaymentsPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'XAF',
+      currency: 'USD',
       minimumFractionDigits: 0
     }).format(amount)
   }
@@ -233,7 +233,7 @@ export default function PaymentsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Montant (FCFA) *</label>
+                <label className="block text-sm font-medium mb-1">Montant (USD) *</label>
                 <input
                   type="number"
                   required

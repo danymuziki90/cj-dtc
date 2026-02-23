@@ -42,7 +42,7 @@ export default function EnrollmentStats({ enrollments }: EnrollmentStatsProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'XAF',
+      currency: 'USD',
       minimumFractionDigits: 0
     }).format(amount)
   }

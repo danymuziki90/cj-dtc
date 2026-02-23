@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { FormattedDate } from '@/components/FormattedDate'
 
 interface Invoice {
   id: number
@@ -157,7 +158,7 @@ export default function InvoicesPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'XAF',
+      currency: 'USD',
       minimumFractionDigits: 0
     }).format(amount)
   }
@@ -264,7 +265,7 @@ export default function InvoicesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Montant HT (FCFA) *</label>
+                <label className="block text-sm font-medium mb-1">Montant HT (USD) *</label>
                 <input
                   type="number"
                   required
@@ -275,7 +276,7 @@ export default function InvoicesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">TVA (FCFA)</label>
+                <label className="block text-sm font-medium mb-1">TVA (USD)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -387,7 +388,7 @@ export default function InvoicesPage() {
                     {invoice.invoiceNumber}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {new Date(invoice.createdAt).toLocaleDateString('fr-FR')}
+                    <FormattedDate date={invoice.createdAt} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {invoice.enrollment.firstName} {invoice.enrollment.lastName}
@@ -399,7 +400,7 @@ export default function InvoicesPage() {
                     {formatCurrency(invoice.totalAmount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('fr-FR') : '-'}
+                    {invoice.dueDate ? <FormattedDate date={invoice.dueDate} /> : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(invoice.status)}`}>

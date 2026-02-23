@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FormattedDate } from './FormattedDate'
 
 interface Progress {
   enrollmentId: number
@@ -78,7 +79,7 @@ export default function StudentProgressTracker({ sessionId, progresses }: Studen
                 <p className="text-sm text-gray-600">{progress.email}</p>
                 {progress.lastActivity && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Dernière activité: {new Date(progress.lastActivity).toLocaleDateString('fr-FR')}
+                    Dernière activité: <FormattedDate date={progress.lastActivity} />
                   </p>
                 )}
               </div>

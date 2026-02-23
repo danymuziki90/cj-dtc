@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import EnrollmentStatusChanger from './EnrollmentStatusChanger'
+import { FormattedDate } from './FormattedDate'
 
 interface Enrollment {
     id: number
@@ -128,7 +129,7 @@ export default function AdminEnrollmentTable({ enrollments: initialEnrollments, 
                                             <td className="p-2">{enrollment.phone || '—'}</td>
                                             <td className="p-2 text-xs text-gray-600">{enrollment.address || '—'}</td>
                                             <td className="p-2">
-                                                {new Date(enrollment.startDate).toLocaleDateString('fr-FR')}
+                                                <FormattedDate date={enrollment.startDate} />
                                             </td>
                                             <td className="p-2">
                                                 <div className="flex items-center gap-2">
@@ -153,7 +154,7 @@ export default function AdminEnrollmentTable({ enrollments: initialEnrollments, 
                                                 )}
                                             </td>
                                             <td className="p-2">
-                                                {new Date(enrollment.createdAt).toLocaleDateString('fr-FR')}
+                                                <FormattedDate date={enrollment.createdAt} />
                                             </td>
                                             <td className="p-2">
                                                 {onPreview && (
@@ -198,12 +199,7 @@ export default function AdminEnrollmentTable({ enrollments: initialEnrollments, 
                     .map(([dateKey, dateEnrollments]: [string, Enrollment[]]) => (
                         <div key={dateKey} className="border rounded-lg p-4">
                             <h4 className="font-semibold text-lg mb-4">
-                                {new Date(dateKey).toLocaleDateString('fr-FR', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}{' '}
+                                <FormattedDate date={dateKey} options={{ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } as any} />
                                 ({dateEnrollments.length})
                             </h4>
                             <div className="space-y-3">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { FormattedDate } from '@/components/FormattedDate'
 
 interface Assignment {
   id: number
@@ -70,12 +71,12 @@ export default function StudentAssignmentsPage() {
     setSubmitting(true)
     try {
       const formData = new FormData()
-      
+
       // Ajouter les fichiers
       Array.from(files).forEach((file, index) => {
         formData.append(`file_${index}`, file)
       })
-      
+
       // Ajouter les métadonnées
       formData.append('assignmentId', assignmentId.toString())
       formData.append('fileCount', files.length.toString())
@@ -88,8 +89,8 @@ export default function StudentAssignmentsPage() {
       if (response.ok) {
         const result = await response.json()
         // Mettre à jour l'assignment dans la liste
-        setAssignments(prev => prev.map(assignment => 
-          assignment.id === assignmentId 
+        setAssignments(prev => prev.map(assignment =>
+          assignment.id === assignmentId
             ? { ...assignment, submissions: [...assignment.submissions, result.submission] }
             : assignment
         ))
@@ -110,11 +111,11 @@ export default function StudentAssignmentsPage() {
 
   const filteredAssignments = assignments.filter(assignment => {
     const matchesType = filter === 'all' || assignment.type === filter
-    const matchesStatus = statusFilter === 'all' || 
+    const matchesStatus = statusFilter === 'all' ||
       (statusFilter === 'pending' && assignment.submissions.length === 0) ||
       (statusFilter === 'submitted' && assignment.submissions.some(s => s.status === 'submitted')) ||
       (statusFilter === 'graded' && assignment.submissions.some(s => s.status === 'graded'))
-    
+
     return matchesType && matchesStatus
   })
 
@@ -163,7 +164,7 @@ export default function StudentAssignmentsPage() {
     const deadlineDate = new Date(deadline)
     const diffTime = deadlineDate.getTime() - now.getTime()
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays < 0) return 'text-red-600'
     if (diffDays <= 3) return 'text-orange-600'
     return 'text-gray-600'
@@ -182,7 +183,7 @@ export default function StudentAssignmentsPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      
+
       {/* Header */}
       <div className="mb-8 sm:mb-12">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -212,7 +213,7 @@ export default function StudentAssignmentsPage() {
               <option value="project">Projets</option>
             </select>
           </div>
-          
+
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
               Statut
@@ -237,7 +238,7 @@ export default function StudentAssignmentsPage() {
         {filteredAssignments.map((assignment) => {
           const latestSubmission = assignment.submissions[assignment.submissions.length - 1]
           const hasSubmission = assignment.submissions.length > 0
-          
+
           return (
             <div key={assignment.id} className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               <div className="p-6 sm:p-8">
@@ -255,13 +256,13 @@ export default function StudentAssignmentsPage() {
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                       <span>📚 {assignment.formation.title}</span>
                       <span className={getDeadlineColor(assignment.deadline)}>
-                        📅 Deadline: {new Date(assignment.deadline).toLocaleDateString('fr-FR')}
+                        📅 Deadline: <FormattedDate date={assignment.deadline} />
                         {isOverdue(assignment.deadline) && ' (En retard!)'}
                       </span>
                       <span>📁 Max: {assignment.maxFileSize}MB</span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 sm:mt-0">
                     {hasSubmission ? (
                       <div className="text-right">
@@ -306,7 +307,7 @@ export default function StudentAssignmentsPage() {
                                 {getStatusLabel(submission.status)}
                               </span>
                               <span className="text-sm text-gray-600">
-                                Soumis le {new Date(submission.submittedAt).toLocaleDateString('fr-FR')}
+                                Soumis le <FormattedDate date={submission.submittedAt} />
                               </span>
                             </div>
                             <div className="text-sm text-gray-500 mt-1">
@@ -324,14 +325,14 @@ export default function StudentAssignmentsPage() {
                             )}
                             {submission.gradedAt && (
                               <p className="text-xs text-gray-500">
-                                Noté le {new Date(submission.gradedAt).toLocaleDateString('fr-FR')}
+                                Noté le <FormattedDate date={submission.gradedAt} />
                               </p>
                             )}
                           </div>
                         </div>
                       ))}
                     </div>
-                    
+
                     {!latestSubmission || latestSubmission.status === 'submitted' ? (
                       <button
                         onClick={() => setSelectedAssignment(assignment)}
@@ -354,7 +355,7 @@ export default function StudentAssignmentsPage() {
           <span className="text-6xl mb-4 block">📚</span>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun travail trouvé</h3>
           <p className="text-gray-600">
-            {filter !== 'all' || statusFilter !== 'all' 
+            {filter !== 'all' || statusFilter !== 'all'
               ? 'Essayez de modifier les filtres pour voir plus de travaux.'
               : 'Aucun travail n\'a été assigné pour le moment.'
             }
@@ -391,7 +392,7 @@ export default function StudentAssignmentsPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                     <div><span className="text-gray-600">Type:</span> {getTypeLabel(selectedAssignment.type)}</div>
                     <div><span className="text-gray-600">Formation:</span> {selectedAssignment.formation.title}</div>
-                    <div><span className="text-gray-600">Deadline:</span> {new Date(selectedAssignment.deadline).toLocaleDateString('fr-FR')}</div>
+                    <div><span className="text-gray-600">Deadline:</span> <FormattedDate date={selectedAssignment.deadline} /></div>
                     <div><span className="text-gray-600">Taille max:</span> {selectedAssignment.maxFileSize}MB</div>
                   </div>
                 </div>

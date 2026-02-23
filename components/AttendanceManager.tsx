@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FormattedDate } from './FormattedDate'
 
 interface Participant {
   id: number
@@ -96,7 +97,7 @@ export default function AttendanceManager({
         >
           {sessionDates.map((date) => (
             <option key={date} value={date}>
-              {new Date(date).toLocaleDateString('fr-FR')}
+              <FormattedDate date={date} />
             </option>
           ))}
         </select>

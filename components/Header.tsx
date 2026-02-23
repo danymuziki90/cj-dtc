@@ -21,7 +21,7 @@ export default function Header() {
           <Link href="/fr" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Accueil</Link>
           <Link href="/fr/about" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">À propos</Link>
           <Link href="/fr/formations" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Formations</Link>
-          <Link href="/fr/programmes" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Programmes</Link>
+          <Link href="/fr/programmes" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Nos Sessions</Link>
           <Link href="/fr/espace-etudiants" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Espace Étudiants</Link>
           <Link href="/fr/actualites" className="text-sm text-gray-700 hover:text-[var(--cj-blue)] transition-colors duration-200">Actualités</Link>
           <Link href="/fr/contact" className="btn-primary">Contact</Link>
@@ -58,7 +58,7 @@ export default function Header() {
           <Link href="/fr" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Accueil</Link>
           <Link href="/fr/about" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>À propos</Link>
           <Link href="/fr/formations" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Formations</Link>
-          <Link href="/fr/programmes" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Programmes</Link>
+          <Link href="/fr/programmes" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Nos Sessions</Link>
           <Link href="/fr/espace-etudiants" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Espace Étudiants</Link>
           <Link href="/fr/actualites" className="py-2 text-sm text-gray-700 hover:text-[var(--cj-blue)]" onClick={() => setOpen(false)}>Actualités</Link>
           <Link href="/fr/contact" className="py-2 inline-block btn-primary" onClick={() => setOpen(false)}>Contact</Link>

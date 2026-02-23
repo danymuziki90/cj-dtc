@@ -222,7 +222,7 @@ export default function NewSessionPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Prix (FCFA) *
+                                Prix (USD) *
                             </label>
                             <input
                                 type="number"
