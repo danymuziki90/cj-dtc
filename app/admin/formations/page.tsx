@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Edit,
   Trash2,
   Eye,
   Download,
@@ -26,9 +26,10 @@ import {
   ArrowDown,
   Play,
   FileText,
-  DollarSign,
   BarChart3,
-  Settings
+  Settings,
+  User,
+  X
 } from 'lucide-react'
 
 export default function FormationsPage() {
@@ -40,6 +41,14 @@ export default function FormationsPage() {
   const [sortBy, setSortBy] = useState('created')
   const [showFilters, setShowFilters] = useState(false)
   const [selectedFormations, setSelectedFormations] = useState<string[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const getProgressColor = (progress?: number) => {
+    const p = progress || 0;
+    if (p >= 80) return 'bg-green-500';
+    if (p >= 50) return 'bg-yellow-500';
+    return 'bg-blue-500';
+  }
 
   // Mock data - would come from API
   const formations = [
@@ -268,13 +277,13 @@ export default function FormationsPage() {
 
   const filteredFormations = formations.filter(formation => {
     const matchesSearch = formation.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         formation.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         formation.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-    
+      formation.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      formation.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+
     const matchesCategory = selectedCategory === 'all' || formation.category === selectedCategory
     const matchesLevel = selectedLevel === 'all' || formation.level === selectedLevel
     const matchesStatus = selectedStatus === 'all' || formation.status === selectedStatus
-    
+
     return matchesSearch && matchesCategory && matchesLevel && matchesStatus
   }).sort((a, b) => {
     switch (sortBy) {
@@ -325,8 +334,8 @@ export default function FormationsPage() {
   }
 
   const handleSelectFormation = (formationId: string) => {
-    setSelectedFormations(prev => 
-      prev.includes(formationId) 
+    setSelectedFormations(prev =>
+      prev.includes(formationId)
         ? prev.filter(id => id !== formationId)
         : [...prev, formationId]
     )
@@ -406,7 +415,7 @@ export default function FormationsPage() {
                   <Plus className="w-4 h-4" />
                   <span>Nouvelle formation</span>
                 </button>
-                
+
                 {selectedFormations.length > 0 && (
                   <>
                     <button className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center space-x-2">
@@ -513,9 +522,8 @@ export default function FormationsPage() {
             {filteredFormations.map((formation) => (
               <div
                 key={formation.id}
-                className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 ${
-                  selectedFormations.includes(formation.id) ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-                }`}
+                className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 ${selectedFormations.includes(formation.id) ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+                  }`}
               >
                 {/* Header */}
                 <div className="p-6 border-b border-gray-100">
@@ -556,7 +564,7 @@ export default function FormationsPage() {
                     <p className="text-gray-600 mb-4 line-clamp-2">
                       {formation.description}
                     </p>
-                    
+
                     {/* Tags */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       {formation.tags.slice(0, 3).map((tag, index) => (
@@ -603,13 +611,13 @@ export default function FormationsPage() {
                     {/* Progress */}
                     <div className="mt-4">
                       <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">Progression</span>
-                      <span className="text-sm font-medium text-gray-900">{formation.progress}%</span>
-                    </div>
+                        <span className="text-sm text-gray-600">Progression</span>
+                        <span className="text-sm font-medium text-gray-900">{formation.progress || 0}%</span>
+                      </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className={`h-2 rounded-full ${getProgressColor(formation.progress)}`}
-                          style={{ width: `${formation.progress}%` }}
+                          style={{ width: `${formation.progress || 0}%` }}
                         ></div>
                       </div>
                     </div>
@@ -627,14 +635,14 @@ export default function FormationsPage() {
                         )}
                       </div>
                       <div className="flex items-center space-x-3">
-                        <Link 
+                        <Link
                           href={`/admin/formations/${formation.id}/edit`}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2"
                         >
                           <Edit className="w-4 h-4" />
                           <span>Modifier</span>
                         </Link>
-                        <Link 
+                        <Link
                           href={`/admin/formations/${formation.id}/duplicate`}
                           className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center space-x-2"
                         >
@@ -653,72 +661,71 @@ export default function FormationsPage() {
                   </div>
                 </div>
               </div>
-              ))}
+            ))}
+          </div>
+          {/* No Results */}
+          {filteredFormations.length === 0 && (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="w-16 h-16 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune formation trouvée</h3>
+              <p className="text-gray-600 mb-4">
+                Essayez de modifier vos critères de recherche ou créer une nouvelle formation.
+              </p>
+              <button
+                onClick={() => {
+                  setSelectedCategory('all')
+                  setSelectedLevel('all')
+                  setSelectedStatus('all')
+                  setSearchQuery('')
+                  setShowFilters(false)
+                }}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Réinitialiser les filtres
+              </button>
             </div>
-            {/* No Results */}
-            {filteredFormations.length === 0 && (
-              <div className="text-center py-16">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-16 h-16 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune formation trouvée</h3>
-                <p className="text-gray-600 mb-4">
-                  Essayez de modifier vos critères de recherche ou créer une nouvelle formation.
-                </p>
+          )}
+
+          {/* Pagination */}
+          {filteredFormations.length > 0 && (
+            <div className="flex items-center justify-center mt-8">
+              <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => {
-                    setSelectedCategory('all')
-                    setSelectedLevel('all')
-                    setSelectedStatus('all')
-                    setSearchQuery('')
-                    setShowFilters(false)
-                  }}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Réinitialiser les filtres
+                  Précédent
+                </button>
+                <div className="flex space-x-1">
+                  {Array.from({ length: Math.ceil(filteredFormations.length / 6) }, (_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentPage(index + 1)}
+                      className={`px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 ${currentPage === index + 1 ? 'bg-blue-600 text-white' : ''
+                        }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(Math.ceil(filteredFormations.length / 6))}
+                  disabled={currentPage >= Math.ceil(filteredFormations.length / 6)}
+                  className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
                 </button>
               </div>
-            )}
-
-            {/* Pagination */}
-            {filteredFormations.length > 0 && (
-              <div className="flex items-center justify-center mt-8">
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Précédent
-                  </button>
-                  <div className="flex space-x-1">
-                    {Array.from({ length: Math.ceil(filteredFormations.length / 6) }, (_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentPage(index + 1)}
-                        className={`px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 ${
-                          currentPage === index + 1 ? 'bg-blue-600 text-white' : ''
-                        }`}
-                      >
-                        {index + 1}
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => setCurrentPage(Math.ceil(filteredFormations.length / 6))}
-                    disabled={currentPage >= Math.ceil(filteredFormations.length / 6)}
-                    className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Suivant
-                  </button>
-                </div>
-                <div className="text-sm text-gray-700 mt-2">
-                  Affichage de {(currentPage - 1) * 6 + 1} à {Math.min(currentPage * 6, filteredFormations.length)} sur {filteredFormations.length}
-                </div>
+              <div className="text-sm text-gray-700 mt-2">
+                Affichage de {(currentPage - 1) * 6 + 1} à {Math.min(currentPage * 6, filteredFormations.length)} sur {filteredFormations.length}
               </div>
-            )}
-          </div>
-        </header>
+            </div>
+          )}
+        </div>
+      </header>
     </div>
   )
 }
