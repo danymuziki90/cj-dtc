@@ -10,7 +10,7 @@ import RecentArticles from '../../components/RecentArticles'
 export default function HomePage() {
   const heroImages = [
     '/books-wood.jpg',
-    '/lor-de-formation.jpeg's
+    '/lor-de-formation.jpeg',
   ];
   const [currentBg, setCurrentBg] = useState(0);
 

@@ -4,6 +4,8 @@ node_modules
 .next
 dist
 coverage
+.tools
+public/uploads/student-submissions
 .DS_Store
 /prisma/dev.db
 # Large binaries / installers
@@ -11,3 +13,4 @@ coverage
 *.msi
 
 .vercel
+.env*.local

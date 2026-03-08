@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 
@@ -25,11 +25,14 @@ model Student {
   firstName     String
   lastName      String
   email         String        @unique
+  username      String?       @unique
   password      String
   phone         String?
   studentNumber String        @unique
   status        String        @default("PENDING")
   role          String        @default("STUDENT")
+  adminSessionId String?
+  adminSession  AdminTrainingSession? @relation(fields: [adminSessionId], references: [id], onDelete: SetNull)
   
   // Additional fields from registration form
   dateOfBirth   DateTime?
@@ -41,6 +44,11 @@ model Student {
   updatedAt     DateTime      @updatedAt
   
   passwordResetTokens PasswordResetToken[]
+  portalSubmissions  StudentSubmission[]
+  portalCertificates StudentCertificate[]
+
+  @@index([username])
+  @@index([adminSessionId])
 }
 
 model User {
@@ -101,6 +109,64 @@ model PasswordResetToken {
   studentId String
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminTrainingSession {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  students    Student[]
+  submissions StudentSubmission[]
+}
+
+model News {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudentSubmission {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  sessionId String?
+  session   AdminTrainingSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  title     String
+  fileUrl   String
+  status    String   @default("pending") // pending / approved / rejected
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([sessionId])
+  @@index([status])
+}
+
+model StudentCertificate {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title     String   @default("Certificate")
+  fileUrl   String
   createdAt DateTime @default(now())
 
   @@index([studentId])

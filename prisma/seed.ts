@@ -7,6 +7,16 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
+  const portalAdminPassword = await bcrypt.hash('admin@123', 10)
+  await prisma.admin.upsert({
+    where: { username: 'admincjtc' },
+    update: { password: portalAdminPassword },
+    create: {
+      username: 'admincjtc',
+      password: portalAdminPassword,
+    },
+  })
+
   const password = await bcrypt.hash('AdminStrongPassword123!', 10)
   const admin = await prisma.user.upsert({
     where: { email: 'admin@cjdevelopmenttc.com' },

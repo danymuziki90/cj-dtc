@@ -1,5 +1,10 @@
 import { redirect } from 'next/navigation'
 
-export default function AdminRedirectPage() {
-  redirect('/admin')
+export default async function AdminRedirectPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  redirect(`/${locale}/admin/dashboard`)
 }

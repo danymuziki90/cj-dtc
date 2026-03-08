@@ -4,9 +4,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Unblock Vercel deployment despite TS errors
   },
-  eslint: {
-    ignoreDuringBuilds: true, // Unblock Vercel deployment despite ESLint errors
-  },
   images: {
     remotePatterns: [
       {
@@ -19,6 +16,7 @@ const nextConfig = {
       },
     ],
   },
-  // Supprimer l'option experimental qui n'est plus nécessaire dans Next.js 14
+  // Keep config lean for Next 16 compatibility.
 }
+
 module.exports = nextConfig

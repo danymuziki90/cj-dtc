@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
         setErrors({ general: 'Email ou mot de passe incorrect' })
       } else if (result?.ok) {
         // Rediriger vers l'espace admin
-        router.push('/admin')
+        router.push('/fr/admin/dashboard')
       }
     } catch (error) {
       console.error('Erreur lors de la connexion:', error)

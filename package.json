@@ -2,8 +2,14 @@
   "name": "cj-dtc-next",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0 <23"
+  },
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/run-next-dev.js",
+    "dev:turbo": "next dev",
+    "postinstall": "prisma generate",
+    "prebuild": "node scripts/check-node-version.js",
     "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "next lint",

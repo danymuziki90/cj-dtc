@@ -54,7 +54,7 @@ export default function Home() {
             <Link href="/fr/espace-etudiants" className="text-white/80 hover:text-white transition-all duration-300 hover:scale-110 font-medium text-sm sm:text-lg">Espace Étudiants</Link>
             <Link href="/fr/partenaires" className="text-white/80 hover:text-white transition-all duration-300 hover:scale-110 font-medium text-sm sm:text-lg">Partenaires</Link>
             <Link href="/contact" className="text-white/80 hover:text-white transition-all duration-300 hover:scale-110 font-medium text-sm sm:text-lg">Contact</Link>
-            <Link href="/admin" className="px-4 sm:px-6 py-2 sm:py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold text-sm sm:text-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300">
+            <Link href="/fr/admin/dashboard" className="px-4 sm:px-6 py-2 sm:py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold text-sm sm:text-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300">
               Admin
             </Link>
           </div>
