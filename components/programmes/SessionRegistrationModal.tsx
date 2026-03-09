@@ -218,7 +218,7 @@ const IOP_SECTIONS: SectionConfig[] = [
     title: 'Experiences passees et vision',
     fields: [
       { key: 'pastActions', label: 'Actions realisees', type: 'textarea', required: true },
-      { key: 'failureLesson', label: 'Echec et lecon', type: 'textarea', required: true },
+      { key: 'failureLesson', label: 'Échec et leçon', type: 'textarea', required: true },
       { key: 'personalDiscipline', label: 'Discipline personnelle', type: 'textarea', required: true },
       { key: 'difficultAction', label: 'Action difficile', type: 'textarea', required: true },
       { key: 'projectionOneYear', label: 'Projection a 1 an', type: 'textarea', required: true },

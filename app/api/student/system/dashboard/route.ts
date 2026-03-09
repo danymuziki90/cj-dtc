@@ -404,7 +404,7 @@ export async function GET(request: NextRequest) {
       .map((item) => ({
         id: `submission-${item.id}`,
         type: 'correction',
-        title: 'Mise a jour de travail',
+        title: 'Mise à jour de travail',
         message: `${item.title}: statut ${item.status}${item.reviewFeedback ? ` - ${item.reviewFeedback}` : ''}`,
         createdAt: item.reviewedAt ? new Date(item.reviewedAt) : new Date(item.updatedAt),
       })),

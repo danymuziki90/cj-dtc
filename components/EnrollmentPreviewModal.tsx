@@ -162,7 +162,7 @@ const SESSION_FIELDS: Record<ProgramSessionType, DisplaySection[]> = {
       title: 'Experiences passees et projection',
       fields: [
         { key: 'pastActions', label: 'Actions realisees' },
-        { key: 'failureLesson', label: 'Echec et lecon' },
+        { key: 'failureLesson', label: 'Échec et leçon' },
         { key: 'personalDiscipline', label: 'Discipline personnelle' },
         { key: 'difficultAction', label: 'Action difficile' },
         { key: 'projectionOneYear', label: 'Projection a 1 an' },
@@ -457,8 +457,8 @@ export default function EnrollmentPreviewModal({
 
       setFeedbackSuccess(
         data.accountCreated
-          ? 'Paiement confirme. Compte etudiant cree et email envoye.'
-          : 'Paiement confirme. Compte etudiant active/maintenu et email envoye.'
+          ? 'Paiement confirmé. Compte étudiant créé et email envoyé.'
+          : 'Paiement confirmé. Compte étudiant activé/maintenu et email envoyé.'
       )
 
       onStatusChange()
@@ -650,7 +650,7 @@ export default function EnrollmentPreviewModal({
                       disabled={confirmingPayment}
                       className="mt-3 rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
                     >
-                      {confirmingPayment ? 'Confirmation...' : 'Confirmer paiement et creer/activer compte etudiant'}
+                  {confirmingPayment ? 'Confirmation...' : 'Confirmer le paiement et créer/activer le compte étudiant'}
                     </button>
                   </>
                 ) : (
@@ -660,7 +660,7 @@ export default function EnrollmentPreviewModal({
 
               {generatedCredentials ? (
                 <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm">
-                  <p className="font-semibold text-blue-800">Nouveau compte etudiant cree</p>
+                  <p className="font-semibold text-blue-800">Nouveau compte étudiant créé</p>
                   <p className="mt-1 text-blue-700">Username: {generatedCredentials.username}</p>
                   <p className="text-blue-700">Mot de passe initial: {generatedCredentials.password}</p>
                 </div>

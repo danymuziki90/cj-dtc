@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
 
 type FormationItem = {
@@ -85,6 +85,7 @@ export default function AdminSessionsPage() {
   const [form, setForm] = useState(initialForm)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [isBootstrapping, setIsBootstrapping] = useState(true)
   const [error, setError] = useState('')
 
@@ -153,6 +154,10 @@ export default function AdminSessionsPage() {
     setLoading(true)
 
     try {
+      if (uploadingImage) {
+        throw new Error("Veuillez attendre la fin de l'upload de l'image.")
+      }
+
       if (!form.formationId) {
         throw new Error('Veuillez selectionner une formation.')
       }
@@ -200,6 +205,37 @@ export default function AdminSessionsPage() {
     }
   }
 
+  async function onImageFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setError('')
+    setUploadingImage(true)
+
+    try {
+      const payload = new FormData()
+      payload.append('file', file)
+      payload.append('folder', 'sessions')
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: payload,
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || "Erreur lors de l'upload de l'image.")
+      }
+
+      setForm((prev) => ({ ...prev, imageUrl: data.url || '' }))
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : 'Erreur inconnue pendant upload.')
+    } finally {
+      setUploadingImage(false)
+      event.target.value = ''
+    }
+  }
+
   async function removeSession(sessionId: number) {
     const confirmed = window.confirm('Supprimer cette session ?')
     if (!confirmed) return
@@ -225,7 +261,7 @@ export default function AdminSessionsPage() {
       <div className="space-y-6">
         <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
           <h2 className="mb-4 text-lg font-semibold text-slate-900">
-            {editingId ? 'Modifier la session' : 'Creer une session'}
+            {editingId ? 'Modifier la session' : 'Créer une session'}
           </h2>
 
           {error ? <p className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
@@ -296,13 +332,44 @@ export default function AdminSessionsPage() {
               />
             </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Image URL</label>
-              <input
-                value={form.imageUrl}
-                onChange={(event) => setForm((prev) => ({ ...prev, imageUrl: event.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
+            <div className="md:col-span-2 xl:col-span-3">
+              <label className="mb-1 block text-sm font-medium text-slate-700">Image de session</label>
+              <div className="rounded-lg border border-slate-300 bg-white p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="inline-flex cursor-pointer items-center rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+                    {uploadingImage ? 'Upload en cours...' : 'Uploader une image'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingImage}
+                      onChange={onImageFileChange}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, imageUrl: '' }))}
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                  >
+                    Retirer l'image
+                  </button>
+                </div>
+
+                <input
+                  value={form.imageUrl}
+                  onChange={(event) => setForm((prev) => ({ ...prev, imageUrl: event.target.value }))}
+                  placeholder="Ou collez une URL d'image"
+                  className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                />
+
+                {form.imageUrl ? (
+                  <img
+                    src={form.imageUrl}
+                    alt="Apercu session"
+                    className="mt-3 h-32 w-52 rounded-lg border border-slate-200 object-cover"
+                  />
+                ) : null}
+              </div>
             </div>
 
             <div>
@@ -440,10 +507,14 @@ export default function AdminSessionsPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || uploadingImage}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
             >
-              {loading ? 'Sauvegarde...' : editingId ? 'Mettre a jour' : 'Creer la session'}
+              {loading || uploadingImage
+                ? 'Sauvegarde...'
+                : editingId
+                ? 'Mettre à jour'
+                : 'Créer la session'}
             </button>
             {editingId ? (
               <button

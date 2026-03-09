@@ -174,7 +174,7 @@ export default function AdminDashboardPage() {
           Surveillez la charge des sessions, les inscriptions et la progression des travaux depuis un tableau unique.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">Mise a jour en temps reel</span>
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">Mise à jour en temps réel</span>
           <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">Suivi des paiements</span>
           <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">Activite recente</span>
         </div>

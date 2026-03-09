@@ -181,7 +181,7 @@ export default function PaymentsPage() {
 
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.error || 'Creation du paiement impossible.')
+        throw new Error(data.error || 'Création du paiement impossible.')
       }
 
       setShowCreateForm(false)

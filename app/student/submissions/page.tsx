@@ -73,7 +73,7 @@ export default function StudentSubmissionsPage() {
     const data = await response.json()
 
     if (!response.ok) {
-      setError(data.error || 'Echec du televersement.')
+      setError(data.error || 'Échec du téléversement.')
       setLoading(false)
       return
     }
@@ -168,7 +168,7 @@ export default function StudentSubmissionsPage() {
                       <>
                         <p>{submission.feedback}</p>
                         {submission.reviewedAt ? (
-                          <p className="text-xs text-slate-500">Mis a jour le {new Date(submission.reviewedAt).toLocaleString('fr-FR')}</p>
+                          <p className="text-xs text-slate-500">Mis ? jour le {new Date(submission.reviewedAt).toLocaleString('fr-FR')}</p>
                         ) : null}
                       </>
                     ) : (

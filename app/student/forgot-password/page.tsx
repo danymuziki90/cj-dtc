@@ -30,7 +30,7 @@ export default function StudentForgotPasswordPage() {
 
       setMessage(
         data.message ||
-          'Si un compte etudiant existe avec cet email, un lien de reinitialisation a ete envoye.'
+          'Si un compte étudiant existe avec cet email, un lien de réinitialisation a été envoyé.'
       )
     } catch {
       setError('Une erreur est survenue.')
@@ -42,9 +42,9 @@ export default function StudentForgotPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="mb-2 text-2xl font-bold text-slate-900">Mot de passe oublie</h1>
+        <h1 className="mb-2 text-2xl font-bold text-slate-900">Mot de passe oublié</h1>
         <p className="mb-6 text-sm text-slate-600">
-          Entrez votre email etudiant pour recevoir un lien de reinitialisation.
+          Entrez votre email étudiant pour recevoir un lien de réinitialisation.
         </p>
 
         {message ? (

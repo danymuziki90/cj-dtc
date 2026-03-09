@@ -78,7 +78,7 @@ export default function RecentArticles() {
     <section className="bg-white py-16">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-bold text-cjblue">Nos dernieres actualites</h2>
+          <h2 className="mb-4 text-4xl font-bold text-cjblue">Nos dernières actualités</h2>
           <p className="mx-auto max-w-2xl text-lg text-gray-600">
             Restez informe des dernieres nouvelles, tendances et annonces du centre CJ DTC.
           </p>

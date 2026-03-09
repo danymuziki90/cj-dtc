@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!news) {
     return generatePageMetadata({
       title: 'Actualité introuvable',
-      description: "L'actualite demandee n'existe pas.",
+      description: "L'actualité demandée n'existe pas.",
       noIndex: true,
     })
   }

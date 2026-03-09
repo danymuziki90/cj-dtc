@@ -215,7 +215,7 @@ export default function AdminActualitesPage() {
 
     if (!response.ok) {
       const payload = await response.json().catch(() => ({}))
-      throw new Error(payload?.error || 'Impossible de charger les actualites.')
+      throw new Error(payload?.error || 'Impossible de charger les actualités.')
     }
 
     const payload = (await response.json()) as NewsResponse
@@ -351,15 +351,15 @@ export default function AdminActualitesPage() {
   }
 
   return (
-    <AdminShell title="Gestion des actualites">
+    <AdminShell title="Gestion des actualités">
       <div className="space-y-6">
         <form onSubmit={onSubmit} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
           <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
-                {editingId ? 'Modifier une actualite' : 'Creer une actualite'}
+                {editingId ? 'Modifier une actualité' : 'Créer une actualité'}
               </h2>
-              <p className="text-sm text-slate-500">Titre, image, contenu riche, categorie, tags et date de publication.</p>
+              <p className="text-sm text-slate-500">Titre, image, contenu riche, catégorie, tags et date de publication.</p>
             </div>
             {editingId ? (
               <button
@@ -390,7 +390,7 @@ export default function AdminActualitesPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="category" className="mb-1 block text-sm font-medium text-slate-700">
-                    Categorie
+                    Catégorie
                   </label>
                   <input
                     id="category"
@@ -419,7 +419,7 @@ export default function AdminActualitesPage() {
 
               <div>
                 <label htmlFor="tagsInput" className="mb-1 block text-sm font-medium text-slate-700">
-                  Tags (separes par virgule)
+                  Tags (séparés par virgule)
                 </label>
                 <input
                   id="tagsInput"
@@ -441,12 +441,12 @@ export default function AdminActualitesPage() {
                   onChange={handleImageChange}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                 />
-                <p className="mt-1 text-xs text-slate-500">PNG, JPG, WEBP, GIF. Max 2 MB. Stockee en base de donnees.</p>
+                <p className="mt-1 text-xs text-slate-500">PNG, JPG, WEBP, GIF. Max 2 MB. Stockée en base de données.</p>
                 {form.imageDataUrl ? (
                   <div className="mt-3">
                     <img
                       src={form.imageDataUrl}
-                      alt="Apercu actualite"
+                      alt="Aperçu actualité"
                       className="h-40 w-full rounded-lg border border-slate-200 object-cover"
                     />
                     <button
@@ -454,7 +454,7 @@ export default function AdminActualitesPage() {
                       onClick={() => setForm((prev) => ({ ...prev, imageDataUrl: null }))}
                       className="mt-2 text-xs font-medium text-red-600 hover:text-red-700"
                     >
-                      Retirer l image
+                      Retirer l'image
                     </button>
                   </div>
                 ) : null}
@@ -466,7 +466,7 @@ export default function AdminActualitesPage() {
                   checked={form.published}
                   onChange={(event) => setForm((prev) => ({ ...prev, published: event.target.checked }))}
                 />
-                Publier cette actualite
+                Publier cette actualité
               </label>
             </div>
 
@@ -489,7 +489,7 @@ export default function AdminActualitesPage() {
               disabled={saving}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
             >
-              {saving ? 'Enregistrement...' : editingId ? 'Mettre a jour' : 'Creer l actualite'}
+              {saving ? 'Enregistrement...' : editingId ? 'Mettre à jour' : "Créer l'actualité"}
             </button>
           </div>
         </form>
@@ -504,13 +504,13 @@ export default function AdminActualitesPage() {
                 id="search"
                 value={filters.search}
                 onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
-                placeholder="Rechercher une actualite..."
+                placeholder="Rechercher une actualité..."
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
               />
             </div>
             <div className="min-w-[180px]">
               <label htmlFor="categoryFilter" className="mb-1 block text-sm font-medium text-slate-700">
-                Categorie
+                Catégorie
               </label>
               <select
                 id="categoryFilter"
@@ -548,7 +548,7 @@ export default function AdminActualitesPage() {
 
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm text-slate-500">
-              {loading ? 'Chargement...' : `${pagination.total} actualite(s)`}
+              {loading ? 'Chargement...' : `${pagination.total} actualité(s)`}
             </p>
             {(filters.search || filters.category !== 'all' || filters.date) && (
               <button
@@ -560,7 +560,7 @@ export default function AdminActualitesPage() {
                 }}
                 className="text-sm font-medium text-blue-700 hover:text-blue-800"
               >
-                Reinitialiser les filtres
+                Réinitialiser les filtres
               </button>
             )}
           </div>
@@ -573,7 +573,7 @@ export default function AdminActualitesPage() {
                   <th className="px-3 py-2 text-left font-semibold text-slate-600">Titre</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-600">Date</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-600">Auteur</th>
-                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Categorie</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Catégorie</th>
                   <th className="px-3 py-2 text-right font-semibold text-slate-600">Actions</th>
                 </tr>
               </thead>
@@ -625,7 +625,7 @@ export default function AdminActualitesPage() {
                 {!loading && news.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-3 py-7 text-center text-sm text-slate-500">
-                      Aucune actualite pour ces filtres.
+                      Aucune actualité pour ces filtres.
                     </td>
                   </tr>
                 ) : null}
@@ -677,7 +677,7 @@ export default function AdminActualitesPage() {
             ))}
             {!loading && news.length === 0 ? (
               <p className="rounded-lg border border-dashed border-slate-300 px-3 py-6 text-center text-sm text-slate-500">
-                Aucune actualite pour ces filtres.
+                Aucune actualité pour ces filtres.
               </p>
             ) : null}
           </div>
@@ -725,4 +725,5 @@ export default function AdminActualitesPage() {
     </AdminShell>
   )
 }
+
 

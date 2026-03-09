@@ -138,6 +138,6 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error('Student submission upload error:', error)
-    return NextResponse.json({ error: 'Echec du televersement.' }, { status: 500 })
+    return NextResponse.json({ error: 'Échec du téléversement.' }, { status: 500 })
   }
 }

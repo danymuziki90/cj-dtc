@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
     console.error('Public news fetch error:', error)
     return NextResponse.json(
       {
-        error: 'Erreur lors du chargement des actualites.',
+        error: 'Erreur lors du chargement des actualités.',
         news: [],
         categories: [],
         pagination: {

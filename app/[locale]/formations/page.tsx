@@ -36,7 +36,7 @@ function summarize(value?: string | null, max = 170) {
 
 function modulesLabel(value?: string | null) {
   const text = normalizeText(value)
-  if (!text) return 'Modules a confirmer'
+  if (!text) return 'Modules à confirmer'
 
   const numeric = Number(text)
   if (!Number.isNaN(numeric) && numeric > 0) {
@@ -250,7 +250,7 @@ export default function FormationsPage() {
             </div>
             <h2 className="mt-6 text-2xl font-bold text-cjblue">Aucune formation trouvee</h2>
             <p className="mt-2 text-slate-600">
-              Essaie un autre mot-cle ou change la categorie selectionnee.
+              Essaie un autre mot-clé ou change la catégorie sélectionnée.
             </p>
             <button
               type="button"
@@ -260,7 +260,7 @@ export default function FormationsPage() {
               }}
               className="mt-5 rounded-xl bg-cjred px-5 py-2.5 font-semibold text-white transition hover:bg-red-700"
             >
-              Reinitialiser les filtres
+              Réinitialiser les filtres
             </button>
           </section>
         ) : (

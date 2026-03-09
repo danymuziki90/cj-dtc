@@ -97,7 +97,7 @@ export default function StudentProfilePage() {
         return
       }
 
-      setMessage('Profil mis a jour avec succes.')
+      setMessage('Profil mis à jour avec succès.')
       setForm((prev) => ({
         ...prev,
         currentPassword: '',
@@ -135,7 +135,7 @@ export default function StudentProfilePage() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Mon compte etudiant</h1>
-            <p className="text-sm text-slate-600">Mettez a jour vos informations personnelles et votre mot de passe.</p>
+            <p className="text-sm text-slate-600">Mettez ? jour vos informations personnelles et votre mot de passe.</p>
           </div>
           <Link
             href="/student/dashboard"

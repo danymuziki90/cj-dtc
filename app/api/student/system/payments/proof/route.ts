@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Student payment proof upload error:', error)
-    return NextResponse.json({ error: 'Echec du televersement de la preuve.' }, { status: 500 })
+    return NextResponse.json({ error: 'Échec du téléversement de la preuve.' }, { status: 500 })
   }
 }
 

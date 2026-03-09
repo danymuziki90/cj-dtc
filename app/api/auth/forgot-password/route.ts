@@ -10,7 +10,7 @@ const forgotSchema = z.object({
 })
 
 const GENERIC_SUCCESS_MESSAGE =
-  'Si un compte existe avec cet email, un lien de reinitialisation a ete envoye.'
+  'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.'
 
 export async function POST(req: Request) {
   try {

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
@@ -84,7 +84,7 @@ export default function ActualitesPage() {
     const payload = (await response.json()) as NewsResponse
 
     if (!response.ok) {
-      throw new Error(payload.error || 'Erreur lors du chargement des actualites.')
+      throw new Error(payload.error || 'Erreur lors du chargement des actualités.')
     }
 
     setNews(payload.news || [])
@@ -121,10 +121,10 @@ export default function ActualitesPage() {
             <p className="text-sm uppercase tracking-[0.25em] text-white/85">CJ DTC</p>
             <h1 className="mt-3 text-5xl font-extrabold leading-tight text-white sm:text-6xl">Actualités</h1>
             <p className="mt-3 max-w-3xl text-base text-white/90 sm:text-lg">
-              Les annonces, sessions, evolutions et informations importantes du centre.
+              Les annonces, sessions, évolutions et informations importantes du centre.
             </p>
             <div className="mt-5 inline-flex rounded-full bg-white/12 px-4 py-2 text-sm font-medium">
-              {loading ? 'Chargement...' : `${pagination.total} actualite(s)`}
+              {loading ? 'Chargement...' : `${pagination.total} actualité(s)`}
             </div>
           </div>
         </section>
@@ -139,13 +139,13 @@ export default function ActualitesPage() {
                 id="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Titre ou mot cle..."
+                placeholder="Titre ou mot-clé..."
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
               />
             </div>
             <div>
               <label htmlFor="category" className="mb-1 block text-sm font-medium text-slate-700">
-                Categorie
+                Catégorie
               </label>
               <select
                 id="category"
@@ -194,7 +194,7 @@ export default function ActualitesPage() {
                 }}
                 className="text-sm font-medium text-cjblue hover:text-blue-800"
               >
-                Reinitialiser les filtres
+                Réinitialiser les filtres
               </button>
             </div>
           )}
@@ -208,7 +208,7 @@ export default function ActualitesPage() {
 
         {!loading && !error && news.length === 0 ? (
           <section className="mt-6 rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
-            <h2 className="text-2xl font-bold text-cjblue">Aucune actualite trouvee</h2>
+            <h2 className="text-2xl font-bold text-cjblue">Aucune actualité trouvée</h2>
             <p className="mt-2 text-sm text-slate-600">Ajustez vos filtres ou revenez plus tard.</p>
             <Link
               href={`/${locale}/contact`}
@@ -237,7 +237,7 @@ export default function ActualitesPage() {
                 <div className="p-5">
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <span className="inline-flex rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
-                      {item.category || 'General'}
+                      {item.category || 'Général'}
                     </span>
                     <time className="text-xs text-slate-500">{formatDate(item.publicationDate)}</time>
                   </div>
@@ -294,3 +294,4 @@ export default function ActualitesPage() {
     </div>
   )
 }
+

@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '../../../../lib/prisma'
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session || session.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
-    // Simuler les certificats (en réalité, viendraient de la base de données)
     const certificates = [
       {
         id: 1,
@@ -26,7 +24,7 @@ export async function GET(req: NextRequest) {
         certificateUrl: 'https://example.com/certificates/CJ-2025-001-ABC123.pdf',
         status: 'generated',
         createdAt: '2025-06-15T10:00:00Z',
-        issuedBy: session.user.email
+        issuedBy: session.user.email,
       },
       {
         id: 2,
@@ -41,13 +39,13 @@ export async function GET(req: NextRequest) {
         certificateUrl: 'https://example.com/certificates/CJ-2025-002-DEF456.pdf',
         status: 'downloaded',
         createdAt: '2025-07-01T14:00:00Z',
-        issuedBy: session.user.email
+        issuedBy: session.user.email,
       },
       {
         id: 3,
         studentName: 'Carol Johnson',
         studentEmail: 'carol.johnson@example.com',
-        formationTitle: 'Gestion de Projet',
+        formationTitle: 'Gestion de projet',
         formationCategorie: 'Management',
         completionDate: '2025-06-20',
         grade: 15,
@@ -56,8 +54,8 @@ export async function GET(req: NextRequest) {
         certificateUrl: 'https://example.com/certificates/CJ-2025-003-GHI789.pdf',
         status: 'verified',
         createdAt: '2025-06-20T09:00:00Z',
-        issuedBy: session.user.email
-      }
+        issuedBy: session.user.email,
+      },
     ]
 
     return NextResponse.json(certificates)
@@ -70,22 +68,19 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session || session.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
     const { studentEmail, formationId, grade, completionDate } = await req.json()
 
-    // Validation basique
     if (!studentEmail || !formationId || !grade || !completionDate) {
       return NextResponse.json({ error: 'Données incomplètes' }, { status: 400 })
     }
 
-    // Générer un ID unique
     const uniqueId = `CJ-2025-${Date.now().toString().slice(-3)}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
-    
-    // Créer le certificat (simulation)
+
     const certificate = {
       id: Date.now(),
       studentName: studentEmail.split('@')[0],
@@ -99,7 +94,7 @@ export async function POST(req: NextRequest) {
       certificateUrl: `https://example.com/certificates/${uniqueId}.pdf`,
       status: 'generated',
       createdAt: new Date().toISOString(),
-      issuedBy: session.user.email
+      issuedBy: session.user.email,
     }
 
     return NextResponse.json(certificate, { status: 201 })
@@ -112,7 +107,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session || session.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
@@ -123,12 +118,11 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Données incomplètes' }, { status: 400 })
     }
 
-    // Simuler la mise à jour du statut (en réalité, viendra de la base de données)
     const updatedCertificate = {
       id: certificateId,
       status,
       updatedAt: new Date().toISOString(),
-      revokedAt: status === 'revoked' ? new Date().toISOString() : undefined
+      revokedAt: status === 'revoked' ? new Date().toISOString() : undefined,
     }
 
     return NextResponse.json(updatedCertificate)

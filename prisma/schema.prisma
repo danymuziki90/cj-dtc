@@ -338,8 +338,8 @@ model TrainingSession {
   endDate           DateTime
   startTime         String
   endTime           String
-  location          String
-  format            String      // presentiel, distanciel, hybride
+  location          String?     @map("locationDetails")
+  format            String      @map("mode") // presentiel, distanciel, hybride
   maxParticipants   Int         @default(25)
   currentParticipants Int       @default(0)
   price             Float       @default(0)

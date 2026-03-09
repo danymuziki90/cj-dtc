@@ -192,7 +192,7 @@ export default function AdminSettingsPage() {
               disabled={saving}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
             >
-              {saving ? 'Creation...' : 'Creer admin'}
+              {saving ? 'Création...' : 'Créer admin'}
             </button>
           </form>
         </section>
@@ -246,7 +246,7 @@ export default function AdminSettingsPage() {
               <thead className="bg-slate-50">
                 <tr>
                   <th className="px-3 py-2 text-left font-semibold text-slate-600">Username</th>
-                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Creation</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Création</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-600">Maj</th>
                   <th className="px-3 py-2 text-right font-semibold text-slate-600">Actions</th>
                 </tr>

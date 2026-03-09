@@ -74,7 +74,7 @@ export default function HomePage() {
               <h2 className="text-3xl font-bold mb-6 text-cjblue">
                 A propos
               </h2>
-              <p className="text-lg text-gray-700 mb-4">
+              <p className="text-lg text-gray-700 mb-4 text-justify">
                 Depuis 2018, CJ DTC forme, accompagne et insère durablement des milliers de jeunes et de professionnels à travers l'Afrique. Nos programmes — rigoureux, pratiques et alignés sur les standards internationaux en Management des Ressources Humaines, leadership et employabilité — sont conçus pour favoriser une insertion professionnelle durable et mesurable.
               </p>
               <div className="flex">
