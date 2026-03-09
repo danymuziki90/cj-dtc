@@ -162,6 +162,32 @@ export async function GET(request: NextRequest) {
     new Set(enrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value)))
   )
 
+  const adminNotifications = await prisma.adminNotification.findMany({
+    where: {
+      OR: [
+        {
+          target: 'all',
+        },
+        {
+          target: 'student',
+          studentEmail,
+        },
+        ...(sessionIds.length
+          ? [
+              {
+                target: 'session',
+                sessionId: {
+                  in: sessionIds,
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 20,
+  })
+
   const resources =
     formationIds.length > 0 || sessionIds.length > 0
       ? await prisma.document.findMany({
@@ -311,6 +337,13 @@ export async function GET(request: NextRequest) {
       type: 'info',
       title: item.title,
       message: item.content,
+      createdAt: item.createdAt,
+    })),
+    ...adminNotifications.map((item) => ({
+      id: `admin-notification-${item.id}`,
+      type: item.type,
+      title: item.title,
+      message: item.message,
       createdAt: item.createdAt,
     })),
     ...mappedSubmissions

@@ -5,9 +5,21 @@ import AdminShell from '@/components/admin-portal/AdminShell'
 
 type DashboardStats = {
   sessions: number
-  news: number
   students: number
+  availableSpots: number
+  paymentsConfirmed: number
+  paymentsPending: number
   submissions: number
+  submissionsPending: number
+  submissionsValidated: number
+  certificates: number
+  news: number
+}
+
+type SessionTypeBreakdown = {
+  MRH: number
+  IOP: number
+  CONFERENCE_FORUM: number
 }
 
 type SubmissionRow = {
@@ -41,9 +53,20 @@ function formatDate(value: string) {
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
     sessions: 0,
-    news: 0,
     students: 0,
+    availableSpots: 0,
+    paymentsConfirmed: 0,
+    paymentsPending: 0,
     submissions: 0,
+    submissionsPending: 0,
+    submissionsValidated: 0,
+    certificates: 0,
+    news: 0,
+  })
+  const [sessionTypes, setSessionTypes] = useState<SessionTypeBreakdown>({
+    MRH: 0,
+    IOP: 0,
+    CONFERENCE_FORUM: 0,
   })
   const [latestSubmissions, setLatestSubmissions] = useState<SubmissionRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -51,28 +74,28 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadStats() {
       try {
-        const [sessionsRes, newsRes, studentsRes, submissionsRes] = await Promise.all([
-          fetch('/api/admin/system/sessions'),
-          fetch('/api/admin/system/news'),
-          fetch('/api/admin/system/students'),
+        const [overviewRes, submissionsRes] = await Promise.all([
+          fetch('/api/admin/system/overview'),
           fetch('/api/admin/system/submissions'),
         ])
 
-        if ([sessionsRes, newsRes, studentsRes, submissionsRes].some((res) => !res.ok)) return
+        if ([overviewRes, submissionsRes].some((res) => !res.ok)) return
 
-        const [sessionsData, newsData, studentsData, submissionsData] = await Promise.all([
-          sessionsRes.json(),
-          newsRes.json(),
-          studentsRes.json(),
-          submissionsRes.json(),
-        ])
+        const [overviewData, submissionsData] = await Promise.all([overviewRes.json(), submissionsRes.json()])
 
         setStats({
-          sessions: sessionsData.sessions?.length || 0,
-          news: newsData.news?.length || 0,
-          students: studentsData.students?.length || 0,
-          submissions: submissionsData.submissions?.length || 0,
+          sessions: overviewData.totals?.sessions || 0,
+          students: overviewData.totals?.students || 0,
+          availableSpots: overviewData.totals?.availableSpots || 0,
+          paymentsConfirmed: overviewData.totals?.paymentsConfirmed || 0,
+          paymentsPending: overviewData.totals?.paymentsPending || 0,
+          submissions: overviewData.totals?.submissions || 0,
+          submissionsPending: overviewData.totals?.submissionsPending || 0,
+          submissionsValidated: overviewData.totals?.submissionsValidated || 0,
+          certificates: overviewData.totals?.certificates || 0,
+          news: overviewData.totals?.news || 0,
         })
+        setSessionTypes(overviewData.sessionTypes || { MRH: 0, IOP: 0, CONFERENCE_FORUM: 0 })
 
         setLatestSubmissions((submissionsData.submissions || []).slice(0, 6))
       } finally {
@@ -85,32 +108,60 @@ export default function AdminDashboardPage() {
 
   const cards = [
     {
-      label: 'Sessions actives',
+      label: 'Sessions',
       value: stats.sessions,
       tone: 'from-cyan-500/20 to-cyan-100',
       ring: 'ring-cyan-200',
       text: 'text-cyan-900',
     },
     {
-      label: 'Publications',
-      value: stats.news,
+      label: 'Etudiants',
+      value: stats.students,
       tone: 'from-indigo-500/20 to-indigo-100',
       ring: 'ring-indigo-200',
       text: 'text-indigo-900',
     },
     {
-      label: 'Etudiants',
-      value: stats.students,
+      label: 'Paiements confirmes',
+      value: stats.paymentsConfirmed,
       tone: 'from-emerald-500/20 to-emerald-100',
       ring: 'ring-emerald-200',
       text: 'text-emerald-900',
     },
     {
-      label: 'Travaux soumis',
-      value: stats.submissions,
+      label: 'Paiements pending',
+      value: stats.paymentsPending,
       tone: 'from-amber-500/20 to-amber-100',
       ring: 'ring-amber-200',
       text: 'text-amber-900',
+    },
+    {
+      label: 'Travaux soumis',
+      value: stats.submissions,
+      tone: 'from-slate-500/20 to-slate-100',
+      ring: 'ring-slate-200',
+      text: 'text-slate-900',
+    },
+    {
+      label: 'Certificats',
+      value: stats.certificates,
+      tone: 'from-fuchsia-500/20 to-fuchsia-100',
+      ring: 'ring-fuchsia-200',
+      text: 'text-fuchsia-900',
+    },
+    {
+      label: 'Actualites',
+      value: stats.news,
+      tone: 'from-rose-500/20 to-rose-100',
+      ring: 'ring-rose-200',
+      text: 'text-rose-900',
+    },
+    {
+      label: 'Places disponibles',
+      value: stats.availableSpots,
+      tone: 'from-teal-500/20 to-teal-100',
+      ring: 'ring-teal-200',
+      text: 'text-teal-900',
     },
   ]
 
@@ -140,6 +191,24 @@ export default function AdminDashboardPage() {
           </article>
         ))}
       </div>
+
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
+        <div className="mb-3 flex flex-wrap items-center gap-3">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Sessions par type</h3>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+            MRH {sessionTypes.MRH}
+          </span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+            IOP {sessionTypes.IOP}
+          </span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+            Conference/Forum {sessionTypes.CONFERENCE_FORUM}
+          </span>
+        </div>
+        <p className="text-sm text-slate-600">
+          Travaux: {stats.submissionsValidated} valides, {stats.submissionsPending} en attente.
+        </p>
+      </section>
 
       <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-4 py-3 md:px-5">

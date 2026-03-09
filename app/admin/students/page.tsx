@@ -15,6 +15,19 @@ type Student = {
     id: string
     title: string
   } | null
+  latestEnrollment: {
+    id: number
+    status: string
+    paymentStatus: string
+    paidAmount: number
+    totalAmount: number
+    formationTitle: string
+    session: {
+      id: number
+      startDate: string
+      location: string
+    } | null
+  } | null
 }
 
 type SessionItem = {
@@ -119,6 +132,45 @@ export default function AdminStudentsPage() {
     await loadData()
   }
 
+  async function resetStudentCredentials(student: Student) {
+    if (!student.username) {
+      alert('Definissez un username avant de reinitialiser le mot de passe.')
+      return
+    }
+
+    const confirmed = window.confirm(
+      `Generer un nouveau mot de passe pour ${student.firstName} ${student.lastName} ?`
+    )
+    if (!confirmed) return
+
+    const response = await fetch(`/api/admin/system/students/${student.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: `${student.firstName} ${student.lastName}`,
+        email: student.email,
+        username: student.username,
+        sessionId: student.adminSession?.id || null,
+        resetPassword: true,
+      }),
+    })
+
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      alert(data?.error || 'Unable to reset credentials.')
+      return
+    }
+
+    if (data.generatedPassword) {
+      setGeneratedCredential({
+        username: student.username,
+        password: data.generatedPassword,
+      })
+    }
+
+    await loadData()
+  }
+
   return (
     <AdminShell title="Students">
       <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
@@ -172,6 +224,7 @@ export default function AdminStudentsPage() {
                 <th className="px-4 py-3 text-left font-semibold text-gray-700">Student</th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-700">Username</th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-700">Session</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-700">Paiement</th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-700">Created</th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-700">Actions</th>
               </tr>
@@ -185,11 +238,31 @@ export default function AdminStudentsPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-700">{student.username || '-'}</td>
                   <td className="px-4 py-3 text-gray-700">{student.adminSession?.title || 'Not assigned'}</td>
+                  <td className="px-4 py-3 text-gray-700">
+                    {student.latestEnrollment ? (
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-gray-500">
+                          {student.latestEnrollment.paymentStatus}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {student.latestEnrollment.paidAmount}/{student.latestEnrollment.totalAmount} USD
+                        </p>
+                      </div>
+                    ) : (
+                      'N/A'
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-700">{new Date(student.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => editStudent(student)} className="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">
                         Edit
+                      </button>
+                      <button
+                        onClick={() => resetStudentCredentials(student)}
+                        className="rounded border border-amber-200 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
+                      >
+                        Reset password
                       </button>
                       <button onClick={() => deleteStudent(student.id)} className="rounded border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50">
                         Delete
@@ -200,7 +273,7 @@ export default function AdminStudentsPage() {
               ))}
               {students.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">No students yet.</td>
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">No students yet.</td>
                 </tr>
               ) : null}
             </tbody>

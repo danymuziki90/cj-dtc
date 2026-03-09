@@ -122,6 +122,24 @@ model Admin {
   updatedAt DateTime @updatedAt
 }
 
+model AdminNotification {
+  id           String   @id @default(cuid())
+  title        String
+  message      String
+  type         String   @default("info")
+  target       String   @default("all") // all, student, session
+  studentEmail String?
+  sessionId    Int?
+  createdBy    String?
+  createdAt    DateTime @default(now())
+
+  @@index([type])
+  @@index([target])
+  @@index([studentEmail])
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
 model AdminTrainingSession {
   id          String   @id @default(cuid())
   title       String
@@ -140,8 +158,17 @@ model News {
   title     String
   content   String
   published Boolean  @default(false)
+  author    String   @default("Admin")
+  category  String   @default("General")
+  tags      String   @default("")
+  imageData String?
+  publicationDate DateTime @default(now())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([published])
+  @@index([publicationDate])
+  @@index([category])
 }
 
 model StudentSubmission {

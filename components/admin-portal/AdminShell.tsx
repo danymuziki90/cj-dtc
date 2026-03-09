@@ -7,10 +7,14 @@ import { useState } from 'react'
 const quickLinks = [
   { href: '/admin/dashboard', label: 'Vue globale' },
   { href: '/admin/sessions', label: 'Sessions' },
+  { href: '/admin/students', label: 'Etudiants' },
   { href: '/admin/enrollments', label: 'Inscriptions' },
   { href: '/admin/payments', label: 'Paiements' },
   { href: '/admin/submissions', label: 'Travaux' },
-  { href: '/admin/students', label: 'Etudiants' },
+  { href: '/admin/certificates', label: 'Certificats' },
+  { href: '/admin/notifications', label: 'Notifications' },
+  { href: '/admin/articles', label: 'Actualites' },
+  { href: '/admin/settings', label: 'Parametres' },
 ]
 
 export default function AdminShell({

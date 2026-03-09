@@ -78,7 +78,61 @@ export async function GET(request: NextRequest) {
     },
   })
 
-  return NextResponse.json({ students })
+  const emails = Array.from(new Set(students.map((student) => student.email)))
+  const latestEnrollments = emails.length
+    ? await prisma.enrollment.findMany({
+        where: {
+          email: {
+            in: emails,
+          },
+        },
+        include: {
+          session: {
+            select: {
+              id: true,
+              startDate: true,
+              location: true,
+            },
+          },
+          formation: {
+            select: {
+              title: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+    : []
+
+  const latestByEmail = latestEnrollments.reduce<Record<string, (typeof latestEnrollments)[number]>>(
+    (acc, enrollment) => {
+      if (!acc[enrollment.email]) acc[enrollment.email] = enrollment
+      return acc
+    },
+    {}
+  )
+
+  const enrichedStudents = students.map((student) => {
+    const enrollment = latestByEmail[student.email]
+    return {
+      ...student,
+      latestEnrollment: enrollment
+        ? {
+            id: enrollment.id,
+            status: enrollment.status,
+            paymentStatus: enrollment.paymentStatus,
+            paidAmount: enrollment.paidAmount,
+            totalAmount: enrollment.totalAmount,
+            formationTitle: enrollment.formation.title,
+            session: enrollment.session,
+          }
+        : null,
+    }
+  })
+
+  return NextResponse.json({ students: enrichedStudents })
 }
 
 export async function POST(request: NextRequest) {

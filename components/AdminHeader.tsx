@@ -6,12 +6,15 @@ import { useState } from 'react'
 
 const navLinks = [
   { href: '/admin/dashboard', label: 'Dashboard' },
-  { href: '/admin/formations', label: 'Formations' },
   { href: '/admin/sessions', label: 'Sessions' },
-  { href: '/admin/articles', label: 'Actualites' },
+  { href: '/admin/students', label: 'Etudiants' },
   { href: '/admin/enrollments', label: 'Inscriptions' },
   { href: '/admin/payments', label: 'Paiements' },
-  { href: '/admin/students', label: 'Etudiants' },
+  { href: '/admin/submissions', label: 'Travaux' },
+  { href: '/admin/certificates', label: 'Certificats' },
+  { href: '/admin/notifications', label: 'Notifications' },
+  { href: '/admin/articles', label: 'Actualites' },
+  { href: '/admin/settings', label: 'Parametres' },
 ]
 
 export default function AdminHeader() {
