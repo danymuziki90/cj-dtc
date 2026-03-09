@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { FormattedDate } from './FormattedDate'
@@ -73,9 +73,9 @@ export default function SessionCalendar({ sessions, onSessionClick }: SessionCal
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      ouverte: 'bg-green-100 border-green-300 text-green-800',
+      ouverte: 'bg-blue-100 border-blue-300 text-blue-800',
       fermee: 'bg-red-100 border-red-300 text-red-800',
-      complete: 'bg-yellow-100 border-yellow-300 text-yellow-800',
+      complete: 'bg-red-100 border-red-300 text-red-800',
       annulee: 'bg-gray-100 border-gray-300 text-gray-800',
       terminee: 'bg-blue-100 border-blue-300 text-blue-800'
     }
@@ -278,3 +278,4 @@ export default function SessionCalendar({ sessions, onSessionClick }: SessionCal
     </div>
   )
 }
+

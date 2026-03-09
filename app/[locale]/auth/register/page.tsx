@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -155,7 +155,7 @@ export default function StudentRegisterPage() {
     if (password.match(/[0-9]/)) strength++
     if (password.match(/[^a-zA-Z0-9]/)) strength++
 
-    const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500']
+    const colors = ['bg-red-500', 'bg-red-500', 'bg-red-500', 'bg-blue-500']
     const texts = ['', 'Faible', 'Moyen', 'Fort', 'Très fort']
 
     return {
@@ -520,3 +520,4 @@ export default function StudentRegisterPage() {
     </div>
   )
 }
+

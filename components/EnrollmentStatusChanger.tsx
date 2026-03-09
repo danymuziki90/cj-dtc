@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 
@@ -72,9 +72,9 @@ export default function EnrollmentStatusChanger({
     const getStatusColor = (s: string) => {
         switch (s) {
             case 'pending':
-                return 'bg-yellow-100 text-yellow-800'
+                return 'bg-red-100 text-red-800'
             case 'accepted':
-                return 'bg-green-100 text-green-800'
+                return 'bg-blue-100 text-blue-800'
             case 'rejected':
                 return 'bg-red-100 text-red-800'
             case 'cancelled':
@@ -108,7 +108,7 @@ export default function EnrollmentStatusChanger({
             </div>
 
             {success && (
-                <div className="p-2 bg-green-50 text-green-700 text-xs rounded border border-green-200">
+                <div className="p-2 bg-blue-50 text-blue-700 text-xs rounded border border-blue-200">
                     ✓ Statut mis à jour. Email envoyé à {email}.
                 </div>
             )}
@@ -120,12 +120,12 @@ export default function EnrollmentStatusChanger({
             )}
 
             {showReasonInput && status !== 'rejected' && (
-                <div className="p-2 bg-yellow-50 border border-yellow-200 rounded space-y-2">
+                <div className="p-2 bg-red-50 border border-red-200 rounded space-y-2">
                     <textarea
                         value={rejectionReason}
                         onChange={e => setRejectionReason(e.target.value)}
                         placeholder="Raison du rejet (optionnel)"
-                        className="w-full text-sm p-1 border border-yellow-300 rounded"
+                        className="w-full text-sm p-1 border border-red-300 rounded"
                         rows={2}
                     />
                     <div className="flex gap-2">
@@ -155,7 +155,7 @@ export default function EnrollmentStatusChanger({
                     <button
                         onClick={() => handleStatusChange('accepted')}
                         disabled={submitting}
-                        className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                     >
                         {submitting && status !== 'rejected' ? 'Envoi...' : 'Accepter'}
                     </button>
@@ -173,7 +173,7 @@ export default function EnrollmentStatusChanger({
                     <button
                         onClick={() => handleStatusChange('pending')}
                         disabled={submitting}
-                        className="text-xs px-2 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700 disabled:opacity-50"
+                        className="text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
                     >
                         En attente
                     </button>
@@ -182,3 +182,4 @@ export default function EnrollmentStatusChanger({
         </div>
     )
 }
+

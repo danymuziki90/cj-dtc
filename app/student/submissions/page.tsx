@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
@@ -17,8 +17,8 @@ type Submission = {
 }
 
 function statusBadge(statusLabel: Submission['statusLabel']) {
-  if (statusLabel === 'valide') return 'bg-emerald-100 text-emerald-700'
-  if (statusLabel === 'corrige') return 'bg-amber-100 text-amber-700'
+  if (statusLabel === 'valide') return 'bg-blue-100 text-blue-700'
+  if (statusLabel === 'corrige') return 'bg-red-100 text-red-700'
   return 'bg-slate-100 text-slate-700'
 }
 
@@ -196,3 +196,4 @@ export default function StudentSubmissionsPage() {
     </div>
   )
 }
+

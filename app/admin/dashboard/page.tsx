@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -36,11 +36,11 @@ type SubmissionRow = {
 function statusClassName(status: string) {
   const normalized = status.toLowerCase()
 
-  if (normalized.includes('valid')) return 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-  if (normalized.includes('corrig') || normalized.includes('review')) return 'bg-sky-50 text-sky-700 ring-sky-200'
-  if (normalized.includes('rejet') || normalized.includes('fail')) return 'bg-rose-50 text-rose-700 ring-rose-200'
+  if (normalized.includes('valid')) return 'bg-blue-50 text-blue-700 ring-blue-200'
+  if (normalized.includes('corrig') || normalized.includes('review')) return 'bg-blue-50 text-blue-700 ring-blue-200'
+  if (normalized.includes('rejet') || normalized.includes('fail')) return 'bg-red-50 text-red-700 ring-red-200'
 
-  return 'bg-amber-50 text-amber-700 ring-amber-200'
+  return 'bg-red-50 text-red-700 ring-red-200'
 }
 
 function formatDate(value: string) {
@@ -110,30 +110,30 @@ export default function AdminDashboardPage() {
     {
       label: 'Sessions',
       value: stats.sessions,
-      tone: 'from-cyan-500/20 to-cyan-100',
-      ring: 'ring-cyan-200',
-      text: 'text-cyan-900',
+      tone: 'from-blue-500/20 to-blue-100',
+      ring: 'ring-blue-200',
+      text: 'text-blue-900',
     },
     {
       label: 'Etudiants',
       value: stats.students,
-      tone: 'from-indigo-500/20 to-indigo-100',
-      ring: 'ring-indigo-200',
-      text: 'text-indigo-900',
+      tone: 'from-blue-500/20 to-blue-100',
+      ring: 'ring-blue-200',
+      text: 'text-blue-900',
     },
     {
       label: 'Paiements confirmes',
       value: stats.paymentsConfirmed,
-      tone: 'from-emerald-500/20 to-emerald-100',
-      ring: 'ring-emerald-200',
-      text: 'text-emerald-900',
+      tone: 'from-blue-500/20 to-blue-100',
+      ring: 'ring-blue-200',
+      text: 'text-blue-900',
     },
     {
       label: 'Paiements pending',
       value: stats.paymentsPending,
-      tone: 'from-amber-500/20 to-amber-100',
-      ring: 'ring-amber-200',
-      text: 'text-amber-900',
+      tone: 'from-red-500/20 to-red-100',
+      ring: 'ring-red-200',
+      text: 'text-red-900',
     },
     {
       label: 'Travaux soumis',
@@ -145,23 +145,23 @@ export default function AdminDashboardPage() {
     {
       label: 'Certificats',
       value: stats.certificates,
-      tone: 'from-fuchsia-500/20 to-fuchsia-100',
-      ring: 'ring-fuchsia-200',
-      text: 'text-fuchsia-900',
+      tone: 'from-blue-500/20 to-blue-100',
+      ring: 'ring-blue-200',
+      text: 'text-blue-900',
     },
     {
-      label: 'Actualites',
+      label: 'Actualités',
       value: stats.news,
-      tone: 'from-rose-500/20 to-rose-100',
-      ring: 'ring-rose-200',
-      text: 'text-rose-900',
+      tone: 'from-red-500/20 to-red-100',
+      ring: 'ring-red-200',
+      text: 'text-red-900',
     },
     {
       label: 'Places disponibles',
       value: stats.availableSpots,
-      tone: 'from-teal-500/20 to-teal-100',
-      ring: 'ring-teal-200',
-      text: 'text-teal-900',
+      tone: 'from-blue-500/20 to-blue-100',
+      ring: 'ring-blue-200',
+      text: 'text-blue-900',
     },
   ]
 
@@ -265,3 +265,4 @@ export default function AdminDashboardPage() {
     </AdminShell>
   )
 }
+

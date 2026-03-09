@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import { Download, Eye } from 'lucide-react'
@@ -67,8 +67,8 @@ const METHOD_LABELS: Record<string, string> = {
 }
 
 const STATUS_STYLES: Record<'pending' | 'success' | 'failed', string> = {
-  pending: 'bg-amber-100 text-amber-800',
-  success: 'bg-emerald-100 text-emerald-800',
+  pending: 'bg-red-100 text-red-800',
+  success: 'bg-blue-100 text-blue-800',
   failed: 'bg-red-100 text-red-800',
 }
 
@@ -246,7 +246,7 @@ export default function PaymentsPage() {
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4">
           <p className="text-sm text-slate-500">Paiements en attente</p>
-          <p className="mt-1 text-2xl font-semibold text-amber-700">
+          <p className="mt-1 text-2xl font-semibold text-red-700">
             {payments.filter((payment) => payment.status === 'pending').length}
           </p>
         </div>
@@ -508,7 +508,7 @@ export default function PaymentsPage() {
                 {proofUrl ? (
                   <p>
                     <strong>Preuve:</strong>{' '}
-                    <a href={proofUrl} target="_blank" rel="noreferrer" className="text-cyan-700 underline">
+                    <a href={proofUrl} target="_blank" rel="noreferrer" className="text-blue-700 underline">
                       Ouvrir la preuve
                     </a>
                   </p>
@@ -530,3 +530,4 @@ export default function PaymentsPage() {
     </div>
   )
 }
+

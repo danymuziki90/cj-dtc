@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 
@@ -387,7 +387,7 @@ export default function DocumentsPage() {
                                             {document.title}
                                         </h3>
                                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${document.isPublic
-                                                ? 'bg-green-100 text-green-800'
+                                                ? 'bg-blue-100 text-blue-800'
                                                 : 'bg-gray-100 text-gray-800'
                                             }`}>
                                             {document.isPublic ? 'Public' : 'Privé'}

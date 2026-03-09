@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 
@@ -89,7 +89,7 @@ export default function BulkEmailSender({ acceptedEnrollments }: BulkEmailSender
             {result && (
                 <div
                     className={`p-4 rounded mb-4 ${result.type === 'success'
-                        ? 'bg-green-50 border border-green-200 text-green-800'
+                        ? 'bg-blue-50 border border-blue-200 text-blue-800'
                         : 'bg-red-50 border border-red-200 text-red-800'
                         }`}
                 >
@@ -132,7 +132,7 @@ export default function BulkEmailSender({ acceptedEnrollments }: BulkEmailSender
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
                         >
                             {isLoading ? 'Envoi en cours...' : `Envoyer à ${acceptedEnrollments.length} destinataire${acceptedEnrollments.length > 1 ? 's' : ''}`}
                         </button>
@@ -141,10 +141,11 @@ export default function BulkEmailSender({ acceptedEnrollments }: BulkEmailSender
             )}
 
             {showForm && acceptedEnrollments.length === 0 && (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+                <div className="p-4 bg-red-50 border border-red-200 rounded text-red-800">
                     ⚠️ Aucune inscription acceptée. Les emails ne peuvent être envoyés qu'aux inscriptions avec le statut "accepté".
                 </div>
             )}
         </div>
     )
 }
+

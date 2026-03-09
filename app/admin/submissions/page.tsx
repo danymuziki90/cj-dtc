@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -86,10 +86,10 @@ export default function AdminSubmissionsPage() {
                   <span
                     className={`rounded-full px-2 py-1 text-xs font-medium ${
                       submission.status === 'approved'
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-blue-100 text-blue-700'
                         : submission.status === 'rejected'
                         ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-700'
+                        : 'bg-red-100 text-red-700'
                     }`}
                   >
                     {submission.status}
@@ -109,13 +109,13 @@ export default function AdminSubmissionsPage() {
                   />
                   {submission.reviewedAt ? (
                     <p className="mb-2 text-xs text-gray-500">
-                      Derniere mise a jour: {new Date(submission.reviewedAt).toLocaleString('fr-FR')}
+                      Dernière mise à jour: {new Date(submission.reviewedAt).toLocaleString('fr-FR')}
                     </p>
                   ) : null}
                   <div className="flex gap-2">
                     <button
                       onClick={() => setStatus(submission.id, 'approved')}
-                      className="rounded border border-green-200 px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-50"
+                      className="rounded border border-blue-200 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50"
                     >
                       Approve
                     </button>
@@ -142,3 +142,4 @@ export default function AdminSubmissionsPage() {
     </AdminShell>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { FormattedDate } from './FormattedDate'
@@ -116,7 +116,7 @@ export default function StudentProgressTracker({ sessionId, progresses }: Studen
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-green-500 h-2 rounded-full"
+                    className="bg-blue-500 h-2 rounded-full"
                     style={{ width: `${(progress.assignmentsSubmitted / progress.totalAssignments) * 100}%` }}
                   ></div>
                 </div>
@@ -131,9 +131,9 @@ export default function StudentProgressTracker({ sessionId, progresses }: Studen
                   <div
                     className={`h-2 rounded-full ${
                       progress.attendanceRate >= 80
-                        ? 'bg-green-500'
+                        ? 'bg-blue-500'
                         : progress.attendanceRate >= 60
-                        ? 'bg-yellow-500'
+                        ? 'bg-red-500'
                         : 'bg-red-500'
                     }`}
                     style={{ width: `${progress.attendanceRate}%` }}
@@ -153,3 +153,4 @@ export default function StudentProgressTracker({ sessionId, progresses }: Studen
     </div>
   )
 }
+

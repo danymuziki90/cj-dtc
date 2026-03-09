@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '../../../../lib/prisma'
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
         title: 'Formations actives',
         value: totalFormations,
         icon: '📚',
-        color: 'bg-green-100'
+        color: 'bg-blue-100'
       },
       {
         title: 'Total inscriptions',
@@ -159,13 +159,13 @@ export async function GET(req: NextRequest) {
         change: inscriptionChange,
         changeType: inscriptionChange >= 0 ? 'increase' as const : 'decrease' as const,
         icon: '📝',
-        color: 'bg-purple-100'
+        color: 'bg-blue-100'
       },
       {
         title: 'Revenu total',
         value: `${totalRevenue._sum.totalAmount || 0}$`,
         icon: '💰',
-        color: 'bg-orange-100'
+        color: 'bg-red-100'
       }
     ]
 
@@ -175,3 +175,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
+

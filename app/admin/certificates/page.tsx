@@ -1,4 +1,4 @@
-import { prisma } from '../../../lib/prisma'
+﻿import { prisma } from '../../../lib/prisma'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -104,7 +104,7 @@ export default async function CertificatesPage() {
                       </Link>
                       <Link 
                         href={`/api/certificates/download/${cert.id}`}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="text-blue-600 hover:text-blue-900"
                         title="Télécharger"
                       >
                         📥
@@ -120,3 +120,4 @@ export default async function CertificatesPage() {
     </div>
   )
 }
+

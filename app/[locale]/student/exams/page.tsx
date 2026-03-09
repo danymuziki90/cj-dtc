@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -200,8 +200,8 @@ export default function StudentExamsPage() {
     switch (status) {
       case 'not_started': return 'bg-gray-100 text-gray-800'
       case 'in_progress': return 'bg-blue-100 text-blue-800'
-      case 'submitted': return 'bg-yellow-100 text-yellow-800'
-      case 'graded': return 'bg-green-100 text-green-800'
+      case 'submitted': return 'bg-red-100 text-red-800'
+      case 'graded': return 'bg-blue-100 text-blue-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -345,7 +345,7 @@ export default function StudentExamsPage() {
                   ) : (
                     <button
                       onClick={submitExam}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Soumettre
                     </button>
@@ -431,7 +431,7 @@ export default function StudentExamsPage() {
                       {getStatusLabel(status)}
                     </span>
                     {score && (
-                      <p className="text-lg font-bold text-green-600 mt-2">
+                      <p className="text-lg font-bold text-blue-600 mt-2">
                         Score: {score}/{exam.questions.reduce((sum, q) => sum + q.points, 0)}
                       </p>
                     )}
@@ -456,7 +456,7 @@ export default function StudentExamsPage() {
                     </div>
                   </div>
                   {!isAvailable && !isOver && (
-                    <div className="mt-2 text-sm text-orange-600">
+                    <div className="mt-2 text-sm text-red-600">
                       ⏰️ L'examen n'est pas encore disponible
                     </div>
                   )}
@@ -480,7 +480,7 @@ export default function StudentExamsPage() {
                   {status === 'in_progress' && (
                     <button
                       onClick={() => setSelectedExam(exam)}
-                      className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       Reprendre
                     </button>
@@ -488,7 +488,7 @@ export default function StudentExamsPage() {
                   {status === 'submitted' && (
                     <button
                       onClick={() => setSelectedExam(exam)}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Voir les détails
                     </button>
@@ -496,7 +496,7 @@ export default function StudentExamsPage() {
                   {status === 'graded' && (
                     <button
                       onClick={() => setSelectedExam(exam)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Voir les résultats
                     </button>
@@ -521,3 +521,4 @@ export default function StudentExamsPage() {
     </div>
   )
 }
+

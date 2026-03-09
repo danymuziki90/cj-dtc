@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
@@ -166,9 +166,9 @@ export const ProgressBar: React.FC<{
 }) => {
   const colorClasses = {
     blue: 'bg-blue-500',
-    green: 'bg-green-500',
+    green: 'bg-blue-500',
     red: 'bg-red-500',
-    yellow: 'bg-yellow-500'
+    yellow: 'bg-red-500'
   }
 
   return (
@@ -185,3 +185,4 @@ export const ProgressBar: React.FC<{
     </div>
   )
 }
+

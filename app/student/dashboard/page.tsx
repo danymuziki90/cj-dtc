@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
@@ -146,10 +146,10 @@ function currency(value: number) {
 function statusClass(value: string) {
   const normalized = value.toLowerCase()
   if (normalized.includes('success') || normalized.includes('paid') || normalized.includes('approved') || normalized.includes('confirmed')) {
-    return 'bg-emerald-100 text-emerald-700'
+    return 'bg-blue-100 text-blue-700'
   }
   if (normalized.includes('pending') || normalized.includes('wait') || normalized.includes('partial')) {
-    return 'bg-amber-100 text-amber-700'
+    return 'bg-red-100 text-red-700'
   }
   if (normalized.includes('failed') || normalized.includes('rejected') || normalized.includes('cancel')) {
     return 'bg-red-100 text-red-700'
@@ -508,3 +508,4 @@ export default function StudentDashboardPage() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -325,7 +325,7 @@ export default function HomePage() {
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
               Excellence
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-cyan-200">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-blue-200">
                 Panafricaine
               </span>
             </h1>
@@ -398,7 +398,7 @@ export default function HomePage() {
               >
                 {formation.featured && (
                   <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 text-sm font-semibold text-center">
-                    Programme Vedette
+                    Programme vedette
                   </div>
                 )}
                 
@@ -532,10 +532,10 @@ export default function HomePage() {
               </div>
               
               {/* Floating elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-red-400 rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-2xl">🇨🇩</span>
               </div>
-              <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-green-400 rounded-full flex items-center justify-center shadow-lg">
+              <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-blue-400 rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-xl">🌍</span>
               </div>
             </div>
@@ -563,7 +563,7 @@ export default function HomePage() {
               <div key={testimonial.id} className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-shadow">
                 <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                    <Star key={i} className="w-5 h-5 text-red-400 fill-current" />
                   ))}
                 </div>
                 
@@ -718,3 +718,4 @@ export default function HomePage() {
     </div>
   )
 }
+

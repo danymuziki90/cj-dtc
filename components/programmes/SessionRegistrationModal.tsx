@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { Loader2, X } from 'lucide-react'
@@ -717,13 +717,13 @@ export default function SessionRegistrationModal({ open, locale, session, progra
 
               {result ? (
                 <div className="space-y-2">
-                  <p className={`text-sm ${result.kind === 'success' ? 'text-emerald-700' : 'text-red-700'}`}>{result.message}</p>
+                  <p className={`text-sm ${result.kind === 'success' ? 'text-blue-700' : 'text-red-700'}`}>{result.message}</p>
                   {result.provider === 'pawapay' && result.paymentStatus === 'pending' && result.paymentId ? (
                     <button
                       type="button"
                       onClick={checkPawaPayStatus}
                       disabled={checkingPawaPayStatus}
-                      className="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800 disabled:opacity-60"
                     >
                       {checkingPawaPayStatus ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
                       Verifier le statut PawaPay
@@ -748,3 +748,4 @@ export default function SessionRegistrationModal({ open, locale, session, progra
     </div>
   )
 }
+

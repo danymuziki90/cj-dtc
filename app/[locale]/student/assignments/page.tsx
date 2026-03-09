@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -140,8 +140,8 @@ export default function StudentAssignmentsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'submitted': return 'bg-blue-100 text-blue-800'
-      case 'graded': return 'bg-green-100 text-green-800'
-      case 'returned': return 'bg-purple-100 text-purple-800'
+      case 'graded': return 'bg-blue-100 text-blue-800'
+      case 'returned': return 'bg-blue-100 text-blue-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -166,7 +166,7 @@ export default function StudentAssignmentsPage() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
     if (diffDays < 0) return 'text-red-600'
-    if (diffDays <= 3) return 'text-orange-600'
+    if (diffDays <= 3) return 'text-red-600'
     return 'text-gray-600'
   }
 
@@ -270,7 +270,7 @@ export default function StudentAssignmentsPage() {
                           {getStatusLabel(latestSubmission.status)}
                         </span>
                         {latestSubmission.grade && (
-                          <p className="text-lg font-bold text-green-600 mt-2">
+                          <p className="text-lg font-bold text-blue-600 mt-2">
                             Note: {latestSubmission.grade}/20
                           </p>
                         )}
@@ -321,7 +321,7 @@ export default function StudentAssignmentsPage() {
                           </div>
                           <div className="text-right">
                             {submission.grade && (
-                              <p className="text-lg font-bold text-green-600">{submission.grade}/20</p>
+                              <p className="text-lg font-bold text-blue-600">{submission.grade}/20</p>
                             )}
                             {submission.gradedAt && (
                               <p className="text-xs text-gray-500">
@@ -489,3 +489,4 @@ export default function StudentAssignmentsPage() {
     </div>
   )
 }
+

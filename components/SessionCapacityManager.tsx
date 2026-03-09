@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { FormattedDate } from './FormattedDate'
@@ -123,7 +123,7 @@ export default function SessionCapacityManager({ session, onUpdate }: SessionCap
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold text-lg">Capacité</h3>
         {isFull && (
-          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+          <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
             Session complète
           </span>
         )}
@@ -142,8 +142,8 @@ export default function SessionCapacityManager({ session, onUpdate }: SessionCap
               fillPercentage >= 100
                 ? 'bg-red-500'
                 : fillPercentage >= 80
-                ? 'bg-yellow-500'
-                : 'bg-green-500'
+                ? 'bg-red-500'
+                : 'bg-blue-500'
             }`}
             style={{ width: `${Math.min(fillPercentage, 100)}%` }}
           ></div>
@@ -178,7 +178,7 @@ export default function SessionCapacityManager({ session, onUpdate }: SessionCap
                     {!isFull && (
                       <button
                         onClick={() => handlePromoteFromWaitlist(item.id)}
-                        className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                        className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
                       >
                         Promouvoir
                       </button>
@@ -198,8 +198,8 @@ export default function SessionCapacityManager({ session, onUpdate }: SessionCap
       )}
 
       {isFull && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
-          <p className="text-sm text-yellow-800">
+        <div className="bg-red-50 border border-red-200 rounded p-3">
+          <p className="text-sm text-red-800">
             ⚠️ Cette session est complète. Les nouvelles inscriptions seront automatiquement ajoutées à la liste d'attente.
           </p>
         </div>
@@ -207,3 +207,4 @@ export default function SessionCapacityManager({ session, onUpdate }: SessionCap
     </div>
   )
 }
+

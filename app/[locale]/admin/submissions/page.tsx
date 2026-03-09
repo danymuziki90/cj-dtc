@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -149,8 +149,8 @@ export default function AdminSubmissionsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'submitted': return 'bg-blue-100 text-blue-800'
-      case 'graded': return 'bg-green-100 text-green-800'
-      case 'returned': return 'bg-purple-100 text-purple-800'
+      case 'graded': return 'bg-blue-100 text-blue-800'
+      case 'returned': return 'bg-blue-100 text-blue-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -183,9 +183,9 @@ export default function AdminSubmissionsPage() {
   }
 
   const getGradeColor = (grade: number) => {
-    if (grade >= 16) return 'text-green-600'
+    if (grade >= 16) return 'text-blue-600'
     if (grade >= 12) return 'text-blue-600'
-    if (grade >= 10) return 'text-yellow-600'
+    if (grade >= 10) return 'text-red-600'
     return 'text-red-600'
   }
 
@@ -350,7 +350,7 @@ export default function AdminSubmissionsPage() {
                 {submission.status === 'graded' && (
                   <button
                     onClick={() => setSelectedSubmission(submission)}
-                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     Modifier la note
                   </button>
@@ -506,3 +506,4 @@ export default function AdminSubmissionsPage() {
     </div>
   )
 }
+

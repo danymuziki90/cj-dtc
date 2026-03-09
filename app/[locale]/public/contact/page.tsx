@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -159,7 +159,7 @@ export default function ContactPage() {
             
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Contactez
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-cyan-200">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-blue-200">
                 {" "}CJ DTC
               </span>
             </h1>
@@ -213,15 +213,15 @@ export default function ContactPage() {
               </h2>
               
               {isSubmitted ? (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
-                  <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-green-900 mb-2">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
+                  <CheckCircle className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-blue-900 mb-2">
                     Message envoyé avec succès !
                   </h3>
-                  <p className="text-green-700 mb-4">
+                  <p className="text-blue-700 mb-4">
                     Nous vous répondrons dans les plus brefs délais.
                   </p>
-                  <div className="text-sm text-green-600">
+                  <div className="text-sm text-blue-600">
                     Redirection automatique...
                   </div>
                 </div>
@@ -507,7 +507,7 @@ export default function ContactPage() {
             </a>
             <a 
               href="https://instagram.com/cjdtc"
-              className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white hover:from-purple-600 hover:to-pink-600 transition-colors"
+              className="w-12 h-12 bg-gradient-to-br from-blue-500 to-red-500 rounded-full flex items-center justify-center text-white hover:from-blue-600 hover:to-red-600 transition-colors"
             >
               <Instagram className="w-6 h-6" />
             </a>
@@ -557,3 +557,4 @@ export default function ContactPage() {
     </div>
   )
 }
+

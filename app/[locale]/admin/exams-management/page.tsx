@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -129,7 +129,7 @@ export default function AdminExamsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft': return 'bg-gray-100 text-gray-800'
-      case 'published': return 'bg-green-100 text-green-800'
+      case 'published': return 'bg-blue-100 text-blue-800'
       case 'closed': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
@@ -196,11 +196,11 @@ export default function AdminExamsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Publiés</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {exams.filter(e => e.status === 'published').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">✅</span>
             </div>
           </div>
@@ -224,11 +224,11 @@ export default function AdminExamsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total soumissions</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {exams.reduce((sum, e) => sum + e.submissions.length, 0)}
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">📊</span>
             </div>
           </div>
@@ -326,7 +326,7 @@ export default function AdminExamsPage() {
                   </div>
                   <div>
                     <span className="text-gray-600">Notés:</span>
-                    <span className="font-medium text-green-600">
+                    <span className="font-medium text-blue-600">
                       {exam.submissions.filter(s => s.status === 'graded').length}
                     </span>
                   </div>
@@ -344,7 +344,7 @@ export default function AdminExamsPage() {
                 {exam.status === 'draft' && (
                   <button
                     onClick={() => handleUpdateExamStatus(exam.id, 'published')}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Publier
                   </button>
@@ -352,7 +352,7 @@ export default function AdminExamsPage() {
                 {exam.status === 'published' && (
                   <button
                     onClick={() => handleUpdateExamStatus(exam.id, 'closed')}
-                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     Fermer
                   </button>
@@ -597,8 +597,8 @@ export default function AdminExamsPage() {
                           </div>
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             question.type === 'multiple' ? 'bg-blue-100 text-blue-800' :
-                            question.type === 'text' ? 'bg-green-100 text-green-800' :
-                            'bg-purple-100 text-purple-800'
+                            question.type === 'text' ? 'bg-blue-100 text-blue-800' :
+                            'bg-blue-100 text-blue-800'
                           }`}>
                             {question.type === 'multiple' ? 'QCM' : question.type === 'text' ? 'Texte' : 'Essai'}
                           </span>
@@ -609,7 +609,7 @@ export default function AdminExamsPage() {
                               <div key={optIndex} className="text-sm text-gray-600">
                                 {optIndex + 1}. {option}
                                 {option === question.correctAnswer && (
-                                  <span className="ml-2 text-green-600 font-medium">(✓ Correct)</span>
+                                  <span className="ml-2 text-blue-600 font-medium">(✓ Correct)</span>
                                 )}
                               </div>
                             ))}
@@ -635,15 +635,15 @@ export default function AdminExamsPage() {
                           </div>
                           <div className="text-right">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              submission.status === 'graded' ? 'bg-green-100 text-green-800' :
-                              submission.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
+                              submission.status === 'graded' ? 'bg-blue-100 text-blue-800' :
+                              submission.status === 'submitted' ? 'bg-red-100 text-red-800' :
                               'bg-blue-100 text-blue-800'
                             }`}>
                               {submission.status === 'graded' ? 'Noté' :
                                submission.status === 'submitted' ? 'Soumis' : 'En cours'}
                             </span>
                             {submission.score && (
-                              <p className="text-sm font-bold text-green-600 mt-1">
+                              <p className="text-sm font-bold text-blue-600 mt-1">
                                 {submission.score}/{submission.maxScore}
                               </p>
                             )}
@@ -668,7 +668,7 @@ export default function AdminExamsPage() {
                         handleUpdateExamStatus(selectedExam.id, 'published')
                         setSelectedExam(null)
                       }}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Publier
                     </button>
@@ -679,7 +679,7 @@ export default function AdminExamsPage() {
                         handleUpdateExamStatus(selectedExam.id, 'closed')
                         setSelectedExam(null)
                       }}
-                      className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       Fermer
                     </button>
@@ -693,3 +693,4 @@ export default function AdminExamsPage() {
     </div>
   )
 }
+

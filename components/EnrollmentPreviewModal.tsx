@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import type { ProgramSessionType } from '@/lib/programmes/session-types'
@@ -648,21 +648,21 @@ export default function EnrollmentPreviewModal({
                     <button
                       onClick={handleConfirmPayment}
                       disabled={confirmingPayment}
-                      className="mt-3 rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                      className="mt-3 rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
                     >
                       {confirmingPayment ? 'Confirmation...' : 'Confirmer paiement et creer/activer compte etudiant'}
                     </button>
                   </>
                 ) : (
-                  <p className="text-sm text-emerald-700">Paiement deja confirme pour cette inscription.</p>
+                  <p className="text-sm text-blue-700">Paiement deja confirme pour cette inscription.</p>
                 )}
               </div>
 
               {generatedCredentials ? (
-                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm">
-                  <p className="font-semibold text-emerald-800">Nouveau compte etudiant cree</p>
-                  <p className="mt-1 text-emerald-700">Username: {generatedCredentials.username}</p>
-                  <p className="text-emerald-700">Mot de passe initial: {generatedCredentials.password}</p>
+                <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm">
+                  <p className="font-semibold text-blue-800">Nouveau compte etudiant cree</p>
+                  <p className="mt-1 text-blue-700">Username: {generatedCredentials.username}</p>
+                  <p className="text-blue-700">Mot de passe initial: {generatedCredentials.password}</p>
                 </div>
               ) : null}
             </div>
@@ -780,7 +780,7 @@ export default function EnrollmentPreviewModal({
               <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{feedbackError}</div>
             ) : null}
             {feedbackSuccess ? (
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{feedbackSuccess}</div>
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700">{feedbackSuccess}</div>
             ) : null}
           </section>
         </div>
@@ -788,3 +788,4 @@ export default function EnrollmentPreviewModal({
     </div>
   )
 }
+

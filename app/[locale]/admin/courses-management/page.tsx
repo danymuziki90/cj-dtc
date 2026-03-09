@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -137,10 +137,10 @@ export default function AdminCoursesPage() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'video': return 'bg-purple-100 text-purple-800'
+      case 'video': return 'bg-blue-100 text-blue-800'
       case 'text': return 'bg-blue-100 text-blue-800'
-      case 'quiz': return 'bg-green-100 text-green-800'
-      case 'assignment': return 'bg-orange-100 text-orange-800'
+      case 'quiz': return 'bg-blue-100 text-blue-800'
+      case 'assignment': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -201,11 +201,11 @@ export default function AdminCoursesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Vidéos</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {courses.filter(c => c.type === 'video').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">🎥</span>
             </div>
           </div>
@@ -215,11 +215,11 @@ export default function AdminCoursesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Quiz</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {courses.filter(c => c.type === 'quiz').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">🧩</span>
             </div>
           </div>
@@ -229,11 +229,11 @@ export default function AdminCoursesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Exercices</p>
-              <p className="text-2xl font-bold text-orange-600">
+              <p className="text-2xl font-bold text-red-600">
                 {courses.filter(c => c.type === 'assignment').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">📝</span>
             </div>
           </div>
@@ -607,3 +607,4 @@ export default function AdminCoursesPage() {
     </div>
   )
 }
+

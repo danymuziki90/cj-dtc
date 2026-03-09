@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { FormattedDate } from './FormattedDate'
 
@@ -61,12 +61,12 @@ function formatCurrency(amount: number) {
 
 function enrollmentStatusClass(status: string) {
   const map: Record<string, string> = {
-    pending: 'bg-amber-100 text-amber-800',
-    accepted: 'bg-emerald-100 text-emerald-800',
+    pending: 'bg-red-100 text-red-800',
+    accepted: 'bg-blue-100 text-blue-800',
     rejected: 'bg-red-100 text-red-800',
     confirmed: 'bg-blue-100 text-blue-800',
-    completed: 'bg-indigo-100 text-indigo-800',
-    waitlist: 'bg-orange-100 text-orange-800',
+    completed: 'bg-blue-100 text-blue-800',
+    waitlist: 'bg-red-100 text-red-800',
     cancelled: 'bg-slate-100 text-slate-700',
   }
 
@@ -89,8 +89,8 @@ function enrollmentStatusLabel(status: string) {
 
 function paymentStatusClass(status: string) {
   const map: Record<string, string> = {
-    paid: 'bg-emerald-100 text-emerald-800',
-    partial: 'bg-amber-100 text-amber-800',
+    paid: 'bg-blue-100 text-blue-800',
+    partial: 'bg-red-100 text-red-800',
     unpaid: 'bg-red-100 text-red-800',
   }
 
@@ -254,3 +254,4 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
     </div>
   )
 }
+

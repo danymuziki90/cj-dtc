@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 
@@ -74,8 +74,8 @@ export default function ContactPage() {
           <h2 className="text-2xl font-bold mb-4">Envoyez-nous un message</h2>
           
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-800 font-semibold">
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-blue-800 font-semibold">
                 ✓ Message envoyé avec succès !
               </p>
             </div>
@@ -157,3 +157,4 @@ export default function ContactPage() {
     </div>
   )
 }
+

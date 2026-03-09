@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { FormEvent, useEffect, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -166,7 +166,7 @@ export default function AdminSettingsPage() {
     <AdminShell title="Parametres Admin">
       <div className="space-y-6">
         {error ? (
-          <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
         ) : null}
 
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -190,7 +190,7 @@ export default function AdminSettingsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-70"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
             >
               {saving ? 'Creation...' : 'Creer admin'}
             </button>
@@ -257,7 +257,7 @@ export default function AdminSettingsPage() {
                     <td className="px-3 py-3 text-slate-900">
                       {admin.username}
                       {currentAdmin?.id === admin.id ? (
-                        <span className="ml-2 rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-semibold text-cyan-700">
+                        <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
                           vous
                         </span>
                       ) : null}
@@ -278,14 +278,14 @@ export default function AdminSettingsPage() {
                         </button>
                         <button
                           onClick={() => resetAdminPassword(admin)}
-                          className="rounded border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50"
+                          className="rounded border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50"
                         >
                           Reset mdp
                         </button>
                         <button
                           onClick={() => removeAdmin(admin)}
                           disabled={currentAdmin?.id === admin.id}
-                          className="rounded border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Supprimer
                         </button>
@@ -315,3 +315,4 @@ export default function AdminSettingsPage() {
     </AdminShell>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -308,7 +308,7 @@ export default function InstructorsPage() {
                                             {instructor.firstName} {instructor.lastName}
                                         </h3>
                                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${instructor.status === 'active'
-                                                ? 'bg-green-100 text-green-800'
+                                                ? 'bg-blue-100 text-blue-800'
                                                 : 'bg-red-100 text-red-800'
                                             }`}>
                                             {instructor.status === 'active' ? 'Actif' : 'Inactif'}
@@ -367,7 +367,7 @@ export default function InstructorsPage() {
                                         onClick={() => toggleStatus(instructor.id, instructor.status)}
                                         className={`px-3 py-1 text-xs font-medium rounded ${instructor.status === 'active'
                                                 ? 'bg-red-100 text-red-800 hover:bg-red-200'
-                                                : 'bg-green-100 text-green-800 hover:bg-green-200'
+                                                : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                                             }`}
                                     >
                                         {instructor.status === 'active' ? 'Désactiver' : 'Activer'}

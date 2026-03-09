@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -156,7 +156,7 @@ export default function VerificationPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ISSUED': return 'bg-green-100 text-green-800'
+      case 'ISSUED': return 'bg-blue-100 text-blue-800'
       case 'VERIFIED': return 'bg-blue-100 text-blue-800'
       case 'REVOKED': return 'bg-red-100 text-red-800'
       case 'EXPIRED': return 'bg-gray-100 text-gray-800'
@@ -166,15 +166,15 @@ export default function VerificationPage() {
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
-      case 'A': return 'text-green-600 bg-green-100'
+      case 'A': return 'text-blue-600 bg-blue-100'
       case 'B': return 'text-blue-600 bg-blue-100'
-      case 'C': return 'text-yellow-600 bg-yellow-100'
+      case 'C': return 'text-red-600 bg-red-100'
       default: return 'text-gray-600 bg-gray-100'
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -183,7 +183,7 @@ export default function VerificationPage() {
               <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
                 <Shield className="w-8 h-8 text-white" />
               </div>
-              <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
                 <QrCode className="w-8 h-8 text-white" />
               </div>
             </div>
@@ -206,23 +206,23 @@ export default function VerificationPage() {
                 <div className="text-sm text-gray-600">Certificats émis</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{stats.issuedThisMonth}</div>
+                <div className="text-2xl font-bold text-blue-600">{stats.issuedThisMonth}</div>
                 <div className="text-sm text-gray-600">Ce mois</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">{stats.verificationCount}</div>
+                <div className="text-2xl font-bold text-blue-600">{stats.verificationCount}</div>
                 <div className="text-sm text-gray-600">Vérifications</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{stats.averageScore}%</div>
+                <div className="text-2xl font-bold text-red-600">{stats.averageScore}%</div>
                 <div className="text-sm text-gray-600">Score moyen</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-600">{stats.completionRate}%</div>
+                <div className="text-2xl font-bold text-blue-600">{stats.completionRate}%</div>
                 <div className="text-sm text-gray-600">Taux de réussite</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-pink-600">{stats.satisfactionScore}</div>
+                <div className="text-2xl font-bold text-red-600">{stats.satisfactionScore}</div>
                 <div className="text-sm text-gray-600">Satisfaction</div>
               </div>
             </div>
@@ -297,17 +297,17 @@ export default function VerificationPage() {
             {verificationResult.success ? (
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                 {/* Success Header */}
-                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <CheckCircle className="w-8 h-8" />
                       <div>
                         <h3 className="text-2xl font-bold">Certificat Valide</h3>
-                        <p className="text-green-100">L'authenticité du certificat a été confirmée</p>
+                        <p className="text-blue-100">L'authenticité du certificat a été confirmée</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-green-100">Vérifié le</div>
+                      <div className="text-sm text-blue-100">Vérifié le</div>
                       <div className="text-lg font-semibold">
                         {new Date().toLocaleDateString('fr-FR')}
                       </div>
@@ -459,7 +459,7 @@ export default function VerificationPage() {
                         </button>
                         <button
                           onClick={() => handleShareCertificate(verificationResult.certificate)}
-                          className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
+                          className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
                         >
                           <Share2 className="w-4 h-4" />
                           <span>Partager</span>
@@ -472,7 +472,7 @@ export default function VerificationPage() {
                   <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Shield className="w-5 h-5 text-green-600" />
+                        <Shield className="w-5 h-5 text-blue-600" />
                         <div>
                           <h5 className="font-medium text-gray-900">Vérification Blockchain</h5>
                           <p className="text-sm text-gray-600">
@@ -528,8 +528,8 @@ export default function VerificationPage() {
               {recentVerifications.map((verification) => (
                 <div key={verification.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">{verification.certificateNumber}</p>
@@ -565,8 +565,8 @@ export default function VerificationPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <QrCode className="w-8 h-8 text-green-600" />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <QrCode className="w-8 h-8 text-blue-600" />
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">Vérification Instantanée</h4>
               <p className="text-sm text-gray-600">
@@ -574,8 +574,8 @@ export default function VerificationPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Globe className="w-8 h-8 text-purple-600" />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Globe className="w-8 h-8 text-blue-600" />
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">Reconnaissance Internationale</h4>
               <p className="text-sm text-gray-600">
@@ -619,3 +619,4 @@ export default function VerificationPage() {
     </div>
   )
 }
+

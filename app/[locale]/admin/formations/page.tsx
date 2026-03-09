@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -132,7 +132,7 @@ export default function AdminFormationsPage() {
   const getStatusColor = (statut: string) => {
     switch (statut) {
       case 'brouillon': return 'bg-gray-100 text-gray-800'
-      case 'publie': return 'bg-green-100 text-green-800'
+      case 'publie': return 'bg-blue-100 text-blue-800'
       case 'archive': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
@@ -197,11 +197,11 @@ export default function AdminFormationsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Publiées</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {formations.filter(f => f.statut === 'publie').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">✅</span>
             </div>
           </div>
@@ -211,11 +211,11 @@ export default function AdminFormationsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Brouillons</p>
-              <p className="text-2xl font-bold text-yellow-600">
+              <p className="text-2xl font-bold text-red-600">
                 {formations.filter(f => f.statut === 'brouillon').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">📝</span>
             </div>
           </div>
@@ -225,11 +225,11 @@ export default function AdminFormationsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total inscrits</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {formations.reduce((sum, f) => sum + f._count.enrollments, 0)}
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">👥</span>
             </div>
           </div>
@@ -301,7 +301,7 @@ export default function AdminFormationsPage() {
                       {formation.statut === 'brouillon' && (
                         <button
                           onClick={() => handleUpdateStatus(formation.id, 'publie')}
-                          className="text-green-600 hover:text-green-900 font-medium"
+                          className="text-blue-600 hover:text-blue-900 font-medium"
                         >
                           Publier
                         </button>
@@ -310,7 +310,7 @@ export default function AdminFormationsPage() {
                       {formation.statut === 'publie' && (
                         <button
                           onClick={() => handleUpdateStatus(formation.id, 'archive')}
-                          className="text-orange-600 hover:text-orange-900 font-medium"
+                          className="text-red-600 hover:text-red-900 font-medium"
                         >
                           Archiver
                         </button>
@@ -588,3 +588,4 @@ export default function AdminFormationsPage() {
     </div>
   )
 }
+

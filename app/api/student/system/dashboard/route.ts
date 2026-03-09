@@ -41,6 +41,17 @@ function getSessionHours(session: { startDate: Date; endDate: Date; prerequisite
   return 2
 }
 
+function getSessionLifecycle(startDate?: Date | null, endDate?: Date | null, now = new Date()) {
+  if (!startDate || !endDate) return 'unknown'
+  const start = new Date(startDate).getTime()
+  const end = new Date(endDate).getTime()
+  const current = now.getTime()
+
+  if (current < start) return 'upcoming'
+  if (current > end) return 'completed'
+  return 'active'
+}
+
 export async function GET(request: NextRequest) {
   const auth = await requireStudent(request)
   if (auth.error) return auth.error
@@ -48,7 +59,7 @@ export async function GET(request: NextRequest) {
   const now = new Date()
   const studentEmail = auth.student.email
 
-  const [enrollments, payments, submissions, portalCertificates, issuedCertificates, news, evaluationsCount] =
+  const [enrollments, payments, submissions, portalCertificates, issuedCertificates, news, evaluationsCount, userProfile] =
     await Promise.all([
       prisma.enrollment.findMany({
         where: { email: studentEmail },
@@ -71,6 +82,8 @@ export async function GET(request: NextRequest) {
               price: true,
               status: true,
               prerequisites: true,
+              maxParticipants: true,
+              currentParticipants: true,
             },
           },
         },
@@ -155,6 +168,12 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
+      prisma.user.findUnique({
+        where: { email: studentEmail },
+        select: {
+          image: true,
+        },
+      }),
     ])
 
   const formationIds = Array.from(new Set(enrollments.map((item) => item.formationId)))
@@ -223,6 +242,38 @@ export async function GET(request: NextRequest) {
       return aDate - bDate
     })[0]
 
+  const currentReservedSpot =
+    currentEnrollment?.sessionId && currentEnrollment?.createdAt
+      ? await prisma.enrollment.count({
+          where: {
+            sessionId: currentEnrollment.sessionId,
+            status: {
+              in: ['pending', 'accepted', 'confirmed', 'waitlist'],
+            },
+            createdAt: {
+              lte: currentEnrollment.createdAt,
+            },
+          },
+        })
+      : null
+
+  const attendanceRows = currentEnrollment
+    ? await prisma.attendance.findMany({
+        where: { enrollmentId: currentEnrollment.id },
+        select: { status: true },
+      })
+    : []
+
+  const attendanceRecordedCount = attendanceRows.length
+  const attendancePresentCount = attendanceRows.filter((item) =>
+    ['present', 'late', 'excused'].includes(item.status.toLowerCase())
+  ).length
+  const attendanceRate =
+    attendanceRecordedCount > 0
+      ? Math.round((attendancePresentCount / attendanceRecordedCount) * 100)
+      : null
+  const attendanceValidated = attendanceRecordedCount === 0 ? true : (attendanceRate || 0) >= 80
+
   const sessionsHistory = enrollmentsWithSession.map((item) => {
     const session = item.session!
     const notes = parseEnrollmentNotes(item.notes)
@@ -237,6 +288,8 @@ export async function GET(request: NextRequest) {
       endDate: session.endDate,
       location: session.location,
       format: session.format,
+      sessionStatus: session.status,
+      sessionLifecycle: getSessionLifecycle(session.startDate, session.endDate, now),
       enrollmentStatus: item.status,
       paymentStatus: item.paymentStatus,
       totalAmount: item.totalAmount,
@@ -418,6 +471,28 @@ export async function GET(request: NextRequest) {
     })),
   ]
 
+  const currentEnrollmentHasSuccessfulPayment = currentEnrollment
+    ? mappedPayments.some(
+        (item) =>
+          item.enrollmentId === currentEnrollment.id &&
+          ['success', 'completed'].includes(item.status.toLowerCase())
+      ) || currentEnrollment.paymentStatus === 'paid'
+    : false
+  const currentEnrollmentProjectValidated = mappedSubmissions.some(
+    (item) => item.status === 'approved' || item.reviewStatus === 'approved'
+  )
+  const certificateEligibility = {
+    paymentValidated: currentEnrollmentHasSuccessfulPayment,
+    projectValidated: currentEnrollmentProjectValidated,
+    attendanceTracked: attendanceRecordedCount > 0,
+    attendanceRate,
+    attendanceValidated,
+    eligible:
+      currentEnrollmentHasSuccessfulPayment &&
+      currentEnrollmentProjectValidated &&
+      attendanceValidated,
+  }
+
   return NextResponse.json({
     student: {
       id: auth.student.id,
@@ -432,7 +507,7 @@ export async function GET(request: NextRequest) {
       city: auth.student.city,
       country: auth.student.country,
       createdAt: auth.student.createdAt,
-      photoUrl: null,
+      photoUrl: userProfile?.image || null,
     },
     dashboard: {
       currentSession: currentEnrollment
@@ -448,6 +523,22 @@ export async function GET(request: NextRequest) {
             location: currentEnrollment.session?.location,
             format: currentEnrollment.session?.format,
             status: currentEnrollment.status,
+            sessionStatus: currentEnrollment.session?.status || null,
+            lifecycle:
+              currentEnrollment.session
+                ? getSessionLifecycle(currentEnrollment.session.startDate, currentEnrollment.session.endDate, now)
+                : 'unknown',
+            availableSpots:
+              currentEnrollment.session
+                ? Math.max(
+                    0,
+                    (currentEnrollment.session.maxParticipants || 0) -
+                      (currentEnrollment.session.currentParticipants || 0)
+                  )
+                : null,
+            reservedSpot: currentReservedSpot,
+            maxParticipants: currentEnrollment.session?.maxParticipants || null,
+            currentParticipants: currentEnrollment.session?.currentParticipants || null,
           }
         : null,
       sessionsHistory,
@@ -455,6 +546,7 @@ export async function GET(request: NextRequest) {
       payments: mappedPayments,
       submissions: mappedSubmissions,
       certificates,
+      certificateEligibility,
       questions,
       notifications,
       progress: {

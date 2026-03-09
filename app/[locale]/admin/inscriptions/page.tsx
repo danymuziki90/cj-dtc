@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -84,11 +84,11 @@ export default function AdminInscriptionsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      case 'accepted': return 'bg-green-100 text-green-800'
+      case 'pending': return 'bg-red-100 text-red-800'
+      case 'accepted': return 'bg-blue-100 text-blue-800'
       case 'rejected': return 'bg-red-100 text-red-800'
       case 'confirmed': return 'bg-blue-100 text-blue-800'
-      case 'completed': return 'bg-purple-100 text-purple-800'
+      case 'completed': return 'bg-blue-100 text-blue-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -146,11 +146,11 @@ export default function AdminInscriptionsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">En attente</p>
-              <p className="text-2xl font-bold text-yellow-600">
+              <p className="text-2xl font-bold text-red-600">
                 {inscriptions.filter(i => i.status === 'pending').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">⏳</span>
             </div>
           </div>
@@ -160,11 +160,11 @@ export default function AdminInscriptionsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Acceptées</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {inscriptions.filter(i => i.status === 'accepted').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">✅</span>
             </div>
           </div>
@@ -361,7 +361,7 @@ export default function AdminInscriptionsPage() {
                             updateInscriptionStatus(selectedInscription.id, 'accepted', undefined, matricule)
                           }}
                           disabled={updating}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                         >
                           {updating ? 'Traitement...' : 'Accepter et attribuer matricule'}
                         </button>
@@ -387,7 +387,7 @@ export default function AdminInscriptionsPage() {
                       <button
                         onClick={() => updateInscriptionStatus(selectedInscription.id, 'completed')}
                         disabled={updating}
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                       >
                         {updating ? 'Traitement...' : 'Marquer comme terminé'}
                       </button>
@@ -402,3 +402,4 @@ export default function AdminInscriptionsPage() {
     </div>
   )
 }
+

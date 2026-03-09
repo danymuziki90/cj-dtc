@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -167,9 +167,9 @@ export default function InvoicesPage() {
     const badges: Record<string, string> = {
       draft: 'bg-gray-100 text-gray-800',
       sent: 'bg-blue-100 text-blue-800',
-      paid: 'bg-green-100 text-green-800',
+      paid: 'bg-blue-100 text-blue-800',
       cancelled: 'bg-red-100 text-red-800',
-      overdue: 'bg-orange-100 text-orange-800'
+      overdue: 'bg-red-100 text-red-800'
     }
     return badges[status] || 'bg-gray-100 text-gray-800'
   }
@@ -224,11 +224,11 @@ export default function InvoicesPage() {
       <div className="grid md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">Total Payé</div>
-          <div className="text-2xl font-bold text-green-600">{formatCurrency(totalAmount)}</div>
+          <div className="text-2xl font-bold text-blue-600">{formatCurrency(totalAmount)}</div>
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">En Attente</div>
-          <div className="text-2xl font-bold text-yellow-600">{formatCurrency(pendingAmount)}</div>
+          <div className="text-2xl font-bold text-red-600">{formatCurrency(pendingAmount)}</div>
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">Nombre de Factures</div>
@@ -236,7 +236,7 @@ export default function InvoicesPage() {
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">Factures Payées</div>
-          <div className="text-2xl font-bold text-green-600">
+          <div className="text-2xl font-bold text-blue-600">
             {invoices.filter(i => i.status === 'paid').length}
           </div>
         </div>
@@ -438,3 +438,4 @@ export default function InvoicesPage() {
     </div>
   )
 }
+

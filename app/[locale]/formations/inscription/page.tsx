@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -159,7 +159,7 @@ export default function InscriptionPage() {
                     <div className="bg-white rounded-lg shadow-md p-8 text-center">
                         {onWaitlist ? (
                             <>
-                                <AlertCircle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+                                <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                                     Inscription en liste d'attente
                                 </h1>
@@ -167,9 +167,9 @@ export default function InscriptionPage() {
                                     La session <strong>{session?.formation.title}</strong> est complète. Votre inscription a été enregistrée dans la liste d'attente.
                                 </p>
                                 <div className="space-y-4">
-                                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                                        <h3 className="font-semibold text-orange-900 mb-2">Vous serez notifié si :</h3>
-                                        <ul className="text-orange-800 text-sm space-y-1">
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                        <h3 className="font-semibold text-red-900 mb-2">Vous serez notifié si :</h3>
+                                        <ul className="text-red-800 text-sm space-y-1">
                                             <li>• Une place se libère dans la session actuelle</li>
                                             <li>• Une nouvelle session est ouverte</li>
                                             <li>• Une date alternative devient disponible</li>
@@ -182,7 +182,7 @@ export default function InscriptionPage() {
                             </>
                         ) : (
                             <>
-                                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                                <CheckCircle className="w-16 h-16 text-blue-500 mx-auto mb-4" />
                                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                                     Inscription réussie !
                                 </h1>
@@ -323,7 +323,7 @@ export default function InscriptionPage() {
                                     <Users className="w-5 h-5 text-cjblue mt-0.5" />
                                     <div>
                                         <p className="font-medium text-gray-900">Places disponibles</p>
-                                        <p className={`text-sm ${isFull ? 'text-red-600' : 'text-green-600'}`}>
+                                        <p className={`text-sm ${isFull ? 'text-red-600' : 'text-blue-600'}`}>
                                             {availableSpots} places restantes
                                         </p>
                                     </div>

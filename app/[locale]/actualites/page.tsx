@@ -1,153 +1,296 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import Breadcrumbs from '../../../components/Breadcrumbs'
 
-interface Article {
-  id: number
-  title: string
+type NewsItem = {
+  id: string
   slug: string
-  excerpt: string
+  title: string
   content: string
-  imageUrl?: string
-  published: boolean
-  createdAt: string
-  updatedAt: string
+  excerpt: string
+  author: string
+  category: string
+  tags: string[]
+  imageDataUrl: string | null
+  publicationDate: string
+}
+
+type NewsResponse = {
+  news: NewsItem[]
+  categories: string[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    pageCount: number
+  }
+  error?: string
+}
+
+const PAGE_SIZE = 9
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat('fr-FR', {
+    dateStyle: 'long',
+  }).format(new Date(value))
+}
+
+function stripHtml(value: string) {
+  return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
 export default function ActualitesPage() {
-  const [articles, setArticles] = useState<Article[]>([])
+  const params = useParams<{ locale: string }>()
+  const locale = params?.locale || 'fr'
+
+  const [news, setNews] = useState<NewsItem[]>([])
+  const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [category, setCategory] = useState('all')
+  const [date, setDate] = useState('')
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: PAGE_SIZE,
+    total: 0,
+    pageCount: 1,
+  })
 
   useEffect(() => {
-    fetchArticles()
-  }, [])
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search.trim())
+      setPage(1)
+    }, 250)
+    return () => window.clearTimeout(timer)
+  }, [search])
 
-  const fetchArticles = async () => {
-    try {
-      const response = await fetch('/api/articles')
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des articles')
-      }
-      const data = await response.json()
-      // Filtrer uniquement les articles publiés
-      const publishedArticles = data.filter((article: Article) => article.published)
-      setArticles(publishedArticles)
-    } catch (error: any) {
-      setError(error.message || 'Une erreur est survenue')
-    } finally {
-      setLoading(false)
+  async function fetchNews(targetPage = page) {
+    const params = new URLSearchParams()
+    params.set('page', String(targetPage))
+    params.set('pageSize', String(PAGE_SIZE))
+    params.set('published', 'true')
+
+    if (debouncedSearch) params.set('search', debouncedSearch)
+    if (category !== 'all') params.set('category', category)
+    if (date) params.set('date', date)
+
+    const response = await fetch(`/api/news?${params.toString()}`, { cache: 'no-store' })
+    const payload = (await response.json()) as NewsResponse
+
+    if (!response.ok) {
+      throw new Error(payload.error || 'Erreur lors du chargement des actualites.')
     }
+
+    setNews(payload.news || [])
+    setCategories(payload.categories || [])
+    setPagination(payload.pagination || { page: 1, pageSize: PAGE_SIZE, total: 0, pageCount: 1 })
   }
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <Breadcrumbs items={[{ label: 'Actualités' }]} />
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-cjblue"></div>
-          <p className="mt-4 text-lg text-gray-600">Chargement des actualités...</p>
-        </div>
-      </div>
-    )
-  }
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    fetchNews()
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur inattendue'))
+      .finally(() => setLoading(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, debouncedSearch, category, date])
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <Breadcrumbs items={[{ label: 'Actualités' }]} />
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <p className="text-red-800">{error}</p>
-          <button 
-            onClick={fetchArticles}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Réessayer
-          </button>
-        </div>
-      </div>
-    )
-  }
+  const pageNumbers = useMemo(() => {
+    if (pagination.pageCount <= 1) return []
+    const start = Math.max(1, pagination.page - 2)
+    const end = Math.min(pagination.pageCount, start + 4)
+    const list: number[] = []
+    for (let i = start; i <= end; i += 1) list.push(i)
+    return list
+  }, [pagination.page, pagination.pageCount])
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <Breadcrumbs items={[{ label: 'Actualités' }]} />
-      <h1 className="text-4xl md:text-5xl font-bold text-cjblue mb-12 text-center">Actualités</h1>
+    <div className="bg-slate-50">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <Breadcrumbs items={[{ label: 'Actualités' }]} />
 
-      {articles.length === 0 ? (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-          <div className="text-gray-500 mb-4">
-            <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m-6 0l-2 2m2-2l2 2m-2-2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8h6z" />
-            </svg>
+        <section className="relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#002D72_0%,#003b96_65%,#E30613_150%)] px-6 py-10 text-white shadow-xl sm:px-8">
+          <div className="pointer-events-none absolute -right-16 -top-14 h-52 w-52 rounded-full bg-white/10 blur-3xl" />
+          <div className="relative">
+            <p className="text-sm uppercase tracking-[0.25em] text-white/85">CJ DTC</p>
+            <h1 className="mt-3 text-5xl font-extrabold leading-tight text-white sm:text-6xl">Actualités</h1>
+            <p className="mt-3 max-w-3xl text-base text-white/90 sm:text-lg">
+              Les annonces, sessions, evolutions et informations importantes du centre.
+            </p>
+            <div className="mt-5 inline-flex rounded-full bg-white/12 px-4 py-2 text-sm font-medium">
+              {loading ? 'Chargement...' : `${pagination.total} actualite(s)`}
+            </div>
           </div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucune actualité disponible</h3>
-          <p className="text-gray-600 mb-6">Revenez bientôt pour découvrir nos dernières nouvelles.</p>
-          <Link href="/fr/contact" className="inline-flex items-center px-6 py-3 bg-cjblue text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-            Nous contacter
-          </Link>
-        </div>
-      ) : (
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <article
-              key={article.id}
-              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="grid gap-3 md:grid-cols-4">
+            <div className="md:col-span-2">
+              <label htmlFor="search" className="mb-1 block text-sm font-medium text-slate-700">
+                Recherche
+              </label>
+              <input
+                id="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Titre ou mot cle..."
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
+              />
+            </div>
+            <div>
+              <label htmlFor="category" className="mb-1 block text-sm font-medium text-slate-700">
+                Categorie
+              </label>
+              <select
+                id="category"
+                value={category}
+                onChange={(event) => {
+                  setCategory(event.target.value)
+                  setPage(1)
+                }}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
+              >
+                <option value="all">Toutes</option>
+                {categories.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="date" className="mb-1 block text-sm font-medium text-slate-700">
+                Date
+              </label>
+              <input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(event) => {
+                  setDate(event.target.value)
+                  setPage(1)
+                }}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
+              />
+            </div>
+          </div>
+
+          {(search || category !== 'all' || date) && (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('')
+                  setDebouncedSearch('')
+                  setCategory('all')
+                  setDate('')
+                  setPage(1)
+                }}
+                className="text-sm font-medium text-cjblue hover:text-blue-800"
+              >
+                Reinitialiser les filtres
+              </button>
+            </div>
+          )}
+        </section>
+
+        {error ? (
+          <section className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+            {error}
+          </section>
+        ) : null}
+
+        {!loading && !error && news.length === 0 ? (
+          <section className="mt-6 rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+            <h2 className="text-2xl font-bold text-cjblue">Aucune actualite trouvee</h2>
+            <p className="mt-2 text-sm text-slate-600">Ajustez vos filtres ou revenez plus tard.</p>
+            <Link
+              href={`/${locale}/contact`}
+              className="mt-5 inline-flex rounded-lg bg-cjblue px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800"
             >
-              <Link href={`/fr/actualites/${article.slug}`} className="block">
-                {article.imageUrl && (
-                  <div className="aspect-video bg-gray-100">
-                    <img
-                      src={article.imageUrl}
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                      Nouveau
-                    </span>
-                    <time className="text-sm text-gray-500">
-                      {new Date(article.createdAt).toLocaleDateString('fr-FR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </time>
-                  </div>
+              Nous contacter
+            </Link>
+          </section>
+        ) : null}
 
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 leading-tight">
-                    {article.title}
-                  </h2>
-
-                  {article.excerpt && (
-                    <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-                      {article.excerpt}
-                    </p>
+        <section className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {news.map((item) => (
+            <article
+              key={item.id}
+              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+            >
+              <Link href={`/${locale}/actualites/${item.slug}`} className="block">
+                <div className="relative h-44 w-full bg-slate-100">
+                  {item.imageDataUrl ? (
+                    <img src={item.imageDataUrl} alt={item.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="grid h-full place-items-center text-4xl text-slate-300">📰</div>
                   )}
+                </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-cjblue font-medium">
-                      Lire la suite →
+                <div className="p-5">
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <span className="inline-flex rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
+                      {item.category || 'General'}
                     </span>
-                    <div className="flex items-center text-gray-400">
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <span className="text-xs">Lire</span>
-                    </div>
+                    <time className="text-xs text-slate-500">{formatDate(item.publicationDate)}</time>
                   </div>
+
+                  <h2 className="text-xl font-bold leading-tight text-cjblue">{item.title}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.excerpt || stripHtml(item.content).slice(0, 170)}</p>
+
+                  <div className="mt-4 text-sm font-semibold text-cjblue">Lire la suite →</div>
                 </div>
               </Link>
             </article>
           ))}
-        </div>
-      )}
+        </section>
+
+        {pagination.pageCount > 1 ? (
+          <section className="mt-8 flex flex-wrap items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              disabled={page <= 1}
+              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+            >
+              Precedent
+            </button>
+
+            <div className="flex flex-wrap gap-1">
+              {pageNumbers.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setPage(value)}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+                    value === page
+                      ? 'bg-cjblue text-white'
+                      : 'border border-slate-300 text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setPage((prev) => Math.min(prev + 1, pagination.pageCount))}
+              disabled={page >= pagination.pageCount}
+              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+            >
+              Suivant
+            </button>
+          </section>
+        ) : null}
+      </div>
     </div>
   )
 }

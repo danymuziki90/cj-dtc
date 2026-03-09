@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
@@ -93,7 +93,7 @@ export default function StudentProfilePage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Echec de mise a jour.')
+        setError(data.error || 'Échec de mise à jour.')
         return
       }
 
@@ -115,7 +115,7 @@ export default function StudentProfilePage() {
           : prev
       )
     } catch {
-      setError('Echec de mise a jour.')
+      setError('Échec de mise à jour.')
     } finally {
       setSaving(false)
     }
@@ -163,7 +163,7 @@ export default function StudentProfilePage() {
         ) : null}
 
         {message ? (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{message}</div>
+          <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">{message}</div>
         ) : null}
         {error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
@@ -271,3 +271,4 @@ export default function StudentProfilePage() {
     </div>
   )
 }
+

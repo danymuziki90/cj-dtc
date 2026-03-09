@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 
@@ -56,8 +56,8 @@ export const StarRating: React.FC<StarRatingProps> = ({
           <svg
             key={star}
             className={`${sizeClasses[size]} ${
-              isFilled ? 'text-yellow-400 fill-current' : 'text-gray-300'
-            } ${interactive && !readonly ? 'hover:text-yellow-400' : ''}`}
+              isFilled ? 'text-red-400 fill-current' : 'text-gray-300'
+            } ${interactive && !readonly ? 'hover:text-red-400' : ''}`}
             fill={isFilled ? 'currentColor' : 'none'}
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -76,3 +76,4 @@ export const StarRating: React.FC<StarRatingProps> = ({
     </div>
   )
 }
+

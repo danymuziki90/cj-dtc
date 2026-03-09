@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -55,11 +55,11 @@ export default function CalendrierPage() {
 
   const getStatusBadge = (status: string) => {
     const badges: Record<string, string> = {
-      ouverte: 'bg-green-100 text-green-800',
+      ouverte: 'bg-blue-100 text-blue-800',
       fermee: 'bg-gray-100 text-gray-800',
       complete: 'bg-blue-100 text-blue-800',
       annulee: 'bg-red-100 text-red-800',
-      terminee: 'bg-purple-100 text-purple-800'
+      terminee: 'bg-blue-100 text-blue-800'
     }
     return badges[status] || 'bg-gray-100 text-gray-800'
   }
@@ -211,3 +211,4 @@ export default function CalendrierPage() {
     </div>
   )
 }
+

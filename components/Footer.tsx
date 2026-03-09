@@ -1,17 +1,17 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import Image from 'next/image'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
+    <footer className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-blue-900 text-white overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0">
         {/* Floating Orbs */}
         <div className="absolute top-20 left-10 w-64 h-64 bg-blue-500 rounded-full filter blur-3xl opacity-10"></div>
-        <div className="absolute bottom-20 right-10 w-80 h-80 bg-indigo-500 rounded-full filter blur-3xl opacity-10"></div>
-        <div className="absolute top-1/2 left-1/3 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl opacity-5"></div>
+        <div className="absolute bottom-20 right-10 w-80 h-80 bg-blue-500 rounded-full filter blur-3xl opacity-10"></div>
+        <div className="absolute top-1/2 left-1/3 w-96 h-96 bg-blue-500 rounded-full filter blur-3xl opacity-5"></div>
         
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
@@ -33,8 +33,8 @@ export default function Footer() {
             <div className="group">
               <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                  <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                  <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                     <span className="text-white font-bold text-lg sm:text-xl">CJ</span>
                   </div>
                 </div>
@@ -138,7 +138,7 @@ export default function Footer() {
           <div className="space-y-6">
             <h4 className="font-bold text-lg text-white mb-6 relative">
               <span className="relative z-10">Formations</span>
-              <div className="absolute -bottom-2 left-0 w-8 h-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full"></div>
+              <div className="absolute -bottom-2 left-0 w-8 h-1 bg-gradient-to-r from-blue-400 to-blue-400 rounded-full"></div>
             </h4>
             <ul className="space-y-3">
               <li>
@@ -188,12 +188,12 @@ export default function Footer() {
           <div className="space-y-6">
             <h4 className="font-bold text-lg text-white mb-6 relative">
               <span className="relative z-10">Ressources</span>
-              <div className="absolute -bottom-2 left-0 w-8 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+              <div className="absolute -bottom-2 left-0 w-8 h-1 bg-gradient-to-r from-blue-400 to-red-400 rounded-full"></div>
             </h4>
             <ul className="space-y-3">
               <li>
                 <Link href="/fr/actualites" className="group flex items-center text-sm text-gray-300 hover:text-white transition-all duration-300">
-                  <svg className="w-4 h-4 mr-2 text-purple-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-2 text-blue-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                   Actualités
@@ -201,7 +201,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/fr/certificates" className="group flex items-center text-sm text-gray-300 hover:text-white transition-all duration-300">
-                  <svg className="w-4 h-4 mr-2 text-purple-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-2 text-blue-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                   Vérifier un certificat
@@ -209,7 +209,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/fr/espace-etudiants" className="group flex items-center text-sm text-gray-300 hover:text-white transition-all duration-300">
-                  <svg className="w-4 h-4 mr-2 text-purple-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-2 text-blue-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                   Espace Étudiants
@@ -217,7 +217,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/fr/partenaires" className="group flex items-center text-sm text-gray-300 hover:text-white transition-all duration-300">
-                  <svg className="w-4 h-4 mr-2 text-purple-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-2 text-blue-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                   Partenaires
@@ -225,7 +225,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/fr/services" className="group flex items-center text-sm text-gray-300 hover:text-white transition-all duration-300">
-                  <svg className="w-4 h-4 mr-2 text-purple-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-2 text-blue-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                   Services
@@ -238,12 +238,12 @@ export default function Footer() {
           <div className="space-y-6">
             <h4 className="font-bold text-lg text-white mb-6 relative">
               <span className="relative z-10">Contact</span>
-              <div className="absolute -bottom-2 left-0 w-8 h-1 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full"></div>
+              <div className="absolute -bottom-2 left-0 w-8 h-1 bg-gradient-to-r from-blue-400 to-blue-400 rounded-full"></div>
             </h4>
             <ul className="space-y-4">
               <li className="group">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -261,7 +261,7 @@ export default function Footer() {
 
               <li className="group">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
@@ -282,7 +282,7 @@ export default function Footer() {
 
               <li className="group">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
@@ -303,7 +303,7 @@ export default function Footer() {
 
         {/* Newsletter Section */}
         <div className="mb-16">
-          <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+          <div className="bg-gradient-to-r from-blue-600/20 to-blue-600/20 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
                 <h3 className="text-xl font-bold text-white mb-2">Restez informé</h3>
@@ -317,7 +317,7 @@ export default function Footer() {
                   placeholder="Votre email..."
                   className="flex-1 px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all duration-300"
                 />
-                <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
+                <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
                   S'abonner
                 </button>
               </div>
@@ -373,3 +373,4 @@ export default function Footer() {
     </footer>
   )
 }
+

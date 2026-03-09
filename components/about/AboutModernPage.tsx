@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import {
   ArrowRight,
   Award,
@@ -51,7 +51,7 @@ const timeline = [
   { year: '2018', text: 'Lancement du centre a Kinshasa, RDC.' },
   { year: '2019', text: 'Demarrage du programme IOP et premiers partenariats.' },
   { year: '2021', text: 'Extension des cohortes dans plusieurs pays.' },
-  { year: '2024', text: 'Renforcement digital, suivi et certification a grande echelle.' },
+  { year: '2024', text: 'Renforcement digital, suivi et certification à grande échelle.' },
 ]
 
 export default function AboutModernPage({
@@ -60,23 +60,23 @@ export default function AboutModernPage({
   contactHref,
 }: AboutModernPageProps) {
   return (
-    <div className="bg-slate-50 text-slate-900">
-      <section className="relative overflow-hidden bg-slate-950 text-white">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(59,130,246,0.35),_transparent_45%),radial-gradient(circle_at_20%_30%,_rgba(6,182,212,0.25),_transparent_38%)]" />
+    <div className="bg-[var(--cj-blue-50)] text-slate-900">
+      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#002D72_0%,#003b96_70%,#E30613_150%)] text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(59,130,246,0.35),_transparent_45%),radial-gradient(circle_at_20%_30%,_rgba(227,6,19,0.20),_transparent_38%)]" />
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <Link
             href={homeHref}
-            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:bg-white/10 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-blue-100 transition hover:bg-white/10 hover:text-white"
           >
-            Retour a l'accueil
+            Retour à l'accueil
           </Link>
 
           <div className="mt-8 max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">CJ Development Training Center</p>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
+            <p className="text-xs uppercase tracking-[0.24em] text-blue-300">CJ Development Training Center</p>
+            <h1 className="mt-4 text-5xl font-extrabold tracking-tight leading-tight text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.35)] sm:text-6xl lg:text-7xl">
               A propos: un centre de formation moderne, axe sur l'impact.
             </h1>
-            <p className="mt-5 text-lg text-slate-300">
+            <p className="mt-5 text-lg text-blue-100">
               Nous aidons les jeunes et les professionnels a passer d'un potentiel brut a une competence
               operationnelle reconnue.
             </p>
@@ -85,9 +85,9 @@ export default function AboutModernPage({
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map((item) => (
               <article key={item.label} className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-                <item.icon className="h-5 w-5 text-cyan-300" />
+                <item.icon className="h-5 w-5 text-blue-300" />
                 <p className="mt-4 text-3xl font-bold">{item.value}</p>
-                <p className="mt-1 text-sm text-slate-300">{item.label}</p>
+                <p className="mt-1 text-sm text-blue-100">{item.label}</p>
               </article>
             ))}
           </div>
@@ -95,19 +95,19 @@ export default function AboutModernPage({
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+        <article className="rounded-3xl border border-blue-100 bg-white p-7 shadow-sm">
           <p className="text-xs uppercase tracking-[0.18em] text-cjblue">Mission</p>
           <h2 className="mt-3 text-2xl font-bold">Former des profils directement employables.</h2>
-          <p className="mt-4 text-slate-600">
+          <p className="mt-4 text-gray-600">
             Notre mission est de combiner pratique, discipline et accompagnement pour accelerer
             l'insertion professionnelle et la progression de carriere.
           </p>
         </article>
 
-        <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+        <article className="rounded-3xl border border-blue-100 bg-white p-7 shadow-sm">
           <p className="text-xs uppercase tracking-[0.18em] text-cjblue">Vision</p>
           <h2 className="mt-3 text-2xl font-bold">Devenir la reference panafricaine des talents.</h2>
-          <p className="mt-4 text-slate-600">
+          <p className="mt-4 text-gray-600">
             Nous voulons batir un ecosysteme de formation capable de produire des leaders utiles aux
             entreprises, institutions et communautes africaines.
           </p>
@@ -115,15 +115,15 @@ export default function AboutModernPage({
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
+        <div className="rounded-3xl border border-blue-100 bg-white p-7 shadow-sm sm:p-8">
           <h3 className="text-2xl font-bold">Nos valeurs</h3>
-          <p className="mt-2 text-slate-600">Un cadre de travail clair, professionnel et orientee resultats.</p>
+          <p className="mt-2 text-gray-600">Un cadre de travail clair, professionnel et orientee resultats.</p>
           <div className="mt-7 grid gap-4 md:grid-cols-2">
             {values.map((value) => (
-              <article key={value.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <article key={value.title} className="rounded-2xl border border-blue-100 bg-[var(--cj-blue-50)] p-5">
                 <value.icon className="h-5 w-5 text-cjblue" />
                 <h4 className="mt-3 font-semibold">{value.title}</h4>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{value.description}</p>
+                <p className="mt-2 text-sm leading-6 text-gray-600">{value.description}</p>
               </article>
             ))}
           </div>
@@ -131,13 +131,13 @@ export default function AboutModernPage({
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
+        <div className="rounded-3xl border border-blue-100 bg-white p-7 shadow-sm sm:p-8">
           <h3 className="text-2xl font-bold">Parcours du centre</h3>
           <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {timeline.map((item) => (
-              <article key={item.year} className="rounded-2xl border border-slate-200 p-5">
-                <p className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">{item.year}</p>
-                <p className="mt-3 text-sm text-slate-600">{item.text}</p>
+              <article key={item.year} className="rounded-2xl border border-blue-100 p-5">
+                <p className="inline-flex rounded-full bg-cjblue px-3 py-1 text-xs font-semibold text-white">{item.year}</p>
+                <p className="mt-3 text-sm text-gray-600">{item.text}</p>
               </article>
             ))}
           </div>
@@ -171,3 +171,4 @@ export default function AboutModernPage({
     </div>
   )
 }
+

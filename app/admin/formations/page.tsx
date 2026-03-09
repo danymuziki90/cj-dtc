@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -45,8 +45,8 @@ export default function FormationsPage() {
 
   const getProgressColor = (progress?: number) => {
     const p = progress || 0;
-    if (p >= 80) return 'bg-green-500';
-    if (p >= 50) return 'bg-yellow-500';
+    if (p >= 80) return 'bg-blue-500';
+    if (p >= 50) return 'bg-red-500';
     return 'bg-blue-500';
   }
 
@@ -307,8 +307,8 @@ export default function FormationsPage() {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'certification': return 'bg-blue-100 text-blue-700'
-      case 'masterclass': return 'bg-purple-100 text-purple-700'
-      case 'workshop': return 'bg-green-100 text-green-700'
+      case 'masterclass': return 'bg-blue-100 text-blue-700'
+      case 'workshop': return 'bg-blue-100 text-blue-700'
       case 'programme': return 'bg-red-100 text-red-700'
       default: return 'bg-gray-100 text-gray-700'
     }
@@ -316,9 +316,9 @@ export default function FormationsPage() {
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'débutant': return 'bg-green-100 text-green-700'
-      case 'intermédiaire': return 'bg-yellow-100 text-yellow-700'
-      case 'avancé': return 'bg-orange-100 text-orange-700'
+      case 'débutant': return 'bg-blue-100 text-blue-700'
+      case 'intermédiaire': return 'bg-red-100 text-red-700'
+      case 'avancé': return 'bg-red-100 text-red-700'
       case 'expert': return 'bg-red-100 text-red-700'
       default: return 'bg-gray-100 text-gray-700'
     }
@@ -327,7 +327,7 @@ export default function FormationsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft': return 'bg-gray-100 text-gray-700'
-      case 'published': return 'bg-green-100 text-green-700'
+      case 'published': return 'bg-blue-100 text-blue-700'
       case 'archived': return 'bg-gray-100 text-gray-700'
       default: return 'bg-gray-100 text-gray-700'
     }
@@ -418,7 +418,7 @@ export default function FormationsPage() {
 
                 {selectedFormations.length > 0 && (
                   <>
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center space-x-2">
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2">
                       <Download className="w-4 h-4" />
                       <span>Exporter</span>
                     </button>
@@ -538,7 +538,7 @@ export default function FormationsPage() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                        <Star className="w-4 h-4 text-red-400 fill-current" />
                         <span className="text-sm text-gray-600">{formation.rating}</span>
                         <span className="text-xs text-gray-500">({formation.reviews})</span>
                       </div>
@@ -644,7 +644,7 @@ export default function FormationsPage() {
                         </Link>
                         <Link
                           href={`/admin/formations/${formation.id}/duplicate`}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center space-x-2"
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2"
                         >
                           <Plus className="w-4 h-4" />
                           <span>Dupliquer</span>
@@ -729,3 +729,4 @@ export default function FormationsPage() {
     </div>
   )
 }
+

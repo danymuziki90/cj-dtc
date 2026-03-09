@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -286,7 +286,7 @@ export default function CertificatesPage() {
 
   const getStatusColor = (certificate: Certificate) => {
     if (isCertificateValid(certificate)) {
-      return 'bg-green-100 text-green-800'
+      return 'bg-blue-100 text-blue-800'
     }
     return 'bg-gray-100 text-gray-800'
   }
@@ -330,7 +330,7 @@ export default function CertificatesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           <p className="mt-4 text-gray-600">Chargement de vos certificats...</p>
@@ -340,7 +340,7 @@ export default function CertificatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -407,7 +407,7 @@ export default function CertificatesPage() {
                 <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
                   <Award className="w-6 h-6 text-blue-600" />
                 </div>
-                <TrendingUp className="w-5 h-5 text-green-500" />
+                <TrendingUp className="w-5 h-5 text-blue-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900">{stats.total}</h3>
               <p className="text-sm text-gray-600">Total Certificats</p>
@@ -415,10 +415,10 @@ export default function CertificatesPage() {
 
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-blue-600" />
                 </div>
-                <TrendingUp className="w-5 h-5 text-green-500" />
+                <TrendingUp className="w-5 h-5 text-blue-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900">{stats.verified}</h3>
               <p className="text-sm text-gray-600">Certificats Validés</p>
@@ -426,10 +426,10 @@ export default function CertificatesPage() {
 
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-blue-600" />
                 </div>
-                <TrendingUp className="w-5 h-5 text-green-500" />
+                <TrendingUp className="w-5 h-5 text-blue-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900">{stats.issuedThisMonth}</h3>
               <p className="text-sm text-gray-600">Ce mois</p>
@@ -437,10 +437,10 @@ export default function CertificatesPage() {
 
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center">
-                  <Star className="w-6 h-6 text-yellow-600" />
+                <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
+                  <Star className="w-6 h-6 text-red-600" />
                 </div>
-                <BarChart3 className="w-5 h-5 text-yellow-500" />
+                <BarChart3 className="w-5 h-5 text-red-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900">{stats.averageScore}%</h3>
               <p className="text-sm text-gray-600">Score Moyen</p>
@@ -494,7 +494,7 @@ export default function CertificatesPage() {
             <div className={`mt-6 p-4 rounded-lg ${
               verificationResult.error 
                 ? 'bg-red-50 border border-red-200' 
-                : 'bg-green-50 border border-green-200'
+                : 'bg-blue-50 border border-blue-200'
             }`}>
               {verificationResult.error ? (
                 <div className="text-red-700">
@@ -502,7 +502,7 @@ export default function CertificatesPage() {
                   <p className="text-sm">{verificationResult.error}</p>
                 </div>
               ) : (
-                <div className="text-green-700">
+                <div className="text-blue-700">
                   <p className="font-semibold">✅ Certificat valide</p>
                   <div className="mt-2 text-sm">
                     <p><strong>Nom:</strong> {verificationResult.certificate?.holderName}</p>
@@ -591,7 +591,7 @@ export default function CertificatesPage() {
                   </button>
                   <button
                     onClick={() => generateQRCode(certificate)}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <QrCode className="w-4 h-4 mr-2" />
                     Générer QR Code
@@ -605,21 +605,21 @@ export default function CertificatesPage() {
                   </button>
                   <button
                     onClick={() => printCertificatePDF(certificate)}
-                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     <DownloadCloud className="w-4 h-4 mr-2" />
                     Imprimer
                   </button>
                   <button
                     onClick={() => shareCertificatePDF(certificate)}
-                    className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     <Share2 className="w-4 h-4 mr-2" />
                     Partager PDF
                   </button>
                   <button
                     onClick={() => emailCertificatePDF(certificate)}
-                    className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     Envoyer
@@ -669,7 +669,7 @@ export default function CertificatesPage() {
 
                 <div className="space-y-6">
                   {/* Certificate Preview */}
-                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-8 border-2 border-blue-200">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-50 rounded-lg p-8 border-2 border-blue-200">
                     <div className="text-center mb-6">
                       <span className="text-6xl mb-4 block">🎓</span>
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">CERTIFICAT DE RÉUSSITE</h3>
@@ -700,7 +700,7 @@ export default function CertificatesPage() {
                       <p className="text-lg text-gray-700 mb-2">
                         <strong>Type de certificat</strong>
                       </p>
-                      <p className="text-xl font-bold text-purple-600">
+                      <p className="text-xl font-bold text-blue-600">
                         {selectedCertificate.type}
                       </p>
                     </div>
@@ -756,7 +756,7 @@ export default function CertificatesPage() {
                 <div className="flex justify-center space-x-4">
                   <button
                     onClick={() => downloadCertificate(selectedCertificate)}
-                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <Download className="w-5 h-5 mr-2" />
                     Télécharger le QR Code
@@ -814,3 +814,4 @@ export default function CertificatesPage() {
     </div>
   )
 }
+

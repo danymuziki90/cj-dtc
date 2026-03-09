@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -181,8 +181,8 @@ export default function StudentCertificatesPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'generated': return 'bg-blue-100 text-blue-800'
-      case 'downloaded': return 'bg-green-100 text-green-800'
-      case 'verified': return 'bg-purple-100 text-purple-800'
+      case 'downloaded': return 'bg-blue-100 text-blue-800'
+      case 'verified': return 'bg-blue-100 text-blue-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -197,9 +197,9 @@ export default function StudentCertificatesPage() {
   }
 
   const getGradeColor = (grade: number) => {
-    if (grade >= 16) return 'text-green-600'
+    if (grade >= 16) return 'text-blue-600'
     if (grade >= 12) return 'text-blue-600'
-    if (grade >= 10) return 'text-yellow-600'
+    if (grade >= 10) return 'text-red-600'
     return 'text-red-600'
   }
 
@@ -269,7 +269,7 @@ export default function StudentCertificatesPage() {
         {verificationResult && (
           <div className={`mt-6 p-4 rounded-lg ${verificationResult.error
               ? 'bg-red-50 border border-red-200'
-              : 'bg-green-50 border border-green-200'
+              : 'bg-blue-50 border border-blue-200'
             }`}>
             {verificationResult.error ? (
               <div className="text-red-700">
@@ -277,7 +277,7 @@ export default function StudentCertificatesPage() {
                 <p className="text-sm">{verificationResult.error}</p>
               </div>
             ) : (
-              <div className="text-green-700">
+              <div className="text-blue-700">
                 <p className="font-semibold">✅ Certificat valide</p>
                 <div className="mt-2 text-sm">
                   <p><strong>Nom:</strong> {verificationResult.studentName}</p>
@@ -357,13 +357,13 @@ export default function StudentCertificatesPage() {
                 </button>
                 <button
                   onClick={() => downloadCertificate(certificate)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   📥 Télécharger
                 </button>
                 <button
                   onClick={() => setVerificationCode(certificate.uniqueId)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   🔍 Vérifier
                 </button>
@@ -405,7 +405,7 @@ export default function StudentCertificatesPage() {
 
               <div className="space-y-6">
                 {/* Certificate Preview */}
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-8 border-2 border-blue-200">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-50 rounded-lg p-8 border-2 border-blue-200">
                   <div className="text-center mb-6">
                     <span className="text-6xl mb-4 block">🎓</span>
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">CERTIFICAT DE RÉUSSITE</h3>
@@ -461,7 +461,7 @@ export default function StudentCertificatesPage() {
                 <div className="flex justify-center space-x-4">
                   <button
                     onClick={() => downloadCertificate(selectedCertificate)}
-                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     📥 Télécharger le PDF
                   </button>
@@ -489,3 +489,4 @@ export default function StudentCertificatesPage() {
     </div>
   )
 }
+

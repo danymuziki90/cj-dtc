@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
@@ -141,21 +141,23 @@ export default function ProgrammesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-100">
+      <div className="min-h-screen bg-[var(--cj-blue-50)]">
         <div className="mx-auto flex h-screen max-w-5xl items-center justify-center px-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-cyan-700 border-t-transparent" />
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-700 border-t-transparent" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-100">
-      <div className="bg-slate-950 py-14 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-[var(--cj-blue-50)] via-white to-[var(--cj-blue-50)]">
+      <div className="bg-[linear-gradient(135deg,#002D72_0%,#003b96_65%,#E30613_140%)] py-14 text-white">
         <div className="mx-auto max-w-6xl px-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">Catalogue 2026</p>
-          <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Nos Sessions</h1>
-          <p className="mt-3 max-w-3xl text-sm text-slate-300 md:text-base">
+          <p className="text-sm uppercase tracking-[0.25em] text-white/90">Catalogue 2026</p>
+          <h1 className="mt-3 text-5xl font-extrabold leading-tight text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.35)] sm:text-6xl lg:text-7xl">
+            Nos Sessions
+          </h1>
+          <p className="mt-3 max-w-3xl text-base text-white/95 md:text-xl">
             Inscrivez-vous a la session adaptee a votre profil: MRH, IOP, Conference / Forum. Le formulaire
             s&apos;adapte automatiquement au type de session.
           </p>
@@ -173,9 +175,9 @@ export default function ProgrammesPage() {
           <div
             className={`mb-6 rounded-xl border px-4 py-3 text-sm ${
               paymentStatus === 'success'
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+                ? 'border-blue-200 bg-blue-50 text-blue-900'
                 : paymentStatus === 'pending'
-                ? 'border-amber-200 bg-amber-50 text-amber-900'
+                ? 'border-blue-200 bg-white text-cjblue'
                 : 'border-red-200 bg-red-50 text-red-900'
             }`}
           >
@@ -187,7 +189,7 @@ export default function ProgrammesPage() {
           <button
             onClick={() => setTypeFilter('ALL')}
             className={`rounded-full px-4 py-2 text-sm font-medium ${
-              typeFilter === 'ALL' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-300'
+              typeFilter === 'ALL' ? 'bg-cjblue text-white' : 'bg-white text-cjblue ring-1 ring-blue-200'
             }`}
           >
             Toutes
@@ -195,7 +197,7 @@ export default function ProgrammesPage() {
           <button
             onClick={() => setTypeFilter('MRH')}
             className={`rounded-full px-4 py-2 text-sm font-medium ${
-              typeFilter === 'MRH' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-300'
+              typeFilter === 'MRH' ? 'bg-cjblue text-white' : 'bg-white text-cjblue ring-1 ring-blue-200'
             }`}
           >
             MRH
@@ -203,7 +205,7 @@ export default function ProgrammesPage() {
           <button
             onClick={() => setTypeFilter('IOP')}
             className={`rounded-full px-4 py-2 text-sm font-medium ${
-              typeFilter === 'IOP' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-300'
+              typeFilter === 'IOP' ? 'bg-cjblue text-white' : 'bg-white text-cjblue ring-1 ring-blue-200'
             }`}
           >
             IOP
@@ -212,8 +214,8 @@ export default function ProgrammesPage() {
             onClick={() => setTypeFilter('CONFERENCE_FORUM')}
             className={`rounded-full px-4 py-2 text-sm font-medium ${
               typeFilter === 'CONFERENCE_FORUM'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 ring-1 ring-slate-300'
+                ? 'bg-cjblue text-white'
+                : 'bg-white text-cjblue ring-1 ring-blue-200'
             }`}
           >
             Conference / Forum
@@ -221,9 +223,9 @@ export default function ProgrammesPage() {
         </div>
 
         {filteredSessions.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center">
-            <p className="text-lg font-medium text-slate-900">Aucune session disponible</p>
-            <p className="mt-2 text-sm text-slate-600">Ajustez le filtre ou revenez plus tard.</p>
+          <div className="rounded-2xl border border-blue-100 bg-white px-6 py-14 text-center">
+            <p className="text-lg font-medium text-cjblue">Aucune session disponible</p>
+            <p className="mt-2 text-sm text-gray-600">Ajustez le filtre ou revenez plus tard.</p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -235,9 +237,9 @@ export default function ProgrammesPage() {
               return (
                 <article
                   key={session.id}
-                  className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                  className="group overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
                 >
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                  <div className="relative h-48 w-full overflow-hidden bg-blue-50">
                     <img
                       src={image}
                       alt={session.formation.title}
@@ -250,46 +252,48 @@ export default function ProgrammesPage() {
 
                   <div className="space-y-4 p-5">
                     <div>
-                      <h2 className="text-lg font-semibold text-slate-900">{session.formation.title}</h2>
-                      <p className="mt-1 text-xs uppercase tracking-[0.15em] text-slate-500">
+                      <h2 className="text-lg font-semibold text-cjblue">{session.formation.title}</h2>
+                      <p className="mt-1 text-xs uppercase tracking-[0.15em] text-gray-500">
                         {normalizeFormatLabel(session.format)}
                       </p>
                     </div>
 
-                    <div className="space-y-2 text-sm text-slate-600">
+                    <div className="space-y-2 text-sm text-gray-600">
                       <p className="flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4 text-cyan-700" />
+                        <CalendarDays className="h-4 w-4 text-cjblue" />
                         <span>{formatDateRange(session.startDate, session.endDate)}</span>
                       </p>
                       <p className="flex items-center gap-2">
-                        <Clock3 className="h-4 w-4 text-cyan-700" />
+                        <Clock3 className="h-4 w-4 text-cjblue" />
                         <span>
                           {session.startTime} - {session.endTime} ({getDurationLabel(session.startDate, session.endDate)})
                         </span>
                       </p>
                       <p className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-cyan-700" />
+                        <MapPin className="h-4 w-4 text-cjblue" />
                         <span>{session.location}</span>
                       </p>
                       <p className="flex items-center gap-2">
-                        <MonitorSmartphone className="h-4 w-4 text-cyan-700" />
+                        <MonitorSmartphone className="h-4 w-4 text-cjblue" />
                         <span>{normalizeFormatLabel(session.format)}</span>
                       </p>
                       <p className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-cyan-700" />
+                        <Users className="h-4 w-4 text-cjblue" />
                         <span>{session.availableSpots} places disponibles</span>
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-                      <p className="text-xl font-semibold text-slate-900">{formatPrice(session.price)}</p>
+                    <div className="flex items-center justify-between border-t border-blue-100 pt-4">
+                      <p className="text-xl font-semibold text-cjblue">{formatPrice(session.price)}</p>
                       <button
                         onClick={() => {
                           setSelectedSession(session)
                           setSelectedType(session.programType)
                         }}
                         className={`rounded-lg px-4 py-2 text-sm font-semibold ${
-                          isFull ? 'cursor-not-allowed bg-slate-200 text-slate-500' : 'bg-cyan-700 text-white hover:bg-cyan-800'
+                          isFull
+                            ? 'cursor-not-allowed bg-red-100 text-red-700'
+                            : 'bg-cjblue text-white hover:bg-blue-800'
                         }`}
                       >
                         {isFull ? 'Liste attente' : "S'inscrire"}
@@ -313,3 +317,4 @@ export default function ProgrammesPage() {
     </div>
   )
 }
+

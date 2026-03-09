@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -13,7 +13,7 @@ const navLinks = [
   { href: '/admin/submissions', label: 'Travaux' },
   { href: '/admin/certificates', label: 'Certificats' },
   { href: '/admin/notifications', label: 'Notifications' },
-  { href: '/admin/articles', label: 'Actualites' },
+  { href: '/admin/articles', label: 'Actualités' },
   { href: '/admin/settings', label: 'Parametres' },
 ]
 
@@ -29,7 +29,7 @@ export default function AdminHeader() {
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/admin/dashboard" className="shrink-0">
           <div className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-cyan-500/20 ring-1 ring-cyan-300/40">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-blue-500/20 ring-1 ring-blue-300/40">
               <img src="/logo.png" alt="CJ DTC" className="h-5 w-5 object-contain" />
             </div>
             <div>
@@ -46,7 +46,7 @@ export default function AdminHeader() {
               href={link.href}
               className={`rounded-full px-3 py-2 text-sm font-medium transition ${
                 isActive(link.href)
-                  ? 'bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/30'
+                  ? 'bg-blue-500 text-slate-950 shadow-lg shadow-blue-500/30'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
               }`}
             >
@@ -87,7 +87,7 @@ export default function AdminHeader() {
               href={link.href}
               className={`rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                 isActive(link.href)
-                  ? 'bg-cyan-500 text-slate-950'
+                  ? 'bg-blue-500 text-slate-950'
                   : 'text-slate-200 hover:bg-slate-800 hover:text-white'
               }`}
               onClick={() => setMenuOpen(false)}
@@ -100,3 +100,4 @@ export default function AdminHeader() {
     </header>
   )
 }
+

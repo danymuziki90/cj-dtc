@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { createContext, useContext, useState, useCallback } from 'react'
 
@@ -99,11 +99,11 @@ const ToastContainer: React.FC = () => {
   const getToastStyles = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return 'bg-green-500 text-white border-green-600'
+        return 'bg-blue-500 text-white border-blue-600'
       case 'error':
         return 'bg-red-500 text-white border-red-600'
       case 'warning':
-        return 'bg-yellow-500 text-white border-yellow-600'
+        return 'bg-red-500 text-white border-red-600'
       case 'info':
         return 'bg-blue-500 text-white border-blue-600'
     }
@@ -170,3 +170,4 @@ export const useToastNotification = () => {
 
   return { success, error, warning, info }
 }
+

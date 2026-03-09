@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -148,7 +148,7 @@ export default function TarifsAdminPage() {
                     </Link>
                     <Link
                         href="/admin/tarifs/new-promo"
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         Nouveau Code Promo
                     </Link>
@@ -185,19 +185,19 @@ export default function TarifsAdminPage() {
                     <div className="text-sm text-gray-600">Règles tarifaires actives</div>
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow">
-                    <div className="text-2xl font-bold text-green-600">
+                    <div className="text-2xl font-bold text-blue-600">
                         {promoCodes.filter(c => c.active).length}
                     </div>
                     <div className="text-sm text-gray-600">Codes promo actifs</div>
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow">
-                    <div className="text-2xl font-bold text-yellow-600">
+                    <div className="text-2xl font-bold text-red-600">
                         {Math.round(promoCodes.reduce((acc, c) => acc + c.currentUses, 0) / promoCodes.length)}
                     </div>
                     <div className="text-sm text-gray-600">Utilisations moyennes</div>
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow">
-                    <div className="text-2xl font-bold text-purple-600">
+                    <div className="text-2xl font-bold text-blue-600">
                         {pricingRules.reduce((acc, r) => acc + r.basePrice, 0) / pricingRules.length || 0}€
                     </div>
                     <div className="text-sm text-gray-600">Prix moyen</div>
@@ -261,7 +261,7 @@ export default function TarifsAdminPage() {
                                             {getPaymentOptionsText(rule.paymentOptions)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${rule.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${rule.active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
                                                 }`}>
                                                 {rule.active ? 'Actif' : 'Inactif'}
                                             </span>
@@ -276,7 +276,7 @@ export default function TarifsAdminPage() {
                                                 </Link>
                                                 <Link
                                                     href={`/admin/tarifs/pricing/${rule.id}/edit`}
-                                                    className="text-indigo-600 hover:text-indigo-900"
+                                                    className="text-blue-600 hover:text-blue-900"
                                                 >
                                                     Modifier
                                                 </Link>
@@ -351,7 +351,7 @@ export default function TarifsAdminPage() {
                                             {code.currentUses}/{code.maxUses || '∞'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${code.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${code.active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
                                                 }`}>
                                                 {code.active ? 'Actif' : 'Inactif'}
                                             </span>
@@ -366,7 +366,7 @@ export default function TarifsAdminPage() {
                                                 </Link>
                                                 <Link
                                                     href={`/admin/tarifs/promo/${code.id}/edit`}
-                                                    className="text-indigo-600 hover:text-indigo-900"
+                                                    className="text-blue-600 hover:text-blue-900"
                                                 >
                                                     Modifier
                                                 </Link>
@@ -399,10 +399,10 @@ export default function TarifsAdminPage() {
                     <button className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors">
                         📊 Générer un rapport tarifaire
                     </button>
-                    <button className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <button className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors">
                         📧 Envoyer les tarifs par email
                     </button>
-                    <button className="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                    <button className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors">
                         💰 Calculatrice de paiement
                     </button>
                 </div>

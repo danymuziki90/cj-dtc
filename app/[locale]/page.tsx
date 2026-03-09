@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import HomeSections from '../../components/HomeSections'
-import RecentFormations from '../../components/RecentFormations'
+import RecentSessions from '../../components/RecentSessions'
 import RecentArticles from '../../components/RecentArticles'
 
 export default function HomePage() {
@@ -100,24 +100,24 @@ export default function HomePage() {
       {/* Pourquoi choisir CJ DTC - Section Spectaculaire */}
       <section className="py-16 sm:py-20 lg:py-24 relative overflow-hidden">
         {/* Background décoratif */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-blue-50"></div>
 
         {/* Orbes flottants */}
         <div className="absolute top-10 left-10 w-32 h-32 bg-blue-400 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-10 right-10 w-48 h-48 bg-indigo-400 rounded-full filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/3 w-40 h-40 bg-purple-400 rounded-full filter blur-3xl opacity-10 animate-pulse delay-500"></div>
+        <div className="absolute bottom-10 right-10 w-48 h-48 bg-blue-400 rounded-full filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/3 w-40 h-40 bg-blue-400 rounded-full filter blur-3xl opacity-10 animate-pulse delay-500"></div>
 
         <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Section */}
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-            <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full mb-6 sm:mb-8">
-              <span className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mr-2 sm:mr-3 animate-pulse"></span>
+            <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-100 to-blue-100 rounded-full mb-6 sm:mb-8">
+              <span className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mr-2 sm:mr-3 animate-pulse"></span>
               <span className="text-blue-800 font-semibold text-sm sm:text-base">Notre Excellence</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-4 sm:mb-6">
               Pourquoi choisir
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent"> CJ DTC</span> ?
+              <span className="bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 bg-clip-text text-transparent"> CJ DTC</span> ?
             </h2>
 
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -130,13 +130,13 @@ export default function HomePage() {
             {/* Card 1 - Formations Certifiantes */}
             <div className="group relative">
               {/* Background glow */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl sm:rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl sm:rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
 
               <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-blue-100">
                 {/* Icon Container */}
                 <div className="relative mb-6 sm:mb-8">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl sm:rounded-3xl transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
-                  <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl sm:rounded-3xl w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-100 rounded-2xl sm:rounded-3xl transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
+                  <div className="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl sm:rounded-3xl w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
                     <span className="text-3xl sm:text-4xl lg:text-5xl">🎓</span>
                   </div>
                 </div>
@@ -156,7 +156,7 @@ export default function HomePage() {
                     <div className="text-xs sm:text-sm text-gray-500">Programmes</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-indigo-600">98%</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">98%</div>
                     <div className="text-xs sm:text-sm text-gray-500">Satisfaction</div>
                   </div>
                 </div>
@@ -166,18 +166,18 @@ export default function HomePage() {
             {/* Card 2 - Expertise Panafricaine */}
             <div className="group relative">
               {/* Background glow */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl sm:rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl sm:rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
 
-              <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-green-100">
+              <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-blue-100">
                 {/* Icon Container */}
                 <div className="relative mb-6 sm:mb-8">
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl sm:rounded-3xl transform -rotate-3 group-hover:-rotate-6 transition-transform duration-300"></div>
-                  <div className="relative bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl sm:rounded-3xl w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-100 rounded-2xl sm:rounded-3xl transform -rotate-3 group-hover:-rotate-6 transition-transform duration-300"></div>
+                  <div className="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl sm:rounded-3xl w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
                     <span className="text-3xl sm:text-4xl lg:text-5xl">🌍</span>
                   </div>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 group-hover:text-green-600 transition-colors">
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 group-hover:text-blue-600 transition-colors">
                   Expertise Panafricaine
                 </h3>
 
@@ -188,11 +188,11 @@ export default function HomePage() {
                 {/* Stats */}
                 <div className="flex items-center justify-between pt-4 sm:pt-6 border-t border-gray-100">
                   <div className="text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-green-600">15+</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">15+</div>
                     <div className="text-xs sm:text-sm text-gray-500">Pays</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-emerald-600">10+</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">10+</div>
                     <div className="text-xs sm:text-sm text-gray-500">Années</div>
                   </div>
                 </div>
@@ -202,18 +202,18 @@ export default function HomePage() {
             {/* Card 3 - Insertion Professionnelle */}
             <div className="group relative">
               {/* Background glow */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl sm:rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-red-600 rounded-2xl sm:rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
 
-              <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-purple-100">
+              <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-blue-100">
                 {/* Icon Container */}
                 <div className="relative mb-6 sm:mb-8">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl sm:rounded-3xl transform rotate-6 group-hover:rotate-12 transition-transform duration-300"></div>
-                  <div className="relative bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl sm:rounded-3xl w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-red-100 rounded-2xl sm:rounded-3xl transform rotate-6 group-hover:rotate-12 transition-transform duration-300"></div>
+                  <div className="relative bg-gradient-to-br from-blue-500 to-red-600 rounded-2xl sm:rounded-3xl w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
                     <span className="text-3xl sm:text-4xl lg:text-5xl">🚀</span>
                   </div>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 group-hover:text-purple-600 transition-colors">
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 group-hover:text-blue-600 transition-colors">
                   Insertion Professionnelle
                 </h3>
 
@@ -224,11 +224,11 @@ export default function HomePage() {
                 {/* Stats */}
                 <div className="flex items-center justify-between pt-4 sm:pt-6 border-t border-gray-100">
                   <div className="text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-purple-600">85%</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">85%</div>
                     <div className="text-xs sm:text-sm text-gray-500">Insertion</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-pink-600">500+</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-red-600">500+</div>
                     <div className="text-xs sm:text-sm text-gray-500">Partenaires</div>
                   </div>
                 </div>
@@ -238,7 +238,7 @@ export default function HomePage() {
 
           {/* Bottom CTA */}
           <div className="mt-12 sm:mt-16 lg:mt-20 text-center">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl sm:rounded-3xl p-8 sm:p-12 lg:p-16 text-white relative overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-600 rounded-2xl sm:rounded-3xl p-8 sm:p-12 lg:p-16 text-white relative overflow-hidden">
               {/* Background pattern */}
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-4 left-4 w-20 h-20 bg-white rounded-full"></div>
@@ -248,7 +248,7 @@ export default function HomePage() {
 
               <div className="relative z-10">
                 <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">
-                  Prêt à <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">transformer votre avenir</span> ?
+                  Prêt à <span className="bg-gradient-to-r from-red-300 to-red-300 bg-clip-text text-transparent">transformer votre avenir</span> ?
                 </h3>
                 <p className="text-base sm:text-lg lg:text-xl text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto">
                   Rejoignez nos <span className="font-semibold">formations et programmes certifiants</span> pour développer vos compétences et accélérer votre carrière
@@ -273,8 +273,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Recent Formations Section */}
-      <RecentFormations />
+      {/* Recent Sessions Section */}
+      <RecentSessions />
 
       {/* Recent Articles Section */}
       <RecentArticles />
@@ -298,3 +298,4 @@ export default function HomePage() {
     </div>
   )
 }
+

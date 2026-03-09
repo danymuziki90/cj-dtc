@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -111,7 +111,7 @@ export default function PromoDetailPage() {
     }
 
     const getStatusColor = (active: boolean) => {
-        return active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        return active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
     }
 
     const getUsagePercentage = (current: number, max?: number) => {
@@ -197,7 +197,7 @@ export default function PromoDetailPage() {
                                 </div>
                                 <div>
                                     <dt className="text-sm font-medium text-gray-500">Réduction</dt>
-                                    <dd className="text-sm text-gray-900 font-semibold text-green-600">
+                                    <dd className="text-sm text-gray-900 font-semibold text-blue-600">
                                         {getDiscountText(promoCode)}
                                     </dd>
                                 </div>
@@ -274,7 +274,7 @@ export default function PromoDetailPage() {
                             {promoCode.maxUses && (
                                 <div className="w-full bg-gray-200 rounded-full h-2">
                                     <div
-                                        className={`h-2 rounded-full ${usagePercentage > 80 ? 'bg-red-500' : usagePercentage > 50 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                                        className={`h-2 rounded-full ${usagePercentage > 80 ? 'bg-red-500' : usagePercentage > 50 ? 'bg-red-500' : 'bg-blue-500'}`}
                                         style={{ width: `${usagePercentage}%` }}
                                     ></div>
                                 </div>
@@ -311,13 +311,13 @@ export default function PromoDetailPage() {
                                 <div className="text-sm text-gray-600">Utilisations totales</div>
                             </div>
                             <div className="bg-white border border-gray-200 p-4 rounded-lg">
-                                <div className="text-2xl font-bold text-green-600">
+                                <div className="text-2xl font-bold text-blue-600">
                                     {promoCode.maxUses ? promoCode.maxUses - promoCode.currentUses : '∞'}
                                 </div>
                                 <div className="text-sm text-gray-600">Utilisations restantes</div>
                             </div>
                             <div className="bg-white border border-gray-200 p-4 rounded-lg">
-                                <div className="text-2xl font-bold text-purple-600">
+                                <div className="text-2xl font-bold text-blue-600">
                                     {((promoCode.currentUses / Math.max(1, promoCode.maxUses || 1)) * 100).toFixed(1)}%
                                 </div>
                                 <div className="text-sm text-gray-600">Taux d'utilisation</div>

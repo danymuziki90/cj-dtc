@@ -260,6 +260,6 @@ export async function PUT(
     return NextResponse.json(updated)
   } catch (error) {
     console.error('Error updating enrollment:', error)
-    return NextResponse.json({ error: 'Erreur lors de la mise a jour' }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 })
   }
 }

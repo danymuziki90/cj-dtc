@@ -2,158 +2,149 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { useParams } from 'next/navigation'
 import { FormattedDate } from './FormattedDate'
 
-interface Article {
-    id: number
-    title: string
-    slug: string
-    excerpt: string | null
-    content: string
-    imageUrl: string | null
-    published: boolean
-    createdAt: string
+interface NewsItem {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  imageDataUrl: string | null
+  category: string
+  publicationDate: string
+}
+
+interface NewsResponse {
+  news: NewsItem[]
 }
 
 export default function RecentArticles() {
-    const [articles, setArticles] = useState<Article[]>([])
-    const [loading, setLoading] = useState(true)
+  const params = useParams<{ locale: string }>()
+  const locale = params?.locale || 'fr'
+  const [articles, setArticles] = useState<NewsItem[]>([])
+  const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        async function fetchArticles() {
-            try {
-                const res = await fetch('/api/articles?limit=3&published=true')
-                if (!res.ok) throw new Error('Failed to fetch')
-                const data = await res.json()
-                setArticles(data)
-            } catch (err) {
-                console.error('Error fetching articles:', err)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchArticles()
-    }, [])
-
-    if (loading) {
-        return (
-            <section className="py-16 bg-white">
-                <div className="container mx-auto px-4">
-                    <div className="text-center mb-12">
-                        <div className="h-10 bg-gray-200 rounded w-1/2 mx-auto mb-4 animate-pulse"></div>
-                        <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto animate-pulse"></div>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="bg-white rounded-xl overflow-hidden shadow-md border border-gray-100 animate-pulse">
-                                <div className="w-full h-48 bg-gray-200"></div>
-                                <div className="p-6 space-y-4">
-                                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                                    <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                                    <div className="h-10 bg-gray-200 rounded w-full mt-4"></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-        )
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        const res = await fetch('/api/news?limit=3&published=true', { cache: 'no-store' })
+        if (!res.ok) throw new Error('Failed to fetch')
+        const data = (await res.json()) as NewsResponse
+        setArticles(data.news || [])
+      } catch (err) {
+        console.error('Error fetching articles:', err)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    if (articles.length === 0) {
-        return null
-    }
+    fetchArticles()
+  }, [])
 
+  if (loading) {
     return (
-        <section className="py-16 bg-white">
-            <div className="container mx-auto px-4">
-                {/* Section Header */}
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-cjblue mb-4">
-                        Nos Dernières Actualités
-                    </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Restez informé des dernières nouvelles, tendances et annonces du Centre CJ DTC.
-                    </p>
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="mb-12 text-center">
+            <div className="mx-auto mb-4 h-10 w-1/2 animate-pulse rounded bg-gray-200" />
+            <div className="mx-auto h-6 w-3/4 animate-pulse rounded bg-gray-200" />
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
+                <div className="h-48 w-full bg-gray-200" />
+                <div className="space-y-4 p-6">
+                  <div className="h-3 w-1/4 rounded bg-gray-200" />
+                  <div className="h-6 w-3/4 rounded bg-gray-200" />
+                  <div className="h-4 w-full rounded bg-gray-200" />
+                  <div className="h-4 w-5/6 rounded bg-gray-200" />
+                  <div className="mt-4 h-10 w-full rounded bg-gray-200" />
                 </div>
-
-                {/* Articles Grid */}
-                <div className="grid md:grid-cols-3 gap-8">
-                    {articles.map((article) => {
-                        const excerpt = article.excerpt || article.content.substring(0, 150)
-
-                        return (
-                            <Link
-                                key={article.id}
-                                href={`/fr/actualites/${article.slug}`}
-                                className="group"
-                            >
-                                <article className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
-                                    {/* Image Container */}
-                                    <div className="relative w-full h-48 bg-gradient-to-br from-cjblue to-blue-600 overflow-hidden">
-                                        {article.imageUrl ? (
-                                            <Image
-                                                src={article.imageUrl}
-                                                alt={article.title}
-                                                fill
-                                                className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <span className="text-white text-5xl">📰</span>
-                                            </div>
-                                        )}
-                                        {/* Category Badge */}
-                                        <div className="absolute top-3 left-3 bg-[var(--cj-red)] text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                            Actualité
-                                        </div>
-                                    </div>
-
-                                    {/* Content Container */}
-                                    <div className="p-6 flex flex-col h-72">
-                                        {/* Date */}
-                                        <time className="text-xs text-gray-400 uppercase tracking-wider mb-2">
-                                            <FormattedDate date={article.createdAt} options={{ year: 'numeric', month: 'long', day: 'numeric' } as any} />
-                                        </time>
-
-                                        {/* Title */}
-                                        <h3 className="text-xl font-bold text-cjblue mb-3 group-hover:text-[var(--cj-red)] transition-colors line-clamp-2">
-                                            {article.title}
-                                        </h3>
-
-                                        {/* Excerpt */}
-                                        <p className="text-gray-600 text-sm mb-4 flex-grow line-clamp-4">
-                                            {excerpt}
-                                            {excerpt.length >= 150 && '...'}
-                                        </p>
-
-                                        {/* Footer - Read More Link */}
-                                        <div className="mt-auto pt-4 border-t border-gray-200">
-                                            <button className="w-full text-[var(--cj-blue)] font-semibold py-2 rounded-lg hover:bg-blue-50 transition-colors group-hover:text-[var(--cj-red)] flex items-center justify-center gap-2">
-                                                Lire l'article
-                                                <span className="group-hover:translate-x-1 transition-transform">→</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </article>
-                            </Link>
-                        )
-                    })}
-                </div>
-
-                {/* CTA Button */}
-                <div className="text-center mt-12">
-                    <Link
-                        href="/fr/actualites"
-                        className="inline-block bg-[var(--cj-blue)] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[var(--cj-red)] transition-colors"
-                    >
-                        Voir tous les articles
-                    </Link>
-                </div>
-            </div>
-        </section>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     )
+  }
+
+  if (articles.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="bg-white py-16">
+      <div className="container mx-auto px-4">
+        <div className="mb-12 text-center">
+          <h2 className="mb-4 text-4xl font-bold text-cjblue">Nos dernieres actualites</h2>
+          <p className="mx-auto max-w-2xl text-lg text-gray-600">
+            Restez informe des dernieres nouvelles, tendances et annonces du centre CJ DTC.
+          </p>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-3">
+          {articles.map((article) => {
+            const excerpt = article.excerpt || article.content.substring(0, 150)
+
+            return (
+              <Link key={article.id} href={`/${locale}/actualites/${article.slug}`} className="group">
+                <article className="transform overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                  <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-cjblue to-blue-600">
+                    {article.imageDataUrl ? (
+                      <img
+                        src={article.imageDataUrl}
+                        alt={article.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="grid h-full place-items-center text-4xl text-white/70">NEWS</div>
+                    )}
+                    <div className="absolute left-3 top-3 rounded-full bg-[var(--cj-red)] px-3 py-1 text-xs font-semibold text-white">
+                      {article.category || 'Actualité'}
+                    </div>
+                  </div>
+
+                  <div className="flex h-72 flex-col p-6">
+                    <time className="mb-2 text-xs uppercase tracking-wider text-gray-400">
+                      <FormattedDate
+                        date={article.publicationDate}
+                        options={{ year: 'numeric', month: 'long', day: 'numeric' } as any}
+                      />
+                    </time>
+
+                    <h3 className="mb-3 line-clamp-2 text-xl font-bold text-cjblue transition-colors group-hover:text-[var(--cj-red)]">
+                      {article.title}
+                    </h3>
+
+                    <p className="mb-4 flex-grow line-clamp-4 text-sm text-gray-600">
+                      {excerpt}
+                      {excerpt.length >= 150 && '...'}
+                    </p>
+
+                    <div className="mt-auto border-t border-gray-200 pt-4">
+                      <button className="flex w-full items-center justify-center gap-2 rounded-lg py-2 font-semibold text-[var(--cj-blue)] transition-colors group-hover:text-[var(--cj-red)] hover:bg-blue-50">
+                        Lire l'article
+                        <span className="transition-transform group-hover:translate-x-1">-&gt;</span>
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              </Link>
+            )
+          })}
+        </div>
+
+        <div className="mt-12 text-center">
+          <Link
+            href={`/${locale}/actualites`}
+            className="inline-block rounded-lg bg-[var(--cj-blue)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--cj-red)]"
+          >
+            Voir tous les articles
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
 }

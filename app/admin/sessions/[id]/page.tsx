@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -109,9 +109,9 @@ export default function SessionDetailPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'ouverte': return 'bg-green-100 text-green-800'
+            case 'ouverte': return 'bg-blue-100 text-blue-800'
             case 'fermee': return 'bg-red-100 text-red-800'
-            case 'complete': return 'bg-yellow-100 text-yellow-800'
+            case 'complete': return 'bg-red-100 text-red-800'
             case 'annulee': return 'bg-gray-100 text-gray-800'
             case 'terminee': return 'bg-blue-100 text-blue-800'
             default: return 'bg-gray-100 text-gray-800'
@@ -120,8 +120,8 @@ export default function SessionDetailPage() {
 
     const getPaymentStatusColor = (status: string) => {
         switch (status) {
-            case 'paye': return 'bg-green-100 text-green-800'
-            case 'partiel': return 'bg-yellow-100 text-yellow-800'
+            case 'paye': return 'bg-blue-100 text-blue-800'
+            case 'partiel': return 'bg-red-100 text-red-800'
             case 'impaye': return 'bg-red-100 text-red-800'
             default: return 'bg-gray-100 text-gray-800'
         }
@@ -129,7 +129,7 @@ export default function SessionDetailPage() {
 
     const getAttendanceStatusColor = (status: string) => {
         switch (status) {
-            case 'present': return 'bg-green-100 text-green-800'
+            case 'present': return 'bg-blue-100 text-blue-800'
             case 'absent': return 'bg-red-100 text-red-800'
             case 'en_cours': return 'bg-blue-100 text-blue-800'
             default: return 'bg-gray-100 text-gray-800'
@@ -402,13 +402,13 @@ export default function SessionDetailPage() {
             <div className="mt-8 bg-white shadow rounded-lg p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Actions</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                         📧 Envoyer un email aux participants
                     </button>
                     <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                         📄 Générer la liste d'émargement
                     </button>
-                    <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                         📊 Exporter les données
                     </button>
                 </div>

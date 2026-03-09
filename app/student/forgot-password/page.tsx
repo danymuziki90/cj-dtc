@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { FormEvent, useState } from 'react'
@@ -48,7 +48,7 @@ export default function StudentForgotPasswordPage() {
         </p>
 
         {message ? (
-          <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
             {message}
           </div>
         ) : null}
@@ -85,3 +85,4 @@ export default function StudentForgotPasswordPage() {
     </div>
   )
 }
+

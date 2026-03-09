@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -366,7 +366,7 @@ export default function AdminCertificatesPage() {
 
   const getStatusColor = (certificate: Certificate) => {
     if (isCertificateValid(certificate)) {
-      return 'bg-green-100 text-green-800'
+      return 'bg-blue-100 text-blue-800'
     }
     return 'bg-gray-100 text-gray-800'
   }
@@ -462,9 +462,9 @@ export default function AdminCertificatesPage() {
   }
 
   const getGradeColor = (grade: number) => {
-    if (grade >= 16) return 'text-green-600'
+    if (grade >= 16) return 'text-blue-600'
     if (grade >= 12) return 'text-blue-600'
-    if (grade >= 10) return 'text-yellow-600'
+    if (grade >= 10) return 'text-red-600'
     return 'text-red-600'
   }
 
@@ -532,11 +532,11 @@ export default function AdminCertificatesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Téléchargés</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {certificates.filter(c => c.status === 'downloaded').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">📥</span>
             </div>
           </div>
@@ -546,11 +546,11 @@ export default function AdminCertificatesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Vérifiés</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {certificates.filter(c => c.status === 'verified').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">✅</span>
             </div>
           </div>
@@ -708,7 +708,7 @@ export default function AdminCertificatesPage() {
                       : cert
                   ))
                 }}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Télécharger
                 </button>
@@ -718,7 +718,7 @@ export default function AdminCertificatesPage() {
                     navigator.clipboard.writeText(certificate.uniqueId)
                     alert('Code de vérification copié dans le presse-papiers!')
                   }}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Copier le code
                 </button>
@@ -733,7 +733,7 @@ export default function AdminCertificatesPage() {
                 {certificate.status === 'downloaded' && (
                   <button
                     onClick={() => handleUpdateCertificateStatus(certificate.id, 'verified')}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Marquer comme vérifié
                   </button>
@@ -901,7 +901,7 @@ export default function AdminCertificatesPage() {
 
               <div className="space-y-6">
                 {/* Certificate Preview */}
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-8 border-2 border-blue-200">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-50 rounded-lg p-8 border-2 border-blue-200">
                   <div className="text-center mb-6">
                     <span className="text-6xl mb-4 block">🎓</span>
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">CERTIFICAT DE RÉUSSITE</h3>
@@ -973,7 +973,7 @@ export default function AdminCertificatesPage() {
                       ))
                       setSelectedCertificate(null)
                     }}
-                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     📥 Télécharger le PDF
                   </button>
@@ -1001,3 +1001,4 @@ export default function AdminCertificatesPage() {
     </div>
   )
 }
+

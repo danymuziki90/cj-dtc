@@ -1,4 +1,4 @@
-import { prisma } from '../../../lib/prisma'
+﻿import { prisma } from '../../../lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,11 +21,12 @@ export default async function LMSPage(){
           <p>API Key: <code>{cfg.apiKey}</code></p>
         </div>
       ) : (
-        <div className="mt-4 p-4 border rounded-lg bg-yellow-50 border-yellow-200">
-          <p className="text-yellow-800">Aucune configuration LMS trouvée ou erreur de connexion à la base de données.</p>
+        <div className="mt-4 p-4 border rounded-lg bg-red-50 border-red-200">
+          <p className="text-red-800">Aucune configuration LMS trouvée ou erreur de connexion à la base de données.</p>
         </div>
       )}
       <p className="mt-4 text-sm text-gray-600">Pour connecter Moodle/TalentLMS/Google Classroom, remplacez les clés API dans la configuration.</p>
     </div>
   )
 }
+

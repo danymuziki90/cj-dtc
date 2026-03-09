@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -116,8 +116,8 @@ export default function TravauxPage() {
   const getStatusBadge = (status: string) => {
     const badges: Record<string, string> = {
       submitted: 'bg-blue-100 text-blue-800',
-      reviewed: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
+      reviewed: 'bg-red-100 text-red-800',
+      approved: 'bg-blue-100 text-blue-800',
       rejected: 'bg-red-100 text-red-800'
     }
     return badges[status] || 'bg-gray-100 text-gray-800'
@@ -295,3 +295,4 @@ export default function TravauxPage() {
     </div>
   )
 }
+

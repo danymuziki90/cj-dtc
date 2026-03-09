@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -13,7 +13,7 @@ const quickLinks = [
   { href: '/admin/submissions', label: 'Travaux' },
   { href: '/admin/certificates', label: 'Certificats' },
   { href: '/admin/notifications', label: 'Notifications' },
-  { href: '/admin/articles', label: 'Actualites' },
+  { href: '/admin/articles', label: 'Actualités' },
   { href: '/admin/settings', label: 'Parametres' },
 ]
 
@@ -50,7 +50,7 @@ export default function AdminShell({
               type="button"
               onClick={logout}
               disabled={loggingOut}
-              className="rounded-xl bg-rose-500/15 px-4 py-2 text-sm font-semibold text-rose-200 ring-1 ring-rose-300/25 transition hover:bg-rose-500/25 disabled:opacity-70"
+              className="rounded-xl bg-red-500/15 px-4 py-2 text-sm font-semibold text-red-200 ring-1 ring-red-300/25 transition hover:bg-red-500/25 disabled:opacity-70"
             >
               {loggingOut ? 'Deconnexion...' : 'Se deconnecter'}
             </button>
@@ -83,3 +83,4 @@ export default function AdminShell({
     </div>
   )
 }
+

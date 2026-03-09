@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
       
       {/* Header Section */}
       <div className="mb-8 sm:mb-12">
-        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-12 text-white relative overflow-hidden shadow-2xl">
+        <div className="bg-gradient-to-br from-blue-600 via-blue-600 to-red-500 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-12 text-white relative overflow-hidden shadow-2xl">
           {/* Animated background pattern */}
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-4 left-4 w-20 h-20 bg-white rounded-full animate-pulse"></div>
@@ -98,18 +98,18 @@ export default function AdminDashboard() {
           <div className="relative z-10">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-100">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100">
                   Tableau de bord Administration
                 </h1>
-                <p className="text-purple-100 text-sm sm:text-base lg:text-lg">
+                <p className="text-blue-100 text-sm sm:text-base lg:text-lg">
                   Gérez votre plateforme e-learning et suivez les performances
                 </p>
               </div>
               <div className="text-center sm:text-right">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-pink-300">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-red-300 to-red-300">
                   {stats?.totalStudents || 0}
                 </div>
-                <div className="text-xs sm:text-sm text-purple-100">Étudiants actifs</div>
+                <div className="text-xs sm:text-sm text-blue-100">Étudiants actifs</div>
               </div>
             </div>
           </div>
@@ -129,10 +129,10 @@ export default function AdminDashboard() {
           <div className="text-xs sm:text-sm text-gray-500">Étudiants</div>
         </div>
 
-        <div className="group bg-gradient-to-br from-green-50 to-green-100 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-green-200 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+        <div className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-200 hover:shadow-2xl transition-all duration-300 hover:scale-105">
           <div className="flex items-center justify-between mb-2">
             <span className="text-2xl sm:text-3xl group-hover:rotate-12 transition-transform duration-300">📚</span>
-            <span className="text-xs sm:text-sm text-green-600 bg-green-200 px-2 py-1 rounded-full">
+            <span className="text-xs sm:text-sm text-blue-600 bg-blue-200 px-2 py-1 rounded-full">
               Actives
             </span>
           </div>
@@ -140,10 +140,10 @@ export default function AdminDashboard() {
           <div className="text-xs sm:text-sm text-gray-500">Étudiants actifs</div>
         </div>
 
-        <div className="group bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-orange-200 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+        <div className="group bg-gradient-to-br from-red-50 to-red-100 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-red-200 hover:shadow-2xl transition-all duration-300 hover:scale-105">
           <div className="flex items-center justify-between mb-2">
             <span className="text-2xl sm:text-3xl group-hover:rotate-12 transition-transform duration-300">📝</span>
-            <span className="text-xs sm:text-sm text-orange-600 bg-orange-200 px-2 py-1 rounded-full">
+            <span className="text-xs sm:text-sm text-red-600 bg-red-200 px-2 py-1 rounded-full">
               En attente
             </span>
           </div>
@@ -151,10 +151,10 @@ export default function AdminDashboard() {
           <div className="text-xs sm:text-sm text-gray-500">Inscriptions</div>
         </div>
 
-        <div className="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-purple-200 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+        <div className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-200 hover:shadow-2xl transition-all duration-300 hover:scale-105">
           <div className="flex items-center justify-between mb-2">
             <span className="text-2xl sm:text-3xl group-hover:rotate-12 transition-transform duration-300">📋</span>
-            <span className="text-xs sm:text-sm text-purple-600 bg-purple-200 px-2 py-1 rounded-full">
+            <span className="text-xs sm:text-sm text-blue-600 bg-blue-200 px-2 py-1 rounded-full">
               À corriger
             </span>
           </div>
@@ -176,21 +176,21 @@ export default function AdminDashboard() {
           </Link>
           <Link
             href="/fr/admin/inscriptions"
-            className="group flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:from-green-100 hover:to-green-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+            className="group flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:from-blue-100 hover:to-blue-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📝</span>
             <span className="text-sm font-medium text-gray-700">Inscriptions</span>
           </Link>
           <Link
             href="/fr/admin/courses"
-            className="group flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:from-purple-100 hover:to-purple-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+            className="group flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:from-blue-100 hover:to-blue-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📚</span>
             <span className="text-sm font-medium text-gray-700">Cours</span>
           </Link>
           <Link
             href="/fr/admin/assignments"
-            className="group flex flex-col items-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl hover:from-orange-100 hover:to-orange-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+            className="group flex flex-col items-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl hover:from-red-100 hover:to-red-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📋</span>
             <span className="text-sm font-medium text-gray-700">Devoirs</span>
@@ -204,21 +204,21 @@ export default function AdminDashboard() {
           </Link>
           <Link
             href="/fr/admin/certificates"
-            className="group flex flex-col items-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl hover:from-yellow-100 hover:to-yellow-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+            className="group flex flex-col items-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl hover:from-red-100 hover:to-red-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">🏆</span>
             <span className="text-sm font-medium text-gray-700">Certificats</span>
           </Link>
           <Link
             href="/fr/admin/reports"
-            className="group flex flex-col items-center p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl hover:from-indigo-100 hover:to-indigo-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+            className="group flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:from-blue-100 hover:to-blue-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📊</span>
             <span className="text-sm font-medium text-gray-700">Rapports</span>
           </Link>
           <Link
             href="/fr/admin/settings"
-            className="group flex flex-col items-center p-4 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl hover:from-pink-100 hover:to-pink-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+            className="group flex flex-col items-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl hover:from-red-100 hover:to-red-200 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">⚙️</span>
             <span className="text-sm font-medium text-gray-700">Paramètres</span>
@@ -237,14 +237,14 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Inscriptions en attente</h2>
-                <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
+                <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
                   {stats.pendingInscriptions} à valider
                 </span>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 sm:p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="flex items-center justify-between p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">
                       JD
                     </div>
                     <div>
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button className="px-3 py-1 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700 transition-colors">
+                    <button className="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition-colors">
                       Valider
                     </button>
                     <button className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs hover:bg-red-700 transition-colors">
@@ -264,7 +264,7 @@ export default function AdminDashboard() {
               </div>
               <Link
                 href="/fr/admin/inscriptions"
-                className="mt-4 text-orange-600 hover:text-orange-700 font-medium text-sm inline-flex items-center"
+                className="mt-4 text-red-600 hover:text-red-700 font-medium text-sm inline-flex items-center"
               >
                 Voir toutes les inscriptions
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,8 +296,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <span className={`px-2 sm:px-3 py-1 rounded-full text-xs ${
-                    activity.status === 'completed' ? 'bg-green-100 text-green-700' :
-                    activity.status === 'pending' ? 'bg-orange-100 text-orange-700' :
+                    activity.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                    activity.status === 'pending' ? 'bg-red-100 text-red-700' :
                     'bg-blue-100 text-blue-700'
                   }`}>
                     {activity.status === 'completed' ? 'Terminé' :
@@ -334,11 +334,11 @@ export default function AdminDashboard() {
                         style={{ width: `${(monthData.students / Math.max(...stats.monthlyStats.map(m => m.students))) * 100}%` }}
                       ></div>
                       <div 
-                        className="bg-green-500 h-2"
+                        className="bg-blue-500 h-2"
                         style={{ width: `${(monthData.inscriptions / Math.max(...stats.monthlyStats.map(m => m.inscriptions))) * 100}%` }}
                       ></div>
                       <div 
-                        className="bg-purple-500 h-2 rounded-r-full"
+                        className="bg-blue-500 h-2 rounded-r-full"
                         style={{ width: `${(monthData.certificates / Math.max(...stats.monthlyStats.map(m => m.certificates))) * 100}%` }}
                       ></div>
                     </div>
@@ -352,11 +352,11 @@ export default function AdminDashboard() {
                 <span className="text-gray-600">Étudiants</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                 <span className="text-gray-600">Inscriptions</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                 <span className="text-gray-600">Certificats</span>
               </div>
             </div>
@@ -403,14 +403,14 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-sm text-gray-600">Taux d'activité</div>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-3xl font-bold text-green-600 mb-1">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-3xl font-bold text-blue-600 mb-1">
                   {stats?.totalInscriptions && stats.totalStudents ? Math.round((stats.totalInscriptions / stats.totalStudents) * 100) : 0}%
                 </div>
                 <div className="text-sm text-gray-600">Taux d'inscription</div>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-3xl font-bold text-purple-600 mb-1">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-3xl font-bold text-blue-600 mb-1">
                   {stats?.totalCertificates && stats.totalStudents ? Math.round((stats.totalCertificates / stats.totalStudents) * 100) : 0}%
                 </div>
                 <div className="text-sm text-gray-600">Taux de certification</div>
@@ -423,33 +423,33 @@ export default function AdminDashboard() {
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Alertes système</h2>
             <div className="space-y-3">
               {stats?.pendingInscriptions && stats.pendingInscriptions > 0 && (
-                <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="p-3 bg-red-50 rounded-lg border border-red-200">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">⚠️</span>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">Inscriptions en attente</p>
-                      <p className="text-xs text-orange-600">{stats.pendingInscriptions} à valider</p>
+                      <p className="text-xs text-red-600">{stats.pendingInscriptions} à valider</p>
                     </div>
                   </div>
                 </div>
               )}
               {stats?.pendingCorrections && stats.pendingCorrections > 0 && (
-                <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="p-3 bg-red-50 rounded-lg border border-red-200">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">📝</span>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">Devoirs à corriger</p>
-                      <p className="text-xs text-yellow-600">{stats.pendingCorrections} en attente</p>
+                      <p className="text-xs text-red-600">{stats.pendingCorrections} en attente</p>
                     </div>
                   </div>
                 </div>
               )}
-              <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">✅</span>
                   <div>
                     <p className="font-medium text-gray-900 text-sm">Système opérationnel</p>
-                    <p className="text-xs text-green-600">Tous les services actifs</p>
+                    <p className="text-xs text-blue-600">Tous les services actifs</p>
                   </div>
                 </div>
               </div>
@@ -460,3 +460,4 @@ export default function AdminDashboard() {
     </div>
   )
 }
+

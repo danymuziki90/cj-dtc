@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -231,13 +231,13 @@ export default function AdminNotificationsPage() {
           </div>
 
           {error ? (
-            <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
+            <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
           ) : null}
 
           <button
             type="submit"
             disabled={saving}
-            className="mt-4 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-70"
+            className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
           >
             {saving ? 'Envoi...' : 'Envoyer notification'}
           </button>
@@ -303,7 +303,7 @@ export default function AdminNotificationsPage() {
                     <td className="px-3 py-3 text-right">
                       <button
                         onClick={() => removeNotification(item.id)}
-                        className="rounded border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                        className="rounded border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
                       >
                         Supprimer
                       </button>
@@ -332,3 +332,4 @@ export default function AdminNotificationsPage() {
     </AdminShell>
   )
 }
+

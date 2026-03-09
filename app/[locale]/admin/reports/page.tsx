@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -143,7 +143,7 @@ export default function AdminReportsPage() {
               </div>
               {stat.change && (
                 <div className={`flex items-center text-sm ${
-                  stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                  stat.changeType === 'increase' ? 'text-blue-600' : 'text-red-600'
                 }`}>
                   <span className="mr-1">
                     {stat.changeType === 'increase' ? '↑' : '↓'}
@@ -175,31 +175,31 @@ export default function AdminReportsPage() {
           <button
             onClick={() => generateReport('formations')}
             disabled={generatingReport}
-            className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
+            className="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
           >
             <span className="text-2xl mb-2 block">📚</span>
-            <p className="font-medium text-green-900">Rapport formations</p>
-            <p className="text-sm text-green-700">Performance des cours</p>
+            <p className="font-medium text-blue-900">Rapport formations</p>
+            <p className="text-sm text-blue-700">Performance des cours</p>
           </button>
           
           <button
             onClick={() => generateReport('inscriptions')}
             disabled={generatingReport}
-            className="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors disabled:opacity-50"
+            className="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
           >
             <span className="text-2xl mb-2 block">📝</span>
-            <p className="font-medium text-purple-900">Rapport inscriptions</p>
-            <p className="text-sm text-purple-700">Tendances et analyse</p>
+            <p className="font-medium text-blue-900">Rapport inscriptions</p>
+            <p className="text-sm text-blue-700">Tendances et analyse</p>
           </button>
           
           <button
             onClick={() => generateReport('revenue')}
             disabled={generatingReport}
-            className="p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors disabled:opacity-50"
+            className="p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
           >
             <span className="text-2xl mb-2 block">💰</span>
-            <p className="font-medium text-orange-900">Rapport financier</p>
-            <p className="text-sm text-orange-700">Revenus et paiements</p>
+            <p className="font-medium text-red-900">Rapport financier</p>
+            <p className="text-sm text-red-700">Revenus et paiements</p>
           </button>
         </div>
       </div>
@@ -231,9 +231,9 @@ export default function AdminReportsPage() {
                   <div className="flex items-center gap-2">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                       report.type === 'students' ? 'bg-blue-100 text-blue-800' :
-                      report.type === 'formations' ? 'bg-green-100 text-green-800' :
-                      report.type === 'inscriptions' ? 'bg-purple-100 text-purple-800' :
-                      'bg-orange-100 text-orange-800'
+                      report.type === 'formations' ? 'bg-blue-100 text-blue-800' :
+                      report.type === 'inscriptions' ? 'bg-blue-100 text-blue-800' :
+                      'bg-red-100 text-red-800'
                     }`}>
                       {report.type === 'students' && 'Étudiants'}
                       {report.type === 'formations' && 'Formations'}
@@ -273,7 +273,7 @@ export default function AdminReportsPage() {
           <h2 className="text-xl font-bold text-gray-900 mb-6">Répartition des formations</h2>
           <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
             <div className="text-center">
-              <span className="text-4xl mb-2 block">🥧</span>
+              <span className="text-4xl mb-2 block">📊</span>
               <p className="text-gray-600">Graphique circulaire</p>
               <p className="text-sm text-gray-500 mt-2">
                 Distribution par catégorie
@@ -285,3 +285,4 @@ export default function AdminReportsPage() {
     </div>
   )
 }
+

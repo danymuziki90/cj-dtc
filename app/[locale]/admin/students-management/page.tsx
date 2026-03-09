@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -135,8 +135,8 @@ export default function AdminStudentsManagementPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800'
-      case 'suspended': return 'bg-orange-100 text-orange-800'
+      case 'active': return 'bg-blue-100 text-blue-800'
+      case 'suspended': return 'bg-red-100 text-red-800'
       case 'inactive': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
@@ -207,11 +207,11 @@ export default function AdminStudentsManagementPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Actifs</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {students.filter(s => s.status === 'active').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">✅</span>
             </div>
           </div>
@@ -221,11 +221,11 @@ export default function AdminStudentsManagementPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Suspendus</p>
-              <p className="text-2xl font-bold text-orange-600">
+              <p className="text-2xl font-bold text-red-600">
                 {students.filter(s => s.status === 'suspended').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">⏸️</span>
             </div>
           </div>
@@ -241,7 +241,7 @@ export default function AdminStudentsManagementPage() {
                   : 0}%
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">📊</span>
             </div>
           </div>
@@ -373,7 +373,7 @@ export default function AdminStudentsManagementPage() {
                       {student.status === 'active' && (
                         <button
                           onClick={() => handleUpdateStudentStatus(student.id, 'suspended')}
-                          className="text-orange-600 hover:text-orange-900"
+                          className="text-red-600 hover:text-red-900"
                         >
                           Suspendre
                         </button>
@@ -381,7 +381,7 @@ export default function AdminStudentsManagementPage() {
                       {student.status === 'suspended' && (
                         <button
                           onClick={() => handleUpdateStudentStatus(student.id, 'active')}
-                          className="text-green-600 hover:text-green-900"
+                          className="text-blue-600 hover:text-blue-900"
                         >
                           Réactiver
                         </button>
@@ -636,15 +636,15 @@ export default function AdminStudentsManagementPage() {
                           </div>
                           <div className="text-right">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              enrollment.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              enrollment.status === 'completed' ? 'bg-blue-100 text-blue-800' :
                               enrollment.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                              'bg-yellow-100 text-yellow-800'
+                              'bg-red-100 text-red-800'
                             }`}>
                               {enrollment.status === 'completed' ? 'Terminé' :
                                enrollment.status === 'confirmed' ? 'Confirmé' : 'En cours'}
                             </span>
                             {enrollment.grade && (
-                              <p className="text-sm font-bold text-green-600 mt-1">
+                              <p className="text-sm font-bold text-blue-600 mt-1">
                                 Note: {enrollment.grade}/20
                               </p>
                             )}
@@ -670,7 +670,7 @@ export default function AdminStudentsManagementPage() {
                           </div>
                           <div className="text-right">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              progress.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                              progress.completed ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
                             }`}>
                               {progress.completed ? 'Complété' : 'En cours'}
                             </span>
@@ -700,7 +700,7 @@ export default function AdminStudentsManagementPage() {
                         handleUpdateStudentStatus(selectedStudent.id, 'suspended')
                         setSelectedStudent(null)
                       }}
-                      className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       Suspendre
                     </button>
@@ -711,7 +711,7 @@ export default function AdminStudentsManagementPage() {
                         handleUpdateStudentStatus(selectedStudent.id, 'active')
                         setSelectedStudent(null)
                       }}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Réactiver
                     </button>
@@ -725,3 +725,4 @@ export default function AdminStudentsManagementPage() {
     </div>
   )
 }
+

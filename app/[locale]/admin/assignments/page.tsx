@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -120,7 +120,7 @@ export default function AdminAssignmentsPage() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     
     if (diffDays < 0) return 'text-red-600'
-    if (diffDays <= 3) return 'text-orange-600'
+    if (diffDays <= 3) return 'text-red-600'
     return 'text-gray-600'
   }
 
@@ -174,11 +174,11 @@ export default function AdminAssignmentsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">TP</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {assignments.filter(a => a.type === 'tp').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">💻</span>
             </div>
           </div>
@@ -188,11 +188,11 @@ export default function AdminAssignmentsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Examens</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {assignments.filter(a => a.type === 'exam').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">📝</span>
             </div>
           </div>
@@ -202,11 +202,11 @@ export default function AdminAssignmentsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Projets</p>
-              <p className="text-2xl font-bold text-orange-600">
+              <p className="text-2xl font-bold text-red-600">
                 {assignments.filter(a => a.type === 'project').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">🚀</span>
             </div>
           </div>
@@ -276,7 +276,7 @@ export default function AdminAssignmentsPage() {
                         </div>
                         <div className="text-right">
                           {submission.grade ? (
-                            <p className="text-sm font-bold text-green-600">{submission.grade}/20</p>
+                            <p className="text-sm font-bold text-blue-600">{submission.grade}/20</p>
                           ) : (
                             <span className="text-xs text-blue-600">En attente de notation</span>
                           )}
@@ -452,3 +452,4 @@ export default function AdminAssignmentsPage() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { FormEvent, useEffect, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -209,7 +209,7 @@ export default function AdminStudentsPage() {
           </button>
 
           {generatedCredential ? (
-            <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+            <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
               <p className="font-semibold">Credentials generated:</p>
               <p>Username: <span className="font-mono">{generatedCredential.username}</span></p>
               <p>Password: <span className="font-mono">{generatedCredential.password}</span></p>
@@ -260,7 +260,7 @@ export default function AdminStudentsPage() {
                       </button>
                       <button
                         onClick={() => resetStudentCredentials(student)}
-                        className="rounded border border-amber-200 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
+                        className="rounded border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50"
                       >
                         Reset password
                       </button>
@@ -283,3 +283,4 @@ export default function AdminStudentsPage() {
     </AdminShell>
   )
 }
+

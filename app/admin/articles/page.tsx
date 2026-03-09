@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -383,7 +383,7 @@ export default function AdminActualitesPage() {
                   value={form.title}
                   onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
                   required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
                 />
               </div>
 
@@ -398,7 +398,7 @@ export default function AdminActualitesPage() {
                     onChange={(event) => setForm((prev) => ({ ...prev, category: event.target.value }))}
                     placeholder="Ex: Formations"
                     required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
                   />
                 </div>
 
@@ -412,7 +412,7 @@ export default function AdminActualitesPage() {
                     value={form.publicationDate}
                     onChange={(event) => setForm((prev) => ({ ...prev, publicationDate: event.target.value }))}
                     required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
                   />
                 </div>
               </div>
@@ -426,7 +426,7 @@ export default function AdminActualitesPage() {
                   value={form.tagsInput}
                   onChange={(event) => setForm((prev) => ({ ...prev, tagsInput: event.target.value }))}
                   placeholder="emploi, certifiante, innovation"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
                 />
               </div>
 
@@ -452,7 +452,7 @@ export default function AdminActualitesPage() {
                     <button
                       type="button"
                       onClick={() => setForm((prev) => ({ ...prev, imageDataUrl: null }))}
-                      className="mt-2 text-xs font-medium text-rose-600 hover:text-rose-700"
+                      className="mt-2 text-xs font-medium text-red-600 hover:text-red-700"
                     >
                       Retirer l image
                     </button>
@@ -480,14 +480,14 @@ export default function AdminActualitesPage() {
           </div>
 
           {error ? (
-            <p className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
+            <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
           ) : null}
 
           <div className="mt-4">
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-70"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
             >
               {saving ? 'Enregistrement...' : editingId ? 'Mettre a jour' : 'Creer l actualite'}
             </button>
@@ -505,7 +505,7 @@ export default function AdminActualitesPage() {
                 value={filters.search}
                 onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
                 placeholder="Rechercher une actualite..."
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
               />
             </div>
             <div className="min-w-[180px]">
@@ -519,7 +519,7 @@ export default function AdminActualitesPage() {
                   setPage(1)
                   setFilters((prev) => ({ ...prev, category: event.target.value }))
                 }}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
               >
                 <option value="all">Toutes</option>
                 {categories.map((category) => (
@@ -541,7 +541,7 @@ export default function AdminActualitesPage() {
                   setPage(1)
                   setFilters((prev) => ({ ...prev, date: event.target.value }))
                 }}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
               />
             </div>
           </div>
@@ -558,7 +558,7 @@ export default function AdminActualitesPage() {
                   setDebouncedSearch('')
                   setPage(1)
                 }}
-                className="text-sm font-medium text-cyan-700 hover:text-cyan-800"
+                className="text-sm font-medium text-blue-700 hover:text-blue-800"
               >
                 Reinitialiser les filtres
               </button>
@@ -598,7 +598,7 @@ export default function AdminActualitesPage() {
                     <td className="px-3 py-3 text-slate-700">{formatDate(item.publicationDate)}</td>
                     <td className="px-3 py-3 text-slate-700">{item.author || 'Admin'}</td>
                     <td className="px-3 py-3">
-                      <span className="inline-flex rounded-full bg-cyan-50 px-2 py-1 text-xs font-medium text-cyan-700">
+                      <span className="inline-flex rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
                         {item.category || DEFAULT_CATEGORY}
                       </span>
                     </td>
@@ -614,7 +614,7 @@ export default function AdminActualitesPage() {
                         <button
                           type="button"
                           onClick={() => removeNews(item)}
-                          className="rounded-md border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                          className="rounded-md border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
                         >
                           Supprimer
                         </button>
@@ -668,7 +668,7 @@ export default function AdminActualitesPage() {
                   <button
                     type="button"
                     onClick={() => removeNews(item)}
-                    className="rounded-md border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                    className="rounded-md border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
                   >
                     Supprimer
                   </button>
@@ -701,7 +701,7 @@ export default function AdminActualitesPage() {
                     onClick={() => setPage(value)}
                     className={`rounded-md px-3 py-1.5 text-sm font-medium ${
                       value === page
-                        ? 'bg-cyan-600 text-white'
+                        ? 'bg-blue-600 text-white'
                         : 'border border-slate-300 text-slate-700 hover:bg-slate-100'
                     }`}
                   >
@@ -725,3 +725,4 @@ export default function AdminActualitesPage() {
     </AdminShell>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -135,10 +135,10 @@ export default function StudentELearningPage() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'video': return 'bg-purple-100 text-purple-800'
+      case 'video': return 'bg-blue-100 text-blue-800'
       case 'text': return 'bg-blue-100 text-blue-800'
-      case 'quiz': return 'bg-green-100 text-green-800'
-      case 'assignment': return 'bg-orange-100 text-orange-800'
+      case 'quiz': return 'bg-blue-100 text-blue-800'
+      case 'assignment': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -193,7 +193,7 @@ export default function StudentELearningPage() {
             <p className="text-sm text-gray-600">Cours disponibles</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-green-600">{progress.filter(p => p.completed).length}</p>
+            <p className="text-2xl font-bold text-blue-600">{progress.filter(p => p.completed).length}</p>
             <p className="text-sm text-gray-600">Cours complétés</p>
           </div>
           <div>
@@ -285,7 +285,7 @@ export default function StudentELearningPage() {
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full transition-all duration-500 ${
-                        isCompleted ? 'bg-green-500' : 'bg-blue-600'
+                        isCompleted ? 'bg-blue-500' : 'bg-blue-600'
                       }`}
                       style={{ width: `${isCompleted ? 100 : Math.min((timeSpent / (course.duration || 60)) * 100, 100)}%` }}
                     ></div>
@@ -300,7 +300,7 @@ export default function StudentELearningPage() {
                         // Simuler la progression
                         updateProgress(course.id, true, timeSpent + 30)
                       }}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Marquer comme complété
                     </button>
@@ -414,7 +414,7 @@ export default function StudentELearningPage() {
                         onClick={() => {
                           updateProgress(selectedCourse.id, true, getCourseTimeSpent(selectedCourse.id) + 30)
                         }}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                       >
                         Marquer comme complété
                       </button>
@@ -435,3 +435,4 @@ export default function StudentELearningPage() {
     </div>
   )
 }
+

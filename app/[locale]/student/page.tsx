@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -140,7 +140,7 @@ export default function StudentDashboard() {
       description: 'Soumettez vos travaux et projets',
       icon: FileText,
       href: '/fr/student/assignments',
-      color: 'from-green-500 to-green-600',
+      color: 'from-blue-500 to-blue-600',
       count: 5
     },
     {
@@ -148,7 +148,7 @@ export default function StudentDashboard() {
       description: 'Téléchargez vos certificats',
       icon: Award,
       href: '/fr/student/certificates',
-      color: 'from-yellow-500 to-yellow-600',
+      color: 'from-red-500 to-red-600',
       count: studentStats.totalCertificates
     },
     {
@@ -156,7 +156,7 @@ export default function StudentDashboard() {
       description: 'Consultez votre emploi du temps',
       icon: Calendar,
       href: '/fr/student/calendar',
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-blue-500 to-blue-600',
       count: 3
     }
   ]
@@ -164,17 +164,17 @@ export default function StudentDashboard() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'text-red-600 bg-red-50 border-red-200'
-      case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
-      case 'low': return 'text-green-600 bg-green-50 border-green-200'
+      case 'medium': return 'text-red-600 bg-red-50 border-red-200'
+      case 'low': return 'text-blue-600 bg-blue-50 border-blue-200'
       default: return 'text-gray-600 bg-gray-50 border-gray-200'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'text-green-600 bg-green-50'
+      case 'completed': return 'text-blue-600 bg-blue-50'
       case 'in-progress': return 'text-blue-600 bg-blue-50'
-      case 'pending': return 'text-yellow-600 bg-yellow-50'
+      case 'pending': return 'text-red-600 bg-red-50'
       default: return 'text-gray-600 bg-gray-50'
     }
   }
@@ -280,7 +280,7 @@ export default function StudentDashboard() {
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                     <User className="w-5 h-5 text-white" />
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>
                 </div>
 
                 <div className="relative group">
@@ -345,7 +345,7 @@ export default function StudentDashboard() {
               <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
                 <BookOpen className="w-6 h-6 text-blue-600" />
               </div>
-              <span className="text-sm text-green-600 font-medium">+12%</span>
+              <span className="text-sm text-blue-600 font-medium">+12%</span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900">{studentStats.totalCourses}</h3>
             <p className="text-sm text-gray-600">Formations suivies</p>
@@ -353,10 +353,10 @@ export default function StudentDashboard() {
 
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-blue-600" />
               </div>
-              <span className="text-sm text-green-600 font-medium">+8%</span>
+              <span className="text-sm text-blue-600 font-medium">+8%</span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900">{studentStats.completedCourses}</h3>
             <p className="text-sm text-gray-600">Formations terminées</p>
@@ -364,10 +364,10 @@ export default function StudentDashboard() {
 
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center">
-                <Award className="w-6 h-6 text-yellow-600" />
+              <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
+                <Award className="w-6 h-6 text-red-600" />
               </div>
-              <span className="text-sm text-green-600 font-medium">+2</span>
+              <span className="text-sm text-blue-600 font-medium">+2</span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900">{studentStats.totalCertificates}</h3>
             <p className="text-sm text-gray-600">Certificats obtenus</p>
@@ -375,10 +375,10 @@ export default function StudentDashboard() {
 
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-blue-600" />
               </div>
-              <span className="text-sm text-green-600 font-medium">+5%</span>
+              <span className="text-sm text-blue-600 font-medium">+5%</span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900">{studentStats.averageGrade}%</h3>
             <p className="text-sm text-gray-600">Moyenne générale</p>
@@ -494,15 +494,15 @@ export default function StudentDashboard() {
               <div className="p-6 space-y-4">
                 {recentCertificates.map((certificate) => (
                   <div key={certificate.id} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="w-10 h-10 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg flex items-center justify-center">
-                      <Award className="w-5 h-5 text-yellow-600" />
+                    <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-red-200 rounded-lg flex items-center justify-center">
+                      <Award className="w-5 h-5 text-red-600" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900 text-sm">{certificate.title}</h4>
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-xs text-gray-600">{certificate.issueDate}</span>
                         <div className="flex items-center space-x-1">
-                          <Star className="w-3 h-3 text-yellow-500" />
+                          <Star className="w-3 h-3 text-red-500" />
                           <span className="text-xs text-gray-600">{certificate.score}%</span>
                         </div>
                       </div>
@@ -520,3 +520,4 @@ export default function StudentDashboard() {
     </div>
   )
 }
+

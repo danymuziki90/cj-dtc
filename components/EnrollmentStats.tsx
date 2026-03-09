@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 interface Enrollment {
   id: number
@@ -57,11 +57,11 @@ export default function EnrollmentStats({ enrollments }: EnrollmentStatsProps) {
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">En attente</div>
-          <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+          <div className="text-2xl font-bold text-red-600">{stats.pending}</div>
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">Acceptées</div>
-          <div className="text-2xl font-bold text-green-600">{stats.accepted}</div>
+          <div className="text-2xl font-bold text-blue-600">{stats.accepted}</div>
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">Confirmées</div>
@@ -81,11 +81,11 @@ export default function EnrollmentStats({ enrollments }: EnrollmentStatsProps) {
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">Partiel</div>
-          <div className="text-xl font-bold text-yellow-600">{stats.partial}</div>
+          <div className="text-xl font-bold text-red-600">{stats.partial}</div>
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">Payé</div>
-          <div className="text-xl font-bold text-green-600">{stats.paid}</div>
+          <div className="text-xl font-bold text-blue-600">{stats.paid}</div>
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-1">Revenus payés</div>
@@ -110,3 +110,4 @@ export default function EnrollmentStats({ enrollments }: EnrollmentStatsProps) {
     </div>
   )
 }
+

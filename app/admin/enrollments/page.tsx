@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import AdminEnrollmentTable, { type EnrollmentRow } from '@/components/AdminEnrollmentTable'
@@ -119,7 +119,7 @@ export default function EnrollmentsPage() {
           <div className="flex gap-2">
             <button
               onClick={() => handleExport('csv')}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm text-white transition-colors hover:bg-green-700"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
             >
               Export CSV
             </button>
@@ -204,3 +204,4 @@ export default function EnrollmentsPage() {
     </AdminShell>
   )
 }
+
