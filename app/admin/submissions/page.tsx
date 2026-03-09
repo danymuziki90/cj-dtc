@@ -8,6 +8,8 @@ type Submission = {
   title: string
   fileUrl: string
   status: 'pending' | 'approved' | 'rejected'
+  feedback?: string | null
+  reviewedAt?: string | null
   createdAt: string
   student: {
     firstName: string
@@ -23,6 +25,7 @@ type Submission = {
 
 export default function AdminSubmissionsPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
+  const [feedbackDrafts, setFeedbackDrafts] = useState<Record<string, string>>({})
 
   async function loadSubmissions() {
     const response = await fetch('/api/admin/system/submissions')
@@ -39,7 +42,7 @@ export default function AdminSubmissionsPage() {
     await fetch(`/api/admin/system/submissions/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, feedback: feedbackDrafts[id] || undefined }),
     })
     await loadSubmissions()
   }
@@ -93,6 +96,22 @@ export default function AdminSubmissionsPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
+                  <textarea
+                    value={feedbackDrafts[submission.id] ?? submission.feedback ?? ''}
+                    onChange={(event) =>
+                      setFeedbackDrafts((prev) => ({
+                        ...prev,
+                        [submission.id]: event.target.value,
+                      }))
+                    }
+                    placeholder="Feedback (optionnel)"
+                    className="mb-2 min-h-[66px] w-full rounded border border-gray-300 px-2 py-1 text-xs"
+                  />
+                  {submission.reviewedAt ? (
+                    <p className="mb-2 text-xs text-gray-500">
+                      Derniere mise a jour: {new Date(submission.reviewedAt).toLocaleString('fr-FR')}
+                    </p>
+                  ) : null}
                   <div className="flex gap-2">
                     <button
                       onClick={() => setStatus(submission.id, 'approved')}

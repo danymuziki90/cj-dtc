@@ -1,0 +1,78 @@
+⚠ Attempted to load @next/swc-win32-x64-msvc, but an error occurred: \\?\C:\Users\NICOLE ZEPHONIE\cj-dtc\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a valid Win32 application.
+\\?\C:\Users\NICOLE ZEPHONIE\cj-dtc\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\server\app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\server\\app-paths-manifest.json',
+  page: '/admin/login'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\server\app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\server\\app-paths-manifest.json',
+  page: '/api/admin/auth/login'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\routes-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\routes-manifest.json'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\routes-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\routes-manifest.json'
+}
+Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\server\app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\server\\app-paths-manifest.json',
+  page: '/admin/login'
+}
+Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\server\app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\server\\app-paths-manifest.json',
+  page: '/api/admin/auth/login'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\routes-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\routes-manifest.json'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\routes-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\routes-manifest.json'
+}
+Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\routes-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\routes-manifest.json'
+}
+Error: ENOENT: no such file or directory, open 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\routes-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NICOLE ZEPHONIE\\cj-dtc\\.next\\dev\\routes-manifest.json'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\cache\webpack\client-development-fallback\0.pack.gz_' -> 'C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\cache\webpack\client-development-fallback\0.pack.gz'

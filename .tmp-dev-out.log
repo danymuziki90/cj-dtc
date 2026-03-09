@@ -1,0 +1,22 @@
+
+> cj-dtc-next@0.1.0 dev
+> node scripts/run-next-dev.js
+
+▲ Next.js 16.1.4 (webpack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.67:3000
+- Environments: .env.local, .env
+
+✓ Starting...
+  next-swc build: wasm build @next/swc-wasm-nodejs
+  Skipping creating a lockfile at C:\Users\NICOLE ZEPHONIE\cj-dtc\.next\dev\lock because we're using WASM bindings
+✓ Ready in 38.3s
+○ Compiling middleware ...
+○ Compiling /admin/login ...
+ GET /admin/login 200 in 2.7s (compile: 809ms, proxy.ts: 260ms, render: 1643ms)
+ GET /admin/login 200 in 249ms (compile: 14ms, proxy.ts: 33ms, render: 201ms)
+○ Compiling /api/admin/auth/login ...
+ POST /api/admin/auth/login 200 in 9.1s (compile: 6.1s, proxy.ts: 28ms, render: 3.0s)
+○ Compiling /_error ...
+ GET /admin/login 500 in 5.1s (proxy.ts: 25ms)
+ POST /api/admin/auth/login 500 in 10.3s (compile: 9.2s, proxy.ts: 189ms, render: 870ms)

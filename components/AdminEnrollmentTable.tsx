@@ -1,257 +1,256 @@
 'use client'
 
-import { useState } from 'react'
-import EnrollmentStatusChanger from './EnrollmentStatusChanger'
 import { FormattedDate } from './FormattedDate'
 
-interface Enrollment {
+type Payment = {
+  id: number
+  amount: number
+  method: string
+  status: string
+  reference: string | null
+  transactionId: string | null
+  paidAt: string | null
+  createdAt: string
+  notes: string | null
+}
+
+export interface EnrollmentRow {
+  id: number
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  address?: string
+  startDate: string
+  status: string
+  paymentStatus: string
+  totalAmount: number
+  paidAmount: number
+  createdAt: string
+  motivationLetter?: string
+  notes?: string
+  payments?: Payment[]
+  formation: {
     id: number
-    firstName: string
-    lastName: string
-    email: string
-    phone?: string
-    address?: string
+    title: string
+    slug: string
+  }
+  session?: {
+    id: number
     startDate: string
-    status: string
-    paymentStatus: string
-    totalAmount: number
-    paidAmount: number
-    createdAt: string
-    motivationLetter?: string
-    notes?: string
-    formation: {
-        id: number
-        title: string
-        slug: string
-    }
+    endDate: string
+    location: string
+    format: string
+    maxParticipants: number
+  } | null
 }
 
 interface AdminEnrollmentTableProps {
-    enrollments: Enrollment[]
-    groupBy: 'formation' | 'date'
-    onPreview?: (enrollment: Enrollment) => void
+  enrollments: EnrollmentRow[]
+  groupBy: 'formation' | 'date'
+  onPreview?: (enrollment: EnrollmentRow) => void
 }
 
-const getStatusBadge = (status: string) => {
-    const statusClasses: Record<string, string> = {
-        pending: 'bg-yellow-100 text-yellow-800',
-        accepted: 'bg-green-100 text-green-800',
-        rejected: 'bg-red-100 text-red-800',
-        confirmed: 'bg-blue-100 text-blue-800',
-        cancelled: 'bg-gray-100 text-gray-800'
-    }
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount || 0)
+}
 
-    const statusLabels: Record<string, string> = {
-        pending: 'En attente',
-        accepted: 'Acceptée',
-        rejected: 'Rejetée',
-        confirmed: 'Confirmée',
-        cancelled: 'Annulée'
-    }
+function enrollmentStatusClass(status: string) {
+  const map: Record<string, string> = {
+    pending: 'bg-amber-100 text-amber-800',
+    accepted: 'bg-emerald-100 text-emerald-800',
+    rejected: 'bg-red-100 text-red-800',
+    confirmed: 'bg-blue-100 text-blue-800',
+    completed: 'bg-indigo-100 text-indigo-800',
+    waitlist: 'bg-orange-100 text-orange-800',
+    cancelled: 'bg-slate-100 text-slate-700',
+  }
+
+  return map[status] || 'bg-slate-100 text-slate-700'
+}
+
+function enrollmentStatusLabel(status: string) {
+  const map: Record<string, string> = {
+    pending: 'En attente',
+    accepted: 'Acceptee',
+    rejected: 'Rejetee',
+    confirmed: 'Confirmee',
+    completed: 'Terminee',
+    waitlist: 'Liste attente',
+    cancelled: 'Annulee',
+  }
+
+  return map[status] || status
+}
+
+function paymentStatusClass(status: string) {
+  const map: Record<string, string> = {
+    paid: 'bg-emerald-100 text-emerald-800',
+    partial: 'bg-amber-100 text-amber-800',
+    unpaid: 'bg-red-100 text-red-800',
+  }
+
+  return map[status] || 'bg-slate-100 text-slate-700'
+}
+
+function paymentStatusLabel(status: string) {
+  const map: Record<string, string> = {
+    paid: 'Paye',
+    partial: 'Partiel',
+    unpaid: 'Non paye',
+  }
+
+  return map[status] || status
+}
+
+function buildDateKey(dateValue: string) {
+  const date = new Date(dateValue)
+  return date.toISOString().split('T')[0]
+}
+
+export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }: AdminEnrollmentTableProps) {
+  if (groupBy === 'formation') {
+    const byFormation = enrollments.reduce((acc: Record<number, EnrollmentRow[]>, enrollment) => {
+      const formationId = enrollment.formation.id
+      if (!acc[formationId]) acc[formationId] = []
+      acc[formationId].push(enrollment)
+      return acc
+    }, {})
 
     return (
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusClasses[status] || statusClasses.pending}`}>
-            {statusLabels[status] || status}
-        </span>
+      <div className="space-y-6">
+        {Object.entries(byFormation).map(([formationId, rows]) => (
+          <div key={formationId} className="rounded-xl border border-slate-200 bg-white p-4">
+            <h3 className="mb-4 text-lg font-semibold text-slate-900">
+              {rows[0]?.formation.title} ({rows.length})
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-slate-50 text-left text-slate-600">
+                  <tr>
+                    <th className="px-3 py-2 font-medium">Participant</th>
+                    <th className="px-3 py-2 font-medium">Contact</th>
+                    <th className="px-3 py-2 font-medium">Session</th>
+                    <th className="px-3 py-2 font-medium">Paiement</th>
+                    <th className="px-3 py-2 font-medium">Statut</th>
+                    <th className="px-3 py-2 font-medium">Inscription</th>
+                    {onPreview ? <th className="px-3 py-2 font-medium">Actions</th> : null}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((enrollment) => (
+                    <tr key={enrollment.id} className="border-t border-slate-100">
+                      <td className="px-3 py-2">
+                        <p className="font-medium text-slate-900">
+                          {enrollment.firstName} {enrollment.lastName}
+                        </p>
+                        <p className="text-xs text-slate-500">#{enrollment.id}</p>
+                      </td>
+                      <td className="px-3 py-2 text-slate-700">
+                        <p>{enrollment.email}</p>
+                        <p className="text-xs text-slate-500">{enrollment.phone || '-'}</p>
+                      </td>
+                      <td className="px-3 py-2 text-slate-700">
+                        <p>
+                          <FormattedDate date={enrollment.startDate} options={{ dateStyle: 'short' } as Intl.DateTimeFormatOptions} />
+                        </p>
+                        <p className="text-xs text-slate-500">{enrollment.session?.location || '-'}</p>
+                      </td>
+                      <td className="px-3 py-2">
+                        <p className="font-medium text-slate-900">
+                          {formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)}
+                        </p>
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${paymentStatusClass(enrollment.paymentStatus)}`}>
+                          {paymentStatusLabel(enrollment.paymentStatus)}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${enrollmentStatusClass(enrollment.status)}`}>
+                          {enrollmentStatusLabel(enrollment.status)}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-slate-700">
+                        <FormattedDate date={enrollment.createdAt} options={{ dateStyle: 'short', timeStyle: 'short' } as Intl.DateTimeFormatOptions} />
+                      </td>
+                      {onPreview ? (
+                        <td className="px-3 py-2">
+                          <button
+                            onClick={() => onPreview(enrollment)}
+                            className="rounded border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                          >
+                            Ouvrir
+                          </button>
+                        </td>
+                      ) : null}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
+      </div>
     )
-}
+  }
 
-const getMimeType = (base64String: string): string => {
-    if (base64String.startsWith('data:application/pdf')) return 'application/pdf'
-    if (base64String.startsWith('data:application/msword')) return 'application/msword'
-    if (base64String.startsWith('data:application/vnd.openxmlformats-officedocument.wordprocessingml.document'))
-        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    if (base64String.startsWith('data:text/plain')) return 'text/plain'
-    return 'application/octet-stream'
-}
+  const byDate = enrollments.reduce((acc: Record<string, EnrollmentRow[]>, enrollment) => {
+    const dateKey = buildDateKey(enrollment.startDate)
+    if (!acc[dateKey]) acc[dateKey] = []
+    acc[dateKey].push(enrollment)
+    return acc
+  }, {})
 
-const downloadMotivationLetter = (motivationLetter: string, fileName: string) => {
-    const link = document.createElement('a')
-    link.href = motivationLetter
-    link.download = `${fileName}_motivation.pdf`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-}
-
-export default function AdminEnrollmentTable({ enrollments: initialEnrollments, groupBy, onPreview }: AdminEnrollmentTableProps) {
-    const [enrollments, setEnrollments] = useState<Enrollment[]>(initialEnrollments)
-
-    const handleStatusChanged = (enrollmentId: number, newStatus: string) => {
-        setEnrollments(prevEnrollments =>
-            prevEnrollments.map(enrollment =>
-                enrollment.id === enrollmentId
-                    ? { ...enrollment, status: newStatus }
-                    : enrollment
-            )
-        )
-    }
-
-    if (groupBy === 'formation') {
-        const byFormation = enrollments.reduce((acc: Record<number, Enrollment[]>, enrollment) => {
-            const formationId = enrollment.formation.id
-            if (!acc[formationId]) {
-                acc[formationId] = []
-            }
-            acc[formationId].push(enrollment)
-            return acc
-        }, {})
-
-        return (
-            <div className="space-y-6">
-                {Object.entries(byFormation).map(([formationId, formationEnrollments]: [string, Enrollment[]]) => (
-                    <div key={formationId} className="border rounded-lg p-4">
-                        <h3 className="font-semibold text-lg mb-4">
-                            {formationEnrollments[0]?.formation.title} ({formationEnrollments.length})
-                        </h3>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead className="border-b bg-gray-50">
-                                    <tr>
-                                        <th className="text-left p-2">Nom</th>
-                                        <th className="text-left p-2">Email</th>
-                                        <th className="text-left p-2">Téléphone</th>
-                                        <th className="text-left p-2">Adresse</th>
-                                        <th className="text-left p-2">Date de début</th>
-                                        <th className="text-left p-2">Statut</th>
-                                        <th className="text-left p-2">Lettre de motivation</th>
-                                        <th className="text-left p-2">Date d'inscription</th>
-                                        {onPreview && <th className="text-left p-2">Actions</th>}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {formationEnrollments.map((enrollment: Enrollment) => (
-                                        <tr key={enrollment.id} className="border-b hover:bg-gray-50">
-                                            <td className="p-2">
-                                                {enrollment.firstName} {enrollment.lastName}
-                                            </td>
-                                            <td className="p-2">{enrollment.email}</td>
-                                            <td className="p-2">{enrollment.phone || '—'}</td>
-                                            <td className="p-2 text-xs text-gray-600">{enrollment.address || '—'}</td>
-                                            <td className="p-2">
-                                                <FormattedDate date={enrollment.startDate} />
-                                            </td>
-                                            <td className="p-2">
-                                                <div className="flex items-center gap-2">
-                                                    {getStatusBadge(enrollment.status)}
-                                                </div>
-                                            </td>
-                                            <td className="p-2">
-                                                {enrollment.motivationLetter ? (
-                                                    <button
-                                                        onClick={() =>
-                                                            downloadMotivationLetter(
-                                                                enrollment.motivationLetter!,
-                                                                `${enrollment.firstName}_${enrollment.lastName}`
-                                                            )
-                                                        }
-                                                        className="text-cjblue hover:text-cjred underline text-xs"
-                                                    >
-                                                        Télécharger
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-gray-400">—</span>
-                                                )}
-                                            </td>
-                                            <td className="p-2">
-                                                <FormattedDate date={enrollment.createdAt} />
-                                            </td>
-                                            <td className="p-2">
-                                                {onPreview && (
-                                                    <button
-                                                        onClick={() => onPreview(enrollment)}
-                                                        className="text-cjblue hover:text-cjred underline text-xs"
-                                                        title="Prévisualiser"
-                                                    >
-                                                        👁️
-                                                    </button>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                ))}
+  return (
+    <div className="space-y-6">
+      {Object.entries(byDate)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([dateKey, rows]) => (
+          <div key={dateKey} className="rounded-xl border border-slate-200 bg-white p-4">
+            <h4 className="mb-4 text-lg font-semibold text-slate-900">
+              <FormattedDate
+                date={dateKey}
+                options={{ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } as Intl.DateTimeFormatOptions}
+              />{' '}
+              ({rows.length})
+            </h4>
+            <div className="space-y-3">
+              {rows.map((enrollment) => (
+                <div
+                  key={enrollment.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 p-3"
+                >
+                  <div>
+                    <p className="font-medium text-slate-900">
+                      {enrollment.firstName} {enrollment.lastName}
+                    </p>
+                    <p className="text-sm text-slate-600">{enrollment.formation.title}</p>
+                    <p className="text-xs text-slate-500">{enrollment.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`rounded-full px-2 py-1 text-xs font-semibold ${paymentStatusClass(enrollment.paymentStatus)}`}>
+                      {paymentStatusLabel(enrollment.paymentStatus)}
+                    </span>
+                    <span className={`rounded-full px-2 py-1 text-xs font-semibold ${enrollmentStatusClass(enrollment.status)}`}>
+                      {enrollmentStatusLabel(enrollment.status)}
+                    </span>
+                    {onPreview ? (
+                      <button
+                        onClick={() => onPreview(enrollment)}
+                        className="rounded border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                      >
+                        Ouvrir
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
             </div>
-        )
-    } else {
-        // Grouper par date de début
-        const byStartDate = enrollments.reduce((acc: Record<string, Enrollment[]>, enrollment) => {
-            const dateObj = typeof enrollment.startDate === 'string'
-                ? new Date(enrollment.startDate)
-                : enrollment.startDate
-            const dateKey = dateObj instanceof Date
-                ? dateObj.toISOString().split('T')[0]
-                : enrollment.startDate.split('T')[0]
-            if (!acc[dateKey]) {
-                acc[dateKey] = []
-            }
-            acc[dateKey].push(enrollment)
-            return acc
-        }, {})
-
-        return (
-            <div className="space-y-6">
-                {Object.entries(byStartDate)
-                    .sort(([a], [b]) => a.localeCompare(b))
-                    .map(([dateKey, dateEnrollments]: [string, Enrollment[]]) => (
-                        <div key={dateKey} className="border rounded-lg p-4">
-                            <h4 className="font-semibold text-lg mb-4">
-                                <FormattedDate date={dateKey} options={{ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } as any} />
-                                ({dateEnrollments.length})
-                            </h4>
-                            <div className="space-y-3">
-                                {dateEnrollments.map((enrollment: Enrollment) => (
-                                    <div key={enrollment.id} className="flex items-start justify-between p-3 hover:bg-gray-50 rounded border">
-                                        <div className="flex-1">
-                                            <div className="font-medium">
-                                                {enrollment.firstName} {enrollment.lastName}
-                                            </div>
-                                            <div className="text-sm text-gray-600 mt-1">
-                                                <div>{enrollment.formation.title}</div>
-                                                <div>{enrollment.email}</div>
-                                                {enrollment.address && <div className="text-xs text-gray-500">{enrollment.address}</div>}
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 ml-4">
-                                            {onPreview && (
-                                                <button
-                                                    onClick={() => onPreview(enrollment)}
-                                                    className="text-cjblue hover:text-cjred text-sm"
-                                                    title="Prévisualiser"
-                                                >
-                                                    👁️
-                                                </button>
-                                            )}
-                                            {enrollment.motivationLetter && (
-                                                <button
-                                                    onClick={() =>
-                                                        downloadMotivationLetter(
-                                                            enrollment.motivationLetter!,
-                                                            `${enrollment.firstName}_${enrollment.lastName}`
-                                                        )
-                                                    }
-                                                    className="text-cjblue hover:text-cjred underline text-xs"
-                                                >
-                                                    📄
-                                                </button>
-                                            )}
-                                            <EnrollmentStatusChanger
-                                                enrollmentId={enrollment.id}
-                                                currentStatus={enrollment.status}
-                                                email={enrollment.email}
-                                                formationTitle={enrollment.formation.title}
-                                                onStatusChanged={(newStatus) => handleStatusChanged(enrollment.id, newStatus)}
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-            </div>
-        )
-    }
+          </div>
+        ))}
+    </div>
+  )
 }

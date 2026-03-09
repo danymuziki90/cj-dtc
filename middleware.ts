@@ -79,7 +79,14 @@ export async function middleware(request: NextRequest) {
   // New student portal JWT protection
   const isStudentPortalPage = pathname.startsWith('/student')
   const isStudentPortalApi = pathname.startsWith('/api/student/system')
-  const isStudentPortalPublicRoute = pathname === '/student/login' || pathname === '/api/student/auth/login' || pathname === '/api/student/auth/logout'
+  const isStudentPortalPublicRoute =
+    pathname === '/student/login' ||
+    pathname === '/student/forgot-password' ||
+    pathname === '/student/reset-password' ||
+    pathname === '/api/student/auth/login' ||
+    pathname === '/api/student/auth/logout' ||
+    pathname === '/api/student/auth/forgot-password' ||
+    pathname === '/api/student/auth/reset-password'
 
   if ((isStudentPortalPage || isStudentPortalApi) && !isStudentPortalPublicRoute) {
     const studentToken = request.cookies.get(STUDENT_AUTH_COOKIE)?.value

@@ -1,41 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import AdminEnrollmentTable from '../../../components/AdminEnrollmentTable'
-import BulkEmailSender from '../../../components/BulkEmailSender'
-import EnrollmentFilters from '../../../components/EnrollmentFilters'
-import EnrollmentStats from '../../../components/EnrollmentStats'
-import EnrollmentPreviewModal from '../../../components/EnrollmentPreviewModal'
+import { useEffect, useState } from 'react'
+import AdminEnrollmentTable, { type EnrollmentRow } from '@/components/AdminEnrollmentTable'
+import BulkEmailSender from '@/components/BulkEmailSender'
+import EnrollmentFilters from '@/components/EnrollmentFilters'
+import EnrollmentStats from '@/components/EnrollmentStats'
+import EnrollmentPreviewModal from '@/components/EnrollmentPreviewModal'
+import AdminShell from '@/components/admin-portal/AdminShell'
 
-interface Enrollment {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  phone?: string
-  address?: string
-  startDate: string
-  status: string
-  paymentStatus: string
-  totalAmount: number
-  paidAmount: number
-  createdAt: string
-  motivationLetter?: string
-  notes?: string
-  formation: {
-    id: number
-    title: string
-    slug: string
-  }
-}
-
-interface Formation {
+type Formation = {
   id: number
   title: string
 }
 
 export default function EnrollmentsPage() {
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([])
+  const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([])
   const [formations, setFormations] = useState<Formation[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({
@@ -44,32 +23,24 @@ export default function EnrollmentsPage() {
     paymentStatus: '',
     startDateFrom: '',
     startDateTo: '',
-    search: ''
+    search: '',
   })
-  const [selectedEnrollment, setSelectedEnrollment] = useState<Enrollment | null>(null)
+  const [selectedEnrollment, setSelectedEnrollment] = useState<EnrollmentRow | null>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [viewMode, setViewMode] = useState<'formation' | 'date'>('formation')
 
-  useEffect(() => {
-    fetchFormations()
-    fetchEnrollments()
-  }, [])
-
-  useEffect(() => {
-    fetchEnrollments()
-  }, [filters])
-
-  const fetchFormations = async () => {
+  async function fetchFormations() {
     try {
-      const response = await fetch('/api/formations')
+      const response = await fetch('/api/formations', { cache: 'no-store' })
       const data = await response.json()
-      setFormations(data)
+      setFormations(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Erreur lors du chargement des formations:', error)
+      setFormations([])
     }
   }
 
-  const fetchEnrollments = async () => {
+  async function fetchEnrollments() {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -80,15 +51,27 @@ export default function EnrollmentsPage() {
       if (filters.startDateTo) params.append('startDateTo', filters.startDateTo)
       if (filters.search) params.append('search', filters.search)
 
-      const response = await fetch(`/api/enrollments?${params}`)
+      const response = await fetch(`/api/enrollments?${params.toString()}`, { cache: 'no-store' })
       const data = await response.json()
-      setEnrollments(data)
+      const nextEnrollments = Array.isArray(data) ? data : []
+      setEnrollments(nextEnrollments)
+      return nextEnrollments as EnrollmentRow[]
     } catch (error) {
       console.error('Erreur lors du chargement des inscriptions:', error)
+      setEnrollments([])
+      return []
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchFormations()
+  }, [])
+
+  useEffect(() => {
+    fetchEnrollments()
+  }, [filters])
 
   const handleExport = async (format: 'excel' | 'csv') => {
     try {
@@ -98,7 +81,7 @@ export default function EnrollmentsPage() {
       })
       params.append('format', format)
 
-      const response = await fetch(`/api/enrollments/export?${params}`)
+      const response = await fetch(`/api/enrollments/export?${params.toString()}`)
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -109,8 +92,8 @@ export default function EnrollmentsPage() {
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
     } catch (error) {
-      console.error('Erreur lors de l\'export:', error)
-      alert('Erreur lors de l\'export')
+      console.error("Erreur lors de l'export:", error)
+      alert("Erreur lors de l'export")
     }
   }
 
@@ -118,133 +101,106 @@ export default function EnrollmentsPage() {
     window.print()
   }
 
-  const handlePreview = (enrollment: Enrollment) => {
+  const handlePreview = (enrollment: EnrollmentRow) => {
     setSelectedEnrollment(enrollment)
     setShowPreview(true)
   }
 
-  const filteredEnrollments = enrollments.filter(enrollment => {
-    if (filters.search) {
-      const search = filters.search.toLowerCase()
-      return (
-        enrollment.firstName.toLowerCase().includes(search) ||
-        enrollment.lastName.toLowerCase().includes(search) ||
-        enrollment.email.toLowerCase().includes(search) ||
-        enrollment.formation.title.toLowerCase().includes(search)
-      )
-    }
-    return true
-  })
-
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-cjblue">Gestion des Inscriptions</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Total: {filteredEnrollments.length} inscription{filteredEnrollments.length > 1 ? 's' : ''}
-          </p>
+    <AdminShell title="Gestion des inscriptions">
+      <div className="space-y-6 p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-3xl font-bold text-cjblue">Gestion des inscriptions</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Total: {enrollments.length} inscription{enrollments.length > 1 ? 's' : ''}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleExport('csv')}
+              className="rounded-lg bg-green-600 px-4 py-2 text-sm text-white transition-colors hover:bg-green-700"
+            >
+              Export CSV
+            </button>
+            <button
+              onClick={() => handleExport('excel')}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
+            >
+              Export Excel
+            </button>
+            <button
+              onClick={handlePrint}
+              className="rounded-lg bg-gray-600 px-4 py-2 text-sm text-white transition-colors hover:bg-gray-700"
+            >
+              Imprimer
+            </button>
+          </div>
         </div>
+
+        <EnrollmentStats enrollments={enrollments} />
+
+        <EnrollmentFilters
+          filters={filters}
+          formations={formations}
+          onFiltersChange={setFilters}
+          onReset={() =>
+            setFilters({
+              status: '',
+              formationId: '',
+              paymentStatus: '',
+              startDateFrom: '',
+              startDateTo: '',
+              search: '',
+            })
+          }
+        />
+
+        <BulkEmailSender acceptedEnrollments={enrollments.filter((item) => item.status === 'accepted')} />
+
         <div className="flex gap-2">
           <button
-            onClick={() => handleExport('csv')}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+            onClick={() => setViewMode('formation')}
+            className={`rounded-lg px-4 py-2 transition-colors ${
+              viewMode === 'formation' ? 'bg-cjblue text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
           >
-            📥 Export CSV
+            Vue par formation
           </button>
           <button
-            onClick={() => handleExport('excel')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            onClick={() => setViewMode('date')}
+            className={`rounded-lg px-4 py-2 transition-colors ${
+              viewMode === 'date' ? 'bg-cjblue text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
           >
-            📊 Export Excel
-          </button>
-          <button
-            onClick={handlePrint}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm"
-          >
-            🖨️ Imprimer
+            Vue par date
           </button>
         </div>
+
+        {loading ? (
+          <div className="py-12 text-center">
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-cjblue" />
+            <p className="mt-4 text-gray-600">Chargement des inscriptions...</p>
+          </div>
+        ) : (
+          <AdminEnrollmentTable enrollments={enrollments} groupBy={viewMode} onPreview={handlePreview} />
+        )}
+
+        {showPreview && selectedEnrollment ? (
+          <EnrollmentPreviewModal
+            enrollment={selectedEnrollment}
+            onClose={() => {
+              setShowPreview(false)
+              setSelectedEnrollment(null)
+            }}
+            onStatusChange={async () => {
+              const freshEnrollments = await fetchEnrollments()
+              const updatedEnrollment = freshEnrollments.find((item) => item.id === selectedEnrollment.id) || null
+              setSelectedEnrollment(updatedEnrollment)
+            }}
+          />
+        ) : null}
       </div>
-
-      {/* Statistiques */}
-      <EnrollmentStats enrollments={filteredEnrollments} />
-
-      {/* Filtres */}
-      <EnrollmentFilters
-        filters={filters}
-        formations={formations}
-        onFiltersChange={setFilters}
-        onReset={() => setFilters({
-          status: '',
-          formationId: '',
-          paymentStatus: '',
-          startDateFrom: '',
-          startDateTo: '',
-          search: ''
-        })}
-      />
-
-      {/* Section Email en masse */}
-      <div className="mb-6">
-        <BulkEmailSender
-          acceptedEnrollments={filteredEnrollments.filter(e => e.status === 'accepted')}
-        />
-      </div>
-
-      {/* Sélecteur de vue */}
-      <div className="mb-4 flex gap-2">
-        <button
-          onClick={() => setViewMode('formation')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            viewMode === 'formation'
-              ? 'bg-cjblue text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Vue par Formation
-        </button>
-        <button
-          onClick={() => setViewMode('date')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            viewMode === 'date'
-              ? 'bg-cjblue text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Vue par Date
-        </button>
-      </div>
-
-      {/* Table des inscriptions */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cjblue mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des inscriptions...</p>
-        </div>
-      ) : (
-        <AdminEnrollmentTable
-          enrollments={filteredEnrollments}
-          groupBy={viewMode}
-          onPreview={handlePreview}
-        />
-      )}
-
-      {/* Modal de prévisualisation */}
-      {showPreview && selectedEnrollment && (
-        <EnrollmentPreviewModal
-          enrollment={selectedEnrollment}
-          onClose={() => {
-            setShowPreview(false)
-            setSelectedEnrollment(null)
-          }}
-          onStatusChange={() => {
-            fetchEnrollments()
-            setShowPreview(false)
-            setSelectedEnrollment(null)
-          }}
-        />
-      )}
-    </div>
+    </AdminShell>
   )
 }

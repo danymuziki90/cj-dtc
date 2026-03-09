@@ -1,5 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
+import {
+    mapParticipationTypeToFormat,
+    normalizeParticipationType,
+    parseSessionMetadata,
+    serializeSessionMetadata,
+    type ManagedSessionType,
+    type ParticipationType,
+} from '@/lib/sessions/metadata'
 
 export const runtime = "nodejs"
 
@@ -13,10 +21,16 @@ export async function GET() {
                         id: true,
                         title: true,
                         slug: true,
-                        categorie: true
+                        categorie: true,
+                        description: true,
                     }
                 },
                 enrollments: {
+                    where: {
+                        status: {
+                            notIn: ['waitlist', 'rejected', 'cancelled']
+                        }
+                    },
                     select: {
                         id: true
                     }
@@ -26,10 +40,23 @@ export async function GET() {
         })
 
         // Ajouter le nombre de participants actuels à chaque session
-        const sessionsWithCount = sessions.map(session => ({
-            ...session,
-            currentParticipants: session.enrollments.length
-        }))
+        const sessionsWithCount = sessions.map((session) => {
+            const parsedMetadata = parseSessionMetadata(session.prerequisites)
+            return {
+                ...session,
+                currentParticipants: session.enrollments.length,
+                prerequisitesText: parsedMetadata.prerequisitesText,
+                adminMeta: {
+                    customTitle: parsedMetadata.metadata.customTitle || null,
+                    sessionType: parsedMetadata.metadata.sessionType || null,
+                    durationLabel: parsedMetadata.metadata.durationLabel || null,
+                    paymentInfo: parsedMetadata.metadata.paymentInfo || null,
+                    participationType:
+                        parsedMetadata.metadata.participationType || normalizeParticipationType(session.format),
+                    imageUrl: parsedMetadata.metadata.imageUrl || session.imageUrl || null,
+                },
+            }
+        })
 
         return NextResponse.json(sessionsWithCount)
     } catch (error) {
@@ -58,7 +85,13 @@ export async function POST(request: Request) {
             description,
             prerequisites,
             objectives,
-            imageUrl
+            imageUrl,
+            sessionType,
+            durationLabel,
+            paymentInfo,
+            customTitle,
+            participationType,
+            prerequisitesText,
         } = body
 
         // Validation des données
@@ -90,11 +123,26 @@ export async function POST(request: Request) {
                 startTime,
                 endTime,
                 location,
-                format,
+                format:
+                    (participationType
+                        ? mapParticipationTypeToFormat(participationType as ParticipationType)
+                        : format) || 'presentiel',
                 maxParticipants: parseInt(maxParticipants) || 25,
                 price: parseFloat(price) || 0,
                 description,
-                prerequisites,
+                prerequisites: serializeSessionMetadata(
+                    {
+                        customTitle: customTitle || null,
+                        sessionType: (sessionType as ManagedSessionType) || undefined,
+                        durationLabel: durationLabel || null,
+                        paymentInfo: paymentInfo || null,
+                        participationType:
+                            ((participationType as ParticipationType) || normalizeParticipationType(format)) ??
+                            'presentiel',
+                        imageUrl: imageUrl || null,
+                    },
+                    prerequisitesText ?? prerequisites
+                ),
                 objectives,
                 imageUrl,
                 status: 'ouverte'

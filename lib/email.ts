@@ -13,9 +13,13 @@ export async function sendVerificationEmail(email: string, token: string) {
   return { success: true }
 }
 
-export async function sendPasswordResetEmail(email: string, token: string) {
+export async function sendPasswordResetEmail(
+  email: string,
+  token: string,
+  resetPath: string = '/auth/reset-password'
+) {
   // In a real application, replace with actual email service
-  const resetLink = `${process.env.NEXT_RES_URL || 'http://localhost:3000'}/auth/reset-password?token=${token}`
+  const resetLink = `${process.env.NEXT_RES_URL || 'http://localhost:3000'}${resetPath}?token=${token}`
 
   console.log('---------------------------------------------------------')
   console.log(`📧 MOCK RESET EMAIL TO: ${email}`)

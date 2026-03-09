@@ -52,11 +52,11 @@ export async function POST(req: Request) {
                     .replace(/{email}/g, enrollment.email)
                     .replace(/{formationTitle}/g, enrollment.formation.title)
 
-                await sendEmail({
-                    to: enrollment.email,
+                await sendEmail(
+                    enrollment.email,
                     subject,
-                    html: personalizedMessage
-                })
+                    personalizedMessage
+                )
 
                 sentCount++
                 console.log(`✅ Email sent to ${enrollment.email}`)

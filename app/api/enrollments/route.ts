@@ -11,12 +11,28 @@ export async function GET(req: Request) {
     const sessionId = url.searchParams.get('sessionId')
     const status = url.searchParams.get('status')
     const paymentStatus = url.searchParams.get('paymentStatus')
+    const startDateFrom = url.searchParams.get('startDateFrom')
+    const startDateTo = url.searchParams.get('startDateTo')
+    const search = url.searchParams.get('search')
 
     const where: any = {}
     if (formationId) where.formationId = parseInt(formationId)
     if (sessionId) where.sessionId = parseInt(sessionId)
     if (status) where.status = status
-    if (paymentStatus) where.paymentStatus = paymentStatus
+    if (paymentStatus && paymentStatus !== 'all') where.paymentStatus = paymentStatus
+    if (startDateFrom || startDateTo) {
+      where.startDate = {}
+      if (startDateFrom) where.startDate.gte = new Date(startDateFrom)
+      if (startDateTo) where.startDate.lte = new Date(startDateTo)
+    }
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { formation: { title: { contains: search, mode: 'insensitive' } } }
+      ]
+    }
 
     const enrollments = await prisma.enrollment.findMany({
       where,
@@ -36,6 +52,22 @@ export async function GET(req: Request) {
             location: true,
             format: true,
             maxParticipants: true
+          }
+        },
+        payments: {
+          select: {
+            id: true,
+            amount: true,
+            method: true,
+            status: true,
+            reference: true,
+            transactionId: true,
+            paidAt: true,
+            createdAt: true,
+            notes: true,
+          },
+          orderBy: {
+            createdAt: 'desc'
           }
         }
       },
@@ -87,6 +119,7 @@ export async function POST(req: Request) {
 
     let status = 'pending'
     let onWaitlist = false
+    let totalAmount = 0
 
     // Vérifier la capacité de la session si sessionId est fourni
     if (sessionId) {
@@ -108,6 +141,7 @@ export async function POST(req: Request) {
 
       const currentEnrollments = session.enrollments.length
       const isFull = currentEnrollments >= session.maxParticipants
+      totalAmount = session.price || 0
 
       if (isFull) {
         status = 'waitlist'
@@ -127,7 +161,8 @@ export async function POST(req: Request) {
         formationId: parseInt(formationId),
         sessionId: sessionId ? parseInt(sessionId) : null,
         startDate: new Date(),
-        status
+        status,
+        totalAmount,
       },
       include: {
         formation: {
@@ -299,7 +334,7 @@ export async function PATCH(req: Request) {
       // Envoyer l'email s'il y a du contenu
       if (emailContent) {
         try {
-          await sendEmail(emailContent)
+          await sendEmail(emailContent.to, emailContent.subject, emailContent.html)
         } catch (error) {
           console.error('Erreur lors de l\'envoi de l\'email:', error)
           // Ne pas bloquer la mise à jour si l'email échoue
@@ -310,10 +345,10 @@ export async function PATCH(req: Request) {
     // Envoyer un rappel de paiement si le statut n'est pas 'paid' et que le paiement était défini
     if (paymentStatus === 'unpaid' && oldEnrollment.paymentStatus !== 'unpaid') {
       try {
-        await sendEmail({
-          to: enrollment.email,
-          subject: `Rappel: Paiement requis pour ${enrollment.formation.title}`,
-          html: `
+        await sendEmail(
+          enrollment.email,
+          `Rappel: Paiement requis pour ${enrollment.formation.title}`,
+          `
             <h2>Rappel de paiement</h2>
             <p>Bonjour ${enrollment.firstName},</p>
             <p>Nous avons remarqué que le paiement pour votre inscription à <strong>${enrollment.formation.title}</strong> est requis.</p>
@@ -322,7 +357,7 @@ export async function PATCH(req: Request) {
             </div>
             <p>Veuillez nous contacter pour effectuer le paiement.</p>
           `
-        })
+        )
       } catch (error) {
         console.error('Erreur envoi rappel paiement:', error)
       }
@@ -337,3 +372,4 @@ export async function PATCH(req: Request) {
     )
   }
 }
+
