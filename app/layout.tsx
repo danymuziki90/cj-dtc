@@ -1,11 +1,10 @@
 import './globals.css'
 import { ReactNode } from 'react'
 import { Inter } from 'next/font/google'
+import type { Metadata } from 'next'
 import GoogleAnalytics from '../components/GoogleAnalytics'
 
 const inter = Inter({ subsets: ['latin'] })
-
-import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://cjdevelopmenttc.com'),
@@ -13,7 +12,8 @@ export const metadata: Metadata = {
     default: 'CJ DEVELOPMENT TRAINING CENTER',
     template: '%s | CJ DTC',
   },
-  description: 'Centre Panafricain de Formation Professionnelle, Leadership et Insertion. Formations certifiantes en Management des Ressources Humaines, Leadership et Employabilité depuis 2018.',
+  description:
+    'Centre panafricain de formation professionnelle en RH, leadership et employabilite. Formations certifiantes en ligne, hybride et presentiel depuis 2018.',
   keywords: ['formation professionnelle', 'leadership', 'RH', 'emploi', 'Afrique', 'certification'],
   authors: [{ name: 'CJ Development Training Center' }],
   creator: 'CJ Development Training Center',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/logo.png',
     shortcut: '/logo.png',
-    apple: '/logo.png'
+    apple: '/logo.png',
   },
   openGraph: {
     type: 'website',
@@ -29,7 +29,8 @@ export const metadata: Metadata = {
     url: 'https://cjdevelopmenttc.com',
     siteName: 'CJ Development Training Center',
     title: 'CJ Development Training Center',
-    description: 'Centre Panafricain de Formation Professionnelle, Leadership et Insertion',
+    description:
+      'Formations certifiantes en RH, leadership et employabilite pour etudiants, professionnels et entreprises.',
     images: [
       {
         url: '/logo.png',
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'CJ Development Training Center',
-    description: 'Bâtir des compétences. Transformer des destins.',
+    description: 'Batir des competences. Transformer des destins.',
     images: ['/logo.png'],
   },
   robots: {

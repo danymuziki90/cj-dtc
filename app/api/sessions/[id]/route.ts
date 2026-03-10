@@ -48,9 +48,11 @@ export async function GET(
     }
 
     const parsedMetadata = parseSessionMetadata(session.prerequisites)
+    const resolvedImageUrl = parsedMetadata.metadata.imageUrl || session.imageUrl || null
 
     return NextResponse.json({
       ...session,
+      imageUrl: resolvedImageUrl,
       prerequisitesText: parsedMetadata.prerequisitesText,
       currentParticipants: session.enrollments.filter(
         (enrollment) => !['waitlist', 'rejected', 'cancelled'].includes(enrollment.status)
@@ -62,7 +64,7 @@ export async function GET(
         paymentInfo: parsedMetadata.metadata.paymentInfo || null,
         participationType:
           parsedMetadata.metadata.participationType || normalizeParticipationType(session.format),
-        imageUrl: parsedMetadata.metadata.imageUrl || session.imageUrl || null,
+        imageUrl: resolvedImageUrl,
       },
     })
   } catch (error) {

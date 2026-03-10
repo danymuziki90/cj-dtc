@@ -13,7 +13,7 @@ export default function StructuredData() {
     },
     contactPoint: {
       '@type': 'ContactPoint',
-      email: 'contact@cjdevelopmenttc.com',
+      email: 'contact@cjdevelopmenttc.org',
       contactType: 'Customer Service',
       availableLanguage: ['French', 'English'],
       telephone: ['+243995136626', '+243999482140', '+224626146065'],

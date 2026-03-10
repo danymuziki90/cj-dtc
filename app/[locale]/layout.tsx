@@ -13,15 +13,25 @@ interface LayoutProps {
 
 export const metadata: Metadata = {
   title: {
-    default: 'CJ Development Training Center - Formation Professionnelle Panafricaine',
+    default: 'CJ Development Training Center - Formation professionnelle panafricaine',
     template: '%s | CJ DTC',
   },
-  description: 'Centre Panafricain de Formation Professionnelle, Leadership et Insertion. Formations certifiantes en Management des Ressources Humaines, Leadership et Employabilité depuis 2018.',
-  keywords: ['formation professionnelle', 'leadership', 'RH', 'emploi', 'Afrique', 'certification', 'insertion professionnelle', 'CJ DTC'],
+  description:
+    'Centre panafricain de formation professionnelle en RH, leadership et employabilite. Programmes certifiants depuis 2018.',
+  keywords: [
+    'formation professionnelle',
+    'leadership',
+    'RH',
+    'emploi',
+    'Afrique',
+    'certification',
+    'insertion professionnelle',
+    'CJ DTC',
+  ],
   authors: [{ name: 'CJ Development Training Center' }],
   openGraph: {
     title: 'CJ Development Training Center',
-    description: 'Bâtir des compétences. Transformer des destins. Créer des opportunités.',
+    description: 'Batir des competences. Transformer des destins. Creer des opportunites.',
     url: 'https://cjdevelopmenttc.com',
     siteName: 'CJ DTC',
     images: [
@@ -38,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'CJ Development Training Center',
-    description: 'Bâtir des compétences. Transformer des destins.',
+    description: 'Batir des competences. Transformer des destins.',
     images: ['/logo.png'],
   },
   robots: {
@@ -61,7 +71,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   const resolvedParams = await Promise.resolve(params)
   const locale = resolvedParams.locale || 'fr'
 
-  // Messages vides pour l'instant (peut être amélioré plus tard)
   const messages = {}
 
   return (

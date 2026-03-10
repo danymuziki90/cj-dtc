@@ -32,6 +32,9 @@ type TrainingSession = {
   status: string
   description?: string
   imageUrl?: string
+  adminMeta?: {
+    imageUrl?: string | null
+  }
 }
 
 function formatPrice(price: number) {
@@ -230,7 +233,7 @@ export default function ProgrammesPage() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {filteredSessions.map((session) => {
-              const image = session.imageUrl || '/logo.png'
+              const image = session.adminMeta?.imageUrl || session.imageUrl || '/logo.png'
               const isFull = session.availableSpots <= 0
               const typeLabel = getProgramSessionTypeLabel(session.programType)
 

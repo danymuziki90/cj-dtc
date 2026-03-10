@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     `
 
     const emailSent = await sendEmail({
-      to: process.env.CONTACT_EMAIL || process.env.MAIL_USER || 'contact@cjdevelopmenttc.com',
+      to: process.env.CONTACT_EMAIL || process.env.MAIL_USER || 'contact@cjdevelopmenttc.org',
       subject: `Contact: ${body.subject}`,
       html: emailHtml
     })

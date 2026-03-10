@@ -1,6 +1,13 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import Image from 'next/image'
+import type { Metadata } from 'next'
 import HomeSections from '../components/HomeSections'
+
+export const metadata: Metadata = {
+  title: 'Accueil',
+  description:
+    'CJ Development Training Center accompagne etudiants et professionnels avec des formations certifiantes en RH, leadership et employabilite.',
+}
 
 export default function Home() {
   return (
@@ -269,4 +276,6 @@ export default function Home() {
     </div>
   )
 }
+
+
 

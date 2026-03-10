@@ -29,6 +29,9 @@ interface TrainingSession {
     prerequisites?: string
     objectives?: string
     imageUrl?: string
+    adminMeta?: {
+        imageUrl?: string | null
+    }
 }
 
 export default function InscriptionPage() {
@@ -246,6 +249,7 @@ export default function InscriptionPage() {
 
     const availableSpots = session.maxParticipants - (session.currentParticipants || 0)
     const isFull = availableSpots <= 0
+    const sessionImageUrl = session.adminMeta?.imageUrl || session.imageUrl
 
     return (
         <div className="min-h-screen bg-gray-50 py-12">
@@ -268,10 +272,10 @@ export default function InscriptionPage() {
                 </div>
 
                 {/* Session Image */}
-                {session.imageUrl && (
+                {sessionImageUrl && (
                     <div className="mb-8">
                         <img
-                            src={session.imageUrl}
+                            src={sessionImageUrl}
                             alt={`Session ${session.formation.title}`}
                             className="w-full h-64 md:h-80 object-cover rounded-lg shadow-md"
                         />

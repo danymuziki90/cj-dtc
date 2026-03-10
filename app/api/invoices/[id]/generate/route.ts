@@ -106,7 +106,7 @@ export async function GET(
           <div class="footer">
             <p><strong>CJ DEVELOPMENT TRAINING CENTER</strong></p>
             <p>Centre Panafricain de Formation Professionnelle, Leadership et Insertion</p>
-            <p>Email: contact@cjdevelopmenttc.com | Site: www.cjdevelopmenttc.com</p>
+            <p>Email: contact@cjdevelopmenttc.org | Site: www.cjdevelopmenttc.com</p>
           </div>
         </body>
       </html>

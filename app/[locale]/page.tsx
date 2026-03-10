@@ -66,32 +66,79 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* About Since 2018 Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-6 text-cjblue">
-                A propos
+      {/* About Section */}
+      <section className="relative overflow-hidden bg-slate-950 py-16 sm:py-20 lg:py-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-24 top-8 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
+          <div className="absolute -right-12 bottom-6 h-72 w-72 rounded-full bg-red-500/15 blur-3xl" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.14),transparent_35%),radial-gradient(circle_at_80%_60%,rgba(239,68,68,0.12),transparent_35%)]" />
+        </div>
+
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-14 lg:px-8">
+          <div className="space-y-7">
+            <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
+              A propos de CJ DTC
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
+                Un centre de formation construit pour des resultats concrets.
               </h2>
-              <p className="text-lg text-gray-700 mb-4 text-justify">
-                Depuis 2018, CJ DTC forme, accompagne et insère durablement des milliers de jeunes et de professionnels à travers l'Afrique. Nos programmes — rigoureux, pratiques et alignés sur les standards internationaux en Management des Ressources Humaines, leadership et employabilité — sont conçus pour favoriser une insertion professionnelle durable et mesurable.
+              <p className="max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
+                Depuis 2018, nous formons et accompagnons des jeunes et professionnels dans
+                des parcours pratiques en RH, leadership et employabilite. Notre approche relie
+                formation, execution terrain et insertion durable.
               </p>
-              <div className="flex">
-                <Link href="/fr/about" className="px-6 py-3 bg-cjblue text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                  Lire plus
-                </Link>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+                <p className="text-2xl font-extrabold text-white">2018</p>
+                <p className="text-xs uppercase tracking-wider text-slate-300">Lancement</p>
+              </div>
+              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+                <p className="text-2xl font-extrabold text-white">8500+</p>
+                <p className="text-xs uppercase tracking-wider text-slate-300">Impacts</p>
+              </div>
+              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur col-span-2 sm:col-span-1">
+                <p className="text-2xl font-extrabold text-white">10+</p>
+                <p className="text-xs uppercase tracking-wider text-slate-300">Pays couverts</p>
               </div>
             </div>
-            <div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/fr/about"
+                className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-100"
+              >
+                Decouvrir notre histoire
+              </Link>
+              <Link
+                href="/fr/formations"
+                className="inline-flex items-center justify-center rounded-xl border border-white/25 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                Voir les formations
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-blue-500/30 to-red-500/20 blur-2xl" />
+            <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/5 p-2 backdrop-blur">
               <Image
                 src="/apropos.jpeg"
                 alt="CJ DTC - Formation et accompagnement"
-                width={600}
-                height={400}
-                className="rounded shadow-lg"
+                width={760}
+                height={520}
+                className="h-[360px] w-full rounded-2xl object-cover sm:h-[430px]"
                 priority
               />
+              <div className="absolute bottom-6 left-6 right-6 rounded-2xl border border-white/20 bg-black/45 p-4 backdrop-blur">
+                <p className="text-xs uppercase tracking-[0.2em] text-blue-200">Positionnement</p>
+                <p className="mt-2 text-sm font-semibold text-white sm:text-base">
+                  Programmes structures, suivi de progression et orientation vers l'insertion.
+                </p>
+              </div>
             </div>
           </div>
         </div>

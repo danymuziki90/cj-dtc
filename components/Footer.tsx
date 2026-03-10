@@ -249,12 +249,12 @@ export default function Footer() {
                     </svg>
                   </div>
                   <a
-                    href="mailto:contact@cjdevelopmenttc.com"
+                    href="mailto:contact@cjdevelopmenttc.org"
                     className="text-sm text-gray-300 hover:text-white transition-colors duration-300"
                   >
                     <span className="font-medium text-white">Email</span>
                     <br />
-                    contact@cjdevelopmenttc.com
+                    contact@cjdevelopmenttc.org
                   </a>
                 </div>
               </li>
@@ -269,10 +269,10 @@ export default function Footer() {
                   <div className="text-sm text-gray-300">
                     <span className="font-medium text-white">RDC</span>
                     <div className="flex flex-col gap-1 mt-1">
-                      <a href="tel:+243995136626" className="hover:text-white transition-colors duration-300">
+                      <a href="tel:+243995136626" className="text-white hover:text-white transition-colors duration-300">
                         +243 995 136 626
                       </a>
-                      <a href="tel:+243999482140" className="hover:text-white transition-colors duration-300">
+                      <a href="tel:+243999482140" className="text-white hover:text-white transition-colors duration-300">
                         +243 999 482 140
                       </a>
                     </div>
@@ -290,7 +290,7 @@ export default function Footer() {
                   <div className="text-sm text-gray-300">
                     <span className="font-medium text-white">Guinée</span>
                     <div className="mt-1">
-                      <a href="tel:+224626146065" className="hover:text-white transition-colors duration-300">
+                      <a href="tel:+224626146065" className="text-white hover:text-white transition-colors duration-300">
                         +224 626 14 60 65
                       </a>
                     </div>

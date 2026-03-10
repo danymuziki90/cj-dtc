@@ -42,8 +42,10 @@ export async function GET() {
         // Ajouter le nombre de participants actuels à chaque session
         const sessionsWithCount = sessions.map((session) => {
             const parsedMetadata = parseSessionMetadata(session.prerequisites)
+            const resolvedImageUrl = parsedMetadata.metadata.imageUrl || session.imageUrl || null
             return {
                 ...session,
+                imageUrl: resolvedImageUrl,
                 currentParticipants: session.enrollments.length,
                 prerequisitesText: parsedMetadata.prerequisitesText,
                 adminMeta: {
@@ -53,7 +55,7 @@ export async function GET() {
                     paymentInfo: parsedMetadata.metadata.paymentInfo || null,
                     participationType:
                         parsedMetadata.metadata.participationType || normalizeParticipationType(session.format),
-                    imageUrl: parsedMetadata.metadata.imageUrl || session.imageUrl || null,
+                    imageUrl: resolvedImageUrl,
                 },
             }
         })

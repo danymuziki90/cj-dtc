@@ -17,6 +17,7 @@ type SessionItem = {
   maxParticipants: number
   currentParticipants: number
   price: number
+  imageUrl?: string | null
   formation: {
     id: number
     title: string
@@ -161,9 +162,9 @@ export default function RecentSessions() {
     <section className="bg-gradient-to-b from-white to-gray-50 py-16">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-bold text-cjblue">Dernières sessions</h2>
+          <h2 className="mb-4 text-4xl font-bold text-cjblue">Nos sessions</h2>
           <p className="mx-auto max-w-2xl text-lg text-gray-600">
-            Les sessions recemment ajoutees ou actuellement actives par l'administration.
+            Decouvrez les sessions actuellement ouvertes et les plus recentes.
           </p>
         </div>
 
@@ -171,21 +172,17 @@ export default function RecentSessions() {
           {sessions.map((session) => {
             const availableSpots = Math.max(0, (session.maxParticipants || 0) - (session.currentParticipants || 0))
             const title = session.adminMeta?.customTitle || session.formation.title
-            const image = session.adminMeta?.imageUrl || null
+            const headerImage = session.adminMeta?.imageUrl || session.imageUrl || '/logo.png'
 
             return (
               <Link key={session.id} href={`/${locale}/programmes`} className="group">
                 <article className="transform overflow-hidden rounded-xl border border-blue-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
                   <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-cjblue to-blue-700">
-                    {image ? (
-                      <img
-                        src={image}
-                        alt={title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="grid h-full place-items-center text-4xl text-white/70">SESSION</div>
-                    )}
+                    <img
+                      src={headerImage}
+                      alt={title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
                     <div className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${statusClasses(session.status)}`}>
                       {statusLabel(session.status)}
                     </div>
@@ -240,3 +237,4 @@ export default function RecentSessions() {
     </section>
   )
 }
+

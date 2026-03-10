@@ -36,6 +36,7 @@ type SessionItem = {
     durationLabel?: string | null
     paymentInfo?: string | null
     participationType?: 'en_ligne' | 'hybride' | 'presentiel' | null
+    imageUrl?: string | null
   }
 }
 
@@ -59,6 +60,7 @@ const initialForm = {
   objectives: '',
   status: 'ouverte',
 }
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 function toDateInputValue(rawDate: string) {
   const value = new Date(rawDate)
@@ -140,7 +142,7 @@ export default function AdminSessionsPage() {
       price: session.price,
       durationLabel: session.adminMeta?.durationLabel || '',
       paymentInfo: session.adminMeta?.paymentInfo || '',
-      imageUrl: session.imageUrl || '',
+      imageUrl: session.adminMeta?.imageUrl || session.imageUrl || '',
       description: session.description || '',
       prerequisitesText: session.prerequisitesText || '',
       objectives: session.objectives || '',
@@ -213,21 +215,22 @@ export default function AdminSessionsPage() {
     setUploadingImage(true)
 
     try {
-      const payload = new FormData()
-      payload.append('file', file)
-      payload.append('folder', 'sessions')
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: payload,
-      })
-
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.error || "Erreur lors de l'upload de l'image.")
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Selectionnez uniquement un fichier image.')
       }
 
-      setForm((prev) => ({ ...prev, imageUrl: data.url || '' }))
+      if (file.size > MAX_IMAGE_BYTES) {
+        throw new Error('Image trop volumineuse. Taille max: 5 MB.')
+      }
+
+      const encoded = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result || ''))
+        reader.onerror = () => reject(new Error("Erreur lors de la lecture de l'image."))
+        reader.readAsDataURL(file)
+      })
+
+      setForm((prev) => ({ ...prev, imageUrl: encoded }))
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : 'Erreur inconnue pendant upload.')
     } finally {

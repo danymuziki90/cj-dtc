@@ -314,7 +314,7 @@ export default function HomeSections() {
                         </div>
                         
                         <p className="text-white/80 text-xs sm:text-sm">
-                            ou envoyez un email à <a href="mailto:contact@cjdevelopmenttc.com" className="underline hover:text-white transition-colors">contact@cjdevelopmenttc.com</a>
+                            ou envoyez un email à <a href="mailto:contact@cjdevelopmenttc.org" className="underline hover:text-white transition-colors">contact@cjdevelopmenttc.org</a>
                         </p>
                     </div>
                 </div>
