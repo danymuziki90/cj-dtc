@@ -35,7 +35,13 @@ export default function Footer() {
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
                   <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-lg sm:text-xl">CJ</span>
+                    <Image
+                      src="/logo.png"
+                      alt="CJ DTC"
+                      width={32}
+                      height={32}
+                      className="h-7 w-7 sm:h-8 sm:w-8 object-contain"
+                    />
                   </div>
                 </div>
                 <div>

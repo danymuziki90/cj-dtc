@@ -1,21 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-interface Formation {
-    id: number
-    title: string
-    slug: string
-}
-
 export default function NewSessionPage() {
     const router = useRouter()
-    const [formations, setFormations] = useState<Formation[]>([])
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
-        formationId: '',
         startDate: '',
         endDate: '',
         startTime: '09:00',
@@ -25,25 +17,7 @@ export default function NewSessionPage() {
         maxParticipants: 25,
         price: 0,
         description: '',
-        prerequisites: '',
-        objectives: ''
     })
-
-    // Mock formations data
-    const mockFormations: Formation[] = [
-        { id: 1, title: 'Management des Ressources Humaines (MRH)', slug: 'mrh' },
-        { id: 2, title: 'IOP – Insertion & Orientation Professionnelle', slug: 'iop' },
-        { id: 3, title: 'Leadership & Intelligence Émotionnelle', slug: 'leadership-ei' },
-        { id: 4, title: 'CJ Master System', slug: 'master-system' },
-        { id: 5, title: 'CJ Family Business – Entrepreneuriat & Business', slug: 'family-business' }
-    ]
-
-    useEffect(() => {
-        // Simulation du chargement des formations
-        setTimeout(() => {
-            setFormations(mockFormations)
-        }, 500)
-    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -90,27 +64,6 @@ export default function NewSessionPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                    {/* Formation */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Formation *
-                        </label>
-                        <select
-                            name="formationId"
-                            value={formData.formationId}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="">Sélectionner une formation</option>
-                            {formations.map(formation => (
-                                <option key={formation.id} value={formation.id}>
-                                    {formation.title}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
                     {/* Dates et horaires */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -247,36 +200,6 @@ export default function NewSessionPage() {
                             onChange={handleChange}
                             rows={4}
                             placeholder="Description spécifique de cette session..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* Prérequis */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Prérequis
-                        </label>
-                        <textarea
-                            name="prerequisites"
-                            value={formData.prerequisites}
-                            onChange={handleChange}
-                            rows={3}
-                            placeholder="Prérequis pour participer à cette session..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* Objectifs */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Objectifs spécifiques
-                        </label>
-                        <textarea
-                            name="objectives"
-                            value={formData.objectives}
-                            onChange={handleChange}
-                            rows={3}
-                            placeholder="Objectifs spécifiques de cette session..."
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>

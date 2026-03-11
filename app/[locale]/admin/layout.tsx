@@ -24,16 +24,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="admin-theme min-h-screen">
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-40 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)}></div>
         <div className="fixed inset-y-0 left-0 flex flex-col w-64 bg-white">
-          <div className="flex items-center justify-between h-12 px-3 bg-blue-600">
-            <span className="text-white font-semibold text-sm">CJ DTC Admin</span>
+          <div className="flex items-center justify-between h-12 px-3 bg-white border-b border-gray-200">
+            <span className="text-gray-900 font-semibold text-sm">CJ DTC Admin</span>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-1 text-white hover:text-gray-200"
+              className="p-1 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded"
               aria-label="Fermer le menu"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,8 +59,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-64 lg:overflow-y-auto lg:bg-white lg:border-r lg:border-gray-200">
         <div className="flex flex-col h-full">
-          <div className="flex items-center h-12 px-3 bg-blue-600 shrink-0">
-            <span className="text-white font-semibold text-sm">CJ DTC Admin</span>
+          <div className="flex items-center h-12 px-3 bg-white border-b border-gray-200 shrink-0">
+            <span className="text-gray-900 font-semibold text-sm">CJ DTC Admin</span>
           </div>
           <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
             {navigation.map((item) => (
@@ -76,8 +76,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
           <div className="p-3 border-t border-gray-200 shrink-0">
             <div className="flex items-center">
-              <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                <span className="text-blue-600 font-semibold text-xs">
+              <div className="w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center shrink-0">
+                <span className="text-gray-900 font-semibold text-xs">
                   {session?.user?.name?.[0]?.toUpperCase()}
                 </span>
               </div>
@@ -104,8 +104,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </svg>
           </button>
           <span className="flex-1 text-sm font-semibold text-gray-900">Administration</span>
-          <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-            <span className="text-blue-600 font-semibold text-xs">
+          <div className="w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center mr-2">
+            <span className="text-gray-900 font-semibold text-xs">
               {session?.user?.name?.[0]?.toUpperCase()}
             </span>
           </div>

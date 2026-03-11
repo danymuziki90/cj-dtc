@@ -32,7 +32,6 @@ const registrationSchema = z.object({
     currency: z.string().min(3).max(3).default('USD'),
     phoneNumber: z.string().optional(),
     operator: z.string().optional(),
-    proofUrl: z.string().optional(),
     returnUrl: z.string().optional(),
   }),
 })
@@ -116,7 +115,6 @@ export async function POST(request: NextRequest) {
       formType,
       answers: payload.answers,
       submittedAt: new Date().toISOString(),
-      paymentProofUrl: payload.payment.proofUrl || null,
     }
 
     const enrollment = await prisma.enrollment.create({
@@ -156,7 +154,6 @@ export async function POST(request: NextRequest) {
           gateway: payload.payment.provider,
           operator: payload.payment.operator || null,
           phoneNumberMasked: maskPhoneNumber(payload.payment.phoneNumber),
-          proofUrl: payload.payment.proofUrl || null,
           formType,
           currency: normalizedCurrency,
         }),
@@ -200,7 +197,6 @@ export async function POST(request: NextRequest) {
               gateway: 'pawapay',
               operator: payload.payment.operator || null,
               phoneNumberMasked: maskPhoneNumber(payload.payment.phoneNumber),
-              proofUrl: payload.payment.proofUrl || null,
               formType,
               currency: normalizedCurrency,
               response: pawaPayResult.rawResponse || null,
@@ -237,7 +233,6 @@ export async function POST(request: NextRequest) {
             status: toPaymentRowStatus(flutterwaveResult.status),
             notes: JSON.stringify({
               gateway: 'flutterwave',
-              proofUrl: payload.payment.proofUrl || null,
               formType,
               currency: normalizedCurrency,
               response: flutterwaveResult.rawResponse || null,

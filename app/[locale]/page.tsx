@@ -302,7 +302,7 @@ export default function HomePage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
                   <Link
-                    href="/fr/formations"
+                    href="/fr/programmes"
                     className="px-6 sm:px-8 lg:px-12 py-3 sm:py-4 lg:py-5 bg-white text-blue-600 rounded-xl sm:rounded-2xl font-bold hover:bg-gray-100 transition-all duration-300 hover:scale-105 text-sm sm:text-base lg:text-lg"
                   >
                     S'inscrire maintenant
@@ -335,7 +335,7 @@ export default function HomePage() {
           <p className="text-lg text-gray-600 mb-8">
             Rejoignez nos formations et programmes certifiants
           </p>
-          <Link href="/fr/espace-etudiants/inscription" className="btn-primary">
+          <Link href="/fr/programmes" className="btn-primary">
             S'inscrire maintenant
           </Link>
         </div>

@@ -8,7 +8,7 @@ export default function Hero() {
         <h2 className="text-4xl font-bold">Bâtir des compétences. Transformer des destins.</h2>
         <p className="mt-4 max-w-2xl">Programmes certifiants, parcours IOP, leadership & solutions RH pour les entreprises. Rejoignez notre réseau panafricain.</p>
         <div className="mt-6">
-          <Link href="/fr/formations" className="btn-primary inline-block">S'inscrire maintenant</Link>
+          <Link href="/fr/programmes" className="btn-primary inline-block">S'inscrire maintenant</Link>
           <Link href="/fr/programmes/iop" className="btn-secondary inline-block ml-4">Rejoindre le programme IOP</Link>
           <Link href="/fr/formations" className="btn-secondary inline-block ml-4">Découvrir nos formations</Link>
         </div>

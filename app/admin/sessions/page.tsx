@@ -1,6 +1,6 @@
 'use client'
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
 
 type FormationItem = {
@@ -53,11 +53,8 @@ const initialForm = {
   maxParticipants: 25,
   price: 0,
   durationLabel: '',
-  paymentInfo: '',
   imageUrl: '',
   description: '',
-  prerequisitesText: '',
-  objectives: '',
   status: 'ouverte',
 }
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
@@ -79,6 +76,26 @@ function formatParticipationLabel(value: string) {
   if (value === 'en_ligne' || value === 'distanciel') return 'En ligne'
   if (value === 'hybride') return 'Hybride'
   return 'Presentiel'
+}
+
+function pickFormationIdForSessionType(
+  formations: FormationItem[],
+  sessionType: 'MRH' | 'IOP' | 'CONFERENCE_FORUM'
+) {
+  const matchers: Record<'MRH' | 'IOP' | 'CONFERENCE_FORUM', string[]> = {
+    MRH: ['mrh', 'ressources humaines', 'rh'],
+    IOP: ['iop', 'orientation professionnelle', 'insertion'],
+    CONFERENCE_FORUM: ['conference', 'forum'],
+  }
+
+  const normalized = formations.map((formation) => ({
+    id: formation.id,
+    haystack: `${formation.title || ''} ${formation.categorie || ''}`.toLowerCase(),
+  }))
+
+  const keywords = matchers[sessionType]
+  const found = normalized.find((formation) => keywords.some((keyword) => formation.haystack.includes(keyword)))
+  return found?.id ?? formations[0]?.id ?? null
 }
 
 export default function AdminSessionsPage() {
@@ -115,11 +132,6 @@ export default function AdminSessionsPage() {
     bootstrap()
   }, [])
 
-  const selectedFormation = useMemo(
-    () => formations.find((formation) => formation.id === Number(form.formationId)) || null,
-    [formations, form.formationId]
-  )
-
   function resetForm() {
     setEditingId(null)
     setForm(initialForm)
@@ -141,14 +153,26 @@ export default function AdminSessionsPage() {
       maxParticipants: session.maxParticipants,
       price: session.price,
       durationLabel: session.adminMeta?.durationLabel || '',
-      paymentInfo: session.adminMeta?.paymentInfo || '',
       imageUrl: session.adminMeta?.imageUrl || session.imageUrl || '',
       description: session.description || '',
-      prerequisitesText: session.prerequisitesText || '',
-      objectives: session.objectives || '',
       status: session.status || 'ouverte',
     })
   }
+
+  useEffect(() => {
+    if (editingId || formations.length === 0) return
+
+    setForm((prev) => {
+      const preferredFormationId = pickFormationIdForSessionType(
+        formations,
+        prev.sessionType as 'MRH' | 'IOP' | 'CONFERENCE_FORUM'
+      )
+      if (!preferredFormationId) return prev
+      const nextFormationId = String(preferredFormationId)
+      if (prev.formationId === nextFormationId) return prev
+      return { ...prev, formationId: nextFormationId }
+    })
+  }, [editingId, formations, form.sessionType])
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
@@ -161,7 +185,7 @@ export default function AdminSessionsPage() {
       }
 
       if (!form.formationId) {
-        throw new Error('Veuillez selectionner une formation.')
+        throw new Error('Aucune formation disponible pour creer une session.')
       }
 
       const url = editingId ? `/api/sessions/${editingId}` : '/api/sessions'
@@ -181,14 +205,11 @@ export default function AdminSessionsPage() {
           maxParticipants: Number(form.maxParticipants),
           price: Number(form.price),
           description: form.description,
-          prerequisitesText: form.prerequisitesText,
-          objectives: form.objectives,
           imageUrl: form.imageUrl,
           status: form.status,
           sessionType: form.sessionType,
           participationType: form.participationType,
           durationLabel: form.durationLabel,
-          paymentInfo: form.paymentInfo,
           customTitle: form.customTitle,
         }),
       })
@@ -271,28 +292,11 @@ export default function AdminSessionsPage() {
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Formation *</label>
-              <select
-                value={form.formationId}
-                onChange={(event) => setForm((prev) => ({ ...prev, formationId: event.target.value }))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                required
-              >
-                <option value="">Selectionner...</option>
-                {formations.map((formation) => (
-                  <option key={formation.id} value={formation.id}>
-                    {formation.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Titre session</label>
               <input
                 value={form.customTitle}
                 onChange={(event) => setForm((prev) => ({ ...prev, customTitle: event.target.value }))}
-                placeholder={selectedFormation?.title || 'Titre libre'}
+                placeholder="Titre libre"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
@@ -301,7 +305,17 @@ export default function AdminSessionsPage() {
               <label className="mb-1 block text-sm font-medium text-slate-700">Type session *</label>
               <select
                 value={form.sessionType}
-                onChange={(event) => setForm((prev) => ({ ...prev, sessionType: event.target.value as any }))}
+                onChange={(event) =>
+                  setForm((prev) => {
+                    const sessionType = event.target.value as 'MRH' | 'IOP' | 'CONFERENCE_FORUM'
+                    const preferredFormationId = pickFormationIdForSessionType(formations, sessionType)
+                    return {
+                      ...prev,
+                      sessionType,
+                      formationId: preferredFormationId ? String(preferredFormationId) : prev.formationId,
+                    }
+                  })
+                }
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               >
                 <option value="MRH">MRH</option>
@@ -315,7 +329,10 @@ export default function AdminSessionsPage() {
               <select
                 value={form.participationType}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, participationType: event.target.value as any }))
+                  setForm((prev) => ({
+                    ...prev,
+                    participationType: event.target.value as 'en_ligne' | 'hybride' | 'presentiel',
+                  }))
                 }
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               >
@@ -471,37 +488,12 @@ export default function AdminSessionsPage() {
             </div>
           </div>
 
-          <div className="mt-3 grid gap-3 md:grid-cols-2">
+          <div className="mt-3 grid gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Description session</label>
               <textarea
                 value={form.description}
                 onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
-                className="min-h-[96px] w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Infos paiement</label>
-              <textarea
-                value={form.paymentInfo}
-                onChange={(event) => setForm((prev) => ({ ...prev, paymentInfo: event.target.value }))}
-                placeholder="Ex: Mobile Money via PawaPay ou lien Flutterwave..."
-                className="min-h-[96px] w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Prerequis</label>
-              <textarea
-                value={form.prerequisitesText}
-                onChange={(event) => setForm((prev) => ({ ...prev, prerequisitesText: event.target.value }))}
-                className="min-h-[96px] w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Objectifs</label>
-              <textarea
-                value={form.objectives}
-                onChange={(event) => setForm((prev) => ({ ...prev, objectives: event.target.value }))}
                 className="min-h-[96px] w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>

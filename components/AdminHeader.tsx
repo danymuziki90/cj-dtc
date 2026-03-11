@@ -25,17 +25,11 @@ export default function AdminHeader() {
     pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(`${href}/`))
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/90 text-slate-100 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white text-black shadow-sm backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/admin/dashboard" className="shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-blue-500/20 ring-1 ring-blue-300/40">
-              <img src="/logo.png" alt="CJ DTC" className="h-5 w-5 object-contain" />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Admin portal</p>
-              <span className="text-sm font-semibold text-white">CJ Development Training</span>
-            </div>
+        <Link href="/admin/dashboard" className="shrink-0" aria-label="Accueil admin">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gray-100 ring-1 ring-gray-300">
+            <img src="/logo.png" alt="CJ DTC" className="h-12 w-12 object-contain" />
           </div>
         </Link>
 
@@ -46,8 +40,8 @@ export default function AdminHeader() {
               href={link.href}
               className={`rounded-full px-3 py-2 text-sm font-medium transition ${
                 isActive(link.href)
-                  ? 'bg-blue-500 text-slate-950 shadow-lg shadow-blue-500/30'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gray-100 text-black ring-1 ring-gray-300'
+                  : 'text-gray-800 hover:bg-gray-100 hover:text-black'
               }`}
             >
               {link.label}
@@ -57,7 +51,7 @@ export default function AdminHeader() {
 
         <button
           type="button"
-          className="rounded-lg p-2 text-slate-200 transition hover:bg-slate-800 md:hidden"
+          className="rounded-lg p-2 text-gray-800 transition hover:bg-gray-100 md:hidden"
           onClick={() => setMenuOpen((current) => !current)}
           aria-expanded={menuOpen}
           aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
@@ -75,7 +69,7 @@ export default function AdminHeader() {
       </div>
 
       <div
-        className={`overflow-hidden border-t border-slate-800 transition-all duration-300 ease-out md:hidden ${
+        className={`overflow-hidden border-t border-gray-200 bg-white transition-all duration-300 ease-out md:hidden ${
           menuOpen ? 'max-h-[24rem] opacity-100' : 'max-h-0 opacity-0'
         }`}
         aria-hidden={!menuOpen}
@@ -87,8 +81,8 @@ export default function AdminHeader() {
               href={link.href}
               className={`rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                 isActive(link.href)
-                  ? 'bg-blue-500 text-slate-950'
-                  : 'text-slate-200 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gray-100 text-black ring-1 ring-gray-300'
+                  : 'text-gray-800 hover:bg-gray-100 hover:text-black'
               }`}
               onClick={() => setMenuOpen(false)}
             >

@@ -349,7 +349,6 @@ export default function SessionRegistrationModal({ open, locale, session, progra
   const sections = useMemo(() => getSections(programType), [programType])
   const [values, setValues] = useState<Record<string, string | boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [proofFile, setProofFile] = useState<File | null>(null)
   const [paymentProvider, setPaymentProvider] = useState<'pawapay' | 'flutterwave'>('pawapay')
   const [pawapayOperator, setPawapayOperator] = useState('airtel')
   const [flutterwaveMethod, setFlutterwaveMethod] = useState<'card' | 'mobile_money' | 'bank_transfer'>('card')
@@ -367,7 +366,6 @@ export default function SessionRegistrationModal({ open, locale, session, progra
     if (!open) return
     setValues(getInitialValues(sections))
     setErrors({})
-    setProofFile(null)
     setResult(null)
     setSubmitting(false)
     setCheckingPawaPayStatus(false)
@@ -406,18 +404,6 @@ export default function SessionRegistrationModal({ open, locale, session, progra
     return Object.keys(nextErrors).length === 0
   }
 
-  const uploadProofIfAny = async () => {
-    if (!proofFile) return null
-    const formData = new FormData()
-    formData.append('file', proofFile)
-    const response = await fetch('/api/payments/proof', { method: 'POST', body: formData })
-    const data = await response.json()
-    if (!response.ok) {
-      throw new Error(data.error || 'Upload preuve paiement impossible.')
-    }
-    return data.url as string
-  }
-
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!validate()) return
@@ -425,7 +411,6 @@ export default function SessionRegistrationModal({ open, locale, session, progra
     setResult(null)
 
     try {
-      const proofUrl = await uploadProofIfAny()
       const payload = {
         sessionId: session.id,
         formType: programType,
@@ -448,7 +433,6 @@ export default function SessionRegistrationModal({ open, locale, session, progra
           currency: 'USD',
           phoneNumber: paymentProvider === 'pawapay' ? String(values.whatsapp || '') : undefined,
           operator: paymentProvider === 'pawapay' ? pawapayOperator : undefined,
-          proofUrl: proofUrl || undefined,
           returnUrl: `/${locale}/programmes`,
         },
       }
@@ -703,16 +687,9 @@ export default function SessionRegistrationModal({ open, locale, session, progra
                     </select>
                   </div>
                 )}
-
-                <div className="mt-3">
-                  <label className="mb-1 block text-sm font-medium text-slate-700">Preuve de paiement (optionnel)</label>
-                  <input
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.webp,.pdf"
-                    onChange={(e) => setProofFile(e.target.files?.[0] || null)}
-                    className="block w-full text-sm"
-                  />
-                </div>
+                <p className="mt-3 text-xs text-slate-500">
+                  Aucun justificatif de paiement n&apos;est requis pour l&apos;inscription aux sessions.
+                </p>
               </section>
 
               {result ? (

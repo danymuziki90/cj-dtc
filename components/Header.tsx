@@ -13,7 +13,7 @@ export default function Header() {
     <header className="header sticky top-0 z-50 bg-transparent">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/fr" className="flex items-center gap-3">
-          <Image src="/logo.png" alt="CJ DEVELOPMENT TRAINING CENTER" width={48} height={48} className="h-12 w-auto" />
+          <Image src="/logo.png" alt="CJ DEVELOPMENT TRAINING CENTER" width={80} height={80} className="h-16 w-auto sm:h-20" />
         </Link>
 
         {/* Desktop nav - identical markup server/client */}
