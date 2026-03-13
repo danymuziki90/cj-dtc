@@ -19,6 +19,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ error: 'Unable to create payment.' }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unable to create payment.' }, { status: 500 })
   }
 }

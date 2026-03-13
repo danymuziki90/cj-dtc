@@ -18,27 +18,38 @@ type StudentPortalAccessEmailParams = {
 }
 
 let cachedTransporter: nodemailer.Transporter | null = null
+let cachedTransporterConfigKey: string | null = null
 
 function getMailTransporter() {
   const host = process.env.MAIL_HOST
   const port = Number(process.env.MAIL_PORT || 587)
   const user = process.env.MAIL_USER
   const pass = process.env.MAIL_PASSWORD
+  const secure = process.env.MAIL_SECURE === 'true'
+  const tlsServername = process.env.MAIL_TLS_SERVERNAME?.trim() || undefined
 
   if (!host || !user || !pass) {
     return null
   }
 
-  if (!cachedTransporter) {
+  const configKey = JSON.stringify({ host, port, user, secure, tlsServername })
+
+  if (!cachedTransporter || cachedTransporterConfigKey !== configKey) {
     cachedTransporter = nodemailer.createTransport({
       host,
       port,
-      secure: process.env.MAIL_SECURE === 'true',
+      secure,
       auth: {
         user,
         pass,
       },
+      tls: tlsServername
+        ? {
+            servername: tlsServername,
+          }
+        : undefined,
     })
+    cachedTransporterConfigKey = configKey
   }
 
   return cachedTransporter

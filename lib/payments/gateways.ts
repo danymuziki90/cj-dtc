@@ -26,7 +26,13 @@ function normalizeAmount(value: number) {
 }
 
 function normalizePhoneNumber(value: string) {
-  return value.replace(/[^\d+]/g, '')
+  return value.replace(/\D/g, '')
+}
+
+function buildStatementDescription(externalReference: string) {
+  const compactReference = externalReference.replace(/[^a-z0-9]/gi, '').toUpperCase()
+  const candidate = `CJDTC${compactReference.slice(-17)}`
+  return candidate.slice(0, 22)
 }
 
 function getSecureApiUrl(value: string, label: string) {
@@ -39,6 +45,11 @@ function getSecureApiUrl(value: string, label: string) {
 
 function normalizeCountryCode(value?: string) {
   return (value || process.env.PAWAPAY_COUNTRY_CODE || 'COD').trim().toUpperCase()
+}
+
+function normalizeDepositPath(value: string | undefined, fallback: string) {
+  const path = (value || fallback).trim()
+  return path.replace(/^\/v1(?=\/deposits(?:\/|$))/, '')
 }
 
 function normalizeOperator(value?: string) {
@@ -71,7 +82,7 @@ async function predictPawaPayCorrespondent(phoneNumber: string): Promise<Resolve
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        accountNumber: msisdn,
+        msisdn,
       }),
       cache: 'no-store',
     })
@@ -174,7 +185,7 @@ export async function initiatePawaPayPayment(input: PawaPayInitInput): Promise<P
     process.env.PAWAPAY_API_URL || 'https://api.sandbox.pawapay.io',
     'PAWAPAY_API_URL'
   )
-  const path = process.env.PAWAPAY_DEPOSIT_PATH || '/v1/deposits'
+  const path = normalizeDepositPath(process.env.PAWAPAY_DEPOSIT_PATH, '/deposits')
   const normalizedAmount = normalizeAmount(input.amount)
   const depositId = randomUUID()
 
@@ -188,36 +199,35 @@ export async function initiatePawaPayPayment(input: PawaPayInitInput): Promise<P
   }
 
   const resolvedCorrespondent = await resolvePawaPayCorrespondent(input)
+  const statementDescription = buildStatementDescription(input.externalReference)
 
-  const payload = [
-    {
-      depositId,
-      amount: normalizedAmount.toFixed(2),
-      currency: input.currency,
-      correspondent: resolvedCorrespondent.correspondent,
-      country: resolvedCorrespondent.country,
-      payer: {
-        type: 'MSISDN',
-        address: {
-          value: normalizePhoneNumber(input.phoneNumber),
-        },
+  const payload = {
+    depositId,
+    amount: normalizedAmount.toFixed(2),
+    currency: input.currency,
+    correspondent: resolvedCorrespondent.correspondent,
+    country: resolvedCorrespondent.country,
+    payer: {
+      type: 'MSISDN',
+      address: {
+        value: normalizePhoneNumber(input.phoneNumber),
       },
-      customerTimestamp: new Date().toISOString(),
-      statementDescription: `CJ DTC ${input.externalReference}`,
-      metadata: [
-        {
-          fieldName: 'fullName',
-          fieldValue: input.fullName,
-          isPII: true,
-        },
-        {
-          fieldName: 'email',
-          fieldValue: input.email,
-          isPII: true,
-        },
-      ],
     },
-  ]
+    customerTimestamp: new Date().toISOString(),
+    statementDescription,
+    metadata: [
+      {
+        fieldName: 'fullName',
+        fieldValue: input.fullName,
+        isPII: true,
+      },
+      {
+        fieldName: 'email',
+        fieldValue: input.email,
+        isPII: true,
+      },
+    ],
+  }
 
   try {
     const response = await fetch(`${apiUrl}${path}`, {
@@ -232,13 +242,17 @@ export async function initiatePawaPayPayment(input: PawaPayInitInput): Promise<P
 
     const rawResponse = (await parseJsonResponse(response)) as JsonRecord | null
     const status = response.ok ? inferPawaPayStatus(rawResponse) : 'failed'
+    const errorMessage =
+      rawResponse && typeof rawResponse.errorMessage === 'string'
+        ? rawResponse.errorMessage
+        : null
 
     return {
       status,
       depositId,
       message: response.ok
         ? 'PawaPay request initialized.'
-        : 'PawaPay request failed during initialization.',
+        : errorMessage || 'PawaPay request failed during initialization.',
       rawResponse,
       isMock: false,
     }
@@ -261,7 +275,7 @@ export async function verifyPawaPayPayment(depositId: string): Promise<PawaPayVe
     process.env.PAWAPAY_API_URL || 'https://api.sandbox.pawapay.io',
     'PAWAPAY_API_URL'
   )
-  const pathTemplate = process.env.PAWAPAY_DEPOSIT_STATUS_PATH || '/v1/deposits/{depositId}'
+  const pathTemplate = normalizeDepositPath(process.env.PAWAPAY_DEPOSIT_STATUS_PATH, '/deposits/{depositId}')
 
   if (!apiKey) {
     return {

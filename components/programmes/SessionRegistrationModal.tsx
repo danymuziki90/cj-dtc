@@ -34,6 +34,12 @@ type SectionConfig = {
   fields: FieldConfig[]
 }
 
+const PAWAPAY_OPERATOR_OPTIONS = [
+  { value: 'airtel', label: 'Airtel RDC' },
+  { value: 'orange', label: 'Orange RDC' },
+  { value: 'vodacom', label: 'Vodacom RDC' },
+]
+
 const MRH_SECTIONS: SectionConfig[] = [
   {
     title: 'Informations personnelles',
@@ -334,6 +340,8 @@ function getInitialValues(sections: SectionConfig[]) {
       initialValues[field.key] = field.type === 'checkbox' ? false : ''
     }
   }
+  initialValues.paymentOperator = ''
+  initialValues.paymentPhoneNumber = ''
   return initialValues
 }
 
@@ -393,6 +401,19 @@ export default function SessionRegistrationModal({ open, locale, session, progra
         }
       }
     }
+
+    if (session.price > 0) {
+      const paymentOperator = values.paymentOperator
+      if (typeof paymentOperator !== 'string' || !paymentOperator.trim()) {
+        nextErrors.paymentOperator = 'Selectionnez votre operateur Mobile Money.'
+      }
+
+      const paymentPhoneNumber = values.paymentPhoneNumber
+      if (typeof paymentPhoneNumber !== 'string' || paymentPhoneNumber.trim().length < 6) {
+        nextErrors.paymentPhoneNumber = 'Entrez le numero Mobile Money a debiter.'
+      }
+    }
+
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
@@ -423,7 +444,8 @@ export default function SessionRegistrationModal({ open, locale, session, progra
           provider: 'pawapay',
           method: 'mobile_money',
           currency: 'USD',
-          phoneNumber: String(values.whatsapp || ''),
+          phoneNumber: String(values.paymentPhoneNumber || values.whatsapp || ''),
+          operator: typeof values.paymentOperator === 'string' ? values.paymentOperator : undefined,
         },
       }
 
@@ -628,9 +650,49 @@ export default function SessionRegistrationModal({ open, locale, session, progra
                 <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
                   Paiement disponible: <strong>PawaPay Mobile Money</strong>
                 </div>
+                {session.price > 0 ? (
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-slate-700">
+                        Operateur Mobile Money *
+                      </label>
+                      <select
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                        value={typeof values.paymentOperator === 'string' ? values.paymentOperator : ''}
+                        onChange={(event) => onChangeValue('paymentOperator', event.target.value)}
+                      >
+                        <option value="">Selectionner votre operateur...</option>
+                        {PAWAPAY_OPERATOR_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.paymentOperator ? (
+                        <p className="mt-1 text-xs text-red-600">{errors.paymentOperator}</p>
+                      ) : null}
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-slate-700">
+                        Numero Mobile Money *
+                      </label>
+                      <input
+                        type="tel"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                        value={typeof values.paymentPhoneNumber === 'string' ? values.paymentPhoneNumber : ''}
+                        onChange={(event) => onChangeValue('paymentPhoneNumber', event.target.value)}
+                        placeholder="Ex: 2439XXXXXXXX"
+                        data-testid="registration-payment-phone"
+                      />
+                      {errors.paymentPhoneNumber ? (
+                        <p className="mt-1 text-xs text-red-600">{errors.paymentPhoneNumber}</p>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
                 <p className="mt-3 text-xs text-slate-500">
-                  Saisissez votre numero WhatsApp ou Mobile Money. Le montant preleve correspond au prix de la session
-                  et le correspondant PawaPay est detecte automatiquement.
+                  Choisissez le reseau a debiter puis saisissez le numero Mobile Money sur lequel le paiement sera preleve.
+                  Le montant preleve correspond au prix de la session.
                 </p>
               </section>
 

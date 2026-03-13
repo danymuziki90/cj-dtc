@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
+import { sendEmail, withEmailTimeout } from '@/lib/email'
 import { inferProgramSessionType } from '@/lib/programmes/session-types'
 import { initiatePawaPayPayment, type GatewayInitStatus } from '@/lib/payments/gateways'
 import { syncEnrollmentPaymentStatus } from '@/lib/payments/status'
@@ -218,17 +218,23 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
 
   await syncEnrollmentPaymentStatus(enrollment.id)
 
-  await sendEmail(
-    enrollment.email,
-    `Confirmation d'inscription - ${session.formation.title}`,
-    `
-      <h2>Bonjour ${enrollment.firstName},</h2>
-      <p>Votre inscription pour la session <strong>${session.formation.title}</strong> a bien ete enregistree.</p>
-      <p>Statut inscription: <strong>${isFull ? 'waitlist' : 'pending'}</strong></p>
-      <p>Statut paiement: <strong>${payment.status}</strong></p>
-      <p>Montant: <strong>${amount.toFixed(2)} ${normalizedCurrency}</strong></p>
-    `
-  )
+  try {
+    await withEmailTimeout(
+      sendEmail(
+        enrollment.email,
+        `Confirmation d'inscription - ${session.formation.title}`, 
+        `
+          <h2>Bonjour ${enrollment.firstName}</h2>
+          <p>Votre inscription pour la session <strong>${session.formation.title}</strong> a bien ete enregistree.</p>
+          <p>Statut inscription: <strong>${isFull ? 'waitlist' : 'pending'}</strong></p>
+          <p>Statut paiement: <strong>${payment.status}</strong></p>
+          <p>Montant: <strong>${amount.toFixed(2)} ${normalizedCurrency}</strong></p>
+        `
+      )
+    )
+  } catch (error) {
+    console.error('Registration confirmation email failed:', error)
+  }
 
   return {
     status: 201,

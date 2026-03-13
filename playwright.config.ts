@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000'
+const serverPort = process.env.PLAYWRIGHT_SERVER_PORT || '34568'
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || `http://127.0.0.1:${serverPort}`
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -9,6 +10,7 @@ export default defineConfig({
     timeout: 10_000,
   },
   fullyParallel: false,
+  workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
@@ -19,7 +21,7 @@ export default defineConfig({
     video: 'off',
   },
   webServer: {
-    command: 'cmd /c "set NEXT_TEST_WASM=1&& scripts\\use-node22.cmd npm run dev"',
+    command: `cmd /c "set NODE_OPTIONS=--max-old-space-size=8192&& set NEXT_TEST_WASM=1&& scripts\\use-node22.cmd npx next dev --webpack --port ${serverPort}"`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

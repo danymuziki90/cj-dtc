@@ -16,3 +16,5 @@ public/uploads/student-submissions
 .env*.local
 playwright-report
 test-results
+.codex-*.log
+debug.log
