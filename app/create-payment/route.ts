@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const result = await createSessionPayment(payload)
     return NextResponse.json(result.body, { status: result.status })
   } catch (error) {
-    console.error('Program registration error:', error)
+    console.error('Create payment error:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -19,6 +19,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ error: 'Unable to register for this session.' }, { status: 500 })
+    return NextResponse.json({ error: 'Unable to create payment.' }, { status: 500 })
   }
 }

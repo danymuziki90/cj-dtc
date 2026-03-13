@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { writeAdminAuditLog } from '@/lib/admin/audit'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { hashPassword, verifyPassword } from '@/lib/auth-portal/password'
 
@@ -43,6 +44,17 @@ export async function POST(request: NextRequest) {
   await prisma.admin.update({
     where: { id: admin.id },
     data: { password },
+  })
+
+  await writeAdminAuditLog({
+    request,
+    adminId: auth.admin.id,
+    adminUsername: auth.admin.username,
+    action: 'admin.password_change_self',
+    targetType: 'admin',
+    targetId: admin.id,
+    targetLabel: auth.admin.username,
+    summary: `Mot de passe admin modifie par ${auth.admin.username}.`,
   })
 
   return NextResponse.json({ success: true })

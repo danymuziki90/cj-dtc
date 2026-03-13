@@ -140,6 +140,27 @@ model AdminNotification {
   @@index([createdAt])
 }
 
+model AdminAuditLog {
+  id            String   @id @default(cuid())
+  adminId       String?
+  adminUsername String
+  action        String
+  targetType    String
+  targetId      String?
+  targetLabel   String?
+  summary       String
+  status        String   @default("success")
+  metadata      Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  @@index([adminId])
+  @@index([action])
+  @@index([targetType])
+  @@index([createdAt])
+}
+
 model AdminTrainingSession {
   id          String   @id @default(cuid())
   title       String

@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "incremental": false,
+    "types": ["node"]
+  },
+  "include": [
+    "lib/email.ts",
+    "app/api/admin/system/students/route.ts",
+    "app/api/admin/system/students/[id]/route.ts",
+    "app/api/enrollments/route.ts",
+    "app/api/payments/route.ts",
+    "components/EnrollmentStats.tsx",
+    "components/admin-portal/PaginationControls.tsx",
+    "app/admin/students/page.tsx",
+    "app/admin/enrollments/page.tsx",
+    "app/admin/payments/page.tsx",
+    "app/admin/login/page.tsx",
+    "app/student/login/page.tsx",
+    "playwright.config.ts",
+    "tests/e2e/admin-student-auth.spec.ts"
+  ]
+}

@@ -6,6 +6,7 @@ import {
   verifyAdminToken,
   verifyStudentToken,
 } from '@/lib/auth-portal/jwt'
+import { isEmergencyAdminLoginAllowed } from '@/lib/auth-portal/security'
 
 export async function requireAdmin(request: NextRequest) {
   const token = request.cookies.get(ADMIN_AUTH_COOKIE)?.value
@@ -19,8 +20,7 @@ export async function requireAdmin(request: NextRequest) {
   }
 
   const prismaAny = prisma as any
-  const allowEmergencyAccess =
-    process.env.ADMIN_ALLOW_EMERGENCY_LOGIN === 'true' || process.env.NODE_ENV !== 'production'
+  const allowEmergencyAccess = isEmergencyAdminLoginAllowed()
 
   try {
     if (prismaAny.admin?.findUnique) {

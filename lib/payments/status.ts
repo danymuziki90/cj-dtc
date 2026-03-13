@@ -5,16 +5,39 @@ export type CanonicalPaymentStatus = 'pending' | 'success' | 'failed'
 export function toCanonicalPaymentStatus(status?: string | null): CanonicalPaymentStatus {
   const normalized = (status || '').toLowerCase()
 
+  if (!normalized) return 'pending'
+
   if (
-    normalized === 'completed' ||
-    normalized === 'success' ||
-    normalized === 'successful' ||
-    normalized === 'paid'
+    normalized.includes('completed') ||
+    normalized.includes('success') ||
+    normalized.includes('successful') ||
+    normalized.includes('paid')
   ) {
     return 'success'
   }
 
-  if (normalized === 'failed' || normalized === 'error' || normalized === 'cancelled') {
+  if (
+    normalized.includes('accepted') ||
+    normalized.includes('submitted') ||
+    normalized.includes('processing') ||
+    normalized.includes('pending') ||
+    normalized.includes('queued')
+  ) {
+    return 'pending'
+  }
+
+  if (
+    normalized.includes('failed') ||
+    normalized.includes('error') ||
+    normalized.includes('cancelled') ||
+    normalized.includes('rejected') ||
+    normalized.includes('declined') ||
+    normalized.includes('not_approved') ||
+    normalized.includes('approval') ||
+    normalized.includes('not_found') ||
+    normalized.includes('insufficient') ||
+    normalized.includes('limit_reached')
+  ) {
     return 'failed'
   }
 

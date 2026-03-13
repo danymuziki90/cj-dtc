@@ -1,7 +1,21 @@
 import { randomUUID } from 'crypto'
-import { toCanonicalPaymentStatus } from '@/lib/payments/status'
 
 type JsonRecord = Record<string, unknown>
+type ResolvedCorrespondent = {
+  correspondent: string
+  country: string
+}
+
+const OPERATOR_ALIASES: Record<string, string> = {
+  airtel: 'AIRTEL_COD',
+  orange: 'ORANGE_COD',
+  vodacom: 'VODACOM_MPESA_COD',
+  mtn: 'MTN_MOMO_COD',
+  'airtel_cod': 'AIRTEL_COD',
+  'orange_cod': 'ORANGE_COD',
+  'vodacom_mpesa_cod': 'VODACOM_MPESA_COD',
+  'mtn_momo_cod': 'MTN_MOMO_COD',
+}
 
 function stripTrailingSlash(value: string) {
   return value.endsWith('/') ? value.slice(0, -1) : value
@@ -13,6 +27,98 @@ function normalizeAmount(value: number) {
 
 function normalizePhoneNumber(value: string) {
   return value.replace(/[^\d+]/g, '')
+}
+
+function getSecureApiUrl(value: string, label: string) {
+  const parsed = new URL(value)
+  if (parsed.protocol !== 'https:') {
+    throw new Error(`${label} must use HTTPS.`)
+  }
+  return stripTrailingSlash(parsed.toString())
+}
+
+function normalizeCountryCode(value?: string) {
+  return (value || process.env.PAWAPAY_COUNTRY_CODE || 'COD').trim().toUpperCase()
+}
+
+function normalizeOperator(value?: string) {
+  if (!value) return null
+
+  const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, '_')
+  return OPERATOR_ALIASES[normalized] || value.trim().toUpperCase() || null
+}
+
+function inferCountryFromCorrespondent(correspondent: string) {
+  const parts = correspondent.split('_')
+  return parts[parts.length - 1] || normalizeCountryCode()
+}
+
+async function predictPawaPayCorrespondent(phoneNumber: string): Promise<ResolvedCorrespondent | null> {
+  const apiKey = process.env.PAWAPAY_API_KEY
+  if (!apiKey) return null
+
+  const apiUrl = getSecureApiUrl(
+    process.env.PAWAPAY_API_URL || 'https://api.sandbox.pawapay.io',
+    'PAWAPAY_API_URL'
+  )
+  const msisdn = normalizePhoneNumber(phoneNumber)
+
+  try {
+    const response = await fetch(`${apiUrl}/v1/predict-correspondent`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        accountNumber: msisdn,
+      }),
+      cache: 'no-store',
+    })
+
+    if (!response.ok) return null
+
+    const rawResponse = (await parseJsonResponse(response)) as JsonRecord | null
+    const correspondent =
+      (typeof rawResponse?.correspondent === 'string' && rawResponse.correspondent) ||
+      (typeof rawResponse?.provider === 'string' && rawResponse.provider) ||
+      null
+    const country =
+      (typeof rawResponse?.country === 'string' && rawResponse.country) ||
+      (correspondent ? inferCountryFromCorrespondent(correspondent) : normalizeCountryCode())
+
+    if (!correspondent) return null
+
+    return {
+      correspondent: correspondent.trim().toUpperCase(),
+      country: country.trim().toUpperCase(),
+    }
+  } catch {
+    return null
+  }
+}
+
+async function resolvePawaPayCorrespondent(input: PawaPayInitInput): Promise<ResolvedCorrespondent> {
+  const mappedOperator =
+    normalizeOperator(input.operator) || normalizeOperator(process.env.PAWAPAY_DEFAULT_OPERATOR)
+
+  if (mappedOperator) {
+    return {
+      correspondent: mappedOperator,
+      country: input.countryCode || inferCountryFromCorrespondent(mappedOperator),
+    }
+  }
+
+  const predicted = await predictPawaPayCorrespondent(input.phoneNumber)
+  if (predicted) {
+    return predicted
+  }
+
+  const fallbackCountry = normalizeCountryCode(input.countryCode)
+  return {
+    correspondent: `AIRTEL_${fallbackCountry}`,
+    country: fallbackCountry,
+  }
 }
 
 async function parseJsonResponse(response: Response) {
@@ -47,32 +153,6 @@ export interface PawaPayInitResult {
   isMock: boolean
 }
 
-export interface FlutterwaveInitInput {
-  amount: number
-  currency: string
-  email: string
-  fullName: string
-  txRef: string
-  redirectUrl: string
-  narration?: string
-}
-
-export interface FlutterwaveInitResult {
-  status: GatewayInitStatus
-  paymentLink: string
-  txRef: string
-  message: string
-  rawResponse?: JsonRecord | null
-  isMock: boolean
-}
-
-export interface FlutterwaveVerifyResult {
-  status: GatewayInitStatus
-  transactionId: string
-  rawResponse?: JsonRecord | null
-  isMock: boolean
-}
-
 export interface PawaPayVerifyResult {
   status: GatewayInitStatus
   depositId: string
@@ -90,7 +170,10 @@ function inferPawaPayStatus(payload: unknown): GatewayInitStatus {
 
 export async function initiatePawaPayPayment(input: PawaPayInitInput): Promise<PawaPayInitResult> {
   const apiKey = process.env.PAWAPAY_API_KEY
-  const apiUrl = stripTrailingSlash(process.env.PAWAPAY_API_URL || 'https://api.sandbox.pawapay.io')
+  const apiUrl = getSecureApiUrl(
+    process.env.PAWAPAY_API_URL || 'https://api.sandbox.pawapay.io',
+    'PAWAPAY_API_URL'
+  )
   const path = process.env.PAWAPAY_DEPOSIT_PATH || '/v1/deposits'
   const normalizedAmount = normalizeAmount(input.amount)
   const depositId = randomUUID()
@@ -104,13 +187,15 @@ export async function initiatePawaPayPayment(input: PawaPayInitInput): Promise<P
     }
   }
 
+  const resolvedCorrespondent = await resolvePawaPayCorrespondent(input)
+
   const payload = [
     {
       depositId,
       amount: normalizedAmount.toFixed(2),
       currency: input.currency,
-      correspondent: input.operator || process.env.PAWAPAY_DEFAULT_OPERATOR || 'AIRTEL_OAPI_UGANDA',
-      country: input.countryCode || process.env.PAWAPAY_COUNTRY_CODE || 'UGA',
+      correspondent: resolvedCorrespondent.correspondent,
+      country: resolvedCorrespondent.country,
       payer: {
         type: 'MSISDN',
         address: {
@@ -172,7 +257,10 @@ export async function initiatePawaPayPayment(input: PawaPayInitInput): Promise<P
 
 export async function verifyPawaPayPayment(depositId: string): Promise<PawaPayVerifyResult> {
   const apiKey = process.env.PAWAPAY_API_KEY
-  const apiUrl = stripTrailingSlash(process.env.PAWAPAY_API_URL || 'https://api.sandbox.pawapay.io')
+  const apiUrl = getSecureApiUrl(
+    process.env.PAWAPAY_API_URL || 'https://api.sandbox.pawapay.io',
+    'PAWAPAY_API_URL'
+  )
   const pathTemplate = process.env.PAWAPAY_DEPOSIT_STATUS_PATH || '/v1/deposits/{depositId}'
 
   if (!apiKey) {
@@ -207,128 +295,6 @@ export async function verifyPawaPayPayment(depositId: string): Promise<PawaPayVe
     return {
       status: 'pending',
       depositId,
-      rawResponse: {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      isMock: false,
-    }
-  }
-}
-
-export async function initiateFlutterwavePayment(input: FlutterwaveInitInput): Promise<FlutterwaveInitResult> {
-  const secretKey = process.env.FLUTTERWAVE_SECRET_KEY
-  const apiUrl = stripTrailingSlash(process.env.FLUTTERWAVE_API_URL || 'https://api.flutterwave.com')
-  const normalizedAmount = normalizeAmount(input.amount)
-
-  if (!secretKey) {
-    const mockedLink = `${input.redirectUrl}${input.redirectUrl.includes('?') ? '&' : '?'}status=successful&tx_ref=${encodeURIComponent(input.txRef)}`
-    return {
-      status: 'pending',
-      paymentLink: mockedLink,
-      txRef: input.txRef,
-      message: 'Flutterwave keys are missing, payment is running in mock mode.',
-      isMock: true,
-    }
-  }
-
-  const payload = {
-    tx_ref: input.txRef,
-    amount: normalizedAmount,
-    currency: input.currency,
-    redirect_url: input.redirectUrl,
-    payment_options: 'card,mobilemoney,banktransfer',
-    customer: {
-      email: input.email,
-      name: input.fullName,
-    },
-    customizations: {
-      title: 'CJ Development Training Center',
-      description: input.narration || 'Session registration payment',
-    },
-  }
-
-  try {
-    const response = await fetch(`${apiUrl}/v3/payments`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${secretKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-      cache: 'no-store',
-    })
-
-    const rawResponse = (await parseJsonResponse(response)) as JsonRecord | null
-    const link = ((rawResponse?.data as JsonRecord | undefined)?.link as string | undefined) || ''
-
-    if (!response.ok || !link) {
-      return {
-        status: 'failed',
-        paymentLink: input.redirectUrl,
-        txRef: input.txRef,
-        message: 'Flutterwave failed to generate a payment link.',
-        rawResponse,
-        isMock: false,
-      }
-    }
-
-    return {
-      status: 'pending',
-      paymentLink: link,
-      txRef: input.txRef,
-      message: 'Flutterwave payment link created.',
-      rawResponse,
-      isMock: false,
-    }
-  } catch (error) {
-    return {
-      status: 'pending',
-      paymentLink: input.redirectUrl,
-      txRef: input.txRef,
-      message: 'Flutterwave network call failed, payment remains pending.',
-      rawResponse: {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      isMock: false,
-    }
-  }
-}
-
-export async function verifyFlutterwaveTransaction(transactionId: string): Promise<FlutterwaveVerifyResult> {
-  const secretKey = process.env.FLUTTERWAVE_SECRET_KEY
-  const apiUrl = stripTrailingSlash(process.env.FLUTTERWAVE_API_URL || 'https://api.flutterwave.com')
-
-  if (!secretKey) {
-    return {
-      status: 'success',
-      transactionId,
-      isMock: true,
-    }
-  }
-
-  try {
-    const response = await fetch(`${apiUrl}/v3/transactions/${encodeURIComponent(transactionId)}/verify`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${secretKey}`,
-      },
-      cache: 'no-store',
-    })
-
-    const rawResponse = (await parseJsonResponse(response)) as JsonRecord | null
-    const remoteStatus = ((rawResponse?.data as JsonRecord | undefined)?.status as string | undefined) || ''
-    const status = toCanonicalPaymentStatus(remoteStatus)
-
-    return {
-      status,
-      transactionId,
-      rawResponse,
-      isMock: false,
-    }
-  } catch (error) {
-    return {
-      status: 'pending',
-      transactionId,
       rawResponse: {
         error: error instanceof Error ? error.message : 'Unknown error',
       },

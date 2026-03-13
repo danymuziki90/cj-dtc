@@ -59,6 +59,32 @@ const initialForm = {
 }
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
+type ApiPayload = {
+  error?: string
+  message?: string
+  url?: string
+}
+
+async function readApiPayload<T extends ApiPayload = ApiPayload>(response: Response): Promise<T> {
+  const contentType = response.headers.get('content-type') || ''
+
+  if (contentType.includes('application/json')) {
+    return (await response.json()) as T
+  }
+
+  const text = (await response.text()).trim()
+  return {
+    error:
+      response.status === 413 || text.toLowerCase().startsWith('request entity too large')
+        ? "La requete est trop volumineuse. Uploadez une image plus legere ou utilisez l'upload integre."
+        : text || `Erreur HTTP ${response.status}`,
+  } as T
+}
+
+function getApiErrorMessage(payload: ApiPayload, fallback: string) {
+  return payload.error || payload.message || fallback
+}
+
 function toDateInputValue(rawDate: string) {
   const value = new Date(rawDate)
   return value.toISOString().split('T')[0]
@@ -188,6 +214,10 @@ export default function AdminSessionsPage() {
         throw new Error('Aucune formation disponible pour creer une session.')
       }
 
+      if (form.imageUrl.startsWith('data:')) {
+        throw new Error("L'image n'a pas ete envoyee correctement. Reuploadez le fichier avant de sauvegarder.")
+      }
+
       const url = editingId ? `/api/sessions/${editingId}` : '/api/sessions'
       const method = editingId ? 'PUT' : 'POST'
 
@@ -214,9 +244,9 @@ export default function AdminSessionsPage() {
         }),
       })
 
-      const data = await response.json()
+      const data = await readApiPayload(response)
       if (!response.ok) {
-        throw new Error(data.error || 'Impossible de sauvegarder la session.')
+        throw new Error(getApiErrorMessage(data, 'Impossible de sauvegarder la session.'))
       }
 
       resetForm()
@@ -244,14 +274,21 @@ export default function AdminSessionsPage() {
         throw new Error('Image trop volumineuse. Taille max: 5 MB.')
       }
 
-      const encoded = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(String(reader.result || ''))
-        reader.onerror = () => reject(new Error("Erreur lors de la lecture de l'image."))
-        reader.readAsDataURL(file)
+      const uploadPayload = new FormData()
+      uploadPayload.append('file', file)
+      uploadPayload.append('folder', 'sessions')
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadPayload,
       })
 
-      setForm((prev) => ({ ...prev, imageUrl: encoded }))
+      const data = await readApiPayload<{ error?: string; url?: string }>(response)
+      if (!response.ok || !data.url) {
+        throw new Error(getApiErrorMessage(data, "Erreur lors de l'upload de l'image."))
+      }
+
+      setForm((prev) => ({ ...prev, imageUrl: data.url || '' }))
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : 'Erreur inconnue pendant upload.')
     } finally {

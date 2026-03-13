@@ -8,6 +8,7 @@ import {
   verifyAdminToken,
   verifyStudentToken,
 } from '@/lib/auth-portal/jwt'
+import { isEmergencyAdminLoginAllowed } from '@/lib/auth-portal/security'
 
 const publicRoutes = [
   '/',
@@ -27,11 +28,42 @@ const localeMiddleware = (request: NextRequest) => {
   return null
 }
 
+const legacyAdminRouteMap: Record<string, string> = {
+  '/admin': '/admin/dashboard',
+  '/admin/dashboard': '/admin/dashboard',
+  '/admin/inscriptions': '/admin/enrollments',
+  '/admin/students': '/admin/students',
+  '/admin/students-management': '/admin/students',
+  '/admin/formations': '/admin/formations',
+  '/admin/courses-management': '/admin/formations',
+  '/admin/exams-management': '/admin/evaluations',
+  '/admin/assignments': '/admin/submissions',
+  '/admin/submissions': '/admin/submissions',
+  '/admin/certificates': '/admin/certificates',
+  '/admin/reports': '/admin/analytics',
+  '/admin/settings': '/admin/settings',
+}
+
+function resolveLegacyAdminRedirect(pathname: string) {
+  const match = pathname.match(/^\/(fr|en)(\/admin(?:\/.*)?$)/)
+  if (!match) return null
+
+  const legacyPath = match[2]
+  return legacyAdminRouteMap[legacyPath] || '/admin/dashboard'
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const localeRedirect = localeMiddleware(request)
   if (localeRedirect) return localeRedirect
+
+  const legacyAdminRedirectPath = resolveLegacyAdminRedirect(pathname)
+  if (legacyAdminRedirectPath) {
+    const url = request.nextUrl.clone()
+    url.pathname = legacyAdminRedirectPath
+    return NextResponse.redirect(url)
+  }
 
   // Normalize only /auth paths for localized legacy auth pages.
   if (pathname === '/auth' || pathname.startsWith('/auth/')) {
@@ -63,7 +95,8 @@ export async function middleware(request: NextRequest) {
           req: request,
           secret: process.env.NEXTAUTH_SECRET,
         })
-    const isLegacyAdminAuthenticated = legacyAdminToken?.role === 'ADMIN'
+    const isLegacyAdminAuthenticated =
+      isEmergencyAdminLoginAllowed() && legacyAdminToken?.role === 'ADMIN'
 
     if (!adminPayload && !isLegacyAdminAuthenticated) {
       if (isAdminPortalApi) {

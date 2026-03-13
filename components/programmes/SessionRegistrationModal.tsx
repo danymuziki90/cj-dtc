@@ -349,16 +349,12 @@ export default function SessionRegistrationModal({ open, locale, session, progra
   const sections = useMemo(() => getSections(programType), [programType])
   const [values, setValues] = useState<Record<string, string | boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [paymentProvider, setPaymentProvider] = useState<'pawapay' | 'flutterwave'>('pawapay')
-  const [pawapayOperator, setPawapayOperator] = useState('airtel')
-  const [flutterwaveMethod, setFlutterwaveMethod] = useState<'card' | 'mobile_money' | 'bank_transfer'>('card')
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{
     kind: 'success' | 'error'
     message: string
     paymentId?: number
     paymentStatus?: string
-    provider?: 'pawapay' | 'flutterwave'
   } | null>(null)
   const [checkingPawaPayStatus, setCheckingPawaPayStatus] = useState(false)
 
@@ -369,9 +365,6 @@ export default function SessionRegistrationModal({ open, locale, session, progra
     setResult(null)
     setSubmitting(false)
     setCheckingPawaPayStatus(false)
-    setPaymentProvider('pawapay')
-    setPawapayOperator('airtel')
-    setFlutterwaveMethod('card')
   }, [open, sections])
 
   if (!open || !session) return null
@@ -427,17 +420,14 @@ export default function SessionRegistrationModal({ open, locale, session, progra
           locale,
         },
         payment: {
-          provider: paymentProvider,
-          method: paymentProvider === 'pawapay' ? 'mobile_money' : flutterwaveMethod,
-          amount: session.price,
+          provider: 'pawapay',
+          method: 'mobile_money',
           currency: 'USD',
-          phoneNumber: paymentProvider === 'pawapay' ? String(values.whatsapp || '') : undefined,
-          operator: paymentProvider === 'pawapay' ? pawapayOperator : undefined,
-          returnUrl: `/${locale}/programmes`,
+          phoneNumber: String(values.whatsapp || ''),
         },
       }
 
-      const response = await fetch('/api/programmes/register', {
+      const response = await fetch('/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -448,17 +438,11 @@ export default function SessionRegistrationModal({ open, locale, session, progra
       }
 
       const action = data.payment?.action
-      if (action?.requiresRedirect && action.redirectUrl) {
-        window.location.href = action.redirectUrl
-        return
-      }
-
       setResult({
         kind: 'success',
         message: action?.message || "Inscription enregistree avec succes.",
         paymentId: data.payment?.id,
         paymentStatus: data.payment?.status,
-        provider: paymentProvider,
       })
     } catch (error) {
       setResult({
@@ -641,61 +625,24 @@ export default function SessionRegistrationModal({ open, locale, session, progra
 
               <section className="rounded-xl border border-slate-200 p-4">
                 <h4 className="text-base font-semibold text-slate-900">Paiement et conditions</h4>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentProvider('pawapay')}
-                    className={`rounded-lg px-3 py-2 text-sm ${paymentProvider === 'pawapay' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'}`}
-                  >
-                    Mobile Money (PawaPay)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentProvider('flutterwave')}
-                    className={`rounded-lg px-3 py-2 text-sm ${paymentProvider === 'flutterwave' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'}`}
-                  >
-                    Flutterwave
-                  </button>
+                <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                  Paiement disponible: <strong>PawaPay Mobile Money</strong>
                 </div>
-
-                {paymentProvider === 'pawapay' ? (
-                  <div className="mt-3">
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Operateur</label>
-                    <select
-                      value={pawapayOperator}
-                      onChange={(e) => setPawapayOperator(e.target.value)}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                    >
-                      <option value="vodacom">Vodacom</option>
-                      <option value="airtel">Airtel</option>
-                      <option value="orange">Orange</option>
-                      <option value="mtn">MTN</option>
-                      <option value="other">Autre</option>
-                    </select>
-                  </div>
-                ) : (
-                  <div className="mt-3">
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Methode Flutterwave</label>
-                    <select
-                      value={flutterwaveMethod}
-                      onChange={(e) => setFlutterwaveMethod(e.target.value as 'card' | 'mobile_money' | 'bank_transfer')}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                    >
-                      <option value="card">Carte bancaire</option>
-                      <option value="mobile_money">Mobile Money</option>
-                      <option value="bank_transfer">Virement bancaire</option>
-                    </select>
-                  </div>
-                )}
                 <p className="mt-3 text-xs text-slate-500">
-                  Aucun justificatif de paiement n&apos;est requis pour l&apos;inscription aux sessions.
+                  Saisissez votre numero WhatsApp ou Mobile Money. Le montant preleve correspond au prix de la session
+                  et le correspondant PawaPay est detecte automatiquement.
                 </p>
               </section>
 
               {result ? (
                 <div className="space-y-2">
                   <p className={`text-sm ${result.kind === 'success' ? 'text-blue-700' : 'text-red-700'}`}>{result.message}</p>
-                  {result.provider === 'pawapay' && result.paymentStatus === 'pending' && result.paymentId ? (
+                  {result.paymentStatus ? (
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Statut paiement: {result.paymentStatus}
+                    </p>
+                  ) : null}
+                  {result.paymentStatus === 'pending' && result.paymentId ? (
                     <button
                       type="button"
                       onClick={checkPawaPayStatus}

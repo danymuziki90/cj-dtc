@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { verifyPassword } from '@/lib/auth-portal/password'
+import { buildRateLimitIdentifier, consumeRateLimit } from '@/lib/auth-portal/rate-limit'
+import { ensurePortalSecretReady, isEmergencyAdminLoginAllowed } from '@/lib/auth-portal/security'
 import {
   ADMIN_AUTH_COOKIE,
   ADMIN_TOKEN_MAX_AGE,
@@ -16,12 +18,37 @@ const loginSchema = z.object({
 
 const DEFAULT_ADMIN_USERNAME = process.env.ADMIN_DEFAULT_USERNAME || 'admincjtc'
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_DEFAULT_PASSWORD || 'admin@123'
-const ALLOW_EMERGENCY_LOGIN =
-  process.env.ADMIN_ALLOW_EMERGENCY_LOGIN === 'true' || process.env.NODE_ENV !== 'production'
+const ADMIN_LOGIN_LIMIT = 5
+const ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    ensurePortalSecretReady('ADMIN_JWT_SECRET')
+
+    const body = await request.json().catch(() => null)
+    const rateLimitKey = buildRateLimitIdentifier(
+      request,
+      typeof body?.username === 'string' ? body.username : 'anonymous'
+    )
+    const rateLimit = consumeRateLimit({
+      bucket: 'admin-login',
+      identifier: rateLimitKey,
+      limit: ADMIN_LOGIN_LIMIT,
+      windowMs: ADMIN_LOGIN_WINDOW_MS,
+    })
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Trop de tentatives de connexion admin. Veuillez reessayer plus tard.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimit.retryAfterSeconds),
+          },
+        }
+      )
+    }
+
     const parsed = loginSchema.safeParse(body)
 
     if (!parsed.success) {
@@ -78,7 +105,7 @@ export async function POST(request: NextRequest) {
     if (!admin) {
       // Controlled emergency fallback when DB/models are unavailable.
       if (
-        ALLOW_EMERGENCY_LOGIN &&
+        isEmergencyAdminLoginAllowed() &&
         dbUnavailable &&
         username === DEFAULT_ADMIN_USERNAME &&
         password === DEFAULT_ADMIN_PASSWORD
@@ -119,6 +146,14 @@ export async function POST(request: NextRequest) {
     return response
   } catch (error) {
     console.error('Admin login error:', error)
+
+    if (error instanceof Error && error.message.includes('JWT_SECRET')) {
+      return NextResponse.json(
+        { error: 'Authentification admin indisponible. Verifiez les secrets JWT.' },
+        { status: 503 }
+      )
+    }
+
     return NextResponse.json(
       { error: 'Server error: admin login temporarily unavailable. Check database/migrations.' },
       { status: 500 }

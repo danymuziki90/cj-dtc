@@ -17,9 +17,45 @@ type MeResponse = {
   }
 }
 
+type SecurityStatus = {
+  environment: string
+  emergencyAdminLoginAllowed: boolean
+  minimumSecretLength: number
+  adminJwt: {
+    source: string
+    strong: boolean
+    valid: boolean
+    usingFallback: boolean
+    message: string
+  }
+  studentJwt: {
+    source: string
+    strong: boolean
+    valid: boolean
+    usingFallback: boolean
+    message: string
+  }
+}
+
+type AuditLogRow = {
+  id: string
+  adminId: string | null
+  adminUsername: string
+  action: string
+  targetType: string
+  targetId: string | null
+  targetLabel: string | null
+  summary: string
+  status: string
+  ipAddress: string | null
+  createdAt: string
+}
+
 export default function AdminSettingsPage() {
   const [admins, setAdmins] = useState<AdminRow[]>([])
   const [currentAdmin, setCurrentAdmin] = useState<MeResponse['admin'] | null>(null)
+  const [security, setSecurity] = useState<SecurityStatus | null>(null)
+  const [auditLogs, setAuditLogs] = useState<AuditLogRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [createForm, setCreateForm] = useState({
@@ -37,20 +73,26 @@ export default function AdminSettingsPage() {
     setLoading(true)
     setError(null)
     try {
-      const [adminsRes, meRes] = await Promise.all([
+      const [adminsRes, meRes, securityRes, auditRes] = await Promise.all([
         fetch('/api/admin/system/admins', { cache: 'no-store' }),
         fetch('/api/admin/auth/me', { cache: 'no-store' }),
+        fetch('/api/admin/system/security-status', { cache: 'no-store' }),
+        fetch('/api/admin/system/audit-logs?limit=25', { cache: 'no-store' }),
       ])
 
-      if (!adminsRes.ok || !meRes.ok) {
+      if (!adminsRes.ok || !meRes.ok || !securityRes.ok || !auditRes.ok) {
         throw new Error('Unable to load admin settings.')
       }
 
       const adminsPayload = await adminsRes.json()
       const mePayload = (await meRes.json()) as MeResponse
+      const securityPayload = (await securityRes.json()) as SecurityStatus
+      const auditPayload = await auditRes.json()
 
       setAdmins(adminsPayload.admins || [])
       setCurrentAdmin(mePayload.admin || null)
+      setSecurity(securityPayload)
+      setAuditLogs(auditPayload.logs || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unexpected error.')
     } finally {
@@ -167,6 +209,55 @@ export default function AdminSettingsPage() {
       <div className="space-y-6">
         {error ? (
           <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        ) : null}
+
+        {security ? (
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">Securite du portail admin</h2>
+                <p className="text-sm text-slate-600">
+                  Environnement: <span className="font-semibold">{security.environment}</span>
+                </p>
+              </div>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  security.emergencyAdminLoginAllowed
+                    ? 'bg-amber-100 text-amber-800'
+                    : 'bg-emerald-100 text-emerald-800'
+                }`}
+              >
+                {security.emergencyAdminLoginAllowed
+                  ? 'Emergency login actif'
+                  : 'Emergency login desactive'}
+              </span>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {[
+                { label: 'Admin JWT', item: security.adminJwt },
+                { label: 'Student JWT', item: security.studentJwt },
+              ].map(({ label, item }) => (
+                <article key={label} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold text-slate-900">{label}</h3>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        item.valid ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {item.valid ? 'Valide' : 'A corriger'}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-700">{item.message}</p>
+                  <p className="mt-2 text-xs text-slate-500">Source: {item.source}</p>
+                  <p className="text-xs text-slate-500">
+                    Longueur minimale recommandee: {security.minimumSecretLength} caracteres
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
         ) : null}
 
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -304,6 +395,51 @@ export default function AdminSettingsPage() {
                   <tr>
                     <td colSpan={4} className="px-3 py-6 text-center text-sm text-slate-500">
                       Chargement...
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Journal d audit recent</h2>
+              <p className="text-sm text-slate-600">Creation, suppression, reset mot de passe et changement de statut.</p>
+            </div>
+          </div>
+
+          <div className="mt-3 overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200 text-sm">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Date</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Admin</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Action</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Cible</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Resume</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">IP</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {auditLogs.map((log) => (
+                  <tr key={log.id}>
+                    <td className="px-3 py-3 text-slate-700">
+                      {new Date(log.createdAt).toLocaleString('fr-FR')}
+                    </td>
+                    <td className="px-3 py-3 text-slate-900">{log.adminUsername}</td>
+                    <td className="px-3 py-3 text-slate-700">{log.action}</td>
+                    <td className="px-3 py-3 text-slate-700">{log.targetLabel || log.targetType}</td>
+                    <td className="px-3 py-3 text-slate-700">{log.summary}</td>
+                    <td className="px-3 py-3 text-slate-500">{log.ipAddress || '-'}</td>
+                  </tr>
+                ))}
+                {!loading && auditLogs.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-3 py-6 text-center text-sm text-slate-500">
+                      Aucun evenement d audit pour le moment.
                     </td>
                   </tr>
                 ) : null}

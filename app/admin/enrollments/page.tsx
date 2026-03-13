@@ -1,30 +1,64 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import AdminEnrollmentTable, { type EnrollmentRow } from '@/components/AdminEnrollmentTable'
 import BulkEmailSender from '@/components/BulkEmailSender'
 import EnrollmentFilters from '@/components/EnrollmentFilters'
-import EnrollmentStats from '@/components/EnrollmentStats'
+import EnrollmentStats, { type EnrollmentStatsSummary } from '@/components/EnrollmentStats'
 import EnrollmentPreviewModal from '@/components/EnrollmentPreviewModal'
 import AdminShell from '@/components/admin-portal/AdminShell'
+import PaginationControls from '@/components/admin-portal/PaginationControls'
 
 type Formation = {
   id: number
   title: string
 }
 
+type PaginationState = {
+  page: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+}
+
+const initialFilters = {
+  status: '',
+  formationId: '',
+  paymentStatus: '',
+  startDateFrom: '',
+  startDateTo: '',
+  search: '',
+}
+
+const initialPagination: PaginationState = {
+  page: 1,
+  pageSize: 10,
+  totalItems: 0,
+  totalPages: 1,
+  hasNextPage: false,
+  hasPreviousPage: false,
+}
+
+const emptyStats: EnrollmentStatsSummary = {
+  total: 0,
+  byStatus: {},
+  byPaymentStatus: {},
+  revenue: {
+    totalAmount: 0,
+    paidAmount: 0,
+  },
+  byFormation: [],
+}
+
 export default function EnrollmentsPage() {
   const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([])
   const [formations, setFormations] = useState<Formation[]>([])
   const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState({
-    status: '',
-    formationId: '',
-    paymentStatus: '',
-    startDateFrom: '',
-    startDateTo: '',
-    search: '',
-  })
+  const [filters, setFilters] = useState(initialFilters)
+  const [pagination, setPagination] = useState<PaginationState>(initialPagination)
+  const [stats, setStats] = useState<EnrollmentStatsSummary>(emptyStats)
   const [selectedEnrollment, setSelectedEnrollment] = useState<EnrollmentRow | null>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [viewMode, setViewMode] = useState<'formation' | 'date'>('formation')
@@ -40,25 +74,38 @@ export default function EnrollmentsPage() {
     }
   }
 
-  async function fetchEnrollments() {
+  async function fetchEnrollments(options?: Partial<PaginationState & typeof filters>) {
     setLoading(true)
     try {
       const params = new URLSearchParams()
-      if (filters.status) params.append('status', filters.status)
-      if (filters.formationId) params.append('formationId', filters.formationId)
-      if (filters.paymentStatus) params.append('paymentStatus', filters.paymentStatus)
-      if (filters.startDateFrom) params.append('startDateFrom', filters.startDateFrom)
-      if (filters.startDateTo) params.append('startDateTo', filters.startDateTo)
-      if (filters.search) params.append('search', filters.search)
+      const nextFilters = {
+        ...filters,
+        ...options,
+      }
+      const page = options?.page ?? pagination.page
+      const pageSize = options?.pageSize ?? pagination.pageSize
+
+      if (nextFilters.status) params.append('status', nextFilters.status)
+      if (nextFilters.formationId) params.append('formationId', nextFilters.formationId)
+      if (nextFilters.paymentStatus) params.append('paymentStatus', nextFilters.paymentStatus)
+      if (nextFilters.startDateFrom) params.append('startDateFrom', nextFilters.startDateFrom)
+      if (nextFilters.startDateTo) params.append('startDateTo', nextFilters.startDateTo)
+      if (nextFilters.search) params.append('search', nextFilters.search)
+      params.append('page', String(page))
+      params.append('pageSize', String(pageSize))
 
       const response = await fetch(`/api/enrollments?${params.toString()}`, { cache: 'no-store' })
       const data = await response.json()
-      const nextEnrollments = Array.isArray(data) ? data : []
+      const nextEnrollments = Array.isArray(data?.enrollments) ? data.enrollments : []
       setEnrollments(nextEnrollments)
+      setPagination(data.pagination || initialPagination)
+      setStats(data.stats || emptyStats)
       return nextEnrollments as EnrollmentRow[]
     } catch (error) {
       console.error('Erreur lors du chargement des inscriptions:', error)
       setEnrollments([])
+      setPagination(initialPagination)
+      setStats(emptyStats)
       return []
     } finally {
       setLoading(false)
@@ -71,7 +118,7 @@ export default function EnrollmentsPage() {
 
   useEffect(() => {
     fetchEnrollments()
-  }, [filters])
+  }, [filters, pagination.page, pagination.pageSize])
 
   const handleExport = async (format: 'excel' | 'csv') => {
     try {
@@ -113,7 +160,7 @@ export default function EnrollmentsPage() {
           <div>
             <h2 className="text-3xl font-bold text-cjblue">Gestion des inscriptions</h2>
             <p className="mt-1 text-sm text-gray-600">
-              Total: {enrollments.length} inscription{enrollments.length > 1 ? 's' : ''}
+              Total filtre: {stats.total} inscription{stats.total > 1 ? 's' : ''}
             </p>
           </div>
           <div className="flex gap-2">
@@ -138,22 +185,19 @@ export default function EnrollmentsPage() {
           </div>
         </div>
 
-        <EnrollmentStats enrollments={enrollments} />
+        <EnrollmentStats summary={stats} />
 
         <EnrollmentFilters
           filters={filters}
           formations={formations}
-          onFiltersChange={setFilters}
-          onReset={() =>
-            setFilters({
-              status: '',
-              formationId: '',
-              paymentStatus: '',
-              startDateFrom: '',
-              startDateTo: '',
-              search: '',
-            })
-          }
+          onFiltersChange={(nextFilters) => {
+            setFilters(nextFilters)
+            setPagination((prev) => ({ ...prev, page: 1 }))
+          }}
+          onReset={() => {
+            setFilters(initialFilters)
+            setPagination((prev) => ({ ...prev, page: 1 }))
+          }}
         />
 
         <BulkEmailSender acceptedEnrollments={enrollments.filter((item) => item.status === 'accepted')} />
@@ -186,6 +230,12 @@ export default function EnrollmentsPage() {
           <AdminEnrollmentTable enrollments={enrollments} groupBy={viewMode} onPreview={handlePreview} />
         )}
 
+        <PaginationControls
+          pagination={pagination}
+          onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+          onPageSizeChange={(pageSize) => setPagination((prev) => ({ ...prev, page: 1, pageSize }))}
+        />
+
         {showPreview && selectedEnrollment ? (
           <EnrollmentPreviewModal
             enrollment={selectedEnrollment}
@@ -204,4 +254,3 @@ export default function EnrollmentsPage() {
     </AdminShell>
   )
 }
-

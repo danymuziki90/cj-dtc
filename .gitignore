@@ -14,3 +14,5 @@ public/uploads/student-submissions
 
 .vercel
 .env*.local
+playwright-report
+test-results

@@ -55,6 +55,7 @@ export default function AdminLoginPage() {
               onChange={(event) => setUsername(event.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
               placeholder="admin username"
+              data-testid="admin-login-username"
               required
             />
           </div>
@@ -67,6 +68,7 @@ export default function AdminLoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
               placeholder="password"
+              data-testid="admin-login-password"
               required
             />
           </div>
@@ -75,6 +77,7 @@ export default function AdminLoginPage() {
             type="submit"
             disabled={loading}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
+            data-testid="admin-login-submit"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>

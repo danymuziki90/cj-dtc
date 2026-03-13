@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { writeAdminAuditLog } from '@/lib/admin/audit'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { hashPassword } from '@/lib/auth-portal/password'
 
@@ -50,6 +51,17 @@ export async function POST(request: NextRequest) {
         createdAt: true,
         updatedAt: true,
       },
+    })
+
+    await writeAdminAuditLog({
+      request,
+      adminId: auth.admin.id,
+      adminUsername: auth.admin.username,
+      action: 'admin.create',
+      targetType: 'admin',
+      targetId: admin.id,
+      targetLabel: admin.username,
+      summary: `Compte administrateur cree pour ${admin.username}.`,
     })
 
     return NextResponse.json({ admin }, { status: 201 })

@@ -58,6 +58,7 @@ export default function StudentLoginPage() {
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+              data-testid="student-login-username"
               required
             />
           </div>
@@ -69,6 +70,7 @@ export default function StudentLoginPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+              data-testid="student-login-password"
               required
             />
           </div>
@@ -77,6 +79,7 @@ export default function StudentLoginPage() {
             type="submit"
             disabled={loading}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
+            data-testid="student-login-submit"
           >
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>

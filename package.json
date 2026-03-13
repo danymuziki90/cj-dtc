@@ -13,6 +13,7 @@
     "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "next lint",
+    "test:e2e": "playwright test",
     "prisma:generate": "prisma generate",
     "prisma:generate-safe": "node scripts/prisma-generate-retry.js",
     "prisma:migrate": "prisma migrate dev",
@@ -55,6 +56,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.7",

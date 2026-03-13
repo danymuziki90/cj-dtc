@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose'
+import { getPortalSecret } from '@/lib/auth-portal/security'
 
 export const ADMIN_AUTH_COOKIE = 'admin_token'
 export const STUDENT_AUTH_COOKIE = 'student_token'
@@ -21,14 +22,6 @@ export type StudentTokenPayload = BaseTokenPayload & {
   studentId: string
 }
 
-function getSecret(envKey: 'ADMIN_JWT_SECRET' | 'STUDENT_JWT_SECRET') {
-  const value = process.env[envKey] || process.env.NEXTAUTH_SECRET
-  if (value) return new TextEncoder().encode(value)
-
-  // Keep development usable without crashing local startup.
-  return new TextEncoder().encode('dev-only-insecure-secret-change-me')
-}
-
 async function signToken(payload: AdminTokenPayload | StudentTokenPayload, secretKey: Uint8Array, expiresInSeconds: number) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
@@ -39,16 +32,16 @@ async function signToken(payload: AdminTokenPayload | StudentTokenPayload, secre
 }
 
 export async function signAdminToken(payload: Omit<AdminTokenPayload, 'role'>) {
-  return signToken({ ...payload, role: 'ADMIN' }, getSecret('ADMIN_JWT_SECRET'), ONE_DAY_IN_SECONDS)
+  return signToken({ ...payload, role: 'ADMIN' }, getPortalSecret('ADMIN_JWT_SECRET'), ONE_DAY_IN_SECONDS)
 }
 
 export async function signStudentToken(payload: Omit<StudentTokenPayload, 'role'>) {
-  return signToken({ ...payload, role: 'STUDENT' }, getSecret('STUDENT_JWT_SECRET'), SEVEN_DAYS_IN_SECONDS)
+  return signToken({ ...payload, role: 'STUDENT' }, getPortalSecret('STUDENT_JWT_SECRET'), SEVEN_DAYS_IN_SECONDS)
 }
 
 export async function verifyAdminToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, getSecret('ADMIN_JWT_SECRET'))
+    const { payload } = await jwtVerify(token, getPortalSecret('ADMIN_JWT_SECRET'))
     if (payload.role !== 'ADMIN') return null
 
     return payload as unknown as AdminTokenPayload
@@ -59,7 +52,7 @@ export async function verifyAdminToken(token: string) {
 
 export async function verifyStudentToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, getSecret('STUDENT_JWT_SECRET'))
+    const { payload } = await jwtVerify(token, getPortalSecret('STUDENT_JWT_SECRET'))
     if (payload.role !== 'STUDENT') return null
 
     return payload as unknown as StudentTokenPayload
