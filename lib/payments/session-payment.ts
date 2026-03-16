@@ -65,13 +65,6 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
     }
   }
 
-  if (!payload.payment.phoneNumber) {
-    return {
-      status: 400,
-      body: { error: 'Phone number is required for PawaPay mobile money payment.' },
-    }
-  }
-
   const session = await prisma.trainingSession.findUnique({
     where: { id: payload.sessionId },
     include: {
@@ -110,13 +103,27 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
   const isFull = activeEnrollmentsCount >= session.maxParticipants
   const amount = Number(session.price || 0)
   const normalizedCurrency = payload.payment.currency.toUpperCase()
+  const hasPayableAmount = amount > 0
+  const requiresImmediatePayment = !isFull && hasPayableAmount
+  const isFreeSession = amount <= 0
+  const isFreeRegistration = !isFull && isFreeSession
+  const registrationDate = new Date()
+
+  if (requiresImmediatePayment && !payload.payment.phoneNumber) {
+    return {
+      status: 400,
+      body: { error: 'Phone number is required for PawaPay mobile money payment.' },
+    }
+  }
 
   const notesPayload = {
     source: 'programmes-page',
     formType,
     answers: payload.answers,
-    submittedAt: new Date().toISOString(),
+    submittedAt: registrationDate.toISOString(),
   }
+
+  const enrollmentStatus = isFull ? 'waitlist' : isFreeRegistration ? 'confirmed' : 'pending'
 
   const enrollment = await prisma.enrollment.create({
     data: {
@@ -134,28 +141,33 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
       formationId: session.formationId,
       sessionId: session.id,
       startDate: session.startDate,
-      status: isFull ? 'waitlist' : 'pending',
-      paymentStatus: 'unpaid',
-      paymentMethod: payload.payment.method,
+      status: enrollmentStatus,
+      paymentStatus: isFreeSession ? 'paid' : 'unpaid',
+      paymentMethod: hasPayableAmount ? payload.payment.method : null,
       totalAmount: amount,
       paidAmount: 0,
+      paymentDate: isFreeRegistration ? registrationDate : null,
     },
   })
 
   const reference = `CJ-${Date.now()}-${randomUUID().slice(0, 8)}`
+  const paymentMethod = hasPayableAmount ? payload.payment.method : 'free'
+  const maskedPhoneNumber = requiresImmediatePayment
+    ? maskPhoneNumber(payload.payment.phoneNumber || payload.personal.whatsapp)
+    : null
 
   let payment = await prisma.payment.create({
     data: {
       enrollmentId: enrollment.id,
       amount,
-      method: payload.payment.method,
-      status: amount <= 0 ? 'success' : 'pending',
+      method: paymentMethod,
+      status: hasPayableAmount ? 'pending' : 'success',
       reference,
-      paidAt: amount <= 0 ? new Date() : null,
+      paidAt: hasPayableAmount ? null : registrationDate,
       notes: JSON.stringify({
-        gateway: amount <= 0 ? 'none' : 'pawapay',
-        operator: payload.payment.operator || null,
-        phoneNumberMasked: maskPhoneNumber(payload.payment.phoneNumber),
+        gateway: requiresImmediatePayment ? 'pawapay' : hasPayableAmount ? 'deferred' : 'none',
+        operator: requiresImmediatePayment ? payload.payment.operator || null : null,
+        phoneNumberMasked: maskedPhoneNumber,
         formType,
         currency: normalizedCurrency,
         callbackUrl,
@@ -170,15 +182,15 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
     status: GatewayInitStatus | 'pending'
   } = {
     provider: 'pawapay',
-    status: amount <= 0 ? 'success' : 'pending',
+    status: hasPayableAmount ? 'pending' : 'success',
     message: isFull
-      ? 'Session is full. Registration has been added to waitlist. Payment is deferred.'
-      : amount <= 0
-      ? 'Registration recorded. No payment is required for this session.'
-      : 'Payment initialized.',
+      ? "La session est complete. Votre inscription a ete ajoutee a la liste d'attente. Le paiement est reporte."
+      : isFreeRegistration
+      ? "Inscription confirmee. Aucun paiement n'est requis pour cette session."
+      : 'Paiement initialise.',
   }
 
-  if (!isFull && amount > 0) {
+  if (requiresImmediatePayment) {
     const pawaPayResult = await initiatePawaPayPayment({
       amount,
       currency: normalizedCurrency,
@@ -198,7 +210,7 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
         notes: JSON.stringify({
           gateway: 'pawapay',
           operator: payload.payment.operator || null,
-          phoneNumberMasked: maskPhoneNumber(payload.payment.phoneNumber),
+          phoneNumberMasked: maskedPhoneNumber,
           formType,
           currency: normalizedCurrency,
           callbackUrl,
@@ -216,21 +228,59 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
     }
   }
 
-  await syncEnrollmentPaymentStatus(enrollment.id)
+  const syncedPayment = await syncEnrollmentPaymentStatus(enrollment.id)
+
+  if (isFreeRegistration) {
+    try {
+      await prisma.adminNotification.create({
+        data: {
+          title: 'Inscription confirmee',
+          message: `Votre inscription a la session ${session.formation.title} est confirmee. Aucun paiement n'est requis.`,
+          type: 'info',
+          target: 'student',
+          studentEmail: enrollment.email,
+          sessionId: session.id,
+          createdBy: 'system',
+        },
+      })
+    } catch (error) {
+      console.error('Free registration notification failed:', error)
+    }
+  }
+
+  const registrationStatusLabel = isFull ? 'waitlist' : enrollmentStatus
+  const paymentStatusLabel = isFull ? 'deferred' : syncedPayment?.paymentStatus || (isFreeRegistration ? 'paid' : payment.status)
+  const emailBody = isFull
+    ? `
+        <h2>Bonjour ${enrollment.firstName}</h2>
+        <p>Votre demande d'inscription pour la session <strong>${session.formation.title}</strong> a bien ete enregistree.</p>
+        <p>La session est actuellement complete. Votre dossier a ete place en <strong>liste d'attente</strong>.</p>
+        <p>Nous vous contacterons des qu'une place se libere.</p>
+        <p>Statut inscription: <strong>${registrationStatusLabel}</strong></p>
+        <p>Statut paiement: <strong>${paymentStatusLabel}</strong></p>
+        <p>Montant de la session: <strong>${amount.toFixed(2)} ${normalizedCurrency}</strong></p>
+      `
+    : isFreeRegistration
+    ? `
+        <h2>Bonjour ${enrollment.firstName}</h2>
+        <p>Votre inscription pour la session <strong>${session.formation.title}</strong> est <strong>confirmee</strong>.</p>
+        <p>Cette session est gratuite. Aucun paiement n'est requis.</p>
+        <p>Statut inscription: <strong>${registrationStatusLabel}</strong></p>
+        <p>Statut paiement: <strong>${paymentStatusLabel}</strong></p>
+        <p>Montant de la session: <strong>${amount.toFixed(2)} ${normalizedCurrency}</strong></p>
+      `
+    : `
+        <h2>Bonjour ${enrollment.firstName}</h2>
+        <p>Votre inscription pour la session <strong>${session.formation.title}</strong> a bien ete enregistree.</p>
+        <p>Veuillez confirmer la demande de paiement Mobile Money pour finaliser votre place.</p>
+        <p>Statut inscription: <strong>${registrationStatusLabel}</strong></p>
+        <p>Statut paiement: <strong>${paymentStatusLabel}</strong></p>
+        <p>Montant: <strong>${amount.toFixed(2)} ${normalizedCurrency}</strong></p>
+      `
 
   try {
     await withEmailTimeout(
-      sendEmail(
-        enrollment.email,
-        `Confirmation d'inscription - ${session.formation.title}`, 
-        `
-          <h2>Bonjour ${enrollment.firstName}</h2>
-          <p>Votre inscription pour la session <strong>${session.formation.title}</strong> a bien ete enregistree.</p>
-          <p>Statut inscription: <strong>${isFull ? 'waitlist' : 'pending'}</strong></p>
-          <p>Statut paiement: <strong>${payment.status}</strong></p>
-          <p>Montant: <strong>${amount.toFixed(2)} ${normalizedCurrency}</strong></p>
-        `
-      )
+      sendEmail(enrollment.email, `Confirmation d'inscription - ${session.formation.title}`, emailBody)
     )
   } catch (error) {
     console.error('Registration confirmation email failed:', error)
@@ -241,7 +291,8 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
     body: {
       success: true,
       enrollmentId: enrollment.id,
-      status: enrollment.status,
+      status: enrollmentStatus,
+      paymentStatus: syncedPayment?.paymentStatus || (isFreeRegistration ? 'paid' : 'unpaid'),
       onWaitlist: isFull,
       payment: {
         id: payment.id,

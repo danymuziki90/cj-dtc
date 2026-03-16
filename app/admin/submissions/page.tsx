@@ -48,16 +48,16 @@ export default function AdminSubmissionsPage() {
   }
 
   return (
-    <AdminShell title="Submissions">
+    <AdminShell title="Travaux et corrections">
       <div className="overflow-x-auto rounded-xl border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Student</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Title</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">Etudiant</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">Titre</th>
               <th className="px-4 py-3 text-left font-semibold text-gray-700">Session</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">File</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Status</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">Fichier</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">Statut</th>
               <th className="px-4 py-3 text-left font-semibold text-gray-700">Actions</th>
             </tr>
           </thead>
@@ -79,7 +79,7 @@ export default function AdminSubmissionsPage() {
                     className="text-blue-600 hover:underline"
                     rel="noreferrer"
                   >
-                    Download
+                    Ouvrir
                   </a>
                 </td>
                 <td className="px-4 py-3">
@@ -92,7 +92,11 @@ export default function AdminSubmissionsPage() {
                         : 'bg-red-100 text-red-700'
                     }`}
                   >
-                    {submission.status}
+                    {submission.status === 'approved'
+                      ? 'Valide'
+                      : submission.status === 'rejected'
+                      ? 'Rejete'
+                      : 'En attente'}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -104,12 +108,12 @@ export default function AdminSubmissionsPage() {
                         [submission.id]: event.target.value,
                       }))
                     }
-                    placeholder="Feedback (optionnel)"
+                    placeholder="Commentaire (optionnel)"
                     className="mb-2 min-h-[66px] w-full rounded border border-gray-300 px-2 py-1 text-xs"
                   />
                   {submission.reviewedAt ? (
                     <p className="mb-2 text-xs text-gray-500">
-                      Dernière mise à jour: {new Date(submission.reviewedAt).toLocaleString('fr-FR')}
+                      Derniere mise a jour: {new Date(submission.reviewedAt).toLocaleString('fr-FR')}
                     </p>
                   ) : null}
                   <div className="flex gap-2">
@@ -117,13 +121,13 @@ export default function AdminSubmissionsPage() {
                       onClick={() => setStatus(submission.id, 'approved')}
                       className="rounded border border-blue-200 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50"
                     >
-                      Approve
+                      Valider
                     </button>
                     <button
                       onClick={() => setStatus(submission.id, 'rejected')}
                       className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
                     >
-                      Reject
+                      Rejeter
                     </button>
                   </div>
                 </td>
@@ -132,7 +136,7 @@ export default function AdminSubmissionsPage() {
             {submissions.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
-                  No submissions yet.
+                  Aucun travail pour le moment.
                 </td>
               </tr>
             ) : null}

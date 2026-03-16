@@ -6,12 +6,16 @@ import { writeAdminAuditLog } from '@/lib/admin/audit'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { hashPassword } from '@/lib/auth-portal/password'
 import { resolveAppBaseUrl, sendStudentPortalAccessEmail, withEmailTimeout } from '@/lib/email'
+import { syncEnrollmentPaymentStatus, toCanonicalPaymentStatus } from '@/lib/payments/status'
 
 const createStudentSchema = z.object({
   name: z.string().min(3),
   email: z.string().email(),
   sessionId: z.string().optional().nullable(),
 })
+
+const STUDENT_PAYMENT_LOCK_MESSAGE =
+  'Le compte etudiant ne peut etre cree qu\'apres validation complete du paiement de la session souscrite.'
 
 function splitName(fullName: string) {
   const cleaned = fullName.trim().replace(/\s+/g, ' ')
@@ -53,6 +57,16 @@ function generateStudentNumber() {
   const time = Date.now().toString().slice(-8)
   const random = randomBytes(2).toString('hex')
   return `STU${time}${random}`
+}
+
+function isEnrollmentPaymentSettled(enrollment: {
+  paymentStatus: string
+  paidAmount: number
+  totalAmount: number
+}) {
+  if (enrollment.totalAmount <= 0) return true
+  if (enrollment.paidAmount >= enrollment.totalAmount) return true
+  return toCanonicalPaymentStatus(enrollment.paymentStatus) === 'success'
 }
 
 function buildStudentWhere(params: { search: string; status: string; sessionId: string }) {
@@ -199,10 +213,6 @@ export async function POST(request: NextRequest) {
     const { name, email, sessionId } = parsed.data
     const { firstName, lastName } = splitName(name)
     const normalizedEmail = email.trim().toLowerCase()
-    const plainPassword = generatePassword()
-    const hashedPassword = await hashPassword(plainPassword)
-    const baseUsername = buildCandidateUsername(name)
-    const username = await ensureUniqueUsername(baseUsername)
 
     const existingStudent = await prisma.student.findUnique({
       where: { email: normalizedEmail },
@@ -223,6 +233,99 @@ export async function POST(request: NextRequest) {
     if (sessionId && !assignedSession) {
       return NextResponse.json({ error: 'Selected session was not found.' }, { status: 400 })
     }
+
+    const latestEnrollment = await prisma.enrollment.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: 'insensitive',
+        },
+        status: {
+          notIn: ['rejected', 'cancelled'],
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: {
+        id: true,
+        status: true,
+        paymentStatus: true,
+        paidAmount: true,
+        totalAmount: true,
+        formation: {
+          select: {
+            title: true,
+          },
+        },
+        session: {
+          select: {
+            id: true,
+            startDate: true,
+            location: true,
+          },
+        },
+      },
+    })
+
+    if (!latestEnrollment) {
+      await writeAdminAuditLog({
+        request,
+        adminId: auth.admin.id,
+        adminUsername: auth.admin.username,
+        action: 'student.create.blocked',
+        targetType: 'student',
+        targetLabel: normalizedEmail,
+        summary: `Creation de compte etudiant bloquee pour ${normalizedEmail} : aucune inscription payee n'a ete trouvee.`,
+        status: 'blocked',
+        metadata: {
+          email: normalizedEmail,
+          adminSessionId: assignedSession?.id || null,
+          reason: 'missing_paid_enrollment',
+        },
+      })
+
+      return NextResponse.json({ error: STUDENT_PAYMENT_LOCK_MESSAGE }, { status: 409 })
+    }
+
+    const syncedPayment = latestEnrollment.totalAmount > 0 ? await syncEnrollmentPaymentStatus(latestEnrollment.id) : null
+    const paymentSnapshot = {
+      paymentStatus: syncedPayment?.paymentStatus || latestEnrollment.paymentStatus,
+      paidAmount: syncedPayment?.paidAmount ?? latestEnrollment.paidAmount,
+      totalAmount: latestEnrollment.totalAmount,
+    }
+
+    if (!isEnrollmentPaymentSettled(paymentSnapshot)) {
+      await writeAdminAuditLog({
+        request,
+        adminId: auth.admin.id,
+        adminUsername: auth.admin.username,
+        action: 'student.create.blocked',
+        targetType: 'student',
+        targetLabel: normalizedEmail,
+        summary: `Creation de compte etudiant bloquee pour ${normalizedEmail} : paiement non solde.`,
+        status: 'blocked',
+        metadata: {
+          email: normalizedEmail,
+          adminSessionId: assignedSession?.id || null,
+          enrollmentId: latestEnrollment.id,
+          enrollmentStatus: latestEnrollment.status,
+          paymentStatus: paymentSnapshot.paymentStatus,
+          paidAmount: paymentSnapshot.paidAmount,
+          totalAmount: paymentSnapshot.totalAmount,
+          formationTitle: latestEnrollment.formation.title,
+          sessionStartDate: latestEnrollment.session?.startDate?.toISOString() || null,
+          sessionLocation: latestEnrollment.session?.location || null,
+        },
+      })
+
+      return NextResponse.json({ error: STUDENT_PAYMENT_LOCK_MESSAGE }, { status: 409 })
+    }
+
+    const plainPassword = generatePassword()
+    const hashedPassword = await hashPassword(plainPassword)
+    const baseUsername = buildCandidateUsername(name)
+    const username = await ensureUniqueUsername(baseUsername)
 
     const student = await prisma.student.create({
       data: {

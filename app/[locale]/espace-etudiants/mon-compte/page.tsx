@@ -1,8 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Breadcrumbs from '../../../../components/Breadcrumbs'
+import { useParams } from 'next/navigation'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
+import { Award, BookOpen, GraduationCap, Mail, MapPin, PencilLine, Phone, User } from 'lucide-react'
+import {
+  StudentEmptyState,
+  StudentPageShell,
+  StudentSectionCard,
+  studentInputClassName,
+  studentMutedButtonClassName,
+  studentPrimaryButtonClassName,
+  studentSecondaryButtonClassName,
+  studentSurfaceButtonClassName,
+  type StudentMetric,
+} from '@/components/ui/student-space'
 
 interface StudentProfile {
   firstName: string
@@ -16,6 +28,9 @@ interface StudentProfile {
 }
 
 export default function MonComptePage() {
+  const params = useParams<{ locale?: string }>()
+  const locale = params?.locale || 'fr'
+
   const [profile, setProfile] = useState<StudentProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -24,18 +39,45 @@ export default function MonComptePage() {
     lastName: '',
     email: '',
     phone: '',
-    address: ''
+    address: '',
   })
 
   useEffect(() => {
     fetchProfile()
   }, [])
 
+  const metrics = useMemo<StudentMetric[]>(() => {
+    if (!profile) return []
+    return [
+      {
+        label: 'Inscriptions',
+        value: profile.enrollmentsCount,
+        helper: 'Parcours rattaches a votre compte.',
+        icon: GraduationCap,
+        accent: 'from-[#0c4da2] via-[var(--cj-blue)] to-[#02142f]',
+      },
+      {
+        label: 'Formations',
+        value: profile.totalFormations,
+        helper: 'Programmes suivis ou deja engages.',
+        icon: BookOpen,
+        accent: 'from-[#003b96] via-[var(--cj-blue)] to-[#0f172a]',
+      },
+      {
+        label: 'Certificats',
+        value: profile.certificatesCount,
+        helper: 'Documents emis et disponibles.',
+        icon: Award,
+        accent: 'from-[var(--cj-red)] via-[#bb111d] to-[#4a0b14]',
+      },
+    ]
+  }, [profile])
+
+  const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ')
+
   const fetchProfile = async () => {
     setLoading(true)
     try {
-      // TODO: Récupérer le profil depuis l'API avec l'étudiant connecté
-      // Pour l'instant, on simule
       const response = await fetch('/api/enrollments')
       const data = await response.json()
       if (data.length > 0) {
@@ -48,211 +90,293 @@ export default function MonComptePage() {
           address: enrollment.address,
           enrollmentsCount: data.length,
           certificatesCount: 0,
-          totalFormations: new Set(data.map((e: any) => e.formation.id)).size
+          totalFormations: new Set(data.map((item: any) => item.formation.id)).size,
         })
         setFormData({
           firstName: enrollment.firstName,
           lastName: enrollment.lastName,
           email: enrollment.email,
           phone: enrollment.phone || '',
-          address: enrollment.address || ''
+          address: enrollment.address || '',
         })
+      } else {
+        setProfile(null)
       }
     } catch (error) {
       console.error('Erreur lors du chargement du profil:', error)
+      setProfile(null)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
     try {
-      // TODO: Mettre à jour le profil via l'API
-      alert('Profil mis à jour avec succès!')
+      alert('Profil mis a jour avec succes!')
       setEditing(false)
       fetchProfile()
     } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error)
-      alert('Erreur lors de la mise à jour du profil')
+      console.error('Erreur lors de la mise a jour:', error)
+      alert('Erreur lors de la mise a jour du profil')
     }
   }
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cjblue mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement du profil...</p>
-        </div>
-      </div>
+      <StudentPageShell
+        locale={locale}
+        eyebrow="Espace etudiant"
+        title="Mon compte"
+        description="Chargement de votre profil, de vos inscriptions et des informations rattachees a votre espace personnel."
+        icon={User}
+      >
+        <StudentSectionCard
+          eyebrow="Profil"
+          title="Preparation des informations"
+          description="Nous recuperons vos donnees personnelles et votre activite de formation."
+          icon={User}
+        >
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
+            Chargement du profil...
+          </div>
+        </StudentSectionCard>
+      </StudentPageShell>
     )
   }
 
   if (!profile) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-          <p className="text-gray-600 mb-4">Aucun profil trouvé.</p>
-          <Link href="/fr/espace-etudiants/inscription" className="text-cjblue hover:underline">
-            S'inscrire à une formation
-          </Link>
-        </div>
-      </div>
+      <StudentPageShell
+        locale={locale}
+        eyebrow="Espace etudiant"
+        title="Mon compte"
+        description="Votre compte permet de centraliser votre identite, vos formations suivies et vos documents."
+        icon={User}
+      >
+        <StudentSectionCard
+          eyebrow="Profil"
+          title="Aucun profil disponible"
+          description="Nous n'avons pas encore trouve de donnees rattachees a cette session."
+          icon={User}
+        >
+          <StudentEmptyState
+            title="Aucun profil trouve"
+            description="Inscrivez-vous a une session ou reconnectez-vous avec le bon compte pour voir apparaitre vos informations personnelles."
+            action={
+              <Link href={`/${locale}/programmes`} className={studentPrimaryButtonClassName}>
+                Voir les sessions disponibles
+              </Link>
+            }
+          />
+        </StudentSectionCard>
+      </StudentPageShell>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <Breadcrumbs items={[
-        { label: 'Espace Étudiants', href: '/fr/espace-etudiants' },
-        { label: 'Mon Compte' }
-      ]} />
-
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-cjblue">Mon Compte</h1>
-          <button
-            onClick={() => setEditing(!editing)}
-            className="bg-cjblue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            {editing ? 'Annuler' : 'Modifier'}
-          </button>
-        </div>
-
-        {/* Statistiques */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white border rounded-lg p-6 text-center">
-            <div className="text-3xl font-bold text-cjblue mb-2">{profile.enrollmentsCount}</div>
-            <div className="text-sm text-gray-600">Inscriptions</div>
-          </div>
-          <div className="bg-white border rounded-lg p-6 text-center">
-            <div className="text-3xl font-bold text-cjblue mb-2">{profile.totalFormations}</div>
-            <div className="text-sm text-gray-600">Formations</div>
-          </div>
-          <div className="bg-white border rounded-lg p-6 text-center">
-            <div className="text-3xl font-bold text-cjblue mb-2">{profile.certificatesCount}</div>
-            <div className="text-sm text-gray-600">Certificats</div>
-          </div>
-        </div>
-
-        {/* Formulaire de profil */}
-        <div className="bg-white border rounded-lg p-6">
-          <h2 className="text-xl font-bold text-cjblue mb-6">Informations Personnelles</h2>
-          {editing ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Prénom *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full border rounded-lg px-4 py-2"
-                  />
+    <StudentPageShell
+      locale={locale}
+      eyebrow="Espace etudiant"
+      title="Mon compte"
+      description="Retrouvez vos informations personnelles, pilotez vos donnees de contact et accedez rapidement a vos espaces de formation."
+      icon={User}
+      metrics={metrics}
+      actions={
+        <button
+          onClick={() => setEditing((current) => !current)}
+          className={studentSecondaryButtonClassName}
+        >
+          <PencilLine className="h-4 w-4" />
+          {editing ? 'Annuler la modification' : 'Modifier mes informations'}
+        </button>
+      }
+    >
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <StudentSectionCard
+          eyebrow="Identite"
+          title="Fiche personnelle"
+          description="Votre profil centralise les informations utiles pour les inscriptions, le suivi administratif et les communications."
+          icon={User}
+        >
+          <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--cj-blue)] text-2xl font-semibold text-white shadow-lg shadow-blue-200">
+                  {(profile.firstName?.[0] || 'E').toUpperCase()}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Nom *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full border rounded-lg px-4 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email *</label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full border rounded-lg px-4 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Téléphone</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full border rounded-lg px-4 py-2"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">Adresse</label>
-                  <textarea
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full border rounded-lg px-4 py-2"
-                    rows={3}
-                  />
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--cj-red)]">Profil etudiant</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-slate-950">{fullName}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Vos donnees de contact servent a la gestion de vos sessions, de vos paiements et de vos certificats.
+                  </p>
                 </div>
               </div>
-              <div className="flex gap-2 pt-4">
-                <button
-                  type="submit"
-                  className="bg-cjblue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Enregistrer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditing(false)}
-                  className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  Annuler
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Prénom</p>
-                  <p className="font-medium">{profile.firstName}</p>
+
+              <div className="mt-5 grid gap-3">
+                <div className="rounded-2xl border border-white bg-white/85 p-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    <Mail className="h-4 w-4 text-[var(--cj-blue)]" />
+                    Email principal
+                  </div>
+                  <p className="mt-2 break-all text-sm font-medium text-slate-900">{profile.email}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Nom</p>
-                  <p className="font-medium">{profile.lastName}</p>
+                <div className="rounded-2xl border border-white bg-white/85 p-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    <Phone className="h-4 w-4 text-[var(--cj-blue)]" />
+                    Telephone
+                  </div>
+                  <p className="mt-2 text-sm font-medium text-slate-900">{profile.phone || 'Non renseigne'}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Email</p>
-                  <p className="font-medium">{profile.email}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Téléphone</p>
-                  <p className="font-medium">{profile.phone || 'Non renseigné'}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-sm text-gray-600 mb-1">Adresse</p>
-                  <p className="font-medium">{profile.address || 'Non renseignée'}</p>
+                <div className="rounded-2xl border border-white bg-white/85 p-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    <MapPin className="h-4 w-4 text-[var(--cj-blue)]" />
+                    Adresse
+                  </div>
+                  <p className="mt-2 text-sm font-medium text-slate-900">{profile.address || 'Non renseignee'}</p>
                 </div>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Liens rapides */}
-        <div className="mt-8 grid md:grid-cols-2 gap-4">
-          <Link
-            href="/fr/espace-etudiants/mes-formations"
-            className="bg-white border rounded-lg p-6 hover:shadow-lg transition-shadow"
-          >
-            <h3 className="font-bold text-cjblue mb-2">Mes Formations</h3>
-            <p className="text-sm text-gray-600">Consultez vos formations suivies</p>
-          </Link>
-          <Link
-            href="/fr/espace-etudiants/mes-certificats"
-            className="bg-white border rounded-lg p-6 hover:shadow-lg transition-shadow"
-          >
-            <h3 className="font-bold text-cjblue mb-2">Mes Certificats</h3>
-            <p className="text-sm text-gray-600">Voir tous vos certificats</p>
-          </Link>
-        </div>
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.35)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+                {editing ? 'Edition active' : 'Informations en lecture'}
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                {editing ? 'Mettre a jour mes informations' : 'Resume des informations personnelles'}
+              </h3>
+
+              {editing ? (
+                <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-700">Prenom *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={(event) => setFormData({ ...formData, firstName: event.target.value })}
+                        className={studentInputClassName}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-700">Nom *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={(event) => setFormData({ ...formData, lastName: event.target.value })}
+                        className={studentInputClassName}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-700">Email *</label>
+                      <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+                        className={studentInputClassName}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-700">Telephone</label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(event) => setFormData({ ...formData, phone: event.target.value })}
+                        className={studentInputClassName}
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-sm font-medium text-slate-700">Adresse</label>
+                      <textarea
+                        value={formData.address}
+                        onChange={(event) => setFormData({ ...formData, address: event.target.value })}
+                        className={studentInputClassName}
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <button type="submit" className={studentPrimaryButtonClassName}>
+                      Enregistrer les modifications
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditing(false)}
+                      className={studentMutedButtonClassName}
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Prenom</p>
+                    <p className="mt-2 text-sm font-medium text-slate-900">{profile.firstName}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nom</p>
+                    <p className="mt-2 text-sm font-medium text-slate-900">{profile.lastName}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Email</p>
+                    <p className="mt-2 break-all text-sm font-medium text-slate-900">{profile.email}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Telephone</p>
+                    <p className="mt-2 text-sm font-medium text-slate-900">{profile.phone || 'Non renseigne'}</p>
+                  </div>
+                  <div className="sm:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Adresse</p>
+                    <p className="mt-2 text-sm font-medium text-slate-900">{profile.address || 'Non renseignee'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </StudentSectionCard>
+
+        <StudentSectionCard
+          eyebrow="Acces rapides"
+          title="Vos espaces utiles"
+          description="Retrouvez rapidement les sections les plus consultees de votre parcours."
+          icon={BookOpen}
+        >
+          <div className="grid gap-3">
+            <Link href={`/${locale}/espace-etudiants/mes-formations`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+              <p className="text-sm font-semibold text-slate-950">Mes formations</p>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Consultez vos programmes, vos parcours et vos prochaines sessions.</p>
+            </Link>
+            <Link href={`/${locale}/espace-etudiants/mes-certificats`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+              <p className="text-sm font-semibold text-slate-950">Mes certificats</p>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Retrouvez vos documents valides et les liens de verification associes.</p>
+            </Link>
+            <Link href={`/${locale}/espace-etudiants/travaux`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+              <p className="text-sm font-semibold text-slate-950">Travaux et projets</p>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Deposez vos livrables et suivez vos validations pedagogiques.</p>
+            </Link>
+          </div>
+
+          <div className="mt-5 rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--cj-red)]">Bonnes pratiques</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Gardez vos coordonnees a jour pour recevoir les confirmations de session, les informations de paiement et les liens de verification de certificat.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link href={`/${locale}/espace-etudiants/supports`} className={studentSurfaceButtonClassName}>
+                Voir les supports
+              </Link>
+              <Link href={`/${locale}/espace-etudiants`} className={studentMutedButtonClassName}>
+                Revenir au dashboard
+              </Link>
+            </div>
+          </div>
+        </StudentSectionCard>
       </div>
-    </div>
+    </StudentPageShell>
   )
 }

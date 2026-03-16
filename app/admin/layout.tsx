@@ -1,14 +1,9 @@
 import '../globals.css'
-import AdminHeader from '../../components/AdminHeader'
 import { ReactNode } from 'react'
+import AdminWorkspace from '@/components/admin-portal/AdminWorkspace'
 
 export const metadata = { title: 'Admin - CJ DEVELOPMENT TRAINING CENTER' }
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="admin-theme min-h-screen">
-      <AdminHeader />
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{children}</div>
-    </div>
-  )
+  return <AdminWorkspace>{children}</AdminWorkspace>
 }

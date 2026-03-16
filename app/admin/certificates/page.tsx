@@ -1,4 +1,4 @@
-﻿import { prisma } from '../../../lib/prisma'
+import { prisma } from '../../../lib/prisma'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -19,7 +19,7 @@ export default async function CertificatesPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full px-3 py-8 sm:px-4 lg:px-5 xl:px-6 2xl:px-8">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-cjblue">Gestion des Certificats</h2>
         <div className="flex space-x-3">

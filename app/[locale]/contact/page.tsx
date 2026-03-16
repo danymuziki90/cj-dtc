@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -13,8 +13,10 @@ import {
   Send,
   ShieldCheck,
   Sparkles,
-  type LucideIcon
+  type LucideIcon,
 } from 'lucide-react'
+import { resolveSiteLocale } from '@/lib/i18n/locale'
+import { publicMessages } from '@/lib/i18n/public-messages'
 
 type ContactFormData = {
   name: string
@@ -31,57 +33,60 @@ type ContactCard = {
   href?: string
 }
 
-const contactCards: ContactCard[] = [
-  {
-    icon: Mail,
-    title: 'Email',
-    value: 'contact@cjdevelopmenttc.org',
-    detail: 'Reponse sous 24h en moyenne',
-    href: 'mailto:contact@cjdevelopmenttc.org'
-  },
-  {
-    icon: Phone,
-    title: 'Telephone',
-    value: '+243 995 136 626',
-    detail: 'Lun - Ven, 8h00 a 18h00',
-    href: 'tel:+243995136626'
-  },
-  {
-    icon: MapPin,
-    title: 'Localisation',
-    value: 'Republique Democratique du Congo',
-    detail: 'Accompagnement en presentiel et en ligne'
-  },
-  {
-    icon: Clock3,
-    title: 'Delai de suivi',
-    value: 'Traitement prioritaire',
-    detail: 'Chaque message est pris en charge par notre equipe'
-  }
-]
-
-const supportHighlights: Array<{ icon: LucideIcon; title: string; description: string }> = [
-  {
-    icon: ShieldCheck,
-    title: 'Accompagnement professionnel',
-    description: 'Un interlocuteur vous guide vers le bon programme selon votre objectif.'
-  },
-  {
-    icon: Sparkles,
-    title: 'Approche orientee resultats',
-    description: 'Nous repondons avec des solutions concretes pour vos besoins formation.'
-  }
-]
+const copy = publicMessages.contact
 
 export default function ContactPage() {
   const params = useParams<{ locale?: string }>()
-  const locale = typeof params?.locale === 'string' ? params.locale : 'fr'
+  const locale = resolveSiteLocale(params?.locale)
+  const t = copy[locale]
+
+  const contactCards: ContactCard[] = [
+    {
+      icon: Mail,
+      title: t.cards[0].title,
+      value: 'contact@cjdevelopmenttc.org',
+      detail: t.cards[0].detail,
+      href: 'mailto:contact@cjdevelopmenttc.org',
+    },
+    {
+      icon: Phone,
+      title: t.cards[1].title,
+      value: '+243 995 136 626',
+      detail: t.cards[1].detail,
+      href: 'tel:+243995136626',
+    },
+    {
+      icon: MapPin,
+      title: t.cards[2].title,
+      value: locale === 'fr' ? 'Republique Democratique du Congo' : 'Democratic Republic of the Congo',
+      detail: t.cards[2].detail,
+    },
+    {
+      icon: Clock3,
+      title: t.cards[3].title,
+      value: locale === 'fr' ? 'Traitement prioritaire' : 'Priority handling',
+      detail: t.cards[3].detail,
+    },
+  ]
+
+  const supportHighlights: Array<{ icon: LucideIcon; title: string; description: string }> = [
+    {
+      icon: ShieldCheck,
+      title: t.highlights[0].title,
+      description: t.highlights[0].description,
+    },
+    {
+      icon: Sparkles,
+      title: t.highlights[1].title,
+      description: t.highlights[1].description,
+    },
+  ]
 
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
   })
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -103,20 +108,19 @@ export default function ContactPage() {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       })
 
       const data = (await response.json()) as { error?: string }
 
       if (!response.ok) {
-        throw new Error(data.error || "Erreur lors de l'envoi du message.")
+        throw new Error(data.error || t.submitError)
       }
 
       setSuccess(true)
       setFormData({ name: '', email: '', subject: '', message: '' })
     } catch (caughtError: unknown) {
-      const message =
-        caughtError instanceof Error ? caughtError.message : 'Une erreur est survenue.'
+      const message = caughtError instanceof Error ? caughtError.message : t.unexpectedError
       setError(message)
     } finally {
       setSubmitting(false)
@@ -138,32 +142,27 @@ export default function ContactPage() {
           <div className="relative z-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
             <div>
               <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-100 backdrop-blur">
-                Contact direct
+                {t.heroBadge}
               </p>
-              <h1 className="mb-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
-                Construisons votre prochaine etape professionnelle.
-              </h1>
-              <p className="max-w-3xl text-base text-blue-100 sm:text-lg">
-                Une page contact premium, claire et rapide: vous envoyez votre demande, notre equipe
-                vous repond avec une orientation concrete vers la bonne session.
-              </p>
+              <h1 className="mb-4 text-4xl font-bold leading-tight text-white sm:text-5xl">{t.heroTitle}</h1>
+              <p className="max-w-3xl text-base text-blue-100 sm:text-lg">{t.heroDescription}</p>
             </div>
 
             <div className="relative rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-lg shadow-[0_20px_45px_rgba(0,0,0,0.25)]">
-              <p className="text-sm font-semibold text-white/90">Besoin d&apos;agir vite ?</p>
+              <p className="text-sm font-semibold text-white/90">{t.quickHelp}</p>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row lg:flex-col">
                 <Link
                   href={`/${locale}/programmes`}
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-cjblue transition hover:-translate-y-0.5 hover:bg-blue-50"
                 >
-                  Voir nos sessions
+                  {t.sessionsCta}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <a
                   href="tel:+243995136626"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/40 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/20"
                 >
-                  Appeler maintenant
+                  {t.callNow}
                 </a>
               </div>
             </div>
@@ -196,10 +195,7 @@ export default function ContactPage() {
             }
 
             return (
-              <div
-                key={card.title}
-                className="relative rounded-2xl border border-slate-200/80 bg-white/85 p-5 backdrop-blur-sm shadow-[0_18px_45px_rgba(15,23,42,0.09)]"
-              >
+              <div key={card.title} className="relative rounded-2xl border border-slate-200/80 bg-white/85 p-5 backdrop-blur-sm shadow-[0_18px_45px_rgba(15,23,42,0.09)]">
                 {content}
               </div>
             )
@@ -210,16 +206,9 @@ export default function ContactPage() {
           <div className="relative">
             <div className="absolute -inset-2 rounded-[2rem] bg-gradient-to-br from-cjblue/25 via-cjblue/5 to-cjred/20 blur-xl" />
             <div className="relative h-full rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_28px_80px_rgba(0,45,114,0.12)] backdrop-blur-xl sm:p-8">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-cjblue">
-                Support humain
-              </p>
-              <h2 className="mb-4 text-2xl font-bold text-cjblue sm:text-3xl">
-                Parlons de votre projet de formation
-              </h2>
-              <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
-                Que vous soyez etudiant, professionnel ou entreprise, nous vous orientons vers la
-                session la plus adaptee et les prochaines etapes d&apos;inscription.
-              </p>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-cjblue">{t.supportEyebrow}</p>
+              <h2 className="mb-4 text-2xl font-bold text-cjblue sm:text-3xl">{t.supportTitle}</h2>
+              <p className="text-sm leading-relaxed text-slate-600 sm:text-base">{t.supportDescription}</p>
 
               <div className="mt-8 space-y-4">
                 {supportHighlights.map((item) => (
@@ -238,7 +227,7 @@ export default function ContactPage() {
               </div>
 
               <div className="mt-8 rounded-2xl bg-[linear-gradient(135deg,rgba(0,45,114,0.97)_0%,rgba(0,59,150,0.96)_70%,rgba(227,6,19,0.92)_150%)] p-5 text-white shadow-xl">
-                <p className="text-sm font-semibold text-blue-100">Canal prioritaire</p>
+                <p className="text-sm font-semibold text-blue-100">{t.priorityChannel}</p>
                 <a
                   href="mailto:contact@cjdevelopmenttc.org"
                   className="mt-2 inline-flex items-center gap-2 text-lg font-bold text-white hover:text-blue-100"
@@ -258,21 +247,18 @@ export default function ContactPage() {
                   <Send className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="mb-0 text-2xl font-bold text-cjblue sm:text-3xl">Envoyez votre message</h2>
-                  <p className="mb-0 text-sm text-slate-600">Tous les champs marques * sont obligatoires.</p>
+                  <h2 className="mb-0 text-2xl font-bold text-cjblue sm:text-3xl">{t.formTitle}</h2>
+                  <p className="mb-0 text-sm text-slate-600">{t.formDescription}</p>
                 </div>
               </div>
 
               {success && (
-                <div
-                  role="status"
-                  className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800"
-                >
+                <div role="status" className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0" />
                     <div>
-                      <p className="font-semibold">Message envoye avec succes.</p>
-                      <p className="text-sm">Notre equipe vous repondra dans les plus brefs delais.</p>
+                      <p className="font-semibold">{t.successTitle}</p>
+                      <p className="text-sm">{t.successDescription}</p>
                     </div>
                   </div>
                 </div>
@@ -288,7 +274,7 @@ export default function ContactPage() {
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div className="sm:col-span-1">
                     <label htmlFor="name" className="mb-2 block text-sm font-semibold text-slate-700">
-                      Nom complet *
+                      {t.fields.name}
                     </label>
                     <input
                       id="name"
@@ -296,14 +282,14 @@ export default function ContactPage() {
                       required
                       value={formData.name}
                       onChange={handleChange('name')}
-                      placeholder="Votre nom"
+                      placeholder={t.fields.namePlaceholder}
                       className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-cjblue focus:outline-none focus:ring-4 focus:ring-cjblue/15"
                     />
                   </div>
 
                   <div className="sm:col-span-1">
                     <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700">
-                      Email *
+                      {t.fields.email}
                     </label>
                     <input
                       id="email"
@@ -311,7 +297,7 @@ export default function ContactPage() {
                       required
                       value={formData.email}
                       onChange={handleChange('email')}
-                      placeholder="votre.email@exemple.com"
+                      placeholder={t.fields.emailPlaceholder}
                       className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-cjblue focus:outline-none focus:ring-4 focus:ring-cjblue/15"
                     />
                   </div>
@@ -319,7 +305,7 @@ export default function ContactPage() {
 
                 <div>
                   <label htmlFor="subject" className="mb-2 block text-sm font-semibold text-slate-700">
-                    Sujet *
+                    {t.fields.subject}
                   </label>
                   <input
                     id="subject"
@@ -327,14 +313,14 @@ export default function ContactPage() {
                     required
                     value={formData.subject}
                     onChange={handleChange('subject')}
-                    placeholder="Objet de votre demande"
+                    placeholder={t.fields.subjectPlaceholder}
                     className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-cjblue focus:outline-none focus:ring-4 focus:ring-cjblue/15"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="message" className="mb-2 block text-sm font-semibold text-slate-700">
-                    Message *
+                    {t.fields.message}
                   </label>
                   <textarea
                     id="message"
@@ -342,7 +328,7 @@ export default function ContactPage() {
                     required
                     value={formData.message}
                     onChange={handleChange('message')}
-                    placeholder="Decrivez votre besoin, votre objectif, et la session qui vous interesse."
+                    placeholder={t.fields.messagePlaceholder}
                     className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-cjblue focus:outline-none focus:ring-4 focus:ring-cjblue/15"
                   />
                 </div>
@@ -352,7 +338,7 @@ export default function ContactPage() {
                   disabled={submitting}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#E30613_0%,#b3040f_100%)] px-6 py-3.5 text-sm font-bold text-white shadow-[0_16px_35px_rgba(227,6,19,0.32)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_45px_rgba(227,6,19,0.42)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {submitting ? 'Envoi en cours...' : 'Envoyer le message'}
+                  {submitting ? t.submitting : t.submit}
                   {!submitting && <ArrowRight className="h-4 w-4" />}
                 </button>
               </form>

@@ -48,7 +48,7 @@ export default function NewSessionPage() {
     }
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
+        <div className="w-full p-6">
             <div className="mb-6">
                 <Link
                     href="/admin/sessions"

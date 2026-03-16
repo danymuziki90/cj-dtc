@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { FormEvent, useEffect, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -81,7 +81,7 @@ export default function AdminSettingsPage() {
       ])
 
       if (!adminsRes.ok || !meRes.ok || !securityRes.ok || !auditRes.ok) {
-        throw new Error('Unable to load admin settings.')
+        throw new Error('Impossible de charger les parametres admin.')
       }
 
       const adminsPayload = await adminsRes.json()
@@ -94,7 +94,7 @@ export default function AdminSettingsPage() {
       setSecurity(securityPayload)
       setAuditLogs(auditPayload.logs || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unexpected error.')
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setLoading(false)
     }
@@ -116,12 +116,12 @@ export default function AdminSettingsPage() {
         body: JSON.stringify(createForm),
       })
       const payload = await response.json()
-      if (!response.ok) throw new Error(payload?.error || 'Unable to create admin.')
+      if (!response.ok) throw new Error(payload?.error || 'Impossible de creer le compte admin.')
 
       setCreateForm({ username: '', password: '' })
       await loadData()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unexpected error.')
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setSaving(false)
     }
@@ -138,7 +138,7 @@ export default function AdminSettingsPage() {
     })
     const payload = await response.json().catch(() => ({}))
     if (!response.ok) {
-      setError(payload?.error || 'Unable to reset password.')
+      setError(payload?.error || 'Impossible de reinitialiser le mot de passe.')
       return
     }
 
@@ -146,7 +146,7 @@ export default function AdminSettingsPage() {
   }
 
   async function renameAdmin(admin: AdminRow) {
-    const username = window.prompt('Nouveau username', admin.username)
+    const username = window.prompt('Nouveau nom d utilisateur', admin.username)
     if (!username || username === admin.username) return
 
     const response = await fetch(`/api/admin/system/admins/${admin.id}`, {
@@ -156,7 +156,7 @@ export default function AdminSettingsPage() {
     })
     const payload = await response.json().catch(() => ({}))
     if (!response.ok) {
-      setError(payload?.error || 'Unable to update username.')
+      setError(payload?.error || 'Impossible de mettre a jour le nom d utilisateur.')
       return
     }
 
@@ -170,7 +170,7 @@ export default function AdminSettingsPage() {
     const response = await fetch(`/api/admin/system/admins/${admin.id}`, { method: 'DELETE' })
     const payload = await response.json().catch(() => ({}))
     if (!response.ok) {
-      setError(payload?.error || 'Unable to delete admin.')
+      setError(payload?.error || 'Impossible de supprimer le compte admin.')
       return
     }
 
@@ -196,7 +196,7 @@ export default function AdminSettingsPage() {
     })
     const payload = await response.json().catch(() => ({}))
     if (!response.ok) {
-      setError(payload?.error || 'Unable to update password.')
+      setError(payload?.error || 'Impossible de mettre a jour le mot de passe.')
       return
     }
 
@@ -228,15 +228,15 @@ export default function AdminSettingsPage() {
                 }`}
               >
                 {security.emergencyAdminLoginAllowed
-                  ? 'Emergency login actif'
-                  : 'Emergency login desactive'}
+                  ? 'Connexion de secours active'
+                  : 'Connexion de secours desactivee'}
               </span>
             </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               {[
-                { label: 'Admin JWT', item: security.adminJwt },
-                { label: 'Student JWT', item: security.studentJwt },
+                { label: 'JWT admin', item: security.adminJwt },
+                { label: 'JWT etudiant', item: security.studentJwt },
               ].map(({ label, item }) => (
                 <article key={label} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-center justify-between gap-3">
@@ -266,7 +266,7 @@ export default function AdminSettingsPage() {
             <input
               value={createForm.username}
               onChange={(event) => setCreateForm((prev) => ({ ...prev, username: event.target.value }))}
-              placeholder="username"
+              placeholder="nom d utilisateur"
               className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
               required
             />
@@ -283,7 +283,7 @@ export default function AdminSettingsPage() {
               disabled={saving}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
             >
-              {saving ? 'Création...' : 'Créer admin'}
+              {saving ? 'Creation...' : 'Creer le compte'}
             </button>
           </form>
         </section>
@@ -336,8 +336,8 @@ export default function AdminSettingsPage() {
             <table className="min-w-full divide-y divide-slate-200 text-sm">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Username</th>
-                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Création</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Nom d utilisateur</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-600">Creation</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-600">Maj</th>
                   <th className="px-3 py-2 text-right font-semibold text-slate-600">Actions</th>
                 </tr>
@@ -371,7 +371,7 @@ export default function AdminSettingsPage() {
                           onClick={() => resetAdminPassword(admin)}
                           className="rounded border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50"
                         >
-                          Reset mdp
+                          Reinit. mdp
                         </button>
                         <button
                           onClick={() => removeAdmin(admin)}
@@ -451,4 +451,3 @@ export default function AdminSettingsPage() {
     </AdminShell>
   )
 }
-

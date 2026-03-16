@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -155,7 +155,7 @@ export default function PromoDetailPage() {
     const usagePercentage = getUsagePercentage(promoCode.currentUses, promoCode.maxUses)
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
+        <div className="w-full p-6">
             <div className="mb-6">
                 <Link
                     href="/admin/tarifs"

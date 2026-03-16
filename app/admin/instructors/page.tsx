@@ -1,6 +1,7 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
+import AdminShell from '@/components/admin-portal/AdminShell'
 
 interface Instructor {
     id: number
@@ -47,7 +48,7 @@ export default function InstructorsPage() {
             const data = await response.json()
             setInstructors(data)
         } catch (error) {
-            console.error('Erreur lors du chargement des instructeurs:', error)
+            console.error('Impossible de charger les formateurs:', error)
         } finally {
             setLoading(false)
         }
@@ -85,7 +86,7 @@ export default function InstructorsPage() {
                 })
             }
         } catch (error) {
-            console.error('Erreur lors de la sauvegarde:', error)
+            console.error('Impossible d enregistrer le formateur:', error)
         }
     }
 
@@ -105,7 +106,7 @@ export default function InstructorsPage() {
     }
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer cet instructeur ?')) return
+        if (!confirm('Supprimer ce formateur ?')) return
 
         try {
             const response = await fetch(`/api/instructors/${id}`, { method: 'DELETE' })
@@ -113,7 +114,7 @@ export default function InstructorsPage() {
                 fetchInstructors()
             }
         } catch (error) {
-            console.error('Erreur lors de la suppression:', error)
+            console.error('Impossible de supprimer le formateur:', error)
         }
     }
 
@@ -129,34 +130,37 @@ export default function InstructorsPage() {
                 fetchInstructors()
             }
         } catch (error) {
-            console.error('Erreur lors de la modification du statut:', error)
+            console.error('Impossible de mettre a jour le statut du formateur:', error)
         }
     }
 
     if (loading) {
         return (
-            <div className="p-6">
-                <div className="animate-pulse">
-                    <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-                    <div className="space-y-4">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="h-24 bg-gray-200 rounded"></div>
-                        ))}
+            <AdminShell title="Gestion des formateurs">
+                <div className="p-6">
+                    <div className="animate-pulse">
+                        <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+                        <div className="space-y-4">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="h-24 bg-gray-200 rounded"></div>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
+            </AdminShell>
         )
     }
 
     return (
+        <AdminShell title="Gestion des formateurs">
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-900">Gestion des Formateurs</h1>
+                <h2 className="text-3xl font-bold text-gray-900">Equipe pedagogique</h2>
                 <button
                     onClick={() => setShowForm(true)}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                    ➕ Ajouter un formateur
+                    Ajouter un formateur
                 </button>
             </div>
 
@@ -164,13 +168,13 @@ export default function InstructorsPage() {
             {showForm && (
                 <div className="bg-white p-6 rounded-lg shadow border">
                     <h2 className="text-xl font-semibold mb-4">
-                        {editingInstructor ? 'Modifier le formateur' : 'Nouveau formateur'}
+                        {editingInstructor ? 'Mettre a jour le formateur' : 'Creer un formateur'}
                     </h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Prénom *
+                                    Prenom *
                                 </label>
                                 <input
                                     type="text"
@@ -209,7 +213,7 @@ export default function InstructorsPage() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Téléphone
+                                    Telephone
                                 </label>
                                 <input
                                     type="tel"
@@ -222,27 +226,27 @@ export default function InstructorsPage() {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Domaine d'expertise
+                                Domaine d expertise
                             </label>
                             <input
                                 type="text"
                                 value={formData.expertise}
                                 onChange={(e) => setFormData(prev => ({ ...prev, expertise: e.target.value }))}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Ex: Management, Informatique, Ressources Humaines..."
+                                placeholder="Ex: Management, informatique, ressources humaines"
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Années d'expérience
+                                Annees d experience
                             </label>
                             <input
                                 type="text"
                                 value={formData.experience}
                                 onChange={(e) => setFormData(prev => ({ ...prev, experience: e.target.value }))}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Ex: 5 ans, 10+ ans..."
+                                placeholder="Ex: 5 ans, 10+ ans"
                             />
                         </div>
 
@@ -284,7 +288,7 @@ export default function InstructorsPage() {
                                 type="submit"
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                             >
-                                {editingInstructor ? 'Modifier' : 'Créer'}
+                                {editingInstructor ? 'Enregistrer' : 'Creer'}
                             </button>
                         </div>
                     </form>
@@ -295,11 +299,15 @@ export default function InstructorsPage() {
             <div className="bg-white rounded-lg shadow border">
                 <div className="px-6 py-4 border-b border-gray-200">
                     <h2 className="text-lg font-semibold text-gray-900">
-                        Formateurs ({instructors.length})
+                        Formateurs actifs et archives ({instructors.length})
                     </h2>
                 </div>
                 <div className="divide-y divide-gray-200">
-                    {instructors.map((instructor) => (
+                    {instructors.length === 0 ? (
+                        <div className="px-6 py-10 text-center text-sm text-gray-500">
+                            Aucun formateur n est disponible pour le moment.
+                        </div>
+                    ) : instructors.map((instructor) => (
                         <div key={instructor.id} className="p-6">
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
@@ -321,7 +329,7 @@ export default function InstructorsPage() {
                                         </div>
                                         {instructor.phone && (
                                             <div>
-                                                <span className="font-medium">Téléphone:</span> {instructor.phone}
+                                                <span className="font-medium">Telephone:</span> {instructor.phone}
                                             </div>
                                         )}
                                         {instructor.expertise && (
@@ -331,7 +339,7 @@ export default function InstructorsPage() {
                                         )}
                                         {instructor.experience && (
                                             <div>
-                                                <span className="font-medium">Expérience:</span> {instructor.experience}
+                                                <span className="font-medium">Experience:</span> {instructor.experience}
                                             </div>
                                         )}
                                     </div>
@@ -342,7 +350,7 @@ export default function InstructorsPage() {
 
                                     {instructor.sessions.length > 0 && (
                                         <div className="mt-3">
-                                            <h4 className="text-sm font-medium text-gray-900 mb-2">Sessions récentes:</h4>
+                                            <h4 className="text-sm font-medium text-gray-900 mb-2">Sessions recentes:</h4>
                                             <div className="flex flex-wrap gap-2">
                                                 {instructor.sessions.slice(0, 3).map((sessionInstructor) => (
                                                     <span
@@ -370,7 +378,7 @@ export default function InstructorsPage() {
                                                 : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                                             }`}
                                     >
-                                        {instructor.status === 'active' ? 'Désactiver' : 'Activer'}
+                                        {instructor.status === 'active' ? 'Desactiver' : 'Activer'}
                                     </button>
                                     <button
                                         onClick={() => handleEdit(instructor)}
@@ -391,5 +399,6 @@ export default function InstructorsPage() {
                 </div>
             </div>
         </div>
+        </AdminShell>
     )
 }

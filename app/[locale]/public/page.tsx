@@ -1,15 +1,16 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { 
-  ArrowRight, 
-  Users, 
-  Award, 
-  Globe, 
-  CheckCircle, 
-  Play, 
+import { useParams, useRouter } from 'next/navigation'
+import {
+  ArrowRight,
+  User,
+  Users,
+  Award,
+  Globe,
+  CheckCircle,
+  Play,
   Star,
   TrendingUp,
   BookOpen,
@@ -31,6 +32,8 @@ import {
 
 export default function HomePage() {
   const router = useRouter()
+  const params = useParams<{ locale?: string }>()
+  const locale = params?.locale || 'fr'
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
 
@@ -210,36 +213,36 @@ export default function HomePage() {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-8">
-              <Link href="/fr" className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
+              <Link href={`/${locale}`} className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
                 Accueil
               </Link>
-              <Link href="/fr/a-propos" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href={`/${locale}/about`} className="text-gray-600 hover:text-blue-600 transition-colors">
                 À Propos
               </Link>
-              <Link href="/fr/formations" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href={`/${locale}/formations`} className="text-gray-600 hover:text-blue-600 transition-colors">
                 Formations
               </Link>
-              <Link href="/fr/programmes" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href={`/${locale}/programmes`} className="text-gray-600 hover:text-blue-600 transition-colors">
                 Programmes
               </Link>
-              <Link href="/fr/partenaires" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href={`/${locale}/partenaires`} className="text-gray-600 hover:text-blue-600 transition-colors">
                 Partenaires
               </Link>
-              <Link href="/fr/contact" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href={`/${locale}/contact`} className="text-gray-600 hover:text-blue-600 transition-colors">
                 Contact
               </Link>
             </nav>
 
             {/* CTA Buttons */}
             <div className="hidden lg:flex items-center space-x-4">
-              <Link 
-                href="/fr/espace-etudiants"
+              <Link
+                href={`/${locale}/espace-etudiants`}
                 className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
               >
                 Espace Étudiants
               </Link>
-              <Link 
-                href="/fr/auth/register"
+              <Link
+                href={`/${locale}/auth/register`}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 S'inscrire
@@ -260,33 +263,33 @@ export default function HomePage() {
         {isMenuOpen && (
           <div className="lg:hidden bg-white border-t border-gray-200">
             <div className="px-4 py-6 space-y-4">
-              <Link href="/fr" className="block text-gray-900 font-medium hover:text-blue-600">
+              <Link href={`/${locale}`} className="block text-gray-900 font-medium hover:text-blue-600">
                 Accueil
               </Link>
-              <Link href="/fr/a-propos" className="block text-gray-600 hover:text-blue-600">
+              <Link href={`/${locale}/about`} className="block text-gray-600 hover:text-blue-600">
                 À Propos
               </Link>
-              <Link href="/fr/formations" className="block text-gray-600 hover:text-blue-600">
+              <Link href={`/${locale}/formations`} className="block text-gray-600 hover:text-blue-600">
                 Formations
               </Link>
-              <Link href="/fr/programmes" className="block text-gray-600 hover:text-blue-600">
+              <Link href={`/${locale}/programmes`} className="block text-gray-600 hover:text-blue-600">
                 Programmes
               </Link>
-              <Link href="/fr/partenaires" className="block text-gray-600 hover:text-blue-600">
+              <Link href={`/${locale}/partenaires`} className="block text-gray-600 hover:text-blue-600">
                 Partenaires
               </Link>
-              <Link href="/fr/contact" className="block text-gray-600 hover:text-blue-600">
+              <Link href={`/${locale}/contact`} className="block text-gray-600 hover:text-blue-600">
                 Contact
               </Link>
               <div className="pt-4 border-t border-gray-200 space-y-3">
-                <Link 
-                  href="/fr/espace-etudiants"
+                <Link
+                  href={`/${locale}/espace-etudiants`}
                   className="block w-full px-4 py-2 text-blue-600 border border-blue-600 rounded-lg text-center font-medium"
                 >
                   Espace Étudiants
                 </Link>
-                <Link 
-                  href="/fr/auth/register"
+                <Link
+                  href={`/${locale}/auth/register`}
                   className="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-center font-medium"
                 >
                   S'inscrire
@@ -303,7 +306,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
           <div className="absolute inset-0 bg-black/20"></div>
         </div>
-        
+
         {/* Animated background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -329,21 +332,21 @@ export default function HomePage() {
                 Panafricaine
               </span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed">
               Formation de leadership et management d'excellence pour les professionnels africains
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Link 
-                href="/fr/formations"
+              <Link
+                href={`/${locale}/formations`}
                 className="px-8 py-4 bg-white text-blue-900 rounded-xl font-semibold hover:bg-blue-50 transition-all transform hover:scale-105 shadow-xl flex items-center justify-center space-x-2"
               >
                 <span>Découvrir nos formations</span>
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link 
-                href="/fr/auth/register"
+              <Link
+                href={`/${locale}/auth/register`}
                 className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105 shadow-xl"
               >
                 S'inscrire maintenant
@@ -390,7 +393,7 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {formations.map((formation) => (
-              <div 
+              <div
                 key={formation.id}
                 className={`bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group ${
                   formation.featured ? 'ring-2 ring-blue-500 ring-offset-2' : ''
@@ -401,11 +404,11 @@ export default function HomePage() {
                     Programme vedette
                   </div>
                 )}
-                
+
                 <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
                   <BookOpen className="w-16 h-16 text-blue-600" />
                 </div>
-                
+
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
                     <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
@@ -413,21 +416,21 @@ export default function HomePage() {
                     </span>
                     <span className="text-sm text-gray-500">{formation.duration}</span>
                   </div>
-                  
+
                   <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                     {formation.title}
                   </h3>
-                  
+
                   <p className="text-gray-600 mb-4 line-clamp-2">
                     {formation.description}
                   </p>
-                  
+
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm text-gray-500">Niveau: {formation.level}</span>
                     <span className="text-lg font-bold text-blue-600">{formation.price}</span>
                   </div>
-                  
-                  <Link 
+
+                  <Link
                     href={`/fr/formations/${formation.id}`}
                     className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all flex items-center justify-center space-x-2"
                   >
@@ -440,8 +443,8 @@ export default function HomePage() {
           </div>
 
           <div className="text-center mt-12">
-            <Link 
-              href="/fr/formations"
+            <Link
+              href={`/${locale}/formations`}
               className="inline-flex items-center space-x-2 px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all"
             >
               <span>Voir toutes les formations</span>
@@ -462,7 +465,7 @@ export default function HomePage() {
                   {" "}CJ DTC
                 </span>
               </h2>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -530,7 +533,7 @@ export default function HomePage() {
                   <div className="text-sm text-blue-700">Excellence • Leadership • Innovation</div>
                 </div>
               </div>
-              
+
               {/* Floating elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-red-400 rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-2xl">🇨🇩</span>
@@ -566,11 +569,11 @@ export default function HomePage() {
                     <Star key={i} className="w-5 h-5 text-red-400 fill-current" />
                   ))}
                 </div>
-                
+
                 <p className="text-gray-700 mb-6 italic">
                   "{testimonial.content}"
                 </p>
-                
+
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
                     <User className="w-6 h-6 text-blue-600" />
@@ -624,14 +627,14 @@ export default function HomePage() {
             Rejoignez plus de 500 professionnels qui ont choisi l'excellence avec CJ DTC
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              href="/fr/auth/register"
+            <Link
+              href={`/${locale}/auth/register`}
               className="px-8 py-4 bg-white text-blue-900 rounded-xl font-semibold hover:bg-blue-50 transition-all transform hover:scale-105 shadow-xl"
             >
               S'inscrire Maintenant
             </Link>
-            <Link 
-              href="/fr/contact"
+            <Link
+              href={`/${locale}/contact`}
               className="px-8 py-4 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-blue-900 transition-all"
             >
               Nous Contacter
@@ -669,22 +672,22 @@ export default function HomePage() {
             <div>
               <h4 className="font-semibold mb-4">Formations</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/fr/formations/mrh" className="hover:text-white">Management RH</Link></li>
-                <li><Link href="/fr/formations/leadership" className="hover:text-white">Leadership</Link></li>
-                <li><Link href="/fr/formations/marketing" className="hover:text-white">Digital Marketing</Link></li>
-                <li><Link href="/fr/formations/family-business" className="hover:text-white">Family Business</Link></li>
-                <li><Link href="/fr/formations/cj-master" className="hover:text-white">CJ Master System</Link></li>
+                <li><Link href={`/${locale}/formations/mrh`} className="hover:text-white">Management RH</Link></li>
+                <li><Link href={`/${locale}/formations/leadership`} className="hover:text-white">Leadership</Link></li>
+                <li><Link href={`/${locale}/formations/marketing`} className="hover:text-white">Digital Marketing</Link></li>
+                <li><Link href={`/${locale}/formations/family-business`} className="hover:text-white">Family Business</Link></li>
+                <li><Link href={`/${locale}/formations/cj-master`} className="hover:text-white">CJ Master System</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold mb-4">Ressources</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/fr/blog" className="hover:text-white">Blog</Link></li>
-                <li><Link href="/fr/ressources" className="hover:text-white">Ressources</Link></li>
-                <li><Link href="/fr/carrieres" className="hover:text-white">Carrières</Link></li>
-                <li><Link href="/fr/partenaires" className="hover:text-white">Partenaires</Link></li>
-                <li><Link href="/fr/verification" className="hover:text-white">Vérification Certificats</Link></li>
+                <li><Link href={`/${locale}/blog`} className="hover:text-white">Blog</Link></li>
+                <li><Link href={`/${locale}/ressources`} className="hover:text-white">Ressources</Link></li>
+                <li><Link href={`/${locale}/carrieres`} className="hover:text-white">Carrières</Link></li>
+                <li><Link href={`/${locale}/partenaires`} className="hover:text-white">Partenaires</Link></li>
+                <li><Link href={`/${locale}/verification`} className="hover:text-white">Vérification Certificats</Link></li>
               </ul>
             </div>
 
@@ -708,9 +711,9 @@ export default function HomePage() {
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 CJ DTC. Tous droits réservés. | 
-              <Link href="/fr/mentions-legales" className="hover:text-white"> Mentions Légales</Link> | 
-              <Link href="/fr/politique-confidentialite" className="hover:text-white"> Politique de Confidentialité</Link>
+            <p>&copy; 2024 CJ DTC. Tous droits réservés. |
+              <Link href={`/${locale}/mentions-legales`} className="hover:text-white"> Mentions Légales</Link> |
+              <Link href={`/${locale}/politique-confidentialite`} className="hover:text-white"> Politique de Confidentialité</Link>
             </p>
           </div>
         </div>
@@ -718,4 +721,3 @@ export default function HomePage() {
     </div>
   )
 }
-

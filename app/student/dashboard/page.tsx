@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import StudentPortalNav from '@/components/student-portal/StudentPortalNav'
 
 type DashboardPayload = {
   student: {
@@ -285,6 +286,7 @@ export default function StudentDashboardPage() {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+        <StudentPortalNav />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <p className="text-xs text-slate-500">Sessions</p>

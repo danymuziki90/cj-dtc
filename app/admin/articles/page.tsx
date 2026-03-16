@@ -357,9 +357,9 @@ export default function AdminActualitesPage() {
           <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
-                {editingId ? 'Modifier une actualité' : 'Créer une actualité'}
+                {editingId ? 'Modifier une actualite' : 'Publier une actualite'}
               </h2>
-              <p className="text-sm text-slate-500">Titre, image, contenu riche, catégorie, tags et date de publication.</p>
+              <p className="text-sm text-slate-500">Titre, image, contenu, categorie, tags et date de publication dans une seule fiche editoriale.</p>
             </div>
             {editingId ? (
               <button
@@ -367,7 +367,7 @@ export default function AdminActualitesPage() {
                 onClick={resetForm}
                 className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
               >
-                Annuler edition
+                Annuler l edition
               </button>
             ) : null}
           </div>
@@ -471,7 +471,7 @@ export default function AdminActualitesPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Contenu / description (WYSIWYG)</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Contenu</label>
               <RichTextEditor
                 value={form.content}
                 onChange={(next) => setForm((prev) => ({ ...prev, content: next }))}
@@ -489,7 +489,7 @@ export default function AdminActualitesPage() {
               disabled={saving}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
             >
-              {saving ? 'Enregistrement...' : editingId ? 'Mettre à jour' : "Créer l'actualité"}
+              {saving ? 'Enregistrement...' : editingId ? 'Mettre a jour' : "Enregistrer l actualite"}
             </button>
           </div>
         </form>
@@ -645,7 +645,7 @@ export default function AdminActualitesPage() {
                     />
                   ) : (
                     <div className="grid h-16 w-20 place-items-center rounded-md border border-dashed border-slate-300 text-xs text-slate-400">
-                      no image
+                      Sans image
                     </div>
                   )}
                   <div className="min-w-0 flex-1">

@@ -5,6 +5,16 @@ import type { ProgramSessionType } from '@/lib/programmes/session-types'
 import { inferProgramSessionType } from '@/lib/programmes/session-types'
 import EnrollmentStatusChanger from './EnrollmentStatusChanger'
 import { FormattedDate } from './FormattedDate'
+import {
+  AdminBadge,
+  AdminEmptyState,
+  AdminPanel,
+  adminInputClassName,
+  adminPrimaryButtonClassName,
+  adminSecondaryButtonClassName,
+  adminSelectClassName,
+  adminTextareaClassName,
+} from '@/components/admin-portal/ui'
 
 type Payment = {
   id: number
@@ -321,6 +331,21 @@ function sortPayments(payments: Payment[] | undefined) {
   )
 }
 
+function enrollmentStatusTone(status: string): 'warning' | 'success' | 'danger' | 'neutral' | 'primary' {
+  if (status === 'accepted') return 'success'
+  if (status === 'confirmed' || status === 'completed') return 'primary'
+  if (status === 'rejected') return 'danger'
+  if (status === 'pending' || status === 'waitlist') return 'warning'
+  return 'neutral'
+}
+
+function paymentStatusTone(status: string): 'success' | 'warning' | 'danger' | 'neutral' {
+  if (status === 'paid' || status === 'success') return 'success'
+  if (status === 'partial' || status === 'pending') return 'warning'
+  if (status === 'unpaid' || status === 'failed' || status === 'rejected') return 'danger'
+  return 'neutral'
+}
+
 export default function EnrollmentPreviewModal({
   enrollment,
   onClose,
@@ -381,6 +406,7 @@ export default function EnrollmentPreviewModal({
 
   const payments = sortPayments(record.payments)
   const canConfirmPayment = record.paymentStatus !== 'paid'
+  const balance = Math.max(record.totalAmount - record.paidAmount, 0)
 
   async function handleSaveComment() {
     setSavingComment(true)
@@ -480,20 +506,30 @@ export default function EnrollmentPreviewModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-xl bg-white shadow-xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4">
-          <h2 className="text-xl font-semibold text-slate-900">
-            Inscription #{record.id} - {record.firstName} {record.lastName}
-          </h2>
-          <button onClick={onClose} className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100">
-            Fermer
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+      <div className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-[32px] border border-white/70 bg-[linear-gradient(180deg,rgba(248,250,252,0.98),rgba(255,255,255,0.96))] shadow-[0_40px_110px_-60px_rgba(15,23,42,0.75)]">
+        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/92 p-5 backdrop-blur">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Revue inscription</p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+                Inscription #{record.id} - {record.firstName} {record.lastName}
+              </h2>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <AdminBadge tone={enrollmentStatusTone(record.status)}>{record.status}</AdminBadge>
+                <AdminBadge tone={paymentStatusTone(record.paymentStatus)}>{record.paymentStatus}</AdminBadge>
+                <AdminBadge tone="neutral">{record.formation.title}</AdminBadge>
+              </div>
+            </div>
+            <button onClick={onClose} className={adminSecondaryButtonClassName}>
+              Fermer
+            </button>
+          </div>
         </div>
 
         <div className="grid gap-6 p-6 lg:grid-cols-[1fr_1fr]">
           <section className="space-y-6">
-            <div className="rounded-xl border border-slate-200 p-4">
+            <AdminPanel className="p-5">
               <h3 className="mb-3 text-lg font-semibold text-slate-900">Profil inscription</h3>
               <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                 <div>
@@ -533,20 +569,23 @@ export default function EnrollmentPreviewModal({
                   <p className="font-medium text-slate-900">{record.session?.location || '-'}</p>
                 </div>
               </div>
-            </div>
+            </AdminPanel>
 
-            <div className="rounded-xl border border-slate-200 p-4">
+            <AdminPanel className="p-5">
               <h3 className="mb-3 text-lg font-semibold text-slate-900">Donnees du participant</h3>
               {enrichedSections.length === 0 && additionalAnswers.length === 0 ? (
-                <p className="text-sm text-slate-600">Aucune reponse detaillee disponible.</p>
+                <AdminEmptyState
+                  title="Aucune reponse detaillee"
+                  description="Cette inscription ne contient pas encore de reponses structurees exploitables."
+                />
               ) : (
                 <div className="space-y-4">
                   {enrichedSections.map((section) => (
-                    <div key={section.title} className="rounded-lg border border-slate-100 p-3">
+                    <div key={section.title} className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
                       <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">{section.title}</h4>
                       <div className="grid gap-2 md:grid-cols-2">
                         {section.rows.map((row) => (
-                          <div key={row.key}>
+                          <div key={row.key} className="rounded-2xl border border-white/80 bg-white px-3 py-3 shadow-sm">
                             <p className="text-xs text-slate-500">{row.label}</p>
                             <p className="text-sm text-slate-900">{displayValue(row.value)}</p>
                           </div>
@@ -556,11 +595,11 @@ export default function EnrollmentPreviewModal({
                   ))}
 
                   {additionalAnswers.length > 0 ? (
-                    <div className="rounded-lg border border-slate-100 p-3">
+                    <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
                       <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">Autres reponses</h4>
                       <div className="grid gap-2 md:grid-cols-2">
                         {additionalAnswers.map((entry) => (
-                          <div key={entry.key}>
+                          <div key={entry.key} className="rounded-2xl border border-white/80 bg-white px-3 py-3 shadow-sm">
                             <p className="text-xs text-slate-500">{entry.key}</p>
                             <p className="text-sm text-slate-900">{displayValue(entry.value)}</p>
                           </div>
@@ -570,32 +609,36 @@ export default function EnrollmentPreviewModal({
                   ) : null}
                 </div>
               )}
-            </div>
+            </AdminPanel>
 
             {record.motivationLetter ? (
-              <div className="rounded-xl border border-slate-200 p-4">
+              <AdminPanel className="p-5">
                 <h3 className="mb-3 text-lg font-semibold text-slate-900">Lettre de motivation</h3>
                 <button
                   onClick={downloadMotivationLetter}
-                  className="rounded bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                  className={adminPrimaryButtonClassName}
                 >
                   Telecharger
                 </button>
-              </div>
+              </AdminPanel>
             ) : null}
           </section>
 
           <section className="space-y-6">
-            <div className="rounded-xl border border-slate-200 p-4">
+            <AdminPanel className="p-5">
               <h3 className="mb-3 text-lg font-semibold text-slate-900">Verification paiement</h3>
               <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                 <div>
                   <p className="text-slate-500">Statut paiement</p>
-                  <p className="font-medium text-slate-900">{record.paymentStatus}</p>
+                  <div className="mt-2">
+                    <AdminBadge tone={paymentStatusTone(record.paymentStatus)}>{record.paymentStatus}</AdminBadge>
+                  </div>
                 </div>
                 <div>
                   <p className="text-slate-500">Statut inscription</p>
-                  <p className="font-medium text-slate-900">{record.status}</p>
+                  <div className="mt-2">
+                    <AdminBadge tone={enrollmentStatusTone(record.status)}>{record.status}</AdminBadge>
+                  </div>
                 </div>
                 <div>
                   <p className="text-slate-500">Montant total</p>
@@ -605,9 +648,13 @@ export default function EnrollmentPreviewModal({
                   <p className="text-slate-500">Montant paye</p>
                   <p className="font-medium text-slate-900">{formatCurrency(record.paidAmount)}</p>
                 </div>
+                <div className="md:col-span-2">
+                  <p className="text-slate-500">Reste a solder</p>
+                  <p className="font-medium text-slate-900">{formatCurrency(balance)}</p>
+                </div>
               </div>
 
-              <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="mt-4 rounded-[22px] border border-slate-200 bg-slate-50/90 p-4">
                 <h4 className="mb-2 text-sm font-semibold text-slate-800">Confirmer paiement</h4>
                 {canConfirmPayment ? (
                   <>
@@ -617,7 +664,7 @@ export default function EnrollmentPreviewModal({
                         <select
                           value={paymentMethod}
                           onChange={(event) => setPaymentMethod(event.target.value)}
-                          className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                          className={adminSelectClassName}
                         >
                           <option value="mobile_money">Mobile Money</option>
                           <option value="card">Carte bancaire</option>
@@ -632,7 +679,7 @@ export default function EnrollmentPreviewModal({
                           value={paymentReference}
                           onChange={(event) => setPaymentReference(event.target.value)}
                           placeholder="REF-123"
-                          className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                          className={adminInputClassName}
                         />
                       </div>
                       <div className="md:col-span-2">
@@ -641,14 +688,14 @@ export default function EnrollmentPreviewModal({
                           value={paymentTransactionId}
                           onChange={(event) => setPaymentTransactionId(event.target.value)}
                           placeholder="TX-..."
-                          className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                          className={adminInputClassName}
                         />
                       </div>
                     </div>
                     <button
                       onClick={handleConfirmPayment}
                       disabled={confirmingPayment}
-                      className="mt-3 rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                      className={`mt-3 ${adminPrimaryButtonClassName}`}
                     >
                   {confirmingPayment ? 'Confirmation...' : 'Confirmer le paiement et créer/activer le compte étudiant'}
                     </button>
@@ -659,25 +706,28 @@ export default function EnrollmentPreviewModal({
               </div>
 
               {generatedCredentials ? (
-                <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm">
-                  <p className="font-semibold text-blue-800">Nouveau compte étudiant créé</p>
-                  <p className="mt-1 text-blue-700">Username: {generatedCredentials.username}</p>
-                  <p className="text-blue-700">Mot de passe initial: {generatedCredentials.password}</p>
+                <div className="mt-4 rounded-[22px] border border-[var(--admin-primary-200)] bg-[var(--admin-primary-50)] p-4 text-sm text-[var(--admin-primary-800)]">
+                  <p className="font-semibold">Nouveau compte etudiant cree</p>
+                  <p className="mt-1">Username: {generatedCredentials.username}</p>
+                  <p>Mot de passe initial: {generatedCredentials.password}</p>
                 </div>
               ) : null}
-            </div>
+            </AdminPanel>
 
-            <div className="rounded-xl border border-slate-200 p-4">
+            <AdminPanel className="p-5">
               <h3 className="mb-3 text-lg font-semibold text-slate-900">Transactions</h3>
               {payments.length === 0 ? (
-                <p className="text-sm text-slate-600">Aucune transaction enregistree.</p>
+                <AdminEmptyState
+                  title="Aucune transaction enregistree"
+                  description="L'historique de paiement de cette inscription est vide pour le moment."
+                />
               ) : (
                 <div className="space-y-3">
                   {payments.map((payment) => {
                     const details = parsePaymentNotes(payment.notes)
 
                     return (
-                      <div key={payment.id} className="rounded-lg border border-slate-100 p-3 text-sm">
+                      <div key={payment.id} className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4 text-sm">
                         <div className="grid gap-2 md:grid-cols-2">
                           <p>
                             <strong>ID:</strong> {payment.id}
@@ -734,27 +784,27 @@ export default function EnrollmentPreviewModal({
                   })}
                 </div>
               )}
-            </div>
+            </AdminPanel>
 
-            <div className="rounded-xl border border-slate-200 p-4">
+            <AdminPanel className="p-5">
               <h3 className="mb-3 text-lg font-semibold text-slate-900">Commentaires internes</h3>
               <textarea
                 value={internalComment}
                 onChange={(event) => setInternalComment(event.target.value)}
                 rows={4}
-                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                className={adminTextareaClassName}
                 placeholder="Ajouter une note interne (sans perdre les reponses du formulaire)"
               />
               <button
                 onClick={handleSaveComment}
                 disabled={savingComment}
-                className="mt-2 rounded bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+                className={`mt-2 ${adminPrimaryButtonClassName}`}
               >
                 {savingComment ? 'Enregistrement...' : 'Enregistrer commentaire'}
               </button>
-            </div>
+            </AdminPanel>
 
-            <div className="rounded-xl border border-slate-200 p-4">
+            <AdminPanel className="p-5">
               <h3 className="mb-3 text-lg font-semibold text-slate-900">Actions statut inscription</h3>
               <EnrollmentStatusChanger
                 key={`${record.id}-${record.status}`}
@@ -767,14 +817,14 @@ export default function EnrollmentPreviewModal({
                   onStatusChange()
                 }}
               />
-            </div>
+            </AdminPanel>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+            <AdminPanel className="bg-slate-50/80 p-5 text-sm text-slate-700">
               <p>
                 <strong>Inscription creee:</strong>{' '}
                 <FormattedDate date={record.createdAt} options={{ dateStyle: 'short', timeStyle: 'short' } as Intl.DateTimeFormatOptions} />
               </p>
-            </div>
+            </AdminPanel>
 
             {feedbackError ? (
               <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{feedbackError}</div>

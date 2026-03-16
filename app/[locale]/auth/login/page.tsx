@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
   const router = useRouter()
+  const params = useParams<{ locale?: string }>()
+  const locale = params?.locale || 'fr'
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -15,9 +17,9 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showPassword, setShowPassword] = useState(false)
 
-  // Récupérer callbackUrl et erreur depuis l'URL (NextAuth renvoie ?error=CredentialsSignin en cas d'échec)
-  const callbackUrl = typeof window !== 'undefined' 
-    ? new URLSearchParams(window.location.search).get('callbackUrl') 
+  // Recuperer callbackUrl et erreur depuis l'URL (NextAuth renvoie ?error=CredentialsSignin en cas d'echec)
+  const callbackUrl = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('callbackUrl')
     : null
 
   useEffect(() => {
@@ -74,8 +76,8 @@ export default function LoginPage() {
     setErrors({})
 
     try {
-      // Redirection gérée par NextAuth pour que le cookie de session soit bien posé avant d'arriver sur la page
-      const redirectUrl = callbackUrl || '/fr/espace-etudiants'
+      // Redirection geree par NextAuth pour que le cookie de session soit bien pose avant d'arriver sur la page
+      const redirectUrl = callbackUrl || `/${locale}/espace-etudiants`
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
@@ -83,13 +85,13 @@ export default function LoginPage() {
         callbackUrl: redirectUrl
       })
 
-      // Si on reste sur la page (redirect: true a pu être ignoré dans certains cas), afficher une erreur
+      // Si on reste sur la page (redirect: true a pu etre ignore dans certains cas), afficher une erreur
       if (result?.error) {
         setErrors({ general: 'Email ou mot de passe incorrect' })
       }
     } catch (error) {
       console.error('Erreur lors de la connexion:', error)
-      setErrors({ general: 'Une erreur est survenue. Veuillez réessayer.' })
+      setErrors({ general: 'Une erreur est survenue. Veuillez reessayer.' })
     } finally {
       setLoading(false)
     }
@@ -104,7 +106,7 @@ export default function LoginPage() {
           Connexion
         </h1>
         <p className="text-base sm:text-lg text-gray-600">
-          Accédez à votre espace personnel
+          Accedez a votre espace personnel
         </p>
       </div>
 
@@ -185,8 +187,8 @@ export default function LoginPage() {
             />
             <span className="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
           </label>
-          <Link href="/fr/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
-            Mot de passe oublié?
+          <Link href={`/${locale}/auth/forgot-password`} className="text-sm text-blue-600 hover:text-blue-700">
+            Mot de passe oublie ?
           </Link>
         </div>
 
@@ -213,8 +215,8 @@ export default function LoginPage() {
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Pas encore de compte?{' '}
-            <Link href="/fr/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
-              Créer un compte
+            <Link href={`/${locale}/auth/register`} className="text-blue-600 hover:text-blue-700 font-medium">
+              Creer un compte
             </Link>
           </p>
         </div>
@@ -231,7 +233,7 @@ export default function LoginPage() {
 
         <button
           type="button"
-          onClick={() => signIn('google', { callbackUrl: '/' })}
+          onClick={() => signIn('google', { callbackUrl: `/${locale}` })}
           className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
         >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">

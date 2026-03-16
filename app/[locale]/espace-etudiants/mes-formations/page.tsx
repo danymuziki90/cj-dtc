@@ -1,9 +1,19 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Breadcrumbs from '../../../../components/Breadcrumbs'
+import { useParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { ArrowRight, BadgeCheck, BookOpen, CalendarDays, GraduationCap, MapPin, MonitorSmartphone, Wallet } from 'lucide-react'
 import { FormattedDate } from '@/components/FormattedDate'
+import {
+  StudentEmptyState,
+  StudentPageShell,
+  StudentSectionCard,
+  studentMutedButtonClassName,
+  studentPrimaryButtonClassName,
+  studentStatusClass,
+  type StudentMetric,
+} from '@/components/ui/student-space'
 
 interface Enrollment {
   id: number
@@ -27,7 +37,47 @@ interface Enrollment {
   } | null
 }
 
+function paymentStatusClass(status: string) {
+  const value = String(status || '').toLowerCase()
+  if (value === 'paid') return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  if (value === 'partial') return 'border-blue-200 bg-blue-50 text-[var(--cj-blue)]'
+  if (value === 'unpaid') return 'border-red-200 bg-red-50 text-red-700'
+  return 'border-slate-200 bg-slate-100 text-slate-700'
+}
+
+function paymentStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    unpaid: 'Non paye',
+    partial: 'Partiel',
+    paid: 'Paye',
+  }
+  return labels[status] || status
+}
+
+function enrollmentStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    pending: 'En attente',
+    accepted: 'Accepte',
+    confirmed: 'Confirme',
+    rejected: 'Rejete',
+    cancelled: 'Annule',
+    completed: 'Termine',
+  }
+  return labels[status] || status
+}
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+  }).format(amount)
+}
+
 export default function MesFormationsPage() {
+  const params = useParams<{ locale?: string }>()
+  const locale = params?.locale || 'fr'
+
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -35,10 +85,46 @@ export default function MesFormationsPage() {
     fetchEnrollments()
   }, [])
 
+  const metrics = useMemo<StudentMetric[]>(() => {
+    const completedCount = enrollments.filter((item) => item.status === 'completed').length
+    const paidCount = enrollments.filter((item) => item.paymentStatus === 'paid').length
+    const activeSessions = enrollments.filter((item) => item.session).length
+
+    return [
+      {
+        label: 'Formations',
+        value: enrollments.length,
+        helper: 'Parcours actuellement visibles dans votre compte.',
+        icon: GraduationCap,
+        accent: 'from-[#0c4da2] via-[var(--cj-blue)] to-[#02142f]',
+      },
+      {
+        label: 'Sessions liees',
+        value: activeSessions,
+        helper: 'Inscriptions rattachees a une session planifiee.',
+        icon: CalendarDays,
+        accent: 'from-[#003b96] via-[var(--cj-blue)] to-[#0f172a]',
+      },
+      {
+        label: 'Paiements valides',
+        value: paidCount,
+        helper: 'Parcours avec reglement complet enregistre.',
+        icon: Wallet,
+        accent: 'from-[var(--cj-red)] via-[#bb111d] to-[#4a0b14]',
+      },
+      {
+        label: 'Formations terminees',
+        value: completedCount,
+        helper: 'Programmes deja finalises ou certificables.',
+        icon: BadgeCheck,
+        accent: 'from-[#1d4ed8] via-[#1e3a8a] to-[#020617]',
+      },
+    ]
+  }, [enrollments])
+
   const fetchEnrollments = async () => {
     setLoading(true)
     try {
-      // TODO: Filtrer par email de l'étudiant connecté
       const response = await fetch('/api/enrollments')
       const data = await response.json()
       setEnrollments(data)
@@ -49,168 +135,159 @@ export default function MesFormationsPage() {
     }
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0
-    }).format(amount)
-  }
-
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, string> = {
-      pending: 'bg-red-100 text-red-800',
-      accepted: 'bg-blue-100 text-blue-800',
-      confirmed: 'bg-blue-100 text-blue-800',
-      rejected: 'bg-red-100 text-red-800',
-      cancelled: 'bg-gray-100 text-gray-800',
-      completed: 'bg-blue-100 text-blue-800'
-    }
-    return badges[status] || 'bg-gray-100 text-gray-800'
-  }
-
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      pending: 'En attente',
-      accepted: 'Accepté',
-      confirmed: 'Confirmé',
-      rejected: 'Rejeté',
-      cancelled: 'Annulé',
-      completed: 'Terminé'
-    }
-    return labels[status] || status
-  }
-
-  const getPaymentStatusBadge = (status: string) => {
-    const badges: Record<string, string> = {
-      unpaid: 'bg-red-100 text-red-800',
-      partial: 'bg-red-100 text-red-800',
-      paid: 'bg-blue-100 text-blue-800'
-    }
-    return badges[status] || 'bg-gray-100 text-gray-800'
-  }
-
-  const getPaymentStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      unpaid: 'Non payé',
-      partial: 'Partiel',
-      paid: 'Payé'
-    }
-    return labels[status] || status
+  if (loading) {
+    return (
+      <StudentPageShell
+        locale={locale}
+        eyebrow="Espace etudiant"
+        title="Mes formations"
+        description="Chargement de vos inscriptions, de vos sessions et de vos informations de paiement."
+        icon={GraduationCap}
+      >
+        <StudentSectionCard
+          eyebrow="Parcours"
+          title="Preparation des formations"
+          description="Nous recuperons vos inscriptions, vos sessions liees et vos statuts de progression."
+          icon={BookOpen}
+        >
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
+            Chargement de vos formations...
+          </div>
+        </StudentSectionCard>
+      </StudentPageShell>
+    )
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <Breadcrumbs items={[
-        { label: 'Espace Étudiants', href: '/fr/espace-etudiants' },
-        { label: 'Mes Formations' }
-      ]} />
-
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-cjblue mb-8">Mes Formations</h1>
-        <p className="text-lg text-gray-700 mb-8">
-          Consultez toutes vos formations : inscriptions en cours, formations suivies et formations terminées.
-        </p>
-
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cjblue mx-auto"></div>
-            <p className="mt-4 text-gray-600">Chargement de vos formations...</p>
-          </div>
-        ) : enrollments.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <p className="text-gray-600 mb-4">Vous n'êtes inscrit à aucune formation pour le moment.</p>
-            <Link href="/fr/espace-etudiants/inscription" className="text-cjblue hover:underline">
-              S'inscrire à une formation
-            </Link>
-          </div>
+    <StudentPageShell
+      locale={locale}
+      eyebrow="Espace etudiant"
+      title="Mes formations"
+      description="Consultez vos inscriptions, suivez l'avancement de vos paiements et retrouvez les liens utiles vers vos sessions et vos supports."
+      icon={GraduationCap}
+      metrics={metrics}
+      actions={
+        <Link href={`/${locale}/programmes`} className={studentPrimaryButtonClassName}>
+          Explorer les sessions
+        </Link>
+      }
+    >
+      <StudentSectionCard
+        eyebrow="Parcours"
+        title="Vue d'ensemble de vos formations"
+        description="Chaque carte rassemble le statut d'inscription, l'etat du paiement, le calendrier et les acces utiles pour continuer votre progression."
+        icon={BookOpen}
+      >
+        {enrollments.length === 0 ? (
+          <StudentEmptyState
+            title="Aucune formation active"
+            description="Vous n'etes inscrit a aucune formation pour le moment. Parcourez les sessions disponibles pour demarrer un nouveau parcours."
+            action={
+              <Link href={`/${locale}/programmes`} className={studentPrimaryButtonClassName}>
+                Decouvrir les sessions
+              </Link>
+            }
+          />
         ) : (
-          <div className="space-y-6">
-            {enrollments.map((enrollment) => (
-              <div
-                key={enrollment.id}
-                className="bg-white border rounded-lg p-6 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-cjblue mb-2">
-                      {enrollment.formation.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      {enrollment.formation.description}
-                    </p>
-                  </div>
-                  <div className="ml-4 flex flex-col gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(enrollment.status)}`}>
-                      {getStatusLabel(enrollment.status)}
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusBadge(enrollment.paymentStatus)}`}>
-                      {getPaymentStatusLabel(enrollment.paymentStatus)}
-                    </span>
-                  </div>
-                </div>
+          <div className="space-y-4">
+            {enrollments.map((enrollment) => {
+              const paymentProgress =
+                enrollment.totalAmount > 0
+                  ? Math.max(0, Math.min(100, Math.round((enrollment.paidAmount / enrollment.totalAmount) * 100)))
+                  : 0
 
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Date de début</p>
-                    <p className="font-medium">
-                      <FormattedDate date={enrollment.startDate} />
-                    </p>
+              return (
+                <div
+                  key={enrollment.id}
+                  className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.4)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_55px_-30px_rgba(0,45,114,0.35)]"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="max-w-3xl">
+                      <h3 className="text-xl font-semibold tracking-tight text-slate-950">{enrollment.formation.title}</h3>
+                      <p className="mt-3 text-sm leading-6 text-slate-600">{enrollment.formation.description}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${studentStatusClass(enrollment.status)}`}>
+                        {enrollmentStatusLabel(enrollment.status)}
+                      </span>
+                      <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${paymentStatusClass(enrollment.paymentStatus)}`}>
+                        {paymentStatusLabel(enrollment.paymentStatus)}
+                      </span>
+                    </div>
                   </div>
-                  {enrollment.session && (
-                    <>
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Session</p>
-                        <p className="font-medium">
+
+                  <div className="mt-5 grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        <CalendarDays className="h-4 w-4 text-[var(--cj-blue)]" />
+                        Debut de parcours
+                      </div>
+                      <p className="mt-2 text-sm font-medium text-slate-900">
+                        <FormattedDate date={enrollment.startDate} />
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        <MonitorSmartphone className="h-4 w-4 text-[var(--cj-blue)]" />
+                        Session / format
+                      </div>
+                      <p className="mt-2 text-sm font-medium text-slate-900">
+                        {enrollment.session
+                          ? `${enrollment.session.format || 'Format non renseigne'}`
+                          : 'Session a confirmer'}
+                      </p>
+                      {enrollment.session ? (
+                        <p className="mt-1 text-xs text-slate-500">
                           <FormattedDate date={enrollment.session.startDate} /> - <FormattedDate date={enrollment.session.endDate} />
                         </p>
+                      ) : null}
+                    </div>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        <MapPin className="h-4 w-4 text-[var(--cj-blue)]" />
+                        Lieu
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Lieu</p>
-                        <p className="font-medium">{enrollment.session.location}</p>
+                      <p className="mt-2 text-sm font-medium text-slate-900">
+                        {enrollment.session?.location || 'A preciser'}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        <Wallet className="h-4 w-4 text-[var(--cj-blue)]" />
+                        Paiement
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Format</p>
-                        <p className="font-medium capitalize">{enrollment.session.format}</p>
+                      <p className="mt-2 text-sm font-medium text-slate-900">
+                        {formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)}
+                      </p>
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+                        <div
+                          className="h-full rounded-full bg-[linear-gradient(90deg,var(--cj-red)_0%,var(--cj-blue)_100%)]"
+                          style={{ width: `${paymentProgress}%` }}
+                        />
                       </div>
-                    </>
-                  )}
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Paiement</p>
-                    <p className="font-medium">
-                      {formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)}
-                    </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-3 border-t border-slate-200 pt-4">
+                    <Link href={`/${locale}/formations/${enrollment.formation.slug}`} className={studentMutedButtonClassName}>
+                      Voir les details
+                    </Link>
+                    <Link href={`/${locale}/espace-etudiants/supports?formationId=${enrollment.formation.id}`} className={studentMutedButtonClassName}>
+                      Supports de cours
+                    </Link>
+                    {enrollment.status === 'completed' ? (
+                      <Link href={`/${locale}/espace-etudiants/resultats`} className={studentPrimaryButtonClassName}>
+                        Voir les resultats
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
-
-                <div className="flex gap-2 pt-4 border-t">
-                  <Link
-                    href={`/fr/formations/${enrollment.formation.slug}`}
-                    className="text-cjblue hover:underline text-sm"
-                  >
-                    Voir les détails
-                  </Link>
-                  <Link
-                    href={`/fr/espace-etudiants/supports?formationId=${enrollment.formation.id}`}
-                    className="text-cjblue hover:underline text-sm"
-                  >
-                    Supports de cours
-                  </Link>
-                  {enrollment.status === 'completed' && (
-                    <Link
-                      href="/fr/espace-etudiants/resultats"
-                      className="text-cjblue hover:underline text-sm"
-                    >
-                      Voir les résultats
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
-      </div>
-    </div>
+      </StudentSectionCard>
+    </StudentPageShell>
   )
 }
-

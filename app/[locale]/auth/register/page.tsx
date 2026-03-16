@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 
@@ -21,6 +21,8 @@ interface StudentAccountData {
 
 export default function StudentRegisterPage() {
   const router = useRouter()
+  const params = useParams<{ locale?: string }>()
+  const locale = params?.locale || 'fr'
   const [formData, setFormData] = useState<StudentAccountData>({
     firstName: '',
     lastName: '',
@@ -126,10 +128,10 @@ export default function StudentRegisterPage() {
 
         if (loginResult?.ok) {
           // Redirect to student dashboard after successful registration and login
-          router.push('/fr/espace-etudiants')
+          router.push(`/${locale}/espace-etudiants`)
         } else {
           // Login failed despite registration success (rare)
-          router.push('/fr/auth/login?message=Compte créé, veuillez vous connecter')
+          router.push(`/${locale}/auth/login?message=Compte cree, veuillez vous connecter`)
         }
       } else {
         // Afficher le message serveur (error) et le détail technique si présent (details)
@@ -520,4 +522,3 @@ export default function StudentRegisterPage() {
     </div>
   )
 }
-

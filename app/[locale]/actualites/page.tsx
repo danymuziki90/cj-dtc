@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import Breadcrumbs from '../../../components/Breadcrumbs'
+import { getIntlLocale, resolveSiteLocale } from '@/lib/i18n/locale'
+import { publicMessages } from '@/lib/i18n/public-messages'
 
 type NewsItem = {
   id: string
@@ -32,8 +34,10 @@ type NewsResponse = {
 
 const PAGE_SIZE = 9
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('fr-FR', {
+const copy = publicMessages.newsList
+
+function formatDate(value: string, locale: 'fr' | 'en') {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     dateStyle: 'long',
   }).format(new Date(value))
 }
@@ -44,7 +48,8 @@ function stripHtml(value: string) {
 
 export default function ActualitesPage() {
   const params = useParams<{ locale: string }>()
-  const locale = params?.locale || 'fr'
+  const locale = resolveSiteLocale(params?.locale)
+  const t = copy[locale]
 
   const [news, setNews] = useState<NewsItem[]>([])
   const [categories, setCategories] = useState<string[]>([])
@@ -84,7 +89,7 @@ export default function ActualitesPage() {
     const payload = (await response.json()) as NewsResponse
 
     if (!response.ok) {
-      throw new Error(payload.error || 'Erreur lors du chargement des actualités.')
+      throw new Error(payload.error || t.loadError)
     }
 
     setNews(payload.news || [])
@@ -96,9 +101,8 @@ export default function ActualitesPage() {
     setLoading(true)
     setError(null)
     fetchNews()
-      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur inattendue'))
+      .catch((err) => setError(err instanceof Error ? err.message : t.unexpectedError))
       .finally(() => setLoading(false))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, debouncedSearch, category, date])
 
   const pageNumbers = useMemo(() => {
@@ -113,18 +117,16 @@ export default function ActualitesPage() {
   return (
     <div className="bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <Breadcrumbs items={[{ label: 'Actualités' }]} />
+        <Breadcrumbs items={[{ label: t.breadcrumb }]} />
 
         <section className="relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#002D72_0%,#003b96_65%,#E30613_150%)] px-6 py-10 text-white shadow-xl sm:px-8">
           <div className="pointer-events-none absolute -right-16 -top-14 h-52 w-52 rounded-full bg-white/10 blur-3xl" />
           <div className="relative">
-            <p className="text-sm uppercase tracking-[0.25em] text-white/85">CJ DTC</p>
-            <h1 className="mt-3 text-5xl font-extrabold leading-tight text-white sm:text-6xl">Actualités</h1>
-            <p className="mt-3 max-w-3xl text-base text-white/90 sm:text-lg">
-              Les annonces, sessions, évolutions et informations importantes du centre.
-            </p>
+            <p className="text-sm uppercase tracking-[0.25em] text-white/85">{t.heroEyebrow}</p>
+            <h1 className="mt-3 text-5xl font-extrabold leading-tight text-white sm:text-6xl">{t.heroTitle}</h1>
+            <p className="mt-3 max-w-3xl text-base text-white/90 sm:text-lg">{t.heroDescription}</p>
             <div className="mt-5 inline-flex rounded-full bg-white/12 px-4 py-2 text-sm font-medium">
-              {loading ? 'Chargement...' : `${pagination.total} actualité(s)`}
+              {loading ? t.loading : `${pagination.total} ${t.totalSuffix}`}
             </div>
           </div>
         </section>
@@ -133,19 +135,19 @@ export default function ActualitesPage() {
           <div className="grid gap-3 md:grid-cols-4">
             <div className="md:col-span-2">
               <label htmlFor="search" className="mb-1 block text-sm font-medium text-slate-700">
-                Recherche
+                {t.searchLabel}
               </label>
               <input
                 id="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Titre ou mot-clé..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
               />
             </div>
             <div>
               <label htmlFor="category" className="mb-1 block text-sm font-medium text-slate-700">
-                Catégorie
+                {t.categoryLabel}
               </label>
               <select
                 id="category"
@@ -156,7 +158,7 @@ export default function ActualitesPage() {
                 }}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
               >
-                <option value="all">Toutes</option>
+                <option value="all">{t.allCategories}</option>
                 {categories.map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -166,7 +168,7 @@ export default function ActualitesPage() {
             </div>
             <div>
               <label htmlFor="date" className="mb-1 block text-sm font-medium text-slate-700">
-                Date
+                {t.dateLabel}
               </label>
               <input
                 id="date"
@@ -194,27 +196,23 @@ export default function ActualitesPage() {
                 }}
                 className="text-sm font-medium text-cjblue hover:text-blue-800"
               >
-                Réinitialiser les filtres
+                {t.resetFilters}
               </button>
             </div>
           )}
         </section>
 
-        {error ? (
-          <section className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
-            {error}
-          </section>
-        ) : null}
+        {error ? <section className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">{error}</section> : null}
 
         {!loading && !error && news.length === 0 ? (
           <section className="mt-6 rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
-            <h2 className="text-2xl font-bold text-cjblue">Aucune actualité trouvée</h2>
-            <p className="mt-2 text-sm text-slate-600">Ajustez vos filtres ou revenez plus tard.</p>
+            <h2 className="text-2xl font-bold text-cjblue">{t.emptyTitle}</h2>
+            <p className="mt-2 text-sm text-slate-600">{t.emptyDescription}</p>
             <Link
               href={`/${locale}/contact`}
               className="mt-5 inline-flex rounded-lg bg-cjblue px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800"
             >
-              Nous contacter
+              {t.contact}
             </Link>
           </section>
         ) : null}
@@ -237,15 +235,15 @@ export default function ActualitesPage() {
                 <div className="p-5">
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <span className="inline-flex rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
-                      {item.category || 'Général'}
+                      {item.category || t.defaultCategory}
                     </span>
-                    <time className="text-xs text-slate-500">{formatDate(item.publicationDate)}</time>
+                    <time className="text-xs text-slate-500">{formatDate(item.publicationDate, locale)}</time>
                   </div>
 
                   <h2 className="text-xl font-bold leading-tight text-cjblue">{item.title}</h2>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{item.excerpt || stripHtml(item.content).slice(0, 170)}</p>
 
-                  <div className="mt-4 text-sm font-semibold text-cjblue">Lire la suite →</div>
+                  <div className="mt-4 text-sm font-semibold text-cjblue">{t.readMore} →</div>
                 </div>
               </Link>
             </article>
@@ -260,7 +258,7 @@ export default function ActualitesPage() {
               disabled={page <= 1}
               className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
             >
-              Precedent
+              {t.previous}
             </button>
 
             <div className="flex flex-wrap gap-1">
@@ -286,7 +284,7 @@ export default function ActualitesPage() {
               disabled={page >= pagination.pageCount}
               className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
             >
-              Suivant
+              {t.next}
             </button>
           </section>
         ) : null}
@@ -294,4 +292,3 @@ export default function ActualitesPage() {
     </div>
   )
 }
-

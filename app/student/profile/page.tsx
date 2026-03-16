@@ -1,8 +1,9 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import StudentPortalNav from '@/components/student-portal/StudentPortalNav'
 
 type ProfileResponse = {
   student: {
@@ -93,11 +94,11 @@ export default function StudentProfilePage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Échec de mise à jour.')
+        setError(data.error || 'Ãƒâ€°chec de mise ÃƒÂ  jour.')
         return
       }
 
-      setMessage('Profil mis à jour avec succès.')
+      setMessage('Profil mis ÃƒÂ  jour avec succÃƒÂ¨s.')
       setForm((prev) => ({
         ...prev,
         currentPassword: '',
@@ -115,7 +116,7 @@ export default function StudentProfilePage() {
           : prev
       )
     } catch {
-      setError('Échec de mise à jour.')
+      setError('Ãƒâ€°chec de mise ÃƒÂ  jour.')
     } finally {
       setSaving(false)
     }
@@ -132,6 +133,7 @@ export default function StudentProfilePage() {
   return (
     <div className="min-h-screen bg-slate-100 px-4 py-6">
       <div className="mx-auto max-w-4xl space-y-4">
+        <StudentPortalNav />
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Mon compte etudiant</h1>
@@ -271,4 +273,5 @@ export default function StudentProfilePage() {
     </div>
   )
 }
+
 

@@ -1,6 +1,7 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
+import { CalendarRange, Download, FileSpreadsheet, Layers3, Printer } from 'lucide-react'
 import AdminEnrollmentTable, { type EnrollmentRow } from '@/components/AdminEnrollmentTable'
 import BulkEmailSender from '@/components/BulkEmailSender'
 import EnrollmentFilters from '@/components/EnrollmentFilters'
@@ -8,6 +9,13 @@ import EnrollmentStats, { type EnrollmentStatsSummary } from '@/components/Enrol
 import EnrollmentPreviewModal from '@/components/EnrollmentPreviewModal'
 import AdminShell from '@/components/admin-portal/AdminShell'
 import PaginationControls from '@/components/admin-portal/PaginationControls'
+import {
+  AdminBadge,
+  AdminPanel,
+  AdminPanelHeader,
+  adminPrimaryButtonClassName,
+  adminSecondaryButtonClassName,
+} from '@/components/admin-portal/ui'
 
 type Formation = {
   id: number
@@ -78,10 +86,7 @@ export default function EnrollmentsPage() {
     setLoading(true)
     try {
       const params = new URLSearchParams()
-      const nextFilters = {
-        ...filters,
-        ...options,
-      }
+      const nextFilters = { ...filters, ...options }
       const page = options?.page ?? pagination.page
       const pageSize = options?.pageSize ?? pagination.pageSize
 
@@ -120,7 +125,7 @@ export default function EnrollmentsPage() {
     fetchEnrollments()
   }, [filters, pagination.page, pagination.pageSize])
 
-  const handleExport = async (format: 'excel' | 'csv') => {
+  async function handleExport(format: 'excel' | 'csv') {
     try {
       const params = new URLSearchParams()
       Object.entries(filters).forEach(([key, value]) => {
@@ -131,12 +136,12 @@ export default function EnrollmentsPage() {
       const response = await fetch(`/api/enrollments/export?${params.toString()}`)
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `inscriptions_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : 'csv'}`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `inscriptions_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : 'csv'}`
+      document.body.appendChild(anchor)
+      anchor.click()
+      document.body.removeChild(anchor)
       window.URL.revokeObjectURL(url)
     } catch (error) {
       console.error("Erreur lors de l'export:", error)
@@ -144,44 +149,33 @@ export default function EnrollmentsPage() {
     }
   }
 
-  const handlePrint = () => {
-    window.print()
-  }
-
-  const handlePreview = (enrollment: EnrollmentRow) => {
+  function handlePreview(enrollment: EnrollmentRow) {
     setSelectedEnrollment(enrollment)
     setShowPreview(true)
   }
 
   return (
     <AdminShell title="Gestion des inscriptions">
-      <div className="space-y-6 p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-3xl font-bold text-cjblue">Gestion des inscriptions</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Total filtre: {stats.total} inscription{stats.total > 1 ? 's' : ''}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleExport('csv')}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
-            >
+      <div className="space-y-6">
+        <div className="flex flex-col gap-3 rounded-[26px] border border-slate-200 bg-white/92 px-5 py-4 shadow-[0_20px_55px_-44px_rgba(15,23,42,0.28)] md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => handleExport('csv')} className={adminSecondaryButtonClassName}>
+              <Download className="h-4 w-4" />
               Export CSV
             </button>
-            <button
-              onClick={() => handleExport('excel')}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
-            >
+            <button type="button" onClick={() => handleExport('excel')} className={adminSecondaryButtonClassName}>
+              <FileSpreadsheet className="h-4 w-4" />
               Export Excel
             </button>
-            <button
-              onClick={handlePrint}
-              className="rounded-lg bg-gray-600 px-4 py-2 text-sm text-white transition-colors hover:bg-gray-700"
-            >
+            <button type="button" onClick={() => window.print()} className={adminPrimaryButtonClassName}>
+              <Printer className="h-4 w-4" />
               Imprimer
             </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <AdminBadge tone="primary">{pagination.totalItems} dossier(s)</AdminBadge>
+            <AdminBadge tone="neutral">{viewMode === 'formation' ? 'Vue formation' : 'Vue date'}</AdminBadge>
+            <AdminBadge tone="success">{formations.length} formation(s)</AdminBadge>
           </div>
         </div>
 
@@ -202,30 +196,46 @@ export default function EnrollmentsPage() {
 
         <BulkEmailSender acceptedEnrollments={enrollments.filter((item) => item.status === 'accepted')} />
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => setViewMode('formation')}
-            className={`rounded-lg px-4 py-2 transition-colors ${
-              viewMode === 'formation' ? 'bg-cjblue text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Vue par formation
-          </button>
-          <button
-            onClick={() => setViewMode('date')}
-            className={`rounded-lg px-4 py-2 transition-colors ${
-              viewMode === 'date' ? 'bg-cjblue text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Vue par date
-          </button>
-        </div>
+        <AdminPanel>
+          <AdminPanelHeader
+            eyebrow="Presentation"
+            title="Choisir l'angle de lecture"
+            description="Passez d'une segmentation par formation a une vue calendrier selon le type de pilotage souhaite."
+            actions={
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('formation')}
+                  className={viewMode === 'formation' ? adminPrimaryButtonClassName : adminSecondaryButtonClassName}
+                >
+                  <Layers3 className="h-4 w-4" />
+                  Vue par formation
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('date')}
+                  className={viewMode === 'date' ? adminPrimaryButtonClassName : adminSecondaryButtonClassName}
+                >
+                  <CalendarRange className="h-4 w-4" />
+                  Vue par date
+                </button>
+              </div>
+            }
+          />
+          <div className="mt-5 flex flex-wrap gap-2">
+            <AdminBadge tone="primary">Page {pagination.page} / {pagination.totalPages}</AdminBadge>
+            <AdminBadge tone="neutral">{pagination.pageSize} lignes par page</AdminBadge>
+            <AdminBadge tone="success">{stats.total} dossier(s) totalises</AdminBadge>
+          </div>
+        </AdminPanel>
 
         {loading ? (
-          <div className="py-12 text-center">
-            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-cjblue" />
-            <p className="mt-4 text-gray-600">Chargement des inscriptions...</p>
-          </div>
+          <AdminPanel>
+            <div className="flex flex-col items-center justify-center py-14 text-center">
+              <span className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-[var(--admin-primary)]" />
+              <p className="mt-4 text-sm text-slate-600">Chargement des inscriptions...</p>
+            </div>
+          </AdminPanel>
         ) : (
           <AdminEnrollmentTable enrollments={enrollments} groupBy={viewMode} onPreview={handlePreview} />
         )}

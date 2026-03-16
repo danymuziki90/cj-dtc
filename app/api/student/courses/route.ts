@@ -1,138 +1,132 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '../../../../lib/prisma'
+import { prisma } from '@/lib/prisma'
+import { requireStudent } from '@/lib/auth-portal/guards'
+import { parseSessionMetadata } from '@/lib/sessions/metadata'
 
-export async function GET(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session || session.user?.role !== 'student') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+function getSessionHours(startDate?: Date | null, endDate?: Date | null, metadata?: string | null) {
+  if (!startDate || !endDate) return 0
 
-    // Simuler des cours (en réalité, viendraient de la base de données)
-    const courses = [
-      {
-        id: 1,
-        title: 'Introduction à JavaScript',
-        description: 'Apprenez les bases de JavaScript avec ce cours complet',
-        content: `# Introduction à JavaScript
-
-## Objectifs
-Ce cours vous permettra de maîtriser les fondamentaux du langage JavaScript.
-
-## Contenu
-1. Variables et types de données
-2. Fonctions et portée
-3. Conditions et boucles
-4. Tableaux et objets
-5. Manipulation du DOM
-6. Événements et interactions
-
-## Exercices pratiques
-- Créer une calculatrice simple
-- Gérer un formulaire interactif
-- Construire un mini-jeu
-
-## Ressources
-- Documentation MDN
-- Tutoriels interactifs
-- Projets pratiques`,
-        type: 'video',
-        formationId: 1,
-        formation: { title: 'Développement Web', categorie: 'Programmation' },
-        order: 1,
-        duration: 45,
-        videoUrl: 'https://example.com/video1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: 2,
-        title: 'HTML5 et CSS3',
-        description: 'Maîtrisez la structure des pages web modernes',
-        content: `# HTML5 et CSS3
-
-## Objectifs
-Apprendre à créer des pages web structurées et stylisées.
-
-## Contenu
-1. Structure HTML5 sémantique
-2. CSS3 et sélecteurs avancés
-3. Flexbox et Grid Layout
-4. Responsive Design
-5. Animations CSS
-6. Intégration JavaScript
-
-## Projets
-- Portfolio personnel
-- Site responsive complet
-- Interface utilisateur moderne`,
-        type: 'text',
-        formationId: 1,
-        formation: { title: 'Développement Web', categorie: 'Design Web' },
-        order: 2,
-        duration: 30,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: 3,
-        title: 'Quiz JavaScript',
-        description: 'Testez vos connaissances avec ce quiz interactif',
-        content: `# Quiz JavaScript
-
-## Instructions
-Répondez aux questions suivantes pour tester votre compréhension.
-
-## Questions
-1. Qu'est-ce qu'une variable en JavaScript ?
-2. Comment déclare-t-on une fonction ?
-3. Qu'est-ce que le DOM ?
-4. Comment ajouter un écouteur d'événement ?
-5. Quelle est la différence entre == et === ?`,
-        type: 'quiz',
-        formationId: 1,
-        formation: { title: 'Développement Web', categorie: 'Évaluation' },
-        order: 3,
-        duration: 15,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: 4,
-        title: 'Projet Portfolio',
-        description: 'Créez votre portfolio personnel en utilisant HTML, CSS et JavaScript',
-        content: `# Projet Portfolio
-
-## Objectifs
-Mettre en pratique toutes les compétences acquises.
-
-## Spécifications
-- Page d'accueil avec présentation
-- Section projets avec galerie
-- Formulaire de contact fonctionnel
-- Design responsive et moderne
-- Animations et interactions subtiles
-
-## Livrables attendus
-- Code source complet
-- Documentation technique
-- Démo en ligne`,
-        type: 'assignment',
-        formationId: 1,
-        formation: { title: 'Développement Web', categorie: 'Projets' },
-        order: 4,
-        duration: 120,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ]
-
-    return NextResponse.json(courses)
-  } catch (error) {
-    console.error('Erreur lors du chargement des cours:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  const parsed = parseSessionMetadata(metadata)
+  const durationLabel = parsed.metadata.durationLabel || ''
+  const durationMatch = durationLabel.match(/(\d+(?:[.,]\d+)?)\s*(h|heure|heures)/i)
+  if (durationMatch) {
+    const value = Number(durationMatch[1].replace(',', '.'))
+    if (!Number.isNaN(value) && value > 0) return value
   }
+
+  const raw = (endDate.getTime() - startDate.getTime()) / 3600000
+  return raw > 0 ? Math.round(raw * 10) / 10 : 0
+}
+
+function resolveCourseType(format?: string | null, hasExerciseResource = false) {
+  if (hasExerciseResource) return 'assignment'
+  if (format === 'distanciel' || format === 'hybride') return 'video'
+  return 'text'
+}
+
+export async function GET(request: NextRequest) {
+  const auth = await requireStudent(request)
+  if (auth.error) return auth.error
+
+  const enrollments = await prisma.enrollment.findMany({
+    where: {
+      email: auth.student.email,
+      status: {
+        notIn: ['rejected', 'cancelled'],
+      },
+    },
+    orderBy: { startDate: 'asc' },
+    include: {
+      formation: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          categorie: true,
+          objectifs: true,
+          modules: true,
+        },
+      },
+      session: {
+        select: {
+          id: true,
+          startDate: true,
+          endDate: true,
+          startTime: true,
+          endTime: true,
+          location: true,
+          format: true,
+          description: true,
+          prerequisites: true,
+        },
+      },
+    },
+  })
+
+  const formationIds = Array.from(new Set(enrollments.map((item) => item.formationId)))
+  const sessionIds = Array.from(new Set(enrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value))))
+
+  const documents = formationIds.length || sessionIds.length
+    ? await prisma.document.findMany({
+        where: {
+          category: {
+            not: 'certificate_template',
+          },
+          OR: [
+            ...(formationIds.length ? [{ formationId: { in: formationIds } }] : []),
+            ...(sessionIds.length ? [{ sessionId: { in: sessionIds } }] : []),
+          ],
+        },
+        select: {
+          id: true,
+          formationId: true,
+          sessionId: true,
+          category: true,
+        },
+      })
+    : []
+
+  const courses = enrollments.map((enrollment, index) => {
+    const relatedDocuments = documents.filter(
+      (document) => document.formationId === enrollment.formationId || document.sessionId === enrollment.sessionId,
+    )
+    const hasExerciseResource = relatedDocuments.some((document) => document.category === 'exercise')
+    const hours = getSessionHours(enrollment.session?.startDate, enrollment.session?.endDate, enrollment.session?.prerequisites)
+    const contentParts = [
+      enrollment.formation.description,
+      enrollment.formation.objectifs,
+      enrollment.formation.modules,
+      enrollment.session?.description,
+    ].filter(Boolean)
+
+    return {
+      id: enrollment.id,
+      title: enrollment.formation.title,
+      description: enrollment.session?.description || enrollment.formation.description,
+      content: contentParts.join('\n\n') || `Programme ${enrollment.formation.title}`,
+      type: resolveCourseType(enrollment.session?.format, hasExerciseResource),
+      formationId: enrollment.formation.id,
+      formation: {
+        title: enrollment.formation.title,
+        categorie: enrollment.formation.categorie,
+      },
+      order: index + 1,
+      duration: hours,
+      videoUrl: null,
+      createdAt: enrollment.createdAt.toISOString(),
+      updatedAt: enrollment.updatedAt.toISOString(),
+      sessionId: enrollment.session?.id || null,
+      startDate: enrollment.session?.startDate?.toISOString() || null,
+      endDate: enrollment.session?.endDate?.toISOString() || null,
+      startTime: enrollment.session?.startTime || null,
+      endTime: enrollment.session?.endTime || null,
+      location: enrollment.session?.location || null,
+      format: enrollment.session?.format || null,
+      status: enrollment.status,
+      paymentStatus: enrollment.paymentStatus,
+      resourcesCount: relatedDocuments.length,
+    }
+  })
+
+  return NextResponse.json(courses)
 }

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { Loader2, X } from 'lucide-react'
@@ -377,6 +377,8 @@ export default function SessionRegistrationModal({ open, locale, session, progra
 
   if (!open || !session) return null
 
+  const isFreeSession = session.price <= 0
+
   const onChangeValue = (key: string, value: string | boolean) => {
     setValues((prev) => ({ ...prev, [key]: value }))
     setErrors((prev) => {
@@ -444,8 +446,11 @@ export default function SessionRegistrationModal({ open, locale, session, progra
           provider: 'pawapay',
           method: 'mobile_money',
           currency: 'USD',
-          phoneNumber: String(values.paymentPhoneNumber || values.whatsapp || ''),
-          operator: typeof values.paymentOperator === 'string' ? values.paymentOperator : undefined,
+          phoneNumber: isFreeSession ? undefined : String(values.paymentPhoneNumber || values.whatsapp || ''),
+          operator:
+            !isFreeSession && typeof values.paymentOperator === 'string'
+              ? values.paymentOperator
+              : undefined,
         },
       }
 
@@ -645,12 +650,19 @@ export default function SessionRegistrationModal({ open, locale, session, progra
                 </section>
               ))}
 
-              <section className="rounded-xl border border-slate-200 p-4">
-                <h4 className="text-base font-semibold text-slate-900">Paiement et conditions</h4>
-                <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                  Paiement disponible: <strong>PawaPay Mobile Money</strong>
-                </div>
-                {session.price > 0 ? (
+              {isFreeSession ? (
+                <section className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+                  <h4 className="text-base font-semibold text-emerald-950">Confirmation immediate</h4>
+                  <p className="mt-3 text-sm text-emerald-800">
+                    Cette session est gratuite. Votre inscription sera confirmee des la soumission du formulaire, sans etape de paiement.
+                  </p>
+                </section>
+              ) : (
+                <section className="rounded-xl border border-slate-200 p-4">
+                  <h4 className="text-base font-semibold text-slate-900">Paiement et conditions</h4>
+                  <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                    Paiement disponible: <strong>PawaPay Mobile Money</strong>
+                  </div>
                   <div className="mt-3 grid gap-3 md:grid-cols-2">
                     <div>
                       <label className="mb-1 block text-sm font-medium text-slate-700">
@@ -689,22 +701,22 @@ export default function SessionRegistrationModal({ open, locale, session, progra
                       ) : null}
                     </div>
                   </div>
-                ) : null}
-                <p className="mt-3 text-xs text-slate-500">
-                  Choisissez le reseau a debiter puis saisissez le numero Mobile Money sur lequel le paiement sera preleve.
-                  Le montant preleve correspond au prix de la session.
-                </p>
-              </section>
+                  <p className="mt-3 text-xs text-slate-500">
+                    Choisissez le reseau a debiter puis saisissez le numero Mobile Money sur lequel le paiement sera preleve.
+                    Le montant preleve correspond au prix de la session.
+                  </p>
+                </section>
+              )}
 
               {result ? (
                 <div className="space-y-2">
                   <p className={`text-sm ${result.kind === 'success' ? 'text-blue-700' : 'text-red-700'}`}>{result.message}</p>
-                  {result.paymentStatus ? (
+                  {!isFreeSession && result.paymentStatus ? (
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                       Statut paiement: {result.paymentStatus}
                     </p>
                   ) : null}
-                  {result.paymentStatus === 'pending' && result.paymentId ? (
+                  {!isFreeSession && result.paymentStatus === 'pending' && result.paymentId ? (
                     <button
                       type="button"
                       onClick={checkPawaPayStatus}
@@ -724,7 +736,7 @@ export default function SessionRegistrationModal({ open, locale, session, progra
                 </button>
                 <button type="submit" disabled={submitting} className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {submitting ? 'Traitement...' : "Valider l'inscription"}
+                  {submitting ? 'Traitement...' : isFreeSession ? "Confirmer l'inscription" : "Valider l'inscription"}
                 </button>
               </div>
             </form>
@@ -734,4 +746,3 @@ export default function SessionRegistrationModal({ open, locale, session, progra
     </div>
   )
 }
-

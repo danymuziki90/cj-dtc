@@ -3,20 +3,26 @@ import { prisma } from '@/lib/prisma'
 export type CanonicalPaymentStatus = 'pending' | 'success' | 'failed'
 
 export function toCanonicalPaymentStatus(status?: string | null): CanonicalPaymentStatus {
-  const normalized = (status || '').toLowerCase()
+  const normalized = (status || '').toLowerCase().trim()
 
   if (!normalized) return 'pending'
+
+  if (normalized === 'unpaid' || normalized === 'partial') {
+    return 'pending'
+  }
 
   if (
     normalized.includes('completed') ||
     normalized.includes('success') ||
     normalized.includes('successful') ||
-    normalized.includes('paid')
+    normalized === 'paid'
   ) {
     return 'success'
   }
 
   if (
+    normalized.includes('partial') ||
+    normalized.includes('unpaid') ||
     normalized.includes('accepted') ||
     normalized.includes('submitted') ||
     normalized.includes('processing') ||
@@ -56,24 +62,34 @@ export async function syncEnrollmentPaymentStatus(enrollmentId: number) {
     where: { enrollmentId },
     select: {
       amount: true,
+      paidAt: true,
       status: true,
     },
   })
 
-  const totalPaid = payments.reduce((sum, payment) => {
-    return toCanonicalPaymentStatus(payment.status) === 'success' ? sum + payment.amount : sum
-  }, 0)
+  const successfulPayments = payments.filter((payment) => toCanonicalPaymentStatus(payment.status) === 'success')
+  const totalPaid = successfulPayments.reduce((sum, payment) => sum + payment.amount, 0)
 
   let paymentStatus = 'unpaid'
-  if (totalPaid > 0 && totalPaid < enrollment.totalAmount) paymentStatus = 'partial'
-  if (totalPaid >= enrollment.totalAmount && enrollment.totalAmount > 0) paymentStatus = 'paid'
+  if (enrollment.totalAmount <= 0) {
+    paymentStatus = 'paid'
+  } else if (totalPaid > 0 && totalPaid < enrollment.totalAmount) {
+    paymentStatus = 'partial'
+  } else if (totalPaid >= enrollment.totalAmount) {
+    paymentStatus = 'paid'
+  }
+
+  const effectivePaymentDate =
+    paymentStatus === 'paid'
+      ? successfulPayments.find((payment) => payment.paidAt)?.paidAt || enrollment.paymentDate || new Date()
+      : enrollment.paymentDate
 
   await prisma.enrollment.update({
     where: { id: enrollmentId },
     data: {
       paidAmount: totalPaid,
       paymentStatus,
-      paymentDate: paymentStatus === 'paid' ? new Date() : enrollment.paymentDate,
+      paymentDate: effectivePaymentDate,
     },
   })
 

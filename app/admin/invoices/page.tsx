@@ -1,8 +1,8 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { FormattedDate } from '@/components/FormattedDate'
+import AdminShell from '@/components/admin-portal/AdminShell'
 
 interface Invoice {
   id: number
@@ -71,7 +71,7 @@ export default function InvoicesPage() {
       const data = await response.json()
       setInvoices(data)
     } catch (error) {
-      console.error('Erreur lors du chargement des factures:', error)
+      console.error('Impossible de charger les factures:', error)
     } finally {
       setLoading(false)
     }
@@ -83,7 +83,7 @@ export default function InvoicesPage() {
       const data = await response.json()
       setEnrollments(data)
     } catch (error) {
-      console.error('Erreur lors du chargement des inscriptions:', error)
+      console.error('Impossible de charger les inscriptions:', error)
     }
   }
 
@@ -112,14 +112,14 @@ export default function InvoicesPage() {
           notes: ''
         })
         fetchInvoices()
-        alert('Facture créée avec succès!')
+        alert('Facture creee avec succes.')
       } else {
         const error = await response.json()
-        alert(`Erreur: ${error.error}`)
+        alert(error.error || 'Impossible de creer la facture.')
       }
     } catch (error) {
-      console.error('Erreur lors de la création de la facture:', error)
-      alert('Erreur lors de la création de la facture')
+      console.error('Impossible de creer la facture:', error)
+      alert('Impossible de creer la facture.')
     }
   }
 
@@ -141,13 +141,13 @@ export default function InvoicesPage() {
 
       if (response.ok) {
         fetchInvoices()
-        alert('Statut mis à jour!')
+        alert('Statut mis a jour.')
       } else {
-        alert('Erreur lors de la mise à jour')
+        alert('Impossible de mettre a jour le statut.')
       }
     } catch (error) {
-      console.error('Erreur:', error)
-      alert('Erreur lors de la mise à jour')
+      console.error('Impossible de mettre a jour la facture:', error)
+      alert('Impossible de mettre a jour le statut.')
     }
   }
 
@@ -177,9 +177,9 @@ export default function InvoicesPage() {
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
       draft: 'Brouillon',
-      sent: 'Envoyée',
-      paid: 'Payée',
-      cancelled: 'Annulée',
+      sent: 'Envoyee',
+      paid: 'Payee',
+      cancelled: 'Annulee',
       overdue: 'En retard'
     }
     return labels[status] || status
@@ -187,16 +187,18 @@ export default function InvoicesPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-20 bg-gray-200 rounded"></div>
-            ))}
+      <AdminShell title="Facturation">
+        <div className="p-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-20 bg-gray-200 rounded"></div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </AdminShell>
     )
   }
 
@@ -209,33 +211,34 @@ export default function InvoicesPage() {
     .reduce((sum, i) => sum + i.totalAmount, 0)
 
   return (
+    <AdminShell title="Facturation">
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-cjblue">Gestion des Factures</h1>
+        <h2 className="text-3xl font-bold text-cjblue">Pilotage des factures</h2>
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
-          {showForm ? 'Annuler' : '+ Nouvelle Facture'}
+          {showForm ? 'Annuler' : 'Nouvelle facture'}
         </button>
       </div>
 
       {/* Statistiques */}
       <div className="grid md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white border rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">Total Payé</div>
+          <div className="text-sm text-gray-600 mb-1">Total encaisse</div>
           <div className="text-2xl font-bold text-blue-600">{formatCurrency(totalAmount)}</div>
         </div>
         <div className="bg-white border rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">En Attente</div>
+          <div className="text-sm text-gray-600 mb-1">A suivre</div>
           <div className="text-2xl font-bold text-red-600">{formatCurrency(pendingAmount)}</div>
         </div>
         <div className="bg-white border rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">Nombre de Factures</div>
+          <div className="text-sm text-gray-600 mb-1">Factures</div>
           <div className="text-2xl font-bold text-cjblue">{invoices.length}</div>
         </div>
         <div className="bg-white border rounded-lg p-4">
-          <div className="text-sm text-gray-600 mb-1">Factures Payées</div>
+          <div className="text-sm text-gray-600 mb-1">Factures reglees</div>
           <div className="text-2xl font-bold text-blue-600">
             {invoices.filter(i => i.status === 'paid').length}
           </div>
@@ -245,7 +248,7 @@ export default function InvoicesPage() {
       {/* Formulaire d'ajout */}
       {showForm && (
         <div className="bg-white border rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">Nouvelle Facture</h2>
+          <h2 className="text-xl font-bold mb-4">Creer une facture</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
@@ -256,7 +259,7 @@ export default function InvoicesPage() {
                   onChange={(e) => setFormData({ ...formData, enrollmentId: e.target.value })}
                   className="w-full border rounded-lg px-3 py-2"
                 >
-                  <option value="">Sélectionner une inscription</option>
+                  <option value="">Selectionner une inscription</option>
                   {enrollments.map((enrollment) => (
                     <option key={enrollment.id} value={enrollment.id}>
                       {enrollment.firstName} {enrollment.lastName} - {enrollment.formation.title}
@@ -286,7 +289,7 @@ export default function InvoicesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Date d'échéance</label>
+                <label className="block text-sm font-medium mb-1">Date d echeance</label>
                 <input
                   type="date"
                   value={formData.dueDate}
@@ -309,7 +312,7 @@ export default function InvoicesPage() {
                 type="submit"
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Créer la Facture
+                Creer la facture
               </button>
               <button
                 type="button"
@@ -335,9 +338,9 @@ export default function InvoicesPage() {
             >
               <option value="">Tous</option>
               <option value="draft">Brouillon</option>
-              <option value="sent">Envoyée</option>
-              <option value="paid">Payée</option>
-              <option value="cancelled">Annulée</option>
+              <option value="sent">Envoyee</option>
+              <option value="paid">Payee</option>
+              <option value="cancelled">Annulee</option>
               <option value="overdue">En retard</option>
             </select>
           </div>
@@ -366,10 +369,10 @@ export default function InvoicesPage() {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">N° Facture</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Étudiant</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Etudiant</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Formation</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant TTC</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Échéance</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Echeance</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
@@ -378,7 +381,7 @@ export default function InvoicesPage() {
             {invoices.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
-                  Aucune facture trouvée
+                  Aucune facture pour cette selection.
                 </td>
               </tr>
             ) : (
@@ -412,9 +415,9 @@ export default function InvoicesPage() {
                       <button
                         onClick={() => generatePDF(invoice.id)}
                         className="text-blue-600 hover:text-blue-800"
-                        title="Générer PDF"
+                        title="Ouvrir le PDF"
                       >
-                        📄
+                        PDF
                       </button>
                       <select
                         value={invoice.status}
@@ -422,9 +425,9 @@ export default function InvoicesPage() {
                         className="text-xs border rounded px-2 py-1"
                       >
                         <option value="draft">Brouillon</option>
-                        <option value="sent">Envoyée</option>
-                        <option value="paid">Payée</option>
-                        <option value="cancelled">Annulée</option>
+                        <option value="sent">Envoyee</option>
+                        <option value="paid">Payee</option>
+                        <option value="cancelled">Annulee</option>
                         <option value="overdue">En retard</option>
                       </select>
                     </div>
@@ -436,6 +439,7 @@ export default function InvoicesPage() {
         </table>
       </div>
     </div>
+    </AdminShell>
   )
 }
 

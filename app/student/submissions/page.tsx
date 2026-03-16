@@ -1,8 +1,9 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import StudentPortalNav from '@/components/student-portal/StudentPortalNav'
 
 type Submission = {
   id: string
@@ -73,7 +74,7 @@ export default function StudentSubmissionsPage() {
     const data = await response.json()
 
     if (!response.ok) {
-      setError(data.error || 'Échec du téléversement.')
+      setError(data.error || 'Ãƒâ€°chec du tÃƒÂ©lÃƒÂ©versement.')
       setLoading(false)
       return
     }
@@ -109,7 +110,9 @@ export default function StudentSubmissionsPage() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 lg:grid-cols-[380px_1fr]">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-6">
+        <StudentPortalNav />
+        <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
         <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-4">
           <h2 className="mb-4 text-lg font-semibold text-slate-900">Remettre un travail</h2>
 
@@ -192,8 +195,10 @@ export default function StudentSubmissionsPage() {
             </tbody>
           </table>
         </div>
+        </div>
       </main>
     </div>
   )
 }
+
 

@@ -1,7 +1,8 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 interface Formation {
   id: number
@@ -11,6 +12,9 @@ interface Formation {
 }
 
 export default function InscriptionPage() {
+  const params = useParams<{ locale?: string }>()
+  const locale = params?.locale || 'fr'
+
   const [formations, setFormations] = useState<Formation[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -122,7 +126,7 @@ export default function InscriptionPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <Link
-        href="/fr/espace-etudiants"
+        href={`/${locale}/espace-etudiants`}
         className="text-cjblue hover:underline mb-4 inline-block"
       >
         ← Retour à l'espace étudiants
@@ -316,7 +320,7 @@ export default function InscriptionPage() {
               {submitting ? 'Envoi en cours...' : 'Soumettre l\'inscription'}
             </button>
             <Link
-              href="/fr/formations"
+              href={`/${locale}/formations`}
               className="px-6 py-3 border border-cjblue text-cjblue rounded-lg hover:bg-cjblue hover:text-white transition-colors"
             >
               Voir les formations
@@ -327,4 +331,3 @@ export default function InscriptionPage() {
     </div>
   )
 }
-

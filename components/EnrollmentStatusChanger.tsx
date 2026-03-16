@@ -1,185 +1,184 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import { AdminBadge, adminDangerButtonClassName, adminPrimaryButtonClassName, adminSecondaryButtonClassName, adminTextareaClassName } from '@/components/admin-portal/ui'
 
 interface EnrollmentActionProps {
-    enrollmentId: number
-    currentStatus: string
-    email: string
-    formationTitle: string
-    onStatusChanged?: (newStatus: string) => void
+  enrollmentId: number
+  currentStatus: string
+  email: string
+  formationTitle: string
+  onStatusChanged?: (newStatus: string) => void
+}
+
+function getStatusTone(status: string): 'warning' | 'success' | 'danger' | 'neutral' | 'primary' {
+  switch (status) {
+    case 'pending':
+      return 'warning'
+    case 'accepted':
+      return 'success'
+    case 'confirmed':
+      return 'primary'
+    case 'rejected':
+      return 'danger'
+    default:
+      return 'neutral'
+  }
+}
+
+function getStatusLabel(status: string) {
+  switch (status) {
+    case 'pending':
+      return 'En attente'
+    case 'accepted':
+      return 'Accepte'
+    case 'confirmed':
+      return 'Confirme'
+    case 'rejected':
+      return 'Rejete'
+    case 'cancelled':
+      return 'Annule'
+    default:
+      return status
+  }
 }
 
 export default function EnrollmentStatusChanger({
-    enrollmentId,
-    currentStatus,
-    email,
-    formationTitle,
-    onStatusChanged
+  enrollmentId,
+  currentStatus,
+  email,
+  formationTitle,
+  onStatusChanged,
 }: EnrollmentActionProps) {
-    const [status, setStatus] = useState(currentStatus)
-    const [submitting, setSubmitting] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState(false)
-    const [rejectionReason, setRejectionReason] = useState('')
-    const [showReasonInput, setShowReasonInput] = useState(false)
+  const [status, setStatus] = useState(currentStatus)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  const [rejectionReason, setRejectionReason] = useState('')
+  const [showReasonInput, setShowReasonInput] = useState(false)
 
-    const handleStatusChange = async (newStatus: string) => {
-        if (newStatus === 'rejected' && !showReasonInput) {
-            setShowReasonInput(true)
-            return
-        }
-
-        setSubmitting(true)
-        setError(null)
-        setSuccess(false)
-
-        try {
-            const response = await fetch(`/api/enrollments/${enrollmentId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    status: newStatus,
-                    reason: rejectionReason
-                })
-            })
-
-            const data = await response.json()
-
-            if (!response.ok) {
-                throw new Error(data?.error || 'Erreur lors de la mise à jour')
-            }
-
-            setStatus(newStatus)
-            setSuccess(true)
-            setShowReasonInput(false)
-            setRejectionReason('')
-
-            // Call callback to refresh parent with new status
-            if (onStatusChanged) {
-                onStatusChanged(newStatus)
-            }
-
-            // Hide success message after 3 seconds
-            setTimeout(() => setSuccess(false), 3000)
-        } catch (err: any) {
-            setError(err.message)
-        } finally {
-            setSubmitting(false)
-        }
+  async function handleStatusChange(newStatus: string) {
+    if (newStatus === 'rejected' && !showReasonInput) {
+      setShowReasonInput(true)
+      return
     }
 
-    const getStatusColor = (s: string) => {
-        switch (s) {
-            case 'pending':
-                return 'bg-red-100 text-red-800'
-            case 'accepted':
-                return 'bg-blue-100 text-blue-800'
-            case 'rejected':
-                return 'bg-red-100 text-red-800'
-            case 'cancelled':
-                return 'bg-gray-100 text-gray-800'
-            default:
-                return 'bg-gray-100 text-gray-800'
-        }
+    setSubmitting(true)
+    setError(null)
+    setSuccess(false)
+
+    try {
+      const response = await fetch(`/api/enrollments/${enrollmentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: newStatus,
+          reason: rejectionReason,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Erreur lors de la mise a jour du statut.')
+      }
+
+      setStatus(newStatus)
+      setSuccess(true)
+      setShowReasonInput(false)
+      setRejectionReason('')
+      onStatusChanged?.(newStatus)
+      window.setTimeout(() => setSuccess(false), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur inattendue.')
+    } finally {
+      setSubmitting(false)
     }
+  }
 
-    const getStatusLabel = (s: string) => {
-        switch (s) {
-            case 'pending':
-                return 'En attente'
-            case 'accepted':
-                return 'Accepté'
-            case 'rejected':
-                return 'Rejeté'
-            case 'cancelled':
-                return 'Annulé'
-            default:
-                return s
-        }
-    }
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <AdminBadge tone={getStatusTone(status)}>{getStatusLabel(status)}</AdminBadge>
+        <span className="text-xs text-slate-500">Email cible: {email}</span>
+      </div>
 
-    return (
-        <div className="space-y-2">
-            <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(status)}`}>
-                    {getStatusLabel(status)}
-                </span>
-            </div>
-
-            {success && (
-                <div className="p-2 bg-blue-50 text-blue-700 text-xs rounded border border-blue-200">
-                    ✓ Statut mis à jour. Email envoyé à {email}.
-                </div>
-            )}
-
-            {error && (
-                <div className="p-2 bg-red-50 text-red-700 text-xs rounded border border-red-200">
-                    ✗ {error}
-                </div>
-            )}
-
-            {showReasonInput && status !== 'rejected' && (
-                <div className="p-2 bg-red-50 border border-red-200 rounded space-y-2">
-                    <textarea
-                        value={rejectionReason}
-                        onChange={e => setRejectionReason(e.target.value)}
-                        placeholder="Raison du rejet (optionnel)"
-                        className="w-full text-sm p-1 border border-red-300 rounded"
-                        rows={2}
-                    />
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => handleStatusChange('rejected')}
-                            disabled={submitting}
-                            className="text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
-                        >
-                            {submitting ? 'Envoi...' : 'Confirmer rejet'}
-                        </button>
-                        <button
-                            onClick={() => {
-                                setShowReasonInput(false)
-                                setRejectionReason('')
-                            }}
-                            disabled={submitting}
-                            className="text-xs px-2 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50"
-                        >
-                            Annuler
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            <div className="flex gap-1 flex-wrap">
-                {status !== 'accepted' && (
-                    <button
-                        onClick={() => handleStatusChange('accepted')}
-                        disabled={submitting}
-                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                    >
-                        {submitting && status !== 'rejected' ? 'Envoi...' : 'Accepter'}
-                    </button>
-                )}
-                {status !== 'rejected' && (
-                    <button
-                        onClick={() => handleStatusChange('rejected')}
-                        disabled={submitting}
-                        className="text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
-                    >
-                        Rejeter
-                    </button>
-                )}
-                {status !== 'pending' && (
-                    <button
-                        onClick={() => handleStatusChange('pending')}
-                        disabled={submitting}
-                        className="text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
-                    >
-                        En attente
-                    </button>
-                )}
-            </div>
+      {success ? (
+        <div className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          Statut mis a jour. Un email a ete prepare pour {email} au sujet de {formationTitle}.
         </div>
-    )
-}
+      ) : null}
 
+      {error ? (
+        <div className="rounded-[20px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</div>
+      ) : null}
+
+      {showReasonInput && status !== 'rejected' ? (
+        <div className="rounded-[24px] border border-rose-200 bg-rose-50/70 px-4 py-4">
+          <label className="mb-2 block text-sm font-medium text-slate-700">Raison du rejet</label>
+          <textarea
+            value={rejectionReason}
+            onChange={(event) => setRejectionReason(event.target.value)}
+            placeholder="Ajoutez un contexte clair pour l'equipe et pour le candidat."
+            className={`${adminTextareaClassName} min-h-[96px] border-rose-200 bg-white`}
+            rows={3}
+          />
+          <div className="mt-3 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                setShowReasonInput(false)
+                setRejectionReason('')
+              }}
+              disabled={submitting}
+              className={adminSecondaryButtonClassName}
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={() => handleStatusChange('rejected')}
+              disabled={submitting}
+              className={adminDangerButtonClassName}
+            >
+              {submitting ? 'Envoi...' : 'Confirmer le rejet'}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        {status !== 'accepted' ? (
+          <button
+            type="button"
+            onClick={() => handleStatusChange('accepted')}
+            disabled={submitting}
+            className={adminPrimaryButtonClassName}
+          >
+            {submitting ? 'Envoi...' : 'Accepter'}
+          </button>
+        ) : null}
+        {status !== 'rejected' ? (
+          <button
+            type="button"
+            onClick={() => handleStatusChange('rejected')}
+            disabled={submitting}
+            className={adminDangerButtonClassName}
+          >
+            Rejeter
+          </button>
+        ) : null}
+        {status !== 'pending' ? (
+          <button
+            type="button"
+            onClick={() => handleStatusChange('pending')}
+            disabled={submitting}
+            className={adminSecondaryButtonClassName}
+          >
+            Repasser en attente
+          </button>
+        ) : null}
+      </div>
+    </div>
+  )
+}

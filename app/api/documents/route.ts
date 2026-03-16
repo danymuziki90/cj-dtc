@@ -1,105 +1,207 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../lib/prisma'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
+import { prisma } from '@/lib/prisma'
+import { requireAdmin, requireStudent } from '@/lib/auth-portal/guards'
+import { ADMIN_AUTH_COOKIE, STUDENT_AUTH_COOKIE } from '@/lib/auth-portal/jwt'
+import { writeAdminAuditLog } from '@/lib/admin/audit'
 
-// GET /api/documents - Récupérer tous les documents
-export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = request.nextUrl
-        const formationId = searchParams.get('formationId')
-        const sessionId = searchParams.get('sessionId')
-        const category = searchParams.get('category')
-        const isPublic = searchParams.get('isPublic')
+export const runtime = 'nodejs'
 
-        const documents = await prisma.document.findMany({
-            where: {
-                ...(formationId && { formationId: parseInt(formationId) }),
-                ...(sessionId && { sessionId: parseInt(sessionId) }),
-                ...(category && { category }),
-                ...(isPublic && { isPublic: isPublic === 'true' })
-            },
-            include: {
-                formation: {
-                    select: { id: true, title: true }
-                },
-                session: {
-                    select: { id: true, startDate: true, location: true }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        })
+async function resolveDocumentAccess(request: NextRequest) {
+  const hasAdminCookie = Boolean(request.cookies.get(ADMIN_AUTH_COOKIE)?.value)
+  const hasStudentCookie = Boolean(request.cookies.get(STUDENT_AUTH_COOKIE)?.value)
 
-        return NextResponse.json(documents)
-    } catch (error) {
-        console.error('Erreur lors de la récupération des documents:', error)
-        return NextResponse.json(
-            { error: 'Erreur lors de la récupération des documents' },
-            { status: 500 }
-        )
+  if (hasAdminCookie) {
+    const adminAuth = await requireAdmin(request)
+    if (!adminAuth.error) {
+      return { mode: 'admin' as const, admin: adminAuth.admin }
     }
+    if (!hasStudentCookie) return { error: adminAuth.error }
+  }
+
+  if (hasStudentCookie) {
+    const studentAuth = await requireStudent(request)
+    if (!studentAuth.error) {
+      return { mode: 'student' as const, student: studentAuth.student }
+    }
+    return { error: studentAuth.error }
+  }
+
+  return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
 }
 
-// POST /api/documents - Upload d'un nouveau document
-export async function POST(request: NextRequest) {
-    try {
-        const formData = await request.formData()
-        const file = formData.get('file') as File
-        const title = formData.get('title') as string
-        const description = formData.get('description') as string
-        const category = formData.get('category') as string
-        const formationId = formData.get('formationId') as string
-        const sessionId = formData.get('sessionId') as string
-        const isPublic = formData.get('isPublic') === 'true'
+function parseOptionalNumber(value: string | null) {
+  if (!value) return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
 
-        if (!file || !title || !category) {
-            return NextResponse.json(
-                { error: 'Fichier, titre et catégorie sont requis' },
-                { status: 400 }
-            )
-        }
+export async function GET(request: NextRequest) {
+  const access = await resolveDocumentAccess(request)
+  if ('error' in access) return access.error
 
-        // Créer le dossier uploads s'il n'existe pas
-        const uploadsDir = join(process.cwd(), 'public', 'uploads', 'documents')
-        try {
-            await mkdir(uploadsDir, { recursive: true })
-        } catch (error) {
-            // Le dossier existe déjà
-        }
+  try {
+    const { searchParams } = request.nextUrl
+    const formationId = parseOptionalNumber(searchParams.get('formationId'))
+    const sessionId = parseOptionalNumber(searchParams.get('sessionId'))
+    const category = searchParams.get('category')?.trim() || null
+    const isPublicParam = searchParams.get('isPublic')
 
-        // Générer un nom de fichier unique
-        const timestamp = Date.now()
-        const fileExtension = file.name.split('.').pop()
-        const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-        const filePath = join('uploads', 'documents', fileName)
+    if (access.mode === 'admin') {
+      const documents = await prisma.document.findMany({
+        where: {
+          ...(formationId ? { formationId } : {}),
+          ...(sessionId ? { sessionId } : {}),
+          ...(category ? { category } : {}),
+          ...(isPublicParam !== null ? { isPublic: isPublicParam === 'true' } : {}),
+        },
+        include: {
+          formation: {
+            select: { id: true, title: true },
+          },
+          session: {
+            select: { id: true, startDate: true, endDate: true, location: true, format: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
 
-        // Sauvegarder le fichier
-        const bytes = await file.arrayBuffer()
-        const buffer = Buffer.from(bytes)
-        await writeFile(join(process.cwd(), 'public', filePath), buffer)
-
-        // Créer l'entrée en base de données
-        const document = await prisma.document.create({
-            data: {
-                title,
-                description,
-                fileName: file.name,
-                filePath,
-                fileSize: file.size,
-                mimeType: file.type,
-                category,
-                formationId: formationId ? parseInt(formationId) : null,
-                sessionId: sessionId ? parseInt(sessionId) : null,
-                isPublic
-            }
-        })
-
-        return NextResponse.json(document, { status: 201 })
-    } catch (error) {
-        console.error('Erreur lors de l\'upload du document:', error)
-        return NextResponse.json(
-            { error: 'Erreur lors de l\'upload du document' },
-            { status: 500 }
-        )
+      return NextResponse.json(documents)
     }
+
+    const enrollments = await prisma.enrollment.findMany({
+      where: {
+        email: access.student.email,
+        status: {
+          notIn: ['rejected', 'cancelled'],
+        },
+      },
+      select: {
+        formationId: true,
+        sessionId: true,
+      },
+    })
+
+    const allowedFormationIds = Array.from(new Set(enrollments.map((item) => item.formationId)))
+    const allowedSessionIds = Array.from(
+      new Set(enrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value))),
+    )
+
+    if (!allowedFormationIds.length && !allowedSessionIds.length) {
+      return NextResponse.json([])
+    }
+
+    if (formationId && !allowedFormationIds.includes(formationId)) {
+      return NextResponse.json([])
+    }
+
+    if (sessionId && !allowedSessionIds.includes(sessionId)) {
+      return NextResponse.json([])
+    }
+
+    const documents = await prisma.document.findMany({
+      where: {
+        category: {
+          not: 'certificate_template',
+        },
+        ...(formationId ? { formationId } : {}),
+        ...(sessionId ? { sessionId } : {}),
+        ...(category ? { category } : {}),
+        OR: [
+          ...(allowedFormationIds.length ? [{ formationId: { in: allowedFormationIds } }] : []),
+          ...(allowedSessionIds.length ? [{ sessionId: { in: allowedSessionIds } }] : []),
+        ],
+      },
+      include: {
+        formation: {
+          select: { id: true, title: true },
+        },
+        session: {
+          select: { id: true, startDate: true, endDate: true, location: true, format: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return NextResponse.json(documents)
+  } catch (error) {
+    console.error('Erreur lors de la recuperation des documents:', error)
+    return NextResponse.json({ error: 'Erreur lors de la recuperation des documents' }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return auth.error
+
+  try {
+    const formData = await request.formData()
+    const file = formData.get('file') as File | null
+    const title = String(formData.get('title') || '').trim()
+    const description = String(formData.get('description') || '').trim() || null
+    const category = String(formData.get('category') || '').trim()
+    const formationId = parseOptionalNumber(String(formData.get('formationId') || '').trim() || null)
+    const sessionId = parseOptionalNumber(String(formData.get('sessionId') || '').trim() || null)
+    const isPublic = String(formData.get('isPublic') || 'false') === 'true'
+
+    if (!file || !title || !category) {
+      return NextResponse.json({ error: 'File, title and category are required.' }, { status: 400 })
+    }
+
+    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'documents')
+    await mkdir(uploadsDir, { recursive: true })
+
+    const safeFileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`
+    const absoluteFilePath = join(uploadsDir, safeFileName)
+    const relativeFilePath = join('uploads', 'documents', safeFileName).replace(/\\/g, '/')
+    const buffer = Buffer.from(await file.arrayBuffer())
+    await writeFile(absoluteFilePath, buffer)
+
+    const document = await prisma.document.create({
+      data: {
+        title,
+        description,
+        fileName: file.name,
+        filePath: relativeFilePath,
+        fileSize: file.size,
+        mimeType: file.type || 'application/octet-stream',
+        formationId,
+        sessionId,
+        category,
+        isPublic,
+        uploadedBy: auth.admin.id,
+      },
+      include: {
+        formation: {
+          select: { id: true, title: true },
+        },
+        session: {
+          select: { id: true, startDate: true, endDate: true, location: true, format: true },
+        },
+      },
+    })
+
+    await writeAdminAuditLog({
+      request,
+      adminId: auth.admin.id,
+      adminUsername: auth.admin.username,
+      action: 'document.create',
+      targetType: 'document',
+      targetId: String(document.id),
+      targetLabel: document.title,
+      summary: `Document ajoute: ${document.title}`,
+      metadata: {
+        category: document.category,
+        formationId: document.formationId,
+        sessionId: document.sessionId,
+        isPublic: document.isPublic,
+      },
+    })
+
+    return NextResponse.json(document, { status: 201 })
+  } catch (error) {
+    console.error('Erreur lors de l upload du document:', error)
+    return NextResponse.json({ error: 'Erreur lors de l upload du document' }, { status: 500 })
+  }
 }

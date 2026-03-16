@@ -1,55 +1,35 @@
 import Link from 'next/link'
+import { BookOpen, Home, UserRound } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-2xl mx-auto text-center">
-        <div className="mb-8">
-          <h1 className="text-9xl font-bold text-cjblue mb-4">404</h1>
-          <h2 className="text-3xl font-semibold text-gray-800 mb-4">
-            Page introuvable
-          </h2>
-          <p className="text-lg text-gray-600 mb-8">
-            Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
+    <div className="min-h-screen bg-[linear-gradient(135deg,#f8fbff_0%,#eef5ff_55%,#fff1f2_100%)] px-4 py-12">
+      <div className="mx-auto max-w-3xl overflow-hidden rounded-[32px] border border-white bg-white shadow-[0_30px_90px_-35px_rgba(0,45,114,0.4)]">
+        <div className="bg-[linear-gradient(120deg,#001737_0%,#002d72_52%,#0c4da2_100%)] px-8 py-10 text-white">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/70">Erreur 404</p>
+          <h1 className="mt-4 text-4xl font-semibold tracking-tight">Page introuvable</h1>
+          <p className="mt-4 text-base leading-8 text-white/80">
+            La page demandee n'est plus disponible ou a ete deplacee. Voici les points d'entree utiles pour continuer votre navigation.
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Link href="/fr" className="btn-primary">
-            Retour à l'accueil
-          </Link>
-          <Link 
-            href="/fr/formations" 
-            className="px-6 py-3 border-2 border-[var(--cj-blue)] text-[var(--cj-blue)] rounded-lg hover:bg-[var(--cj-blue)] hover:text-white transition-colors"
-          >
-            Voir nos formations
-          </Link>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6 text-left">
-          <div>
-            <h3 className="font-semibold text-cjblue mb-2">Navigation rapide</h3>
-            <ul className="space-y-1 text-sm text-gray-600">
-              <li><Link href="/fr/about" className="hover:text-[var(--cj-blue)]">À propos</Link></li>
-              <li><Link href="/fr/formations" className="hover:text-[var(--cj-blue)]">Formations</Link></li>
-              <li><Link href="/fr/contact" className="hover:text-[var(--cj-blue)]">Contact</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-cjblue mb-2">Ressources</h3>
-            <ul className="space-y-1 text-sm text-gray-600">
-              <li><Link href="/fr/espace-etudiants" className="hover:text-[var(--cj-blue)]">Espace Étudiants</Link></li>
-              <li><Link href="/fr/actualites" className="hover:text-[var(--cj-blue)]">Actualités</Link></li>
-              <li><Link href="/fr/partenaires" className="hover:text-[var(--cj-blue)]">Partenaires</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-cjblue mb-2">Aide</h3>
-            <ul className="space-y-1 text-sm text-gray-600">
-              <li><Link href="/fr/contact" className="hover:text-[var(--cj-blue)]">Nous contacter</Link></li>
-              <li><Link href="/fr/programmes" className="hover:text-[var(--cj-blue)]">Programmes</Link></li>
-              <li><Link href="/fr/services" className="hover:text-[var(--cj-blue)]">Services</Link></li>
-            </ul>
+        <div className="space-y-8 px-8 py-8">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Link href="/fr" className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+              <Home className="h-6 w-6 text-[var(--cj-blue)]" />
+              <p className="mt-4 text-sm font-semibold text-slate-950">Retour a l'accueil</p>
+              <p className="mt-2 text-sm leading-6 text-slate-500">Revenir a la page d'accueil principale de CJ DTC.</p>
+            </Link>
+            <Link href="/fr/formations" className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+              <BookOpen className="h-6 w-6 text-[var(--cj-blue)]" />
+              <p className="mt-4 text-sm font-semibold text-slate-950">Voir les formations</p>
+              <p className="mt-2 text-sm leading-6 text-slate-500">Explorer les programmes et les prochaines opportunites de formation.</p>
+            </Link>
+            <Link href="/fr/espace-etudiants" className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+              <UserRound className="h-6 w-6 text-[var(--cj-blue)]" />
+              <p className="mt-4 text-sm font-semibold text-slate-950">Espace etudiants</p>
+              <p className="mt-2 text-sm leading-6 text-slate-500">Acceder au tableau de bord, aux travaux et aux certificats.</p>
+            </Link>
           </div>
         </div>
       </div>

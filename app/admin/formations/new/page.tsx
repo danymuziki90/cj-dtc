@@ -75,7 +75,7 @@ export default function NewFormation() {
   }
 
   return (
-    <form onSubmit={submit} className="max-w-2xl space-y-4">
+    <form onSubmit={submit} className="w-full space-y-4">
       {error && (
         <div className="p-3 bg-red-50 text-red-700 border border-red-100 rounded">{error}</div>
       )}

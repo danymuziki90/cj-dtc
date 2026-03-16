@@ -1,6 +1,7 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
+import AdminShell from '@/components/admin-portal/AdminShell'
 
 interface Evaluation {
     id: number
@@ -57,7 +58,7 @@ export default function EvaluationsPage() {
             const data = await response.json()
             setEvaluations(data)
         } catch (error) {
-            console.error('Erreur lors du chargement des évaluations:', error)
+            console.error('Impossible de charger les evaluations:', error)
         } finally {
             setLoading(false)
         }
@@ -69,7 +70,7 @@ export default function EvaluationsPage() {
             const data = await response.json()
             setFormations(data)
         } catch (error) {
-            console.error('Erreur lors du chargement des formations:', error)
+            console.error('Impossible de charger les formations:', error)
         }
     }
 
@@ -97,7 +98,7 @@ export default function EvaluationsPage() {
     }
 
     const renderStars = (rating: number) => {
-        return '★'.repeat(rating) + '☆'.repeat(5 - rating)
+        return '?'.repeat(rating) + '?'.repeat(5 - rating)
     }
 
     const filteredEvaluations = evaluations.filter(evaluation => {
@@ -108,28 +109,31 @@ export default function EvaluationsPage() {
 
     if (loading) {
         return (
-            <div className="p-6">
-                <div className="animate-pulse">
-                    <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-                    <div className="space-y-4">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="h-32 bg-gray-200 rounded"></div>
-                        ))}
+            <AdminShell title="Evaluations et satisfaction">
+                <div className="p-6">
+                    <div className="animate-pulse">
+                        <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+                        <div className="space-y-4">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="h-32 bg-gray-200 rounded"></div>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
+            </AdminShell>
         )
     }
 
     const distribution = getRatingDistribution(filteredEvaluations)
 
     return (
+        <AdminShell title="Evaluations et satisfaction">
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-900">Évaluations & Satisfaction</h1>
+                <h2 className="text-3xl font-bold text-gray-900">Retours et satisfaction</h2>
             </div>
 
-            {/* Statistiques générales */}
+            {/* Statistiques generales */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-lg shadow border">
                     <div className="flex items-center">
@@ -139,7 +143,7 @@ export default function EvaluationsPage() {
                             </svg>
                         </div>
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-600">Total Évaluations</p>
+                            <p className="text-sm font-medium text-gray-600">Evaluations</p>
                             <p className="text-2xl font-bold text-gray-900">{filteredEvaluations.length}</p>
                         </div>
                     </div>
@@ -153,7 +157,7 @@ export default function EvaluationsPage() {
                             </svg>
                         </div>
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-600">Note Moyenne</p>
+                            <p className="text-sm font-medium text-gray-600">Note moyenne</p>
                             <p className="text-2xl font-bold text-gray-900">{getAverageRating(filteredEvaluations)}/5</p>
                         </div>
                     </div>
@@ -197,11 +201,11 @@ export default function EvaluationsPage() {
 
             {/* Distribution des notes */}
             <div className="bg-white p-6 rounded-lg shadow border">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Distribution des Notes</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Distribution des notes</h2>
                 <div className="space-y-2">
                     {[5, 4, 3, 2, 1].map(rating => (
                         <div key={rating} className="flex items-center justify-between">
-                            <span className="text-sm text-gray-700 w-8">{rating}★</span>
+                            <span className="text-sm text-gray-700 w-8">{rating}?</span>
                             <div className="flex-1 mx-4">
                                 <div className="w-full bg-gray-200 rounded-full h-3">
                                     <div
@@ -251,11 +255,11 @@ export default function EvaluationsPage() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Aucune</option>
-                            <option value="1">1 étoile</option>
-                            <option value="2">2 étoiles</option>
-                            <option value="3">3 étoiles</option>
-                            <option value="4">4 étoiles</option>
-                            <option value="5">5 étoiles</option>
+                            <option value="1">1 etoile</option>
+                            <option value="2">2 etoiles</option>
+                            <option value="3">3 etoiles</option>
+                            <option value="4">4 etoiles</option>
+                            <option value="5">5 etoiles</option>
                         </select>
                     </div>
                     <div>
@@ -268,25 +272,29 @@ export default function EvaluationsPage() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Aucune</option>
-                            <option value="1">1 étoile</option>
-                            <option value="2">2 étoiles</option>
-                            <option value="3">3 étoiles</option>
-                            <option value="4">4 étoiles</option>
-                            <option value="5">5 étoiles</option>
+                            <option value="1">1 etoile</option>
+                            <option value="2">2 etoiles</option>
+                            <option value="3">3 etoiles</option>
+                            <option value="4">4 etoiles</option>
+                            <option value="5">5 etoiles</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            {/* Liste des évaluations */}
+            {/* Liste des evaluations */}
             <div className="bg-white rounded-lg shadow border">
                 <div className="px-6 py-4 border-b border-gray-200">
                     <h2 className="text-lg font-semibold text-gray-900">
-                        Évaluations ({filteredEvaluations.length})
+                        Evaluations ({filteredEvaluations.length})
                     </h2>
                 </div>
                 <div className="divide-y divide-gray-200">
-                    {filteredEvaluations.map((evaluation) => (
+                    {filteredEvaluations.length === 0 ? (
+                        <div className="px-6 py-10 text-center text-sm text-gray-500">
+                            Aucune evaluation ne correspond aux filtres actuels.
+                        </div>
+                    ) : filteredEvaluations.map((evaluation) => (
                         <div key={evaluation.id} className="p-6">
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
@@ -310,18 +318,18 @@ export default function EvaluationsPage() {
                                     <div className="text-sm text-gray-600 mb-3">
                                         Formation: <span className="font-medium">{evaluation.formation.title}</span>
                                         {evaluation.session && (
-                                            <> • Session: {new Date(evaluation.session.startDate).toLocaleDateString('fr-FR')} à {evaluation.session.location}</>
+                                            <> - Session: {new Date(evaluation.session.startDate).toLocaleDateString('fr-FR')} a {evaluation.session.location}</>
                                         )}
                                     </div>
 
                                     {evaluation.overallComment && (
                                         <div className="mb-3">
-                                            <h4 className="text-sm font-medium text-gray-900 mb-1">Commentaire général:</h4>
+                                            <h4 className="text-sm font-medium text-gray-900 mb-1">Commentaire general:</h4>
                                             <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded">{evaluation.overallComment}</p>
                                         </div>
                                     )}
 
-                                    {/* Détails des notes */}
+                                    {/* Details des notes */}
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                                         {evaluation.contentRating && (
                                             <div className="text-center">
@@ -349,7 +357,7 @@ export default function EvaluationsPage() {
                                         )}
                                     </div>
 
-                                    {/* Points forts et améliorations */}
+                                    {/* Points forts et ameliorations */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {evaluation.strengths && (
                                             <div>
@@ -359,7 +367,7 @@ export default function EvaluationsPage() {
                                         )}
                                         {evaluation.improvements && (
                                             <div>
-                                                <h4 className="text-sm font-medium text-red-700 mb-1">À améliorer:</h4>
+                                                <h4 className="text-sm font-medium text-red-700 mb-1">A ameliorer:</h4>
                                                 <p className="text-sm text-gray-700 bg-red-50 p-2 rounded">{evaluation.improvements}</p>
                                             </div>
                                         )}
@@ -378,5 +386,6 @@ export default function EvaluationsPage() {
                 </div>
             </div>
         </div>
+        </AdminShell>
     )
 }

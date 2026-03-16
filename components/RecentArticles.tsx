@@ -1,9 +1,11 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { FormattedDate } from './FormattedDate'
+import { resolveSiteLocale } from '@/lib/i18n/locale'
+import { publicMessages } from '@/lib/i18n/public-messages'
 
 interface NewsItem {
   id: string
@@ -20,9 +22,12 @@ interface NewsResponse {
   news: NewsItem[]
 }
 
+const copy = publicMessages.recentArticles
+
 export default function RecentArticles() {
   const params = useParams<{ locale: string }>()
-  const locale = params?.locale || 'fr'
+  const locale = resolveSiteLocale(params?.locale)
+  const t = copy[locale]
   const [articles, setArticles] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -70,18 +75,14 @@ export default function RecentArticles() {
     )
   }
 
-  if (articles.length === 0) {
-    return null
-  }
+  if (articles.length === 0) return null
 
   return (
     <section className="bg-white py-16">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-bold text-cjblue">Nos dernières actualités</h2>
-          <p className="mx-auto max-w-2xl text-lg text-gray-600">
-            Restez informe des dernieres nouvelles, tendances et annonces du centre CJ DTC.
-          </p>
+          <h2 className="mb-4 text-4xl font-bold text-cjblue">{t.title}</h2>
+          <p className="mx-auto max-w-2xl text-lg text-gray-600">{t.description}</p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-3">
@@ -99,10 +100,10 @@ export default function RecentArticles() {
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                     ) : (
-                      <div className="grid h-full place-items-center text-4xl text-white/70">NEWS</div>
+                      <div className="grid h-full place-items-center text-4xl text-white/70">{t.defaultImageLabel}</div>
                     )}
                     <div className="absolute left-3 top-3 rounded-full bg-[var(--cj-red)] px-3 py-1 text-xs font-semibold text-white">
-                      {article.category || 'Actualité'}
+                      {article.category || t.defaultCategory}
                     </div>
                   </div>
 
@@ -110,6 +111,7 @@ export default function RecentArticles() {
                     <time className="mb-2 text-xs uppercase tracking-wider text-gray-400">
                       <FormattedDate
                         date={article.publicationDate}
+                        locale={t.dateLocale}
                         options={{ year: 'numeric', month: 'long', day: 'numeric' } as any}
                       />
                     </time>
@@ -125,7 +127,7 @@ export default function RecentArticles() {
 
                     <div className="mt-auto border-t border-gray-200 pt-4">
                       <button className="flex w-full items-center justify-center gap-2 rounded-lg py-2 font-semibold text-[var(--cj-blue)] transition-colors group-hover:text-[var(--cj-red)] hover:bg-blue-50">
-                        Lire l'article
+                        {t.readArticle}
                         <span className="transition-transform group-hover:translate-x-1">-&gt;</span>
                       </button>
                     </div>
@@ -141,7 +143,7 @@ export default function RecentArticles() {
             href={`/${locale}/actualites`}
             className="inline-block rounded-lg bg-[var(--cj-blue)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--cj-red)]"
           >
-            Voir tous les articles
+            {t.viewAll}
           </Link>
         </div>
       </div>

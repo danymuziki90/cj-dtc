@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -72,10 +72,10 @@ export default function AdminNotificationsPage() {
         cache: 'no-store',
       })
       const payload = await response.json()
-      if (!response.ok) throw new Error(payload?.error || 'Unable to load notifications.')
+      if (!response.ok) throw new Error(payload?.error || 'Impossible de charger les notifications.')
       setNotifications(payload.notifications || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unexpected error.')
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setLoading(false)
     }
@@ -115,12 +115,12 @@ export default function AdminNotificationsPage() {
         }),
       })
       const payload = await response.json()
-      if (!response.ok) throw new Error(payload?.error || 'Unable to create notification.')
+      if (!response.ok) throw new Error(payload?.error || 'Impossible de creer la notification.')
 
       setForm(initialForm)
       await loadNotifications()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unexpected error.')
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setSaving(false)
     }
@@ -133,7 +133,7 @@ export default function AdminNotificationsPage() {
     const response = await fetch(`/api/admin/system/notifications/${id}`, { method: 'DELETE' })
     const payload = await response.json().catch(() => ({}))
     if (!response.ok) {
-      setError(payload?.error || 'Unable to delete notification.')
+      setError(payload?.error || 'Impossible de supprimer la notification.')
       return
     }
 
@@ -144,7 +144,8 @@ export default function AdminNotificationsPage() {
     <AdminShell title="Notifications et messages">
       <div className="space-y-6">
         <form onSubmit={onSubmit} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Envoyer une notification</h2>
+          <h2 className="mb-1 text-lg font-semibold text-slate-900">Diffuser une notification</h2>
+          <p className="mb-4 text-sm text-slate-500">Redigez un message clair, choisissez la cible et gardez une trace visible dans le panneau admin.</p>
           <div className="grid gap-3 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Titre</label>
@@ -239,7 +240,7 @@ export default function AdminNotificationsPage() {
             disabled={saving}
             className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
           >
-            {saving ? 'Envoi...' : 'Envoyer notification'}
+            {saving ? 'Envoi...' : 'Envoyer la notification'}
           </button>
         </form>
 
@@ -268,7 +269,7 @@ export default function AdminNotificationsPage() {
             <input
               value={filters.search}
               onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
-              placeholder="Recherche titre/message/email..."
+              placeholder="Titre, message ou email"
               className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
             />
           </div>
@@ -332,4 +333,3 @@ export default function AdminNotificationsPage() {
     </AdminShell>
   )
 }
-

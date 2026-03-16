@@ -1,8 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Breadcrumbs from '../../../../components/Breadcrumbs'
+import { useParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { BookOpen, ExternalLink, FolderOpen, Gauge, Laptop, Layers3, ShieldCheck } from 'lucide-react'
+import {
+  StudentEmptyState,
+  StudentPageShell,
+  StudentSectionCard,
+  studentMutedButtonClassName,
+  studentPrimaryButtonClassName,
+  studentSurfaceButtonClassName,
+  type StudentMetric,
+} from '@/components/ui/student-space'
 
 interface Course {
   id: number
@@ -15,6 +25,9 @@ interface Course {
 }
 
 export default function ElearningPage() {
+  const params = useParams<{ locale?: string }>()
+  const locale = params?.locale || 'fr'
+
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -22,129 +35,218 @@ export default function ElearningPage() {
     fetchCourses()
   }, [])
 
+  const metrics = useMemo<StudentMetric[]>(() => {
+    const averageProgress = courses.length
+      ? Math.round(courses.reduce((sum, course) => sum + course.progress, 0) / courses.length)
+      : 0
+    const activeAccess = courses.filter((course) => Boolean(course.lmsUrl)).length
+    const totalModules = courses.reduce((sum, course) => sum + course.modules, 0)
+
+    return [
+      {
+        label: 'Cours',
+        value: courses.length,
+        helper: 'Parcours exposes dans votre espace numerique.',
+        icon: Laptop,
+        accent: 'from-[#0c4da2] via-[var(--cj-blue)] to-[#02142f]',
+      },
+      {
+        label: 'Acces actifs',
+        value: activeAccess,
+        helper: 'Cours avec lien LMS deja disponible.',
+        icon: ShieldCheck,
+        accent: 'from-[#003b96] via-[var(--cj-blue)] to-[#0f172a]',
+      },
+      {
+        label: 'Progression moyenne',
+        value: `${averageProgress}%`,
+        helper: 'Avancement global sur les cours affiches.',
+        icon: Gauge,
+        accent: 'from-[var(--cj-red)] via-[#bb111d] to-[#4a0b14]',
+      },
+      {
+        label: 'Modules',
+        value: totalModules,
+        helper: 'Total des modules repertories.',
+        icon: Layers3,
+        accent: 'from-[#1d4ed8] via-[#1e3a8a] to-[#020617]',
+      },
+    ]
+  }, [courses])
+
   const fetchCourses = async () => {
     setLoading(true)
     try {
-      // TODO: Récupérer les cours depuis l'API LMS
-      // Pour l'instant, on simule avec des données
       const response = await fetch('/api/lms/courses')
       try {
         const data = await response.json()
         setCourses(data)
       } catch {
-        // Si l'API n'existe pas encore, on affiche un message
         setCourses([])
       }
     } catch (error) {
       console.error('Erreur lors du chargement des cours:', error)
+      setCourses([])
     } finally {
       setLoading(false)
     }
   }
 
+  if (loading) {
+    return (
+      <StudentPageShell
+        locale={locale}
+        eyebrow="Espace etudiant"
+        title="Plateforme e-learning"
+        description="Chargement de vos cours, de vos acces LMS et de vos indicateurs de progression en ligne."
+        icon={Laptop}
+      >
+        <StudentSectionCard
+          eyebrow="E-learning"
+          title="Preparation de la plateforme"
+          description="Nous recuperons vos parcours numeriques et vos liens d'acces."
+          icon={BookOpen}
+        >
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
+            Chargement de vos cours...
+          </div>
+        </StudentSectionCard>
+      </StudentPageShell>
+    )
+  }
+
   return (
-    <div className="container mx-auto px-4 py-12">
-      <Breadcrumbs items={[
-        { label: 'Espace Étudiants', href: '/fr/espace-etudiants' },
-        { label: 'Plateforme e-learning' }
-      ]} />
+    <StudentPageShell
+      locale={locale}
+      eyebrow="Espace etudiant"
+      title="Plateforme e-learning"
+      description="Accedez a votre environnement d'apprentissage en ligne, visualisez votre progression et retrouvez les ressources liees a chaque cours."
+      icon={Laptop}
+      metrics={metrics}
+    >
+      {courses.length === 0 ? (
+        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <StudentSectionCard
+            eyebrow="Configuration"
+            title="Plateforme en cours d'activation"
+            description="Votre espace e-learning est en cours de preparation. Les acces seront affiches ici des qu'ils seront finalises."
+            icon={ShieldCheck}
+          >
+            <StudentEmptyState
+              title="Acces numerique en attente"
+              description="Vous recevrez une notification des que vos cours seront synchronises avec la plateforme e-learning."
+              action={
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Link href={`/${locale}/espace-etudiants/supports`} className={studentPrimaryButtonClassName}>
+                    Voir les supports
+                  </Link>
+                  <Link href={`/${locale}/espace-etudiants/travaux`} className={studentMutedButtonClassName}>
+                    Soumettre un travail
+                  </Link>
+                </div>
+              }
+            />
+          </StudentSectionCard>
 
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-cjblue mb-8">Plateforme e-learning</h1>
-        <p className="text-lg text-gray-700 mb-8">
-          Accédez à votre environnement d'apprentissage en ligne et suivez votre progression.
-        </p>
-
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cjblue mx-auto"></div>
-            <p className="mt-4 text-gray-600">Chargement de vos cours...</p>
-          </div>
-        ) : courses.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <div className="text-6xl mb-4">💻</div>
-            <h3 className="text-xl font-bold text-cjblue mb-4">Plateforme e-learning en configuration</h3>
-            <p className="text-gray-600 mb-6">
-              La plateforme e-learning est actuellement en cours de configuration.
-              Vous recevrez un email dès que votre accès sera activé.
-            </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-left max-w-2xl mx-auto">
-              <h4 className="font-semibold text-cjblue mb-2">En attendant, vous pouvez :</h4>
-              <ul className="list-disc list-inside space-y-2 text-gray-700">
-                <li>Consulter vos supports de cours</li>
-                <li>Soumettre vos travaux</li>
-                <li>Consulter vos résultats</li>
-                <li>Contacter vos formateurs</li>
-              </ul>
+          <StudentSectionCard
+            eyebrow="En attendant"
+            title="Actions utiles pendant la mise en place"
+            description="Vous pouvez continuer a avancer sur votre parcours sans attendre l'activation finale de la plateforme."
+            icon={FolderOpen}
+          >
+            <div className="space-y-3">
+              {[
+                'Consulter vos supports pedagogiques.',
+                'Soumettre vos travaux et projets.',
+                'Consulter vos resultats et certificats.',
+                'Suivre vos formations depuis le dashboard.',
+              ].map((item) => (
+                <div key={item} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                  {item}
+                </div>
+              ))}
+              <div className="rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-5">
+                <p className="text-sm font-semibold text-slate-950">Acces directs</p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link href={`/${locale}/espace-etudiants/supports`} className={studentSurfaceButtonClassName}>
+                    Supports
+                  </Link>
+                  <Link href={`/${locale}/espace-etudiants/resultats`} className={studentSurfaceButtonClassName}>
+                    Resultats
+                  </Link>
+                  <Link href={`/${locale}/espace-etudiants`} className={studentSurfaceButtonClassName}>
+                    Dashboard
+                  </Link>
+                </div>
+              </div>
             </div>
-            <div className="mt-6 flex gap-4 justify-center">
-              <Link
-                href="/fr/espace-etudiants/supports"
-                className="bg-cjblue text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Voir les supports
-              </Link>
-              <Link
-                href="/fr/espace-etudiants/travaux"
-                className="bg-white border-2 border-cjblue text-cjblue px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                Soumettre un travail
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
+          </StudentSectionCard>
+        </div>
+      ) : (
+        <StudentSectionCard
+          eyebrow="Cours"
+          title="Parcours disponibles"
+          description="Suivez votre progression module par module et accedez directement a chaque cours lorsque le lien LMS est disponible."
+          icon={BookOpen}
+        >
+          <div className="space-y-4">
             {courses.map((course) => (
               <div
                 key={course.id}
-                className="bg-white border rounded-lg p-6 hover:shadow-lg transition-shadow"
+                className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.4)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_55px_-30px_rgba(0,45,114,0.35)]"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-cjblue mb-2">{course.title}</h3>
-                    <p className="text-gray-600 mb-4">{course.description}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <span>{course.completedModules}/{course.modules} modules complétés</span>
-                      <span className="font-medium">{course.progress}% complété</span>
-                    </div>
-                    <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="max-w-3xl">
+                    <h3 className="text-xl font-semibold tracking-tight text-slate-950">{course.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{course.description}</p>
+                  </div>
+                  <div className="rounded-3xl border border-blue-100 bg-blue-50 px-4 py-3 text-center">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--cj-blue)]">Progression</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{course.progress}%</p>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Modules completes</p>
+                    <p className="mt-2 text-sm font-medium text-slate-900">{course.completedModules} / {course.modules}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 md:col-span-2 xl:col-span-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Avancement</p>
+                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
                       <div
-                        className="bg-cjblue h-2 rounded-full transition-all"
+                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--cj-red)_0%,var(--cj-blue)_100%)]"
                         style={{ width: `${course.progress}%` }}
-                      ></div>
+                      />
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2 pt-4 border-t">
+
+                <div className="mt-5 flex flex-wrap gap-3 border-t border-slate-200 pt-4">
                   {course.lmsUrl ? (
                     <a
                       href={course.lmsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-cjblue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      className={studentPrimaryButtonClassName}
                     >
-                      Accéder au cours
+                      Acceder au cours
+                      <ExternalLink className="h-4 w-4" />
                     </a>
                   ) : (
-                    <button
-                      disabled
-                      className="bg-gray-300 text-gray-600 px-6 py-2 rounded-lg cursor-not-allowed"
-                    >
-                      Accès en attente
+                    <button disabled className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-200 px-5 py-3 text-sm font-medium text-slate-500">
+                      Acces en attente
                     </button>
                   )}
-                  <Link
-                    href={`/fr/espace-etudiants/supports?formationId=${course.id}`}
-                    className="text-cjblue hover:underline px-6 py-2"
-                  >
+                  <Link href={`/${locale}/espace-etudiants/supports?formationId=${course.id}`} className={studentMutedButtonClassName}>
                     Supports de cours
                   </Link>
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
-    </div>
+        </StudentSectionCard>
+      )}
+    </StudentPageShell>
   )
 }

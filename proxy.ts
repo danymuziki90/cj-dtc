@@ -44,6 +44,28 @@ const legacyAdminRouteMap: Record<string, string> = {
   '/admin/settings': '/admin/settings',
 }
 
+const legacyStudentRouteMap: Record<string, string> = {
+  '/espace-etudiants': '/student/dashboard',
+  '/espace-etudiants/calendrier': '/student/mes-sessions',
+  '/espace-etudiants/elearning': '/student/mes-sessions',
+  '/espace-etudiants/inscription': '/student/mes-sessions',
+  '/espace-etudiants/mes-formations': '/student/mes-sessions',
+  '/espace-etudiants/supports': '/student/ressources',
+  '/espace-etudiants/resultats': '/student/resultats',
+  '/espace-etudiants/mes-certificats': '/student/certificats',
+  '/espace-etudiants/mon-compte': '/student/profile',
+  '/espace-etudiants/travaux': '/student/submissions',
+  '/student': '/student/dashboard',
+  '/student/dashboard': '/student/dashboard',
+  '/student/profile': '/student/profile',
+  '/student/assignments': '/student/submissions',
+  '/student/certificates': '/student/certificats',
+  '/student/elearning': '/student/mes-sessions',
+  '/student/exams': '/student/resultats',
+  '/student/inscription': '/student/mes-sessions',
+  '/student/inscription/success': '/student/dashboard',
+}
+
 function resolveLegacyAdminRedirect(pathname: string) {
   const match = pathname.match(/^\/(fr|en)(\/admin(?:\/.*)?$)/)
   if (!match) return null
@@ -52,7 +74,15 @@ function resolveLegacyAdminRedirect(pathname: string) {
   return legacyAdminRouteMap[legacyPath] || '/admin/dashboard'
 }
 
-export async function middleware(request: NextRequest) {
+function resolveLegacyStudentRedirect(pathname: string) {
+  const localizedMatch = pathname.match(/^\/(fr|en)(\/(?:espace-etudiants|student)(?:\/.*)?$)/)
+  const legacyPath = localizedMatch ? localizedMatch[2] : pathname
+
+  if (!legacyPath.startsWith('/espace-etudiants') && !legacyPath.startsWith('/student')) return null
+  return legacyStudentRouteMap[legacyPath] || '/student/dashboard'
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const localeRedirect = localeMiddleware(request)
@@ -65,14 +95,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Normalize only /auth paths for localized legacy auth pages.
-  if (pathname === '/auth' || pathname.startsWith('/auth/')) {
+  const legacyStudentRedirectPath = resolveLegacyStudentRedirect(pathname)
+  if (legacyStudentRedirectPath) {
     const url = request.nextUrl.clone()
-    url.pathname = `/fr${pathname}`
+    url.pathname = legacyStudentRedirectPath
     return NextResponse.redirect(url)
   }
 
-  if (pathname === '/espace-etudiants' || pathname.startsWith('/espace-etudiants/')) {
+  // Normalize only /auth paths for localized legacy auth pages.
+  if (pathname === '/auth' || pathname.startsWith('/auth/')) {
     const url = request.nextUrl.clone()
     url.pathname = `/fr${pathname}`
     return NextResponse.redirect(url)

@@ -1,8 +1,20 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Breadcrumbs from '../../../../components/Breadcrumbs'
+import { useParams } from 'next/navigation'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
+import { CheckCircle2, Clock3, Download, FileText, FolderOpen, GraduationCap, MessageSquare, Upload } from 'lucide-react'
+import {
+  StudentEmptyState,
+  StudentPageShell,
+  StudentSectionCard,
+  studentInputClassName,
+  studentMutedButtonClassName,
+  studentPrimaryButtonClassName,
+  studentSecondaryButtonClassName,
+  studentStatusClass,
+  type StudentMetric,
+} from '@/components/ui/student-space'
 
 interface Submission {
   id: number
@@ -25,6 +37,9 @@ interface Formation {
 }
 
 export default function TravauxPage() {
+  const params = useParams<{ locale?: string }>()
+  const locale = params?.locale || 'fr'
+
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [formations, setFormations] = useState<Formation[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,7 +48,7 @@ export default function TravauxPage() {
   const [formData, setFormData] = useState({
     title: '',
     formationId: '',
-    file: null as File | null
+    file: null as File | null,
   })
 
   useEffect(() => {
@@ -41,13 +56,39 @@ export default function TravauxPage() {
     fetchSubmissions()
   }, [])
 
+  const metrics = useMemo<StudentMetric[]>(() => {
+    const approvedCount = submissions.filter((item) => item.status === 'approved').length
+    return [
+      {
+        label: 'Travaux soumis',
+        value: submissions.length,
+        helper: 'Depot enregistre depuis votre espace personnel.',
+        icon: FolderOpen,
+        accent: 'from-[#0c4da2] via-[var(--cj-blue)] to-[#02142f]',
+      },
+      {
+        label: 'Formations liees',
+        value: formations.length,
+        helper: 'Parcours disponibles pour vos rendus.',
+        icon: GraduationCap,
+        accent: 'from-[#003b96] via-[var(--cj-blue)] to-[#0f172a]',
+      },
+      {
+        label: 'Travaux valides',
+        value: approvedCount,
+        helper: 'Soumissions deja approuvees.',
+        icon: CheckCircle2,
+        accent: 'from-[var(--cj-red)] via-[#bb111d] to-[#4a0b14]',
+      },
+    ]
+  }, [formations.length, submissions])
+
   const fetchFormations = async () => {
     try {
       const response = await fetch('/api/enrollments')
       const data = await response.json()
-      // Extraire les formations uniques des inscriptions
       const uniqueFormations = Array.from(
-        new Map(data.map((e: any) => [e.formation.id, e.formation])).values()
+        new Map(data.map((item: any) => [item.formation.id, item.formation])).values(),
       ) as Formation[]
       setFormations(uniqueFormations)
     } catch (error) {
@@ -58,8 +99,6 @@ export default function TravauxPage() {
   const fetchSubmissions = async () => {
     setLoading(true)
     try {
-      // Pour l'instant, on simule avec des données vides
-      // À remplacer par une vraie API quand le modèle StudentSubmission sera créé
       setSubmissions([])
     } catch (error) {
       console.error('Erreur lors du chargement des travaux:', error)
@@ -68,8 +107,8 @@ export default function TravauxPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
     if (!formData.file || !formData.title || !formData.formationId) {
       alert('Veuillez remplir tous les champs')
       return
@@ -82,14 +121,13 @@ export default function TravauxPage() {
       submitData.append('title', formData.title)
       submitData.append('formationId', formData.formationId)
 
-      // TODO: Créer l'API route /api/student-submissions
       const response = await fetch('/api/student-submissions', {
         method: 'POST',
-        body: submitData
+        body: submitData,
       })
 
       if (response.ok) {
-        alert('Travail soumis avec succès!')
+        alert('Travail soumis avec succes!')
         setShowForm(false)
         setFormData({ title: '', formationId: '', file: null })
         fetchSubmissions()
@@ -110,77 +148,86 @@ export default function TravauxPage() {
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
-  }
-
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, string> = {
-      submitted: 'bg-blue-100 text-blue-800',
-      reviewed: 'bg-red-100 text-red-800',
-      approved: 'bg-blue-100 text-blue-800',
-      rejected: 'bg-red-100 text-red-800'
-    }
-    return badges[status] || 'bg-gray-100 text-gray-800'
+    return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`
   }
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
       submitted: 'Soumis',
-      reviewed: 'En révision',
-      approved: 'Approuvé',
-      rejected: 'Rejeté'
+      reviewed: 'En revision',
+      approved: 'Approuve',
+      rejected: 'Rejete',
     }
     return labels[status] || status
   }
 
-  return (
-    <div className="container mx-auto px-4 py-12">
-      <Breadcrumbs items={[
-        { label: 'Espace Étudiants', href: '/fr/espace-etudiants' },
-        { label: 'Soumission des travaux' }
-      ]} />
-
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-cjblue mb-4">Soumission des Travaux</h1>
-            <p className="text-lg text-gray-700">
-              Déposez vos travaux pratiques, dossiers et préparations de soutenance.
-            </p>
+  if (loading) {
+    return (
+      <StudentPageShell
+        locale={locale}
+        eyebrow="Espace etudiant"
+        title="Travaux et projets"
+        description="Chargement de vos soumissions, des formations rattachees et des informations de depot."
+        icon={FolderOpen}
+      >
+        <StudentSectionCard
+          eyebrow="Travaux"
+          title="Preparation des soumissions"
+          description="Nous recuperons votre historique de depots et vos formations disponibles."
+          icon={FileText}
+        >
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
+            Chargement des travaux...
           </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-cjblue text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            {showForm ? 'Annuler' : '+ Nouveau Travail'}
-          </button>
-        </div>
+        </StudentSectionCard>
+      </StudentPageShell>
+    )
+  }
 
-        {/* Formulaire de soumission */}
-        {showForm && (
-          <div className="bg-white border rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-bold mb-4">Soumettre un Travail</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+  return (
+    <StudentPageShell
+      locale={locale}
+      eyebrow="Espace etudiant"
+      title="Travaux et projets"
+      description="Deposez vos travaux pratiques, suivez les retours de validation et gardez une vue claire sur vos livrables."
+      icon={FolderOpen}
+      metrics={metrics}
+      actions={
+        <button onClick={() => setShowForm((current) => !current)} className={studentSecondaryButtonClassName}>
+          <Upload className="h-4 w-4" />
+          {showForm ? 'Fermer le formulaire' : 'Nouveau travail'}
+        </button>
+      }
+    >
+      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <StudentSectionCard
+          eyebrow="Depot"
+          title="Soumettre un nouveau travail"
+          description="Choisissez la formation concernee, ajoutez un titre clair et chargez votre livrable au bon format."
+          icon={Upload}
+        >
+          {showForm ? (
+            <form onSubmit={handleSubmit} className="space-y-4 rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-5">
               <div>
-                <label className="block text-sm font-medium mb-1">Titre du travail *</label>
+                <label className="mb-2 block text-sm font-medium text-slate-700">Titre du travail *</label>
                 <input
                   type="text"
                   required
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full border rounded-lg px-4 py-2"
+                  onChange={(event) => setFormData({ ...formData, title: event.target.value })}
+                  className={studentInputClassName}
                   placeholder="Ex: TP1 - Gestion des ressources humaines"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Formation *</label>
+                <label className="mb-2 block text-sm font-medium text-slate-700">Formation *</label>
                 <select
                   required
                   value={formData.formationId}
-                  onChange={(e) => setFormData({ ...formData, formationId: e.target.value })}
-                  className="w-full border rounded-lg px-4 py-2"
+                  onChange={(event) => setFormData({ ...formData, formationId: event.target.value })}
+                  className={studentInputClassName}
                 >
-                  <option value="">Sélectionner une formation</option>
+                  <option value="">Selectionner une formation</option>
                   {formations.map((formation) => (
                     <option key={formation.id} value={formation.id.toString()}>
                       {formation.title}
@@ -189,110 +236,135 @@ export default function TravauxPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Fichier *</label>
+                <label className="mb-2 block text-sm font-medium text-slate-700">Fichier *</label>
                 <input
                   type="file"
                   required
-                  onChange={(e) => setFormData({ ...formData, file: e.target.files?.[0] || null })}
-                  className="w-full border rounded-lg px-4 py-2"
+                  onChange={(event) => setFormData({ ...formData, file: event.target.files?.[0] || null })}
+                  className={studentInputClassName}
                   accept=".pdf,.doc,.docx,.zip,.rar"
                 />
-                {formData.file && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    Fichier sélectionné: {formData.file.name} ({formatFileSize(formData.file.size)})
+                {formData.file ? (
+                  <p className="mt-3 text-sm text-slate-500">
+                    Fichier selectionne: {formData.file.name} ({formatFileSize(formData.file.size)})
                   </p>
-                )}
+                ) : null}
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={uploading}
-                  className="bg-cjblue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  {uploading ? 'Envoi en cours...' : 'Soumettre'}
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button type="submit" disabled={uploading} className={`${studentPrimaryButtonClassName} disabled:cursor-not-allowed disabled:opacity-60`}>
+                  {uploading ? 'Envoi en cours...' : 'Soumettre le travail'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-                >
+                <button type="button" onClick={() => setShowForm(false)} className={studentMutedButtonClassName}>
                   Annuler
                 </button>
               </div>
             </form>
-          </div>
-        )}
+          ) : (
+            <StudentEmptyState
+              title="Aucun depot en cours"
+              description="Ouvrez le formulaire pour ajouter un livrable, le rattacher a une formation et le transmettre a l'equipe pedagogique."
+              action={
+                <button onClick={() => setShowForm(true)} className={studentPrimaryButtonClassName}>
+                  <Upload className="h-4 w-4" />
+                  Commencer une soumission
+                </button>
+              }
+            />
+          )}
+        </StudentSectionCard>
 
-        {/* Liste des travaux soumis */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cjblue mx-auto"></div>
-            <p className="mt-4 text-gray-600">Chargement des travaux...</p>
+        <StudentSectionCard
+          eyebrow="Conseils"
+          title="Cadre de soumission"
+          description="Quelques repaires utiles pour rendre vos livrables plus lisibles et plus faciles a traiter."
+          icon={MessageSquare}
+        >
+          <div className="space-y-3">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-sm font-semibold text-slate-950">Formats acceptes</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">PDF, DOC, DOCX, ZIP et RAR selon le type de rendu demande.</p>
+            </div>
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-sm font-semibold text-slate-950">Bon titrage</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Indiquez la session, le numero du travail et un intitule court pour accelerer la verification.</p>
+            </div>
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-sm font-semibold text-slate-950">Suivi</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Une fois soumis, votre travail apparait dans l'historique avec son statut et les retours eventuels.</p>
+            </div>
+            <div className="rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--cj-red)]">Navigation utile</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link href={`/${locale}/espace-etudiants/supports`} className={studentMutedButtonClassName}>
+                  Voir les supports
+                </Link>
+                <Link href={`/${locale}/espace-etudiants`} className={studentMutedButtonClassName}>
+                  Retour au dashboard
+                </Link>
+              </div>
+            </div>
           </div>
-        ) : submissions.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <p className="text-gray-600 mb-4">Aucun travail soumis pour le moment.</p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="text-cjblue hover:underline"
-            >
-              Soumettre votre premier travail
-            </button>
-          </div>
+        </StudentSectionCard>
+      </div>
+
+      <StudentSectionCard
+        eyebrow="Historique"
+        title="Travaux deja soumis"
+        description="Retrouvez vos depots, leur statut de validation et les retours pedagogiques deja publies."
+        icon={FileText}
+      >
+        {submissions.length === 0 ? (
+          <StudentEmptyState
+            title="Aucun travail soumis pour le moment"
+            description="Votre historique de rendus apparaitra ici des que vous aurez transmis un premier livrable."
+            action={
+              <button onClick={() => setShowForm(true)} className={studentPrimaryButtonClassName}>
+                Soumettre votre premier travail
+              </button>
+            }
+          />
         ) : (
           <div className="space-y-4">
             {submissions.map((submission) => (
               <div
                 key={submission.id}
-                className="bg-white border rounded-lg p-6 hover:shadow-lg transition-shadow"
+                className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.4)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_55px_-30px_rgba(0,45,114,0.35)]"
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <h3 className="text-lg font-bold text-cjblue mb-2">{submission.title}</h3>
-                    <p className="text-sm text-gray-600">
-                      Formation: {submission.formation.title}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Soumis le: {new Date(submission.submittedAt).toLocaleDateString('fr-FR')}
-                    </p>
+                    <p className="text-lg font-semibold text-slate-950">{submission.title}</p>
+                    <p className="mt-2 text-sm text-slate-600">Formation: {submission.formation.title}</p>
+                    <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
+                      <span className="inline-flex items-center gap-1">
+                        <Clock3 className="h-3.5 w-3.5" />
+                        Soumis le {new Date(submission.submittedAt).toLocaleDateString('fr-FR')}
+                      </span>
+                      <span>{submission.fileName} ({formatFileSize(submission.fileSize)})</span>
+                    </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(submission.status)}`}>
+                  <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${studentStatusClass(submission.status)}`}>
                     {getStatusLabel(submission.status)}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Fichier:</span> {submission.fileName} ({formatFileSize(submission.fileSize)})
+                {submission.feedback ? (
+                  <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-sm text-slate-700">
+                    <span className="font-semibold text-[var(--cj-blue)]">Feedback:</span> {submission.feedback}
                   </div>
-                  <div className="flex gap-2">
-                    <a
-                      href={`/${submission.filePath}`}
-                      download={submission.fileName}
-                      className="text-cjblue hover:underline text-sm"
-                    >
-                      Télécharger
-                    </a>
-                    {submission.feedback && (
-                      <button className="text-cjblue hover:underline text-sm">
-                        Voir le feedback
-                      </button>
-                    )}
-                  </div>
-                </div>
+                ) : null}
 
-                {submission.feedback && (
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm font-medium text-cjblue mb-1">Feedback:</p>
-                    <p className="text-sm text-gray-700">{submission.feedback}</p>
-                  </div>
-                )}
+                <div className="mt-4 flex flex-wrap gap-3 border-t border-slate-200 pt-4">
+                  <a href={`/${submission.filePath}`} download={submission.fileName} className={studentMutedButtonClassName}>
+                    <Download className="h-4 w-4" />
+                    Telecharger
+                  </a>
+                  {submission.feedback ? <button className={studentMutedButtonClassName}>Voir le feedback</button> : null}
+                </div>
               </div>
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </StudentSectionCard>
+    </StudentPageShell>
   )
 }
-

@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import AdminShell from '@/components/admin-portal/AdminShell'
 
 interface Document {
     id: number
@@ -52,10 +53,10 @@ export default function DocumentsPage() {
 
     const categories = [
         { value: 'syllabus', label: 'Syllabus/Programme' },
-        { value: 'presentation', label: 'Présentation' },
+        { value: 'presentation', label: 'Presentation' },
         { value: 'exercise', label: 'Exercice' },
         { value: 'resource', label: 'Ressource' },
-        { value: 'certificate_template', label: 'Modèle de certificat' }
+        { value: 'certificate_template', label: 'Modele de certificat' }
     ]
 
     const fetchDocuments = async () => {
@@ -69,7 +70,7 @@ export default function DocumentsPage() {
             const data = await response.json()
             setDocuments(data)
         } catch (error) {
-            console.error('Erreur lors du chargement des documents:', error)
+            console.error('Impossible de charger les documents:', error)
         } finally {
             setLoading(false)
         }
@@ -81,7 +82,7 @@ export default function DocumentsPage() {
             const data = await response.json()
             setFormations(data)
         } catch (error) {
-            console.error('Erreur lors du chargement des formations:', error)
+            console.error('Impossible de charger les formations:', error)
         }
     }
 
@@ -130,21 +131,28 @@ export default function DocumentsPage() {
                 }
             }
         } catch (error) {
-            console.error('Erreur lors de l\'upload:', error)
+            console.error('Impossible d importer le document:', error)
         } finally {
             setUploading(false)
         }
     }
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return
+        if (!confirm('Supprimer ce document ?')) return
 
         try {
-            // Note: Il faudrait créer une API DELETE pour les documents
-            // Pour l'instant, on simule la suppression
-            setDocuments(documents.filter(doc => doc.id !== id))
+            const response = await fetch(`/api/documents/${id}`, {
+                method: 'DELETE'
+            })
+
+            if (!response.ok) {
+                const payload = await response.json().catch(() => null)
+                throw new Error(payload?.error || 'Suppression impossible')
+            }
+
+            setDocuments((current) => current.filter(doc => doc.id !== id))
         } catch (error) {
-            console.error('Erreur lors de la suppression:', error)
+            console.error('Impossible de supprimer le document:', error)
         }
     }
 
@@ -162,28 +170,31 @@ export default function DocumentsPage() {
 
     if (loading) {
         return (
-            <div className="p-6">
-                <div className="animate-pulse">
-                    <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-                    <div className="space-y-4">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="h-20 bg-gray-200 rounded"></div>
-                        ))}
+            <AdminShell title="Supports pedagogiques">
+                <div className="p-6">
+                    <div className="animate-pulse">
+                        <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+                        <div className="space-y-4">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="h-20 bg-gray-200 rounded"></div>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
+            </AdminShell>
         )
     }
 
     return (
+        <AdminShell title="Supports pedagogiques">
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-900">Supports Pédagogiques</h1>
+                <h2 className="text-3xl font-bold text-gray-900">Bibliotheque documentaire</h2>
                 <button
                     onClick={() => fileInputRef.current?.click()}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                    📁 Upload un document
+                    Ajouter un document
                 </button>
             </div>
 
@@ -261,7 +272,7 @@ export default function DocumentsPage() {
             {fileInputRef.current?.files?.[0] && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-                        <h3 className="text-lg font-semibold mb-4">Upload de document</h3>
+                        <h3 className="text-lg font-semibold mb-4">Importer un document</h3>
 
                         <div className="space-y-4">
                             <div>
@@ -308,7 +319,7 @@ export default function DocumentsPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Formation associée
+                                    Formation associee
                                 </label>
                                 <select
                                     value={uploadForm.formationId}
@@ -333,7 +344,7 @@ export default function DocumentsPage() {
                                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                 />
                                 <label htmlFor="isPublic" className="ml-2 text-sm text-gray-700">
-                                    Document public (accessible aux étudiants)
+                                    Document public (accessible aux etudiants)
                                 </label>
                             </div>
                         </div>
@@ -363,7 +374,7 @@ export default function DocumentsPage() {
                                 disabled={uploading}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                             >
-                                {uploading ? 'Upload en cours...' : 'Uploader'}
+                                {uploading ? 'Import en cours...' : 'Enregistrer le document'}
                             </button>
                         </div>
                     </div>
@@ -374,11 +385,15 @@ export default function DocumentsPage() {
             <div className="bg-white rounded-lg shadow border">
                 <div className="px-6 py-4 border-b border-gray-200">
                     <h2 className="text-lg font-semibold text-gray-900">
-                        Documents ({documents.length})
+                        Documents disponibles ({documents.length})
                     </h2>
                 </div>
                 <div className="divide-y divide-gray-200">
-                    {documents.map((document) => (
+                    {documents.length === 0 ? (
+                        <div className="px-6 py-10 text-center text-sm text-gray-500">
+                            Aucun document ne correspond aux filtres actuels.
+                        </div>
+                    ) : documents.map((document) => (
                         <div key={document.id} className="p-6">
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
@@ -404,7 +419,7 @@ export default function DocumentsPage() {
                                     <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
                                         <span>Fichier: {document.fileName}</span>
                                         <span>Taille: {formatFileSize(document.fileSize)}</span>
-                                        <span>Upload: {new Date(document.createdAt).toLocaleDateString('fr-FR')}</span>
+                                        <span>Ajoute le: {new Date(document.createdAt).toLocaleDateString('fr-FR')}</span>
                                     </div>
 
                                     {document.formation && (
@@ -423,7 +438,7 @@ export default function DocumentsPage() {
                                         rel="noopener noreferrer"
                                         className="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
                                     >
-                                        📁 Voir
+                                        Ouvrir
                                     </a>
                                     <button
                                         onClick={() => handleDelete(document.id)}
@@ -438,5 +453,6 @@ export default function DocumentsPage() {
                 </div>
             </div>
         </div>
+        </AdminShell>
     )
 }

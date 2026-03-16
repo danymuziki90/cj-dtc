@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
   const now = new Date()
   const studentEmail = auth.student.email
 
-  const [enrollments, payments, submissions, portalCertificates, issuedCertificates, news, evaluationsCount, userProfile] =
+  const [enrollments, payments, submissions, portalCertificates, issuedCertificates, news, evaluations, userProfile] =
     await Promise.all([
       prisma.enrollment.findMany({
         where: { email: studentEmail },
@@ -159,11 +159,28 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
         take: 8,
       }),
-      prisma.evaluation.count({
+      prisma.evaluation.findMany({
         where: {
           enrollment: {
             is: {
               email: studentEmail,
+            },
+          },
+        },
+        orderBy: { submittedAt: 'desc' },
+        include: {
+          formation: {
+            select: {
+              title: true,
+            },
+          },
+          session: {
+            select: {
+              id: true,
+              startDate: true,
+              endDate: true,
+              location: true,
+              format: true,
             },
           },
         },
@@ -211,6 +228,9 @@ export async function GET(request: NextRequest) {
     formationIds.length > 0 || sessionIds.length > 0
       ? await prisma.document.findMany({
           where: {
+            category: {
+              not: 'certificate_template',
+            },
             OR: [
               ...(formationIds.length > 0 ? [{ formationId: { in: formationIds } }] : []),
               ...(sessionIds.length > 0 ? [{ sessionId: { in: sessionIds } }] : []),
@@ -228,6 +248,21 @@ export async function GET(request: NextRequest) {
             createdAt: true,
             formationId: true,
             sessionId: true,
+            formation: {
+              select: {
+                id: true,
+                title: true,
+              },
+            },
+            session: {
+              select: {
+                id: true,
+                startDate: true,
+                endDate: true,
+                location: true,
+                format: true,
+              },
+            },
           },
         })
       : []
@@ -257,15 +292,38 @@ export async function GET(request: NextRequest) {
         })
       : null
 
-  const attendanceRows = currentEnrollment
+  const waitlistRows = enrollmentsWithSession.length
+    ? await prisma.waitlist.findMany({
+        where: {
+          enrollmentId: {
+            in: enrollmentsWithSession.map((item) => item.id),
+          },
+        },
+        select: {
+          enrollmentId: true,
+          position: true,
+        },
+      })
+    : []
+  const waitlistPositionByEnrollmentId = new Map(waitlistRows.map((item) => [item.enrollmentId, item.position]))
+
+  const attendanceRows = enrollmentsWithSession.length
     ? await prisma.attendance.findMany({
-        where: { enrollmentId: currentEnrollment.id },
-        select: { status: true },
+        where: {
+          enrollmentId: {
+            in: enrollmentsWithSession.map((item) => item.id),
+          },
+        },
+        orderBy: [{ date: 'desc' }, { recordedAt: 'desc' }],
       })
     : []
 
-  const attendanceRecordedCount = attendanceRows.length
-  const attendancePresentCount = attendanceRows.filter((item) =>
+  const currentEnrollmentAttendanceRows = currentEnrollment
+    ? attendanceRows.filter((item) => item.enrollmentId === currentEnrollment.id)
+    : []
+
+  const attendanceRecordedCount = currentEnrollmentAttendanceRows.length
+  const attendancePresentCount = currentEnrollmentAttendanceRows.filter((item) =>
     ['present', 'late', 'excused'].includes(item.status.toLowerCase())
   ).length
   const attendanceRate =
@@ -294,6 +352,19 @@ export async function GET(request: NextRequest) {
       paymentStatus: item.paymentStatus,
       totalAmount: item.totalAmount,
       paidAmount: item.paidAmount,
+      balanceAmount: Math.max(item.totalAmount - item.paidAmount, 0),
+      waitlistPosition: waitlistPositionByEnrollmentId.get(item.id) || null,
+      reservedSpot:
+        item.sessionId && item.createdAt
+          ? enrollmentsWithSession
+              .filter(
+                (row) =>
+                  row.sessionId === item.sessionId &&
+                  ['pending', 'accepted', 'confirmed', 'waitlist'].includes(row.status) &&
+                  row.createdAt <= item.createdAt
+              )
+              .length
+          : null,
       questionsCount: getStudentQuestions(notes).length,
       hours: getSessionHours({
         startDate: session.startDate,
@@ -312,6 +383,47 @@ export async function GET(request: NextRequest) {
 
   const hoursCompleted = completedSessionRows.reduce((sum, item) => sum + item.hours, 0)
   const hoursRemaining = pendingSessionRows.reduce((sum, item) => sum + item.hours, 0)
+
+  const enrollmentMap = new Map(enrollmentsWithSession.map((item) => [item.id, item]))
+
+  const attendance = attendanceRows.map((attendanceRow) => {
+    const enrollment = enrollmentMap.get(attendanceRow.enrollmentId)
+    const session = enrollment?.session
+    return {
+      id: attendanceRow.id,
+      enrollmentId: attendanceRow.enrollmentId,
+      sessionId: attendanceRow.sessionId,
+      date: attendanceRow.date,
+      status: attendanceRow.status,
+      notes: attendanceRow.notes,
+      recordedAt: attendanceRow.recordedAt,
+      formationTitle: enrollment?.formation.title || 'Session',
+      sessionLabel: session
+        ? `${new Date(session.startDate).toLocaleDateString('fr-FR')} - ${session.location || 'En ligne'}`
+        : 'Session non affectee',
+    }
+  })
+
+  const results = evaluations.map((evaluation) => ({
+    id: evaluation.id,
+    enrollmentId: evaluation.enrollmentId,
+    formationTitle: evaluation.formation.title,
+    sessionLabel: evaluation.session
+      ? `${new Date(evaluation.session.startDate).toLocaleDateString('fr-FR')} - ${evaluation.session.location || 'En ligne'}`
+      : 'Sans session',
+    overallRating: evaluation.overallRating,
+    overallComment: evaluation.overallComment,
+    contentRating: evaluation.contentRating,
+    instructorRating: evaluation.instructorRating,
+    materialRating: evaluation.materialRating,
+    organizationRating: evaluation.organizationRating,
+    facilityRating: evaluation.facilityRating,
+    strengths: evaluation.strengths,
+    improvements: evaluation.improvements,
+    recommendations: evaluation.recommendations,
+    submittedAt: evaluation.submittedAt,
+    isAnonymous: evaluation.isAnonymous,
+  }))
 
   const submissionFeedbackMap = enrollments.reduce<Record<string, { feedback?: string | null; status?: string | null; updatedAt?: string }>>(
     (acc, enrollment) => {
@@ -404,7 +516,7 @@ export async function GET(request: NextRequest) {
       .map((item) => ({
         id: `submission-${item.id}`,
         type: 'correction',
-        title: 'Mise à jour de travail',
+        title: 'Mise a jour de travail',
         message: `${item.title}: statut ${item.status}${item.reviewFeedback ? ` - ${item.reviewFeedback}` : ''}`,
         createdAt: item.reviewedAt ? new Date(item.reviewedAt) : new Date(item.updatedAt),
       })),
@@ -537,8 +649,13 @@ export async function GET(request: NextRequest) {
                   )
                 : null,
             reservedSpot: currentReservedSpot,
+            waitlistPosition: waitlistPositionByEnrollmentId.get(currentEnrollment.id) || null,
             maxParticipants: currentEnrollment.session?.maxParticipants || null,
             currentParticipants: currentEnrollment.session?.currentParticipants || null,
+            paymentStatus: currentEnrollment.paymentStatus,
+            paidAmount: currentEnrollment.paidAmount,
+            totalAmount: currentEnrollment.totalAmount,
+            balanceAmount: Math.max(currentEnrollment.totalAmount - currentEnrollment.paidAmount, 0),
           }
         : null,
       sessionsHistory,
@@ -549,13 +666,15 @@ export async function GET(request: NextRequest) {
       certificateEligibility,
       questions,
       notifications,
+      attendance,
+      results,
       progress: {
         hoursCompleted,
         hoursRemaining,
         exercisesCompleted: mappedSubmissions.filter((item) => item.status === 'approved').length,
         exercisesInProgress: mappedSubmissions.filter((item) => item.status === 'pending').length,
         projectsCompleted: mappedSubmissions.filter((item) => item.status === 'approved').length,
-        evaluationsCompleted: evaluationsCount,
+        evaluationsCompleted: evaluations.length,
       },
       metrics: {
         totalSessions: sessionsHistory.length,
