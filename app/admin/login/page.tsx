@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, LockKeyhole, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, Sparkles } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -43,49 +43,19 @@ export default function AdminLoginPage() {
       <div className="relative grid w-full max-w-6xl overflow-hidden rounded-[36px] border border-white/70 bg-white/86 shadow-[0_40px_110px_-60px_rgba(15,23,42,0.55)] backdrop-blur-xl lg:grid-cols-[1.05fr_0.95fr]">
         <section className="relative overflow-hidden bg-[linear-gradient(140deg,rgba(0,45,114,0.98),rgba(0,48,160,0.92),rgba(227,6,19,0.88))] px-6 py-8 text-white md:px-8 md:py-10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.14),transparent_26%)]" />
-          <div className="relative flex h-full flex-col justify-between gap-8">
-            <div>
+          <div className="relative flex h-full items-start">
+            <div className="max-w-xl">
               <div className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur">
                 <Sparkles className="h-3.5 w-3.5" />
                 Acces admin
               </div>
               <h1 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl">
-                Une connexion admin claire et professionnelle.
+                Portail administrateur de CJ Development Training Center
               </h1>
-              <p className="mt-5 max-w-xl text-sm leading-7 text-blue-50/90 md:text-[15px]">
-                Accedez a une interface claire pour suivre les KPIs, les risques et les actions prioritaires du panneau admin.
+              <p className="mt-5 text-sm leading-7 text-blue-50/90 md:text-[15px]">
+                Connectez-vous pour gerer les sessions, les inscriptions, les paiements et le suivi des etudiants
+                depuis un espace de travail clair, securise et adapte aux operations du centre.
               </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                {
-                  icon: ShieldCheck,
-                  title: 'Acces securise',
-                  text: 'Authentification admin et secrets dedies au portail.',
-                },
-                {
-                  icon: LockKeyhole,
-                  title: 'Controle fin',
-                  text: 'Actions critiques, paiements et comptes sous surveillance.',
-                },
-                {
-                  icon: Sparkles,
-                  title: 'Interface coherente',
-                  text: 'Une base claire pour toutes les pages de gestion.',
-                },
-              ].map((item) => {
-                const Icon = item.icon
-                return (
-                  <article key={item.title} className="rounded-[26px] border border-white/14 bg-white/10 p-4 backdrop-blur">
-                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12 text-white ring-1 ring-white/12">
-                      <Icon className="h-5 w-5" />
-                    </span>
-                    <p className="mt-4 text-sm font-semibold text-white">{item.title}</p>
-                    <p className="mt-2 text-sm leading-6 text-blue-50/85">{item.text}</p>
-                  </article>
-                )
-              })}
             </div>
           </div>
         </section>

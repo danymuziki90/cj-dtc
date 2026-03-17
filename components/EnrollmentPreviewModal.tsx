@@ -28,6 +28,16 @@ type Payment = {
   createdAt: string
 }
 
+type EnrollmentAccount = {
+  state: string
+  label: string
+  tone: 'warning' | 'success' | 'primary' | 'neutral' | 'danger'
+  canCreate: boolean
+  canLogin: boolean
+  studentId?: string | null
+  username?: string | null
+}
+
 type Enrollment = {
   id: number
   firstName: string
@@ -58,6 +68,7 @@ type Enrollment = {
     maxParticipants: number
   } | null
   payments?: Payment[]
+  account?: EnrollmentAccount
 }
 
 interface EnrollmentPreviewModalProps {
@@ -355,6 +366,7 @@ export default function EnrollmentPreviewModal({
   const [internalComment, setInternalComment] = useState('')
   const [savingComment, setSavingComment] = useState(false)
   const [confirmingPayment, setConfirmingPayment] = useState(false)
+  const [creatingStudentAccount, setCreatingStudentAccount] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('mobile_money')
   const [paymentReference, setPaymentReference] = useState('')
   const [paymentTransactionId, setPaymentTransactionId] = useState('')
@@ -469,7 +481,11 @@ export default function EnrollmentPreviewModal({
       }
 
       if (data.enrollment) {
-        setRecord((prev) => ({ ...prev, ...data.enrollment }))
+        setRecord((prev) => ({
+          ...prev,
+          ...data.enrollment,
+          ...(data.account ? { account: data.account } : {}),
+        }))
       }
 
       if (data.credentials?.username && data.credentials?.password) {
@@ -492,6 +508,61 @@ export default function EnrollmentPreviewModal({
       setFeedbackError(error instanceof Error ? error.message : 'Erreur inattendue.')
     } finally {
       setConfirmingPayment(false)
+    }
+  }
+
+  async function handleCreateStudentAccount() {
+    setCreatingStudentAccount(true)
+    setFeedbackError(null)
+    setFeedbackSuccess(null)
+
+    try {
+      const response = await fetch(`/api/enrollments/${record.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'createStudentAccount',
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Impossible de creer le compte etudiant.')
+      }
+
+      if (data.enrollment) {
+        setRecord((prev) => ({
+          ...prev,
+          ...data.enrollment,
+          ...(data.account ? { account: data.account } : {}),
+        }))
+      }
+
+      if (data.credentials?.username && data.credentials?.password) {
+        setGeneratedCredentials({
+          username: data.credentials.username,
+          password: data.credentials.password,
+        })
+      } else {
+        setGeneratedCredentials(null)
+      }
+
+      const emailSuffix = data.notifications?.credentialsEmailSent
+        ? ' Les identifiants ont ete envoyes automatiquement.'
+        : ''
+
+      setFeedbackSuccess(
+        data.accountCreated
+          ? `Compte etudiant cree avec succes.${emailSuffix}`
+          : `Compte etudiant active avec succes.${emailSuffix}`
+      )
+
+      onStatusChange()
+    } catch (error) {
+      setFeedbackError(error instanceof Error ? error.message : 'Erreur inattendue.')
+    } finally {
+      setCreatingStudentAccount(false)
     }
   }
 
@@ -518,6 +589,7 @@ export default function EnrollmentPreviewModal({
               <div className="mt-3 flex flex-wrap gap-2">
                 <AdminBadge tone={enrollmentStatusTone(record.status)}>{record.status}</AdminBadge>
                 <AdminBadge tone={paymentStatusTone(record.paymentStatus)}>{record.paymentStatus}</AdminBadge>
+                {record.account ? <AdminBadge tone={record.account.tone}>{record.account.label}</AdminBadge> : null}
                 <AdminBadge tone="neutral">{record.formation.title}</AdminBadge>
               </div>
             </div>
@@ -625,6 +697,55 @@ export default function EnrollmentPreviewModal({
           </section>
 
           <section className="space-y-6">
+            <AdminPanel className="p-5">
+              <h3 className="mb-3 text-lg font-semibold text-slate-900">Compte etudiant</h3>
+              <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
+                <div>
+                  <p className="text-slate-500">Etat du compte</p>
+                  <div className="mt-2">
+                    {record.account ? (
+                      <AdminBadge tone={record.account.tone}>{record.account.label}</AdminBadge>
+                    ) : (
+                      <AdminBadge tone="neutral">Etat indisponible</AdminBadge>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-slate-500">Identifiant</p>
+                  <p className="font-medium text-slate-900">{record.account?.username || 'Pas encore genere'}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Connexion</p>
+                  <p className="font-medium text-slate-900">{record.account?.canLogin ? 'Autorisee' : 'Bloquee'}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Action admin</p>
+                  <p className="font-medium text-slate-900">
+                    {record.account?.canCreate ? 'Creation de compte possible maintenant' : 'Aucune action manuelle requise'}
+                  </p>
+                </div>
+              </div>
+
+              {record.account?.canCreate ? (
+                <div className="mt-4 rounded-[22px] border border-[var(--admin-primary-100)] bg-[var(--admin-primary-50)] p-4">
+                  <p className="text-sm font-semibold text-[var(--admin-primary-800)]">
+                    Cette inscription est eligible a la creation du compte etudiant.
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--admin-primary-700)]">
+                    Le compte sera cree, active et les identifiants seront envoyes automatiquement a l'etudiant.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleCreateStudentAccount}
+                    disabled={creatingStudentAccount}
+                    className={`mt-3 ${adminPrimaryButtonClassName}`}
+                  >
+                    {creatingStudentAccount ? 'Creation en cours...' : 'Creer le compte etudiant'}
+                  </button>
+                </div>
+              ) : null}
+            </AdminPanel>
+
             <AdminPanel className="p-5">
               <h3 className="mb-3 text-lg font-semibold text-slate-900">Verification paiement</h3>
               <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
@@ -838,4 +959,12 @@ export default function EnrollmentPreviewModal({
     </div>
   )
 }
+
+
+
+
+
+
+
+
 

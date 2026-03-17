@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { CalendarDays, Eye, MapPin, UserRound } from 'lucide-react'
 import { FormattedDate } from './FormattedDate'
@@ -22,6 +22,16 @@ type Payment = {
   notes: string | null
 }
 
+type EnrollmentAccount = {
+  state: string
+  label: string
+  tone: 'warning' | 'success' | 'primary' | 'neutral' | 'danger'
+  canCreate: boolean
+  canLogin: boolean
+  studentId?: string | null
+  username?: string | null
+}
+
 export interface EnrollmentRow {
   id: number
   firstName: string
@@ -38,6 +48,7 @@ export interface EnrollmentRow {
   motivationLetter?: string
   notes?: string
   payments?: Payment[]
+  account?: EnrollmentAccount
   formation: {
     id: number
     title: string
@@ -152,15 +163,16 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
     return (
       <div className="space-y-6">
         {Object.entries(byFormation)
-          .sort(([, a], [, b]) => (b.length - a.length) || a[0].formation.title.localeCompare(b[0].formation.title))
+          .sort(([, a], [, b]) => b.length - a.length || a[0].formation.title.localeCompare(b[0].formation.title))
           .map(([formationId, rows]) => {
             const soldCount = rows.filter((row) => row.paymentStatus === 'paid').length
+            const activeAccounts = rows.filter((row) => row.account?.state === 'active').length
             return (
               <AdminPanel key={formationId}>
                 <AdminPanelHeader
                   eyebrow="Groupe formation"
                   title={rows[0]?.formation.title || 'Formation'}
-                  description={`${rows.length} inscription(s) dont ${soldCount} paiement(s) soldes.`}
+                  description={`${rows.length} inscription(s), ${soldCount} paiement(s) soldes et ${activeAccounts} compte(s) actif(s).`}
                   actions={<AdminBadge tone="primary">{rows.length} dossiers</AdminBadge>}
                 />
 
@@ -172,6 +184,7 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Contact</th>
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Session</th>
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Paiement</th>
+                        <th className="px-4 py-3 text-left font-semibold text-slate-600">Compte etudiant</th>
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Dossier</th>
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Inscription</th>
                         {onPreview ? <th className="px-4 py-3 text-left font-semibold text-slate-600">Action</th> : null}
@@ -215,6 +228,16 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                                 {paymentStatusLabel(enrollment.paymentStatus)}
                               </AdminBadge>
                             </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            {enrollment.account ? (
+                              <div className="space-y-2">
+                                <AdminBadge tone={enrollment.account.tone}>{enrollment.account.label}</AdminBadge>
+                                <p className="text-xs text-slate-500">{enrollment.account.username || 'Aucun identifiant'}</p>
+                              </div>
+                            ) : (
+                              <p className="text-xs text-slate-500">Etat indisponible</p>
+                            )}
                           </td>
                           <td className="px-4 py-4">
                             <AdminBadge tone={enrollmentStatusTone(enrollment.status)}>
@@ -293,6 +316,9 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                         <AdminBadge tone={enrollmentStatusTone(enrollment.status)}>
                           {enrollmentStatusLabel(enrollment.status)}
                         </AdminBadge>
+                        {enrollment.account ? (
+                          <AdminBadge tone={enrollment.account.tone}>{enrollment.account.label}</AdminBadge>
+                        ) : null}
                       </div>
                       <p className="text-sm text-slate-600">{enrollment.formation.title}</p>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
@@ -302,6 +328,7 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                           {enrollment.session?.location || 'Aucun lieu'}
                         </span>
                         <span>{formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)}</span>
+                        {enrollment.account?.username ? <span>ID: {enrollment.account.username}</span> : null}
                       </div>
                     </div>
                     {onPreview ? <EnrollmentActionButton onClick={() => onPreview(enrollment)} /> : null}

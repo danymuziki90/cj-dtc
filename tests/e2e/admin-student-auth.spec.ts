@@ -9,36 +9,48 @@ type StudentCredentials = {
 const adminUsername = process.env.E2E_ADMIN_USERNAME || 'admincjtc'
 const adminPassword = process.env.E2E_ADMIN_PASSWORD || 'admin@123'
 
-async function loginAsAdmin(page: Page) {
-  await page.goto('/admin/login')
-  await page.getByTestId('admin-login-username').fill(adminUsername)
-  await page.getByTestId('admin-login-password').fill(adminPassword)
-  const loginResponsePromise = page.waitForResponse(
-    (response) =>
-      response.url().includes('/api/admin/auth/login') && response.request().method() === 'POST'
-  )
-  await page.getByTestId('admin-login-submit').click()
-  const loginResponse = await loginResponsePromise
+async function loginAsAdmin(page: Page, request: APIRequestContext) {
+  const loginResponse = await request.post('/api/admin/auth/login', {
+    data: {
+      username: adminUsername,
+      password: adminPassword,
+    },
+  })
+
   expect(loginResponse.ok()).toBeTruthy()
+
+  const setCookie = await loginResponse.headerValue('set-cookie')
+  const tokenMatch = setCookie?.match(/admin_token=([^;]+)/)
+  expect(tokenMatch?.[1]).toBeTruthy()
+
+  await page.context().addCookies([
+    {
+      name: 'admin_token',
+      value: tokenMatch![1],
+      domain: '127.0.0.1',
+      path: '/',
+      httpOnly: true,
+      sameSite: 'Lax',
+    },
+  ])
+
+  await page.goto('/admin/dashboard')
   await expect(page.getByText('Pilotage global de la plateforme')).toBeVisible({ timeout: 30_000 })
 }
 
-async function createEnrollmentFixture(
+async function createFormationAndSession(
   request: APIRequestContext,
   options: {
     suffix: number
-    firstName: string
-    lastName: string
-    email: string
-    paid: boolean
-  }
+    price: number
+  },
 ) {
   const formationResponse = await request.post('/api/formations', {
     data: {
       title: `E2E Formation ${options.suffix}`,
       description: 'Formation de test E2E',
       categorie: 'E2E',
-      statut: 'publie',
+      statut: 'brouillon',
     },
   })
   expect(formationResponse.ok()).toBeTruthy()
@@ -57,12 +69,31 @@ async function createEnrollmentFixture(
       location: 'Kinshasa',
       format: 'presentiel',
       maxParticipants: '25',
-      price: '100',
+      price: String(options.price),
       description: 'Session de test E2E',
     },
   })
   expect(sessionResponse.ok()).toBeTruthy()
   const session = await sessionResponse.json()
+
+  return { formation, session }
+}
+
+async function createEnrollmentFixture(
+  request: APIRequestContext,
+  options: {
+    suffix: number
+    firstName: string
+    lastName: string
+    email: string
+    paid: boolean
+    price?: number
+  },
+) {
+  const { formation, session } = await createFormationAndSession(request, {
+    suffix: options.suffix,
+    price: options.price ?? 100,
+  })
 
   const enrollmentResponse = await request.post('/api/enrollments', {
     data: {
@@ -96,18 +127,58 @@ async function createEnrollmentFixture(
   }
 }
 
+async function createFreeRegistrationFixture(
+  request: APIRequestContext,
+  options: {
+    suffix: number
+    firstName: string
+    lastName: string
+    email: string
+  },
+) {
+  const { session } = await createFormationAndSession(request, {
+    suffix: options.suffix,
+    price: 0,
+  })
+
+  const registrationResponse = await request.post('/api/programmes/register', {
+    data: {
+      sessionId: session.id,
+      personal: {
+        firstName: options.firstName,
+        lastName: options.lastName,
+        email: options.email,
+        whatsapp: '+243990000111',
+        address: 'Kinshasa',
+      },
+      answers: {
+        expectations: 'Valider le flux automatique du compte etudiant.',
+      },
+      payment: {
+        provider: 'pawapay',
+        method: 'mobile_money',
+        currency: 'USD',
+      },
+    },
+  })
+
+  expect(registrationResponse.ok()).toBeTruthy()
+  return registrationResponse.json()
+}
+
 test.describe('Admin and student critical flows', () => {
   test.describe.configure({ mode: 'serial' })
 
   let createdStudent: StudentCredentials | null = null
+  let autoProvisionedStudentEmail: string | null = null
 
-  test('admin login works', async ({ page }) => {
-    await loginAsAdmin(page)
+  test('admin login works', async ({ page, request }) => {
+    await loginAsAdmin(page, request)
     await expect(page.getByText('Pilotage global de la plateforme')).toBeVisible()
   })
 
   test('admin cannot create a student account before payment is fully validated', async ({ page, request }) => {
-    await loginAsAdmin(page)
+    await loginAsAdmin(page, request)
 
     const suffix = Date.now()
     const email = `e2e.student.unpaid.${suffix}@example.com`
@@ -128,44 +199,84 @@ test.describe('Admin and student critical flows', () => {
     const createResponsePromise = page.waitForResponse(
       (response) =>
         response.url().includes('/api/admin/system/students') && response.request().method() === 'POST',
-      { timeout: 90_000 }
+      { timeout: 90_000 },
     )
     await page.getByTestId('student-create-submit').click()
     const createResponse = await createResponsePromise
     expect(createResponse.status()).toBe(409)
     await expect(page.getByTestId('student-create-error')).toContainText(
-      "Le compte etudiant ne peut etre cree qu'apres validation complete du paiement de la session souscrite."
+      "Le compte etudiant ne peut etre cree qu'apres validation complete du paiement de la session souscrite.",
     )
     await expect(page.getByTestId('student-credentials-panel')).toHaveCount(0)
   })
 
-  test('admin can create a student account after full payment validation', async ({ page, request }) => {
-    await loginAsAdmin(page)
+  test('free session registration creates the student account automatically', async ({ page, request }) => {
+    await loginAsAdmin(page, request)
 
     const suffix = Date.now()
-    const fullName = `E2E Student ${suffix}`
-    const email = `e2e.student.paid.${suffix}@example.com`
+    const email = `e2e.student.free.${suffix}@example.com`
+
+    await createFreeRegistrationFixture(request, {
+      suffix,
+      firstName: 'E2E',
+      lastName: `Free ${suffix}`,
+      email,
+    })
+
+    await page.goto('/admin/students')
+    await page.getByTestId('student-search-input').fill(email)
+    await expect(page.getByText(email)).toBeVisible({ timeout: 30_000 })
+
+    await page.goto('/admin/enrollments')
+    await page.getByPlaceholder('Nom, email, formation ou lieu').fill(email)
+    await expect(page.getByText('Compte actif')).toBeVisible({ timeout: 30_000 })
+  })
+
+  test('paid session validation creates the student account automatically', async ({ page, request }) => {
+    await loginAsAdmin(page, request)
+
+    const suffix = Date.now()
+    const email = `e2e.student.auto.${suffix}@example.com`
 
     await createEnrollmentFixture(request, {
       suffix,
       firstName: 'E2E',
-      lastName: `Student ${suffix}`,
+      lastName: `Auto ${suffix}`,
       email,
       paid: true,
     })
 
-    await page.goto('/admin/students')
+    autoProvisionedStudentEmail = email
 
-    await page.getByTestId('student-create-name').fill(fullName)
-    await page.getByTestId('student-create-email').fill(email)
-    const createResponsePromise = page.waitForResponse(
+    await page.goto('/admin/students')
+    await page.getByTestId('student-search-input').fill(email)
+    await expect(page.getByText(email)).toBeVisible({ timeout: 30_000 })
+
+    await page.goto('/admin/enrollments')
+    await page.getByPlaceholder('Nom, email, formation ou lieu').fill(email)
+    await expect(page.getByText('Compte actif')).toBeVisible({ timeout: 30_000 })
+  })
+
+  test('student can log in after admin resets credentials on an auto-created account', async ({ page, request }) => {
+    test.skip(!autoProvisionedStudentEmail, 'No auto-created student is available for the reset flow.')
+
+    await loginAsAdmin(page, request)
+    await page.goto('/admin/students')
+    await page.getByTestId('student-search-input').fill(autoProvisionedStudentEmail!)
+    await expect(page.getByText(autoProvisionedStudentEmail!)).toBeVisible({ timeout: 30_000 })
+
+    page.once('dialog', async (dialog) => {
+      await dialog.accept()
+    })
+
+    const resetResponsePromise = page.waitForResponse(
       (response) =>
-        response.url().includes('/api/admin/system/students') && response.request().method() === 'POST',
-      { timeout: 90_000 }
+        response.url().includes('/api/admin/system/students/') && response.request().method() === 'PUT',
+      { timeout: 90_000 },
     )
-    await page.getByTestId('student-create-submit').click()
-    const createResponse = await createResponsePromise
-    expect(createResponse.ok()).toBeTruthy()
+    await page.getByRole('button', { name: 'Reinit. + e-mail' }).first().click()
+    const resetResponse = await resetResponsePromise
+    expect(resetResponse.ok()).toBeTruthy()
 
     await expect(page.getByTestId('student-credentials-panel')).toBeVisible({ timeout: 30_000 })
     await expect(page.getByTestId('student-credentials-copy')).toBeVisible()
@@ -177,29 +288,21 @@ test.describe('Admin and student critical flows', () => {
     expect(password).toBeTruthy()
 
     createdStudent = {
-      email,
+      email: autoProvisionedStudentEmail!,
       username: username as string,
       password: password as string,
     }
 
-    await page.getByTestId('student-search-input').fill(email)
-    await expect(page.getByText(email)).toBeVisible()
-  })
-
-  test('student can log in with generated credentials', async ({ page }) => {
-    test.skip(!createdStudent, 'Student credentials were not generated by the creation flow.')
-
     await page.goto('/student/login')
-    await page.getByTestId('student-login-username').fill(createdStudent!.username)
-    await page.getByTestId('student-login-password').fill(createdStudent!.password)
+    await page.getByTestId('student-login-username').fill(createdStudent.username)
+    await page.getByTestId('student-login-password').fill(createdStudent.password)
     const loginResponsePromise = page.waitForResponse(
       (response) =>
-        response.url().includes('/api/student/auth/login') && response.request().method() === 'POST'
+        response.url().includes('/api/student/auth/login') && response.request().method() === 'POST',
     )
     await page.getByTestId('student-login-submit').click()
     const loginResponse = await loginResponsePromise
     expect(loginResponse.ok()).toBeTruthy()
-    await expect(page.getByText(createdStudent!.email)).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByText(createdStudent.email)).toBeVisible({ timeout: 30_000 })
   })
 })
-

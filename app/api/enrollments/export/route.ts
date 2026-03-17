@@ -1,7 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../../lib/prisma'
+import { deriveEnrollmentAccountState } from '../../../../lib/student/account-provisioning'
 
 export const dynamic = 'force-dynamic'
+
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase()
+}
+
+async function enrichEnrollmentsWithAccount(enrollments: Array<any>) {
+  const emails = Array.from(new Set(enrollments.map((enrollment) => normalizeEmail(enrollment.email)).filter(Boolean)))
+  const students = emails.length
+    ? await prisma.student.findMany({
+        where: {
+          OR: emails.map((email) => ({
+            email: {
+              equals: email,
+              mode: 'insensitive',
+            },
+          })),
+        },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          status: true,
+        },
+      })
+    : []
+
+  const studentByEmail = new Map(students.map((student) => [normalizeEmail(student.email), student]))
+
+  return enrollments.map((enrollment) => {
+    const student = studentByEmail.get(normalizeEmail(enrollment.email)) || null
+    const account = deriveEnrollmentAccountState({
+      enrollmentStatus: enrollment.status,
+      paymentStatus: enrollment.paymentStatus,
+      paidAmount: enrollment.paidAmount,
+      totalAmount: enrollment.totalAmount,
+      student,
+    })
+
+    return {
+      ...enrollment,
+      account: {
+        ...account,
+        username: student?.username || '',
+      },
+    }
+  })
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,6 +61,7 @@ export async function GET(req: NextRequest) {
     const startDateFrom = searchParams.get('startDateFrom')
     const startDateTo = searchParams.get('startDateTo')
     const search = searchParams.get('search')
+    const accountStatus = searchParams.get('accountStatus')
 
     const where: any = {}
     if (status) where.status = status
@@ -29,125 +78,92 @@ export async function GET(req: NextRequest) {
       include: {
         formation: {
           select: {
-            title: true
-          }
-        }
+            title: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     })
 
-    // Filtrer par recherche si fourni
     let filteredEnrollments = enrollments
     if (search) {
       const searchLower = search.toLowerCase()
-      filteredEnrollments = enrollments.filter(e =>
-        e.firstName.toLowerCase().includes(searchLower) ||
-        e.lastName.toLowerCase().includes(searchLower) ||
-        e.email.toLowerCase().includes(searchLower) ||
-        e.formation.title.toLowerCase().includes(searchLower)
+      filteredEnrollments = enrollments.filter(
+        (enrollment) =>
+          enrollment.firstName.toLowerCase().includes(searchLower) ||
+          enrollment.lastName.toLowerCase().includes(searchLower) ||
+          enrollment.email.toLowerCase().includes(searchLower) ||
+          enrollment.formation.title.toLowerCase().includes(searchLower),
       )
     }
 
+    const enrichedEnrollments = await enrichEnrollmentsWithAccount(filteredEnrollments)
+    const exportRows = accountStatus
+      ? enrichedEnrollments.filter((enrollment) => enrollment.account.state === accountStatus)
+      : enrichedEnrollments
+
+    const headers = [
+      'ID',
+      'Prenom',
+      'Nom',
+      'Email',
+      'Telephone',
+      'Adresse',
+      'Formation',
+      'Date de debut',
+      'Statut',
+      'Statut paiement',
+      'Statut compte',
+      'Identifiant compte',
+      'Montant total',
+      'Montant paye',
+      'Date inscription',
+    ]
+
+    const rows = exportRows.map((enrollment) => [
+      enrollment.id.toString(),
+      enrollment.firstName,
+      enrollment.lastName,
+      enrollment.email,
+      enrollment.phone || '',
+      enrollment.address || '',
+      enrollment.formation.title,
+      new Date(enrollment.startDate).toLocaleDateString('fr-FR'),
+      enrollment.status,
+      enrollment.paymentStatus,
+      enrollment.account.label,
+      enrollment.account.username || '',
+      enrollment.totalAmount.toString(),
+      enrollment.paidAmount.toString(),
+      new Date(enrollment.createdAt).toLocaleDateString('fr-FR'),
+    ])
+
     if (format === 'csv') {
-      // Générer CSV
-      const headers = [
-        'ID',
-        'Prénom',
-        'Nom',
-        'Email',
-        'Téléphone',
-        'Adresse',
-        'Formation',
-        'Date de début',
-        'Statut',
-        'Statut paiement',
-        'Montant total',
-        'Montant payé',
-        'Date inscription'
-      ]
-
-      const rows = filteredEnrollments.map(e => [
-        e.id.toString(),
-        e.firstName,
-        e.lastName,
-        e.email,
-        e.phone || '',
-        e.address || '',
-        e.formation.title,
-        new Date(e.startDate).toLocaleDateString('fr-FR'),
-        e.status,
-        e.paymentStatus,
-        e.totalAmount.toString(),
-        e.paidAmount.toString(),
-        new Date(e.createdAt).toLocaleDateString('fr-FR')
-      ])
-
       const csvContent = [
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
       ].join('\n')
 
       return new NextResponse(csvContent, {
         headers: {
           'Content-Type': 'text/csv; charset=utf-8',
-          'Content-Disposition': `attachment; filename="inscriptions_${new Date().toISOString().split('T')[0]}.csv"`
-        }
-      })
-    } else {
-      // Générer Excel (format simple CSV avec extension .xlsx pour compatibilité)
-      // Pour une vraie génération Excel, utiliser une bibliothèque comme exceljs
-      const headers = [
-        'ID',
-        'Prénom',
-        'Nom',
-        'Email',
-        'Téléphone',
-        'Adresse',
-        'Formation',
-        'Date de début',
-        'Statut',
-        'Statut paiement',
-        'Montant total',
-        'Montant payé',
-        'Date inscription'
-      ]
-
-      const rows = filteredEnrollments.map(e => [
-        e.id.toString(),
-        e.firstName,
-        e.lastName,
-        e.email,
-        e.phone || '',
-        e.address || '',
-        e.formation.title,
-        new Date(e.startDate).toLocaleDateString('fr-FR'),
-        e.status,
-        e.paymentStatus,
-        e.totalAmount.toString(),
-        e.paidAmount.toString(),
-        new Date(e.createdAt).toLocaleDateString('fr-FR')
-      ])
-
-      // Format TSV pour Excel
-      const tsvContent = [
-        headers.join('\t'),
-        ...rows.map(row => row.join('\t'))
-      ].join('\n')
-
-      return new NextResponse(tsvContent, {
-        headers: {
-          'Content-Type': 'application/vnd.ms-excel',
-          'Content-Disposition': `attachment; filename="inscriptions_${new Date().toISOString().split('T')[0]}.xls"`
-        }
+          'Content-Disposition': `attachment; filename="inscriptions_${new Date().toISOString().split('T')[0]}.csv"`,
+        },
       })
     }
+
+    const tsvContent = [headers.join('\t'), ...rows.map((row) => row.join('\t'))].join('\n')
+
+    return new NextResponse(tsvContent, {
+      headers: {
+        'Content-Type': 'application/vnd.ms-excel',
+        'Content-Disposition': `attachment; filename="inscriptions_${new Date().toISOString().split('T')[0]}.xls"`,
+      },
+    })
   } catch (error: any) {
-    console.error('Erreur lors de l\'export:', error)
-    return NextResponse.json(
-      { error: 'Erreur lors de l\'export' },
-      { status: 500 }
-    )
+    console.error("Erreur lors de l'export:", error)
+    return NextResponse.json({ error: "Erreur lors de l'export" }, { status: 500 })
   }
 }

@@ -1,10 +1,11 @@
-import { randomUUID } from 'crypto'
+﻿import { randomUUID } from 'crypto'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, withEmailTimeout } from '@/lib/email'
 import { inferProgramSessionType } from '@/lib/programmes/session-types'
 import { initiatePawaPayPayment, type GatewayInitStatus } from '@/lib/payments/gateways'
 import { syncEnrollmentPaymentStatus } from '@/lib/payments/status'
+import { provisionStudentAccountFromEnrollment } from '@/lib/student/account-provisioning'
 
 export const createSessionPaymentSchema = z.object({
   sessionId: z.number().int().positive(),
@@ -149,7 +150,6 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
       paymentDate: isFreeRegistration ? registrationDate : null,
     },
   })
-
   const reference = `CJ-${Date.now()}-${randomUUID().slice(0, 8)}`
   const paymentMethod = hasPayableAmount ? payload.payment.method : 'free'
   const maskedPhoneNumber = requiresImmediatePayment
@@ -230,6 +230,15 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
 
   const syncedPayment = await syncEnrollmentPaymentStatus(enrollment.id)
 
+  const autoProvisionResult =
+    isFreeRegistration || syncedPayment?.paymentStatus === 'paid'
+      ? await provisionStudentAccountFromEnrollment({
+          enrollmentId: enrollment.id,
+          source: isFreeRegistration ? 'program-registration-free' : 'program-registration-payment',
+        })
+      : null
+
+
   if (isFreeRegistration) {
     try {
       await prisma.adminNotification.create({
@@ -248,7 +257,8 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
     }
   }
 
-  const registrationStatusLabel = isFull ? 'waitlist' : enrollmentStatus
+  const resolvedEnrollmentStatus = autoProvisionResult?.enrollment?.status || enrollmentStatus
+  const registrationStatusLabel = isFull ? 'waitlist' : resolvedEnrollmentStatus
   const paymentStatusLabel = isFull ? 'deferred' : syncedPayment?.paymentStatus || (isFreeRegistration ? 'paid' : payment.status)
   const emailBody = isFull
     ? `
@@ -291,7 +301,7 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
     body: {
       success: true,
       enrollmentId: enrollment.id,
-      status: enrollmentStatus,
+      status: resolvedEnrollmentStatus,
       paymentStatus: syncedPayment?.paymentStatus || (isFreeRegistration ? 'paid' : 'unpaid'),
       onWaitlist: isFull,
       payment: {
@@ -303,6 +313,22 @@ export async function createSessionPayment(payload: CreateSessionPaymentPayload)
         action: paymentAction,
         callbackUrl,
       },
+      studentAccount: autoProvisionResult
+        ? {
+            state: autoProvisionResult.accountStatus?.state || null,
+            accountCreated: autoProvisionResult.accountCreated,
+            accountActivated: autoProvisionResult.accountActivated,
+          }
+        : null,
     },
   }
 }
+
+
+
+
+
+
+
+
+

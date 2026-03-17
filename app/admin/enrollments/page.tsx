@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { CalendarRange, Download, FileSpreadsheet, Layers3, Printer } from 'lucide-react'
@@ -35,6 +35,7 @@ const initialFilters = {
   status: '',
   formationId: '',
   paymentStatus: '',
+  accountStatus: '',
   startDateFrom: '',
   startDateTo: '',
   search: '',
@@ -53,6 +54,7 @@ const emptyStats: EnrollmentStatsSummary = {
   total: 0,
   byStatus: {},
   byPaymentStatus: {},
+  byAccountStatus: {},
   revenue: {
     totalAmount: 0,
     paidAmount: 0,
@@ -93,6 +95,7 @@ export default function EnrollmentsPage() {
       if (nextFilters.status) params.append('status', nextFilters.status)
       if (nextFilters.formationId) params.append('formationId', nextFilters.formationId)
       if (nextFilters.paymentStatus) params.append('paymentStatus', nextFilters.paymentStatus)
+      if (nextFilters.accountStatus) params.append('accountStatus', nextFilters.accountStatus)
       if (nextFilters.startDateFrom) params.append('startDateFrom', nextFilters.startDateFrom)
       if (nextFilters.startDateTo) params.append('startDateTo', nextFilters.startDateTo)
       if (nextFilters.search) params.append('search', nextFilters.search)
@@ -176,6 +179,7 @@ export default function EnrollmentsPage() {
             <AdminBadge tone="primary">{pagination.totalItems} dossier(s)</AdminBadge>
             <AdminBadge tone="neutral">{viewMode === 'formation' ? 'Vue formation' : 'Vue date'}</AdminBadge>
             <AdminBadge tone="success">{formations.length} formation(s)</AdminBadge>
+            <AdminBadge tone="primary">{stats.byAccountStatus.active || 0} compte(s) actif(s)</AdminBadge>
           </div>
         </div>
 
@@ -264,3 +268,5 @@ export default function EnrollmentsPage() {
     </AdminShell>
   )
 }
+
+

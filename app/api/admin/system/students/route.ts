@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
@@ -6,12 +6,15 @@ import { writeAdminAuditLog } from '@/lib/admin/audit'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { hashPassword } from '@/lib/auth-portal/password'
 import { resolveAppBaseUrl, sendStudentPortalAccessEmail, withEmailTimeout } from '@/lib/email'
-import { syncEnrollmentPaymentStatus, toCanonicalPaymentStatus } from '@/lib/payments/status'
+import { syncEnrollmentPaymentStatus } from '@/lib/payments/status'
+import { isEnrollmentPaymentSettled } from '@/lib/student/account-provisioning'
 
 const createStudentSchema = z.object({
   name: z.string().min(3),
   email: z.string().email(),
   sessionId: z.string().optional().nullable(),
+  username: z.string().trim().min(3).max(80).optional().nullable(),
+  password: z.string().min(8).max(128).optional().nullable(),
 })
 
 const STUDENT_PAYMENT_LOCK_MESSAGE =
@@ -57,16 +60,6 @@ function generateStudentNumber() {
   const time = Date.now().toString().slice(-8)
   const random = randomBytes(2).toString('hex')
   return `STU${time}${random}`
-}
-
-function isEnrollmentPaymentSettled(enrollment: {
-  paymentStatus: string
-  paidAmount: number
-  totalAmount: number
-}) {
-  if (enrollment.totalAmount <= 0) return true
-  if (enrollment.paidAmount >= enrollment.totalAmount) return true
-  return toCanonicalPaymentStatus(enrollment.paymentStatus) === 'success'
 }
 
 type StudentCreationEnrollmentCandidate = {
@@ -367,10 +360,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: STUDENT_PAYMENT_LOCK_MESSAGE }, { status: 409 })
     }
 
-    const plainPassword = generatePassword()
+    const manualUsername = parsed.data.username?.trim() ? parsed.data.username.trim().toLowerCase() : null
+    const providedPassword = parsed.data.password?.trim() ? parsed.data.password.trim() : null
+
+    let username: string
+    if (manualUsername) {
+      const usernameExists = await prisma.student.findUnique({
+        where: { username: manualUsername },
+        select: { id: true },
+      })
+
+      if (usernameExists) {
+        return NextResponse.json({ error: 'This username is already in use.' }, { status: 409 })
+      }
+
+      username = manualUsername
+    } else {
+      const baseUsername = buildCandidateUsername(name)
+      username = await ensureUniqueUsername(baseUsername)
+    }
+
+    const plainPassword = providedPassword || generatePassword()
     const hashedPassword = await hashPassword(plainPassword)
-    const baseUsername = buildCandidateUsername(name)
-    const username = await ensureUniqueUsername(baseUsername)
 
     const student = await prisma.student.create({
       data: {
@@ -430,6 +441,7 @@ export async function POST(request: NextRequest) {
         username: student.username,
         adminSessionId: student.adminSessionId,
         credentialsEmailSent,
+        manualCredentials: Boolean(manualUsername || providedPassword),
       },
     })
 
@@ -458,3 +470,10 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ArrowRight, Award, BookOpenText, Clock3, GraduationCap, Layers3 } from 'lucide-react'
@@ -7,6 +7,7 @@ import { generatePageMetadata } from '../../../../components/PageMetadata'
 import { prisma } from '../../../../lib/prisma'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
+import { isE2EFormationFixture } from '@/lib/formations/public'
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string }> | { locale: string; slug: string }
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     where: { slug: resolvedParams.slug },
   })
 
-  if (!formation) {
+  if (!formation || isE2EFormationFixture(formation)) {
     return generatePageMetadata({
       title: t.metadataMissingTitle,
       description: t.metadataMissingDescription,
@@ -66,7 +67,7 @@ export default async function FormationDetailPage({ params }: PageProps) {
     console.error('Formation detail database error:', error)
   }
 
-  if (!formation) {
+  if (!formation || isE2EFormationFixture(formation)) {
     notFound()
   }
 
@@ -207,3 +208,5 @@ export default async function FormationDetailPage({ params }: PageProps) {
     </div>
   )
 }
+
+

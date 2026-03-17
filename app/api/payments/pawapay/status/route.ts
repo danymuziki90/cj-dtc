@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyPawaPayPayment } from '@/lib/payments/gateways'
 import { syncEnrollmentPaymentStatus } from '@/lib/payments/status'
+import { provisionStudentAccountFromEnrollment } from '@/lib/student/account-provisioning'
 
 export const runtime = 'nodejs'
 
@@ -64,10 +65,26 @@ export async function GET(request: NextRequest) {
 
     await syncEnrollmentPaymentStatus(payment.enrollment.id)
 
+    const autoProvisionResult =
+      verification.status === 'success'
+        ? await provisionStudentAccountFromEnrollment({
+            enrollmentId: payment.enrollment.id,
+            appBaseUrl: new URL(request.url).origin,
+            source: 'pawapay-status-check',
+          })
+        : null
+
     return NextResponse.json({
       paymentId: updated.id,
       status: updated.status,
       transactionId: updated.transactionId,
+      studentAccount: autoProvisionResult
+        ? {
+            state: autoProvisionResult.accountStatus?.state || null,
+            accountCreated: autoProvisionResult.accountCreated,
+            accountActivated: autoProvisionResult.accountActivated,
+          }
+        : null,
     })
   } catch (error) {
     console.error('PawaPay status check error:', error)

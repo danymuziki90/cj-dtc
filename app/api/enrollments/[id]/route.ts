@@ -1,94 +1,55 @@
-import { randomBytes } from 'crypto'
-import { NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
-import { hashPassword } from '@/lib/auth-portal/password'
+import { requireAdmin } from '@/lib/auth-portal/guards'
+import { resolveAppBaseUrl, sendEmail } from '@/lib/email'
+import { provisionStudentAccountFromEnrollment } from '@/lib/student/account-provisioning'
 
-function buildBaseUsername(firstName: string, lastName: string, email: string) {
-  const fromName = `${firstName}.${lastName}`
-    .toLowerCase()
-    .replace(/[^a-z0-9.]/g, '')
-    .replace(/\.+/g, '.')
-    .replace(/^\./, '')
-    .replace(/\.$/, '')
+const STUDENT_PAYMENT_LOCK_MESSAGE =
+  "Le compte etudiant ne peut etre cree qu'apres validation complete du paiement de la session souscrite."
 
-  if (fromName.length >= 3) return fromName
+function buildStudentAccountCreationError(reason: string | null) {
+  if (reason === 'payment_pending') {
+    return {
+      status: 409,
+      error: STUDENT_PAYMENT_LOCK_MESSAGE,
+    }
+  }
 
-  const localPart = email.split('@')[0] || `student${Date.now()}`
-  return localPart.toLowerCase().replace(/[^a-z0-9.]/g, '') || `student${Date.now()}`
-}
+  if (reason === 'waitlist') {
+    return {
+      status: 409,
+      error: "Le compte etudiant ne peut pas etre cree pour une inscription en liste d'attente.",
+    }
+  }
 
-async function ensureUniqueUsername(baseUsername: string) {
-  let candidate = baseUsername
-  let suffix = 1
+  if (reason === 'ineligible') {
+    return {
+      status: 409,
+      error: "Le compte etudiant ne peut pas etre cree pour cette inscription.",
+    }
+  }
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const existing = await prisma.student.findUnique({ where: { username: candidate } })
-    if (!existing) return candidate
-    candidate = `${baseUsername}${suffix}`
-    suffix += 1
+  return {
+    status: 404,
+    error: 'Inscription introuvable.',
   }
 }
 
-function generateSecurePassword() {
-  return `Std#${randomBytes(8).toString('hex')}`
-}
-
-function generateStudentNumber() {
-  return `STU${Date.now().toString().slice(-8)}${randomBytes(2).toString('hex').toUpperCase()}`
-}
-
-function resolveAppBaseUrl(request: Request) {
-  const fromEnv = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_RES_URL
-  if (fromEnv) return fromEnv.replace(/\/+$/, '')
-  const url = new URL(request.url)
-  return `${url.protocol}//${url.host}`
-}
-
-async function sendPaymentConfirmationCredentialsEmail(params: {
-  to: string
-  fullName: string
-  formationTitle: string
-  username: string
-  password?: string
-  appBaseUrl: string
-}) {
-  const loginLink = `${params.appBaseUrl}/student/login`
-  const isNewAccount = Boolean(params.password)
-
-  await sendEmail(
-    params.to,
-    `Paiement confirme - Acces etudiant ${params.formationTitle}`,
-    `
-      <h2>Bonjour ${params.fullName},</h2>
-      <p>Votre paiement pour la session <strong>${params.formationTitle}</strong> a ete confirme.</p>
-      ${
-        isNewAccount
-          ? `<p>Votre compte etudiant a ete cree automatiquement.</p>
-             <p><strong>Nom d'utilisateur:</strong> ${params.username}</p>
-             <p><strong>Mot de passe initial:</strong> ${params.password}</p>`
-          : `<p>Votre compte etudiant existe deja.</p>
-             <p><strong>Nom d'utilisateur:</strong> ${params.username}</p>`
-      }
-      <p>Connectez-vous ici: <a href="${loginLink}">${loginLink}</a></p>
-      <p>Nous vous recommandons de modifier votre mot de passe apres la premiere connexion.</p>
-    `
-  )
-}
-
 export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requireAdmin(req)
+  if (auth.error) return auth.error
+
   try {
     const resolvedParams = await params
-    const enrollmentId = parseInt(resolvedParams.id)
+    const enrollmentId = Number(resolvedParams.id)
     const body = await req.json()
     const { status, reason, notes, paymentStatus, action, paymentMethod, amount, reference, transactionId } = body
 
-    if (Number.isNaN(enrollmentId)) {
-      return NextResponse.json({ error: 'Identifiant d’inscription invalide' }, { status: 400 })
+    if (!Number.isFinite(enrollmentId)) {
+      return NextResponse.json({ error: "Identifiant d'inscription invalide" }, { status: 400 })
     }
 
     const enrollment = await prisma.enrollment.findUnique({
@@ -104,12 +65,45 @@ export async function PUT(
       return NextResponse.json({ error: 'Inscription non trouvee' }, { status: 404 })
     }
 
+    if (action === 'createStudentAccount') {
+      const provision = await provisionStudentAccountFromEnrollment({
+        enrollmentId: enrollment.id,
+        request: req,
+        appBaseUrl: resolveAppBaseUrl(req.url),
+        source: `admin:${auth.admin.username}:manual-account-create`,
+      })
+
+      if (!provision.eligible || !provision.student) {
+        const failure = buildStudentAccountCreationError(provision.reason)
+        return NextResponse.json({ error: failure.error }, { status: failure.status })
+      }
+
+      const updatedEnrollment = await prisma.enrollment.findUnique({
+        where: { id: enrollment.id },
+        include: {
+          formation: true,
+          session: true,
+          payments: true,
+        },
+      })
+
+      return NextResponse.json({
+        success: true,
+        enrollment: updatedEnrollment,
+        student: provision.student,
+        account: provision.accountStatus,
+        accountCreated: provision.accountCreated,
+        accountActivated: provision.accountActivated,
+        credentials: provision.credentials,
+        notifications: provision.notifications,
+      })
+    }
+
     if (action === 'confirmPayment') {
       const paidAmount = enrollment.totalAmount > 0 ? enrollment.totalAmount : enrollment.paidAmount || 0
       const now = new Date()
-
       const successPayments = enrollment.payments.filter((payment) =>
-        ['success', 'completed'].includes(payment.status)
+        ['success', 'completed'].includes(payment.status),
       )
 
       if (successPayments.length === 0) {
@@ -130,7 +124,7 @@ export async function PUT(
         })
       }
 
-      const updatedEnrollment = await prisma.enrollment.update({
+      await prisma.enrollment.update({
         where: { id: enrollment.id },
         data: {
           paymentStatus: 'paid',
@@ -138,11 +132,29 @@ export async function PUT(
           paymentDate: now,
           paymentMethod: paymentMethod || enrollment.paymentMethod || 'mobile_money',
           status:
-            enrollment.status === 'pending' || enrollment.status === 'accepted' || enrollment.status === 'waitlist'
+            enrollment.status === 'pending' || enrollment.status === 'accepted'
               ? 'confirmed'
               : enrollment.status,
           ...(notes !== undefined ? { notes } : {}),
         },
+      })
+
+      const provision = await provisionStudentAccountFromEnrollment({
+        enrollmentId: enrollment.id,
+        request: req,
+        appBaseUrl: resolveAppBaseUrl(req.url),
+        source: `admin:${auth.admin.username}:payment-confirmation`,
+      })
+
+      if (!provision.eligible || !provision.student?.username) {
+        return NextResponse.json(
+          { error: 'Compte etudiant introuvable apres confirmation du paiement.' },
+          { status: 500 },
+        )
+      }
+
+      const updatedEnrollment = await prisma.enrollment.findUnique({
+        where: { id: enrollment.id },
         include: {
           formation: true,
           session: true,
@@ -150,76 +162,22 @@ export async function PUT(
         },
       })
 
-      const existingStudent = await prisma.student.findUnique({
-        where: { email: enrollment.email },
-      })
-
-      let student = existingStudent
-      let plainPassword: string | null = null
-
-      if (!existingStudent) {
-        plainPassword = generateSecurePassword()
-        const hashedPassword = await hashPassword(plainPassword)
-        const baseUsername = buildBaseUsername(enrollment.firstName, enrollment.lastName, enrollment.email)
-        const username = await ensureUniqueUsername(baseUsername)
-
-        student = await prisma.student.create({
-          data: {
-            firstName: enrollment.firstName,
-            lastName: enrollment.lastName,
-            email: enrollment.email,
-            username,
-            password: hashedPassword,
-            phone: enrollment.phone || null,
-            address: enrollment.address || null,
-            studentNumber: generateStudentNumber(),
-            status: 'ACTIVE',
-            role: 'STUDENT',
-          },
-        })
-      } else if (existingStudent.status !== 'ACTIVE') {
-        student = await prisma.student.update({
-          where: { id: existingStudent.id },
-          data: { status: 'ACTIVE' },
-        })
-      }
-
-      if (!student || !student.username) {
-        return NextResponse.json(
-          { error: 'Compte etudiant introuvable apres confirmation du paiement.' },
-          { status: 500 }
-        )
-      }
-
-      await sendPaymentConfirmationCredentialsEmail({
-        to: enrollment.email,
-        fullName: `${enrollment.firstName} ${enrollment.lastName}`.trim(),
-        formationTitle: enrollment.formation.title,
-        username: student.username,
-        password: plainPassword || undefined,
-        appBaseUrl: resolveAppBaseUrl(req),
-      })
-
       return NextResponse.json({
         success: true,
         enrollment: updatedEnrollment,
-        student: {
-          id: student.id,
-          email: student.email,
-          username: student.username,
-          status: student.status,
-        },
-        accountCreated: !existingStudent,
-        credentials: plainPassword
-          ? {
-              username: student.username,
-              password: plainPassword,
-            }
-          : null,
+        student: provision.student,
+        account: provision.accountStatus,
+        accountCreated: provision.accountCreated,
+        accountActivated: provision.accountActivated,
+        credentials: provision.credentials,
+        notifications: provision.notifications,
       })
     }
 
-    if (status && !['pending', 'accepted', 'rejected', 'cancelled', 'confirmed', 'completed', 'waitlist'].includes(status)) {
+    if (
+      status &&
+      !['pending', 'accepted', 'rejected', 'cancelled', 'confirmed', 'completed', 'waitlist'].includes(status)
+    ) {
       return NextResponse.json({ error: 'Statut invalide' }, { status: 400 })
     }
 
@@ -242,7 +200,7 @@ export async function PUT(
             <h2>Bonjour ${enrollment.firstName},</h2>
             <p>Votre inscription a ete acceptee pour la session <strong>${enrollment.formation.title}</strong>.</p>
             <p>Prochaine etape: finaliser le paiement.</p>
-          `
+          `,
         )
       } else if (status === 'rejected') {
         await sendEmail(
@@ -252,7 +210,7 @@ export async function PUT(
             <h2>Bonjour ${enrollment.firstName},</h2>
             <p>Votre inscription n'a pas ete retenue pour <strong>${enrollment.formation.title}</strong>.</p>
             ${reason ? `<p>Motif: ${reason}</p>` : ''}
-          `
+          `,
         )
       }
     }
@@ -260,6 +218,6 @@ export async function PUT(
     return NextResponse.json(updated)
   } catch (error) {
     console.error('Error updating enrollment:', error)
-    return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur lors de la mise a jour' }, { status: 500 })
   }
 }

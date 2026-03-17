@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import {
@@ -932,6 +932,56 @@ export default function AdminStudentsPage() {
                   </select>
                 </div>
 
+                <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={form.manualCredentials}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        manualCredentials: event.target.checked,
+                        username: event.target.checked ? prev.username : '',
+                        password: event.target.checked ? prev.password : '',
+                      }))
+                    }
+                    className="mt-1"
+                    data-testid="student-create-manual-toggle"
+                  />
+                  <span>
+                    <span className="block font-medium text-slate-900">Definir les identifiants manuellement</span>
+                    <span className="mt-1 block text-xs leading-5 text-slate-500">
+                      Laissez ces champs desactives pour une generation automatique du nom d'utilisateur et du mot de passe.
+                    </span>
+                  </span>
+                </label>
+
+                {form.manualCredentials ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-700">Nom d'utilisateur</label>
+                      <input
+                        value={form.username}
+                        onChange={(event) => setForm((prev) => ({ ...prev, username: event.target.value }))}
+                        placeholder="ex. nicole.zephonie"
+                        className={inputClassName}
+                        data-testid="student-create-username"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-700">Mot de passe</label>
+                      <input
+                        type="text"
+                        value={form.password}
+                        onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+                        placeholder="8 caracteres minimum"
+                        className={inputClassName}
+                        data-testid="student-create-password"
+                      />
+                    </div>
+                  </div>
+                ) : null}
+
                 <button
                   type="submit"
                   disabled={submitting}
@@ -1196,7 +1246,7 @@ export default function AdminStudentsPage() {
                         icon={CircleDollarSign}
                         label="Paiements a suivre"
                         value={`${selectedStudentDetails.overview.pendingPayments}`}
-                        helper={`${selectedStudentDetails.overview.settledEnrollments} inscription(s) soldée(s)`}
+                        helper={`${selectedStudentDetails.overview.settledEnrollments} inscription(s) soldÃ©e(s)`}
                         tone="warning"
                       />
                       <SummaryCard
@@ -1252,11 +1302,11 @@ export default function AdminStudentsPage() {
                                 </div>
                                 <p className="mt-2 text-slate-600">
                                   {enrollment.session
-                                    ? `${formatDateTime(enrollment.session.startDate)} · ${enrollment.session.location || 'En ligne'}`
+                                    ? `${formatDateTime(enrollment.session.startDate)} Â· ${enrollment.session.location || 'En ligne'}`
                                     : 'Sans session'}
                                 </p>
                                 <p className="mt-1 text-slate-500">
-                                  {formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)} · {enrollment.status}
+                                  {formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)} Â· {enrollment.status}
                                 </p>
                               </div>
                             ))
@@ -1281,7 +1331,7 @@ export default function AdminStudentsPage() {
                                   </span>
                                 </div>
                                 <p className="mt-2 text-slate-600">
-                                  {formatCurrency(payment.amount)} · {payment.method} · {formatDateTime(payment.createdAt)}
+                                  {formatCurrency(payment.amount)} Â· {payment.method} Â· {formatDateTime(payment.createdAt)}
                                 </p>
                                 <p className="mt-1 text-slate-500">{payment.reference || payment.transactionId || payment.sessionLabel}</p>
                               </div>
@@ -1362,7 +1412,7 @@ export default function AdminStudentsPage() {
                                   {certificate.verified ? 'Verifie' : 'En attente'}
                                 </span>
                               </div>
-                              <p className="mt-2 text-slate-500">{certificate.code} · {formatDate(certificate.issuedAt)}</p>
+                              <p className="mt-2 text-slate-500">{certificate.code} Â· {formatDate(certificate.issuedAt)}</p>
                             </div>
                           ))}
                           {selectedStudentDetails.notifications.slice(0, 3).map((notification) => (
@@ -1411,7 +1461,7 @@ export default function AdminStudentsPage() {
                                   </span>
                                 </div>
                                 <p className="mt-2 text-slate-600">{log.summary}</p>
-                                <p className="mt-1 text-slate-500">{log.adminUsername} · {formatDateTime(log.createdAt)}</p>
+                                <p className="mt-1 text-slate-500">{log.adminUsername} Â· {formatDateTime(log.createdAt)}</p>
                               </div>
                             ))
                           ) : (
@@ -1696,7 +1746,7 @@ export default function AdminStudentsPage() {
                               </p>
                               {student.latestEnrollment?.session ? (
                                 <p className="text-xs text-slate-500">
-                                  {formatDateTime(student.latestEnrollment.session.startDate)} ·{' '}
+                                  {formatDateTime(student.latestEnrollment.session.startDate)} Â·{' '}
                                   {student.latestEnrollment.session.location}
                                 </p>
                               ) : null}
@@ -1908,3 +1958,5 @@ export default function AdminStudentsPage() {
     </AdminShell>
   )
 }
+
+

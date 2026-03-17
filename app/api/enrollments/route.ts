@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
-import { sendEmail } from '../../../lib/email'
+import { deriveEnrollmentAccountState, provisionStudentAccountFromEnrollment } from '../../../lib/student/account-provisioning'
+import { resolveAppBaseUrl, sendEmail } from '../../../lib/email'
 
 export const runtime = 'nodejs'
 
@@ -37,68 +38,131 @@ function buildEnrollmentWhere(url: URL): EnrollmentWhere {
   return where
 }
 
-async function buildEnrollmentStats(where: EnrollmentWhere) {
-  const [statusGroups, paymentGroups, revenue, formationGroups] = await Promise.all([
-    prisma.enrollment.groupBy({
-      by: ['status'],
-      _count: { _all: true },
-      where,
-    }),
-    prisma.enrollment.groupBy({
-      by: ['paymentStatus'],
-      _count: { _all: true },
-      where,
-    }),
-    prisma.enrollment.aggregate({
-      where,
-      _sum: {
-        totalAmount: true,
-        paidAmount: true,
-      },
-    }),
-    prisma.enrollment.groupBy({
-      by: ['formationId'],
-      _count: { _all: true },
-      where,
-    }),
-  ])
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase()
+}
 
-  const formations = formationGroups.length
-    ? await prisma.formation.findMany({
-        where: {
-          id: { in: formationGroups.map((group) => group.formationId) },
+async function findStudentsForEmails(emails: string[]) {
+  const normalizedEmails = Array.from(new Set(emails.map((email) => normalizeEmail(email)).filter(Boolean)))
+  if (normalizedEmails.length === 0) return []
+
+  return prisma.student.findMany({
+    where: {
+      OR: normalizedEmails.map((email) => ({
+        email: {
+          equals: email,
+          mode: 'insensitive',
         },
+      })),
+    },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      status: true,
+    },
+  })
+}
+
+async function attachEnrollmentAccountState<T extends { email: string; status: string; paymentStatus: string; paidAmount: number; totalAmount: number }>(
+  enrollments: T[],
+) {
+  const students = await findStudentsForEmails(enrollments.map((enrollment) => enrollment.email))
+  const studentByEmail = new Map(students.map((student) => [normalizeEmail(student.email), student]))
+
+  return enrollments.map((enrollment) => {
+    const student = studentByEmail.get(normalizeEmail(enrollment.email)) || null
+    const account = deriveEnrollmentAccountState({
+      enrollmentStatus: enrollment.status,
+      paymentStatus: enrollment.paymentStatus,
+      paidAmount: enrollment.paidAmount,
+      totalAmount: enrollment.totalAmount,
+      student,
+    })
+
+    return {
+      ...enrollment,
+      account: {
+        ...account,
+        studentId: student?.id || null,
+        username: student?.username || null,
+      },
+    }
+  })
+}
+
+function buildEnrollmentStatsFromRows(
+  rows: Array<{
+    status: string
+    paymentStatus: string
+    paidAmount: number
+    totalAmount: number
+    formation: { id: number; title: string }
+    account?: { state: string } | null
+  }>,
+) {
+  const byStatus: Record<string, number> = {}
+  const byPaymentStatus: Record<string, number> = {}
+  const byAccountStatus: Record<string, number> = {}
+  const byFormation = new Map<number, { id: number; title: string; count: number }>()
+  let totalAmount = 0
+  let paidAmount = 0
+
+  for (const row of rows) {
+    byStatus[row.status] = (byStatus[row.status] || 0) + 1
+    byPaymentStatus[row.paymentStatus] = (byPaymentStatus[row.paymentStatus] || 0) + 1
+    if (row.account?.state) {
+      byAccountStatus[row.account.state] = (byAccountStatus[row.account.state] || 0) + 1
+    }
+
+    totalAmount += row.totalAmount || 0
+    paidAmount += row.paidAmount || 0
+
+    const existingFormation = byFormation.get(row.formation.id)
+    if (existingFormation) {
+      existingFormation.count += 1
+    } else {
+      byFormation.set(row.formation.id, {
+        id: row.formation.id,
+        title: row.formation.title,
+        count: 1,
+      })
+    }
+  }
+
+  return {
+    total: rows.length,
+    byStatus,
+    byPaymentStatus,
+    byAccountStatus,
+    revenue: {
+      totalAmount,
+      paidAmount,
+    },
+    byFormation: Array.from(byFormation.values()).sort((left, right) => right.count - left.count),
+  }
+}
+
+async function buildEnrollmentStats(where: EnrollmentWhere) {
+  const rows = await prisma.enrollment.findMany({
+    where,
+    select: {
+      status: true,
+      paymentStatus: true,
+      paidAmount: true,
+      totalAmount: true,
+      email: true,
+      formation: {
         select: {
           id: true,
           title: true,
         },
-      })
-    : []
-
-  const formationMap = new Map(formations.map((formation) => [formation.id, formation.title]))
-
-  return {
-    total: statusGroups.reduce((sum, group) => sum + group._count._all, 0),
-    byStatus: statusGroups.reduce<Record<string, number>>((acc, group) => {
-      acc[group.status] = group._count._all
-      return acc
-    }, {}),
-    byPaymentStatus: paymentGroups.reduce<Record<string, number>>((acc, group) => {
-      acc[group.paymentStatus] = group._count._all
-      return acc
-    }, {}),
-    revenue: {
-      totalAmount: revenue._sum.totalAmount || 0,
-      paidAmount: revenue._sum.paidAmount || 0,
+      },
     },
-    byFormation: formationGroups
-      .map((group) => ({
-        id: group.formationId,
-        title: formationMap.get(group.formationId) || `Formation ${group.formationId}`,
-        count: group._count._all,
-      }))
-      .sort((left, right) => right.count - left.count),
-  }
+  })
+
+  const enrichedRows = await attachEnrollmentAccountState(rows)
+  return buildEnrollmentStatsFromRows(enrichedRows)
 }
 
 const enrollmentInclude = {
@@ -141,6 +205,7 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url, 'http://localhost')
     const where = buildEnrollmentWhere(url)
+    const accountStatusFilter = url.searchParams.get('accountStatus')?.trim() || ''
     const paginationRequested = url.searchParams.has('page') || url.searchParams.has('pageSize')
     const page = Math.max(1, Number(url.searchParams.get('page') || 1))
     const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get('pageSize') || 10)))
@@ -153,7 +218,41 @@ export async function GET(req: Request) {
         orderBy: { createdAt: 'desc' },
       })
 
-      return NextResponse.json(enrollments)
+      const enrichedEnrollments = await attachEnrollmentAccountState(enrollments)
+      const filteredEnrollments = accountStatusFilter
+        ? enrichedEnrollments.filter((enrollment) => enrollment.account.state === accountStatusFilter)
+        : enrichedEnrollments
+
+      return NextResponse.json(filteredEnrollments)
+    }
+
+    if (accountStatusFilter) {
+      const allEnrollments = await prisma.enrollment.findMany({
+        where,
+        include: enrollmentInclude,
+        orderBy: { createdAt: 'desc' },
+      })
+
+      const enrichedEnrollments = await attachEnrollmentAccountState(allEnrollments)
+      const filteredEnrollments = enrichedEnrollments.filter(
+        (enrollment) => enrollment.account.state === accountStatusFilter,
+      )
+      const totalItems = filteredEnrollments.length
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
+      const paginatedEnrollments = filteredEnrollments.slice(skip, skip + pageSize)
+
+      return NextResponse.json({
+        enrollments: paginatedEnrollments,
+        pagination: {
+          page,
+          pageSize,
+          totalItems,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+        },
+        stats: buildEnrollmentStatsFromRows(filteredEnrollments),
+      })
     }
 
     const [totalItems, enrollments, stats] = await Promise.all([
@@ -168,10 +267,11 @@ export async function GET(req: Request) {
       buildEnrollmentStats(where),
     ])
 
+    const enrichedEnrollments = await attachEnrollmentAccountState(enrollments)
     const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
 
     return NextResponse.json({
-      enrollments,
+      enrollments: enrichedEnrollments,
       pagination: {
         page,
         pageSize,
@@ -186,7 +286,7 @@ export async function GET(req: Request) {
     console.error('Enrollment GET error:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la recuperation des inscriptions' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
@@ -251,22 +351,31 @@ export async function POST(req: Request) {
       if (isFull) {
         status = 'waitlist'
         onWaitlist = true
+      } else if (totalAmount <= 0) {
+        status = 'confirmed'
       }
     }
+
+    const normalizedEmail = String(email).trim().toLowerCase()
+    const immediateAccessEnrollment = !onWaitlist && Boolean(sessionId) && totalAmount <= 0
+    const registrationDate = new Date()
 
     const enrollment = await prisma.enrollment.create({
       data: {
         firstName,
         lastName,
-        email,
+        email: normalizedEmail,
         phone: phone || null,
         address: address || null,
         motivationLetter: motivationLetter || null,
         formationId: parseInt(formationId),
         sessionId: sessionId ? parseInt(sessionId) : null,
-        startDate: new Date(),
+        startDate: registrationDate,
         status,
+        paymentStatus: immediateAccessEnrollment ? 'paid' : 'unpaid',
         totalAmount,
+        paidAmount: 0,
+        paymentDate: immediateAccessEnrollment ? registrationDate : null,
       },
       include: {
         formation: {
@@ -286,12 +395,29 @@ export async function POST(req: Request) {
       },
     })
 
+    const studentAccount = immediateAccessEnrollment
+      ? await provisionStudentAccountFromEnrollment({
+          enrollmentId: enrollment.id,
+          appBaseUrl: resolveAppBaseUrl(req.url),
+          source: 'public-enrollment-free',
+        })
+      : null
+
     return NextResponse.json(
       {
         ...enrollment,
         onWaitlist,
+        studentAccount: studentAccount
+          ? {
+              state: studentAccount.accountStatus?.state || null,
+              accountCreated: studentAccount.accountCreated,
+              accountActivated: studentAccount.accountActivated,
+            }
+          : null,
         message: onWaitlist
           ? "Inscription en liste d'attente (session complete)"
+          : immediateAccessEnrollment
+          ? 'Inscription enregistree avec succes. Votre acces etudiant est en cours d activation.'
           : 'Inscription enregistree avec succes',
       },
       { status: 201 }
@@ -472,3 +598,8 @@ export async function PATCH(req: Request) {
     )
   }
 }
+
+
+
+
+

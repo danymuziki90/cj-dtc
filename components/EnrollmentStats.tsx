@@ -1,12 +1,13 @@
-﻿'use client'
+'use client'
 
-import { BadgeCheck, CircleDollarSign, Clock3, CreditCard, Layers3 } from 'lucide-react'
+import { BadgeCheck, CircleDollarSign, Clock3, CreditCard, Layers3, UserRoundCheck } from 'lucide-react'
 import { AdminMetricCard, AdminPanel, AdminPanelHeader, AdminBadge } from '@/components/admin-portal/ui'
 
 export type EnrollmentStatsSummary = {
   total: number
   byStatus: Record<string, number>
   byPaymentStatus: Record<string, number>
+  byAccountStatus: Record<string, number>
   revenue: {
     totalAmount: number
     paidAmount: number
@@ -29,10 +30,12 @@ function formatCurrency(amount: number) {
 export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsSummary }) {
   const acceptedCount = (summary.byStatus.accepted || 0) + (summary.byStatus.confirmed || 0)
   const paidRatio = summary.total > 0 ? Math.round(((summary.byPaymentStatus.paid || 0) / summary.total) * 100) : 0
+  const activeAccounts = summary.byAccountStatus.active || 0
+  const pendingAccounts = summary.byAccountStatus.pending_creation || 0
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
         <AdminMetricCard
           icon={Layers3}
           label="Inscriptions"
@@ -62,6 +65,13 @@ export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsS
           tone="neutral"
         />
         <AdminMetricCard
+          icon={UserRoundCheck}
+          label="Comptes actifs"
+          value={String(activeAccounts)}
+          helper={`${pendingAccounts} dossier(s) attendent encore la creation du compte.`}
+          tone="primary"
+        />
+        <AdminMetricCard
           icon={CircleDollarSign}
           label="Encaissements"
           value={formatCurrency(summary.revenue.paidAmount)}
@@ -74,7 +84,7 @@ export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsS
         <AdminPanelHeader
           eyebrow="Distribution"
           title="Lecture rapide du portefeuille d'inscriptions"
-          description="Croisez les statuts de dossier, de paiement et le poids de chaque formation sans quitter la page."
+          description="Croisez les statuts de dossier, de paiement, de compte et le poids de chaque formation sans quitter la page."
         />
 
         <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_320px]">
@@ -96,7 +106,16 @@ export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsS
                 <AdminBadge tone="success">Soldes: {summary.byPaymentStatus.paid || 0}</AdminBadge>
               </div>
             </div>
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 px-4 py-4 md:col-span-2 xl:col-span-1">
+            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Statut compte</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <AdminBadge tone="warning">Paiement requis: {summary.byAccountStatus.awaiting_payment || 0}</AdminBadge>
+                <AdminBadge tone="primary">A creer: {summary.byAccountStatus.pending_creation || 0}</AdminBadge>
+                <AdminBadge tone="success">Actifs: {summary.byAccountStatus.active || 0}</AdminBadge>
+                <AdminBadge tone="danger">Suspendus: {summary.byAccountStatus.suspended || 0}</AdminBadge>
+              </div>
+            </div>
+            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 px-4 py-4 md:col-span-2 xl:col-span-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Valeur portefeuille</p>
               <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
                 {formatCurrency(summary.revenue.totalAmount)}

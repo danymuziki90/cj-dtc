@@ -2,6 +2,7 @@ import { constants, createHash, createVerify, timingSafeEqual } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { syncEnrollmentPaymentStatus, toCanonicalPaymentStatus } from '@/lib/payments/status'
+import { provisionStudentAccountFromEnrollment } from '@/lib/student/account-provisioning'
 
 type JsonRecord = Record<string, unknown>
 
@@ -578,14 +579,34 @@ export async function handlePawaPayCallback(request: NextRequest) {
 
     await syncEnrollmentPaymentStatus(payment.enrollment.id)
 
+    const autoProvisionResult =
+      status === 'success'
+        ? await provisionStudentAccountFromEnrollment({
+            enrollmentId: payment.enrollment.id,
+            appBaseUrl: new URL(request.url).origin,
+            source: 'pawapay-callback',
+            request,
+          })
+        : null
+
     return NextResponse.json({
       success: true,
       paymentId: payment.id,
       status,
       depositId,
+      studentAccount: autoProvisionResult
+        ? {
+            state: autoProvisionResult.accountStatus?.state || null,
+            accountCreated: autoProvisionResult.accountCreated,
+            accountActivated: autoProvisionResult.accountActivated,
+          }
+        : null,
     })
   } catch (error) {
     console.error('PawaPay callback error:', error)
     return NextResponse.json({ error: 'Unable to process callback.' }, { status: 500 })
   }
 }
+
+
+

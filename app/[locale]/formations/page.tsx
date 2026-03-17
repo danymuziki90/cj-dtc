@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import Breadcrumbs from '../../../components/Breadcrumbs'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
+import { isE2EFormationFixture } from '@/lib/formations/public'
 
 interface Formation {
   id: number
@@ -85,7 +86,7 @@ export default function FormationsPage() {
       }
 
       const data = (await response.json()) as Formation[]
-      const publishedFormations = data.filter((f) => f.statut === 'publie')
+      const publishedFormations = data.filter((f) => f.statut === 'publie' && !isE2EFormationFixture(f))
       setFormations(publishedFormations)
     } catch (err: any) {
       setError(err.message || t.genericError)
@@ -355,3 +356,4 @@ export default function FormationsPage() {
     </div>
   )
 }
+

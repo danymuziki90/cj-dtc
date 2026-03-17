@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useMemo, useState } from 'react'
 import { Search, SlidersHorizontal } from 'lucide-react'
@@ -11,24 +11,20 @@ import {
   adminSelectClassName,
 } from '@/components/admin-portal/ui'
 
+type EnrollmentFilterState = {
+  status: string
+  formationId: string
+  paymentStatus: string
+  accountStatus: string
+  startDateFrom: string
+  startDateTo: string
+  search: string
+}
+
 interface EnrollmentFiltersProps {
-  filters: {
-    status: string
-    formationId: string
-    paymentStatus: string
-    startDateFrom: string
-    startDateTo: string
-    search: string
-  }
+  filters: EnrollmentFilterState
   formations: Array<{ id: number; title: string }>
-  onFiltersChange: (filters: {
-    status: string
-    formationId: string
-    paymentStatus: string
-    startDateFrom: string
-    startDateTo: string
-    search: string
-  }) => void
+  onFiltersChange: (filters: EnrollmentFilterState) => void
   onReset: () => void
 }
 
@@ -44,7 +40,7 @@ export default function EnrollmentFilters({
     return Object.values(filters).filter((value) => value.trim().length > 0).length
   }, [filters])
 
-  function updateFilter(key: keyof EnrollmentFiltersProps['filters'], value: string) {
+  function updateFilter(key: keyof EnrollmentFilterState, value: string) {
     onFiltersChange({ ...filters, [key]: value })
   }
 
@@ -53,7 +49,7 @@ export default function EnrollmentFilters({
       <AdminPanelHeader
         eyebrow="Filtres"
         title="Affiner la vue des inscriptions"
-        description="Combinez recherche, statut, formation et temporalite pour faire ressortir les dossiers a traiter en priorite."
+        description="Combinez recherche, paiement, compte et temporalite pour faire ressortir les dossiers a traiter en priorite."
         actions={
           <>
             <button type="button" onClick={() => setShowAdvanced((value) => !value)} className={adminSecondaryButtonClassName}>
@@ -71,10 +67,11 @@ export default function EnrollmentFilters({
         <AdminBadge tone="primary">Filtres actifs: {activeFilterCount}</AdminBadge>
         {filters.search ? <AdminBadge tone="neutral">Recherche: {filters.search}</AdminBadge> : null}
         {filters.paymentStatus ? <AdminBadge tone="warning">Paiement: {filters.paymentStatus}</AdminBadge> : null}
+        {filters.accountStatus ? <AdminBadge tone="primary">Compte: {filters.accountStatus}</AdminBadge> : null}
         {filters.status ? <AdminBadge tone="success">Dossier: {filters.status}</AdminBadge> : null}
       </div>
 
-      <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_repeat(3,minmax(0,1fr))]">
+      <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_repeat(4,minmax(0,1fr))]">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">Recherche</label>
           <div className="relative">
@@ -100,6 +97,7 @@ export default function EnrollmentFilters({
             <option value="pending">En attente</option>
             <option value="accepted">Accepte</option>
             <option value="confirmed">Confirme</option>
+            <option value="waitlist">Liste attente</option>
             <option value="rejected">Rejete</option>
             <option value="cancelled">Annule</option>
             <option value="completed">Termine</option>
@@ -133,6 +131,23 @@ export default function EnrollmentFilters({
             <option value="unpaid">Non solde</option>
             <option value="partial">Partiel</option>
             <option value="paid">Solde</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-700">Compte etudiant</label>
+          <select
+            value={filters.accountStatus}
+            onChange={(event) => updateFilter('accountStatus', event.target.value)}
+            className={adminSelectClassName}
+          >
+            <option value="">Tous les etats</option>
+            <option value="awaiting_payment">En attente paiement</option>
+            <option value="pending_creation">Compte a creer</option>
+            <option value="active">Compte actif</option>
+            <option value="created">Compte cree</option>
+            <option value="suspended">Compte suspendu</option>
+            <option value="waitlist">Liste d'attente</option>
           </select>
         </div>
       </div>

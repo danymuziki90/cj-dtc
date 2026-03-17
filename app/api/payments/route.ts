@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { syncEnrollmentPaymentStatus, toCanonicalPaymentStatus } from '@/lib/payments/status'
+import { provisionStudentAccountFromEnrollment } from '@/lib/student/account-provisioning'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -330,10 +331,26 @@ export async function POST(req: Request) {
 
     await syncEnrollmentPaymentStatus(enrollment.id)
 
+    const autoProvisionResult =
+      canonicalStatus === 'success'
+        ? await provisionStudentAccountFromEnrollment({
+            enrollmentId: enrollment.id,
+            appBaseUrl: new URL(req.url).origin,
+            source: 'payments-api-success',
+          })
+        : null
+
     return NextResponse.json(
       {
         ...payment,
         status: canonicalStatus,
+        studentAccount: autoProvisionResult
+          ? {
+              state: autoProvisionResult.accountStatus?.state || null,
+              accountCreated: autoProvisionResult.accountCreated,
+              accountActivated: autoProvisionResult.accountActivated,
+            }
+          : null,
       },
       { status: 201 }
     )
@@ -347,3 +364,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unable to create payment.' }, { status: 500 })
   }
 }
+
+
+
+
