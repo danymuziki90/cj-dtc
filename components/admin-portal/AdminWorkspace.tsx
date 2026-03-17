@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
+import AdminGlobalSearch from '@/components/admin-portal/AdminGlobalSearch'
 import {
   BellRing,
+  BarChart3,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
@@ -40,6 +42,12 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     caption: 'Vue globale',
     icon: LayoutDashboard,
+  },
+  {
+    href: '/admin/reports',
+    label: 'Reporting',
+    caption: 'KPIs et alertes',
+    icon: BarChart3,
   },
   {
     href: '/admin/sessions',
@@ -179,7 +187,17 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
   }, [pathname])
 
   const currentItem = useMemo(() => {
-    return navItems.find((item) => isActivePath(pathname, item.href)) || navItems[0]
+    const matched = navItems.find((item) => isActivePath(pathname, item.href))
+    if (matched) return matched
+    if (pathname.startsWith('/admin/search')) {
+      return {
+        href: '/admin/search',
+        label: 'Recherche',
+        caption: 'Navigation globale',
+        icon: Search,
+      }
+    }
+    return navItems[0]
   }, [pathname])
 
   const currentDate = useMemo(() => {
@@ -306,16 +324,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
               </div>
 
               <div className="hidden min-w-[280px] flex-1 items-center justify-end xl:flex">
-                <div className="flex w-full max-w-md items-center gap-3 rounded-[24px] border border-slate-200 bg-white px-4 py-3 shadow-[0_18px_45px_-40px_rgba(15,23,42,0.25)]">
-                  <Search className="h-4 w-4 text-slate-400" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-slate-700">Navigation rapide</p>
-                    <p className="truncate text-xs text-slate-500">Recherche, filtres et raccourcis</p>
-                  </div>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-500">
-                    Ctrl K
-                  </span>
-                </div>
+                <AdminGlobalSearch />
               </div>
 
               <div className="hidden items-center gap-2 md:flex">
@@ -393,4 +402,9 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
     </div>
   )
 }
+
+
+
+
+
 

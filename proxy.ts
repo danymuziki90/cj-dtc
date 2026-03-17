@@ -45,25 +45,30 @@ const legacyAdminRouteMap: Record<string, string> = {
 }
 
 const legacyStudentRouteMap: Record<string, string> = {
-  '/espace-etudiants': '/student/dashboard',
-  '/espace-etudiants/calendrier': '/student/mes-sessions',
-  '/espace-etudiants/elearning': '/student/mes-sessions',
-  '/espace-etudiants/inscription': '/student/mes-sessions',
-  '/espace-etudiants/mes-formations': '/student/mes-sessions',
-  '/espace-etudiants/supports': '/student/ressources',
-  '/espace-etudiants/resultats': '/student/resultats',
-  '/espace-etudiants/mes-certificats': '/student/certificats',
-  '/espace-etudiants/mon-compte': '/student/profile',
-  '/espace-etudiants/travaux': '/student/submissions',
-  '/student': '/student/dashboard',
-  '/student/dashboard': '/student/dashboard',
-  '/student/profile': '/student/profile',
-  '/student/assignments': '/student/submissions',
-  '/student/certificates': '/student/certificats',
-  '/student/elearning': '/student/mes-sessions',
-  '/student/exams': '/student/resultats',
-  '/student/inscription': '/student/mes-sessions',
-  '/student/inscription/success': '/student/dashboard',
+  '/espace-etudiants': '/espace-etudiants',
+  '/espace-etudiants/calendrier': '/espace-etudiants/calendrier',
+  '/espace-etudiants/elearning': '/espace-etudiants/elearning',
+  '/espace-etudiants/inscription': '/espace-etudiants/inscription',
+  '/espace-etudiants/mes-formations': '/espace-etudiants/mes-formations',
+  '/espace-etudiants/supports': '/espace-etudiants/supports',
+  '/espace-etudiants/resultats': '/espace-etudiants/resultats',
+  '/espace-etudiants/mes-certificats': '/espace-etudiants/mes-certificats',
+  '/espace-etudiants/mon-compte': '/espace-etudiants/mon-compte',
+  '/espace-etudiants/travaux': '/espace-etudiants/travaux',
+  '/student': '/espace-etudiants',
+  '/student/dashboard': '/espace-etudiants',
+  '/student/profile': '/espace-etudiants/mon-compte',
+  '/student/assignments': '/espace-etudiants/travaux',
+  '/student/certificates': '/espace-etudiants/mes-certificats',
+  '/student/certificats': '/espace-etudiants/mes-certificats',
+  '/student/elearning': '/espace-etudiants/elearning',
+  '/student/exams': '/espace-etudiants/resultats',
+  '/student/inscription': '/espace-etudiants/inscription',
+  '/student/inscription/success': '/espace-etudiants',
+  '/student/mes-sessions': '/espace-etudiants/mes-formations',
+  '/student/resultats': '/espace-etudiants/resultats',
+  '/student/ressources': '/espace-etudiants/supports',
+  '/student/submissions': '/espace-etudiants/travaux',
 }
 
 function resolveLegacyAdminRedirect(pathname: string) {
@@ -76,10 +81,16 @@ function resolveLegacyAdminRedirect(pathname: string) {
 
 function resolveLegacyStudentRedirect(pathname: string) {
   const localizedMatch = pathname.match(/^\/(fr|en)(\/(?:espace-etudiants|student)(?:\/.*)?$)/)
+  const locale = localizedMatch ? localizedMatch[1] : 'fr'
   const legacyPath = localizedMatch ? localizedMatch[2] : pathname
 
   if (!legacyPath.startsWith('/espace-etudiants') && !legacyPath.startsWith('/student')) return null
-  return legacyStudentRouteMap[legacyPath] || '/student/dashboard'
+
+  const mappedPath = legacyStudentRouteMap[legacyPath]
+  if (!mappedPath) return null
+
+  const redirectPath = `/${locale}${mappedPath}`
+  return redirectPath === pathname ? null : redirectPath
 }
 
 export async function proxy(request: NextRequest) {
@@ -169,11 +180,13 @@ export async function proxy(request: NextRequest) {
 
   // Legacy protected localized areas (existing project behavior).
   const isLegacyAdminRoute = /^\/(fr|en)\/admin(\/|$)/.test(pathname)
-  const isStudentHomeRoute = /^\/(fr|en)\/espace-etudiants\/?$/.test(pathname)
+  const isLocalizedStudentSpaceRoute = /^\/(fr|en)\/espace-etudiants(\/|$)/.test(pathname)
   const isLegacyStudentRoute =
-    (pathname.includes('/espace-etudiants') && !isStudentHomeRoute) ||
     /^\/(fr|en)\/student(\/|$)/.test(pathname) ||
-    (pathname.includes('/dashboard') && !pathname.startsWith('/admin') && !pathname.startsWith('/student'))
+    (pathname.includes('/dashboard') &&
+      !pathname.startsWith('/admin') &&
+      !pathname.startsWith('/student') &&
+      !isLocalizedStudentSpaceRoute)
 
   if (!isLegacyAdminRoute && !isLegacyStudentRoute) {
     return NextResponse.next()

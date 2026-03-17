@@ -9,6 +9,8 @@ const pageDescriptions: Record<string, string> = {
   Submissions: 'Pilotez les livrables, les corrections et les validations.',
   'Travaux et corrections': 'Pilotez les livrables, les corrections et les validations.',
   'Notifications et messages': 'Diffusez les messages, relances et rappels depuis une interface claire.',
+  'Centre de reporting': 'Lisez les KPIs reels, les alertes systeme et les conversions qui pilotent les decisions admin.',
+  'Recherche admin': 'Retrouvez rapidement un etudiant, une session, une inscription ou un paiement depuis un point d entree unique.',
   'Gestion des actualites': 'Publiez, organisez et mettez a jour les contenus editoriaux.',
   'Gestion des actualités': 'Publiez, organisez et mettez a jour les contenus editoriaux.',
   'Parametres Admin': 'Pilotez la securite, les comptes admin et la configuration du portail.',
@@ -43,3 +45,4 @@ export default function AdminShell({
     </div>
   )
 }
+

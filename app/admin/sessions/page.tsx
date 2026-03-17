@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
 import { CalendarDays, Edit3, ImagePlus, Layers3, MapPin, Plus, Trash2, Users } from 'lucide-react'
@@ -506,7 +506,7 @@ export default function AdminSessionsPage() {
                 {sessions.map((session) => {
                   const availableSpots = Math.max(0, (session.maxParticipants || 0) - (session.currentParticipants || 0))
                   return (
-                    <article key={session.id} className="rounded-[26px] border border-slate-200 bg-slate-50/80 px-4 py-4 shadow-sm">
+                    <article id={`session-${session.id}`} key={session.id} className="rounded-[26px] border border-slate-200 bg-slate-50/80 px-4 py-4 shadow-sm">
                       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
@@ -556,3 +556,4 @@ export default function AdminSessionsPage() {
     </AdminShell>
   )
 }
+

@@ -69,6 +69,84 @@ function isEnrollmentPaymentSettled(enrollment: {
   return toCanonicalPaymentStatus(enrollment.paymentStatus) === 'success'
 }
 
+type StudentCreationEnrollmentCandidate = {
+  id: number
+  status: string
+  paymentStatus: string
+  paidAmount: number
+  totalAmount: number
+  createdAt: Date
+  formation: {
+    title: string
+  }
+  session: {
+    id: number
+    startDate: Date
+    location: string | null
+  } | null
+}
+
+async function resolveEligibleEnrollmentForStudentCreation(email: string) {
+  const enrollments = await prisma.enrollment.findMany({
+    where: {
+      email: {
+        equals: email,
+        mode: 'insensitive',
+      },
+      status: {
+        notIn: ['rejected', 'cancelled'],
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    select: {
+      id: true,
+      status: true,
+      paymentStatus: true,
+      paidAmount: true,
+      totalAmount: true,
+      createdAt: true,
+      formation: {
+        select: {
+          title: true,
+        },
+      },
+      session: {
+        select: {
+          id: true,
+          startDate: true,
+          location: true,
+        },
+      },
+    },
+  })
+
+  if (enrollments.length === 0) {
+    return {
+      latestEnrollment: null,
+      settledEnrollment: null,
+    }
+  }
+
+  const paymentSnapshots = await Promise.all(
+    enrollments.map(async (enrollment) => {
+      const syncedPayment = enrollment.totalAmount > 0 ? await syncEnrollmentPaymentStatus(enrollment.id) : null
+
+      return {
+        ...enrollment,
+        paymentStatus: syncedPayment?.paymentStatus || enrollment.paymentStatus,
+        paidAmount: syncedPayment?.paidAmount ?? enrollment.paidAmount,
+      }
+    }),
+  )
+
+  return {
+    latestEnrollment: paymentSnapshots[0],
+    settledEnrollment: paymentSnapshots.find((enrollment) => isEnrollmentPaymentSettled(enrollment)) || null,
+  }
+}
+
 function buildStudentWhere(params: { search: string; status: string; sessionId: string }) {
   const where: any = {}
 
@@ -234,39 +312,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Selected session was not found.' }, { status: 400 })
     }
 
-    const latestEnrollment = await prisma.enrollment.findFirst({
-      where: {
-        email: {
-          equals: normalizedEmail,
-          mode: 'insensitive',
-        },
-        status: {
-          notIn: ['rejected', 'cancelled'],
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      select: {
-        id: true,
-        status: true,
-        paymentStatus: true,
-        paidAmount: true,
-        totalAmount: true,
-        formation: {
-          select: {
-            title: true,
-          },
-        },
-        session: {
-          select: {
-            id: true,
-            startDate: true,
-            location: true,
-          },
-        },
-      },
-    })
+    const { latestEnrollment, settledEnrollment } = await resolveEligibleEnrollmentForStudentCreation(normalizedEmail)
 
     if (!latestEnrollment) {
       await writeAdminAuditLog({
@@ -288,14 +334,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: STUDENT_PAYMENT_LOCK_MESSAGE }, { status: 409 })
     }
 
-    const syncedPayment = latestEnrollment.totalAmount > 0 ? await syncEnrollmentPaymentStatus(latestEnrollment.id) : null
-    const paymentSnapshot = {
-      paymentStatus: syncedPayment?.paymentStatus || latestEnrollment.paymentStatus,
-      paidAmount: syncedPayment?.paidAmount ?? latestEnrollment.paidAmount,
-      totalAmount: latestEnrollment.totalAmount,
-    }
+    if (!settledEnrollment) {
+      const paymentSnapshot = {
+        paymentStatus: latestEnrollment.paymentStatus,
+        paidAmount: latestEnrollment.paidAmount,
+        totalAmount: latestEnrollment.totalAmount,
+      }
 
-    if (!isEnrollmentPaymentSettled(paymentSnapshot)) {
       await writeAdminAuditLog({
         request,
         adminId: auth.admin.id,
