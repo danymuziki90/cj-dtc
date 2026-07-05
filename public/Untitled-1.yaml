@@ -1,0 +1,26 @@
+Instructions pour tester localement :
+
+1) Dézipper et installer :
+   unzip cj-dtc-next-final-features.zip -d cj-dtc-next
+   cd cj-dtc-next
+   npm install
+
+2) Créer .env (copier .env.example) et remplir :
+   - DATABASE_URL (Postgres)
+   - NEXTAUTH_SECRET
+   - GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET (si tu veux tester OAuth)
+
+   Exemple :
+   cp .env.example .env
+   # puis édite .env et renseigne les valeurs
+
+3) Générer et migrer Prisma :
+   npx prisma generate
+   npx prisma migrate dev --name init
+
+4) Seed :
+   npx ts-node prisma/seed.ts
+
+Notes :
+- Assure-toi que Postgres est accessible et que DATABASE_URL est correcte.
+- Si tu utilises OAuth, configure les credentials Google dans la console Google et dans .env.

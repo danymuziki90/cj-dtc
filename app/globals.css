@@ -1,0 +1,364 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Colors */
+:root {
+  --cj-blue: #002D72;
+  --cj-blue-700: #003b96;
+  --cj-blue-50: #eef5ff;
+  --cj-red: #E30613;
+  --cj-red-700: #b3040f;
+  --cj-red-50: #fff1f2;
+  --cj-gray: #F1F1F1;
+  --admin-primary: #0030a0;
+  --admin-primary-800: #001d67;
+  --admin-primary-700: #002680;
+  --admin-primary-500: #0f49ba;
+  --admin-primary-200: #bdd2ff;
+  --admin-primary-100: #d9e5ff;
+  --admin-primary-50: #edf3ff;
+  --admin-accent: #ff0000;
+  --admin-accent-700: #cc0000;
+  --admin-accent-200: #ffc2c2;
+  --admin-accent-100: #ffe1e1;
+  --admin-accent-50: #fff1f1;
+  --admin-surface: #f3f7ff;
+}
+
+/* Admin theme from logo dominant colors (#0030A0 / #FF0000) */
+.admin-theme {
+  background: linear-gradient(180deg, #ffffff 0%, var(--admin-surface) 100%);
+}
+
+.admin-theme .bg-blue-50 {
+  background-color: var(--admin-primary-50) !important;
+}
+
+.admin-theme .bg-blue-100 {
+  background-color: var(--admin-primary-100) !important;
+}
+
+.admin-theme .bg-blue-200 {
+  background-color: var(--admin-primary-200) !important;
+}
+
+.admin-theme .bg-blue-500 {
+  background-color: var(--admin-primary-500) !important;
+}
+
+.admin-theme .bg-blue-600 {
+  background-color: var(--admin-primary) !important;
+}
+
+.admin-theme .bg-blue-700 {
+  background-color: var(--admin-primary-700) !important;
+}
+
+.admin-theme .bg-blue-800 {
+  background-color: var(--admin-primary-800) !important;
+}
+
+.admin-theme .bg-blue-500\/20 {
+  background-color: rgb(0 48 160 / 0.2) !important;
+}
+
+.admin-theme .text-blue-500 {
+  color: var(--admin-primary-500) !important;
+}
+
+.admin-theme .text-blue-600 {
+  color: var(--admin-primary) !important;
+}
+
+.admin-theme .text-blue-700 {
+  color: var(--admin-primary-700) !important;
+}
+
+.admin-theme .text-blue-800,
+.admin-theme .text-blue-900 {
+  color: var(--admin-primary-800) !important;
+}
+
+.admin-theme .border-blue-100 {
+  border-color: var(--admin-primary-100) !important;
+}
+
+.admin-theme .border-blue-200 {
+  border-color: var(--admin-primary-200) !important;
+}
+
+.admin-theme .border-blue-300 {
+  border-color: #9db9ff !important;
+}
+
+.admin-theme .ring-blue-100 {
+  --tw-ring-color: var(--admin-primary-100) !important;
+}
+
+.admin-theme .ring-blue-200 {
+  --tw-ring-color: var(--admin-primary-200) !important;
+}
+
+.admin-theme .ring-blue-300 {
+  --tw-ring-color: #9db9ff !important;
+}
+
+.admin-theme .from-blue-500\/20 {
+  --tw-gradient-from: rgb(0 48 160 / 0.2) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(0 48 160 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.admin-theme .to-blue-100 {
+  --tw-gradient-to: var(--admin-primary-100) var(--tw-gradient-to-position) !important;
+}
+
+.admin-theme .hover\:bg-blue-50:hover {
+  background-color: var(--admin-primary-50) !important;
+}
+
+.admin-theme .hover\:bg-blue-100:hover,
+.admin-theme .hover\:bg-blue-200:hover {
+  background-color: var(--admin-primary-100) !important;
+}
+
+.admin-theme .hover\:bg-blue-700:hover {
+  background-color: var(--admin-primary-700) !important;
+}
+
+.admin-theme .hover\:text-blue-700:hover {
+  color: var(--admin-primary-700) !important;
+}
+
+.admin-theme .bg-red-50 {
+  background-color: var(--admin-accent-50) !important;
+}
+
+.admin-theme .bg-red-100 {
+  background-color: var(--admin-accent-100) !important;
+}
+
+.admin-theme .bg-red-500,
+.admin-theme .bg-red-600 {
+  background-color: var(--admin-accent) !important;
+}
+
+.admin-theme .bg-red-700 {
+  background-color: var(--admin-accent-700) !important;
+}
+
+.admin-theme .bg-red-500\/20 {
+  background-color: rgb(255 0 0 / 0.2) !important;
+}
+
+.admin-theme .text-red-600,
+.admin-theme .text-red-700,
+.admin-theme .text-red-800 {
+  color: #b00000 !important;
+}
+
+.admin-theme .border-red-200,
+.admin-theme .ring-red-200 {
+  border-color: var(--admin-accent-200) !important;
+  --tw-ring-color: var(--admin-accent-200) !important;
+}
+
+.admin-theme .hover\:bg-red-700:hover {
+  background-color: var(--admin-accent-700) !important;
+}
+
+/* Fonts */
+html,
+body {
+  font-family: 'Open Sans', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg, #ffffff 0%, var(--cj-blue-50) 100%);
+  color: #111827;
+  line-height: 1.6;
+}
+
+/* Typography Scale - Consistent Visual Hierarchy */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--cj-blue);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+/* Heading sizes for consistent hierarchy */
+h1 {
+  font-size: 2.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* 44px - Hero/Page titles */
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+/* 32px - Section titles */
+h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* 24px - Subsection titles */
+h4 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+/* 20px - Card titles */
+h5 {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 18px - Small titles */
+h6 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 16px - Mini titles */
+
+/* Responsive typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  h4 {
+    font-size: 1.125rem;
+  }
+}
+
+/* Paragraph spacing */
+p {
+  margin-bottom: 1rem;
+}
+
+/* Lead text for important paragraphs */
+.text-lead {
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: #4B5563;
+}
+
+/* Section spacing utilities */
+.section-spacing {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.section-spacing-sm {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+/* CTA */
+.btn-primary {
+  background: var(--cj-red);
+  color: white;
+  font-weight: 700;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 30px rgba(227, 6, 19, 0.15);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(227, 6, 19, 0.18);
+  background: var(--cj-red-700);
+}
+
+.btn-secondary {
+  background: var(--cj-blue);
+  color: white;
+  font-weight: 700;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 30px rgba(0, 45, 114, 0.2);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(0, 45, 114, 0.24);
+  background: var(--cj-blue-700);
+}
+
+/* Hero animation */
+@keyframes hero-translate {
+  0% {
+    transform: translateX(-10%);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(10%);
+    opacity: 0.9;
+  }
+}
+
+.animate-hero {
+  animation: hero-translate 12s ease-in-out infinite alternate;
+}
+
+/* Header / Footer */
+.header {
+  background: white;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.footer {
+  background: var(--cj-blue);
+  color: white;
+  padding: 2rem 0;
+}
+
+/* Brand accents applied project-wide */
+a {
+  color: var(--cj-blue);
+}
+
+a:hover {
+  color: var(--cj-blue-700);
+}
+
+::selection {
+  background: rgba(227, 6, 19, 0.22);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cj-red);
+  outline-offset: 2px;
+}
+
+/* Utility */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}

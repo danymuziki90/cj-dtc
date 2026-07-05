@@ -1,0 +1,22 @@
+node_modules
+.env
+.env.local
+.next
+dist
+coverage
+.tools
+.npm-cache
+.npm-global
+public/uploads/student-submissions
+.DS_Store
+/prisma/dev.db
+# Large binaries / installers
+*.exe
+*.msi
+
+.vercel
+.env*.local
+playwright-report
+test-results
+.codex-*.log
+debug.log

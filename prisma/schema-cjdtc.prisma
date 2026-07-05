@@ -1,0 +1,785 @@
+// CJ DTC - Enhanced Schema for Pan-African Training Platform
+// Version 2.0 - Production Ready
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUMS
+enum UserRole {
+  ADMIN
+  STUDENT
+  STAFF
+  INSTRUCTOR
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum StudentStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  GRADUATED
+  ALUMNI
+}
+
+enum FormationType {
+  CERTIFICATION
+  WORKSHOP
+  SEMINAR
+  MASTERCLASS
+  ONLINE_COURSE
+  CORPORATE_TRAINING
+}
+
+enum FormationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  INACTIVE
+}
+
+enum EnrollmentStatus {
+  PENDING
+  ACCEPTED
+  CONFIRMED
+  REJECTED
+  CANCELLED
+  COMPLETED
+  DROPPED_OUT
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  OVERDUE
+  REFUNDED
+}
+
+enum CertificateType {
+  COMPLETION
+  ATTENDANCE
+  EXCELLENCE
+  MASTERY
+  SPECIALIZATION
+}
+
+enum CertificateStatus {
+  ISSUED
+  VERIFIED
+  REVOKED
+  EXPIRED
+}
+
+enum DocumentType {
+  SYLLABUS
+  PRESENTATION
+  EXERCISE
+  RESOURCE
+  CERTIFICATE_TEMPLATE
+  ASSIGNMENT
+  SUBMISSION
+  IDENTITY
+  TRANSCRIPT
+}
+
+enum AssignmentType {
+  HOMEWORK
+  PROJECT
+  EXAM
+  QUIZ
+  CASE_STUDY
+  PRESENTATION
+}
+
+enum SubmissionStatus {
+  SUBMITTED
+  GRADED
+  RETURNED
+  PLAGIARISM_DETECTED
+}
+
+// CORE MODELS
+
+model User {
+  id              String      @id @default(cuid())
+  email           String      @unique
+  password        String?
+  name            String?
+  firstName       String?
+  lastName        String?
+  phone           String?
+  avatar          String?
+  role            UserRole    @default(STUDENT)
+  status          UserStatus  @default(ACTIVE)
+  emailVerified   DateTime?
+  lastLoginAt     DateTime?
+  twoFactorEnabled Boolean    @default(false)
+  
+  // CJ DTC Specific Fields
+  studentNumber   String?     @unique
+  dateOfBirth     DateTime?
+  nationality     String?
+  address         String?
+  city            String?
+  country         String?
+  bio             String?
+  linkedinUrl     String?
+  
+  // Timestamps
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relations
+  accounts        Account[]
+  sessions        Session[]
+  enrollments     Enrollment[]
+  certificates    Certificate[]
+  submissions     Submission[]
+  documents       Document[]
+  activityLogs    ActivityLog[]
+  
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// FORMATIONS & PROGRAMS
+
+model Formation {
+  id              Int            @id @default(autoincrement())
+  title           String
+  slug            String         @unique
+  description     String
+  shortDescription String?
+  objectives      String?
+  prerequisites   String?
+  targetAudience  String?
+  
+  // CJ DTC Specific Programs
+  type            FormationType
+  category        String         // MRH, IOP, Leadership, Family Business, CJ Master System
+  level           String?        // Beginner, Intermediate, Advanced
+  duration        String?        // in hours/days
+  credits         Int?           // academic credits
+  
+  // Pricing
+  price           Float          @default(0)
+  currency        String         @default("USD")
+  scholarshipAvailable Boolean   @default(false)
+  
+  // Delivery
+  format          String         // online, onsite, hybrid
+  language        String[]       // ["fr", "en"]
+  timezone        String?
+  
+  // Media
+  imageUrl        String?
+  videoUrl        String?
+  brochureUrl     String?
+  
+  // Status & Metadata
+  status          FormationStatus @default(DRAFT)
+  featured        Boolean        @default(false)
+  certificateTemplate String?
+  
+  // SEO
+  seoTitle        String?
+  seoDescription  String?
+  seoKeywords     String?
+  
+  // Relations
+  enrollments     Enrollment[]
+  sessions        TrainingSession[]
+  documents       Document[]
+  assignments     Assignment[]
+  certificates    Certificate[]
+  instructors     FormationInstructor[]
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  @@index([type])
+  @@index([category])
+  @@index([status])
+  @@index([featured])
+  @@map("formations")
+}
+
+model TrainingSession {
+  id                Int            @id @default(autoincrement())
+  formationId       Int
+  title             String
+  
+  // Schedule
+  startDate         DateTime
+  endDate           DateTime
+  startTime         String         // "09:00"
+  endTime           String         // "17:00"
+  timezone          String
+  recurringPattern  String?        // "weekly", "monthly"
+  
+  // Location
+  location          String?
+  locationType      String         // onsite, online, hybrid
+  meetingUrl        String?        // Zoom, Teams, etc.
+  meetingId         String?
+  meetingPassword   String?
+  
+  // Capacity
+  maxParticipants   Int            @default(25)
+  currentParticipants Int          @default(0)
+  waitlistEnabled   Boolean        @default(true)
+  
+  // Instructor
+  instructorId      String?
+  instructor        User?          @relation(fields: [instructorId], references: [id])
+  
+  // Status
+  status            String         @default("scheduled") // scheduled, in_progress, completed, cancelled
+  
+  // Relations
+  formation         Formation      @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  enrollments       Enrollment[]
+  documents         Document[]
+  assignments       Assignment[]
+  certificates      Certificate[]
+  attendances       Attendance[]
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([formationId])
+  @@index([startDate])
+  @@index([status])
+  @@map("training_sessions")
+}
+
+// ENROLLMENTS & STUDENTS
+
+model Enrollment {
+  id                Int              @id @default(autoincrement())
+  enrollmentCode    String           @unique
+  
+  // Student Information
+  userId            String?
+  user              User?            @relation(fields: [userId], references: [id])
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  
+  // Formation
+  formationId       Int
+  formation         Formation        @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  sessionId         Int?
+  session           TrainingSession? @relation(fields: [sessionId], references: [id])
+  
+  // Academic Info
+  studentNumber     String?          @unique
+  status            EnrollmentStatus @default(PENDING)
+  progress          Float            @default(0) // 0-100%
+  grade             Float?           // Final grade 0-100
+  credits           Int?             // Credits earned
+  
+  // Schedule
+  startDate         DateTime
+  endDate           DateTime?
+  expectedEndDate  DateTime?
+  
+  // Financial
+  totalAmount       Float            @default(0)
+  paidAmount        Float            @default(0)
+  paymentStatus    PaymentStatus    @default(UNPAID)
+  paymentMethod     String?          // card, mobile_money, bank_transfer
+  
+  // Documents
+  identityDocument  String?          // ID card URL
+  cvDocument        String?          // CV URL
+  motivationLetter  String?
+  
+  // Corporate Info
+  companyName      String?
+  companyAddress   String?
+  supervisorName   String?
+  supervisorEmail  String?
+  
+  // Analytics
+  source            String?          // website, social_media, referral, corporate
+  utmSource         String?
+  utmMedium         String?
+  utmCampaign       String?
+  
+  // Relations
+  certificates      Certificate[]
+  payments          Payment[]
+  invoices          Invoice[]
+  submissions       Submission[]
+  attendances       Attendance[]
+  waitlist          Waitlist[]
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([formationId])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([email])
+  @@index([status])
+  @@index([paymentStatus])
+  @@map("enrollments")
+}
+
+// CERTIFICATES & VERIFICATION
+
+model Certificate {
+  id                Int              @id @default(autoincrement())
+  certificateNumber String           @unique
+  qrCode            String           @unique
+  verificationUrl   String           @unique
+  
+  // Recipient
+  enrollmentId      Int
+  enrollment        Enrollment       @relation(fields: [enrollmentId], references: [id])
+  userId            String?
+  user              User?            @relation(fields: [userId], references: [id])
+  holderName        String
+  holderEmail       String
+  
+  // Formation
+  formationId       Int
+  formation         Formation        @relation(fields: [formationId], references: [id])
+  sessionId         Int?
+  session           TrainingSession? @relation(fields: [sessionId], references: [id])
+  
+  // Certificate Details
+  type              CertificateType
+  status            CertificateStatus @default(ISSUED)
+  grade             String?          // A, B, C, etc.
+  score             Float?           // 0-100
+  credits           Int?             // Credits earned
+  
+  // Issuance
+  issuedAt          DateTime         @default(now())
+  issuedBy          String?          // Admin user ID
+  validUntil        DateTime?        // Expiration date
+  
+  // Digital Certificate
+  pdfUrl            String?
+  blockchainHash    String?          // For blockchain verification
+  digitalSignature  String?
+  
+  // Verification
+  verificationCount Int              @default(0)
+  lastVerifiedAt    DateTime?
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([enrollmentId])
+  @@index([formationId])
+  @@index([certificateNumber])
+  @@index([qrCode])
+  @@index([status])
+  @@map("certificates")
+}
+
+// DOCUMENTS & RESOURCES
+
+model Document {
+  id              Int          @id @default(autoincrement())
+  title           String
+  description     String?
+  fileName        String
+  filePath        String
+  fileSize        Int
+  mimeType        String
+  type            DocumentType
+  
+  // Associations
+  formationId     Int?
+  formation       Formation?    @relation(fields: [formationId], references: [id])
+  sessionId       Int?
+  session         TrainingSession? @relation(fields: [sessionId], references: [id])
+  assignmentId    Int?
+  enrollmentId    Int?
+  
+  // Access Control
+  isPublic        Boolean       @default(false)
+  accessLevel     String        @default("student") // student, instructor, admin
+  downloadCount   Int           @default(0)
+  
+  // Metadata
+  uploadedBy      String?       // User ID
+  tags            String[]      // For search
+  version         Int           @default(1)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([formationId])
+  @@index([sessionId])
+  @@index([type])
+  @@index([isPublic])
+  @@map("documents")
+}
+
+// ASSIGNMENTS & SUBMISSIONS
+
+model Assignment {
+  id                Int            @id @default(autoincrement())
+  title             String
+  description       String
+  instructions      String?
+  type              AssignmentType
+  
+  // Formation
+  formationId       Int
+  formation         Formation      @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  sessionId         Int?
+  session           TrainingSession? @relation(fields: [sessionId], references: [id])
+  
+  // Schedule
+  startDate         DateTime
+  deadline          DateTime
+  lateSubmissionAllowed Boolean    @default(false)
+  latePenalty       Float?         // Percentage penalty
+  
+  // Requirements
+  maxFileSize       Int            @default(10) // MB
+  allowedFileTypes  String         @default("pdf,doc,docx,ppt,pptx,txt,zip")
+  maxAttempts       Int            @default(3)
+  
+  // Grading
+  maxScore          Float          @default(100)
+  passingScore      Float          @default(60)
+  autoGrade         Boolean        @default(false)
+  rubric            String?        // JSON rubric
+  
+  // Relations
+  submissions       Submission[]
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([formationId])
+  @@index([sessionId])
+  @@index([deadline])
+  @@index([type])
+  @@map("assignments")
+}
+
+model Submission {
+  id                Int              @id @default(autoincrement())
+  assignmentId      Int
+  assignment        Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  enrollmentId      Int
+  enrollment        Enrollment       @relation(fields: [enrollmentId], references: [id])
+  userId            String?
+  user              User?            @relation(fields: [userId], references: [id])
+  
+  // Submission Details
+  status            SubmissionStatus @default(SUBMITTED)
+  score             Float?           // 0-maxScore
+  percentage        Float?           // 0-100%
+  grade             String?          // A, B, C, etc.
+  feedback          String?
+  instructorNotes   String?
+  
+  // Timing
+  submittedAt       DateTime         @default(now())
+  gradedAt          DateTime?
+  gradedBy          String?          // Instructor ID
+  
+  // Academic Integrity
+  plagiarismScore   Float?           // 0-100%
+  plagiarismReport  String?
+  
+  // Relations
+  files             SubmissionFile[]
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([assignmentId])
+  @@index([enrollmentId])
+  @@index([userId])
+  @@index([status])
+  @@map("submissions")
+}
+
+model SubmissionFile {
+  id             Int      @id @default(autoincrement())
+  submissionId   Int
+  submission     Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  name           String
+  originalName   String
+  size           Int
+  mimeType       String
+  url            String
+  thumbnailUrl   String?
+  
+  uploadedAt     DateTime @default(now())
+  
+  @@index([submissionId])
+  @@map("submission_files")
+}
+
+// PAYMENTS & BILLING
+
+model Payment {
+  id              Int            @id @default(autoincrement())
+  enrollmentId    Int
+  enrollment      Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  
+  // Payment Details
+  amount          Float
+  currency        String         @default("USD")
+  method          String         // card, mobile_money, bank_transfer, cash, check
+  status          String         @default("pending") // pending, completed, failed, refunded
+  transactionId   String?        @unique
+  reference       String?        // Reference number
+  gateway         String?        // Payment gateway used
+  
+  // Dates
+  paidAt          DateTime?
+  dueDate         DateTime?
+  
+  // Refunds
+  refundAmount    Float?         @default(0)
+  refundReason    String?
+  refundedAt      DateTime?
+  
+  // Metadata
+  notes           String?
+  metadata        String?        // JSON metadata
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  @@index([enrollmentId])
+  @@index([status])
+  @@index([transactionId])
+  @@index([paidAt])
+  @@map("payments")
+}
+
+model Invoice {
+  id              Int            @id @default(autoincrement())
+  enrollmentId    Int
+  enrollment      Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  
+  // Invoice Details
+  invoiceNumber   String         @unique
+  amount          Float
+  taxAmount       Float          @default(0)
+  totalAmount     Float
+  currency        String         @default("USD")
+  
+  // Status
+  status          String         @default("draft") // draft, sent, paid, cancelled, overdue
+  
+  // Dates
+  issueDate       DateTime       @default(now())
+  dueDate         DateTime?
+  paidDate        DateTime?
+  sentAt          DateTime?
+  
+  // Documents
+  pdfUrl          String?
+  
+  // Billing Info
+  billingName     String?
+  billingAddress  String?
+  billingEmail    String?
+  billingPhone    String?
+  
+  // Notes
+  notes           String?
+  terms           String?
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  @@index([enrollmentId])
+  @@index([invoiceNumber])
+  @@index([status])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+// ATTENDANCE & PARTICIPATION
+
+model Attendance {
+  id             Int            @id @default(autoincrement())
+  enrollmentId   Int
+  enrollment     Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  sessionId      Int
+  session        TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  // Attendance Details
+  date           DateTime
+  status         String         // present, absent, late, excused
+  checkInTime    DateTime?
+  checkOutTime   DateTime?
+  duration       Int?           // Minutes attended
+  
+  // Notes
+  notes          String?
+  instructorNotes String?
+  
+  // Metadata
+  recordedBy     String?        // User ID who recorded
+  recordedAt     DateTime       @default(now())
+  
+  @@unique([sessionId, enrollmentId, date])
+  @@index([sessionId])
+  @@index([enrollmentId])
+  @@index([date])
+  @@index([status])
+  @@map("attendances")
+}
+
+// INSTRUCTORS & STAFF
+
+model FormationInstructor {
+  id             Int       @id @default(autoincrement())
+  formationId    Int
+  formation      Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  instructorId   String
+  instructor     User      @relation(fields: [instructorId], references: [id])
+  role           String    @default("instructor") // lead_instructor, assistant, guest
+  
+  // Compensation
+  hourlyRate     Float?
+  totalHours     Float?
+  
+  createdAt      DateTime  @default(now())
+  
+  @@unique([formationId, instructorId])
+  @@index([formationId])
+  @@index([instructorId])
+  @@map("formation_instructors")
+}
+
+// WAITLIST MANAGEMENT
+
+model Waitlist {
+  id             Int            @id @default(autoincrement())
+  sessionId      Int
+  session        TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  enrollmentId   Int
+  enrollment     Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  
+  position       Int
+  priority       Int            @default(0) // Higher number = higher priority
+  status         String         @default("active") // active, offered, declined, enrolled
+  
+  // Notifications
+  notifiedAt     DateTime?
+  offerExpiresAt DateTime?
+  
+  addedAt        DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  
+  @@unique([sessionId, enrollmentId])
+  @@index([sessionId])
+  @@index([enrollmentId])
+  @@index([position])
+  @@map("waitlist")
+}
+
+// ACTIVITY LOGS
+
+model ActivityLog {
+  id             Int      @id @default(autoincrement())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  
+  // Activity Details
+  action         String   // login, logout, view_document, submit_assignment, etc.
+  resourceType   String?  // formation, document, assignment, etc.
+  resourceId     String?  // ID of the resource
+  resourceName   String?  // Name of the resource
+  
+  // Context
+  ipAddress      String?
+  userAgent      String?
+  platform       String?  // web, mobile, api
+  
+  // Metadata
+  metadata       String?  // JSON metadata
+  
+  createdAt      DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([resourceType])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// SYSTEM CONFIGURATION
+
+model SystemConfig {
+  id             Int      @id @default(autoincrement())
+  key            String   @unique
+  value          String
+  description    String?
+  category       String?  // general, email, payment, security
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([category])
+  @@map("system_configs")
+}
