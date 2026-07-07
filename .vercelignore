@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+tests
+.playwright
+.npm-cache
+.npm-global
+.cursor
+.tools
+*.log
+tmp
