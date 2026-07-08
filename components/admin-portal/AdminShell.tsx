@@ -6,12 +6,12 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
   Pilotage: {
     eyebrow: 'Centre de commandement',
     description:
-      'Vue instantanée des KPI opérationnels, des alertes critiques et des actions à traiter en priorité aujourd'hui.',
+      "Vue instantanée des KPI opérationnels, des alertes critiques et des actions à traiter en priorité aujourd'hui.",
   },
   'Dashboard Admin': {
     eyebrow: 'Centre de commandement',
     description:
-      'Vue instantanée des KPI opérationnels, des alertes critiques et des actions à traiter en priorité aujourd'hui.',
+      "Vue instantanée des KPI opérationnels, des alertes critiques et des actions à traiter en priorité aujourd'hui.",
   },
   Sessions: {
     eyebrow: 'Calendrier & cohortes',
@@ -36,12 +36,12 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
   Inscriptions: {
     eyebrow: 'Demandes & validations',
     description:
-      'Traitez le pipeline des demandes d'inscription, validez ou refusez chaque dossier et assurez le suivi des relances.',
+      "Traitez le pipeline des demandes d'inscription, validez ou refusez chaque dossier et assurez le suivi des relances.",
   },
   'Gestion des inscriptions': {
     eyebrow: 'Demandes & validations',
     description:
-      'Traitez le pipeline des demandes d'inscription, validez ou refusez chaque dossier et assurez le suivi des relances.',
+      "Traitez le pipeline des demandes d'inscription, validez ou refusez chaque dossier et assurez le suivi des relances.",
   },
   Travaux: {
     eyebrow: 'Livrables & corrections',
@@ -101,22 +101,22 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
   Reporting: {
     eyebrow: 'Analyse & indicateurs',
     description:
-      'Lisez les indicateurs clés de performance, les tendances de conversion et les signaux d'alerte du centre.',
+      "Lisez les indicateurs clés de performance, les tendances de conversion et les signaux d'alerte du centre.",
   },
   'Centre de reporting': {
     eyebrow: 'Analyse & indicateurs',
     description:
-      'Lisez les indicateurs clés de performance, les tendances de conversion et les signaux d'alerte du centre.',
+      "Lisez les indicateurs clés de performance, les tendances de conversion et les signaux d'alerte du centre.",
   },
   Recherche: {
     eyebrow: 'Navigation globale',
     description:
-      'Retrouvez rapidement un étudiant, une session, une inscription ou un document depuis un point d'entrée unique.',
+      "Retrouvez rapidement un étudiant, une session, une inscription ou un document depuis un point d'entrée unique.",
   },
   'Recherche admin': {
     eyebrow: 'Navigation globale',
     description:
-      'Retrouvez rapidement un étudiant, une session, une inscription ou un document depuis un point d'entrée unique.',
+      "Retrouvez rapidement un étudiant, une session, une inscription ou un document depuis un point d'entrée unique.",
   },
   Formations: {
     eyebrow: 'Catalogue & programmes',
@@ -126,7 +126,7 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
   Documents: {
     eyebrow: 'Supports pédagogiques',
     description:
-      'Centralisez les supports de formation, gérez les droits d'accès et assurez la disponibilité des ressources.',
+      "Centralisez les supports de formation, gérez les droits d'accès et assurez la disponibilité des ressources.",
   },
   Facturation: {
     eyebrow: 'Facturation & règlements',
@@ -136,7 +136,7 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
   Évaluations: {
     eyebrow: 'Retours & satisfaction',
     description:
-      'Consultez les évaluations des formations, identifiez les signaux de satisfaction et repérez les axes d'amélioration.',
+      "Consultez les évaluations des formations, identifiez les signaux de satisfaction et repérez les axes d'amélioration.",
   },
   Formateurs: {
     eyebrow: 'Intervenants & expertises',
@@ -148,7 +148,7 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
 const DEFAULT_ENTRY = {
   eyebrow: 'Administration',
   description:
-    'Interface d'administration CJ Development — pilotez les opérations, les priorités et les décisions du quotidien.',
+    "Interface d'administration CJ Development — pilotez les opérations, les priorités et les décisions du quotidien.",
 }
 
 export default function AdminShell({

@@ -8,7 +8,7 @@ const weakSecretMarkers = [
 ]
 
 type PortalSecretKey = 'ADMIN_JWT_SECRET' | 'STUDENT_JWT_SECRET'
-type SecretSource = PortalSecretKey | 'NEXTAUTH_SECRET' | 'DEV_FALLBACK'
+type SecretSource = PortalSecretKey | 'NEXTAUTH_SECRET' | 'JWT_SECRET' | 'DEV_FALLBACK'
 
 type SecretResolution = {
   value: string
@@ -47,7 +47,7 @@ function buildSecretMessage(secretKey: PortalSecretKey, resolution: SecretResolu
   }
 
   if (resolution.usingFallback) {
-    return `${label}: fallback sur NEXTAUTH_SECRET car ${secretKey} est absent ou trop faible.`
+    return `${label}: fallback sur ${resolution.source} car ${secretKey} est absent ou trop faible.`
   }
 
   if (!resolution.valid) {
@@ -60,6 +60,7 @@ function buildSecretMessage(secretKey: PortalSecretKey, resolution: SecretResolu
 function resolvePortalSecret(secretKey: PortalSecretKey): SecretResolution {
   const dedicatedSecret = process.env[secretKey]?.trim()
   const nextAuthSecret = process.env.NEXTAUTH_SECRET?.trim()
+  const jwtSecret = process.env.JWT_SECRET?.trim()
 
   if (dedicatedSecret && !isWeakSecret(dedicatedSecret)) {
     const resolution = {
@@ -87,6 +88,19 @@ function resolvePortalSecret(secretKey: PortalSecretKey): SecretResolution {
     return { ...resolution, message: buildSecretMessage(secretKey, resolution) }
   }
 
+  if (jwtSecret && !isWeakSecret(jwtSecret)) {
+    const resolution = {
+      value: jwtSecret,
+      source: 'JWT_SECRET',
+      valid: true,
+      strong: true,
+      usingFallback: true,
+      message: '',
+    } satisfies SecretResolution
+
+    return { ...resolution, message: buildSecretMessage(secretKey, resolution) }
+  }
+
   if (!isProduction()) {
     const resolution = {
       value: DEV_FALLBACK_SECRET,
@@ -100,13 +114,13 @@ function resolvePortalSecret(secretKey: PortalSecretKey): SecretResolution {
     return { ...resolution, message: buildSecretMessage(secretKey, resolution) }
   }
 
-  const candidate = dedicatedSecret || nextAuthSecret || ''
+  const candidate = dedicatedSecret || nextAuthSecret || jwtSecret || ''
   const resolution = {
     value: candidate,
-    source: dedicatedSecret ? secretKey : 'NEXTAUTH_SECRET',
+    source: dedicatedSecret ? secretKey : nextAuthSecret ? 'NEXTAUTH_SECRET' : 'JWT_SECRET',
     valid: false,
     strong: false,
-    usingFallback: !dedicatedSecret && Boolean(nextAuthSecret),
+    usingFallback: !dedicatedSecret && Boolean(nextAuthSecret || jwtSecret),
     message: '',
   } satisfies SecretResolution
 
@@ -118,7 +132,7 @@ export function getPortalSecret(secretKey: PortalSecretKey) {
 
   if (isProduction() && !resolution.valid) {
     throw new Error(
-      `${secretKey} ou NEXTAUTH_SECRET doit etre configure avec au moins ${MIN_SECRET_LENGTH} caracteres en production.`
+      `${secretKey}, NEXTAUTH_SECRET ou JWT_SECRET doit etre configure avec au moins ${MIN_SECRET_LENGTH} caracteres en production.`
     )
   }
 
@@ -137,7 +151,7 @@ export function ensurePortalSecretReady(secretKey: PortalSecretKey) {
 
   if (!resolution.valid) {
     throw new Error(
-      `${secretKey} ou NEXTAUTH_SECRET doit etre configure avec un secret fort avant de signer des tokens.`
+      `${secretKey}, NEXTAUTH_SECRET ou JWT_SECRET doit etre configure avec un secret fort avant de signer des tokens.`
     )
   }
 }

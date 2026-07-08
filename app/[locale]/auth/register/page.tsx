@@ -127,6 +127,17 @@ export default function StudentRegisterPage() {
         })
 
         if (loginResult?.ok) {
+          const portalLogin = await fetch('/api/student/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: formData.email, password: formData.password }),
+          })
+
+          if (!portalLogin.ok) {
+            const payload = await portalLogin.json().catch(() => null)
+            throw new Error(payload?.error || 'Impossible de creer la session etudiant.')
+          }
+
           // Redirect to student dashboard after successful registration and login
           router.push(`/${locale}/espace-etudiants`)
         } else {

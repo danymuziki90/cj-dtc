@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Calendar, MapPin, Clock, Users, DollarSign, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react'
@@ -34,7 +34,7 @@ interface TrainingSession {
     }
 }
 
-export default function InscriptionPage() {
+function InscriptionContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const sessionId = searchParams.get('session')
@@ -492,5 +492,13 @@ export default function InscriptionPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function InscriptionPage() {
+    return (
+        <Suspense fallback={null}>
+            <InscriptionContent />
+        </Suspense>
     )
 }

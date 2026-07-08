@@ -6,6 +6,7 @@ import { buildRateLimitIdentifier, consumeRateLimit } from '@/lib/auth-portal/ra
 
 const enrollSchema = z.object({
   formationId: z.number().int().positive(),
+  sessionId: z.number().int().positive().optional(),
 })
 
 const ENROLL_LIMIT = 10
@@ -16,7 +17,12 @@ export async function GET(request: NextRequest) {
   if (auth.error) return auth.error
 
   const enrollments = await prisma.enrollment.findMany({
-    where: { email: { equals: auth.student.email, mode: 'insensitive' } },
+    where: {
+      OR: [
+        { studentId: auth.student.id },
+        { email: { equals: auth.student.email, mode: 'insensitive' } },
+      ],
+    },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -56,7 +62,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Formation invalide.' }, { status: 400 })
   }
 
-  const { formationId } = parsed.data
+  const { formationId, sessionId } = parsed.data
 
   const formation = await prisma.formation.findUnique({
     where: { id: formationId },
@@ -71,11 +77,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Cette formation n\'est pas disponible.' }, { status: 422 })
   }
 
-  // Prevent duplicate enrollment for the same formation
+  let session: { id: number; price: number; formationId: number } | null = null
+  if (sessionId) {
+    session = await prisma.trainingSession.findUnique({
+      where: { id: sessionId },
+      select: { id: true, price: true, formationId: true },
+    })
+
+    if (!session || session.formationId !== formationId) {
+      return NextResponse.json({ error: 'Session invalide pour cette formation.' }, { status: 400 })
+    }
+  }
+
+  // Prevent duplicate active requests for the same formation from the same student account.
   const existing = await prisma.enrollment.findFirst({
     where: {
-      email: { equals: auth.student.email, mode: 'insensitive' },
       formationId,
+      OR: [
+        { studentId: auth.student.id },
+        { email: { equals: auth.student.email, mode: 'insensitive' } },
+      ],
       status: { notIn: ['rejected', 'cancelled'] },
     },
     select: { id: true, status: true },
@@ -90,16 +111,18 @@ export async function POST(request: NextRequest) {
 
   const enrollment = await prisma.enrollment.create({
     data: {
+      studentId: auth.student.id,
       firstName: auth.student.firstName,
       lastName: auth.student.lastName,
       email: auth.student.email,
       phone: auth.student.phone || null,
       address: auth.student.address || null,
       formationId,
+      sessionId: session?.id || null,
       startDate: new Date(),
       status: 'pending',
       paymentStatus: 'unpaid',
-      totalAmount: 0,
+      totalAmount: session?.price || 0,
       paidAmount: 0,
     },
     select: {

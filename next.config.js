@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  outputFileTracingRoot: __dirname,
   // Avoid repeated static generation retries on heavier routes during CI/local build.
   staticPageGenerationTimeout: 300,
   typescript: {

@@ -189,7 +189,7 @@ export default async function FormationDetailPage({ params }: PageProps) {
                 </p>
 
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Link href={`/${locale}/espace-etudiants/inscription`} className="inline-flex items-center gap-2 rounded-2xl bg-[var(--cj-red)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700">
+                  <Link href={`/${locale}/espace-etudiants/confirm-inscription?formationId=${formation.id}`} className="inline-flex items-center gap-2 rounded-2xl bg-[var(--cj-red)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700">
                     {t.enrollCta}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -208,5 +208,4 @@ export default async function FormationDetailPage({ params }: PageProps) {
     </div>
   )
 }
-
 

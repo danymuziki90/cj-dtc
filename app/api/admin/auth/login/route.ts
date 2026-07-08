@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { verifyPassword } from '@/lib/auth-portal/password'
+import { hashPassword, verifyPassword } from '@/lib/auth-portal/password'
 import { buildRateLimitIdentifier, consumeRateLimit } from '@/lib/auth-portal/rate-limit'
 import { ensurePortalSecretReady, isEmergencyAdminLoginAllowed } from '@/lib/auth-portal/security'
 import {
@@ -21,10 +21,29 @@ const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_DEFAULT_PASSWORD || 'admin@123'
 const ADMIN_LOGIN_LIMIT = 5
 const ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000
 
+function isPortalSecretError(error: unknown) {
+  return error instanceof Error && (
+    error.message.includes('JWT_SECRET') ||
+    error.message.includes('NEXTAUTH_SECRET') ||
+    error.message.includes('ADMIN_JWT_SECRET')
+  )
+}
+
+function logAdminLoginError(error: unknown, context: Record<string, unknown> = {}) {
+  console.error('Admin login failed:', {
+    scope: 'admin-login',
+    ...context,
+    errorName: error instanceof Error ? error.name : typeof error,
+    errorMessage: error instanceof Error ? error.message : String(error),
+  })
+}
+
+function canBootstrapDefaultAdmin(password: string) {
+  return password.length >= 12 && password !== 'admin@123'
+}
+
 export async function POST(request: NextRequest) {
   try {
-    ensurePortalSecretReady('ADMIN_JWT_SECRET')
-
     const body = await request.json().catch(() => null)
     const rateLimitKey = buildRateLimitIdentifier(
       request,
@@ -74,7 +93,7 @@ export async function POST(request: NextRequest) {
       }
     } catch (error) {
       dbUnavailable = true
-      console.error('Admin login lookup (admin table) failed:', error)
+      logAdminLoginError(error, { phase: 'lookup-admin-table', username })
     }
 
     // Compatibility fallback: legacy User table admin account.
@@ -98,39 +117,82 @@ export async function POST(request: NextRequest) {
         }
       } catch (error) {
         dbUnavailable = true
-        console.error('Admin login lookup (legacy user table) failed:', error)
+        logAdminLoginError(error, { phase: 'lookup-legacy-user', username })
       }
     }
 
     if (!admin) {
-      // Controlled emergency fallback when DB/models are unavailable.
       if (
-        isEmergencyAdminLoginAllowed() &&
-        dbUnavailable &&
+        !dbUnavailable &&
+        prismaAny.admin?.count &&
         username === DEFAULT_ADMIN_USERNAME &&
         password === DEFAULT_ADMIN_PASSWORD
       ) {
-        const token = await signAdminToken({
-          sub: 'local-default-admin',
-          username: DEFAULT_ADMIN_USERNAME,
-        })
+        const adminCount = await prismaAny.admin.count()
 
-        const response = NextResponse.json({
-          success: true,
-          admin: { id: 'local-default-admin', username: DEFAULT_ADMIN_USERNAME },
-          fallback: true,
-        })
-        response.cookies.set(ADMIN_AUTH_COOKIE, token, getAuthCookieOptions(ADMIN_TOKEN_MAX_AGE))
-        return response
+        if (adminCount === 0) {
+          if (!canBootstrapDefaultAdmin(DEFAULT_ADMIN_PASSWORD)) {
+            logAdminLoginError(new Error('Weak ADMIN_DEFAULT_PASSWORD cannot bootstrap admin'), {
+              phase: 'bootstrap-admin',
+              username,
+            })
+
+            return NextResponse.json(
+              { error: 'Configuration admin incomplete. Mot de passe bootstrap trop faible.' },
+              { status: 503 }
+            )
+          }
+
+          const createdAdmin = await prismaAny.admin.create({
+            data: {
+              username: DEFAULT_ADMIN_USERNAME,
+              password: await hashPassword(DEFAULT_ADMIN_PASSWORD),
+            },
+          })
+
+          admin = {
+            id: createdAdmin.id,
+            username: createdAdmin.username,
+            password: createdAdmin.password,
+          }
+        }
       }
 
-      return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 })
+      if (!admin) {
+        // Controlled emergency fallback when DB/models are unavailable.
+        if (
+          isEmergencyAdminLoginAllowed() &&
+          dbUnavailable &&
+          username === DEFAULT_ADMIN_USERNAME &&
+          password === DEFAULT_ADMIN_PASSWORD
+        ) {
+          ensurePortalSecretReady('ADMIN_JWT_SECRET')
+          const token = await signAdminToken({
+            sub: 'local-default-admin',
+            username: DEFAULT_ADMIN_USERNAME,
+          })
+
+          const response = NextResponse.json({
+            success: true,
+            admin: { id: 'local-default-admin', username: DEFAULT_ADMIN_USERNAME },
+            fallback: true,
+          })
+          response.cookies.set(ADMIN_AUTH_COOKIE, token, getAuthCookieOptions(ADMIN_TOKEN_MAX_AGE))
+          return response
+        }
+      }
+
+      if (!admin) {
+        return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 })
+      }
     }
 
     const isValidPassword = await verifyPassword(password, admin.password)
     if (!isValidPassword) {
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 })
     }
+
+    ensurePortalSecretReady('ADMIN_JWT_SECRET')
 
     const token = await signAdminToken({
       sub: admin.id,

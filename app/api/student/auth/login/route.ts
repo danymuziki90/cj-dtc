@@ -71,14 +71,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Nom d'utilisateur ou mot de passe incorrect. Veuillez reessayer." }, { status: 401 })
     }
 
-    if (student.status !== 'ACTIVE') {
+    if (student.status === 'SUSPENDED') {
       return NextResponse.json(
-        {
-          error:
-            student.status === 'SUSPENDED'
-              ? 'Votre compte etudiant est suspendu. Contactez l administration.'
-              : 'Votre compte etudiant est en attente d activation.',
-        },
+        { error: 'Votre compte etudiant est suspendu. Contactez l administration.' },
         { status: 403 }
       )
     }
@@ -91,10 +86,13 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({
       success: true,
+      token,
       student: {
         id: student.id,
         name: `${student.firstName} ${student.lastName}`.trim(),
         username: student.username,
+        email: student.email,
+        role: student.role,
       },
     })
 

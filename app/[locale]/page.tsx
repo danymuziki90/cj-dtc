@@ -220,7 +220,6 @@ export default function HomePage() {
                 objective: isFr
                   ? 'Renforcer la stratégie RH et le leadership des managers pour piloter la performance humaine.'
                   : 'Strengthen HR strategy and leadership for managers to drive human performance.',
-                duration: isFr ? '3 mois' : '3 months',
                 format: isFr ? 'Blended, ateliers & coaching' : 'Blended, workshops & coaching',
                 audience: isFr ? 'Managers RH, responsables opérationnels' : 'HR managers, operational leaders',
                 benefits: isFr
@@ -232,7 +231,6 @@ export default function HomePage() {
                 objective: isFr
                   ? 'Maîtriser le recrutement, la gestion de carrière et l’efficacité opérationnelle des équipes.'
                   : 'Master recruitment, career management and operational efficiency for your teams.',
-                duration: isFr ? '4 semaines' : '4 weeks',
                 format: isFr ? 'Mix présentiel / distanciel' : 'Hybrid in-person / remote',
                 audience: isFr ? 'Professionnels RH et responsables de talent' : 'HR professionals and talent leaders',
                 benefits: isFr
@@ -244,7 +242,6 @@ export default function HomePage() {
                 objective: isFr
                   ? 'Développer la posture de décision, la communication stratégique et l’impact collectif.'
                   : 'Develop decision-making posture, strategic communication and collective impact.',
-                duration: isFr ? '6 semaines' : '6 weeks',
                 format: isFr ? 'Sessions intensives + coaching' : 'Intensive sessions + coaching',
                 audience: isFr ? 'Cadres, responsables de projet, dirigeants' : 'Executives, project leaders, decision makers',
                 benefits: isFr
@@ -261,10 +258,6 @@ export default function HomePage() {
                   <p className="mt-4 text-sm leading-relaxed text-slate-600 font-opensans">{item.objective}</p>
 
                   <div className="mt-6 space-y-3 border-t border-slate-100 pt-5 text-sm text-slate-600 font-opensans">
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex h-2 w-2 rounded-full bg-[var(--cj-red)]" />
-                      <span><strong>{isFr ? 'Durée : ' : 'Duration: '}</strong>{item.duration}</span>
-                    </div>
                     <div className="flex items-center gap-3">
                       <span className="inline-flex h-2 w-2 rounded-full bg-[var(--cj-red)]" />
                       <span><strong>{isFr ? 'Format : ' : 'Format: '}</strong>{item.format}</span>

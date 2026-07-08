@@ -290,6 +290,8 @@ model LMSConfig {
 
 model Enrollment {
   id                  Int      @id @default(autoincrement())
+  studentId           String?
+  student             Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
   firstName           String
   lastName            String
   email               String
@@ -344,6 +346,7 @@ model Enrollment {
   updatedAt           DateTime @updatedAt
 
   @@index([formationId])
+  @@index([studentId])
   @@index([sessionId])
   @@index([email])
   @@index([startDate])

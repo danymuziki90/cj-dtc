@@ -34,10 +34,11 @@ export async function POST(req: Request) {
     }
 
     const { email, password, firstName, lastName, phone, role } = result.data
+    const normalizedEmail = email.trim().toLowerCase()
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     })
 
     if (existingUser) {
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
 
     // Check if student exists
     const existingStudent = await prisma.student.findUnique({
-      where: { email }
+      where: { email: normalizedEmail }
     })
 
     if (existingStudent) {
@@ -71,7 +72,8 @@ export async function POST(req: Request) {
         data: {
           firstName,
           lastName,
-          email,
+          email: normalizedEmail,
+          username: normalizedEmail,
           password: hashedPassword,
           phone,
           studentNumber,
@@ -79,14 +81,14 @@ export async function POST(req: Request) {
           address: result.data.address,
           city: result.data.city,
           country: result.data.country,
-          status: 'PENDING',
+          status: 'ACTIVE',
           role: role as any
         }
       })
       const user = await tx.user.create({
         data: {
           name: `${firstName} ${lastName}`,
-          email,
+          email: normalizedEmail,
           password: hashedPassword,
           role: role as any
         }

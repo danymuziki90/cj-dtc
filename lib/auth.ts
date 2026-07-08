@@ -35,12 +35,20 @@ const providers: any[] = [
     async authorize(credentials) {
       if (!credentials?.email || !credentials?.password) return null
 
-      // Try Student model first (for student login)
-      const student = await prisma.student.findUnique({
-        where: { email: credentials.email }
+      const identifier = credentials.email.trim().toLowerCase()
+
+      // Student accounts are the source of truth for the student portal.
+      // Accept both email and username so registration and login stay aligned.
+      const student = await prisma.student.findFirst({
+        where: {
+          OR: [
+            { email: { equals: identifier, mode: 'insensitive' } },
+            { username: { equals: identifier, mode: 'insensitive' } },
+          ],
+        },
       })
 
-      if (student && student.status === 'ACTIVE') {
+      if (student) {
         const valid = await bcrypt.compare(credentials.password, student.password)
         if (valid) {
           return {
@@ -55,18 +63,21 @@ const providers: any[] = [
 
       // Fallback to User model (for admin login)
       const user = await prisma.user.findUnique({
-        where: { email: credentials.email }
+        where: { email: identifier }
       })
       if (!user || !user.password) return null
 
       const valid = await bcrypt.compare(credentials.password, user.password)
       if (!valid) return null
 
+      const role = user.role || 'STUDENT'
+      if (role === 'STUDENT') return null
+
       return {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role || 'STUDENT'
+        role,
       }
     }
   })

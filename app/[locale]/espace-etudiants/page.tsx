@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   AlertCircle,
@@ -67,10 +67,18 @@ function formatCurrency(value: number) {
   }).format(value || 0);
 }
 
-export default function EspaceEtudiantsPage() {
+function EspaceEtudiantsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale || "fr";
+  const pendingFormationId = searchParams.get("formationId");
+  const pendingSessionId = searchParams.get("sessionId");
+  const pendingEnrollmentPath = pendingFormationId
+    ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${encodeURIComponent(
+        pendingFormationId,
+      )}${pendingSessionId ? `&sessionId=${encodeURIComponent(pendingSessionId)}` : ""}`
+    : "";
 
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -258,10 +266,24 @@ export default function EspaceEtudiantsPage() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
-                href={`/${locale}/auth/student-login`}
+                href={`/${locale}/auth/student-login${
+                  pendingEnrollmentPath
+                    ? `?next=${encodeURIComponent(pendingEnrollmentPath)}`
+                    : ""
+                }`}
                 className="rounded-2xl bg-[var(--cj-blue)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--cj-blue-700)]"
               >
                 Se connecter
+              </Link>
+              <Link
+                href={`/${locale}/auth/student-register${
+                  pendingEnrollmentPath
+                    ? `?next=${encodeURIComponent(pendingEnrollmentPath)}`
+                    : ""
+                }`}
+                className="rounded-2xl bg-[var(--cj-red)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--cj-red-700)]"
+              >
+                Creer un compte
               </Link>
               <Link
                 href={`/${locale}`}
@@ -1310,5 +1332,13 @@ export default function EspaceEtudiantsPage() {
         </SectionCard>
       </main>
     </div>
+  );
+}
+
+export default function EspaceEtudiantsPage() {
+  return (
+    <Suspense fallback={null}>
+      <EspaceEtudiantsContent />
+    </Suspense>
   );
 }

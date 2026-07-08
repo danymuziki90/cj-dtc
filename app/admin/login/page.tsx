@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Lock, Shield } from 'lucide-react'
 
@@ -11,7 +11,7 @@ const errorMessages: Record<string, string> = {
     'Accès non autorisé. Ce portail est réservé aux administrateurs habilités.',
 }
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [username, setUsername] = useState('')
@@ -195,5 +195,13 @@ export default function AdminLoginPage() {
         </section>
       </div>
     </div>
+  )
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminLoginForm />
+    </Suspense>
   )
 }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Award, BookOpen, Download, FileText, Filter, GraduationCap, Layers3 } from 'lucide-react'
 import {
   StudentEmptyState,
@@ -35,7 +35,7 @@ interface Formation {
   title: string
 }
 
-export default function SupportsPage() {
+function SupportsContent() {
   const params = useParams<{ locale?: string }>()
   const locale = params?.locale || 'fr'
   const searchParams = useSearchParams()
@@ -268,5 +268,13 @@ export default function SupportsPage() {
         )}
       </StudentSectionCard>
     </StudentPageShell>
+  )
+}
+
+export default function SupportsPage() {
+  return (
+    <Suspense fallback={null}>
+      <SupportsContent />
+    </Suspense>
   )
 }

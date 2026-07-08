@@ -267,7 +267,7 @@ export default function AdminDashboardPage() {
       helper: 'Dossiers eligibles a servir.',
     },
     {
-      title: 'Sessions avec liste d'attente',
+      title: "Sessions avec liste d'attente",
       count: data.actionsNow.waitlistToPromote.length,
       href: '/admin/sessions',
       helper: 'Places à débloquer, promotions possibles.',

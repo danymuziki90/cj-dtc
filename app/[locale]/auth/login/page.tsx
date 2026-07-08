@@ -76,19 +76,33 @@ export default function LoginPage() {
     setErrors({})
 
     try {
-      // Redirection geree par NextAuth pour que le cookie de session soit bien pose avant d'arriver sur la page
       const redirectUrl = callbackUrl || `/${locale}/espace-etudiants`
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
-        redirect: true,
+        redirect: false,
         callbackUrl: redirectUrl
       })
 
-      // Si on reste sur la page (redirect: true a pu etre ignore dans certains cas), afficher une erreur
-      if (result?.error) {
+      if (result?.error || !result?.ok) {
         setErrors({ general: 'Email ou mot de passe incorrect' })
+        return
       }
+
+      const portalLogin = await fetch('/api/student/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: formData.email, password: formData.password }),
+      })
+
+      if (!portalLogin.ok) {
+        const payload = await portalLogin.json().catch(() => null)
+        setErrors({ general: payload?.error || 'Impossible de creer la session etudiant.' })
+        return
+      }
+
+      router.push(redirectUrl)
+      router.refresh()
     } catch (error) {
       console.error('Erreur lors de la connexion:', error)
       setErrors({ general: 'Une erreur est survenue. Veuillez reessayer.' })

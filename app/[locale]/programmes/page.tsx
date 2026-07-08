@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { CalendarDays, Clock3, MapPin, Users } from 'lucide-react'
 import Breadcrumbs from '../../../components/Breadcrumbs'
-import SessionRegistrationModal from '@/components/programmes/SessionRegistrationModal'
 import { inferProgramSessionType, type ProgramSessionType } from '@/lib/programmes/session-types'
 import { getIntlLocale, resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
@@ -96,8 +95,9 @@ function summarizeSession(value: string | null | undefined, fallback: string, ma
   return `${text.slice(0, max).trimEnd()}...`
 }
 
-export default function ProgrammesPage() {
+function ProgrammesContent() {
   const params = useParams<{ locale: string }>()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const locale = resolveSiteLocale(params?.locale)
   const t = copy[locale]
@@ -110,8 +110,6 @@ export default function ProgrammesPage() {
   const [sessions, setSessions] = useState<TrainingSession[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedSession, setSelectedSession] = useState<TrainingSession | null>(null)
-  const [selectedType, setSelectedType] = useState<ProgramSessionType>('MRH')
   const [typeFilter, setTypeFilter] = useState<'ALL' | ProgramSessionType>('ALL')
 
   const paymentStatus = searchParams.get('payment_status')
@@ -438,8 +436,9 @@ export default function ProgrammesPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            setSelectedSession(session)
-                            setSelectedType(session.programType)
+                            router.push(
+                              `/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formation.id}&sessionId=${session.id}`
+                            )
                           }}
                           className={`inline-flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                             isFull
@@ -459,15 +458,14 @@ export default function ProgrammesPage() {
         )}
       </div>
 
-      <SessionRegistrationModal
-        open={Boolean(selectedSession)}
-        locale={locale}
-        session={selectedSession}
-        programType={selectedType}
-        onClose={() => setSelectedSession(null)}
-      />
     </div>
   )
 }
 
-
+export default function ProgrammesPage() {
+  return (
+    <Suspense fallback={null}>
+      <ProgrammesContent />
+    </Suspense>
+  )
+}

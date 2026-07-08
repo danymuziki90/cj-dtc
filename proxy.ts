@@ -180,9 +180,22 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  const isLocalizedStudentSpaceRoute = /^\/(fr|en)\/espace-etudiants(\/|$)/.test(pathname)
+
+  if (isLocalizedStudentSpaceRoute) {
+    const studentToken = request.cookies.get(STUDENT_AUTH_COOKIE)?.value
+    const studentPayload = studentToken ? await verifyStudentToken(studentToken) : null
+
+    if (!studentPayload) {
+      const locale = pathname.startsWith('/en/') ? 'en' : 'fr'
+      const loginUrl = new URL(`/${locale}/auth/student-login`, request.url)
+      loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
+      return NextResponse.redirect(loginUrl)
+    }
+  }
+
   // Legacy protected localized areas (existing project behavior).
   const isLegacyAdminRoute = /^\/(fr|en)\/admin(\/|$)/.test(pathname)
-  const isLocalizedStudentSpaceRoute = /^\/(fr|en)\/espace-etudiants(\/|$)/.test(pathname)
   const isLegacyStudentRoute =
     /^\/(fr|en)\/student(\/|$)/.test(pathname) ||
     (pathname.includes('/dashboard') &&

@@ -2,20 +2,24 @@
 
 import Link from 'next/link'
 import { FormEvent, Suspense, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
 type FieldError = Record<string, string>
 
-function safeRedirect(value: string | null) {
-  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/student/dashboard'
-  if (value.startsWith('/student/login') || value.startsWith('/student/register')) return '/student/dashboard'
+function safeRedirect(value: string | null, locale: string) {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return `/${locale}/espace-etudiants`
+  if (value.includes('/auth/student-login') || value.includes('/auth/student-register')) {
+    return `/${locale}/espace-etudiants`
+  }
   return value
 }
 
 function StudentRegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = safeRedirect(searchParams.get('callbackUrl'))
+  const params = useParams<{ locale?: string }>()
+  const locale = params?.locale || 'fr'
+  const nextPath = safeRedirect(searchParams.get('next') || searchParams.get('callbackUrl'), locale)
 
   const [form, setForm] = useState({
     fullName: '',
@@ -75,7 +79,6 @@ function StudentRegisterForm() {
           confirmPassword: form.confirmPassword,
         }),
       })
-
       const data = await response.json().catch(() => ({}))
 
       if (!response.ok) {
@@ -91,7 +94,7 @@ function StudentRegisterForm() {
         return
       }
 
-      router.push(`/student/login?registered=1&callbackUrl=${encodeURIComponent(callbackUrl)}`)
+      router.push(`/${locale}/auth/student-login?registered=1&next=${encodeURIComponent(nextPath)}`)
       router.refresh()
     } catch {
       setGlobalError('Impossible de creer le compte pour le moment.')
@@ -124,7 +127,7 @@ function StudentRegisterForm() {
     )
   }
 
-  const loginHref = `/student/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+  const loginHref = `/${locale}/auth/student-login?next=${encodeURIComponent(nextPath)}`
 
   return (
     <main className="min-h-screen bg-[linear-gradient(135deg,#f8fbff_0%,#eef5ff_58%,#fff4f5_100%)] px-4 py-8">
@@ -133,7 +136,7 @@ function StudentRegisterForm() {
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Espace Etudiant</p>
           <h1 className="mt-5 text-4xl font-semibold leading-tight">Creer votre compte etudiant</h1>
           <p className="mt-4 text-sm leading-7 text-white/78">
-            Une fois le compte cree, vous serez redirige vers la connexion avec un message de confirmation.
+            Creez vos identifiants, puis connectez-vous pour acceder a votre tableau de bord.
           </p>
         </section>
 
