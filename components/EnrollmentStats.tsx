@@ -35,7 +35,7 @@ export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsS
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminMetricCard
           icon={Layers3}
           label="Inscriptions"
@@ -58,25 +58,11 @@ export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsS
           tone="success"
         />
         <AdminMetricCard
-          icon={CreditCard}
-          label="Paiements soldes"
-          value={`${paidRatio}%`}
-          helper={`${summary.byPaymentStatus.paid || 0} dossier(s) completement regles.`}
-          tone="neutral"
-        />
-        <AdminMetricCard
           icon={UserRoundCheck}
           label="Comptes actifs"
           value={String(activeAccounts)}
           helper={`${pendingAccounts} dossier(s) attendent encore la creation du compte.`}
           tone="primary"
-        />
-        <AdminMetricCard
-          icon={CircleDollarSign}
-          label="Encaissements"
-          value={formatCurrency(summary.revenue.paidAmount)}
-          helper="Revenus effectivement encaisses."
-          tone="success"
         />
       </section>
 

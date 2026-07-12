@@ -11,7 +11,6 @@ function buildEnrollmentWhere(url: URL): EnrollmentWhere {
   const formationId = url.searchParams.get('formationId')
   const sessionId = url.searchParams.get('sessionId')
   const status = url.searchParams.get('status')
-  const paymentStatus = url.searchParams.get('paymentStatus')
   const startDateFrom = url.searchParams.get('startDateFrom')
   const startDateTo = url.searchParams.get('startDateTo')
   const search = url.searchParams.get('search')?.trim()
@@ -20,7 +19,6 @@ function buildEnrollmentWhere(url: URL): EnrollmentWhere {
   if (formationId) where.formationId = parseInt(formationId)
   if (sessionId) where.sessionId = parseInt(sessionId)
   if (status) where.status = status
-  if (paymentStatus && paymentStatus !== 'all') where.paymentStatus = paymentStatus
   if (startDateFrom || startDateTo) {
     where.startDate = {}
     if (startDateFrom) where.startDate.gte = new Date(startDateFrom)

@@ -120,19 +120,7 @@ export default function EnrollmentFilters({
           </select>
         </div>
 
-        <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">Paiement</label>
-          <select
-            value={filters.paymentStatus}
-            onChange={(event) => updateFilter('paymentStatus', event.target.value)}
-            className={adminSelectClassName}
-          >
-            <option value="">Tous les statuts</option>
-            <option value="unpaid">Non solde</option>
-            <option value="partial">Partiel</option>
-            <option value="paid">Solde</option>
-          </select>
-        </div>
+
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">Compte etudiant</label>
