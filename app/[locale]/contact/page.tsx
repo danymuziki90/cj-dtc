@@ -6,346 +6,555 @@ import { useState } from 'react'
 import {
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock3,
+  Compass,
   MailIcon,
   MapPinIcon,
+  MessageCircle,
   Phone,
   Send,
-  ShieldCheck,
-  Sparkle,
-  type LucideIcon,
+  UserCheck,
+  Users,
 } from 'lucide-react'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
-type ContactFormData = {
+const copy = publicMessages.contact
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+type FormData = {
   name: string
   email: string
+  phone: string
+  org: string
+  reason: string
   subject: string
   message: string
 }
 
-type ContactCard = {
-  icon: LucideIcon
-  title: string
-  value: string
-  detail: string
-  href?: string
+const EMPTY_FORM: FormData = {
+  name: '', email: '', phone: '', org: '', reason: '', subject: '', message: '',
 }
 
-const copy = publicMessages.contact
+// ─── Icon map (why-cards) ─────────────────────────────────────────────────────
+const WHY_ICONS = { UserCheck, Users, Clock3, Compass }
 
+// ─── Channel icon map ─────────────────────────────────────────────────────────
+const CHANNEL_ICONS: Record<string, React.ElementType> = {
+  Mail: MailIcon,
+  MessageCircle,
+  Phone,
+  MapPin: MapPinIcon,
+}
+
+// ─── Section badge ────────────────────────────────────────────────────────────
+function SectionBadge({ text }: { text: string }) {
+  return (
+    <span className="mb-3 inline-block rounded-full border border-[var(--cj-blue)]/20 bg-[var(--cj-blue)]/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[var(--cj-blue)]">
+      {text}
+    </span>
+  )
+}
+
+// ─── FAQ item ─────────────────────────────────────────────────────────────────
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-[var(--cj-blue)]/30">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+        aria-expanded={open}
+      >
+        <span className="text-sm font-semibold text-slate-900">{question}</span>
+        {open
+          ? <ChevronUp className="h-4 w-4 flex-shrink-0 text-[var(--cj-blue)]" />
+          : <ChevronDown className="h-4 w-4 flex-shrink-0 text-slate-400" />}
+      </button>
+      {open && (
+        <div className="border-t border-slate-100 bg-slate-50/60 px-6 py-4">
+          <p className="text-sm leading-relaxed text-slate-600">{answer}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 export default function ContactPage() {
   const params = useParams<{ locale?: string }>()
   const locale = resolveSiteLocale(params?.locale)
   const t = copy[locale]
 
-  const contactCards: ContactCard[] = [
-    {
-      icon: MailIcon,
-      title: t.cards[0].title,
-      value: 'contact@cjdevelopmenttc.org',
-      detail: t.cards[0].detail,
-      href: 'mailto:contact@cjdevelopmenttc.org',
-    },
-    {
-      icon: Phone,
-      title: t.cards[1].title,
-      value: '+243 995 136 626',
-      detail: t.cards[1].detail,
-      href: 'tel:+243995136626',
-    },
-    {
-      icon: MapPinIcon,
-      title: t.cards[2].title,
-      value: locale === 'fr' ? 'Republique Democratique du Congo' : 'Democratic Republic of the Congo',
-      detail: t.cards[2].detail,
-    },
-    {
-      icon: Clock3,
-      title: t.cards[3].title,
-      value: locale === 'fr' ? 'Traitement prioritaire' : 'Priority handling',
-      detail: t.cards[3].detail,
-    },
-  ]
-
-  const supportHighlights: Array<{ icon: LucideIcon; title: string; description: string }> = [
-    {
-      icon: ShieldCheck,
-      title: t.highlights[0].title,
-      description: t.highlights[0].description,
-    },
-    {
-      icon: Sparkle,
-      title: t.highlights[1].title,
-      description: t.highlights[1].description,
-    },
-  ]
-
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  })
+  const [form, setForm] = useState<FormData>(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
 
-  const handleChange =
-    (field: keyof ContactFormData) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setFormData((previous) => ({ ...previous, [field]: event.target.value }))
-    }
+  function update(field: keyof FormData) {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setForm((prev) => ({ ...prev, [field]: e.target.value }))
+  }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setSubmitting(true)
     setError('')
     setSuccess(false)
-
     try {
-      const response = await fetch('/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(form),
       })
-
-      const data = (await response.json()) as { error?: string }
-
-      if (!response.ok) {
-        throw new Error(data.error || t.submitError)
-      }
-
+      const data = (await res.json()) as { error?: string }
+      if (!res.ok) throw new Error(data.error ?? t.submitError)
       setSuccess(true)
-      setFormData({ name: '', email: '', subject: '', message: '' })
-    } catch (caughtError: unknown) {
-      const message = caughtError instanceof Error ? caughtError.message : t.unexpectedError
-      setError(message)
+      setForm(EMPTY_FORM)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t.unexpectedError)
     } finally {
       setSubmitting(false)
     }
   }
 
+  const inputCls =
+    'w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-[var(--cj-blue)] focus:outline-none focus:ring-4 focus:ring-[var(--cj-blue)]/10'
+  const labelCls = 'mb-1.5 block text-sm font-semibold text-slate-700'
+
   return (
-    <div className="relative overflow-hidden pb-16 pt-8 sm:pb-20 sm:pt-12">
-      <div className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,rgba(0,45,114,0.16),transparent_42%),radial-gradient(circle_at_bottom_left,rgba(227,6,19,0.14),transparent_45%)]" />
-      <div className="pointer-events-none absolute -left-24 top-20 -z-10 h-80 w-80 rounded-full bg-cjblue/15 blur-3xl" />
-      <div className="pointer-events-none absolute -right-20 top-8 -z-10 h-72 w-72 rounded-full bg-cjred/20 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-1/2 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-cjblue/10 blur-3xl" />
+    <div className="min-h-screen bg-slate-50">
 
-      <div className="container mx-auto px-4">
-        <section className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(130deg,#002D72_0%,#003b96_60%,#E30613_150%)] px-6 py-10 text-white shadow-[0_35px_90px_rgba(0,45,114,0.34)] sm:px-10 sm:py-14">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.22),transparent_40%),radial-gradient(circle_at_88%_10%,rgba(227,6,19,0.45),transparent_36%)]" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[linear-gradient(120deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.18)_70%,rgba(255,255,255,0.35)_100%)] sm:block" />
-
-          <div className="relative z-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+      {/* ── SECTION 1 — HERO ──────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--cj-blue)] via-[#003d99] to-[#c00020] py-24">
+        {/* background grid pattern */}
+        <div className="pointer-events-none absolute inset-0 opacity-10"
+          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}
+        />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+            {/* Left: text + CTAs */}
             <div>
-              <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-100 backdrop-blur">
+              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white/90">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
                 {t.heroBadge}
+              </span>
+              <h1 className="mt-2 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+                {t.heroTitle}
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
+                {t.heroSubtitle}
               </p>
-              <h1 className="mb-4 text-4xl font-bold leading-tight text-white sm:text-5xl">{t.heroTitle}</h1>
-              <p className="max-w-3xl text-base text-blue-100 sm:text-lg">{t.heroDescription}</p>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <a
+                  href="#contact-form"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[var(--cj-blue)] shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
+                >
+                  {t.heroCta1}
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+                <Link
+                  href={`/${locale}/formations`}
+                  className="inline-flex items-center gap-2 rounded-xl border-2 border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
+                >
+                  {t.heroCta2}
+                </Link>
+              </div>
             </div>
 
-            <div className="relative rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-lg shadow-[0_20px_45px_rgba(0,0,0,0.25)]">
-              <p className="text-sm font-semibold text-white/90">{t.quickHelp}</p>
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row lg:flex-col">
-                <Link
-                  href={`/${locale}/formations#sessions`}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-cjblue transition hover:-translate-y-0.5 hover:bg-blue-50"
-                >
-                  {t.sessionsCta}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <a
-                  href="tel:+243995136626"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/40 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/20"
-                >
-                  {t.callNow}
-                </a>
+            {/* Right: trust card */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="w-full max-w-sm rounded-2xl border border-white/20 bg-white/10 p-8 backdrop-blur-sm">
+                <div className="mb-6 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-green-400" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-white/80">
+                    {t.heroBadge}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { value: '15+', label: locale === 'fr' ? 'Années' : 'Years' },
+                    { value: '10+', label: locale === 'fr' ? 'Pays' : 'Countries' },
+                    { value: '8 500+', label: locale === 'fr' ? 'Étudiants' : 'Students' },
+                  ].map((stat) => (
+                    <div key={stat.label} className="text-center">
+                      <div className="text-2xl font-extrabold text-white">{stat.value}</div>
+                      <div className="mt-1 text-xs text-white/60">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-center">
+                  <CheckCircle2 className="mx-auto mb-1 h-5 w-5 text-green-400" />
+                  <p className="text-xs font-semibold text-white/90">
+                    {locale === 'fr' ? 'Réponse garantie sous 24h' : 'Guaranteed reply within 24h'}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {contactCards.map((card) => {
-            const content = (
-              <>
-                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#002D72_0%,#003b96_70%,#E30613_160%)] text-white shadow-lg">
-                  <card.icon className="h-5 w-5" />
-                </div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{card.title}</p>
-                <p className="mt-2 text-base font-bold text-slate-900">{card.value}</p>
-                <p className="mt-1 text-sm text-slate-600">{card.detail}</p>
-              </>
-            )
+      {/* ── SECTION 2 — CONTACT CHANNELS ─────────────────────────────────── */}
+      <section id="contact-channels" className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <SectionBadge text={t.contactSectionBadge} />
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+              {t.contactSectionTitle}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base text-slate-500">
+              {t.contactSectionDescription}
+            </p>
+          </div>
 
-            if (card.href) {
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {t.channels.map((channel) => {
+              const Icon = CHANNEL_ICONS[channel.icon] ?? MailIcon
+              const isExternal = channel.href.startsWith('http')
               return (
-                <a
-                  key={card.title}
-                  href={card.href}
-                  className="group relative rounded-2xl border border-slate-200/80 bg-white/85 p-5 backdrop-blur-sm shadow-[0_18px_45px_rgba(15,23,42,0.09)] transition duration-300 hover:-translate-y-1 hover:border-cjblue/30 hover:shadow-[0_24px_60px_rgba(0,45,114,0.2)]"
+                <div
+                  key={channel.id}
+                  className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
                 >
-                  {content}
-                </a>
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--cj-blue)]/8 text-[var(--cj-blue)]">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <div className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">
+                    {channel.label}
+                  </div>
+                  <div className="mb-2 text-sm font-semibold text-slate-900 break-all">
+                    {channel.value}
+                  </div>
+                  <p className="mb-4 flex-1 text-xs leading-relaxed text-slate-500">
+                    {channel.description}
+                  </p>
+                  <span className="mb-4 inline-flex items-center gap-1.5 self-start rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                    {channel.available}
+                  </span>
+                  {isExternal ? (
+                    <a
+                      href={channel.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--cj-blue)] px-4 py-2.5 text-xs font-semibold text-white transition hover:opacity-90"
+                    >
+                      {channel.cta}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
+                  ) : (
+                    <a
+                      href={channel.href}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--cj-blue)] px-4 py-2.5 text-xs font-semibold text-white transition hover:opacity-90"
+                    >
+                      {channel.cta}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+                </div>
               )
-            }
+            })}
+          </div>
+        </div>
+      </section>
 
-            return (
-              <div key={card.title} className="relative rounded-2xl border border-slate-200/80 bg-white/85 p-5 backdrop-blur-sm shadow-[0_18px_45px_rgba(15,23,42,0.09)]">
-                {content}
-              </div>
-            )
-          })}
-        </section>
+      {/* ── SECTION 3 — HOURS + FORM ──────────────────────────────────────── */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
 
-        <section className="mt-10 grid gap-6 lg:grid-cols-[1fr_1.25fr]">
-          <div className="relative">
-            <div className="absolute -inset-2 rounded-[2rem] bg-gradient-to-br from-cjblue/25 via-cjblue/5 to-cjred/20 blur-xl" />
-            <div className="relative h-full rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_28px_80px_rgba(0,45,114,0.12)] backdrop-blur-xl sm:p-8">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-cjblue">{t.supportEyebrow}</p>
-              <h2 className="mb-4 text-2xl font-bold text-cjblue sm:text-3xl">{t.supportTitle}</h2>
-              <p className="text-sm leading-relaxed text-slate-600 sm:text-base">{t.supportDescription}</p>
+            {/* LEFT: Hours panel */}
+            <div>
+              <SectionBadge text={t.hoursBadge} />
+              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                {t.hoursTitle}
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-500">
+                {t.hoursDescription}
+              </p>
 
-              <div className="mt-8 space-y-4">
-                {supportHighlights.map((item) => (
-                  <div key={item.title} className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cjblue/10 text-cjblue">
-                        <item.icon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">{item.title}</p>
-                        <p className="mt-1 text-sm text-slate-600">{item.description}</p>
-                      </div>
-                    </div>
+              {/* Schedule */}
+              <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200">
+                {t.schedule.map((row, i) => (
+                  <div
+                    key={row.day}
+                    className={`flex items-center justify-between px-6 py-4 ${i !== t.schedule.length - 1 ? 'border-b border-slate-100' : ''} ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}`}
+                  >
+                    <span className="text-sm font-semibold text-slate-700">{row.day}</span>
+                    <span className={`text-sm font-medium ${row.hours === 'Fermé' || row.hours === 'Closed' ? 'text-[var(--cj-red)]' : 'text-slate-900'}`}>
+                      {row.hours}
+                    </span>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-8 rounded-2xl bg-[linear-gradient(135deg,rgba(0,45,114,0.97)_0%,rgba(0,59,150,0.96)_70%,rgba(227,6,19,0.92)_150%)] p-5 text-white shadow-xl">
-                <p className="text-sm font-semibold text-blue-100">{t.priorityChannel}</p>
-                <a
-                  href="mailto:contact@cjdevelopmenttc.org"
-                  className="mt-2 inline-flex items-center gap-2 text-lg font-bold text-white hover:text-blue-100"
-                >
-                  contact@cjdevelopmenttc.org
-                  <ArrowRight className="h-4 w-4" />
-                </a>
+              {/* Response times */}
+              <div className="mt-8">
+                <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-400">
+                  {locale === 'fr' ? 'Délais de réponse' : 'Response times'}
+                </h3>
+                <div className="space-y-3">
+                  {t.responseTimes.map((rt) => (
+                    <div key={rt.channel} className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-5 py-3">
+                      <span className="text-sm font-semibold text-slate-700">{rt.channel}</span>
+                      <span className="text-xs font-medium text-slate-500">{rt.delay}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Response badge */}
+              <div className="mt-8 flex items-center gap-3 rounded-2xl border border-green-100 bg-green-50 px-6 py-4">
+                <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-600" />
+                <span className="text-sm font-semibold text-green-800">{t.responseBadge}</span>
               </div>
             </div>
-          </div>
 
-          <div className="relative">
-            <div className="absolute -inset-2 rounded-[2rem] bg-gradient-to-br from-cjred/25 via-white/0 to-cjblue/20 blur-xl" />
-            <div className="relative rounded-[1.75rem] border border-white/70 bg-white/95 p-6 shadow-[0_32px_90px_rgba(15,23,42,0.17)] backdrop-blur-xl sm:p-8">
-              <div className="mb-6 flex items-center gap-3">
-                <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-cjred/10 text-cjred">
-                  <Send className="h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="mb-0 text-2xl font-bold text-cjblue sm:text-3xl">{t.formTitle}</h2>
-                  <p className="mb-0 text-sm text-slate-600">{t.formDescription}</p>
-                </div>
-              </div>
+            {/* RIGHT: Contact form */}
+            <div id="contact-form" className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+              <SectionBadge text={t.formBadge} />
+              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
+                {t.formTitle}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-slate-500">{t.formDescription}</p>
 
-              {success && (
-                <div role="status" className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0" />
+              {success ? (
+                <div className="mt-8 rounded-2xl border border-green-100 bg-green-50 px-6 py-8 text-center">
+                  <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-green-500" />
+                  <p className="text-base font-bold text-green-800">{t.successTitle}</p>
+                  <p className="mt-2 text-sm text-green-700">{t.successDescription}</p>
+                  <button
+                    type="button"
+                    onClick={() => setSuccess(false)}
+                    className="mt-6 rounded-xl border-2 border-green-600 px-6 py-2.5 text-sm font-semibold text-green-700 transition hover:bg-green-600 hover:text-white"
+                  >
+                    {locale === 'fr' ? 'Envoyer un autre message' : 'Send another message'}
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="mt-6 space-y-5" noValidate>
+                  {/* Name + Email (2-col) */}
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <p className="font-semibold">{t.successTitle}</p>
-                      <p className="text-sm">{t.successDescription}</p>
+                      <label htmlFor="cf-name" className={labelCls}>{t.fields.name}</label>
+                      <input
+                        id="cf-name"
+                        type="text"
+                        required
+                        value={form.name}
+                        onChange={update('name')}
+                        placeholder={t.fields.namePlaceholder}
+                        className={inputCls}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="cf-email" className={labelCls}>{t.fields.email}</label>
+                      <input
+                        id="cf-email"
+                        type="email"
+                        required
+                        value={form.email}
+                        onChange={update('email')}
+                        placeholder={t.fields.emailPlaceholder}
+                        className={inputCls}
+                      />
                     </div>
                   </div>
-                </div>
-              )}
 
-              {error && (
-                <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
-                  <p className="font-medium">{error}</p>
-                </div>
-              )}
+                  {/* Phone + Org (2-col) */}
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="cf-phone" className={labelCls}>{t.fields.phone}</label>
+                      <input
+                        id="cf-phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={update('phone')}
+                        placeholder={t.fields.phonePlaceholder}
+                        className={inputCls}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="cf-org" className={labelCls}>{t.fields.org}</label>
+                      <input
+                        id="cf-org"
+                        type="text"
+                        value={form.org}
+                        onChange={update('org')}
+                        placeholder={t.fields.orgPlaceholder}
+                        className={inputCls}
+                      />
+                    </div>
+                  </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div className="sm:col-span-1">
-                    <label htmlFor="name" className="mb-2 block text-sm font-semibold text-slate-700">
-                      {t.fields.name}
-                    </label>
+                  {/* Reason select */}
+                  <div>
+                    <label htmlFor="cf-reason" className={labelCls}>{t.reasonLabel}</label>
+                    <select
+                      id="cf-reason"
+                      required
+                      value={form.reason}
+                      onChange={update('reason')}
+                      className={inputCls}
+                    >
+                      <option value="">{t.reasonPlaceholder}</option>
+                      {t.reasons.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Subject */}
+                  <div>
+                    <label htmlFor="cf-subject" className={labelCls}>{t.fields.subject}</label>
                     <input
-                      id="name"
+                      id="cf-subject"
                       type="text"
                       required
-                      value={formData.name}
-                      onChange={handleChange('name')}
-                      placeholder={t.fields.namePlaceholder}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-cjblue focus:outline-none focus:ring-4 focus:ring-cjblue/15"
+                      value={form.subject}
+                      onChange={update('subject')}
+                      placeholder={t.fields.subjectPlaceholder}
+                      className={inputCls}
                     />
                   </div>
 
-                  <div className="sm:col-span-1">
-                    <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700">
-                      {t.fields.email}
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
+                  {/* Message */}
+                  <div>
+                    <label htmlFor="cf-message" className={labelCls}>{t.fields.message}</label>
+                    <textarea
+                      id="cf-message"
                       required
-                      value={formData.email}
-                      onChange={handleChange('email')}
-                      placeholder={t.fields.emailPlaceholder}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-cjblue focus:outline-none focus:ring-4 focus:ring-cjblue/15"
+                      rows={5}
+                      value={form.message}
+                      onChange={update('message')}
+                      placeholder={t.fields.messagePlaceholder}
+                      className={`${inputCls} resize-none`}
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label htmlFor="subject" className="mb-2 block text-sm font-semibold text-slate-700">
-                    {t.fields.subject}
-                  </label>
-                  <input
-                    id="subject"
-                    type="text"
-                    required
-                    value={formData.subject}
-                    onChange={handleChange('subject')}
-                    placeholder={t.fields.subjectPlaceholder}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-cjblue focus:outline-none focus:ring-4 focus:ring-cjblue/15"
-                  />
-                </div>
+                  {/* Error */}
+                  {error && (
+                    <p role="alert" className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                      {error}
+                    </p>
+                  )}
 
-                <div>
-                  <label htmlFor="message" className="mb-2 block text-sm font-semibold text-slate-700">
-                    {t.fields.message}
-                  </label>
-                  <textarea
-                    id="message"
-                    rows={6}
-                    required
-                    value={formData.message}
-                    onChange={handleChange('message')}
-                    placeholder={t.fields.messagePlaceholder}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-cjblue focus:outline-none focus:ring-4 focus:ring-cjblue/15"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#E30613_0%,#b3040f_100%)] px-6 py-3.5 text-sm font-bold text-white shadow-[0_16px_35px_rgba(227,6,19,0.32)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_45px_rgba(227,6,19,0.42)] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {submitting ? t.submitting : t.submit}
-                  {!submitting && <ArrowRight className="h-4 w-4" />}
-                </button>
-              </form>
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cj-blue)] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {submitting ? (
+                      <>
+                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        {t.submitting}
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4" />
+                        {t.submit}
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 4 — WHY CONTACT US ───────────────────────────────────── */}
+      <section className="bg-slate-50 py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <SectionBadge text={t.whyBadge} />
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+              {t.whyTitle}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base text-slate-500">
+              {t.whyDescription}
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {t.whyCards.map((card) => {
+              const Icon = WHY_ICONS[card.icon as keyof typeof WHY_ICONS] ?? UserCheck
+              return (
+                <div
+                  key={card.icon}
+                  className="flex flex-col rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--cj-blue)]/8 text-[var(--cj-blue)]">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="mb-2 text-sm font-bold text-slate-900">{card.title}</h3>
+                  <p className="text-xs leading-relaxed text-slate-500">{card.description}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 5 — FAQ ──────────────────────────────────────────────── */}
+      <section id="faq" className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <SectionBadge text={t.faqBadge} />
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+              {t.faqTitle}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base text-slate-500">
+              {t.faqDescription}
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-3xl space-y-3">
+            {t.faq.map((item) => (
+              <FAQItem key={item.question} question={item.question} answer={item.answer} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 6 — FINAL CTA ─────────────────────────────────────────── */}
+      <section className="bg-gradient-to-br from-slate-900 via-[#001a4d] to-[var(--cj-blue)] py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <span className="mb-4 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white/80">
+            {t.ctaBadge}
+          </span>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            {t.ctaTitle}
+          </h2>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70">
+            {t.ctaDescription}
+          </p>
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <Link
+              href={`/${locale}/formations`}
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[var(--cj-blue)] shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              {t.ctaBtn1}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a
+              href="#contact-form"
+              className="inline-flex items-center gap-2 rounded-xl border-2 border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
+            >
+              {t.ctaBtn2}
+            </a>
+          </div>
+        </div>
+      </section>
+
     </div>
   )
 }

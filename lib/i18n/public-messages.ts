@@ -814,10 +814,189 @@ export const publicMessages = {
   },
   contact: {
     fr: {
-      heroBadge: 'Contact direct',
-      heroTitle: 'Construisons votre prochaine etape professionnelle.',
-      heroDescription:
-        'Une page contact premium, claire et rapide: vous envoyez votre demande, notre equipe vous repond avec une orientation concrete vers la bonne session.',
+      // ── Meta & Hero ────────────────────────────────────────────────
+      metaTitle: 'Contact | CJ Development Training Center',
+      metaDescription:
+        'Contactez CJ Development Training Center. Email, WhatsApp, telephone, formulaire. Notre equipe repond sous 24h et vous oriente vers la bonne formation.',
+      heroBadge: 'Equipe disponible — Reponse sous 24h',
+      heroTitle: 'Parlons de votre avenir professionnel.',
+      heroSubtitle:
+        "Une question sur nos formations, un projet d'entreprise, un partenariat ou un besoin specifique ? Notre equipe vous repond rapidement et vous accompagne dans votre demarche.",
+      heroCta1: 'Nous contacter',
+      heroCta2: 'Decouvrir nos formations',
+      // ── Moyens de contact ──────────────────────────────────────────
+      contactSectionBadge: 'Comment nous joindre',
+      contactSectionTitle: 'Tous les moyens de contact',
+      contactSectionDescription:
+        'Choisissez le canal le plus adapte a votre besoin. Nous sommes accessibles par email, WhatsApp, telephone et en presentiel.',
+      channels: [
+        {
+          id: 'email',
+          icon: 'Mail',
+          label: 'Email',
+          value: 'contact@cjdevelopmenttc.org',
+          description: 'Pour toute demande detaillee, inscription ou partenariat.',
+          cta: 'Envoyer un email',
+          href: 'mailto:contact@cjdevelopmenttc.org',
+          available: 'Reponse en moins de 24h',
+        },
+        {
+          id: 'whatsapp',
+          icon: 'MessageCircle',
+          label: 'WhatsApp',
+          value: '+243 995 136 626',
+          description: 'Discussion immediate pour questions rapides.',
+          cta: 'Ouvrir WhatsApp',
+          href: 'https://wa.me/243995136626',
+          available: 'Quelques minutes (heures ouvrables)',
+        },
+        {
+          id: 'phone',
+          icon: 'Phone',
+          label: 'Telephone',
+          value: '+243 999 482 140',
+          description: 'Lundi – Vendredi, 8h00 a 18h00 (RDC).',
+          cta: 'Appeler maintenant',
+          href: 'tel:+243999482140',
+          available: 'Lun – Ven, 8h – 18h',
+        },
+        {
+          id: 'address',
+          icon: 'MapPin',
+          label: 'Localisation',
+          value: 'Kinshasa, Republique Democratique du Congo',
+          description: 'Accompagnement en presentiel et a distance dans plusieurs pays.',
+          cta: 'Voir sur la carte',
+          href: 'https://maps.google.com/?q=Kinshasa,RDC',
+          available: 'Plusieurs pays couverts',
+        },
+      ],
+      // ── Horaires ───────────────────────────────────────────────────
+      hoursBadge: 'Disponibilite',
+      hoursTitle: 'Horaires et delais de reponse',
+      hoursDescription: "Nous nous engageons a repondre a chaque demande dans les meilleurs delais.",
+      schedule: [
+        { day: 'Lundi – Vendredi', hours: '8h00 – 18h00' },
+        { day: 'Samedi', hours: '9h00 – 13h00' },
+        { day: 'Dimanche', hours: 'Ferme' },
+      ],
+      responseTimes: [
+        { channel: 'Email', delay: 'Moins de 24h' },
+        { channel: 'WhatsApp', delay: 'Quelques minutes (heures ouvrables)' },
+        { channel: 'Formulaire', delay: 'Moins de 24h' },
+      ],
+      responseBadge: 'Reponse rapide',
+      // ── Formulaire ─────────────────────────────────────────────────
+      formBadge: 'Formulaire de contact',
+      formTitle: 'Envoyez-nous votre message',
+      formDescription:
+        'Remplissez ce formulaire et notre equipe vous contacte dans les 24h avec une reponse adaptee a votre besoin.',
+      reasonLabel: 'Motif de votre demande *',
+      reasonPlaceholder: 'Selectionnez un motif',
+      reasons: [
+        'Formation',
+        'Entreprise',
+        'Partenariat',
+        'Media',
+        'Assistance etudiant',
+        'Certification',
+        'Coaching',
+        'Autre',
+      ],
+      successTitle: 'Message envoye avec succes !',
+      successDescription:
+        "Merci pour votre message. Notre equipe vous repondra dans les 24h avec une orientation concrete.",
+      submitError: "Erreur lors de l'envoi. Veuillez reessayer.",
+      unexpectedError: 'Une erreur est survenue. Reessayez dans quelques instants.',
+      fields: {
+        name: 'Nom complet *',
+        namePlaceholder: 'Votre nom et prenom',
+        email: 'Email *',
+        emailPlaceholder: 'votre.email@exemple.com',
+        phone: 'Telephone',
+        phonePlaceholder: '+243 ...',
+        org: 'Organisation (optionnel)',
+        orgPlaceholder: 'Entreprise, universite...',
+        subject: 'Sujet *',
+        subjectPlaceholder: 'Objet de votre demande',
+        message: 'Message *',
+        messagePlaceholder:
+          "Decrivez votre projet, votre objectif de formation ou votre besoin specifique. Plus votre message est precis, plus notre reponse sera utile.",
+      },
+      submitting: 'Envoi en cours...',
+      submit: 'Envoyer le message',
+      // ── Pourquoi nous contacter ────────────────────────────────────
+      whyBadge: 'Pourquoi nous contacter',
+      whyTitle: 'Une equipe a votre service',
+      whyDescription:
+        "Nous traitons chaque demande avec attention. Voici ce que vous pouvez attendre de notre equipe.",
+      whyCards: [
+        {
+          icon: 'UserCheck',
+          title: 'Accompagnement personnalise',
+          description: 'Chaque demande recoit une reponse adaptee a votre profil et a vos objectifs.',
+        },
+        {
+          icon: 'Users',
+          title: 'Conseillers disponibles',
+          description: 'Notre equipe vous oriente selon votre parcours, vos contraintes et vos ambitions.',
+        },
+        {
+          icon: 'Clock3',
+          title: 'Reponse rapide',
+          description: 'Nous repondons generalement sous 24 heures, souvent bien avant.',
+        },
+        {
+          icon: 'Compass',
+          title: 'Orientation professionnelle',
+          description: "Nous vous aidons a choisir le programme le plus adapte a votre projet.",
+        },
+      ],
+      // ── FAQ ────────────────────────────────────────────────────────
+      faqBadge: 'Questions frequentes',
+      faqTitle: "Vous avez des questions ? Nous avons les reponses.",
+      faqDescription:
+        'Trouvez rapidement les informations les plus demandees avant de nous contacter.',
+      faq: [
+        {
+          question: "Comment s'inscrire a une formation ?",
+          answer:
+            "Rendez-vous sur la page Formations, choisissez votre programme et cliquez sur Reserver ma place. Vous pouvez aussi nous contacter directement via le formulaire ou WhatsApp.",
+        },
+        {
+          question: 'Comment payer une formation ?',
+          answer:
+            "Plusieurs modes de paiement sont disponibles : virement, mobile money, paiement echelonne. Notre equipe vous detaille les options lors de votre inscription.",
+        },
+        {
+          question: 'Puis-je suivre les cours a distance ?',
+          answer:
+            "Oui. La plupart de nos formations sont disponibles en ligne, en presentiel ou en format hybride selon les sessions ouvertes.",
+        },
+        {
+          question: 'Comment obtenir un certificat ?',
+          answer:
+            "Le certificat est delivre apres validation des conditions pedagogiques : presence, travaux pratiques et evaluation finale.",
+        },
+        {
+          question: 'Les entreprises peuvent-elles former leurs employes ?',
+          answer:
+            "Absolument. Nous proposons des formations intra-entreprise, du coaching d'equipe et des programmes sur mesure pour les organisations. Contactez notre equipe entreprise.",
+        },
+        {
+          question: 'Puis-je demander un devis ?',
+          answer:
+            "Oui. Utilisez le formulaire ci-dessous, selectionnez le motif Entreprise ou Partenariat, et notre equipe vous envoie une proposition detaillee sous 24h.",
+        },
+      ],
+      // ── CTA final ──────────────────────────────────────────────────
+      ctaBadge: "C'est le moment d'agir",
+      ctaTitle: 'Pret a developper vos competences ?',
+      ctaDescription:
+        "Notre equipe est disponible pour vous accompagner dans votre projet de formation ou dans le developpement des competences de votre organisation.",
+      ctaBtn1: 'Commencer mon inscription',
+      ctaBtn2: 'Contacter un conseiller',
+      // ── Legacy ─────────────────────────────────────────────────────
       quickHelp: "Besoin d'agir vite ?",
       sessionsCta: 'Voir nos sessions',
       callNow: 'Appeler maintenant',
@@ -830,42 +1009,195 @@ export const publicMessages = {
       supportEyebrow: 'Support humain',
       supportTitle: 'Parlons de votre projet de formation',
       supportDescription:
-        "Que vous soyez etudiant, professionnel ou entreprise, nous vous orientons vers la session la plus adaptee et les prochaines etapes d'inscription.",
+        "Que vous soyez etudiant, professionnel ou entreprise, nous vous orientons vers la session la plus adaptee.",
       highlights: [
-        {
-          title: 'Accompagnement professionnel',
-          description: 'Un interlocuteur vous guide vers le bon programme selon votre objectif.',
-        },
-        {
-          title: 'Approche orientee resultats',
-          description: 'Nous repondons avec des solutions concretes pour vos besoins formation.',
-        },
+        { title: 'Accompagnement professionnel', description: 'Un interlocuteur vous guide vers le bon programme.' },
+        { title: 'Approche orientee resultats', description: 'Nous repondons avec des solutions concretes.' },
       ],
       priorityChannel: 'Canal prioritaire',
-      formTitle: 'Envoyez votre message',
-      formDescription: 'Tous les champs marques * sont obligatoires.',
-      successTitle: 'Message envoye avec succes.',
-      successDescription: 'Notre equipe vous repondra dans les plus brefs delais.',
-      submitError: "Erreur lors de l'envoi du message.",
-      unexpectedError: 'Une erreur est survenue.',
-      fields: {
-        name: 'Nom complet *',
-        namePlaceholder: 'Votre nom',
-        email: 'Email *',
-        emailPlaceholder: 'votre.email@exemple.com',
-        subject: 'Sujet *',
-        subjectPlaceholder: 'Objet de votre demande',
-        message: 'Message *',
-        messagePlaceholder: 'Decrivez votre besoin, votre objectif, et la session qui vous interesse.',
-      },
-      submitting: 'Envoi en cours...',
-      submit: 'Envoyer le message',
     },
     en: {
-      heroBadge: 'Direct contact',
-      heroTitle: 'Let us build your next professional step.',
-      heroDescription:
-        'A premium, clear and fast contact page: you send your request, our team responds with concrete guidance toward the right session.',
+      // ── Meta & Hero ────────────────────────────────────────────────
+      metaTitle: 'Contact | CJ Development Training Center',
+      metaDescription:
+        "Contact CJ Development Training Center. Email, WhatsApp, phone, form. Our team responds within 24h and guides you to the right training.",
+      heroBadge: 'Available team — Response within 24h',
+      heroTitle: 'Let us talk about your professional future.',
+      heroSubtitle:
+        "A question about our programs, a corporate project, a partnership or a specific need? Our team responds quickly and supports you through your journey.",
+      heroCta1: 'Contact us',
+      heroCta2: 'Discover our programs',
+      // ── Moyens de contact ──────────────────────────────────────────
+      contactSectionBadge: 'How to reach us',
+      contactSectionTitle: 'All contact channels',
+      contactSectionDescription:
+        'Choose the channel that suits your need best. We are reachable by email, WhatsApp, phone and in person.',
+      channels: [
+        {
+          id: 'email',
+          icon: 'Mail',
+          label: 'Email',
+          value: 'contact@cjdevelopmenttc.org',
+          description: 'For detailed requests, enrollment or partnership inquiries.',
+          cta: 'Send an email',
+          href: 'mailto:contact@cjdevelopmenttc.org',
+          available: 'Response within 24h',
+        },
+        {
+          id: 'whatsapp',
+          icon: 'MessageCircle',
+          label: 'WhatsApp',
+          value: '+243 995 136 626',
+          description: 'Instant chat for quick questions.',
+          cta: 'Open WhatsApp',
+          href: 'https://wa.me/243995136626',
+          available: 'A few minutes (business hours)',
+        },
+        {
+          id: 'phone',
+          icon: 'Phone',
+          label: 'Phone',
+          value: '+243 999 482 140',
+          description: 'Monday – Friday, 8am to 6pm (DRC time).',
+          cta: 'Call now',
+          href: 'tel:+243999482140',
+          available: 'Mon – Fri, 8am – 6pm',
+        },
+        {
+          id: 'address',
+          icon: 'MapPin',
+          label: 'Location',
+          value: 'Kinshasa, Democratic Republic of the Congo',
+          description: 'In-person and remote support across several countries.',
+          cta: 'View on map',
+          href: 'https://maps.google.com/?q=Kinshasa,DRC',
+          available: 'Multiple countries covered',
+        },
+      ],
+      // ── Horaires ───────────────────────────────────────────────────
+      hoursBadge: 'Availability',
+      hoursTitle: 'Opening hours & response times',
+      hoursDescription: 'We are committed to responding to every request as quickly as possible.',
+      schedule: [
+        { day: 'Monday – Friday', hours: '8:00am – 6:00pm' },
+        { day: 'Saturday', hours: '9:00am – 1:00pm' },
+        { day: 'Sunday', hours: 'Closed' },
+      ],
+      responseTimes: [
+        { channel: 'Email', delay: 'Less than 24h' },
+        { channel: 'WhatsApp', delay: 'A few minutes (business hours)' },
+        { channel: 'Form', delay: 'Less than 24h' },
+      ],
+      responseBadge: 'Fast response',
+      // ── Formulaire ─────────────────────────────────────────────────
+      formBadge: 'Contact form',
+      formTitle: 'Send us your message',
+      formDescription:
+        'Fill in this form and our team will contact you within 24h with a response tailored to your need.',
+      reasonLabel: 'Reason for your enquiry *',
+      reasonPlaceholder: 'Select a reason',
+      reasons: [
+        'Training',
+        'Business',
+        'Partnership',
+        'Media',
+        'Student support',
+        'Certification',
+        'Coaching',
+        'Other',
+      ],
+      successTitle: 'Message sent successfully!',
+      successDescription:
+        'Thank you for your message. Our team will get back to you within 24h with concrete guidance.',
+      submitError: 'Error while sending. Please try again.',
+      unexpectedError: 'An unexpected error occurred. Please try again in a moment.',
+      fields: {
+        name: 'Full name *',
+        namePlaceholder: 'Your first and last name',
+        email: 'Email *',
+        emailPlaceholder: 'your.email@example.com',
+        phone: 'Phone',
+        phonePlaceholder: '+1 ...',
+        org: 'Organisation (optional)',
+        orgPlaceholder: 'Company, university...',
+        subject: 'Subject *',
+        subjectPlaceholder: 'Subject of your request',
+        message: 'Message *',
+        messagePlaceholder:
+          'Describe your project, your training goal or your specific need. The more precise your message, the more useful our response will be.',
+      },
+      submitting: 'Sending...',
+      submit: 'Send message',
+      // ── Pourquoi nous contacter ────────────────────────────────────
+      whyBadge: 'Why contact us',
+      whyTitle: 'A team at your service',
+      whyDescription: 'We handle every request with care. Here is what you can expect from our team.',
+      whyCards: [
+        {
+          icon: 'UserCheck',
+          title: 'Personalised support',
+          description: 'Every request receives a response tailored to your profile and objectives.',
+        },
+        {
+          icon: 'Users',
+          title: 'Available advisors',
+          description: 'Our team guides you based on your background, constraints and ambitions.',
+        },
+        {
+          icon: 'Clock3',
+          title: 'Fast response',
+          description: 'We typically respond within 24 hours, often much sooner.',
+        },
+        {
+          icon: 'Compass',
+          title: 'Professional orientation',
+          description: 'We help you choose the program best suited to your project.',
+        },
+      ],
+      // ── FAQ ────────────────────────────────────────────────────────
+      faqBadge: 'Frequently asked questions',
+      faqTitle: 'You have questions. We have answers.',
+      faqDescription: 'Find the most commonly requested information before contacting us.',
+      faq: [
+        {
+          question: 'How do I enroll in a training program?',
+          answer:
+            'Go to the Training page, select your program and click Reserve my spot. You can also contact us directly via the form or WhatsApp.',
+        },
+        {
+          question: 'How do I pay for a training?',
+          answer:
+            'Several payment options are available: bank transfer, mobile money, installment plans. Our team will walk you through the options when you register.',
+        },
+        {
+          question: 'Can I follow the courses remotely?',
+          answer:
+            'Yes. Most of our training programs are available online, on-site or in a hybrid format depending on the open sessions.',
+        },
+        {
+          question: 'How do I obtain a certificate?',
+          answer:
+            'The certificate is issued after meeting the academic requirements: attendance, practical assignments and final assessment.',
+        },
+        {
+          question: 'Can companies train their employees?',
+          answer:
+            'Absolutely. We offer in-company training, team coaching and custom programs for organizations. Contact our corporate team.',
+        },
+        {
+          question: 'Can I request a quote?',
+          answer:
+            'Yes. Use the form below, select the Business or Partnership reason, and our team will send you a detailed proposal within 24h.',
+        },
+      ],
+      // ── CTA final ──────────────────────────────────────────────────
+      ctaBadge: 'Time to take action',
+      ctaTitle: 'Ready to develop your skills?',
+      ctaDescription:
+        'Our team is ready to support you in your training project or in developing the skills of your organization.',
+      ctaBtn1: 'Start my enrollment',
+      ctaBtn2: 'Contact an advisor',
+      // ── Legacy ─────────────────────────────────────────────────────
       quickHelp: 'Need to move fast?',
       sessionsCta: 'View our sessions',
       callNow: 'Call now',
@@ -878,36 +1210,12 @@ export const publicMessages = {
       supportEyebrow: 'Human support',
       supportTitle: 'Let us talk about your training project',
       supportDescription:
-        'Whether you are a student, professional or organization, we guide you toward the most suitable session and the next registration steps.',
+        'Whether you are a student, professional or organization, we guide you toward the most suitable session.',
       highlights: [
-        {
-          title: 'Professional guidance',
-          description: 'A dedicated contact helps you move toward the right program based on your objective.',
-        },
-        {
-          title: 'Results-oriented approach',
-          description: 'We respond with practical solutions for your training needs.',
-        },
+        { title: 'Professional guidance', description: 'A dedicated contact helps you find the right program.' },
+        { title: 'Results-oriented approach', description: 'We respond with practical solutions for your needs.' },
       ],
       priorityChannel: 'Priority channel',
-      formTitle: 'Send your message',
-      formDescription: 'All fields marked * are required.',
-      successTitle: 'Message sent successfully.',
-      successDescription: 'Our team will get back to you as soon as possible.',
-      submitError: 'Error while sending the message.',
-      unexpectedError: 'An unexpected error occurred.',
-      fields: {
-        name: 'Full name *',
-        namePlaceholder: 'Your name',
-        email: 'Email *',
-        emailPlaceholder: 'your.email@example.com',
-        subject: 'Subject *',
-        subjectPlaceholder: 'Subject of your request',
-        message: 'Message *',
-        messagePlaceholder: 'Describe your need, your goal, and the session you are interested in.',
-      },
-      submitting: 'Sending...',
-      submit: 'Send message',
     },
   },
   services: {
