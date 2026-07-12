@@ -5,7 +5,7 @@ import {
   AlertCircle,
   ArrowRight,
   BadgeCheck,
-  CircleDollarSign,
+  Copy,
   Mail,
   PencilLine,
   RefreshCcw,
@@ -442,44 +442,28 @@ export default function AdminStudentsPage() {
     const activeStudents = students.filter((student) => student.status === 'ACTIVE').length
     const suspendedStudents = students.filter((student) => student.status === 'SUSPENDED').length
     const assignedStudents = students.filter((student) => Boolean(student.adminSession)).length
-    const pendingPayments = students.filter(hasPendingPayment).length
-    const collectedAmount = students.reduce((sum, student) => sum + (student.latestEnrollment?.paidAmount || 0), 0)
 
     return [
       {
-        label: 'Comptes filtres',
+        label: 'Comptes filtrés',
         value: `${pagination.totalItems}`,
-        helper: `${students.length} affiches sur la page actuelle`,
+        helper: `${students.length} affichés sur la page actuelle`,
         tone: 'primary' as const,
         icon: Users,
       },
       {
         label: 'Actifs',
         value: `${activeStudents}`,
-        helper: `${suspendedStudents} comptes suspendus sur cette vue`,
+        helper: `${suspendedStudents} compte(s) suspendu(s) sur cette vue`,
         tone: 'success' as const,
         icon: ShieldCheck,
       },
       {
-        label: 'Affectes',
+        label: 'Affectés',
         value: `${assignedStudents}`,
-        helper: 'Comptes lies a une session admin',
+        helper: 'Comptes liés à une session admin',
         tone: 'neutral' as const,
         icon: BadgeCheck,
-      },
-      {
-        label: 'Paiements a suivre',
-        value: `${pendingPayments}`,
-        helper: 'Inscriptions avec statut paiement non solde',
-        tone: 'warning' as const,
-        icon: ShieldAlert,
-      },
-      {
-        label: 'Encaisse visible',
-        value: formatCurrency(collectedAmount),
-        helper: 'Montants payes sur les lignes chargees',
-        tone: 'primary' as const,
-        icon: CircleDollarSign,
       },
     ]
   }, [pagination.totalItems, students])
@@ -884,9 +868,8 @@ export default function AdminStudentsPage() {
               </div>
 
               <form onSubmit={onCreateStudent} className="mt-6 space-y-4" data-testid="student-create-form">
-                <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm leading-6 text-amber-800">
-                  Le compte etudiant ne peut etre cree qu&apos;apres validation complete du paiement de la session
-                  souscrite.
+                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-sm leading-6 text-emerald-800">
+                  Le compte étudiant est créé et activé automatiquement dès l'inscription à une session.
                 </div>
 
                 <div>
@@ -1110,30 +1093,17 @@ export default function AdminStudentsPage() {
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(selectedStudent.status)}`}>
                       {getStatusLabel(selectedStudent.status)}
                     </span>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${paymentBadgeClass(
-                        selectedStudent.latestEnrollment?.paymentStatus
-                      )}`}
-                    >
-                      {paymentStatusLabel(selectedStudent.latestEnrollment?.paymentStatus)}
-                    </span>
                   </div>
 
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     <DetailField label="Email" value={selectedStudent.email} />
-                    <DetailField label="Nom d utilisateur" value={selectedStudent.username || 'Non defini'} />
-                    <DetailField label="Session" value={selectedStudent.adminSession?.title || 'Non affectee'} />
+                    <DetailField label="Nom d'utilisateur" value={selectedStudent.username || 'Non défini'} />
+                    <DetailField label="Session" value={selectedStudent.adminSession?.title || 'Non affectée'} />
                     <DetailField
                       label="Inscription"
                       value={selectedStudent.latestEnrollment?.formationTitle || 'Aucune inscription'}
                     />
-                    <DetailField label="Cree le" value={formatDate(selectedStudent.createdAt)} />
-                    <DetailField
-                      label="Reste a payer"
-                      value={
-                        selectedStudent.latestEnrollment ? formatCurrency(getOutstandingBalance(selectedStudent)) : 'N/A'
-                      }
-                    />
+                    <DetailField label="Créé le" value={formatDate(selectedStudent.createdAt)} />
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-2">
@@ -1205,20 +1175,12 @@ export default function AdminStudentsPage() {
                       {selectedStudentDetails?.student.fullName || getStudentName(selectedStudent)}
                     </h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Vue consolidee du profil, des inscriptions, des paiements, des presences, des travaux et de
-                      l'historique admin.
+                      Vue consolidée du profil, des inscriptions, des présences, des travaux, des certificats et de l'historique admin.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(selectedStudent.status)}`}>
                       {getStatusLabel(selectedStudent.status)}
-                    </span>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${paymentBadgeClass(
-                        selectedStudent.latestEnrollment?.paymentStatus
-                      )}`}
-                    >
-                      {paymentStatusLabel(selectedStudent.latestEnrollment?.paymentStatus)}
                     </span>
                   </div>
                 </div>
@@ -1242,24 +1204,17 @@ export default function AdminStudentsPage() {
                         tone="primary"
                       />
                       <SummaryCard
-                        icon={CircleDollarSign}
-                        label="Paiements a suivre"
-                        value={`${selectedStudentDetails.overview.pendingPayments}`}
-                        helper={`${selectedStudentDetails.overview.settledEnrollments} inscription(s) soldÃ©e(s)`}
-                        tone="warning"
-                      />
-                      <SummaryCard
                         icon={BadgeCheck}
                         label="Travaux / certificats"
                         value={`${selectedStudentDetails.overview.submissionsCount} / ${selectedStudentDetails.overview.certificatesCount}`}
-                        helper="Soumissions portail et certificats emis"
+                        helper="Soumissions portail et certificats émis"
                         tone="success"
                       />
                       <SummaryCard
                         icon={Mail}
                         label="Notifications"
                         value={`${selectedStudentDetails.overview.notificationsCount}`}
-                        helper={`${selectedStudentDetails.overview.attendanceCount} presence(s) enregistree(s)`}
+                        helper={`${selectedStudentDetails.overview.attendanceCount} présence(s) enregistrée(s)`}
                         tone="neutral"
                       />
                     </div>
@@ -1295,49 +1250,20 @@ export default function AdminStudentsPage() {
                               <div key={enrollment.id} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                   <strong className="text-slate-900">{enrollment.formation.title}</strong>
-                                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${paymentBadgeClass(enrollment.paymentStatus)}`}>
-                                    {paymentStatusLabel(enrollment.paymentStatus)}
+                                  <span className="rounded-full px-3 py-1 text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-700">
+                                    {enrollment.status}
                                   </span>
                                 </div>
                                 <p className="mt-2 text-slate-600">
                                   {enrollment.session
-                                    ? `${formatDateTime(enrollment.session.startDate)} Â· ${enrollment.session.location || 'En ligne'}`
+                                    ? `${formatDateTime(enrollment.session.startDate)} · ${enrollment.session.location || 'En ligne'}`
                                     : 'Sans session'}
                                 </p>
-                                <p className="mt-1 text-slate-500">
-                                  {formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)} Â· {enrollment.status}
-                                </p>
                               </div>
                             ))
                           ) : (
                             <p className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-5 text-sm text-slate-500">
-                              Aucune inscription rattachee a ce compte.
-                            </p>
-                          )}
-                        </div>
-                      </article>
-
-                      <article className="rounded-[26px] border border-slate-200 bg-slate-50/80 p-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Paiements</p>
-                        <div className="mt-4 space-y-3">
-                          {selectedStudentDetails.payments.length ? (
-                            selectedStudentDetails.payments.slice(0, 5).map((payment) => (
-                              <div key={payment.id} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                  <strong className="text-slate-900">{payment.formationTitle}</strong>
-                                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${paymentBadgeClass(payment.status)}`}>
-                                    {paymentStatusLabel(payment.status)}
-                                  </span>
-                                </div>
-                                <p className="mt-2 text-slate-600">
-                                  {formatCurrency(payment.amount)} Â· {payment.method} Â· {formatDateTime(payment.createdAt)}
-                                </p>
-                                <p className="mt-1 text-slate-500">{payment.reference || payment.transactionId || payment.sessionLabel}</p>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-5 text-sm text-slate-500">
-                              Aucun paiement rattache a cet etudiant.
+                              Aucune inscription rattachée à ce compte.
                             </p>
                           )}
                         </div>
@@ -1681,26 +1607,25 @@ export default function AdminStudentsPage() {
                 <table className="min-w-full divide-y divide-slate-200 text-sm">
                   <thead className="bg-slate-50/80">
                     <tr>
-                      <th className="px-5 py-4 text-left font-semibold text-slate-600">Etudiant</th>
-                      <th className="px-5 py-4 text-left font-semibold text-slate-600">Acces</th>
+                      <th className="px-5 py-4 text-left font-semibold text-slate-600">Étudiant</th>
+                      <th className="px-5 py-4 text-left font-semibold text-slate-600">Accès</th>
                       <th className="px-5 py-4 text-left font-semibold text-slate-600">Statut</th>
                       <th className="px-5 py-4 text-left font-semibold text-slate-600">Session et inscription</th>
-                      <th className="px-5 py-4 text-left font-semibold text-slate-600">Paiement</th>
-                      <th className="px-5 py-4 text-left font-semibold text-slate-600">Creation</th>
+                      <th className="px-5 py-4 text-left font-semibold text-slate-600">Création</th>
                       <th className="px-5 py-4 text-left font-semibold text-slate-600">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 bg-white">
                     {loadingList ? (
                       <tr>
-                        <td colSpan={7} className="px-5 py-10 text-center text-sm text-slate-500">
-                          Chargement des etudiants...
+                        <td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-500">
+                          Chargement des étudiants...
                         </td>
                       </tr>
                     ) : students.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-5 py-10 text-center text-sm text-slate-500">
-                          Aucun etudiant ne correspond aux filtres actuels.
+                        <td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-500">
+                          Aucun étudiant ne correspond aux filtres actuels.
                         </td>
                       </tr>
                     ) : (
@@ -1727,9 +1652,9 @@ export default function AdminStudentsPage() {
                           <td className="px-5 py-4 text-slate-700">
                             <div className="space-y-2">
                               <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
-                                {student.username || 'Nom d utilisateur non defini'}
+                                {student.username || "Nom d'utilisateur non défini"}
                               </span>
-                              <p className="text-xs text-slate-500">Connexion etudiant geree depuis le portail.</p>
+                              <p className="text-xs text-slate-500">Connexion étudiant gérée depuis le portail.</p>
                             </div>
                           </td>
                           <td className="px-5 py-4">
@@ -1739,41 +1664,17 @@ export default function AdminStudentsPage() {
                           </td>
                           <td className="px-5 py-4 text-slate-700">
                             <div className="space-y-2">
-                              <p className="font-semibold text-slate-900">{student.adminSession?.title || 'Non affectee'}</p>
+                              <p className="font-semibold text-slate-900">{student.adminSession?.title || 'Non affectée'}</p>
                               <p className="text-xs text-slate-500">
-                                {student.latestEnrollment?.formationTitle || 'Aucune inscription rattachee'}
+                                {student.latestEnrollment?.formationTitle || 'Aucune inscription rattachée'}
                               </p>
                               {student.latestEnrollment?.session ? (
                                 <p className="text-xs text-slate-500">
-                                  {formatDateTime(student.latestEnrollment.session.startDate)} Â·{' '}
+                                  {formatDateTime(student.latestEnrollment.session.startDate)} ·{' '}
                                   {student.latestEnrollment.session.location}
                                 </p>
                               ) : null}
                             </div>
-                          </td>
-                          <td className="px-5 py-4 text-slate-700">
-                            {student.latestEnrollment ? (
-                              <div className="space-y-2">
-                                <span
-                                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${paymentBadgeClass(
-                                    student.latestEnrollment.paymentStatus
-                                  )}`}
-                                >
-                                  {paymentStatusLabel(student.latestEnrollment.paymentStatus)}
-                                </span>
-                                <p className="text-sm font-semibold text-slate-900">
-                                  {formatCurrency(student.latestEnrollment.paidAmount)} /{' '}
-                                  {formatCurrency(student.latestEnrollment.totalAmount)}
-                                </p>
-                                <p className="text-xs text-slate-500">
-                                  {getOutstandingBalance(student) > 0
-                                    ? `Reste ${formatCurrency(getOutstandingBalance(student))}`
-                                    : 'Aucun solde restant'}
-                                </p>
-                              </div>
-                            ) : (
-                              <span className="text-sm text-slate-400">Aucun paiement</span>
-                            )}
                           </td>
                           <td className="px-5 py-4 text-slate-600">{formatDate(student.createdAt)}</td>
                           <td className="px-5 py-4">

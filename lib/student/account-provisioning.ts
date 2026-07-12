@@ -144,20 +144,15 @@ export function deriveEnrollmentAccountState(input: AccountStateInput): AccountS
     }
   }
 
-  if (!isEnrollmentPaymentSettled(input)) {
-    return {
-      state: 'awaiting_payment',
-      label: 'En attente paiement',
-      tone: 'warning',
-      canCreate: false,
-      canLogin: false,
-    }
-  }
+  // Refonte 2026 : le statut de paiement ne bloque plus la création du compte.
+  // Tout étudiant inscrit (pending, accepted, confirmed, completed) et non en
+  // liste d'attente obtient immédiatement un accès étudiant.
+  // Le champ paymentStatus reste en base pour traçabilité financière éventuelle.
 
   if (!student) {
     return {
       state: 'pending_creation',
-      label: 'Compte a creer',
+      label: 'Compte à créer',
       tone: 'primary',
       canCreate: true,
       canLogin: false,
@@ -186,7 +181,7 @@ export function deriveEnrollmentAccountState(input: AccountStateInput): AccountS
 
   return {
     state: 'created',
-    label: 'Compte cree',
+    label: 'Compte créé',
     tone: 'primary',
     canCreate: false,
     canLogin: false,
@@ -274,36 +269,6 @@ export async function provisionStudentAccountFromEnrollment({
     return {
       eligible: false,
       reason: 'waitlist',
-      accountCreated: false,
-      accountActivated: false,
-      credentials: null,
-      student: existingStudent
-        ? {
-            id: existingStudent.id,
-            email: existingStudent.email,
-            username: existingStudent.username,
-            status: existingStudent.status,
-          }
-        : null,
-      enrollment: {
-        id: currentEnrollment.id,
-        status: currentEnrollment.status,
-        paymentStatus: currentEnrollment.paymentStatus,
-        paidAmount: currentEnrollment.paidAmount,
-        totalAmount: currentEnrollment.totalAmount,
-      },
-      accountStatus: initialAccountStatus,
-      notifications: {
-        credentialsEmailSent: false,
-        credentialsEmailError: null,
-      },
-    }
-  }
-
-  if (initialAccountStatus.state === 'awaiting_payment') {
-    return {
-      eligible: false,
-      reason: 'payment_pending',
       accountCreated: false,
       accountActivated: false,
       credentials: null,

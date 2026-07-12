@@ -29,7 +29,7 @@ model Student {
   password      String
   phone         String?
   studentNumber String        @unique
-  status        String        @default("PENDING")
+  status        String        @default("ACTIVE")
   role          String        @default("STUDENT")
   adminSessionId String?
   adminSession  AdminTrainingSession? @relation(fields: [adminSessionId], references: [id], onDelete: SetNull)

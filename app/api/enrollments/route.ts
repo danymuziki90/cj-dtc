@@ -323,7 +323,9 @@ export async function POST(req: Request) {
       )
     }
 
-    let status = 'pending'
+    // Depuis la refonte 2026 : tout étudiant qui s'inscrit est immédiatement actif.
+    // Il n'y a plus d'étape de validation manuelle par l'admin.
+    let status = 'confirmed'
     let onWaitlist = false
     let totalAmount = 0
 
@@ -351,13 +353,13 @@ export async function POST(req: Request) {
       if (isFull) {
         status = 'waitlist'
         onWaitlist = true
-      } else if (totalAmount <= 0) {
-        status = 'confirmed'
       }
+      // Toutes les sessions non pleines → confirmed directement (payantes ou gratuites)
     }
 
     const normalizedEmail = String(email).trim().toLowerCase()
-    const immediateAccessEnrollment = !onWaitlist && Boolean(sessionId) && totalAmount <= 0
+    // Provisioning immédiat pour toutes les inscriptions confirmées (pas seulement gratuites)
+    const immediateAccessEnrollment = !onWaitlist && Boolean(sessionId)
     const registrationDate = new Date()
 
     const enrollment = await prisma.enrollment.create({
@@ -372,10 +374,9 @@ export async function POST(req: Request) {
         sessionId: sessionId ? parseInt(sessionId) : null,
         startDate: registrationDate,
         status,
-        paymentStatus: immediateAccessEnrollment ? 'paid' : 'unpaid',
+        paymentStatus: 'unpaid',
         totalAmount,
         paidAmount: 0,
-        paymentDate: immediateAccessEnrollment ? registrationDate : null,
       },
       include: {
         formation: {
@@ -399,7 +400,7 @@ export async function POST(req: Request) {
       ? await provisionStudentAccountFromEnrollment({
           enrollmentId: enrollment.id,
           appBaseUrl: resolveAppBaseUrl(req.url),
-          source: 'public-enrollment-free',
+          source: 'public-enrollment-auto',
         })
       : null
 
@@ -415,9 +416,9 @@ export async function POST(req: Request) {
             }
           : null,
         message: onWaitlist
-          ? "Inscription en liste d'attente (session complete)"
+          ? "Inscription en liste d'attente (session complète)"
           : immediateAccessEnrollment
-          ? 'Inscription enregistree avec succes. Votre acces etudiant est en cours d activation.'
+          ? "Inscription enregistrée avec succès. Votre accès étudiant est en cours d'activation."
           : 'Inscription enregistree avec succes',
       },
       { status: 201 }

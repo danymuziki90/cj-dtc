@@ -60,7 +60,7 @@ const navItems: NavItem[] = [
   {
     href: '/admin/enrollments',
     label: 'Inscriptions',
-    caption: 'Demandes et validations',
+    caption: 'Suivi et consultation',
     icon: FileStack,
   },
   {

@@ -9,10 +9,8 @@ import {
   AdminBadge,
   AdminEmptyState,
   AdminPanel,
-  adminInputClassName,
   adminPrimaryButtonClassName,
   adminSecondaryButtonClassName,
-  adminSelectClassName,
   adminTextareaClassName,
 } from '@/components/admin-portal/ui'
 
@@ -350,13 +348,6 @@ function enrollmentStatusTone(status: string): 'warning' | 'success' | 'danger' 
   return 'neutral'
 }
 
-function paymentStatusTone(status: string): 'success' | 'warning' | 'danger' | 'neutral' {
-  if (status === 'paid' || status === 'success') return 'success'
-  if (status === 'partial' || status === 'pending') return 'warning'
-  if (status === 'unpaid' || status === 'failed' || status === 'rejected') return 'danger'
-  return 'neutral'
-}
-
 export default function EnrollmentPreviewModal({
   enrollment,
   onClose,
@@ -365,11 +356,7 @@ export default function EnrollmentPreviewModal({
   const [record, setRecord] = useState<Enrollment>(enrollment)
   const [internalComment, setInternalComment] = useState('')
   const [savingComment, setSavingComment] = useState(false)
-  const [confirmingPayment, setConfirmingPayment] = useState(false)
   const [creatingStudentAccount, setCreatingStudentAccount] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState('mobile_money')
-  const [paymentReference, setPaymentReference] = useState('')
-  const [paymentTransactionId, setPaymentTransactionId] = useState('')
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
   const [feedbackSuccess, setFeedbackSuccess] = useState<string | null>(null)
   const [generatedCredentials, setGeneratedCredentials] = useState<{ username: string; password: string } | null>(null)
@@ -378,13 +365,6 @@ export default function EnrollmentPreviewModal({
     setRecord(enrollment)
     const notes = parseEnrollmentNotes(enrollment.notes)
     setInternalComment(notes.adminComment)
-    setPaymentMethod(
-      sortPayments(enrollment.payments)[0]?.method ||
-        enrollment.paymentMethod ||
-        'mobile_money'
-    )
-    setPaymentReference('')
-    setPaymentTransactionId('')
     setFeedbackError(null)
     setFeedbackSuccess(null)
     setGeneratedCredentials(null)
@@ -415,10 +395,6 @@ export default function EnrollmentPreviewModal({
   const additionalAnswers = Object.entries(notesInfo.answers)
     .filter(([key, value]) => key !== 'locale' && !knownFields.has(key) && hasDisplayValue(value))
     .map(([key, value]) => ({ key, value }))
-
-  const payments = sortPayments(record.payments)
-  const canConfirmPayment = record.paymentStatus !== 'paid'
-  const balance = Math.max(record.totalAmount - record.paidAmount, 0)
 
   async function handleSaveComment() {
     setSavingComment(true)
@@ -453,61 +429,6 @@ export default function EnrollmentPreviewModal({
       setFeedbackError(error instanceof Error ? error.message : 'Erreur inattendue.')
     } finally {
       setSavingComment(false)
-    }
-  }
-
-  async function handleConfirmPayment() {
-    setConfirmingPayment(true)
-    setFeedbackError(null)
-    setFeedbackSuccess(null)
-
-    try {
-      const response = await fetch(`/api/enrollments/${record.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'confirmPayment',
-          paymentMethod,
-          amount: record.totalAmount > 0 ? record.totalAmount : undefined,
-          reference: paymentReference || undefined,
-          transactionId: paymentTransactionId || undefined,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data?.error || 'Impossible de confirmer le paiement.')
-      }
-
-      if (data.enrollment) {
-        setRecord((prev) => ({
-          ...prev,
-          ...data.enrollment,
-          ...(data.account ? { account: data.account } : {}),
-        }))
-      }
-
-      if (data.credentials?.username && data.credentials?.password) {
-        setGeneratedCredentials({
-          username: data.credentials.username,
-          password: data.credentials.password,
-        })
-      } else {
-        setGeneratedCredentials(null)
-      }
-
-      setFeedbackSuccess(
-        data.accountCreated
-          ? 'Paiement confirmé. Compte étudiant créé et email envoyé.'
-          : 'Paiement confirmé. Compte étudiant activé/maintenu et email envoyé.'
-      )
-
-      onStatusChange()
-    } catch (error) {
-      setFeedbackError(error instanceof Error ? error.message : 'Erreur inattendue.')
-    } finally {
-      setConfirmingPayment(false)
     }
   }
 
@@ -588,7 +509,6 @@ export default function EnrollmentPreviewModal({
               </h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 <AdminBadge tone={enrollmentStatusTone(record.status)}>{record.status}</AdminBadge>
-                <AdminBadge tone={paymentStatusTone(record.paymentStatus)}>{record.paymentStatus}</AdminBadge>
                 {record.account ? <AdminBadge tone={record.account.tone}>{record.account.label}</AdminBadge> : null}
                 <AdminBadge tone="neutral">{record.formation.title}</AdminBadge>
               </div>
@@ -744,167 +664,6 @@ export default function EnrollmentPreviewModal({
                   </button>
                 </div>
               ) : null}
-            </AdminPanel>
-
-            <AdminPanel className="p-5">
-              <h3 className="mb-3 text-lg font-semibold text-slate-900">Verification paiement</h3>
-              <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
-                <div>
-                  <p className="text-slate-500">Statut paiement</p>
-                  <div className="mt-2">
-                    <AdminBadge tone={paymentStatusTone(record.paymentStatus)}>{record.paymentStatus}</AdminBadge>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-slate-500">Statut inscription</p>
-                  <div className="mt-2">
-                    <AdminBadge tone={enrollmentStatusTone(record.status)}>{record.status}</AdminBadge>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-slate-500">Montant total</p>
-                  <p className="font-medium text-slate-900">{formatCurrency(record.totalAmount)}</p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Montant paye</p>
-                  <p className="font-medium text-slate-900">{formatCurrency(record.paidAmount)}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-slate-500">Reste a solder</p>
-                  <p className="font-medium text-slate-900">{formatCurrency(balance)}</p>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-[22px] border border-slate-200 bg-slate-50/90 p-4">
-                <h4 className="mb-2 text-sm font-semibold text-slate-800">Confirmer paiement</h4>
-                {canConfirmPayment ? (
-                  <>
-                    <div className="grid gap-2 md:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Methode</label>
-                        <select
-                          value={paymentMethod}
-                          onChange={(event) => setPaymentMethod(event.target.value)}
-                          className={adminSelectClassName}
-                        >
-                          <option value="mobile_money">Mobile Money</option>
-                          <option value="card">Carte bancaire</option>
-                          <option value="bank_transfer">Virement bancaire</option>
-                          <option value="cash">Especes</option>
-                          <option value="check">Cheque</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Reference</label>
-                        <input
-                          value={paymentReference}
-                          onChange={(event) => setPaymentReference(event.target.value)}
-                          placeholder="REF-123"
-                          className={adminInputClassName}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Transaction ID</label>
-                        <input
-                          value={paymentTransactionId}
-                          onChange={(event) => setPaymentTransactionId(event.target.value)}
-                          placeholder="TX-..."
-                          className={adminInputClassName}
-                        />
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleConfirmPayment}
-                      disabled={confirmingPayment}
-                      className={`mt-3 ${adminPrimaryButtonClassName}`}
-                    >
-                  {confirmingPayment ? 'Confirmation...' : 'Confirmer le paiement et créer/activer le compte étudiant'}
-                    </button>
-                  </>
-                ) : (
-                  <p className="text-sm text-blue-700">Paiement deja confirme pour cette inscription.</p>
-                )}
-              </div>
-
-              {generatedCredentials ? (
-                <div className="mt-4 rounded-[22px] border border-[var(--admin-primary-200)] bg-[var(--admin-primary-50)] p-4 text-sm text-[var(--admin-primary-800)]">
-                  <p className="font-semibold">Nouveau compte etudiant cree</p>
-                  <p className="mt-1">Username: {generatedCredentials.username}</p>
-                  <p>Mot de passe initial: {generatedCredentials.password}</p>
-                </div>
-              ) : null}
-            </AdminPanel>
-
-            <AdminPanel className="p-5">
-              <h3 className="mb-3 text-lg font-semibold text-slate-900">Transactions</h3>
-              {payments.length === 0 ? (
-                <AdminEmptyState
-                  title="Aucune transaction enregistree"
-                  description="L'historique de paiement de cette inscription est vide pour le moment."
-                />
-              ) : (
-                <div className="space-y-3">
-                  {payments.map((payment) => {
-                    const details = parsePaymentNotes(payment.notes)
-
-                    return (
-                      <div key={payment.id} className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4 text-sm">
-                        <div className="grid gap-2 md:grid-cols-2">
-                          <p>
-                            <strong>ID:</strong> {payment.id}
-                          </p>
-                          <p>
-                            <strong>Montant:</strong> {formatCurrency(payment.amount)}
-                          </p>
-                          <p>
-                            <strong>Methode:</strong> {METHOD_LABELS[payment.method] || payment.method}
-                          </p>
-                          <p>
-                            <strong>Statut:</strong> {payment.status}
-                          </p>
-                          <p>
-                            <strong>Reference:</strong> {payment.reference || '-'}
-                          </p>
-                          <p>
-                            <strong>Transaction:</strong> {payment.transactionId || '-'}
-                          </p>
-                          <p>
-                            <strong>Gateway:</strong> {details.gateway || '-'}
-                          </p>
-                          <p>
-                            <strong>Operateur:</strong> {details.operator || '-'}
-                          </p>
-                          <p>
-                            <strong>Date creation:</strong>{' '}
-                            <FormattedDate date={payment.createdAt} options={{ dateStyle: 'short', timeStyle: 'short' } as Intl.DateTimeFormatOptions} />
-                          </p>
-                          <p>
-                            <strong>Date paiement:</strong>{' '}
-                            {payment.paidAt ? (
-                              <FormattedDate date={payment.paidAt} options={{ dateStyle: 'short', timeStyle: 'short' } as Intl.DateTimeFormatOptions} />
-                            ) : (
-                              '-'
-                            )}
-                          </p>
-                          {details.phoneNumberMasked ? (
-                            <p>
-                              <strong>Numero masque:</strong> {details.phoneNumberMasked}
-                            </p>
-                          ) : null}
-                          {details.proofUrl ? (
-                            <p>
-                              <strong>Preuve:</strong>{' '}
-                              <a className="text-blue-700 underline" href={details.proofUrl} target="_blank" rel="noreferrer">
-                                Ouvrir
-                              </a>
-                            </p>
-                          ) : null}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
             </AdminPanel>
 
             <AdminPanel className="p-5">

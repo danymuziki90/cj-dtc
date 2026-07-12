@@ -103,15 +103,6 @@ type DashboardPayload = {
     }
   }
   actionsNow: {
-    paymentsToValidate: Array<{
-      enrollmentId: number
-      studentName: string
-      email: string
-      formationTitle: string
-      sessionLabel: string
-      balanceAmount: number
-      createdAt: string
-    }>
     studentsBlockedWithoutAccount: Array<{
       enrollmentId: number
       studentName: string
