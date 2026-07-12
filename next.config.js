@@ -30,6 +30,10 @@ const nextConfig = {
     return config
   },
   // Keep config lean for Next 16 compatibility.
+  turbopack: {
+    // Empty config to acknowledge we've reviewed Turbopack compatibility
+    // and silence the error about webpack config without turbopack config
+  },
 }
 
 module.exports = nextConfig

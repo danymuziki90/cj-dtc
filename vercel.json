@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx prisma generate && node scripts/next-build-with-memory.js",
+  "buildCommand": "node scripts/next-build-with-memory.js",
   "framework": "nextjs",
   "installCommand": "npm install"
 }

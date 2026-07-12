@@ -39,17 +39,17 @@ const METHOD_STEPS = {
     {
       num: '01',
       title: 'Apprentissage par la pratique',
-      desc: 'Chaque module est conçu autour de cas réels, d'exercices terrain et de mises en situation professionnelle. Pas de théorie sans application immédiate.',
+      desc: "Chaque module est conçu autour de cas réels, d'exercices terrain et de mises en situation professionnelle. Pas de théorie sans application immédiate.",
     },
     {
       num: '02',
       title: 'Coaching individuel et collectif',
-      desc: 'Nos formateurs accompagnent chaque apprenant pendant et après la session. Le coaching ne s'arrête pas à la fin du cours.',
+      desc: "Nos formateurs accompagnent chaque apprenant pendant et après la session. Le coaching ne s'arrête pas à la fin du cours.",
     },
     {
       num: '03',
-      title: 'Orientation vers l'emploi',
-      desc: 'Chaque programme intègre un volet insertion : préparation CV, simulation d'entretien, mise en réseau avec des partenaires employeurs.',
+      title: "Orientation vers l'emploi",
+      desc: "Chaque programme intègre un volet insertion : préparation CV, simulation d'entretien, mise en réseau avec des partenaires employeurs.",
     },
     {
       num: '04',
@@ -82,7 +82,7 @@ const METHOD_STEPS = {
 }
 
 const COUNTRIES = [
-  'RD Congo', 'Guinée', 'Côte d'Ivoire', 'Cameroun', 'Sénégal',
+  'RD Congo', 'Guinée', 'Côte d\'Ivoire', 'Cameroun', 'Sénégal',
   'Bénin', 'Togo', 'Mali', 'Burkina Faso', 'Niger', 'Gabon',
 ]
 
@@ -118,12 +118,12 @@ const VALUES = {
     {
       icon: Users2,
       title: 'Leadership utile',
-      desc: 'Nous formons des profils capables de décider, d'agir et de faire avancer leurs équipes dans des contextes africains et globaux.',
+      desc: "Nous formons des profils capables de décider, d'agir et de faire avancer leurs équipes dans des contextes africains et globaux.",
     },
     {
       icon: Globe2,
       title: 'Impact social mesurable',
-      desc: 'Chaque promotion vise un résultat concret : insertion, promotion, création d'entreprise ou renforcement institutionnel.',
+      desc: 'Chaque promotion vise un résultat concret : insertion, promotion, création d\'entreprise ou renforcement institutionnel.',
     },
   ],
   en: [
@@ -237,12 +237,12 @@ export default function AboutModernPage({
             </p>
             <h2 className="mt-3 text-2xl font-black text-[var(--cj-blue)]">
               {isFr
-                ? 'Né d'un constat : le diplôme seul ne suffit pas.'
+                ? "Né d'un constat : le diplôme seul ne suffit pas."
                 : 'Born from an observation: a degree alone is not enough.'}
             </h2>
             <p className="mt-4 text-sm leading-8 text-slate-600">
               {isFr
-                ? 'En 2018, CJ Development Training Center est fondé à Kinshasa avec une conviction simple : des milliers de jeunes africains obtiennent des diplômes sans trouver d'emploi, parce que leurs compétences opérationnelles ne correspondent pas aux attentes réelles des entreprises. Nous avons créé un espace pour combler cet écart — pas avec des cours supplémentaires, mais avec une méthode pratique, un accompagnement humain et un réseau actif.'
+                ? "En 2018, CJ Development Training Center est fondé à Kinshasa avec une conviction simple : des milliers de jeunes africains obtiennent des diplômes sans trouver d'emploi, parce que leurs compétences opérationnelles ne correspondent pas aux attentes réelles des entreprises. Nous avons créé un espace pour combler cet écart — pas avec des cours supplémentaires, mais avec une méthode pratique, un accompagnement humain et un réseau actif."
                 : 'In 2018, CJ Development Training Center was founded in Kinshasa with a simple conviction: thousands of young Africans obtain degrees without finding jobs, because their operational skills do not match what employers actually need. We created a space to bridge that gap — not with more courses, but with a practical method, human support and an active network.'}
             </p>
             <p className="mt-4 text-sm leading-8 text-slate-600">
@@ -368,7 +368,7 @@ export default function AboutModernPage({
             </div>
             <p className="mt-4 text-sm leading-7 text-slate-600">
               {isFr
-                ? 'CJ DTC forme des professionnels en Afrique centrale, de l'Ouest et au-delà. Notre réseau s'étend chaque année grâce à nos partenaires institutionnels et nos anciens apprenants devenus ambassadeurs.'
+                ? 'CJ DTC forme des professionnels en Afrique centrale, de l\'Ouest et au-delà. Notre réseau s\'étend chaque année grâce à nos partenaires institutionnels et nos anciens apprenants devenus ambassadeurs.'
                 : 'CJ DTC trains professionals across Central Africa, West Africa and beyond. Our network grows each year through institutional partners and alumni who become ambassadors.'}
             </p>
             <div className="mt-5 flex flex-wrap gap-2">

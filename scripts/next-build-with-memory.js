@@ -5,7 +5,7 @@ const nextBin = path.join(__dirname, '..', 'node_modules', 'next', 'dist', 'bin'
 const existingNodeOptions = process.env.NODE_OPTIONS || ''
 const memoryOption = '--max-old-space-size=4096'
 
-const child = spawn(process.execPath, [nextBin, 'build', '--webpack'], {
+const child = spawn(process.execPath, [nextBin, 'build'], {
   cwd: path.join(__dirname, '..'),
   env: {
     ...process.env,
