@@ -15,19 +15,19 @@ import {
   Play,
   CheckCircle,
   AlertCircle,
-  User,
+  UserIcon,
   Settings,
   LogOut,
   Bell,
-  Search,
+  SearchIcon,
   Filter,
   ChevronRight,
   BarChart3,
   Users,
-  Target,
+  TargetIcon,
   Globe,
   Flag,
-  Star
+  StarIcon
 } from 'lucide-react'
 
 export default function StudentDashboard() {
@@ -243,9 +243,9 @@ export default function StudentDashboard() {
 
             {/* Right side */}
             <div className="flex items-center space-x-4">
-              {/* Search */}
+              {/* SearchIcon */}
               <div className="hidden md:flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
-                <Search className="w-4 h-4 text-gray-400" />
+                <SearchIcon className="w-4 h-4 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Rechercher..."
@@ -265,7 +265,7 @@ export default function StudentDashboard() {
                 )}
               </button>
 
-              {/* User Menu */}
+              {/* UserIcon Menu */}
               <div className="flex items-center space-x-3">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-medium text-gray-900">
@@ -278,7 +278,7 @@ export default function StudentDashboard() {
                 
                 <div className="relative">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                    <User className="w-5 h-5 text-white" />
+                    <UserIcon className="w-5 h-5 text-white" />
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>
                 </div>
@@ -326,7 +326,7 @@ export default function StudentDashboard() {
                     <span className="text-sm">{studentStats.studyHours}h d'étude</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Target className="w-5 h-5" />
+                    <TargetIcon className="w-5 h-5" />
                     <span className="text-sm">Prochaine échéance: {studentStats.nextDeadline}</span>
                   </div>
                 </div>
@@ -502,7 +502,7 @@ export default function StudentDashboard() {
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-xs text-gray-600">{certificate.issueDate}</span>
                         <div className="flex items-center space-x-1">
-                          <Star className="w-3 h-3 text-red-500" />
+                          <StarIcon className="w-3 h-3 text-red-500" />
                           <span className="text-xs text-gray-600">{certificate.score}%</span>
                         </div>
                       </div>

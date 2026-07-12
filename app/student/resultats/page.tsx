@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, CheckCircle2, ClipboardCheck, NotebookText, ShieldCheck, Star } from 'lucide-react'
+import { BarChart3, CheckCircle2, ClipboardCheck, BookOpen, ShieldCheck, StarIcon } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentSectionCard,
@@ -18,11 +18,11 @@ export default function StudentResultsPage() {
   const { data, loading, error } = useStudentDashboardData()
 
   if (loading) {
-    return <StudentPortalLoading title="Resultats" description="Consultez vos evaluations, votre progression et votre eligibilite au certificat." icon={NotebookText} />
+    return <StudentPortalLoading title="Resultats" description="Consultez vos evaluations, votre progression et votre eligibilite au certificat." icon={BookOpen} />
   }
 
   if (!data || error) {
-    return <StudentPortalError title="Resultats" description="Consultez vos evaluations, votre progression et votre eligibilite au certificat." icon={NotebookText} error={error} />
+    return <StudentPortalError title="Resultats" description="Consultez vos evaluations, votre progression et votre eligibilite au certificat." icon={BookOpen} error={error} />
   }
 
   const eligibility = data.dashboard.certificateEligibility
@@ -62,7 +62,7 @@ export default function StudentResultsPage() {
     <StudentPortalPageShell
       title="Mes resultats"
       description="Suivez vos evaluations, votre taux de presence et les conditions restantes pour obtenir votre certificat."
-      icon={NotebookText}
+      icon={BookOpen}
       metrics={metrics}
     >
       <StudentSectionCard
@@ -94,7 +94,7 @@ export default function StudentResultsPage() {
         eyebrow="Evaluations"
         title="Retours et notes pedagogiques"
         description="Les notes et appreciations validees par l'equipe pedagogique sont centralisees ici."
-        icon={Star}
+        icon={StarIcon}
       >
         {data.dashboard.results.length ? (
           <div className="grid gap-4 xl:grid-cols-2">

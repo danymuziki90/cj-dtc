@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   Award, BookOpen, CalendarDays, Filter,
-  Search, Sparkles, TrendingUp, Users, X,
+  SearchIcon, Sparkle, TrendingUp, Users, XIcon,
 } from 'lucide-react'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import type { Formation, FormationCatalogFilters } from '@/lib/types/formation'
@@ -63,11 +63,11 @@ export default function FormationsPage() {
   const hasActiveFilters = !!filters.search || filters.category !== 'all' || filters.level !== 'all' || filters.format !== 'all'
 
   const sortOptions = [
-    { id: 'popular',      name: isFr ? 'Plus populaire'   : 'Most popular'   },
+    { id: 'popular',      name: isFr ? 'PlusIcon populaire'   : 'Most popular'   },
     { id: 'price-low',    name: isFr ? 'Prix croissant'   : 'Price low–high' },
     { id: 'price-high',   name: isFr ? 'Prix décroissant' : 'Price high–low' },
     { id: 'rating',       name: isFr ? 'Mieux noté'       : 'Top rated'      },
-    { id: 'newest',       name: isFr ? 'Plus récent'      : 'Newest'         },
+    { id: 'newest',       name: isFr ? 'PlusIcon récent'      : 'Newest'         },
     { id: 'alphabetical', name: isFr ? 'Alphabétique'     : 'A – Z'          },
   ]
 
@@ -150,7 +150,7 @@ export default function FormationsPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <span className="inline-flex items-center gap-2 rounded-full bg-[var(--cj-blue)] px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white mb-3">
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkle className="h-3.5 w-3.5" />
                 {isFr ? 'Programmes phares' : 'Featured programs'}
               </span>
               <h2 className="text-3xl font-black text-slate-900">
@@ -172,19 +172,19 @@ export default function FormationsPage() {
               {isFr ? 'Catalogue complet' : 'Full catalog'}
             </h2>
             <p className="mt-2 text-base text-slate-600">
-              {isFr ? 'Recherchez, filtrez et trouvez le programme qui vous correspond.' : 'Search, filter and find the program that matches your goals.'}
+              {isFr ? 'Recherchez, filtrez et trouvez le programme qui vous correspond.' : 'SearchIcon, filter and find the program that matches your goals.'}
             </p>
           </div>
 
-          {/* Search + sort */}
+          {/* SearchIcon + sort */}
           <div className="mb-6 flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="text"
                 value={filters.search || ''}
                 onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
-                placeholder={isFr ? 'Rechercher une formation…' : 'Search a program…'}
+                placeholder={isFr ? 'Rechercher une formation…' : 'SearchIcon a program…'}
                 className="w-full rounded-xl border border-slate-200 pl-9 pr-9 py-2.5 text-sm focus:border-[var(--cj-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--cj-blue)]/20"
               />
               {filters.search && (
@@ -192,7 +192,7 @@ export default function FormationsPage() {
                   onClick={() => setFilters(f => ({ ...f, search: '' }))}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
                 >
-                  <X className="h-4 w-4" />
+                  <XIcon className="h-4 w-4" />
                 </button>
               )}
             </div>
@@ -259,7 +259,7 @@ export default function FormationsPage() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-slate-900">{isFr ? 'Filtres' : 'Filters'}</h3>
               <button onClick={() => setShowMobileFilters(false)}>
-                <X className="h-5 w-5 text-slate-500" />
+                <XIcon className="h-5 w-5 text-slate-500" />
               </button>
             </div>
             <div className="space-y-6">

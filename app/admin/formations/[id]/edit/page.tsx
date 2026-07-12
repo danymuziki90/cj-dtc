@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, AlertCircle, RefreshCw, Eye } from 'lucide-react'
+import { ChevronLeft, AlertCircle, RotateCw, Eye } from 'lucide-react'
 import FormationForm from '@/components/admin/FormationForm'
 
 export default function EditFormationPage() {
@@ -51,7 +51,7 @@ export default function EditFormationPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center gap-3 text-gray-600">
-          <RefreshCw className="w-5 h-5 animate-spin" />
+          <RotateCw className="w-5 h-5 animate-spin" />
           <span>Chargement de la formation…</span>
         </div>
       </div>

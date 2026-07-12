@@ -4,18 +4,18 @@ import Link from 'next/link'
 import { 
   Clock, 
   Users, 
-  Target, 
-  MapPin, 
+  TargetIcon, 
+  MapPinIcon, 
   Monitor, 
   Layers,
-  Star, 
+  StarIcon, 
   Award,
   BookOpen,
   CheckCircle2,
   TrendingUp,
-  User,
+  UserIcon,
   ChevronRight,
-  Sparkles
+  Sparkle
 } from 'lucide-react'
 import type { Formation } from '@/lib/types/formation'
 import { calculateDiscount, summarizeText, parseTextList } from '@/lib/formations/catalog'
@@ -27,7 +27,7 @@ interface FormationCardProps {
 }
 
 const formatIcons = {
-  presentiel: MapPin,
+  presentiel: MapPinIcon,
   en_ligne: Monitor,
   hybride: Layers
 }
@@ -73,7 +73,7 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
       {/* Badge Featured */}
       {featured && (
         <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 text-sm font-semibold text-center flex items-center justify-center gap-2">
-          <Sparkles className="w-4 h-4" />
+          <Sparkle className="w-4 h-4" />
           <span>Formation vedette</span>
         </div>
       )}
@@ -107,7 +107,7 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
           </span>
           {formation.rating && formation.reviewCount && (
             <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+              <StarIcon className="w-4 h-4 text-yellow-400 fill-current" />
               <span className="text-sm font-medium text-gray-700">{formation.rating}</span>
               <span className="text-xs text-gray-500">({formation.reviewCount})</span>
             </div>
@@ -173,7 +173,7 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
           
           {formation.level && (
             <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <TargetIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
               <span className={`px-2 py-0.5 rounded text-xs font-medium ${levelColor} truncate`}>
                 {formation.level.charAt(0).toUpperCase() + formation.level.slice(1)}
               </span>
@@ -202,7 +202,7 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
             )}
             {formation.hasCoaching && (
               <div className="flex items-center gap-1 text-gray-600">
-                <User className="w-3 h-3 text-green-500" />
+                <UserIcon className="w-3 h-3 text-green-500" />
                 <span>Coaching</span>
               </div>
             )}
@@ -233,7 +233,7 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
                     className="w-full h-full rounded-full object-cover"
                   />
                 ) : (
-                  <User className="w-5 h-5 text-blue-600" />
+                  <UserIcon className="w-5 h-5 text-blue-600" />
                 )}
               </div>
               <div className="min-w-0">

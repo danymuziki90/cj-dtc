@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { Mail, SendHorizonal, Sparkles } from 'lucide-react'
+import { MailIcon, Send, Sparkle } from 'lucide-react'
 import {
   AdminBadge,
   AdminEmptyState,
@@ -138,11 +138,11 @@ export default function BulkEmailSender({ acceptedEnrollments }: BulkEmailSender
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Aide rapide</p>
                 <div className="mt-4 space-y-3 text-sm text-slate-600">
                   <p className="inline-flex items-start gap-2">
-                    <Sparkles className="mt-0.5 h-4 w-4 text-[var(--admin-primary)]" />
+                    <Sparkle className="mt-0.5 h-4 w-4 text-[var(--admin-primary)]" />
                     Variables disponibles: {'{'}firstName{'}'}, {'{'}lastName{'}'}, {'{'}email{'}'}, {'{'}formationTitle{'}'}.
                   </p>
                   <p className="inline-flex items-start gap-2">
-                    <Mail className="mt-0.5 h-4 w-4 text-[var(--admin-primary)]" />
+                    <MailIcon className="mt-0.5 h-4 w-4 text-[var(--admin-primary)]" />
                     Seules les inscriptions avec statut accepte sont inclues dans l'envoi.
                   </p>
                 </div>
@@ -154,7 +154,7 @@ export default function BulkEmailSender({ acceptedEnrollments }: BulkEmailSender
                 Annuler
               </button>
               <button type="submit" disabled={isLoading} className={adminPrimaryButtonClassName}>
-                <SendHorizonal className="h-4 w-4" />
+                <Send className="h-4 w-4" />
                 {isLoading
                   ? 'Envoi en cours...'
                   : `Envoyer a ${acceptedEnrollments.length} destinataire${acceptedEnrollments.length > 1 ? 's' : ''}`}

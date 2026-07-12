@@ -6,8 +6,8 @@ import { useParams } from "next/navigation";
 import {
   ArrowRight,
   Phone,
-  Mail,
-  MapPin,
+  MailIcon,
+  MapPinIcon,
   Clock,
   Send,
   CheckCircle,
@@ -40,7 +40,7 @@ export default function ContactPage() {
 
   const contactInfo = [
     {
-      icon: MapPin,
+      icon: MapPinIcon,
       title: "Adresse",
       details: "Avenue des Aviateurs, Commune de la Gombe",
       city: "Kinshasa, République Démocratique du Congo",
@@ -53,7 +53,7 @@ export default function ContactPage() {
       link: "tel:+243123456789",
     },
     {
-      icon: Mail,
+      icon: MailIcon,
       title: "Email",
       details: "info@cjdtc.com",
       link: "mailto:info@cjdtc.com",
@@ -447,7 +447,7 @@ export default function ContactPage() {
                           href={`mailto:${service.email}`}
                           className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center space-x-1"
                         >
-                          <Mail className="w-4 h-4" />
+                          <MailIcon className="w-4 h-4" />
                           <span>{service.email}</span>
                         </a>
                       </div>
@@ -603,7 +603,7 @@ export default function ContactPage() {
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="h-96 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
               <div className="text-center">
-                <MapPin className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+                <MapPinIcon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   CJ DTC Headquarters
                 </h3>
@@ -619,7 +619,7 @@ export default function ContactPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"
                 >
-                  <MapPin className="w-5 h-5" />
+                  <MapPinIcon className="w-5 h-5" />
                   <span>Voir sur Google Maps</span>
                 </a>
               </div>

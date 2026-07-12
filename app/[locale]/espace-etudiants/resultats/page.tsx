@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
-import { Award, CheckCircle2, FileBarChart2, GraduationCap, MessageSquare, Star } from 'lucide-react'
+import { Award, CheckCircle2, FileBarChart2, GraduationCap, MessageSquare, StarIcon } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentPageShell,
@@ -55,7 +55,7 @@ function certificateTypeLabel(type: string) {
 
 function renderStars(rating: number) {
   return Array.from({ length: 5 }, (_, index) => (
-    <Star
+    <StarIcon
       key={`${rating}-${index}`}
       className={`h-4 w-4 ${index < rating ? 'fill-[var(--cj-red)] text-[var(--cj-red)]' : 'text-slate-300'}`}
     />
@@ -92,7 +92,7 @@ export default function ResultatsPage() {
         label: 'Note moyenne',
         value: evaluations.length ? `${averageRating}/5` : '0/5',
         helper: 'Moyenne globale des notes visibles.',
-        icon: Star,
+        icon: StarIcon,
         accent: 'from-[#003b96] via-[var(--cj-blue)] to-[#0f172a]',
       },
       {

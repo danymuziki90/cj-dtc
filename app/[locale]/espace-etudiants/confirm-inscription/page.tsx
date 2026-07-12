@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { FormEvent, Suspense, useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, CalendarDays, CheckCircle2, GraduationCap, Loader2, MapPin, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CheckCircle2, GraduationCap, Loader2, MapPinIcon, ShieldCheck } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentPageShell,
@@ -128,7 +128,7 @@ function ConfirmInscriptionContent() {
       {
         label: 'Lieu / format',
         value: session ? [session.location, session.format].filter(Boolean).join(' | ') : 'A confirmer',
-        icon: MapPin,
+        icon: MapPinIcon,
       },
     ]
   }, [formation, session])

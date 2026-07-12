@@ -4,7 +4,7 @@ import {
   CalendarDays,
   Clock3,
   GraduationCap,
-  MapPin,
+  MapPinIcon,
 } from "lucide-react";
 import {
   StudentEmptyState,
@@ -86,7 +86,7 @@ export default function StudentSessionsPage() {
       label: "Inscriptions",
       value: data.dashboard.sessionsHistory.length,
       helper: "Total des inscriptions enregistrees.",
-      icon: MapPin,
+      icon: MapPinIcon,
       accent: "from-[#001737] to-[#002D72]",
     },
   ];

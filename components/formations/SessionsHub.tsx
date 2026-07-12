@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, RefreshCw, SlidersHorizontal, X } from 'lucide-react'
+import { CalendarDays, RotateCw, SlidersHorizontal, XIcon } from 'lucide-react'
 import SessionCard, { type SessionItem } from './SessionCard'
 import { inferProgramSessionType, type ProgramSessionType } from '@/lib/programmes/session-types'
 
@@ -149,7 +149,7 @@ export default function SessionsHub({ locale }: Props) {
                   onClick={() => { setTypeFilter('ALL'); setFormatFilter('all') }}
                   className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <XIcon className="h-3.5 w-3.5" />
                   {locale === 'fr' ? 'Réinitialiser' : 'Reset'}
                 </button>
               )}
@@ -216,7 +216,7 @@ export default function SessionsHub({ locale }: Props) {
               onClick={() => window.location.reload()}
               className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2 text-sm font-semibold text-white hover:bg-red-700"
             >
-              <RefreshCw className="h-4 w-4" />
+              <RotateCw className="h-4 w-4" />
               {locale === 'fr' ? 'Réessayer' : 'Retry'}
             </button>
           </div>

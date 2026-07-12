@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { BookOpen, Home, Search, UserRound } from 'lucide-react'
+import { BookOpen, Home, SearchIcon, User } from 'lucide-react'
 
 export default function NotFound() {
   const router = useRouter()
@@ -38,12 +38,12 @@ export default function NotFound() {
                 <p className="mt-2 text-sm leading-6 text-slate-500">Retrouvez nos programmes et les prochaines sessions ouvertes.</p>
               </Link>
               <Link href={`/${locale}/espace-etudiants`} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
-                <UserRound className="h-6 w-6 text-[var(--cj-blue)]" />
+                <User className="h-6 w-6 text-[var(--cj-blue)]" />
                 <p className="mt-4 text-sm font-semibold text-slate-950">Espace etudiant</p>
                 <p className="mt-2 text-sm leading-6 text-slate-500">Accedez a votre dashboard, vos travaux et vos resultats.</p>
               </Link>
               <Link href={`/${locale}/contact`} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
-                <Search className="h-6 w-6 text-[var(--cj-blue)]" />
+                <SearchIcon className="h-6 w-6 text-[var(--cj-blue)]" />
                 <p className="mt-4 text-sm font-semibold text-slate-950">Nous contacter</p>
                 <p className="mt-2 text-sm leading-6 text-slate-500">Si vous cherchiez une page precise, nous pouvons vous reorienter.</p>
               </Link>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, BellRing, Megaphone, RefreshCcw, SendHorizonal } from 'lucide-react'
+import { AlertTriangle, BellRing, Volume2, RotateCcw, Send } from 'lucide-react'
 import AdminShell from '@/components/admin-portal/AdminShell'
 import {
   AdminBadge,
@@ -200,8 +200,8 @@ export default function AdminNotificationsPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminMetricCard icon={BellRing} label="Notifications manuelles" value={`${notifications.length}`} helper="Messages saisis et visibles dans le centre admin." tone="primary" />
         <AdminMetricCard icon={AlertTriangle} label="Alertes systeme" value={`${systemAlerts.length}`} helper="Generees automatiquement a partir des paiements, presences et sessions." tone="warning" />
-        <AdminMetricCard icon={Megaphone} label="Rappels" value={`${notifications.filter((item) => item.type === 'reminder').length}`} helper="Messages de relance deja publies." tone="success" />
-        <AdminMetricCard icon={RefreshCcw} label="Filtres sauvegardes" value={`${Number(Boolean(filters.type !== 'all' || filters.target !== 'all' || filters.search))}`} helper="Vos filtres de consultation sont conserves localement." tone="neutral" />
+        <AdminMetricCard icon={Volume2} label="Rappels" value={`${notifications.filter((item) => item.type === 'reminder').length}`} helper="Messages de relance deja publies." tone="success" />
+        <AdminMetricCard icon={RotateCcw} label="Filtres sauvegardes" value={`${Number(Boolean(filters.type !== 'all' || filters.target !== 'all' || filters.search))}`} helper="Vos filtres de consultation sont conserves localement." tone="neutral" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
@@ -258,7 +258,7 @@ export default function AdminNotificationsPage() {
             </div>
             {error ? <p className="rounded-[22px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
             <button type="submit" disabled={saving} className={adminPrimaryButtonClassName}>
-              <SendHorizonal className="h-4 w-4" />
+              <Send className="h-4 w-4" />
               {saving ? 'Envoi...' : 'Envoyer la notification'}
             </button>
           </form>
@@ -296,7 +296,7 @@ export default function AdminNotificationsPage() {
           description="Filtrez par type, cible ou texte. Les filtres restent en memoire sur ce navigateur."
           actions={
             <button type="button" onClick={() => setFilters(initialFilters)} className={adminSecondaryButtonClassName}>
-              <RefreshCcw className="h-4 w-4" />
+              <RotateCcw className="h-4 w-4" />
               Reinitialiser les filtres
             </button>
           }

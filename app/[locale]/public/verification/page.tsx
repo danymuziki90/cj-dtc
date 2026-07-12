@@ -3,27 +3,27 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
-  Search, 
+  SearchIcon, 
   Award, 
   CheckCircle, 
-  X, 
+  XIcon, 
   Calendar, 
-  User, 
+  UserIcon, 
   BookOpen,
-  Shield,
+  ShieldIcon,
   Globe,
   Flag,
   ExternalLink,
   AlertCircle,
   Clock,
-  MapPin,
-  Mail,
+  MapPinIcon,
+  MailIcon,
   Phone,
-  Star,
+  StarIcon,
   TrendingUp,
   BarChart3,
   Users,
-  Target
+  TargetIcon
 } from 'lucide-react'
 
 // QR Code services
@@ -238,7 +238,7 @@ export default function VerificationPage() {
               <Download className="w-5 h-5 mr-2" /> Télécharger le QR Code
             </button>
             <button onClick={() => { setSelectedCertificate(null); setVerificationCode(selectedCertificate.code); }} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <Shield className="w-5 h-5 mr-2" /> Vérifier ce certificat
+              <ShieldIcon className="w-5 h-5 mr-2" /> Vérifier ce certificat
             </button>
             <button onClick={() => setSelectedCertificate(null)} className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
               Fermer
@@ -257,7 +257,7 @@ export default function VerificationPage() {
           <div className="text-center">
             <div className="flex justify-center space-x-4 mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                <Shield className="w-8 h-8 text-white" />
+                <ShieldIcon className="w-8 h-8 text-white" />
               </div>
               <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
                 <QrCode className="w-8 h-8 text-white" />
@@ -313,7 +313,7 @@ export default function VerificationPage() {
               <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
-                    <Star className="w-6 h-6 text-red-600" />
+                    <StarIcon className="w-6 h-6 text-red-600" />
                   </div>
                   <TrendingUp className="w-5 h-5 text-blue-500" />
                 </div>
@@ -355,7 +355,7 @@ export default function VerificationPage() {
                   </span>
                 ) : (
                   <>
-                    <Shield className="w-5 h-5" />
+                    <ShieldIcon className="w-5 h-5" />
                     <span>Vérifier</span>
                   </>
                 )}
@@ -448,7 +448,7 @@ export default function VerificationPage() {
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="w-8 h-8 text-blue-600" />
+                  <ShieldIcon className="w-8 h-8 text-blue-600" />
                 </div>
                 <h4 className="font-semibold text-gray-900 mb-2">Sécurité Maximale</h4>
                 <p className="text-sm text-gray-600">

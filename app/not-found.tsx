@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, Home, UserRound } from 'lucide-react'
+import { BookOpen, Home, User } from 'lucide-react'
 
 export default function NotFound() {
   return (
@@ -26,7 +26,7 @@ export default function NotFound() {
               <p className="mt-2 text-sm leading-6 text-slate-500">Explorer les programmes et les prochaines opportunites de formation.</p>
             </Link>
             <Link href="/fr/espace-etudiants" className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
-              <UserRound className="h-6 w-6 text-[var(--cj-blue)]" />
+              <User className="h-6 w-6 text-[var(--cj-blue)]" />
               <p className="mt-4 text-sm font-semibold text-slate-950">Espace etudiants</p>
               <p className="mt-2 text-sm leading-6 text-slate-500">Acceder au tableau de bord, aux travaux et aux certificats.</p>
             </Link>

@@ -5,24 +5,24 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   ArrowRight,
-  User,
+  UserIcon,
   Users,
   Award,
   Globe,
   CheckCircle,
   Play,
-  Star,
+  StarIcon,
   TrendingUp,
   BookOpen,
-  Target,
+  TargetIcon,
   Flag,
-  MapPin,
+  MapPinIcon,
   Phone,
-  Mail,
+  MailIcon,
   Calendar,
   ChevronRight,
   Menu,
-  X,
+  XIcon,
   Facebook,
   Twitter,
   Linkedin,
@@ -281,7 +281,7 @@ export default function HomePage() {
               className="lg:hidden p-2 text-gray-600 hover:text-gray-900"
             >
               {isMenuOpen ? (
-                <X className="w-6 h-6" />
+                <XIcon className="w-6 h-6" />
               ) : (
                 <Menu className="w-6 h-6" />
               )}
@@ -551,7 +551,7 @@ export default function HomePage() {
                       Expertise Panafricaine
                     </h3>
                     <p className="text-gray-600">
-                      Plus de 10 ans d'expérience dans la formation des
+                      PlusIcon de 10 ans d'expérience dans la formation des
                       professionnels africains
                     </p>
                   </div>
@@ -559,7 +559,7 @@ export default function HomePage() {
 
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Target className="w-6 h-6 text-blue-600" />
+                    <TargetIcon className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -639,7 +639,7 @@ export default function HomePage() {
               >
                 <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star
+                    <StarIcon
                       key={i}
                       className="w-5 h-5 text-red-400 fill-current"
                     />
@@ -652,7 +652,7 @@ export default function HomePage() {
 
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-blue-600" />
+                    <UserIcon className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">
@@ -851,7 +851,7 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">Contact</h4>
               <div className="space-y-3 text-gray-400">
                 <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4" />
+                  <MapPinIcon className="w-4 h-4" />
                   <span>Kinshasa, RDC</span>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -859,7 +859,7 @@ export default function HomePage() {
                   <span>+243 XXX XXX XXX</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4" />
+                  <MailIcon className="w-4 h-4" />
                   <span>info@cjdtc.com</span>
                 </div>
               </div>

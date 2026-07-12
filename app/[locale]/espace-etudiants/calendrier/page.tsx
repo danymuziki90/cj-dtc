@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Clock3, GraduationCap, MapPin, MonitorSmartphone, TimerReset } from 'lucide-react'
+import { CalendarDays, Clock3, GraduationCap, MapPinIcon, MonitorSmartphone, TimerReset } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentPageShell,
@@ -112,7 +112,7 @@ export default function CalendrierPage() {
         label: 'Presentiel',
         value: presentielCount,
         helper: 'Sessions programmees sur site.',
-        icon: MapPin,
+        icon: MapPinIcon,
         accent: 'from-[var(--cj-red)] via-[#bb111d] to-[#4a0b14]',
       },
       {

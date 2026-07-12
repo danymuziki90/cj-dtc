@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { FormEvent, Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowRight, Search } from 'lucide-react'
+import { ArrowRight, SearchIcon } from 'lucide-react'
 import AdminShell from '@/components/admin-portal/AdminShell'
 import {
   AdminBadge,
@@ -110,7 +110,7 @@ function AdminSearchContent() {
         />
         <form onSubmit={submit} className="mt-5 flex flex-col gap-3 md:flex-row">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nom, email, reference, formation..." className={`${adminInputClassName} pl-11`} />
           </div>
           <button type="submit" className={adminPrimaryButtonClassName}>Rechercher</button>

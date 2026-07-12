@@ -8,7 +8,7 @@ import {
   CircleDollarSign,
   Download,
   Layers3,
-  Save,
+  SaveIcon,
 } from 'lucide-react'
 import {
   Bar,
@@ -257,7 +257,7 @@ export default function AdminReportsPage() {
                 <option value="all">Historique complet</option>
               </select>
               <button type="button" onClick={saveCurrentView} className={adminSecondaryButtonClassName}>
-                <Save className="h-4 w-4" />
+                <SaveIcon className="h-4 w-4" />
                 Sauvegarder la vue
               </button>
               <button type="button" onClick={() => window.print()} className={adminPrimaryButtonClassName}>

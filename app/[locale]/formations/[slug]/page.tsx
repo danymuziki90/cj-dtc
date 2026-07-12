@@ -7,29 +7,29 @@ import {
   ArrowLeft,
   Clock,
   Users,
-  MapPin,
+  MapPinIcon,
   Monitor,
   Layers,
   Award,
   BookOpen,
-  Target,
+  TargetIcon,
   CheckCircle2,
-  Star,
+  StarIcon,
   TrendingUp,
   Calendar,
   DollarSign,
   Download,
   Share2,
   Heart,
-  User,
+  UserIcon,
   ChevronRight,
-  Shield,
+  ShieldIcon,
   Briefcase,
   GraduationCap,
-  MessageCircle,
+  MessageCircleIcon,
   PlayCircle,
   FileText,
-  Zap
+  ZapIcon
 } from 'lucide-react'
 
 import type { Formation } from '@/lib/types/formation'
@@ -37,7 +37,7 @@ import { parseTextList, calculateDiscount, getSimilarFormations } from '@/lib/fo
 import FormationCard from '@/components/formations/FormationCard'
 
 const formatIcons = {
-  presentiel: MapPin,
+  presentiel: MapPinIcon,
   en_ligne: Monitor,
   hybride: Layers
 }
@@ -180,7 +180,7 @@ export default function FormationDetailPage() {
               <div className="flex flex-wrap items-center gap-6 text-blue-100">
                 {formation.rating && (
                   <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-300 fill-current" />
+                    <StarIcon className="w-5 h-5 text-yellow-300 fill-current" />
                     <span className="font-semibold text-white">{formation.rating}</span>
                     <span>({formation.reviewCount || 0} avis)</span>
                   </div>
@@ -276,13 +276,13 @@ export default function FormationDetailPage() {
                     )}
                     {formation.hasCoaching && (
                       <li className="flex items-center gap-2 text-sm text-gray-700">
-                        <User className="w-4 h-4 text-blue-600" />
+                        <UserIcon className="w-4 h-4 text-blue-600" />
                         <span>Coaching personnalisé</span>
                       </li>
                     )}
                     {formation.hasAccompaniment && (
                       <li className="flex items-center gap-2 text-sm text-gray-700">
-                        <Shield className="w-4 h-4 text-blue-600" />
+                        <ShieldIcon className="w-4 h-4 text-blue-600" />
                         <span>Accompagnement post-formation</span>
                       </li>
                     )}
@@ -303,7 +303,7 @@ export default function FormationDetailPage() {
                   )}
                   {formation.nextSession?.location && (
                     <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <MapPinIcon className="w-4 h-4 text-gray-400" />
                       <span>{formation.nextSession.location}</span>
                     </div>
                   )}
@@ -394,7 +394,7 @@ export default function FormationDetailPage() {
                     <div className="bg-white rounded-lg shadow-md p-8">
                       <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Target className="w-6 h-6 text-blue-600" />
+                          <TargetIcon className="w-6 h-6 text-blue-600" />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900">
                           Objectifs pédagogiques
@@ -419,7 +419,7 @@ export default function FormationDetailPage() {
                     <div className="bg-white rounded-lg shadow-md p-8">
                       <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <Zap className="w-6 h-6 text-purple-600" />
+                          <ZapIcon className="w-6 h-6 text-purple-600" />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900">
                           Compétences développées
@@ -468,7 +468,7 @@ export default function FormationDetailPage() {
                     <div className="bg-white rounded-lg shadow-md p-8">
                       <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <Shield className="w-6 h-6 text-orange-600" />
+                          <ShieldIcon className="w-6 h-6 text-orange-600" />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900">
                           Prérequis
@@ -561,7 +561,7 @@ export default function FormationDetailPage() {
                           className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
-                        <User className="w-12 h-12 text-blue-600" />
+                        <UserIcon className="w-12 h-12 text-blue-600" />
                       )}
                     </div>
                     <div className="flex-1">
@@ -611,7 +611,7 @@ export default function FormationDetailPage() {
                   href={`/${locale}/contact`}
                   className="w-full block text-center px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  <MessageCircle className="w-4 h-4 inline mr-2" />
+                  <MessageCircleIcon className="w-4 h-4 inline mr-2" />
                   Nous contacter
                 </Link>
               </div>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Clock3, MapPin, Users, Monitor, Layers } from 'lucide-react'
+import { CalendarDays, Clock3, MapPinIcon, Users, Monitor, Layers } from 'lucide-react'
 
 export type SessionItem = {
   id: number
@@ -70,7 +70,7 @@ const FORMAT_LABELS: Record<string, { fr: string; en: string }> = {
 }
 
 const FORMAT_ICONS = {
-  presentiel: MapPin,
+  presentiel: MapPinIcon,
   en_ligne:   Monitor,
   hybride:    Layers,
 }
@@ -80,7 +80,7 @@ export default function SessionCard({ session: s, locale }: Props) {
   const available = Math.max(0, s.maxParticipants - (s.currentParticipants || 0))
   const isFull = available <= 0
   const fmt = normalizeFormat(s.format)
-  const FormatIcon = FORMAT_ICONS[fmt as keyof typeof FORMAT_ICONS] ?? MapPin
+  const FormatIcon = FORMAT_ICONS[fmt as keyof typeof FORMAT_ICONS] ?? MapPinIcon
   const formatLabel = FORMAT_LABELS[fmt]?.[locale] ?? s.format
   const image = s.adminMeta?.imageUrl || s.imageUrl || '/logo.png'
   const days = getDurationDays(s.startDate, s.endDate)
@@ -169,7 +169,7 @@ export default function SessionCard({ session: s, locale }: Props) {
           </div>
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
             <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-              <MapPin className="h-3.5 w-3.5 text-[var(--cj-blue)]" />
+              <MapPinIcon className="h-3.5 w-3.5 text-[var(--cj-blue)]" />
               {locale === 'fr' ? 'Lieu' : 'Location'}
             </dt>
             <dd className="mt-1 text-xs font-semibold text-[var(--cj-blue)] truncate">{s.location}</dd>

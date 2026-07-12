@@ -5,7 +5,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Compass, Users, Briefcase, GraduationCap, Rocket, Building2, MessageCircle } from 'lucide-react'
+import { Compass, Users, Briefcase, GraduationCap, Rocket, Building2, MessageCircleIcon } from 'lucide-react'
 
 interface GuidanceProfile {
   id: string
@@ -133,7 +133,7 @@ export default function FormationGuidance({ locale = 'fr' }: { locale?: string }
 
           {/* Contact Card */}
           <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-lg p-6 text-white flex flex-col justify-center items-center text-center">
-            <MessageCircle className="w-12 h-12 mb-4" />
+            <MessageCircleIcon className="w-12 h-12 mb-4" />
             <h3 className="text-xl font-bold mb-2">
               Besoin d'aide ?
             </h3>
@@ -164,7 +164,7 @@ export default function FormationGuidance({ locale = 'fr' }: { locale?: string }
               href={`/${locale}/contact`}
               className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center"
             >
-              <MessageCircle className="w-5 h-5 mr-2" />
+              <MessageCircleIcon className="w-5 h-5 mr-2" />
               Prendre rendez-vous
             </Link>
             <a

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { ArrowLeft, Sparkles } from 'lucide-react'
+import { ArrowLeft, Sparkle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type StudentMetric = {
@@ -174,7 +174,7 @@ export function StudentPageShell({
             <div className="flex flex-wrap items-start justify-between gap-5">
               <div className="max-w-3xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkle className="h-4 w-4" />
                   {eyebrow}
                 </div>
                 <div className="mt-5 flex items-start gap-4">

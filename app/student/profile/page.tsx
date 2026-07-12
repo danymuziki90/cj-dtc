@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, useEffect, useState } from 'react'
-import { KeyRound, UserRound } from 'lucide-react'
+import { KeyRound, User } from 'lucide-react'
 import {
   StudentSectionCard,
   studentInputClassName,
@@ -134,7 +134,7 @@ export default function StudentProfilePage() {
       <StudentPortalLoading
         title="Mon profil"
         description="Gerer vos informations personnelles et votre mot de passe."
-        icon={UserRound}
+        icon={User}
       />
     )
   }
@@ -144,7 +144,7 @@ export default function StudentProfilePage() {
       <StudentPortalError
         title="Mon profil"
         description="Gerer vos informations personnelles et votre mot de passe."
-        icon={UserRound}
+        icon={User}
         error={loadError}
       />
     )
@@ -155,28 +155,28 @@ export default function StudentProfilePage() {
       label: 'Numero etudiant',
       value: profile?.student.studentNumber || '-',
       helper: 'Identifiant unique de votre compte.',
-      icon: UserRound,
+      icon: User,
       accent: 'from-[#002D72] to-[#0C4DA2]',
     },
     {
       label: 'Statut',
       value: profile?.student.status || '-',
       helper: 'Etat actuel de votre compte.',
-      icon: UserRound,
+      icon: User,
       accent: 'from-[#0C4DA2] to-[#4F8FE8]',
     },
     {
       label: 'Sessions',
       value: profile?.metrics.sessionsCount ?? 0,
       helper: 'Inscriptions enregistrees.',
-      icon: UserRound,
+      icon: User,
       accent: 'from-[#E30613] to-[#F16C78]',
     },
     {
       label: 'Travaux',
       value: profile?.metrics.submissionsCount ?? 0,
       helper: 'Fichiers deposes.',
-      icon: UserRound,
+      icon: User,
       accent: 'from-[#001737] to-[#002D72]',
     },
   ]
@@ -185,7 +185,7 @@ export default function StudentProfilePage() {
     <StudentPortalPageShell
       title="Mon profil"
       description="Mettez a jour vos informations personnelles et changez votre mot de passe."
-      icon={UserRound}
+      icon={User}
       metrics={metrics}
     >
       <form onSubmit={onSubmit} noValidate>
@@ -194,7 +194,7 @@ export default function StudentProfilePage() {
           eyebrow="Compte"
           title="Informations personnelles"
           description="Ces informations sont visibles par l'administration."
-          icon={UserRound}
+          icon={User}
         >
           {message ? (
             <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700" role="status">

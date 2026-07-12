@@ -19,13 +19,13 @@ import {
   FolderOpen,
   GraduationCap,
   LogOut,
-  MapPin,
+  MapPinIcon,
   MessageSquare,
   Phone,
   ShieldCheck,
-  Sparkles,
+  Sparkle,
   Upload,
-  User,
+  UserIcon,
   Wallet,
 } from "lucide-react";
 import {
@@ -330,7 +330,7 @@ function EspaceEtudiantsContent() {
         : "Aucune session active",
     },
     {
-      icon: MapPin,
+      icon: MapPinIcon,
       label: "Lieu / format",
       value: currentSession
         ? [currentSession.location, currentSession.format]
@@ -379,7 +379,7 @@ function EspaceEtudiantsContent() {
       title: "Mon compte",
       description: "Mettre a jour vos informations personnelles.",
       href: `${basePath}/mon-compte`,
-      icon: User,
+      icon: UserIcon,
     },
     {
       title: "Mes travaux",
@@ -441,7 +441,7 @@ function EspaceEtudiantsContent() {
               href={`${basePath}/mon-compte`}
               className={studentSecondaryButtonClassName}
             >
-              <User className="h-4 w-4" />
+              <UserIcon className="h-4 w-4" />
               Mon compte
             </Link>
             <button
@@ -462,7 +462,7 @@ function EspaceEtudiantsContent() {
           <div className="relative grid gap-8 xl:grid-cols-[1.5fr_0.95fr]">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
-                <Sparkles className="h-4 w-4" />
+                <Sparkle className="h-4 w-4" />
                 Tableau de bord etudiant
               </div>
 
@@ -724,7 +724,7 @@ function EspaceEtudiantsContent() {
                       </div>
                       <div className="rounded-2xl border border-slate-200 bg-white p-4">
                         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-                          <MapPin className="h-4 w-4 text-[var(--cj-blue)]" />
+                          <MapPinIcon className="h-4 w-4 text-[var(--cj-blue)]" />
                           Lieu
                         </div>
                         <p className="mt-2 text-sm font-medium text-slate-900">
@@ -1035,7 +1035,7 @@ function EspaceEtudiantsContent() {
               eyebrow="Navigation"
               title="Acces rapides"
               description="Retrouvez les sections les plus utiles en un clic depuis votre tableau de bord."
-              icon={Sparkles}
+              icon={Sparkle}
             >
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 {quickLinks.map(({ title, description, href, icon: Icon }) => (

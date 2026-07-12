@@ -9,7 +9,7 @@ import {
   BookOpen,
   CalendarDays,
   GraduationCap,
-  MapPin,
+  MapPinIcon,
   MonitorSmartphone,
   Wallet,
 } from "lucide-react";
@@ -283,7 +283,7 @@ export default function MesFormationsPage() {
                     </div>
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                        <MapPin className="h-4 w-4 text-[var(--cj-blue)]" />
+                        <MapPinIcon className="h-4 w-4 text-[var(--cj-blue)]" />
                         Lieu
                       </div>
                       <p className="mt-2 text-sm font-medium text-slate-900">

@@ -4,7 +4,7 @@
 
 'use client'
 
-import { X } from 'lucide-react'
+import { XIcon } from 'lucide-react'
 import { FORMATION_LEVELS, FORMATION_FORMATS } from '@/lib/types/formation'
 import type { FormationCatalogFilters } from '@/lib/types/formation'
 
@@ -57,7 +57,7 @@ export default function FilterPanel({
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <XIcon className="w-5 h-5 text-gray-500" />
           </button>
         )}
       </div>

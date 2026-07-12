@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Search, SlidersHorizontal } from 'lucide-react'
+import { SearchIcon, SlidersHorizontal } from 'lucide-react'
 import {
   AdminBadge,
   AdminPanel,
@@ -75,7 +75,7 @@ export default function EnrollmentFilters({
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">Recherche</label>
           <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Nom, email, formation ou lieu"

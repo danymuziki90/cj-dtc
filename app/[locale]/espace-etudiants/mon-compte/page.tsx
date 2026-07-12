@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { Award, BookOpen, GraduationCap, Mail, MapPin, PencilLine, Phone, User } from 'lucide-react'
+import { Award, BookOpen, GraduationCap, MailIcon, MapPinIcon, Pencil, Phone, UserIcon } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentPageShell,
@@ -129,13 +129,13 @@ export default function MonComptePage() {
         eyebrow="Espace etudiant"
         title="Mon compte"
         description="Chargement de votre profil, de vos inscriptions et des informations rattachees a votre espace personnel."
-        icon={User}
+        icon={UserIcon}
       >
         <StudentSectionCard
           eyebrow="Profil"
           title="Preparation des informations"
           description="Nous recuperons vos donnees personnelles et votre activite de formation."
-          icon={User}
+          icon={UserIcon}
         >
           <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
             Chargement du profil...
@@ -152,13 +152,13 @@ export default function MonComptePage() {
         eyebrow="Espace etudiant"
         title="Mon compte"
         description="Votre compte permet de centraliser votre identite, vos formations suivies et vos documents."
-        icon={User}
+        icon={UserIcon}
       >
         <StudentSectionCard
           eyebrow="Profil"
           title="Aucun profil disponible"
           description="Nous n'avons pas encore trouve de donnees rattachees a cette session."
-          icon={User}
+          icon={UserIcon}
         >
           <StudentEmptyState
             title="Aucun profil trouve"
@@ -180,14 +180,14 @@ export default function MonComptePage() {
       eyebrow="Espace etudiant"
       title="Mon compte"
       description="Retrouvez vos informations personnelles, pilotez vos donnees de contact et accedez rapidement a vos espaces de formation."
-      icon={User}
+      icon={UserIcon}
       metrics={metrics}
       actions={
         <button
           onClick={() => setEditing((current) => !current)}
           className={studentSecondaryButtonClassName}
         >
-          <PencilLine className="h-4 w-4" />
+          <Pencil className="h-4 w-4" />
           {editing ? 'Annuler la modification' : 'Modifier mes informations'}
         </button>
       }
@@ -197,7 +197,7 @@ export default function MonComptePage() {
           eyebrow="Identite"
           title="Fiche personnelle"
           description="Votre profil centralise les informations utiles pour les inscriptions, le suivi administratif et les communications."
-          icon={User}
+          icon={UserIcon}
         >
           <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-5">
@@ -217,7 +217,7 @@ export default function MonComptePage() {
               <div className="mt-5 grid gap-3">
                 <div className="rounded-2xl border border-white bg-white/85 p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    <Mail className="h-4 w-4 text-[var(--cj-blue)]" />
+                    <MailIcon className="h-4 w-4 text-[var(--cj-blue)]" />
                     Email principal
                   </div>
                   <p className="mt-2 break-all text-sm font-medium text-slate-900">{profile.email}</p>
@@ -231,7 +231,7 @@ export default function MonComptePage() {
                 </div>
                 <div className="rounded-2xl border border-white bg-white/85 p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    <MapPin className="h-4 w-4 text-[var(--cj-blue)]" />
+                    <MapPinIcon className="h-4 w-4 text-[var(--cj-blue)]" />
                     Adresse
                   </div>
                   <p className="mt-2 text-sm font-medium text-slate-900">{profile.address || 'Non renseignee'}</p>

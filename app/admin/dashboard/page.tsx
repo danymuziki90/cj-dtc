@@ -13,8 +13,8 @@ import {
   FileStack,
   FolderKanban,
   GraduationCap,
-  RefreshCw,
-  Users2,
+  RotateCw,
+  Users,
 } from 'lucide-react'
 import {
   Bar,
@@ -201,7 +201,7 @@ export default function AdminDashboardPage() {
       <AdminShell title="Pilotage">
         <AdminPanel>
           <div className="flex items-center gap-3 py-4">
-            <RefreshCw className="h-5 w-5 animate-spin text-[var(--admin-primary)]" />
+            <RotateCw className="h-5 w-5 animate-spin text-[var(--admin-primary)]" />
             <div>
               <p className="font-semibold text-slate-900">Chargement du tableau de bord</p>
               <p className="text-sm text-slate-500">Consolidation des indicateurs, alertes et actions prioritaires…</p>
@@ -227,7 +227,7 @@ export default function AdminDashboardPage() {
                 onClick={() => window.location.reload()}
                 className="mt-3 inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50"
               >
-                <RefreshCw className="h-4 w-4" />
+                <RotateCw className="h-4 w-4" />
                 Réessayer
               </button>
             </div>
@@ -502,7 +502,7 @@ export default function AdminDashboardPage() {
             </ResponsiveContainer>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <AdminMetricCard icon={Users2} label="Étudiants" value={`${data.totals.students}`} helper="Comptes actifs enregistrés dans le système." tone="neutral" />
+            <AdminMetricCard icon={Users} label="Étudiants" value={`${data.totals.students}`} helper="Comptes actifs enregistrés dans le système." tone="neutral" />
             <AdminMetricCard icon={CalendarClock} label="Sessions" value={`${data.totals.sessions}`} helper="Sessions prises en compte dans le pilotage." tone="neutral" />
             <AdminMetricCard icon={BadgeCheck} label="Taux de conversion" value={`${data.summary.accountConversionRate}%`} helper="Inscriptions ayant abouti à un compte étudiant." tone="success" />
             <AdminMetricCard icon={GraduationCap} label="Certificats émis" value={`${data.totals.certificatesIssued}`} helper={`${data.summary.certificatesReady} dossier(s) supplémentaires éligibles.`} tone="primary" />

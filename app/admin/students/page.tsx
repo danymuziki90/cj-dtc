@@ -6,16 +6,16 @@ import {
   ArrowRight,
   BadgeCheck,
   Copy,
-  Mail,
-  PencilLine,
-  RefreshCcw,
-  Search,
+  MailIcon,
+  Pencil,
+  RotateCcw,
+  SearchIcon,
   ShieldAlert,
   ShieldCheck,
-  Trash2,
-  UserRound,
+  Trash,
+  User,
   Users,
-  X,
+  XIcon,
 } from 'lucide-react'
 import AdminShell from '@/components/admin-portal/AdminShell'
 import PaginationControls from '@/components/admin-portal/PaginationControls'
@@ -1004,7 +1004,7 @@ export default function AdminStudentsPage() {
                       {generatedCredential.emailSent ? 'Email envoye' : 'Email a relancer'}
                     </span>
                     <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[var(--admin-primary)] ring-1 ring-[var(--admin-primary-100)]">
-                      <Mail className="h-5 w-5" />
+                      <MailIcon className="h-5 w-5" />
                     </span>
                   </div>
                 </div>
@@ -1026,7 +1026,7 @@ export default function AdminStudentsPage() {
 
                 <div className="mt-4 rounded-2xl border border-[var(--admin-primary-100)] bg-white/80 px-4 py-3 text-sm text-[var(--admin-primary-800)]">
                   <div className="flex items-start gap-3">
-                    <Mail className="mt-0.5 h-4 w-4" />
+                    <MailIcon className="mt-0.5 h-4 w-4" />
                     <div>
                       <p className="font-semibold text-[var(--admin-primary-800)]">Destinataire</p>
                       <p className="mt-1">{generatedCredential.email}</p>
@@ -1047,7 +1047,7 @@ export default function AdminStudentsPage() {
                     className={`${primaryButtonClassName} w-full`}
                     data-testid="student-credentials-send-email"
                   >
-                    <Mail className="h-4 w-4" />
+                    <MailIcon className="h-4 w-4" />
                     {sendingCredentialEmail
                       ? 'Envoi en cours...'
                       : generatedCredential.emailSent
@@ -1083,7 +1083,7 @@ export default function AdminStudentsPage() {
                   {selectedStudent ? (
                     <span className="text-sm font-bold tracking-[0.18em]">{getStudentInitials(selectedStudent)}</span>
                   ) : (
-                    <UserRound className="h-5 w-5" />
+                    <User className="h-5 w-5" />
                   )}
                 </span>
               </div>
@@ -1108,7 +1108,7 @@ export default function AdminStudentsPage() {
 
                   <div className="mt-5 flex flex-wrap gap-2">
                     <button type="button" onClick={() => openEditStudent(selectedStudent)} className={secondaryButtonClassName}>
-                      <PencilLine className="h-4 w-4" />
+                      <Pencil className="h-4 w-4" />
                       Editer
                     </button>
                     <button
@@ -1116,7 +1116,7 @@ export default function AdminStudentsPage() {
                       onClick={() => resetStudentCredentials(selectedStudent)}
                       className={secondaryButtonClassName}
                     >
-                      <RefreshCcw className="h-4 w-4" />
+                      <RotateCcw className="h-4 w-4" />
                       Reinit. + e-mail
                     </button>
                     {selectedStudent.status === 'SUSPENDED' ? (
@@ -1139,7 +1139,7 @@ export default function AdminStudentsPage() {
                       </button>
                     )}
                     <button type="button" onClick={() => deleteStudent(selectedStudent.id)} className={dangerButtonClassName}>
-                      <Trash2 className="h-4 w-4" />
+                      <Trash className="h-4 w-4" />
                       Supprimer
                     </button>
                   </div>
@@ -1211,7 +1211,7 @@ export default function AdminStudentsPage() {
                         tone="success"
                       />
                       <SummaryCard
-                        icon={Mail}
+                        icon={MailIcon}
                         label="Notifications"
                         value={`${selectedStudentDetails.overview.notificationsCount}`}
                         helper={`${selectedStudentDetails.overview.attendanceCount} présence(s) enregistrée(s)`}
@@ -1414,7 +1414,7 @@ export default function AdminStudentsPage() {
                 </div>
                 {hasFilters ? (
                   <button type="button" onClick={resetFilters} className={secondaryButtonClassName}>
-                    <RefreshCcw className="h-4 w-4" />
+                    <RotateCcw className="h-4 w-4" />
                     Reinitialiser les filtres
                   </button>
                 ) : null}
@@ -1424,7 +1424,7 @@ export default function AdminStudentsPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700">Recherche</label>
                   <div className="relative">
-                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
                       value={filters.search}
                       onChange={(event) => {
@@ -1547,7 +1547,7 @@ export default function AdminStudentsPage() {
                           }}
                           className={subtleButtonClassName}
                         >
-                          <PencilLine className="h-3.5 w-3.5" />
+                          <Pencil className="h-3.5 w-3.5" />
                           Editer
                         </button>
                         <button
@@ -1558,7 +1558,7 @@ export default function AdminStudentsPage() {
                           }}
                           className={subtleButtonClassName}
                         >
-                          <RefreshCcw className="h-3.5 w-3.5" />
+                          <RotateCcw className="h-3.5 w-3.5" />
                           Reinit. + e-mail
                         </button>
                         {student.status === 'SUSPENDED' ? (
@@ -1594,7 +1594,7 @@ export default function AdminStudentsPage() {
                           }}
                           className="inline-flex items-center gap-2 rounded-2xl border border-[var(--admin-accent-200)] bg-[var(--admin-accent-50)] px-3 py-2 text-xs font-semibold text-[var(--admin-accent-700)]"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash className="h-3.5 w-3.5" />
                           Supprimer
                         </button>
                       </div>
@@ -1680,7 +1680,7 @@ export default function AdminStudentsPage() {
                           <td className="px-5 py-4">
                             <div className="flex flex-wrap gap-2" onClick={(event) => event.stopPropagation()}>
                               <button type="button" onClick={() => openEditStudent(student)} className={subtleButtonClassName}>
-                                <PencilLine className="h-3.5 w-3.5" />
+                                <Pencil className="h-3.5 w-3.5" />
                                 Editer
                               </button>
                               <button
@@ -1688,7 +1688,7 @@ export default function AdminStudentsPage() {
                                 onClick={() => resetStudentCredentials(student)}
                                 className={subtleButtonClassName}
                               >
-                                <RefreshCcw className="h-3.5 w-3.5" />
+                                <RotateCcw className="h-3.5 w-3.5" />
                                 Reinit. + e-mail
                               </button>
                               {student.status === 'SUSPENDED' ? (
@@ -1715,7 +1715,7 @@ export default function AdminStudentsPage() {
                                 onClick={() => deleteStudent(student.id)}
                                 className="inline-flex items-center gap-2 rounded-2xl border border-[var(--admin-accent-200)] bg-[var(--admin-accent-50)] px-3 py-2 text-xs font-semibold text-[var(--admin-accent-700)]"
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash className="h-3.5 w-3.5" />
                                 Supprimer
                               </button>
                             </div>
@@ -1760,7 +1760,7 @@ export default function AdminStudentsPage() {
                 className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-700"
                 disabled={savingEdit}
               >
-                <X className="h-5 w-5" />
+                <XIcon className="h-5 w-5" />
               </button>
             </div>
 

@@ -4,7 +4,7 @@
 
 'use client'
 
-import { TrendingUp, Users, Star, Award } from 'lucide-react'
+import { TrendingUp, Users, StarIcon, Award } from 'lucide-react'
 import type { CatalogStats } from '@/lib/types/formation'
 
 interface FormationStatsProps {
@@ -28,7 +28,7 @@ export default function FormationStats({ stats }: FormationStatsProps) {
     {
       label: 'Note moyenne',
       value: stats.averageRating.toFixed(1),
-      icon: Star,
+      icon: StarIcon,
       color: 'text-yellow-600'
     },
     {

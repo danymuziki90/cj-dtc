@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Eye, EyeOff } from 'lucide-react'
+import { SaveIcon, Eye, EyeOff } from 'lucide-react'
 
 const CATEGORIES = [
   { id: 'leadership-gouvernance',     label: 'Leadership & Gouvernance' },
@@ -262,7 +262,7 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
             </>
           ) : (
             <>
-              <Save className="w-4 h-4" />
+              <SaveIcon className="w-4 h-4" />
               {submitLabel}
             </>
           )}

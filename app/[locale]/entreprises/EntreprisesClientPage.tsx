@@ -4,8 +4,8 @@ import { useState } from 'react'
 import {
   ArrowRight, Award, BarChart3, BookOpen, Briefcase, Building2,
   CheckCircle2, ChevronDown, ChevronUp, Globe2, GraduationCap,
-  HeartHandshake, Heart, Landmark, Layers, Lightbulb, MessageCircle,
-  Rocket, Shield, Target, TrendingUp, Users, Zap,
+  HeartHandshake, Heart, Landmark, Layers, Lightbulb, MessageCircleIcon,
+  Rocket, ShieldIcon, TargetIcon, TrendingUp, Users, ZapIcon,
 } from 'lucide-react'
 import EntrepriseContactForm from '@/components/entreprises/EntrepriseContactForm'
 
@@ -83,7 +83,7 @@ const COPY = {
     ctaBtn2:        'Get a custom quote',
     learnMore:      'Learn more',
     benefits:       'Benefits',
-    audience:       'Target audience',
+    audience:       'TargetIcon audience',
   },
 }
 
@@ -103,7 +103,7 @@ const WHY_CARDS = {
     { icon: Rocket,     title: 'Leadership renforcé',           desc: 'Développement des leaders à tous les niveaux pour une organisation plus résiliente.' },
     { icon: Heart,      title: 'Fidélisation des talents',      desc: "L'investissement formation réduit le turnover et renforce l'engagement collaborateur." },
     { icon: Layers,     title: 'Accompagnement du changement',  desc: 'Soutien aux équipes lors des transformations organisationnelles ou changements stratégiques.' },
-    { icon: Shield,     title: 'Pratiques RH professionnalisées', desc: 'Structuration des processus RH pour une gestion des talents plus efficace et durable.' },
+    { icon: ShieldIcon,     title: 'Pratiques RH professionnalisées', desc: 'Structuration des processus RH pour une gestion des talents plus efficace et durable.' },
   ],
   en: [
     { icon: TrendingUp, title: 'Skills development',            desc: 'Programs calibrated to real business needs to raise collective performance.' },
@@ -111,7 +111,7 @@ const WHY_CARDS = {
     { icon: Rocket,     title: 'Stronger leadership',           desc: 'Leadership development at all levels for a more resilient organisation.' },
     { icon: Heart,      title: 'Talent retention',              desc: 'Investing in training reduces turnover and strengthens employee engagement.' },
     { icon: Layers,     title: 'Change management',             desc: 'Supporting teams through organisational or strategic transformations.' },
-    { icon: Shield,     title: 'Professionalised HR practices', desc: 'Structuring HR processes for more effective and sustainable talent management.' },
+    { icon: ShieldIcon,     title: 'Professionalised HR practices', desc: 'Structuring HR processes for more effective and sustainable talent management.' },
   ],
 }
 
@@ -119,12 +119,12 @@ const SOLUTIONS = {
   fr: [
     { icon: BookOpen,   title: 'Formation intra-entreprise',    desc: 'Sessions animées dans vos locaux, adaptées à votre culture et vos équipes.',                  benefits: ["Cohésion d'équipe", 'Pertinence contextuelle', 'Flexibilité horaire'],      audience: 'Équipes, services, directions' },
     { icon: Layers,     title: 'Formation sur mesure',          desc: 'Ingénierie pédagogique complète à partir de vos enjeux métiers et objectifs stratégiques.',    benefits: ['Programme 100% adapté', 'ROI mesurable', 'Contenu propriétaire'],           audience: 'Toute organisation' },
-    { icon: Target,     title: 'Coaching individuel',           desc: 'Accompagnement personnalisé de dirigeants, managers et hauts potentiels.',                     benefits: ['Progression rapide', 'Confidentialité', 'Plan de développement'],          audience: 'Dirigeants, managers, talents' },
+    { icon: TargetIcon,     title: 'Coaching individuel',           desc: 'Accompagnement personnalisé de dirigeants, managers et hauts potentiels.',                     benefits: ['Progression rapide', 'Confidentialité', 'Plan de développement'],          audience: 'Dirigeants, managers, talents' },
     { icon: Users,      title: "Coaching d'équipe",             desc: 'Renforcement de la cohésion, la communication et la performance collective.',                  benefits: ["Synergie d'équipe", 'Résolution de conflits', 'Alignement'],              audience: 'CODIR, équipes projet' },
     { icon: Rocket,     title: 'Leadership & management',       desc: 'Programmes certifiants pour développer les compétences managériales à tous les niveaux.',      benefits: ['Certification reconnue', 'Impact opérationnel', 'Engagement accru'],      audience: 'Managers, cadres, directeurs' },
-    { icon: Shield,     title: 'Accompagnement RH',             desc: 'Audit, structuration et professionnalisation de la fonction RH de votre organisation.',        benefits: ['Processus optimisés', 'Conformité', "Attractivité employeur"],            audience: 'DRH, responsables RH' },
+    { icon: ShieldIcon,     title: 'Accompagnement RH',             desc: 'Audit, structuration et professionnalisation de la fonction RH de votre organisation.',        benefits: ['Processus optimisés', 'Conformité', "Attractivité employeur"],            audience: 'DRH, responsables RH' },
     { icon: TrendingUp, title: 'Gestion des talents',           desc: 'Identification, développement et fidélisation des profils clés.',                              benefits: ['Plans de succession', 'Cartographie compétences', 'Rétention'],           audience: 'DRH, directions générales' },
-    { icon: Zap,        title: 'Employabilité jeunes talents',  desc: "Programmes d'insertion professionnelle pour alternants, stagiaires et nouveaux recrutés.",     benefits: ['Onboarding accéléré', 'Fidélisation', 'Compétences opérationnelles'],     audience: 'Jeunes professionnels, RH' },
+    { icon: ZapIcon,        title: 'Employabilité jeunes talents',  desc: "Programmes d'insertion professionnelle pour alternants, stagiaires et nouveaux recrutés.",     benefits: ['Onboarding accéléré', 'Fidélisation', 'Compétences opérationnelles'],     audience: 'Jeunes professionnels, RH' },
     { icon: Globe2,     title: 'Séminaires & ateliers',         desc: "Événements sur mesure pour booster la dynamique d'équipe et stimuler l'innovation.",           benefits: ['Énergie collective', 'Innovation', 'Alignement stratégique'],            audience: 'Équipes dirigeantes, managers' },
     { icon: HeartHandshake,  title: 'Conférences professionnelles',  desc: 'Interventions d\'experts pour vos événements internes et conventions corporate.',               benefits: ['Crédibilité externe', 'Inspiration', 'Mise en réseau'],                  audience: 'Toute organisation' },
     { icon: Lightbulb,  title: 'Interventions corporate',       desc: 'Facilitation stratégique, ateliers de co-construction et missions de conseil.',                benefits: ['Décisions éclairées', 'Intelligence collective', 'Résultats concrets'],   audience: 'COMEX, équipes stratégiques' },
@@ -133,12 +133,12 @@ const SOLUTIONS = {
   en: [
     { icon: BookOpen,   title: 'In-company training',           desc: 'Sessions delivered at your premises, tailored to your culture and teams.',                     benefits: ['Team cohesion', 'Contextual relevance', 'Scheduling flexibility'],        audience: 'Teams, departments, leadership' },
     { icon: Layers,     title: 'Custom training',               desc: 'Full learning design built around your business challenges and strategic goals.',               benefits: ['100% tailored program', 'Measurable ROI', 'Proprietary content'],         audience: 'Any organisation' },
-    { icon: Target,     title: 'Individual coaching',           desc: 'Personalised support for executives, managers and high-potential talent.',                      benefits: ['Rapid progression', 'Confidentiality', 'Development plan'],              audience: 'Executives, managers, talents' },
+    { icon: TargetIcon,     title: 'Individual coaching',           desc: 'Personalised support for executives, managers and high-potential talent.',                      benefits: ['Rapid progression', 'Confidentiality', 'Development plan'],              audience: 'Executives, managers, talents' },
     { icon: Users,      title: 'Team coaching',                 desc: 'Strengthening cohesion, communication and collective performance.',                             benefits: ['Team synergy', 'Conflict resolution', 'Alignment'],                      audience: 'Executive committees, project teams' },
     { icon: Rocket,     title: 'Leadership & management',       desc: 'Certified programs to develop managerial skills at every level.',                               benefits: ['Recognised certification', 'Operational impact', 'Higher engagement'],   audience: 'Managers, executives, directors' },
-    { icon: Shield,     title: 'HR advisory',                   desc: 'Audit, structuring and professionalisation of your HR function.',                               benefits: ['Optimised processes', 'Compliance', 'Employer branding'],                audience: 'CHROs, HR managers' },
+    { icon: ShieldIcon,     title: 'HR advisory',                   desc: 'Audit, structuring and professionalisation of your HR function.',                               benefits: ['Optimised processes', 'Compliance', 'Employer branding'],                audience: 'CHROs, HR managers' },
     { icon: TrendingUp, title: 'Talent management',             desc: 'Identifying, developing and retaining key profiles within your organisation.',                  benefits: ['Succession plans', 'Skills mapping', 'Retention'],                       audience: 'CHROs, senior management' },
-    { icon: Zap,        title: 'Youth employability',           desc: 'Professional integration programs for apprentices, interns and new hires.',                     benefits: ['Accelerated onboarding', 'Retention', 'Operational skills'],              audience: 'Young professionals, HR' },
+    { icon: ZapIcon,        title: 'Youth employability',           desc: 'Professional integration programs for apprentices, interns and new hires.',                     benefits: ['Accelerated onboarding', 'Retention', 'Operational skills'],              audience: 'Young professionals, HR' },
     { icon: Globe2,     title: 'Seminars & workshops',          desc: 'Bespoke events to boost team energy and stimulate innovation.',                                 benefits: ['Collective energy', 'Innovation', 'Strategic alignment'],                audience: 'Executive teams, managers' },
     { icon: HeartHandshake,  title: 'Professional conferences',      desc: 'Expert speaking and facilitation for your internal events and corporate conventions.',          benefits: ['External credibility', 'Inspiration', 'Networking'],                     audience: 'Any organisation' },
     { icon: Lightbulb,  title: 'Corporate interventions',       desc: 'Strategic facilitation, co-design workshops and one-off advisory missions.',                    benefits: ['Informed decisions', 'Collective intelligence', 'Concrete results'],     audience: 'Executive committees, strategic teams' },
@@ -155,7 +155,7 @@ const SECTORS = {
     { icon: Globe2,        label: 'Organisations internationales' },
     { icon: Landmark,      label: 'Administrations publiques'     },
     { icon: GraduationCap, label: 'Universités & écoles'          },
-    { icon: Shield,        label: 'Institutions financières'      },
+    { icon: ShieldIcon,        label: 'Institutions financières'      },
     { icon: Layers,        label: 'Industries & manufactures'     },
     { icon: Users,         label: 'Coopératives & mutuelles'      },
   ],
@@ -167,7 +167,7 @@ const SECTORS = {
     { icon: Globe2,        label: 'International organisations'   },
     { icon: Landmark,      label: 'Public administrations'        },
     { icon: GraduationCap, label: 'Universities & schools'        },
-    { icon: Shield,        label: 'Financial institutions'        },
+    { icon: ShieldIcon,        label: 'Financial institutions'        },
     { icon: Layers,        label: 'Industry & manufacturing'      },
     { icon: Users,         label: 'Cooperatives & mutuals'        },
   ],
@@ -194,18 +194,18 @@ const STEPS = {
 
 const DIFFERENTIATORS = {
   fr: [
-    { icon: Target,    title: 'Approche orientée résultats',      desc: "Chaque programme est conçu avec des indicateurs de succès clairs et mesurables dès la conception." },
+    { icon: TargetIcon,    title: 'Approche orientée résultats',      desc: "Chaque programme est conçu avec des indicateurs de succès clairs et mesurables dès la conception." },
     { icon: Users,     title: 'Formateurs expérimentés',          desc: "Nos intervenants sont des praticiens reconnus, alliant expertise théorique et expérience terrain." },
     { icon: Lightbulb, title: 'Pédagogie interactive',            desc: "Études de cas réels, simulations, jeux de rôles et ateliers pratiques pour un apprentissage ancré." },
-    { icon: Shield,    title: 'Coaching post-formation',          desc: "Un accompagnement continu après la formation pour consolider les acquis et ancrer le changement." },
+    { icon: ShieldIcon,    title: 'Coaching post-formation',          desc: "Un accompagnement continu après la formation pour consolider les acquis et ancrer le changement." },
     { icon: Globe2,    title: 'Ancrage dans le contexte africain', desc: "Nos programmes intègrent les réalités du marché, des cultures et des enjeux spécifiques à l'Afrique." },
     { icon: Award,     title: 'Certification reconnue',           desc: "Nos certifications renforcent la crédibilité et l'employabilité de vos collaborateurs sur le marché." },
   ],
   en: [
-    { icon: Target,    title: 'Results-oriented approach',        desc: "Every program is designed with clear, measurable success indicators from the design phase." },
+    { icon: TargetIcon,    title: 'Results-oriented approach',        desc: "Every program is designed with clear, measurable success indicators from the design phase." },
     { icon: Users,     title: 'Experienced facilitators',         desc: "Our trainers are recognised practitioners combining theoretical expertise with field experience." },
     { icon: Lightbulb, title: 'Interactive pedagogy',             desc: "Real case studies, simulations, role plays and practical workshops for grounded learning." },
-    { icon: Shield,    title: 'Post-training coaching',           desc: "Continued support after training to consolidate learning and embed sustainable change." },
+    { icon: ShieldIcon,    title: 'Post-training coaching',           desc: "Continued support after training to consolidate learning and embed sustainable change." },
     { icon: Globe2,    title: 'African context expertise',        desc: "Our programs integrate the realities of African markets, cultures and specific challenges." },
     { icon: Award,     title: 'Recognised certification',         desc: "Our certifications enhance the employability and credibility of your teams on the market." },
   ],
@@ -279,7 +279,7 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
             <div className="flex flex-col gap-4 sm:flex-row">
               <a href="#contact"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--cj-red)] px-7 py-4 text-sm font-bold text-white shadow-xl shadow-red-900/30 transition hover:bg-red-700 hover:-translate-y-0.5">
-                <MessageCircle className="h-4 w-4" />
+                <MessageCircleIcon className="h-4 w-4" />
                 {t.heroCta1}
               </a>
               <a href="#solutions"

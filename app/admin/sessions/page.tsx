@@ -1,7 +1,7 @@
 'use client'
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Edit3, ImagePlus, Layers3, MapPin, Plus, Trash2, Users } from 'lucide-react'
+import { CalendarDays, Edit3, ImagePlus, Layers3, MapPinIcon, PlusIcon, Trash, Users } from 'lucide-react'
 import AdminShell from '@/components/admin-portal/AdminShell'
 import {
   AdminBadge,
@@ -365,7 +365,7 @@ export default function AdminSessionsPage() {
           <AdminMetricCard icon={Layers3} label="Sessions" value={String(metrics.total)} helper="Catalogue actuellement configure." tone="primary" />
           <AdminMetricCard icon={CalendarDays} label="Ouvertes" value={String(metrics.open)} helper="Sessions encore disponibles a l'inscription." tone="success" />
           <AdminMetricCard icon={Users} label="Places occupees" value={String(metrics.seats)} helper="Participants deja engages." tone="warning" />
-          <AdminMetricCard icon={MapPin} label="Ticket moyen" value={formatCurrency(metrics.averagePrice)} helper="Prix moyen des sessions configurees." tone="neutral" />
+          <AdminMetricCard icon={MapPinIcon} label="Ticket moyen" value={formatCurrency(metrics.averagePrice)} helper="Prix moyen des sessions configurees." tone="neutral" />
         </section>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
@@ -477,7 +477,7 @@ export default function AdminSessionsPage() {
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 {editingId ? <button type="button" onClick={resetForm} className={adminSecondaryButtonClassName}>Annuler</button> : null}
                 <button type="submit" disabled={loading || uploadingImage} className={adminPrimaryButtonClassName}>
-                  <Plus className="h-4 w-4" />
+                  <PlusIcon className="h-4 w-4" />
                   {loading || uploadingImage ? 'Sauvegarde...' : editingId ? 'Mettre a jour la session' : 'Creer la session'}
                 </button>
               </div>
@@ -515,7 +515,7 @@ export default function AdminSessionsPage() {
                             <AdminBadge tone="neutral">{session.adminMeta?.sessionType || 'MRH'}</AdminBadge>
                           </div>
                           <div className="mt-2 flex flex-wrap gap-3 text-sm text-slate-600">
-                            <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" />{session.location}</span>
+                            <span className="inline-flex items-center gap-1"><MapPinIcon className="h-4 w-4" />{session.location}</span>
                             <span>{formatParticipationLabel(session.adminMeta?.participationType || session.format)}</span>
                             <span>{session.startTime} - {session.endTime}</span>
                           </div>
@@ -542,7 +542,7 @@ export default function AdminSessionsPage() {
                             <button type="button" onClick={() => updateCapacity(session, session.maxParticipants + 1)} className={adminSecondaryButtonClassName}>+1 place</button>
                           </div>
                           <button type="button" onClick={() => startEdit(session)} className={adminPrimaryButtonClassName}><Edit3 className="h-4 w-4" />Modifier</button>
-                          <button type="button" onClick={() => removeSession(session.id)} className={adminDangerButtonClassName}><Trash2 className="h-4 w-4" />Supprimer</button>
+                          <button type="button" onClick={() => removeSession(session.id)} className={adminDangerButtonClassName}><Trash className="h-4 w-4" />Supprimer</button>
                         </div>
                       </div>
                     </article>

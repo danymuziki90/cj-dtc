@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, useRef, useState } from 'react'
-import { Download, FileUp, NotebookText, Paperclip, UploadCloud } from 'lucide-react'
+import { Download, FileUp, BookOpen, Paperclip, UploadCloud } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentSectionCard,
@@ -52,7 +52,7 @@ export default function StudentSubmissionsPage() {
       <StudentPortalLoading
         title="Mes travaux"
         description="Deposez vos travaux, suivez leur statut et consultez les retours du formateur."
-        icon={NotebookText}
+        icon={BookOpen}
       />
     )
   }
@@ -62,7 +62,7 @@ export default function StudentSubmissionsPage() {
       <StudentPortalError
         title="Mes travaux"
         description="Deposez vos travaux, suivez leur statut et consultez les retours du formateur."
-        icon={NotebookText}
+        icon={BookOpen}
         error={error}
       />
     )
@@ -85,7 +85,7 @@ export default function StudentSubmissionsPage() {
       label: 'Valides',
       value: approved,
       helper: 'Travaux acceptes par le formateur.',
-      icon: NotebookText,
+      icon: BookOpen,
       accent: 'from-[#0C4DA2] to-[#4F8FE8]',
     },
     {
@@ -153,7 +153,7 @@ export default function StudentSubmissionsPage() {
     <StudentPortalPageShell
       title="Mes travaux"
       description="Deposez vos travaux, suivez leur statut de correction et consultez les retours du formateur."
-      icon={NotebookText}
+      icon={BookOpen}
       metrics={metrics}
     >
       {/* Formulaire de depot */}
@@ -228,7 +228,7 @@ export default function StudentSubmissionsPage() {
         eyebrow="Historique"
         title="Tous mes depots"
         description="Consultez le statut, les retours du formateur et telechargez vos fichiers soumis."
-        icon={NotebookText}
+        icon={BookOpen}
       >
         {submissions.length ? (
           <div className="space-y-4">

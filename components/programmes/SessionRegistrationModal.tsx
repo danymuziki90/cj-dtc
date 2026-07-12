@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
-import { Loader2, X } from 'lucide-react'
+import { Loader2, XIcon } from 'lucide-react'
 import type { ProgramSessionType } from '@/lib/programmes/session-types'
 
 type SessionCardData = {
@@ -176,7 +176,7 @@ const IOP_SECTIONS: SectionConfig[] = [
     fields: [
       { key: 'currentStatus', label: 'Statut actuel', type: 'text', required: true },
       { key: 'currentDescription', label: 'Description actuelle', type: 'textarea', required: true },
-      { key: 'biggestChallenge', label: 'Plus grand defi', type: 'textarea', required: true },
+      { key: 'biggestChallenge', label: 'PlusIcon grand defi', type: 'textarea', required: true },
     ],
   },
   {
@@ -527,7 +527,7 @@ export default function SessionRegistrationModal({ open, locale, session, progra
             <h3 className="text-lg font-semibold">{session.formation.title}</h3>
           </div>
           <button type="button" onClick={onClose} className="rounded-full p-2 hover:bg-white/10" aria-label="Fermer">
-            <X className="h-5 w-5" />
+            <XIcon className="h-5 w-5" />
           </button>
         </div>
 

@@ -13,10 +13,10 @@ import {
   Clock3,
   HelpCircle,
   Loader2,
-  MapPin,
-  MessageCircle,
+  MapPinIcon,
+  MessageCircleIcon,
   Users,
-  Zap,
+  ZapIcon,
 } from 'lucide-react'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import { inferProgramSessionType, type ProgramSessionType } from '@/lib/programmes/session-types'

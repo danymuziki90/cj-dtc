@@ -2,7 +2,7 @@
 
 import { FormEvent, Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowRight, Lock, Shield } from 'lucide-react'
+import { ArrowRight, Lock, ShieldIcon } from 'lucide-react'
 
 const errorMessages: Record<string, string> = {
   expired:
@@ -62,7 +62,7 @@ function AdminLoginForm() {
           <div className="relative flex h-full flex-col justify-between gap-10">
             <div>
               <div className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur">
-                <Shield className="h-3.5 w-3.5" aria-hidden="true" />
+                <ShieldIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 Accès administrateur
               </div>
 

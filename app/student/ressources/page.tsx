@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { BookOpen, Download, FolderOpen, Layers3, Sparkles } from 'lucide-react'
+import { BookOpen, Download, FolderOpen, Layers3, Sparkle } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentSectionCard,
@@ -51,7 +51,7 @@ export default function StudentResourcesPage() {
       label: 'Publics',
       value: resources.filter((item) => item.isPublic).length,
       helper: 'Documents partages pour consultation simple.',
-      icon: Sparkles,
+      icon: Sparkle,
       accent: 'from-[#E30613] to-[#F16C78]',
     },
     {

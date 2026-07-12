@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CalendarRange, Download, FileSpreadsheet, Layers3, Printer } from 'lucide-react'
+import { CalendarRange, Download, FileSpreadsheet, Layers3, PrinterIcon } from 'lucide-react'
 import AdminEnrollmentTable, { type EnrollmentRow } from '@/components/AdminEnrollmentTable'
 import BulkEmailSender from '@/components/BulkEmailSender'
 import EnrollmentFilters from '@/components/EnrollmentFilters'
@@ -164,7 +164,7 @@ export default function EnrollmentsPage() {
               Export Excel
             </button>
             <button type="button" onClick={() => window.print()} className={adminPrimaryButtonClassName}>
-              <Printer className="h-4 w-4" />
+              <PrinterIcon className="h-4 w-4" />
               Imprimer
             </button>
           </div>

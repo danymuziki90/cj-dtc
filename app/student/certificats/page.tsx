@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Award, BadgeCheck, Download, Medal, ShieldCheck } from 'lucide-react'
+import { Award, BadgeCheck, Download, Award, ShieldCheck } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentSectionCard,
@@ -15,11 +15,11 @@ export default function StudentCertificatesPage() {
   const { data, loading, error } = useStudentDashboardData()
 
   if (loading) {
-    return <StudentPortalLoading title="Certificats" description="Consultez vos certificats emis et l'etat de vos conditions de validation." icon={Medal} />
+    return <StudentPortalLoading title="Certificats" description="Consultez vos certificats emis et l'etat de vos conditions de validation." icon={Award} />
   }
 
   if (!data || error) {
-    return <StudentPortalError title="Certificats" description="Consultez vos certificats emis et l'etat de vos conditions de validation." icon={Medal} error={error} />
+    return <StudentPortalError title="Certificats" description="Consultez vos certificats emis et l'etat de vos conditions de validation." icon={Award} error={error} />
   }
 
   const eligibility = data.dashboard.certificateEligibility
@@ -50,7 +50,7 @@ export default function StudentCertificatesPage() {
       label: 'Eligibilite',
       value: eligibility.eligible ? 'Oui' : 'Non',
       helper: 'Etat actuel avant emission du certificat.',
-      icon: Medal,
+      icon: Award,
       accent: 'from-[#001737] to-[#002D72]',
     },
   ]
@@ -59,7 +59,7 @@ export default function StudentCertificatesPage() {
     <StudentPortalPageShell
       title="Mes certificats"
       description="Suivez les conditions de validation de votre parcours et telechargez vos certificats disponibles."
-      icon={Medal}
+      icon={Award}
       metrics={metrics}
     >
       {/* Conditions de delivrance */}

@@ -7,12 +7,12 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock3,
-  Mail,
-  MapPin,
+  MailIcon,
+  MapPinIcon,
   Phone,
   Send,
   ShieldCheck,
-  Sparkles,
+  Sparkle,
   type LucideIcon,
 } from 'lucide-react'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
@@ -42,7 +42,7 @@ export default function ContactPage() {
 
   const contactCards: ContactCard[] = [
     {
-      icon: Mail,
+      icon: MailIcon,
       title: t.cards[0].title,
       value: 'contact@cjdevelopmenttc.org',
       detail: t.cards[0].detail,
@@ -56,7 +56,7 @@ export default function ContactPage() {
       href: 'tel:+243995136626',
     },
     {
-      icon: MapPin,
+      icon: MapPinIcon,
       title: t.cards[2].title,
       value: locale === 'fr' ? 'Republique Democratique du Congo' : 'Democratic Republic of the Congo',
       detail: t.cards[2].detail,
@@ -76,7 +76,7 @@ export default function ContactPage() {
       description: t.highlights[0].description,
     },
     {
-      icon: Sparkles,
+      icon: Sparkle,
       title: t.highlights[1].title,
       description: t.highlights[1].description,
     },

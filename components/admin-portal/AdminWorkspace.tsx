@@ -18,12 +18,12 @@ import {
   LogOut,
   Menu,
   Newspaper,
-  Plus,
-  Search,
+  PlusIcon,
+  SearchIcon,
   Settings2,
-  Shield,
-  Users2,
-  X,
+  ShieldIcon,
+  Users,
+  XIcon,
 } from 'lucide-react'
 
 type AdminWorkspaceProps = {
@@ -55,7 +55,7 @@ const navItems: NavItem[] = [
     href: '/admin/students',
     label: 'Étudiants',
     caption: 'Comptes et accès',
-    icon: Users2,
+    icon: Users,
   },
   {
     href: '/admin/enrollments',
@@ -96,8 +96,8 @@ const navItems: NavItem[] = [
 ]
 
 const quickActions = [
-  { href: '/admin/sessions/new', label: 'Nouvelle session', icon: Plus },
-  { href: '/admin/articles/new', label: 'Nouvel article', icon: Plus },
+  { href: '/admin/sessions/new', label: 'Nouvelle session', icon: PlusIcon },
+  { href: '/admin/articles/new', label: 'Nouvel article', icon: PlusIcon },
 ]
 
 function isActivePath(pathname: string, href: string) {
@@ -181,7 +181,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
     const matched = navItems.find((item) => isActivePath(pathname, item.href))
     if (matched) return matched
     if (pathname.startsWith('/admin/search')) {
-      return { href: '/admin/search', label: 'Recherche', caption: 'Navigation globale', icon: Search }
+      return { href: '/admin/search', label: 'Recherche', caption: 'Navigation globale', icon: SearchIcon }
     }
     return navItems[0]
   }, [pathname])
@@ -250,7 +250,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
       <div className="mt-6 rounded-[26px] border border-[var(--admin-primary-200)] bg-[linear-gradient(135deg,rgba(0,48,160,0.08),rgba(255,255,255,0.96))] px-4 py-3">
         <div className="flex items-center gap-3">
           <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--admin-primary)] text-white shadow-md shadow-blue-900/20">
-            <Shield className="h-4 w-4" />
+            <ShieldIcon className="h-4 w-4" />
           </span>
           {!collapsed ? (
             <div className="min-w-0">
@@ -352,7 +352,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                     href={action.href}
                     className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-[var(--admin-primary-200)] hover:bg-[var(--admin-primary-50)] hover:text-[var(--admin-primary)]"
                   >
-                    <Plus className="h-3.5 w-3.5" />
+                    <PlusIcon className="h-3.5 w-3.5" />
                     {action.label}
                   </Link>
                 ))}
@@ -384,7 +384,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
               className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600"
               aria-label="Fermer la navigation"
             >
-              <X className="h-4 w-4" />
+              <XIcon className="h-4 w-4" />
             </button>
           </div>
           <div className="flex-1 overflow-y-auto">

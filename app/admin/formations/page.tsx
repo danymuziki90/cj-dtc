@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  Plus, Search, Filter, Edit, Trash2, Eye, Download,
-  BookOpen, Clock, Users, Target, Star, ChevronRight,
-  User, X, AlertCircle, Copy, RefreshCw, CheckSquare,
-  Square, ChevronLeft, ChevronDown
+  PlusIcon, SearchIcon, Filter, Edit, Trash, Eye, Download,
+  BookOpen, Clock, Users, TargetIcon, StarIcon, ChevronRight,
+  UserIcon, XIcon, AlertCircle, Copy, RotateCw, CheckSquare,
+  SquareIcon, ChevronLeft, ChevronDown
 } from 'lucide-react'
 
 interface Formation {
@@ -248,7 +248,7 @@ export default function AdminFormationsPage() {
         }`}>
           {toast.type === 'error' && <AlertCircle className="w-5 h-5" />}
           {toast.msg}
-          <button onClick={() => setToast(null)}><X className="w-4 h-4" /></button>
+          <button onClick={() => setToast(null)}><XIcon className="w-4 h-4" /></button>
         </div>
       )}
 
@@ -258,7 +258,7 @@ export default function AdminFormationsPage() {
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-600" />
+                <Trash className="w-5 h-5 text-red-600" />
               </div>
               <h3 className="text-lg font-bold text-gray-900">Supprimer la formation</h3>
             </div>
@@ -286,7 +286,7 @@ export default function AdminFormationsPage() {
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-600" />
+                <Trash className="w-5 h-5 text-red-600" />
               </div>
               <h3 className="text-lg font-bold text-gray-900">Suppression multiple</h3>
             </div>
@@ -325,9 +325,9 @@ export default function AdminFormationsPage() {
               </span>
             </div>
 
-            {/* Search */}
+            {/* SearchIcon */}
             <div className="flex-1 max-w-md relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Rechercher une formation…"
@@ -338,7 +338,7 @@ export default function AdminFormationsPage() {
               {search && (
                 <button onClick={() => setSearch('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  <X className="w-4 h-4" />
+                  <XIcon className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -359,7 +359,7 @@ export default function AdminFormationsPage() {
               <button onClick={loadFormations}
                 className="p-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
                 title="Actualiser">
-                <RefreshCw className="w-4 h-4" />
+                <RotateCw className="w-4 h-4" />
               </button>
 
               <button onClick={doExportCSV}
@@ -371,14 +371,14 @@ export default function AdminFormationsPage() {
               {selected.length > 0 && (
                 <button onClick={() => setConfirmBulk(true)}
                   className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">
-                  <Trash2 className="w-4 h-4" />
+                  <Trash className="w-4 h-4" />
                   <span>{selected.length}</span>
                 </button>
               )}
 
               <Link href="/admin/formations/new"
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
-                <Plus className="w-4 h-4" />
+                <PlusIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">Nouvelle formation</span>
               </Link>
             </div>
@@ -411,10 +411,10 @@ export default function AdminFormationsPage() {
                 <label className="block text-xs font-medium text-gray-500 mb-1">Trier par</label>
                 <select value={sortBy} onChange={e => setSortBy(e.target.value)}
                   className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                  <option value="created">Plus récent</option>
+                  <option value="created">PlusIcon récent</option>
                   <option value="title-asc">Titre A → Z</option>
                   <option value="title-desc">Titre Z → A</option>
-                  <option value="students">Plus populaire</option>
+                  <option value="students">PlusIcon populaire</option>
                   <option value="rating">Mieux noté</option>
                   <option value="price-asc">Prix croissant</option>
                   <option value="price-desc">Prix décroissant</option>
@@ -443,7 +443,7 @@ export default function AdminFormationsPage() {
             <div className="flex items-center gap-3 text-sm">
               <span className="text-blue-600 font-medium">{selected.length} sélectionnée(s)</span>
               <button onClick={() => setSelected([])} className="text-gray-400 hover:text-gray-600">
-                <X className="w-4 h-4" />
+                <XIcon className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -456,7 +456,7 @@ export default function AdminFormationsPage() {
               className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition-colors">
               {allPageSelected
                 ? <CheckSquare className="w-4 h-4 text-blue-600" />
-                : <Square className="w-4 h-4" />}
+                : <SquareIcon className="w-4 h-4" />}
               Sélectionner cette page
             </button>
           </div>
@@ -493,7 +493,7 @@ export default function AdminFormationsPage() {
             <p className="text-gray-500 mb-6 max-w-sm">{error}</p>
             <button onClick={loadFormations}
               className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
-              <RefreshCw className="w-4 h-4" />
+              <RotateCw className="w-4 h-4" />
               Réessayer
             </button>
           </div>
@@ -521,7 +521,7 @@ export default function AdminFormationsPage() {
               )}
               <Link href="/admin/formations/new"
                 className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
-                <Plus className="w-4 h-4" />
+                <PlusIcon className="w-4 h-4" />
                 Créer une formation
               </Link>
             </div>
@@ -624,7 +624,7 @@ function FormationAdminCard({ formation: f, isSelected, onSelect, onEdit, onDele
           className="absolute top-3 left-3 w-7 h-7 rounded-lg border-2 border-white bg-white/80 shadow flex items-center justify-center hover:bg-white transition-colors">
           {isSelected
             ? <CheckSquare className="w-5 h-5 text-blue-600" />
-            : <Square className="w-5 h-5 text-gray-400" />}
+            : <SquareIcon className="w-5 h-5 text-gray-400" />}
         </button>
 
         {/* Status badge */}
@@ -646,7 +646,7 @@ function FormationAdminCard({ formation: f, isSelected, onSelect, onEdit, onDele
           )}
           {f.rating ? (
             <div className="flex items-center gap-1">
-              <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
+              <StarIcon className="w-3.5 h-3.5 text-yellow-400 fill-current" />
               <span className="text-xs font-medium text-gray-700">{f.rating.toFixed(1)}</span>
               {f.reviewCount ? <span className="text-xs text-gray-400">({f.reviewCount})</span> : null}
             </div>
@@ -685,7 +685,7 @@ function FormationAdminCard({ formation: f, isSelected, onSelect, onEdit, onDele
         {f.instructor && (
           <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
             <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <User className="w-4 h-4 text-blue-600" />
+              <UserIcon className="w-4 h-4 text-blue-600" />
             </div>
             <span className="truncate">{f.instructor.firstName} {f.instructor.lastName}</span>
           </div>
@@ -732,7 +732,7 @@ function FormationAdminCard({ formation: f, isSelected, onSelect, onEdit, onDele
                   </button>
                   <button onClick={() => { onDelete(); setShowMenu(false) }}
                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                    <Trash2 className="w-4 h-4" />
+                    <Trash className="w-4 h-4" />
                     Supprimer
                   </button>
                 </div>

@@ -7,20 +7,20 @@ import {
   BookOpen,
   GraduationCap,
   LayoutDashboard,
-  Medal,
-  NotebookText,
-  UserRound,
+  Award,
+  BookOpen,
+  User,
 } from 'lucide-react'
 
 const items = [
   { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/student/mes-sessions', label: 'Mes sessions', icon: GraduationCap },
   { href: '/student/ressources', label: 'Ressources', icon: BookOpen },
-  { href: '/student/resultats', label: 'Resultats', icon: NotebookText },
-  { href: '/student/certificats', label: 'Certificats', icon: Medal },
+  { href: '/student/resultats', label: 'Resultats', icon: BookOpen },
+  { href: '/student/certificats', label: 'Certificats', icon: Award },
   { href: '/student/notifications', label: 'Notifications', icon: Bell },
-  { href: '/student/submissions', label: 'Travaux', icon: NotebookText },
-  { href: '/student/profile', label: 'Profil', icon: UserRound },
+  { href: '/student/submissions', label: 'Travaux', icon: BookOpen },
+  { href: '/student/profile', label: 'Profil', icon: User },
 ]
 
 function isItemActive(pathname: string, href: string) {

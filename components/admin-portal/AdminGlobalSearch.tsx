@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Search } from 'lucide-react'
+import { SearchIcon } from 'lucide-react'
 
 const RECENT_SEARCHES_KEY = 'cj-admin-recent-searches'
 
@@ -75,7 +75,7 @@ export default function AdminGlobalSearch() {
         onSubmit={(event) => submitSearch(event)}
         className="flex w-full items-center gap-3 rounded-[24px] border border-slate-200 bg-white px-4 py-3 shadow-[0_18px_45px_-40px_rgba(15,23,42,0.25)]"
       >
-        <Search className="h-4 w-4 text-slate-400" />
+        <SearchIcon className="h-4 w-4 text-slate-400" />
         <input
           ref={inputRef}
           value={query}

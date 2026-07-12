@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Save, Eye, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, SaveIcon, Eye, AlertCircle, CheckCircle2 } from 'lucide-react'
 import FormationForm from '@/components/admin/FormationForm'
 
 export default function NewFormationPage() {

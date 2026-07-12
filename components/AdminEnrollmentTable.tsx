@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, Eye, MapPin, UserRound } from 'lucide-react'
+import { CalendarDays, Eye, MapPinIcon, User } from 'lucide-react'
 import { FormattedDate } from './FormattedDate'
 import {
   AdminBadge,
@@ -196,7 +196,7 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                           <td className="px-4 py-4">
                             <div className="flex items-start gap-3">
                               <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--admin-primary-50)] text-[var(--admin-primary)] ring-1 ring-[var(--admin-primary-100)]">
-                                <UserRound className="h-4 w-4" />
+                                <User className="h-4 w-4" />
                               </span>
                               <div>
                                 <p className="font-semibold text-slate-900">
@@ -324,7 +324,7 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                         <span>{enrollment.email}</span>
                         <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5" />
+                          <MapPinIcon className="h-3.5 w-3.5" />
                           {enrollment.session?.location || 'Aucun lieu'}
                         </span>
                         <span>{formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)}</span>

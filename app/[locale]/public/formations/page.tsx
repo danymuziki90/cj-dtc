@@ -6,18 +6,18 @@ import { useParams } from "next/navigation";
 import {
   ArrowRight,
   Filter,
-  Search,
+  SearchIcon,
   Clock,
   Users,
-  User,
+  UserIcon,
   Award,
   Calendar,
-  Star,
+  StarIcon,
   BookOpen,
-  Target,
+  TargetIcon,
   TrendingUp,
   ChevronRight,
-  MapPin,
+  MapPinIcon,
   DollarSign,
   BarChart3,
   CheckCircle,
@@ -257,11 +257,11 @@ export default function FormationsPage() {
   ];
 
   const sortOptions = [
-    { id: "popular", name: "Plus populaire" },
+    { id: "popular", name: "PlusIcon populaire" },
     { id: "price-low", name: "Prix croissant" },
     { id: "price-high", name: "Prix décroissant" },
     { id: "rating", name: "Mieux noté" },
-    { id: "newest", name: "Plus récent" },
+    { id: "newest", name: "PlusIcon récent" },
   ];
 
   const filteredFormations = formations
@@ -332,7 +332,7 @@ export default function FormationsPage() {
   const getFormatIcon = (format: string) => {
     switch (format) {
       case "présentiel":
-        return MapPin;
+        return MapPinIcon;
       case "en ligne":
         return BookOpen;
       case "hybride":
@@ -403,13 +403,13 @@ export default function FormationsPage() {
         </div>
       </header>
 
-      {/* Search and Filters */}
+      {/* SearchIcon and Filters */}
       <section className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search Bar */}
+            {/* SearchIcon Bar */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Rechercher une formation..."
@@ -588,7 +588,7 @@ export default function FormationsPage() {
                     {formation.category}
                   </span>
                   <div className="flex items-center space-x-1">
-                    <Star className="w-4 h-4 text-red-400 fill-current" />
+                    <StarIcon className="w-4 h-4 text-red-400 fill-current" />
                     <span className="text-sm text-gray-600">
                       {formation.rating}
                     </span>
@@ -636,7 +636,7 @@ export default function FormationsPage() {
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Target className="w-4 h-4 text-gray-400" />
+                    <TargetIcon className="w-4 h-4 text-gray-400" />
                     <span
                       className={`px-2 py-1 rounded text-xs ${getLevelColor(formation.level)}`}
                     >
@@ -656,7 +656,7 @@ export default function FormationsPage() {
                 <div className="border-t border-gray-100 pt-4 mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-blue-600" />
+                      <UserIcon className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">
@@ -703,7 +703,7 @@ export default function FormationsPage() {
         {filteredFormations.length === 0 && (
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-12 h-12 text-gray-400" />
+              <SearchIcon className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Aucune formation trouvée

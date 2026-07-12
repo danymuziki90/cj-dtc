@@ -3,30 +3,30 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
-  Search, 
+  SearchIcon, 
   Award, 
   CheckCircle, 
-  X, 
+  XIcon, 
   Calendar, 
-  User, 
+  UserIcon, 
   BookOpen,
   Download,
   Share2,
   QrCode,
-  Shield,
+  ShieldIcon,
   Globe,
   Flag,
   ExternalLink,
   AlertCircle,
   Clock,
-  MapPin,
-  Mail,
+  MapPinIcon,
+  MailIcon,
   Phone,
-  Star,
+  StarIcon,
   TrendingUp,
   BarChart3,
   Users,
-  Target
+  TargetIcon
 } from 'lucide-react'
 
 export default function VerificationPage() {
@@ -181,7 +181,7 @@ export default function VerificationPage() {
           <div className="text-center">
             <div className="flex justify-center space-x-4 mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                <Shield className="w-8 h-8 text-white" />
+                <ShieldIcon className="w-8 h-8 text-white" />
               </div>
               <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
                 <QrCode className="w-8 h-8 text-white" />
@@ -246,7 +246,7 @@ export default function VerificationPage() {
           <div className="max-w-2xl mx-auto">
             <div className="flex flex-col space-y-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Numéro de certificat (ex: CJ-DTC-2024-0001)"
@@ -269,7 +269,7 @@ export default function VerificationPage() {
                   </>
                 ) : (
                   <>
-                    <Shield className="w-5 h-5" />
+                    <ShieldIcon className="w-5 h-5" />
                     <span>Vérifier le certificat</span>
                   </>
                 )}
@@ -401,7 +401,7 @@ export default function VerificationPage() {
                         <div className="bg-gray-50 rounded-lg p-4">
                           <div className="flex items-center space-x-4 mb-4">
                             <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                              <User className="w-8 h-8 text-blue-600" />
+                              <UserIcon className="w-8 h-8 text-blue-600" />
                             </div>
                             <div>
                               <h5 className="font-semibold text-gray-900 text-lg">
@@ -472,7 +472,7 @@ export default function VerificationPage() {
                   <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Shield className="w-5 h-5 text-blue-600" />
+                        <ShieldIcon className="w-5 h-5 text-blue-600" />
                         <div>
                           <h5 className="font-medium text-gray-900">Vérification Blockchain</h5>
                           <p className="text-sm text-gray-600">
@@ -494,7 +494,7 @@ export default function VerificationPage() {
               <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-red-200">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <X className="w-8 h-8 text-red-600" />
+                    <XIcon className="w-8 h-8 text-red-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-red-900 mb-4">
                     Certificat Non Valide
@@ -557,7 +557,7 @@ export default function VerificationPage() {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-blue-600" />
+                <ShieldIcon className="w-8 h-8 text-blue-600" />
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">Sécurité Maximale</h4>
               <p className="text-sm text-gray-600">

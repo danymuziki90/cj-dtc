@@ -10,22 +10,22 @@ import {
   Share2, 
   Eye, 
   Calendar, 
-  User, 
+  UserIcon, 
   BookOpen,
   CheckCircle, 
   Clock, 
   TrendingUp, 
-  Star, 
-  Shield,
+  StarIcon, 
+  ShieldIcon,
   ExternalLink,
   AlertCircle,
   Copy,
   Smartphone,
   Filter,
-  Search,
+  SearchIcon,
   ChevronRight,
   BarChart3,
-  Target
+  TargetIcon
 } from 'lucide-react'
 import { 
   generateCertificateQRCodeDisplay, 
@@ -355,7 +355,7 @@ export default function CertificatesPage() {
             
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Rechercher un certificat..."
@@ -438,7 +438,7 @@ export default function CertificatesPage() {
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
-                  <Star className="w-6 h-6 text-red-600" />
+                  <StarIcon className="w-6 h-6 text-red-600" />
                 </div>
                 <BarChart3 className="w-5 h-5 text-red-500" />
               </div>
@@ -481,7 +481,7 @@ export default function CertificatesPage() {
                   </span>
                 ) : (
                   <>
-                    <Shield className="w-5 h-5" />
+                    <ShieldIcon className="w-5 h-5" />
                     <span>Vérifier</span>
                   </>
                 )}
@@ -621,7 +621,7 @@ export default function CertificatesPage() {
                     onClick={() => emailCertificatePDF(certificate)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    <Mail className="w-4 h-4 mr-2" />
+                    <MailIcon className="w-4 h-4 mr-2" />
                     Envoyer
                   </button>
                   <button
@@ -768,7 +768,7 @@ export default function CertificatesPage() {
                     }}
                     className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    <Shield className="w-5 h-5 mr-2" />
+                    <ShieldIcon className="w-5 h-5 mr-2" />
                     Vérifier ce certificat
                   </button>
                   <button

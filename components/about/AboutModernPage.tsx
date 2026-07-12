@@ -7,10 +7,10 @@ import {
   CheckCircle2,
   Globe2,
   GraduationCap,
-  MapPin,
-  Target,
+  MapPinIcon,
+  TargetIcon,
   TrendingUp,
-  Users2,
+  Users,
 } from 'lucide-react'
 import { resolveSiteLocale, type SiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
@@ -26,9 +26,9 @@ type AboutModernPageProps = {
 // ─── Contenu statique — page de conviction ────────────────────────────────────
 
 const PROOF_STATS = [
-  { value: '8 500+', label: 'Apprenants formés',    labelEn: 'Learners trained',      icon: Users2 },
+  { value: '8 500+', label: 'Apprenants formés',    labelEn: 'Learners trained',      icon: Users },
   { value: '10+',    label: 'Pays couverts',         labelEn: 'Countries reached',     icon: Globe2 },
-  { value: '2018',   label: 'Année de fondation',    labelEn: 'Founded',               icon: Target },
+  { value: '2018',   label: 'Année de fondation',    labelEn: 'Founded',               icon: TargetIcon },
   { value: '95%',    label: 'Taux de satisfaction',  labelEn: 'Satisfaction rate',     icon: Award },
   { value: '29+',    label: 'Promotions certifiées', labelEn: 'Certified cohorts',     icon: GraduationCap },
   { value: '85%',    label: "Taux d'insertion",      labelEn: 'Placement rate',        icon: TrendingUp },
@@ -116,7 +116,7 @@ const VALUES = {
       desc: 'Transparence, discipline et redevabilité dans chaque session, chaque interaction, chaque décision pédagogique.',
     },
     {
-      icon: Users2,
+      icon: Users,
       title: 'Leadership utile',
       desc: "Nous formons des profils capables de décider, d'agir et de faire avancer leurs équipes dans des contextes africains et globaux.",
     },
@@ -138,7 +138,7 @@ const VALUES = {
       desc: 'Transparency, discipline and accountability in every session, every interaction, every pedagogical decision.',
     },
     {
-      icon: Users2,
+      icon: Users,
       title: 'Useful leadership',
       desc: 'We train people who can decide, act and move their teams forward in African and global contexts.',
     },
@@ -355,7 +355,7 @@ export default function AboutModernPage({
           <article className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--cj-blue-50)] text-[var(--cj-blue)]">
-                <MapPin className="h-5 w-5" />
+                <MapPinIcon className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">

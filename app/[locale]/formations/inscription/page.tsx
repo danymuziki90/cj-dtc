@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, MapPin, Clock, Users, DollarSign, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react'
+import { Calendar, MapPinIcon, Clock, Users, DollarSign, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react'
 import { FormattedDate } from '@/components/FormattedDate'
 
 interface TrainingSession {
@@ -313,7 +313,7 @@ function InscriptionContent() {
                                 </div>
 
                                 <div className="flex items-start gap-3">
-                                    <MapPin className="w-5 h-5 text-cjblue mt-0.5" />
+                                    <MapPinIcon className="w-5 h-5 text-cjblue mt-0.5" />
                                     <div>
                                         <p className="font-medium text-gray-900">Lieu</p>
                                         <p className="text-sm text-gray-600">{session.location}</p>
