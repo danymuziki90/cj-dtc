@@ -252,9 +252,13 @@ function ProgrammesContent() {
                 {t.heroEyebrow}
               </span>
               <h1 className="mt-4 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-                {t.heroTitle}
+                {locale === 'fr' ? 'Sessions ouvertes — inscriptions en cours' : 'Open sessions — registrations open'}
               </h1>
-              <p className="mt-4 max-w-3xl text-base text-blue-100 sm:text-lg">{t.heroDescription}</p>
+              <p className="mt-4 max-w-3xl text-base text-blue-100 sm:text-lg">
+                {locale === 'fr'
+                  ? 'Choisissez votre session, vérifiez les places disponibles et réservez directement depuis cette page. Chaque inscription est confirmée immédiatement.'
+                  : 'Choose your session, check available spots and register directly from this page. Each registration is confirmed immediately.'}
+              </p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
@@ -371,6 +375,27 @@ function ProgrammesContent() {
                       <span className="rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white">
                         {normalizeFormatLabel(session.format, locale)}
                       </span>
+                      {/* Badge urgence places */}
+                      {!isFull && session.availableSpots <= 5 && session.availableSpots > 0 ? (
+                        <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white shadow-md">
+                          {locale === 'fr' ? `${session.availableSpots} place${session.availableSpots > 1 ? 's' : ''} restante${session.availableSpots > 1 ? 's' : ''}` : `${session.availableSpots} spot${session.availableSpots > 1 ? 's' : ''} left`}
+                        </span>
+                      ) : null}
+                      {/* Badge dernière semaine */}
+                      {!isFull && session.availableSpots > 5 && (() => {
+                        const daysLeft = Math.ceil((new Date(session.startDate).getTime() - Date.now()) / 86400000)
+                        return daysLeft <= 7 && daysLeft >= 0
+                      })() ? (
+                        <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow-md">
+                          {locale === 'fr' ? 'Dernière semaine' : 'Last week'}
+                        </span>
+                      ) : null}
+                      {/* Badge session confirmée */}
+                      {!isFull && session.currentParticipants >= Math.floor(session.maxParticipants * 0.5) ? (
+                        <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-md">
+                          {locale === 'fr' ? 'Session confirmée' : 'Confirmed'}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
 

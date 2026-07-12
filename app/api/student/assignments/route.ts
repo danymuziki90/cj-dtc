@@ -1,137 +1,194 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '../../../../lib/prisma'
+import { prisma } from '@/lib/prisma'
+import { requireStudent } from '@/lib/auth-portal/guards'
 
-export async function GET(req: NextRequest) {
+export const runtime = 'nodejs'
+
+const ENROLLMENT_STATUSES_WITH_ACCESS = ['accepted', 'confirmed', 'completed']
+
+function parseAllowedFileTypes(value: string | null | undefined) {
+  return (value || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function normalizeExtension(value: string) {
+  return value.replace(/^\./, '').trim().toLowerCase()
+}
+
+function mapSubmissionFile(file: any) {
+  return {
+    ...file,
+    type: file.mimeType,
+  }
+}
+
+function mapAssignment(assignment: any) {
+  return {
+    ...assignment,
+    allowedFileTypes: parseAllowedFileTypes(assignment.allowedFileTypes),
+    submissions: assignment.submissions.map((submission: any) => ({
+      ...submission,
+      files: submission.files.map(mapSubmissionFile),
+    })),
+  }
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session || session.user?.role !== 'student') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+    const auth = await requireStudent(request)
+    if (auth.error) return auth.error
 
-    // Récupérer les travaux assignés à l'étudiant
     const assignments = await prisma.assignment.findMany({
       where: {
         formation: {
           enrollments: {
             some: {
-              email: session.user.email,
-              status: 'confirmed'
-            }
-          }
-        }
+              OR: [
+                { studentId: auth.student.id },
+                { email: { equals: auth.student.email, mode: 'insensitive' } },
+              ],
+              status: { in: ENROLLMENT_STATUSES_WITH_ACCESS },
+            },
+          },
+        },
       },
       include: {
         formation: true,
         submissions: {
           where: {
-            studentEmail: session.user.email
+            studentEmail: { equals: auth.student.email, mode: 'insensitive' },
           },
           include: {
-            files: true
+            files: true,
           },
-          orderBy: { submittedAt: 'desc' }
-        }
+          orderBy: { submittedAt: 'asc' },
+        },
       },
-      orderBy: { deadline: 'asc' }
+      orderBy: { deadline: 'asc' },
     })
 
-    return NextResponse.json(assignments)
+    return NextResponse.json(assignments.map(mapAssignment))
   } catch (error) {
-    console.error('Erreur lors du chargement des travaux:', error)
+    console.error('Student assignments list error:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session || session.user?.role !== 'student') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+    const auth = await requireStudent(request)
+    if (auth.error) return auth.error
 
-    const formData = await req.formData()
+    const formData = await request.formData()
     const assignmentId = Number(formData.get('assignmentId'))
     const fileCount = Number(formData.get('fileCount'))
 
-    if (!assignmentId) {
-      return NextResponse.json({ error: 'ID du travail requis' }, { status: 400 })
+    if (!Number.isInteger(assignmentId) || assignmentId <= 0) {
+      return NextResponse.json({ error: 'ID du travail requis.' }, { status: 400 })
     }
 
-    // Vérifier le travail
+    if (!Number.isInteger(fileCount) || fileCount <= 0 || fileCount > 10) {
+      return NextResponse.json({ error: 'Ajoutez entre 1 et 10 fichiers.' }, { status: 400 })
+    }
+
     const assignment = await prisma.assignment.findUnique({
       where: { id: assignmentId },
-      include: { formation: true }
+      include: { formation: true },
     })
-
     if (!assignment) {
-      return NextResponse.json({ error: 'Travail non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Travail introuvable.' }, { status: 404 })
     }
 
-    // Vérifier que l'étudiant est bien inscrit à cette formation
+    if (assignment.deadline < new Date()) {
+      return NextResponse.json({ error: 'La date limite de remise est depassee.' }, { status: 400 })
+    }
+
     const enrollment = await prisma.enrollment.findFirst({
       where: {
-        email: session.user.email,
+        OR: [
+          { studentId: auth.student.id },
+          { email: { equals: auth.student.email, mode: 'insensitive' } },
+        ],
         formationId: assignment.formationId,
-        status: 'confirmed'
-      }
+        status: { in: ENROLLMENT_STATUSES_WITH_ACCESS },
+      },
+      select: { id: true },
     })
-
     if (!enrollment) {
-      return NextResponse.json({ error: 'Non inscrit à cette formation' }, { status: 403 })
+      return NextResponse.json({ error: 'Vous n etes pas inscrit a cette formation.' }, { status: 403 })
     }
 
-    // Créer la soumission
+    const allowedTypes = parseAllowedFileTypes(assignment.allowedFileTypes).map(normalizeExtension)
+    const maxBytes = assignment.maxFileSize * 1024 * 1024
+    const files: File[] = []
+
+    for (let index = 0; index < fileCount; index += 1) {
+      const file = formData.get(`file_${index}`)
+      if (!(file instanceof File)) continue
+
+      const extension = normalizeExtension(file.name.split('.').pop() || '')
+      if (allowedTypes.length && !allowedTypes.includes(extension)) {
+        return NextResponse.json({ error: `Format non autorise: ${file.name}` }, { status: 400 })
+      }
+
+      if (file.size > maxBytes) {
+        return NextResponse.json({ error: `Fichier trop volumineux: ${file.name}` }, { status: 400 })
+      }
+
+      files.push(file)
+    }
+
+    if (!files.length) {
+      return NextResponse.json({ error: 'Aucun fichier valide fourni.' }, { status: 400 })
+    }
+
     const submission = await prisma.submission.create({
       data: {
         assignmentId,
-        studentEmail: session.user.email,
+        studentEmail: auth.student.email,
         status: 'submitted',
-        submittedAt: new Date()
-      }
+        submittedAt: new Date(),
+      },
     })
 
-    // Traiter les fichiers
-    const files = []
-    for (let i = 0; i < fileCount; i++) {
-      const file = formData.get(`file_${i}`) as File
-      if (file) {
-        // Convertir le fichier en base64 pour le stockage
-        const buffer = await file.arrayBuffer()
-        const base64 = Buffer.from(buffer).toString('base64')
-        const mimeType = file.type || 'application/octet-stream'
-        
-        const submissionFile = await prisma.submissionFile.create({
-          data: {
-            submissionId: submission.id,
-            name: `file_${i}_${Date.now()}`,
-            originalName: file.name,
-            size: file.size,
-            mimeType,
-            url: `data:${mimeType};base64,${base64}`
-          }
-        })
-        
-        files.push(submissionFile)
-      }
+    for (const [index, file] of files.entries()) {
+      const buffer = await file.arrayBuffer()
+      const base64 = Buffer.from(buffer).toString('base64')
+      const mimeType = file.type || 'application/octet-stream'
+
+      await prisma.submissionFile.create({
+        data: {
+          submissionId: submission.id,
+          name: `assignment-${assignmentId}-${submission.id}-${index}`,
+          originalName: file.name,
+          size: file.size,
+          mimeType,
+          url: `data:${mimeType};base64,${base64}`,
+        },
+      })
     }
 
-    // Retourner la soumission avec les fichiers
     const submissionWithFiles = await prisma.submission.findUnique({
       where: { id: submission.id },
-      include: { files: true }
+      include: { files: true },
     })
 
-    return NextResponse.json({
-      success: true,
-      submission: submissionWithFiles
-    }, { status: 201 })
-
+    return NextResponse.json(
+      {
+        success: true,
+        submission: submissionWithFiles
+          ? {
+              ...submissionWithFiles,
+              files: submissionWithFiles.files.map(mapSubmissionFile),
+            }
+          : null,
+      },
+      { status: 201 }
+    )
   } catch (error) {
-    console.error('Erreur lors de la soumission:', error)
+    console.error('Student assignment submit error:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

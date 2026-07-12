@@ -27,16 +27,22 @@ interface Assignment {
   }>
 }
 
+interface FormationOption {
+  id: number
+  title: string
+}
+
 export default function AdminAssignmentsPage() {
   const { data: session } = useSession()
   const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [formations, setFormations] = useState<FormationOption[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     type: 'tp' as 'tp' | 'exam' | 'project',
-    formationId: 1,
+    formationId: 0,
     deadline: '',
     maxFileSize: 10,
     allowedFileTypes: ['pdf', 'doc', 'docx', 'zip'],
@@ -45,6 +51,7 @@ export default function AdminAssignmentsPage() {
 
   useEffect(() => {
     fetchAssignments()
+    fetchFormations()
   }, [])
 
   const fetchAssignments = async () => {
@@ -59,8 +66,28 @@ export default function AdminAssignmentsPage() {
     }
   }
 
+  const fetchFormations = async () => {
+    try {
+      const response = await fetch('/api/formations')
+      const data = await response.json()
+      const nextFormations = Array.isArray(data) ? data : []
+      setFormations(nextFormations)
+      setFormData(prev => ({
+        ...prev,
+        formationId: prev.formationId || nextFormations[0]?.id || 0,
+      }))
+    } catch (error) {
+      console.error('Erreur lors du chargement des formations:', error)
+    }
+  }
+
   const handleCreateAssignment = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!formData.formationId) {
+      alert('Veuillez selectionner une formation.')
+      return
+    }
     
     try {
       const response = await fetch('/api/admin/assignments', {
@@ -79,7 +106,7 @@ export default function AdminAssignmentsPage() {
           title: '',
           description: '',
           type: 'tp',
-          formationId: 1,
+          formationId: formations[0]?.id || 0,
           deadline: '',
           maxFileSize: 10,
           allowedFileTypes: ['pdf', 'doc', 'docx', 'zip'],
@@ -360,6 +387,7 @@ export default function AdminAssignmentsPage() {
                       value={formData.type}
                       onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as any }))}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
                     >
                       <option value="tp">TP</option>
                       <option value="exam">Examen</option>
@@ -407,10 +435,14 @@ export default function AdminAssignmentsPage() {
                       value={formData.formationId}
                       onChange={(e) => setFormData(prev => ({ ...prev, formationId: Number(e.target.value) }))}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
                     >
-                      <option value={1}>Développement Web</option>
-                      <option value={2}>Marketing Digital</option>
-                      <option value={3}>Gestion de Projet</option>
+                      <option value={0} disabled>Selectionnez une formation</option>
+                      {formations.map((formation) => (
+                        <option key={formation.id} value={formation.id}>
+                          {formation.title}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -439,7 +471,8 @@ export default function AdminAssignmentsPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    disabled={!formations.length}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Créer le travail
                   </button>
@@ -452,4 +485,3 @@ export default function AdminAssignmentsPage() {
     </div>
   )
 }
-

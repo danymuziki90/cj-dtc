@@ -5,6 +5,13 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { hashPassword } from '@/lib/auth-portal/password'
 import { buildRateLimitIdentifier, consumeRateLimit } from '@/lib/auth-portal/rate-limit'
+import { ensurePortalSecretReady } from '@/lib/auth-portal/security'
+import {
+  STUDENT_AUTH_COOKIE,
+  STUDENT_TOKEN_MAX_AGE,
+  getAuthCookieOptions,
+  signStudentToken,
+} from '@/lib/auth-portal/jwt'
 
 const registerSchema = z
   .object({
@@ -57,6 +64,8 @@ function logStudentRegistrationError(error: unknown, context: Record<string, unk
 
 export async function POST(request: NextRequest) {
   try {
+    ensurePortalSecretReady('STUDENT_JWT_SECRET')
+
     const body = await request.json().catch(() => null)
     const rateLimitKey = buildRateLimitIdentifier(
       request,
@@ -134,18 +143,30 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(
+    const token = await signStudentToken({
+      sub: student.id,
+      studentId: student.id,
+      username: student.username || student.email,
+    })
+
+    const response = NextResponse.json(
       {
         success: true,
-        message: 'Compte cree avec succes. Vous pouvez maintenant vous connecter.',
+        token,
+        message: 'Compte cree avec succes. Vous etes connecte.',
         student: {
           id: student.id,
           name: `${student.firstName} ${student.lastName}`.trim(),
           username: student.username,
+          email: student.email,
+          role: student.role,
         },
       },
       { status: 201 }
     )
+
+    response.cookies.set(STUDENT_AUTH_COOKIE, token, getAuthCookieOptions(STUDENT_TOKEN_MAX_AGE))
+    return response
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       logStudentRegistrationError(error, {

@@ -91,7 +91,7 @@ function StudentRegisterForm() {
         return
       }
 
-      router.push(`/student/login?registered=1&callbackUrl=${encodeURIComponent(callbackUrl)}`)
+      router.push(callbackUrl)
       router.refresh()
     } catch {
       setGlobalError('Impossible de creer le compte pour le moment.')
@@ -133,7 +133,7 @@ function StudentRegisterForm() {
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Espace Etudiant</p>
           <h1 className="mt-5 text-4xl font-semibold leading-tight">Creer votre compte etudiant</h1>
           <p className="mt-4 text-sm leading-7 text-white/78">
-            Une fois le compte cree, vous serez redirige vers la connexion avec un message de confirmation.
+            Une fois le compte cree, vous accedez directement a votre tableau de bord.
           </p>
         </section>
 

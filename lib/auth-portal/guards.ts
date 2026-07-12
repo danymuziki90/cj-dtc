@@ -83,7 +83,9 @@ export async function requireStudent(request: NextRequest) {
     return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
 
-  if (student.status !== 'ACTIVE') {
+  const normalizedStatus = typeof student.status === 'string' ? student.status.trim().toUpperCase() : ''
+
+  if (normalizedStatus !== 'ACTIVE') {
     return {
       error: NextResponse.json(
         { error: 'Compte etudiant inactif. Veuillez contacter l administration.' },
