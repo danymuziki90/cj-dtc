@@ -6,7 +6,12 @@ import { AdminMetricCard, AdminPanel, AdminPanelHeader, AdminBadge } from '@/com
 export type EnrollmentStatsSummary = {
   total: number
   byStatus: Record<string, number>
+  byPaymentStatus: Record<string, number>
   byAccountStatus: Record<string, number>
+  revenue: {
+    totalAmount: number
+    paidAmount: number
+  }
   byFormation: Array<{
     id: number
     title: string
@@ -81,9 +86,9 @@ export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsS
             <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Statut paiement</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <AdminBadge tone="danger">Non soldes: {summary.byPaymentStatus.unpaid || 0}</AdminBadge>
-                <AdminBadge tone="warning">Partiels: {summary.byPaymentStatus.partial || 0}</AdminBadge>
-                <AdminBadge tone="success">Soldes: {summary.byPaymentStatus.paid || 0}</AdminBadge>
+                <AdminBadge tone="danger">Non soldes: {summary.byPaymentStatus?.unpaid ?? 0}</AdminBadge>
+                <AdminBadge tone="warning">Partiels: {summary.byPaymentStatus?.partial ?? 0}</AdminBadge>
+                <AdminBadge tone="success">Soldes: {summary.byPaymentStatus?.paid ?? 0}</AdminBadge>
               </div>
             </div>
             <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 px-4 py-4">
