@@ -287,7 +287,7 @@ export default function AboutModernPage({
             <p className="mt-3 max-w-2xl text-base text-slate-600">
               {isFr
                 ? 'Nous ne formons pas pour former. Chaque étape de notre méthode est conçue pour produire une transformation mesurable.'
-                : 'We don't train for the sake of training. Every step of our method is designed to produce measurable transformation.'}
+                : "We don't train for the sake of training. Every step of our method is designed to produce measurable transformation."}
             </p>
           </div>
 
