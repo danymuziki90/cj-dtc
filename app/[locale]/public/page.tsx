@@ -31,7 +31,6 @@ import {
 } from "lucide-react";
 
 export default function HomePage() {
-  const router = useRouter();
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale || "fr";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
