@@ -5,7 +5,6 @@ import {
   Clock3,
   GraduationCap,
   MapPin,
-  Users,
 } from "lucide-react";
 import {
   StudentEmptyState,
@@ -19,7 +18,6 @@ import {
 } from "@/components/student-portal/StudentPortalPageShell";
 import { useStudentDashboardData } from "@/components/student-portal/useStudentDashboard";
 import {
-  formatPortalCurrency,
   formatPortalDate,
   formatPortalDateTime,
   statusToneClass,
@@ -28,6 +26,13 @@ import {
 function sessionTypeLabel(value: string | null | undefined) {
   if (!value) return "Session";
   return value.replace(/_/g, " ");
+}
+
+function lifecycleLabel(value: string) {
+  if (value === "upcoming") return "A venir";
+  if (value === "active") return "En cours";
+  if (value === "completed") return "Terminee";
+  return value;
 }
 
 export default function StudentSessionsPage() {
@@ -78,10 +83,10 @@ export default function StudentSessionsPage() {
       accent: "from-[#E30613] to-[#F16C78]",
     },
     {
-      label: "Paiements confirmes",
-      value: data.dashboard.metrics.successfulPayments,
-      helper: "Paiements valides sur votre espace.",
-      icon: Users,
+      label: "Inscriptions",
+      value: data.dashboard.sessionsHistory.length,
+      helper: "Total des inscriptions enregistrees.",
+      icon: MapPin,
       accent: "from-[#001737] to-[#002D72]",
     },
   ];
@@ -93,6 +98,7 @@ export default function StudentSessionsPage() {
       icon={GraduationCap}
       metrics={metrics}
     >
+      {/* Session active */}
       <StudentSectionCard
         eyebrow="En cours"
         title="Ma session actuelle"
@@ -139,8 +145,8 @@ export default function StudentSessionsPage() {
                     Lieu / format
                   </p>
                   <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {currentSession.location || "En ligne"} ·{" "}
-                    {currentSession.format || "Détails session"}
+                    {currentSession.location || "En ligne"} &middot;{" "}
+                    {currentSession.format || "Details session"}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
@@ -153,6 +159,7 @@ export default function StudentSessionsPage() {
                 </div>
               </div>
             </div>
+
             <div className="rounded-3xl border border-slate-200 bg-white p-5">
               <h3 className="text-lg font-semibold text-slate-950">
                 Capacite et reservation
@@ -180,9 +187,9 @@ export default function StudentSessionsPage() {
                   </strong>
                 </div>
                 <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <span>Cycle</span>
+                  <span>Etat</span>
                   <strong className="text-slate-950">
-                    {currentSession.lifecycle}
+                    {lifecycleLabel(currentSession.lifecycle)}
                   </strong>
                 </div>
               </div>
@@ -196,10 +203,11 @@ export default function StudentSessionsPage() {
         )}
       </StudentSectionCard>
 
+      {/* Historique */}
       <StudentSectionCard
         eyebrow="Historique"
         title="Toutes mes inscriptions"
-        description="Vue chronologique de vos sessions, du suivi de paiement et du volume d'heures associe."
+        description="Vue chronologique de vos sessions et du volume d'heures associe."
         icon={Clock3}
       >
         {data.dashboard.sessionsHistory.length ? (
@@ -219,18 +227,20 @@ export default function StudentSessionsPage() {
                     </h3>
                   </div>
                   <span
-                    className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusToneClass(session.paymentStatus)}`}
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusToneClass(session.sessionLifecycle)}`}
                   >
-                    {session.paymentStatus}
+                    {lifecycleLabel(session.sessionLifecycle)}
                   </span>
                 </div>
+
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                     <p className="font-semibold text-slate-900">
-                      {formatPortalDate(session.startDate)}
+                      {formatPortalDate(session.startDate)} &rarr;{" "}
+                      {formatPortalDate(session.endDate)}
                     </p>
                     <p className="mt-1">
-                      {session.location || "En ligne"} · {session.format}
+                      {session.location || "En ligne"} &middot; {session.format}
                     </p>
                   </div>
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
@@ -240,21 +250,18 @@ export default function StudentSessionsPage() {
                     </p>
                     <p className="mt-1">
                       <strong className="text-slate-900">Heures:</strong>{" "}
-                      {session.hours}
+                      {session.hours}h
                     </p>
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                  <span
-                    className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusToneClass(session.sessionLifecycle)}`}
-                  >
-                    {session.sessionLifecycle}
-                  </span>
-                  <span>
-                    {formatPortalCurrency(session.paidAmount)} /{" "}
-                    {formatPortalCurrency(session.totalAmount)}
-                  </span>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                   <span>{session.questionsCount} question(s)</span>
+                  {session.waitlistPosition ? (
+                    <span className="rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-orange-700">
+                      Liste d&apos;attente #{session.waitlistPosition}
+                    </span>
+                  ) : null}
                 </div>
               </article>
             ))}

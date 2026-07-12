@@ -368,7 +368,7 @@ export default function AboutModernPage({
             </div>
             <p className="mt-4 text-sm leading-7 text-slate-600">
               {isFr
-                ? 'CJ DTC forme des professionnels en Afrique centrale, de l\'Ouest et au-delà. Notre réseau s\'étend chaque année grâce à nos partenaires institutionnels et nos anciens apprenants devenus ambassadeurs.'
+                ? "CJ DTC forme des professionnels en Afrique centrale, de l'Ouest et au-delà. Notre réseau s'étend chaque année grâce à nos partenaires institutionnels et nos anciens apprenants devenus ambassadeurs."
                 : 'CJ DTC trains professionals across Central Africa, West Africa and beyond. Our network grows each year through institutional partners and alumni who become ambassadors.'}
             </p>
             <div className="mt-5 flex flex-wrap gap-2">

@@ -21,6 +21,9 @@ function StudentRegisterForm() {
     fullName: '',
     email: '',
     username: '',
+    phone: '',
+    city: '',
+    country: '',
     password: '',
     confirmPassword: '',
   })
@@ -45,7 +48,7 @@ function StudentRegisterForm() {
     if (form.fullName.trim().length < 2) errors.fullName = 'Le nom complet doit comporter au moins 2 caracteres.'
     if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = 'Adresse e-mail invalide.'
     if (!/^[a-zA-Z0-9._-]{3,40}$/.test(form.username.trim())) {
-      errors.username = 'Le nom d utilisateur doit contenir 3 a 40 caracteres valides.'
+      errors.username = "Le nom d'utilisateur doit contenir 3 a 40 caracteres valides (lettres, chiffres, . - _)."
     }
     if (form.password.length < 8) errors.password = 'Le mot de passe doit comporter au moins 8 caracteres.'
     if (form.password !== form.confirmPassword) errors.confirmPassword = 'Les mots de passe ne correspondent pas.'
@@ -71,6 +74,9 @@ function StudentRegisterForm() {
           fullName: form.fullName.trim(),
           email: form.email.trim(),
           username: form.username.trim(),
+          phone: form.phone.trim() || undefined,
+          city: form.city.trim() || undefined,
+          country: form.country.trim() || undefined,
           password: form.password,
           confirmPassword: form.confirmPassword,
         }),
@@ -100,11 +106,19 @@ function StudentRegisterForm() {
     }
   }
 
-  function field(id: keyof typeof form, label: string, type = 'text', autoComplete?: string) {
+  function field(
+    id: keyof typeof form,
+    label: string,
+    type = 'text',
+    autoComplete?: string,
+    required = false,
+    placeholder?: string,
+  ) {
     return (
       <div>
         <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-700">
           {label}
+          {required ? <span className="ml-1 text-red-500">*</span> : <span className="ml-1 text-xs text-slate-400">(optionnel)</span>}
         </label>
         <input
           id={id}
@@ -113,13 +127,19 @@ function StudentRegisterForm() {
           autoComplete={autoComplete}
           value={form[id]}
           onChange={handleChange}
+          placeholder={placeholder}
           className={`w-full rounded-2xl border px-4 py-3 outline-none transition focus:border-[var(--cj-blue)] ${
             fieldErrors[id] ? 'border-red-400 bg-red-50' : 'border-blue-100 bg-white'
           }`}
-          required
+          required={required}
           aria-invalid={Boolean(fieldErrors[id])}
+          aria-describedby={fieldErrors[id] ? `${id}-error` : undefined}
         />
-        {fieldErrors[id] ? <p className="mt-1 text-xs text-red-600">{fieldErrors[id]}</p> : null}
+        {fieldErrors[id] ? (
+          <p id={`${id}-error`} className="mt-1 text-xs text-red-600" role="alert">
+            {fieldErrors[id]}
+          </p>
+        ) : null}
       </div>
     )
   }
@@ -129,31 +149,62 @@ function StudentRegisterForm() {
   return (
     <main className="min-h-screen bg-[linear-gradient(135deg,#f8fbff_0%,#eef5ff_58%,#fff4f5_100%)] px-4 py-8">
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+        {/* Panneau gauche */}
         <section className="rounded-[30px] bg-[linear-gradient(135deg,#02142f_0%,#002d72_56%,#0c4da2_100%)] p-8 text-white shadow-[0_30px_90px_-40px_rgba(0,45,114,0.65)]">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Espace Etudiant</p>
           <h1 className="mt-5 text-4xl font-semibold leading-tight">Creer votre compte etudiant</h1>
-          <p className="mt-4 text-sm leading-7 text-white/78">
-            Une fois le compte cree, vous accedez directement a votre tableau de bord.
+          <p className="mt-4 text-sm leading-7 text-white/80">
+            Une fois le compte cree, vous accedez directement a votre tableau de bord — sans validation requise.
           </p>
+          <ul className="mt-6 space-y-3 text-sm text-white/70">
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 text-white/40">&#10003;</span>
+              Acces immediat a vos sessions et ressources
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 text-white/40">&#10003;</span>
+              Depot et suivi de vos travaux
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 text-white/40">&#10003;</span>
+              Telechargement de vos certificats
+            </li>
+          </ul>
         </section>
 
+        {/* Formulaire */}
         <section className="rounded-[28px] border border-white bg-white p-6 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.45)] sm:p-8">
           <h2 className="text-2xl font-semibold text-slate-950">Creer un compte</h2>
-          <p className="mt-2 text-sm text-slate-600">Renseignez les informations de base de votre compte.</p>
+          <p className="mt-2 text-sm text-slate-600">
+            Les champs marques <span className="text-red-500">*</span> sont obligatoires.
+          </p>
 
           {globalError ? (
-            <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
               {globalError}
             </div>
           ) : null}
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
-            {field('fullName', 'Nom complet', 'text', 'name')}
-            {field('email', 'Adresse e-mail', 'email', 'email')}
-            {field('username', "Nom d'utilisateur", 'text', 'username')}
+            {/* Identite */}
+            {field('fullName', 'Nom complet', 'text', 'name', true, 'Ex: Jean Dupont')}
+            {field('email', 'Adresse e-mail', 'email', 'email', true)}
+            {field('username', "Nom d'utilisateur", 'text', 'username', true, 'Ex: jean.dupont')}
+
+            {/* Coordonnees optionnelles */}
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('password', 'Mot de passe', 'password', 'new-password')}
-              {field('confirmPassword', 'Confirmation du mot de passe', 'password', 'new-password')}
+              {field('phone', 'Telephone', 'tel', 'tel', false, 'Ex: +33 6 12 34 56 78')}
+              {field('city', 'Ville', 'text', 'address-level2', false)}
+            </div>
+            {field('country', 'Pays', 'text', 'country-name', false)}
+
+            {/* Mot de passe */}
+            <div className="border-t border-slate-100 pt-2">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {field('password', 'Mot de passe', 'password', 'new-password', true)}
+                {field('confirmPassword', 'Confirmation du mot de passe', 'password', 'new-password', true)}
+              </div>
+              <p className="mt-1 text-xs text-slate-500">Minimum 8 caracteres.</p>
             </div>
 
             <button

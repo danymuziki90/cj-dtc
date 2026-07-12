@@ -18,7 +18,7 @@ export default function Hero() {
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
-            href={`/${locale}/programmes`}
+            href={`/${locale}/formations#sessions`}
             className="btn-primary inline-block"
           >
             Voir nos programmes

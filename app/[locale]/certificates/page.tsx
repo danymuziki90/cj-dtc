@@ -63,7 +63,7 @@ interface Certificate {
 // Formation mock data (would come from API)
 const mockFormations = [
   { id: 1, title: 'Management des Ressources Humaines', category: 'Certification' },
-  { id: 2, title: 'Leadership et Management d\'Équipe', category: 'Masterclass' },
+  { id: 2, title: "Leadership et Management d'Équipe", category: 'Masterclass' },
   { id: 3, title: 'Digital Marketing Stratégique', category: 'Workshop' }
 ]
 

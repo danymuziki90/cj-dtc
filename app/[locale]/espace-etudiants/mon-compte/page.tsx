@@ -164,7 +164,7 @@ export default function MonComptePage() {
             title="Aucun profil trouve"
             description="Inscrivez-vous a une session ou reconnectez-vous avec le bon compte pour voir apparaitre vos informations personnelles."
             action={
-              <Link href={`/${locale}/programmes`} className={studentPrimaryButtonClassName}>
+              <Link href={`/${locale}/formations#sessions`} className={studentPrimaryButtonClassName}>
                 Voir les sessions disponibles
               </Link>
             }

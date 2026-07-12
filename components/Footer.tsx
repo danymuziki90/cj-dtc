@@ -136,11 +136,19 @@ export default function Footer() {
                 </li>
               ))}
               <li>
-                <Link href={`/${locale}/programmes`} className="group flex items-center text-sm text-gray-300 transition-all duration-300 hover:text-white">
+                <Link href={`/${locale}/formations#sessions`} className="group flex items-center text-sm text-gray-300 transition-all duration-300 hover:text-white">
                   <svg className="mr-2 h-4 w-4 text-blue-400 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                   {t.links.programs}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/entreprises`} className="group flex items-center text-sm text-gray-300 transition-all duration-300 hover:text-white">
+                  <svg className="mr-2 h-4 w-4 text-red-400 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  {t.links.corporate ?? (locale === 'fr' ? 'Entreprises' : 'Businesses')}
                 </Link>
               </li>
             </ul>

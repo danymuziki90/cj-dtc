@@ -32,10 +32,6 @@ export type StudentPortalPayload = {
       waitlistPosition: number | null
       maxParticipants: number | null
       currentParticipants: number | null
-      paymentStatus: string
-      paidAmount: number
-      totalAmount: number
-      balanceAmount: number
     } | null
     sessionsHistory: Array<{
       enrollmentId: number
@@ -50,10 +46,6 @@ export type StudentPortalPayload = {
       sessionStatus: string
       sessionLifecycle: string
       enrollmentStatus: string
-      paymentStatus: string
-      totalAmount: number
-      paidAmount: number
-      balanceAmount: number
       waitlistPosition: number | null
       reservedSpot: number | null
       questionsCount: number
@@ -82,30 +74,6 @@ export type StudentPortalPayload = {
         format: string
       } | null
     }>
-    payments: Array<{
-      id: number
-      amount: number
-      method: string
-      status: string
-      reference: string | null
-      transactionId: string | null
-      paidAt: string | null
-      createdAt: string
-      gateway: string | null
-      operator: string | null
-      proofUrl: string | null
-      formationTitle: string
-      enrollmentId: number
-      session: {
-        id: number
-        startDate: string
-        endDate: string
-        location: string | null
-      } | null
-      enrollmentPaymentStatus: string
-      enrollmentPaidAmount: number
-      enrollmentTotalAmount: number
-    }>
     submissions: Array<{
       id: string
       title: string
@@ -132,7 +100,6 @@ export type StudentPortalPayload = {
       } | null
     }>
     certificateEligibility: {
-      paymentValidated: boolean
       projectValidated: boolean
       attendanceTracked: boolean
       attendanceRate: number | null
@@ -229,7 +196,6 @@ export type StudentPortalPayload = {
       totalSessions: number
       completedSessions: number
       pendingSessions: number
-      totalPayments: number
       successfulPayments: number
     }
   }

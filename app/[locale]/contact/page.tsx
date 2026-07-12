@@ -152,7 +152,7 @@ export default function ContactPage() {
               <p className="text-sm font-semibold text-white/90">{t.quickHelp}</p>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row lg:flex-col">
                 <Link
-                  href={`/${locale}/programmes`}
+                  href={`/${locale}/formations#sessions`}
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-cjblue transition hover:-translate-y-0.5 hover:bg-blue-50"
                 >
                   {t.sessionsCta}

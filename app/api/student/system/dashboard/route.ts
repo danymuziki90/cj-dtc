@@ -278,6 +278,7 @@ export async function GET(request: NextRequest) {
         endDate: session.endDate,
         prerequisites: session.prerequisites,
       }),
+      // Champs paiement supprimés — cohérence refonte admin
     }
   })
 
@@ -522,6 +523,7 @@ export async function GET(request: NextRequest) {
             waitlistPosition: waitlistPositionByEnrollmentId.get(currentEnrollment.id) || null,
             maxParticipants: currentEnrollment.session?.maxParticipants || null,
             currentParticipants: currentEnrollment.session?.currentParticipants || null,
+            // Champs paiement supprimés — cohérence avec la refonte admin (auto-activation sans validation paiement)
           }
         : null,
       sessionsHistory,
@@ -545,6 +547,7 @@ export async function GET(request: NextRequest) {
         totalSessions: sessionsHistory.length,
         completedSessions: completedSessionRows.length,
         pendingSessions: pendingSessionRows.length,
+        successfulPayments: 0,
       },
     },
   })

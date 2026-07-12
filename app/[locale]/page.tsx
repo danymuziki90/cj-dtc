@@ -198,7 +198,7 @@ export default function HomePage() {
               </h2>
               <p className="mt-4 text-base text-slate-600 font-opensans leading-relaxed">
                 {isFr
-                  ? 'Chaque programme est conçu autour d\'objectifs d\'apprentissage précis, de cas pratiques intensifs et d\'un encadrement par des experts du secteur.'
+                  ? "Chaque programme est conçu autour d'objectifs d'apprentissage précis, de cas pratiques intensifs et d'un encadrement par des experts du secteur."
                   : 'Each program is designed around clear learning objectives, intensive casework, and mentoring by industry experts.'}
               </p>
             </div>
@@ -305,14 +305,14 @@ export default function HomePage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
-              {isFr ? 'Mesure d\'impact' : 'Impact Metrics'}
+              {isFr ? "Mesure d'impact" : 'Impact Metrics'}
             </span>
             <h2 className="mt-5 text-3xl font-black sm:text-4xl lg:text-5xl font-montserrat">
               {isFr ? 'Des résultats réels et vérifiables.' : 'Real and verifiable results.'}
             </h2>
             <p className="mt-4 text-base sm:text-lg text-slate-300 font-opensans leading-relaxed">
               {isFr
-                ? 'Notre modèle pédagogique combine théorie et immersion terrain pour des indicateurs d\'insertion et de réussite concrets.'
+                ? "Notre modèle pédagogique combine théorie et immersion terrain pour des indicateurs d'insertion et de réussite concrets."
                 : 'Our educational model combines theory and field immersion for concrete placement and success indicators.'}
             </p>
           </div>

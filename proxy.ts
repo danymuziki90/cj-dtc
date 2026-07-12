@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
@@ -17,7 +16,7 @@ const publicRoutes = [
   '/auth/forgot-password',
   '/api/auth/login',
   '/api/auth/register',
-  '/api/auth/verify'
+  '/api/auth/verify',
 ]
 
 const localeMiddleware = (request: NextRequest) => {
@@ -44,61 +43,21 @@ const legacyAdminRouteMap: Record<string, string> = {
   '/admin/settings': '/admin/settings',
 }
 
-const legacyStudentRouteMap: Record<string, string> = {
-  '/espace-etudiants': '/espace-etudiants',
-  '/espace-etudiants/calendrier': '/espace-etudiants/calendrier',
-  '/espace-etudiants/elearning': '/espace-etudiants/elearning',
-  '/espace-etudiants/inscription': '/espace-etudiants/inscription',
-  '/espace-etudiants/mes-formations': '/espace-etudiants/mes-formations',
-  '/espace-etudiants/supports': '/espace-etudiants/supports',
-  '/espace-etudiants/resultats': '/espace-etudiants/resultats',
-  '/espace-etudiants/mes-certificats': '/espace-etudiants/mes-certificats',
-  '/espace-etudiants/mon-compte': '/espace-etudiants/mon-compte',
-  '/espace-etudiants/travaux': '/espace-etudiants/travaux',
-  '/student': '/espace-etudiants',
-  '/student/dashboard': '/espace-etudiants',
-  '/student/profile': '/espace-etudiants/mon-compte',
-  '/student/assignments': '/espace-etudiants/travaux',
-  '/student/certificates': '/espace-etudiants/mes-certificats',
-  '/student/certificats': '/espace-etudiants/mes-certificats',
-  '/student/elearning': '/espace-etudiants/elearning',
-  '/student/exams': '/espace-etudiants/resultats',
-  '/student/inscription': '/espace-etudiants/inscription',
-  '/student/inscription/success': '/espace-etudiants',
-  '/student/mes-sessions': '/espace-etudiants/mes-formations',
-  '/student/resultats': '/espace-etudiants/resultats',
-  '/student/ressources': '/espace-etudiants/supports',
-  '/student/submissions': '/espace-etudiants/travaux',
-}
-
 function resolveLegacyAdminRedirect(pathname: string) {
   const match = pathname.match(/^\/(fr|en)(\/admin(?:\/.*)?$)/)
   if (!match) return null
-
   const legacyPath = match[2]
   return legacyAdminRouteMap[legacyPath] || '/admin/dashboard'
-}
-
-function resolveLegacyStudentRedirect(pathname: string) {
-  const localizedMatch = pathname.match(/^\/(fr|en)(\/(?:espace-etudiants|student)(?:\/.*)?$)/)
-  const locale = localizedMatch ? localizedMatch[1] : 'fr'
-  const legacyPath = localizedMatch ? localizedMatch[2] : pathname
-
-  if (!legacyPath.startsWith('/espace-etudiants') && !legacyPath.startsWith('/student')) return null
-
-  const mappedPath = legacyStudentRouteMap[legacyPath]
-  if (!mappedPath) return null
-
-  const redirectPath = `/${locale}${mappedPath}`
-  return redirectPath === pathname ? null : redirectPath
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Redirect bare / to /fr
   const localeRedirect = localeMiddleware(request)
   if (localeRedirect) return localeRedirect
 
+  // Legacy localized admin redirects (e.g. /fr/admin/inscriptions → /admin/enrollments)
   const legacyAdminRedirectPath = resolveLegacyAdminRedirect(pathname)
   if (legacyAdminRedirectPath) {
     const url = request.nextUrl.clone()
@@ -106,21 +65,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  const legacyStudentRedirectPath = resolveLegacyStudentRedirect(pathname)
-  if (legacyStudentRedirectPath) {
-    const url = request.nextUrl.clone()
-    url.pathname = legacyStudentRedirectPath
-    return NextResponse.redirect(url)
-  }
-
-  // Normalize only /auth paths for localized legacy auth pages.
+  // Normalize /auth/* → /fr/auth/*
   if (pathname === '/auth' || pathname.startsWith('/auth/')) {
     const url = request.nextUrl.clone()
     url.pathname = `/fr${pathname}`
     return NextResponse.redirect(url)
   }
 
-  // New admin portal JWT protection
+  // ─── Admin portal JWT protection ───────────────────────────────────────────
   const isAdminPortalPage = pathname.startsWith('/admin')
   const isAdminPortalApi = pathname.startsWith('/api/admin')
   const isAdminPortalPublicRoute =
@@ -133,10 +85,7 @@ export async function proxy(request: NextRequest) {
     const adminPayload = adminToken ? await verifyAdminToken(adminToken) : null
     const legacyAdminToken = adminPayload
       ? null
-      : await getToken({
-          req: request,
-          secret: process.env.NEXTAUTH_SECRET,
-        })
+      : await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     const isLegacyAdminAuthenticated =
       isEmergencyAdminLoginAllowed() && legacyAdminToken?.role === 'ADMIN'
 
@@ -144,16 +93,17 @@ export async function proxy(request: NextRequest) {
       if (isAdminPortalApi) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
-
       const loginUrl = new URL('/admin/login', request.url)
       loginUrl.searchParams.set('callbackUrl', pathname)
       return NextResponse.redirect(loginUrl)
     }
   }
 
-  // New student portal JWT protection
+  // ─── Student portal JWT protection ────────────────────────────────────────
   const isStudentPortalPage = pathname.startsWith('/student')
   const isStudentPortalApi = pathname.startsWith('/api/student/system')
+
+  // Public routes — no token required
   const isStudentPortalPublicRoute =
     pathname === '/student/login' ||
     pathname === '/student/register' ||
@@ -165,21 +115,33 @@ export async function proxy(request: NextRequest) {
     pathname === '/api/student/auth/forgot-password' ||
     pathname === '/api/student/auth/reset-password'
 
-  if ((isStudentPortalPage || isStudentPortalApi) && !isStudentPortalPublicRoute) {
+  // Auth pages — redirect to dashboard if already logged in
+  const isStudentAuthPage =
+    pathname === '/student/login' || pathname === '/student/register'
+
+  if (isStudentPortalPage || isStudentPortalApi) {
     const studentToken = request.cookies.get(STUDENT_AUTH_COOKIE)?.value
     const studentPayload = studentToken ? await verifyStudentToken(studentToken) : null
 
-    if (!studentPayload) {
+    // Already authenticated → skip login/register
+    if (studentPayload && isStudentAuthPage) {
+      return NextResponse.redirect(new URL('/student/dashboard', request.url))
+    }
+
+    // Protected route without valid token → login
+    if (!studentPayload && !isStudentPortalPublicRoute) {
       if (isStudentPortalApi) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
-
       const loginUrl = new URL('/student/login', request.url)
       loginUrl.searchParams.set('callbackUrl', pathname)
       return NextResponse.redirect(loginUrl)
     }
+
+    return NextResponse.next()
   }
 
+  // ─── Legacy localized espace-etudiants protection ─────────────────────────
   const isLocalizedStudentSpaceRoute = /^\/(fr|en)\/espace-etudiants(\/|$)/.test(pathname)
 
   if (isLocalizedStudentSpaceRoute) {
@@ -194,7 +156,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Legacy protected localized areas (existing project behavior).
+  // ─── Legacy localized admin/student routes (NextAuth) ─────────────────────
   const isLegacyAdminRoute = /^\/(fr|en)\/admin(\/|$)/.test(pathname)
   const isLegacyStudentRoute =
     /^\/(fr|en)\/student(\/|$)/.test(pathname) ||
@@ -207,13 +169,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const isPublic = publicRoutes.some(route => pathname.startsWith(route) || pathname === `/fr${route}`)
+  const isPublic = publicRoutes.some(
+    (route) => pathname.startsWith(route) || pathname === `/fr${route}`
+  )
   if (isPublic) return NextResponse.next()
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  })
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
 
   if (!token) {
     const loginUrl = new URL('/fr/auth/login', request.url)
@@ -246,6 +207,6 @@ export const config = {
     '/fr/student/:path*',
     '/fr/espace-etudiants/:path*',
     '/auth/:path*',
-    '/(fr|en)/:path*'
-  ]
+    '/(fr|en)/:path*',
+  ],
 }

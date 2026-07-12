@@ -111,7 +111,7 @@ export default function HomeSections({ locale }: HomeSectionsProps) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--cj-red)]">
-              {isFr ? 'Ils l'ont vécu' : 'Alumni voices'}
+              {isFr ? "Ils l'ont vécu" : 'Alumni voices'}
             </p>
             <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
               {t.testimonialsTitle}

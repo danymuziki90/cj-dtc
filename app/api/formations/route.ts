@@ -3,15 +3,133 @@ import { prisma } from '../../../lib/prisma'
 
 export const runtime = "nodejs"
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     if (!process.env.DATABASE_URL) {
-      return NextResponse.json([])
+      return NextResponse.json({ formations: [] })
     }
 
-    const list = await prisma.formation.findMany({ orderBy: { createdAt: 'desc' } })
-    return NextResponse.json(list)
+    const { searchParams } = new URL(req.url)
+    const includeStats = searchParams.get('stats') === 'true'
+    const status = searchParams.get('status') || 'publie'
+
+    // Récupérer les formations avec toutes les relations
+    const formations = await prisma.formation.findMany({
+      where: status !== 'all' ? { statut: status } : undefined,
+      include: {
+        sessions: {
+          include: {
+            instructors: {
+              include: {
+                instructor: true
+              }
+            }
+          },
+          orderBy: { startDate: 'asc' }
+        },
+        enrollments: {
+          where: { status: 'confirmed' }
+        },
+        evaluations: true
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    // Enrichir les données avec des calculs
+    const enrichedFormations = formations.map(formation => {
+      const enrollmentCount = formation.enrollments.length
+      const evaluations = formation.evaluations
+      
+      // Calculer la note moyenne
+      const rating = evaluations.length > 0
+        ? evaluations.reduce((sum, ev) => sum + ev.overallRating, 0) / evaluations.length
+        : undefined
+      
+      const reviewCount = evaluations.length
+
+      // Trouver la prochaine session
+      const now = new Date()
+      const nextSession = formation.sessions
+        .filter(s => new Date(s.startDate) > now && s.status === 'ouverte')
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())[0]
+
+      // Calculer les prix depuis les sessions
+      const sessionPrices = formation.sessions
+        .filter(s => s.price > 0)
+        .map(s => s.price)
+      
+      const price = sessionPrices.length > 0 
+        ? Math.min(...sessionPrices)
+        : undefined
+      
+      const originalPrice = sessionPrices.length > 1
+        ? Math.max(...sessionPrices)
+        : undefined
+
+      // Instructeur principal (premier instructeur de la première session)
+      const instructor = nextSession?.instructors?.[0]?.instructor || 
+                        formation.sessions[0]?.instructors?.[0]?.instructor
+
+      // Tags depuis la catégorie et modules
+      const tags: string[] = []
+      if (formation.categorie) tags.push(formation.categorie)
+      if (formation.certification) tags.push('Certification')
+
+      return {
+        ...formation,
+        enrollmentCount,
+        rating: rating ? Math.round(rating * 10) / 10 : undefined,
+        reviewCount,
+        nextSession: nextSession ? {
+          id: nextSession.id,
+          startDate: nextSession.startDate.toISOString(),
+          endDate: nextSession.endDate.toISOString(),
+          location: nextSession.location || 'À définir',
+          format: nextSession.format,
+          price: nextSession.price,
+          maxParticipants: nextSession.maxParticipants,
+          currentParticipants: nextSession.currentParticipants,
+          status: nextSession.status
+        } : undefined,
+        price,
+        originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
+        instructor: instructor ? {
+          id: instructor.id.toString(),
+          firstName: instructor.firstName,
+          lastName: instructor.lastName,
+          title: instructor.expertise || 'Formateur expert',
+          bio: instructor.bio,
+          photoUrl: instructor.photoUrl,
+          expertise: instructor.expertise?.split(',').map(e => e.trim())
+        } : undefined,
+        tags,
+        hasCertificate: !!formation.certification,
+        hasSupports: true, // Par défaut, toutes les formations incluent des supports
+        hasPracticalExercises: true,
+        hasCoaching: false,
+        hasAccompaniment: false,
+        featured: enrollmentCount > 50 || (rating && rating >= 4.5),
+        // Enlever les relations lourdes de la réponse
+        sessions: undefined,
+        enrollments: undefined,
+        evaluations: undefined
+      }
+    })
+
+    // Retourner avec ou sans stats
+    if (includeStats) {
+      const stats = {
+        totalFormations: enrichedFormations.length,
+        totalStudents: enrichedFormations.reduce((sum, f) => sum + f.enrollmentCount, 0),
+        averageRating: enrichedFormations.filter(f => f.rating).reduce((sum, f) => sum + (f.rating || 0), 0) / enrichedFormations.filter(f => f.rating).length || 0,
+        successRate: 95
+      }
+      return NextResponse.json({ formations: enrichedFormations, stats })
+    }
+
+    return NextResponse.json({ formations: enrichedFormations })
   } catch (error) {
+    console.error('Error fetching formations:', error)
     return NextResponse.json({ error: 'Erreur lors de la récupération des formations' }, { status: 500 })
   }
 }
@@ -28,7 +146,8 @@ export async function POST(req: Request) {
       methodes, 
       certification, 
       statut = 'brouillon',
-      imageUrl 
+      imageUrl,
+      objectifs
     } = body
 
     if (!title) {
@@ -36,18 +155,33 @@ export async function POST(req: Request) {
     }
 
     // Générer un slug à partir du titre
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim()
+    const generateSlug = (text: string) => {
+      return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
+    }
+
+    let slug = generateSlug(title)
+    
+    // Vérifier l'unicité du slug
+    let counter = 1
+    let uniqueSlug = slug
+    while (await prisma.formation.findUnique({ where: { slug: uniqueSlug } })) {
+      uniqueSlug = `${slug}-${counter}`
+      counter++
+    }
 
     const created = await prisma.formation.create({
       data: {
         title,
-        slug,
+        slug: uniqueSlug,
         description: description || '',
+        objectifs: objectifs || '',
         categorie: categorie || '',
         duree: duree || '',
         modules: modules || '',
@@ -59,11 +193,11 @@ export async function POST(req: Request) {
     })
     return NextResponse.json(created, { status: 201 })
   } catch (error: any) {
-    if (error.code === 'P2002') {
-      return NextResponse.json({ error: 'Ce slug existe déjà' }, { status: 409 })
-    }
     console.error('Formation creation error:', error)
-    return NextResponse.json({ error: 'Erreur lors de la création' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Erreur lors de la création', 
+      details: error.message 
+    }, { status: 500 })
   }
 }
 

@@ -378,8 +378,8 @@ export default function AdminExamsPage() {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun examen trouvé</h3>
           <p className="text-gray-600">
             {filter !== 'all' 
-              ? 'Essayez de modifier le filtre pour voir plus d\'examens.'
-              : 'Aucun examen n\'a été créé pour le moment.'
+              ? "Essayez de modifier le filtre pour voir plus d'examens."
+              : "Aucun examen n'a été créé pour le moment."
             }
           </p>
         </div>

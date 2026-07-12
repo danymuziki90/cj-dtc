@@ -6,12 +6,7 @@ import { AdminMetricCard, AdminPanel, AdminPanelHeader, AdminBadge } from '@/com
 export type EnrollmentStatsSummary = {
   total: number
   byStatus: Record<string, number>
-  byPaymentStatus: Record<string, number>
   byAccountStatus: Record<string, number>
-  revenue: {
-    totalAmount: number
-    paidAmount: number
-  }
   byFormation: Array<{
     id: number
     title: string
@@ -29,7 +24,6 @@ function formatCurrency(amount: number) {
 
 export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsSummary }) {
   const acceptedCount = (summary.byStatus.accepted || 0) + (summary.byStatus.confirmed || 0)
-  const paidRatio = summary.total > 0 ? Math.round(((summary.byPaymentStatus.paid || 0) / summary.total) * 100) : 0
   const activeAccounts = summary.byAccountStatus.active || 0
   const pendingAccounts = summary.byAccountStatus.pending_creation || 0
 

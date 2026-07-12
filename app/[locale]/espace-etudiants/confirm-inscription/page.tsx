@@ -241,7 +241,7 @@ function ConfirmInscriptionContent() {
           title="Formation introuvable"
           description={error}
           action={
-            <Link href={`/${locale}/programmes`} className={studentPrimaryButtonClassName}>
+            <Link href={`/${locale}/formations#sessions`} className={studentPrimaryButtonClassName}>
               Voir les formations
             </Link>
           }
@@ -258,7 +258,7 @@ function ConfirmInscriptionContent() {
       description="Aucune ressaisie n'est necessaire. La demande sera liee a votre compte et transmise a l'administration."
       icon={ShieldCheck}
       actions={
-        <Link href={`/${locale}/programmes`} className={studentSecondaryButtonClassName}>
+        <Link href={`/${locale}/formations#sessions`} className={studentSecondaryButtonClassName}>
           <ArrowLeft className="h-4 w-4" />
           Changer de formation
         </Link>

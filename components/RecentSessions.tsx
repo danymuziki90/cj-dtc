@@ -179,7 +179,7 @@ export default function RecentSessions() {
             const headerImage = session.adminMeta?.imageUrl || session.imageUrl || '/logo.png'
 
             return (
-              <Link key={session.id} href={`/${locale}/programmes`} className="group">
+              <Link key={session.id} href={`/${locale}/formations#sessions`} className="group">
                 <article className="transform overflow-hidden rounded-xl border border-blue-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
                   <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-cjblue to-blue-700">
                     <img
@@ -231,7 +231,7 @@ export default function RecentSessions() {
 
         <div className="mt-12 text-center">
           <Link
-            href={`/${locale}/programmes`}
+            href={`/${locale}/formations#sessions`}
             className="inline-block rounded-lg bg-[var(--cj-blue)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--cj-red)]"
           >
             {t.viewAll}

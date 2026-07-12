@@ -183,7 +183,7 @@ export default function MesFormationsPage() {
       metrics={metrics}
       actions={
         <Link
-          href={`/${locale}/programmes`}
+          href={`/${locale}/formations#sessions`}
           className={studentPrimaryButtonClassName}
         >
           Explorer les sessions
@@ -202,7 +202,7 @@ export default function MesFormationsPage() {
             description="Vous n'etes inscrit a aucune formation pour le moment. Parcourez les sessions disponibles pour demarrer un nouveau parcours."
             action={
               <Link
-                href={`/${locale}/programmes`}
+                href={`/${locale}/formations#sessions`}
                 className={studentPrimaryButtonClassName}
               >
                 Decouvrir les sessions

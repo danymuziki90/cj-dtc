@@ -23,6 +23,7 @@ export default function StudentCertificatesPage() {
   }
 
   const eligibility = data.dashboard.certificateEligibility
+  const conditionsMet = [eligibility.projectValidated, eligibility.attendanceValidated].filter(Boolean).length
   const metrics: StudentMetric[] = [
     {
       label: 'Certificats',
@@ -40,8 +41,8 @@ export default function StudentCertificatesPage() {
     },
     {
       label: 'Conditions',
-      value: [eligibility.paymentValidated, eligibility.projectValidated, eligibility.attendanceValidated].filter(Boolean).length,
-      helper: 'Conditions deja remplies sur 3.',
+      value: `${conditionsMet}/2`,
+      helper: 'Projet valide et presence suffisante.',
       icon: ShieldCheck,
       accent: 'from-[#E30613] to-[#F16C78]',
     },
@@ -61,15 +62,15 @@ export default function StudentCertificatesPage() {
       icon={Medal}
       metrics={metrics}
     >
+      {/* Conditions de delivrance */}
       <StudentSectionCard
         eyebrow="Validation"
         title="Conditions de delivrance"
-        description="Le certificat est delivre une fois les criteres pedagogiques et administratifs validés."
+        description="Le certificat est delivre une fois les criteres pedagogiques valides."
         icon={ShieldCheck}
       >
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           {[
-            { label: 'Paiement complet', value: eligibility.paymentValidated },
             { label: 'Travail valide', value: eligibility.projectValidated },
             { label: 'Presence suffisante', value: eligibility.attendanceValidated },
           ].map((item) => (
@@ -83,8 +84,24 @@ export default function StudentCertificatesPage() {
             </div>
           ))}
         </div>
+
+        {eligibility.attendanceTracked && eligibility.attendanceRate !== null ? (
+          <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-sm font-semibold text-slate-900">
+              Taux de presence&nbsp;: {eligibility.attendanceRate}%
+            </p>
+            <p className="mt-1 text-xs text-slate-500">Seuil requis&nbsp;: 80%</p>
+            <div className="mt-2 h-2 w-full rounded-full bg-slate-200">
+              <div
+                className={`h-2 rounded-full transition-all ${eligibility.attendanceValidated ? 'bg-emerald-500' : 'bg-orange-400'}`}
+                style={{ width: `${Math.min(eligibility.attendanceRate, 100)}%` }}
+              />
+            </div>
+          </div>
+        ) : null}
       </StudentSectionCard>
 
+      {/* Certificats emis */}
       <StudentSectionCard
         eyebrow="Archives"
         title="Documents emis"
@@ -98,16 +115,18 @@ export default function StudentCertificatesPage() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--cj-red)]">{certificate.type}</p>
-                    <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">{certificate.title || certificate.formation?.title || 'Certificat'}</h3>
+                    <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
+                      {certificate.title || certificate.formation?.title || 'Certificat'}
+                    </h3>
                   </div>
                   <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusToneClass(certificate.verified ? 'verified' : 'pending')}`}>
                     {certificate.verified ? 'Verifie' : 'A verifier'}
                   </span>
                 </div>
                 <div className="mt-4 space-y-2 text-sm text-slate-600">
-                  <p><strong className="text-slate-900">Titulaire:</strong> {certificate.holderName}</p>
-                  <p><strong className="text-slate-900">Code:</strong> {certificate.code}</p>
-                  <p><strong className="text-slate-900">Emission:</strong> {formatPortalDate(certificate.issuedAt)}</p>
+                  <p><strong className="text-slate-900">Titulaire&nbsp;:</strong> {certificate.holderName}</p>
+                  <p><strong className="text-slate-900">Code&nbsp;:</strong> {certificate.code}</p>
+                  <p><strong className="text-slate-900">Emission&nbsp;:</strong> {formatPortalDate(certificate.issuedAt)}</p>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-3">
                   {certificate.fileUrl ? (
@@ -118,7 +137,7 @@ export default function StudentCertificatesPage() {
                       className="inline-flex items-center gap-2 rounded-2xl bg-[var(--cj-blue)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--cj-blue-700)]"
                     >
                       <Download className="h-4 w-4" />
-                      Ouvrir
+                      Telecharger
                     </a>
                   ) : null}
                   <Link

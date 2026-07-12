@@ -1,732 +1,746 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  Plus,
-  Search,
-  Filter,
-  Edit,
-  Trash2,
-  Eye,
-  Download,
-  Calendar,
-  MapPin,
-  BookOpen,
-  Award,
-  Clock,
-  Users,
-  Target,
-  TrendingUp,
-  Star,
-  ChevronRight,
-  MoreHorizontal,
-  ArrowUp,
-  ArrowDown,
-  Play,
-  FileText,
-  BarChart3,
-  Settings,
-  User,
-  X
+  Plus, Search, Filter, Edit, Trash2, Eye, Download,
+  BookOpen, Clock, Users, Target, Star, ChevronRight,
+  User, X, AlertCircle, Copy, RefreshCw, CheckSquare,
+  Square, ChevronLeft, ChevronDown
 } from 'lucide-react'
 
-export default function FormationsPage() {
+interface Formation {
+  id: number
+  title: string
+  slug: string
+  description: string
+  objectifs?: string
+  duree?: string
+  modules?: string
+  methodes?: string
+  certification?: string
+  categorie?: string
+  statut: string
+  imageUrl?: string
+  createdAt: string
+  updatedAt: string
+  enrollmentCount?: number
+  rating?: number
+  reviewCount?: number
+  price?: number
+  originalPrice?: number
+  nextSession?: { startDate: string; location?: string; format?: string } | null
+  instructor?: { firstName: string; lastName: string; title?: string } | null
+  tags?: string[]
+  level?: string
+  format?: string
+}
+
+const ITEMS_PER_PAGE = 9
+
+const STATUS_COLORS: Record<string, string> = {
+  brouillon: 'bg-gray-100 text-gray-700 border-gray-200',
+  publie:    'bg-green-100 text-green-700 border-green-200',
+  archive:   'bg-orange-100 text-orange-700 border-orange-200',
+}
+const STATUS_LABELS: Record<string, string> = {
+  brouillon: 'Brouillon',
+  publie:    'Publié',
+  archive:   'Archivé',
+}
+
+export default function AdminFormationsPage() {
   const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedLevel, setSelectedLevel] = useState('all')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [sortBy, setSortBy] = useState('created')
-  const [showFilters, setShowFilters] = useState(false)
-  const [selectedFormations, setSelectedFormations] = useState<string[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
 
-  const getProgressColor = (progress?: number) => {
-    const p = progress || 0;
-    if (p >= 80) return 'bg-blue-500';
-    if (p >= 50) return 'bg-red-500';
-    return 'bg-blue-500';
+  // ── Data ────────────────────────────────────────────────────────────────────
+  const [formations, setFormations]     = useState<Formation[]>([])
+  const [isLoading, setIsLoading]       = useState(true)
+  const [error, setError]               = useState<string | null>(null)
+  const [toast, setToast]               = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
+
+  // ── Filters / sort ──────────────────────────────────────────────────────────
+  const [search, setSearch]             = useState('')
+  const [catFilter, setCatFilter]       = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [sortBy, setSortBy]             = useState('created')
+  const [showFilters, setShowFilters]   = useState(false)
+
+  // ── Selection / pagination ──────────────────────────────────────────────────
+  const [selected, setSelected]         = useState<number[]>([])
+  const [page, setPage]                 = useState(1)
+
+  // ── Action modals ────────────────────────────────────────────────────────────
+  const [confirmDelete, setConfirmDelete] = useState<Formation | null>(null)
+  const [confirmBulk, setConfirmBulk]     = useState(false)
+
+  // ── Load ────────────────────────────────────────────────────────────────────
+  const loadFormations = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/formations?status=all')
+      if (!res.ok) throw new Error('Impossible de charger les formations')
+      const data = await res.json()
+      setFormations(data.formations ?? [])
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { loadFormations() }, [loadFormations])
+
+  function showToast(msg: string, type: 'success' | 'error' = 'success') {
+    setToast({ msg, type })
+    setTimeout(() => setToast(null), 3500)
   }
 
-  // Mock data - would come from API
-  const formations = [
-    {
-      id: '1',
-      title: "Management des Ressources Humaines",
-      slug: "management-rh",
-      description: "Maîtrisez les stratégies RH modernes adaptées au contexte africain avec cette certification complète reconnue mondialement.",
-      category: "certification",
-      level: "avancé",
-      format: "présentiel",
-      duration: "3 mois",
-      price: 850,
-      originalPrice: 1200,
-      rating: 4.8,
-      reviews: 127,
-      students: 450,
-      status: "published",
-      objectives: [
-        "Développer une stratégie RH alignée sur les objectifs business",
-        "Maîtriser la gestion des talents et de la performance",
-        "Implémenter des systèmes de rémunération équitables",
-        "Gérer le changement et la transformation organisationnelle"
-      ],
-      prerequisites: "Expérience professionnelle de 3+ ans en RH",
-      certification: "Certification CJ DTC + Préparation SHRM-CP",
-      nextSession: "2024-02-15",
-      location: "Kinshasa",
-      instructor: "Dr. Marie Mwamba",
-      instructorTitle: "Expert en RH internationale",
-      image: "/formations/mrh.jpg",
-      tags: ["RH", "Management", "Certification", "SHRM"],
-      language: ["fr", "en"],
-      createdAt: "2024-01-15",
-      updatedAt: "2024-01-28"
-    },
-    {
-      id: '2',
-      title: "Leadership et Management d'Équipe",
-      slug: "leadership-management",
-      description: "Développez votre leadership transformationnel et apprenez à inspirer vos équipes vers l'excellence.",
-      category: "masterclass",
-      level: "intermédiaire",
-      format: "hybride",
-      duration: "6 semaines",
-      price: 650,
-      originalPrice: 900,
-      rating: 4.9,
-      reviews: 89,
-      students: 320,
-      status: "published",
-      objectives: [
-        "Comprendre les différents styles de leadership",
-        "Développer son intelligence émotionnelle",
-        "Maîtriser la communication et l'écoute active",
-        "Construire une culture d'entreprise performante"
-      ],
-      prerequisites: "Poste de management ou projet de promotion",
-      certification: "Certificat de Leadership CJ DTC",
-      nextSession: "2024-02-01",
-      location: "En ligne + Présentiel",
-      instructor: "Prof. Jean-Pierre Lukoki",
-      instructorTitle: "Expert en leadership transformationnel",
-      image: "/formations/leadership.jpg",
-      tags: ["Leadership", "Management", "Communication"],
-      language: ["fr"]
-    },
-    {
-      id: '3',
-      title: "Digital Marketing Stratégique",
-      slug: "digital-marketing",
-      description: "Maîtrisez les techniques du marketing digital pour développer votre présence en ligne.",
-      category: "workshop",
-      level: "débutant",
-      format: "en ligne",
-      duration: "4 semaines",
-      price: 450,
-      originalPrice: 600,
-      rating: 4.7,
-      reviews: 156,
-      students: 280,
-      status: "published",
-      objectives: [
-        "Élaborer une stratégie marketing digitale complète",
-        "Maîtriser les réseaux sociaux et le content marketing",
-        "Analyser les performances avec Google Analytics",
-        "Optimiser le référencement naturel (SEO)"
-      ],
-      prerequisites: "Aucun prérequis particulier",
-      certification: "Certificat de Digital Marketing CJ DTC",
-      nextSession: "2024-02-10",
-      location: "100% en ligne",
-      instructor: "Mme. Sarah Kabeya",
-      instructorTitle: "Spécialiste en marketing digital",
-      image: "/formations/marketing.jpg",
-      tags: ["Marketing", "Digital", "SEO", "Social Media"],
-      language: ["fr", "en"]
-    },
-    {
-      id: '4',
-      title: "Family Business Governance",
-      slug: "family-business",
-      description: "Pérennisez votre entreprise familiale avec des stratégies de gouvernance éprouvées.",
-      category: "certification",
-      level: "avancé",
-      format: "présentiel",
-      duration: "2 mois",
-      price: 1200,
-      originalPrice: 1500,
-      rating: 4.9,
-      reviews: 67,
-      students: 180,
-      status: "published",
-      objectives: [
-        "Structurer la gouvernance d'entreprise familiale",
-        "Gérer les relations familiales et professionnelles",
-        "Préparer la succession et la transmission",
-        "Développer une vision à long terme"
-      ],
-      prerequisites: "Membre d'une entreprise familiale ou projet de création",
-      certification: "Certification Family Business CJ DTC",
-      nextSession: "2024-03-01",
-      location: "Kinshasa",
-      instructor: "Dr. Christian Junior",
-      instructorTitle: "Expert en gouvernance d'entreprise",
-      image: "/formations/family-business.jpg",
-      tags: ["Family Business", "Gouvernance", "Succession"],
-      language: ["fr"]
-    },
-    {
-      id: '5',
-      title: "CJ Master System",
-      slug: "cj-master-system",
-      description: "Le programme complet d'excellence managériale pour les leaders de demain.",
-      category: "programme",
-      level: "expert",
-      format: "hybride",
-      duration: "6 mois",
-      price: 3500,
-      originalPrice: 5000,
-      rating: 5.0,
-      reviews: 45,
-      students: 95,
-      status: "published",
-      objectives: [
-        "Maîtriser tous les aspects du management stratégique",
-        "Développer une vision globale de l'entreprise",
-        "Acquérir des compétences en transformation digitale",
-        "Devenir un leader visionnaire et inspirant"
-      ],
-      prerequisites: "5+ ans d'expérience en management",
-      certification: "Diplôme Executive Master CJ DTC",
-      nextSession: "2024-04-01",
-      location: "Kinshasa + International",
-      instructor: "Équipe d'experts CJ DTC",
-      instructorTitle: "Professeurs internationaux",
-      image: "/formations/cj-master.jpg",
-      tags: ["Executive", "Master", "Leadership", "Stratégie"],
-      language: ["fr", "en"]
-    },
-    {
-      id: '6',
-      title: "International Operations Protocol",
-      slug: "international-operations",
-      description: "Maîtrisez les protocoles et relations internationales dans un contexte global.",
-      category: "certification",
-      level: "intermédiaire",
-      format: "présentiel",
-      duration: "8 semaines",
-      price: 750,
-      originalPrice: 1000,
-      rating: 4.6,
-      reviews: 78,
-      students: 220,
-      status: "published",
-      objectives: [
-        "Comprendre les protocoles diplomatiques et d'affaires",
-        "Maîtriser les règles de l'étiquette internationale",
-        "Développer des compétences en négociation interculturelle",
-        "Gérer les relations avec les partenaires internationaux"
-      ],
-      prerequisites: "Poste à responsabilité internationale ou projet d'expansion",
-      certification: "Certification Protocol International CJ DTC",
-      nextSession: "2024-02-20",
-      location: "Kinshasa",
-      instructor: "Amb. Jean-Claude Muteba",
-      instructorTitle: "Ancien diplomate",
-      image: "/formations/iop.jpg",
-      tags: ["Protocol", "International", "Diplomatie"],
-      language: ["fr", "en"]
-    }
+  // ── Derived: filtered + sorted ───────────────────────────────────────────────
+  const filtered = formations
+    .filter(f => {
+      const q = search.toLowerCase()
+      const matchSearch =
+        !q ||
+        f.title.toLowerCase().includes(q) ||
+        f.description.toLowerCase().includes(q) ||
+        (f.tags ?? []).some(t => t.toLowerCase().includes(q))
+      const matchCat    = catFilter    === 'all' || f.categorie === catFilter
+      const matchStatus = statusFilter === 'all' || f.statut    === statusFilter
+      return matchSearch && matchCat && matchStatus
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'title-asc':  return a.title.localeCompare(b.title)
+        case 'title-desc': return b.title.localeCompare(a.title)
+        case 'students':   return (b.enrollmentCount ?? 0) - (a.enrollmentCount ?? 0)
+        case 'rating':     return (b.rating ?? 0) - (a.rating ?? 0)
+        case 'price-asc':  return (a.price ?? 0) - (b.price ?? 0)
+        case 'price-desc': return (b.price ?? 0) - (a.price ?? 0)
+        default:           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      }
+    })
+
+  const totalPages  = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE))
+  const safePage    = Math.min(page, totalPages)
+  const paginated   = filtered.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE)
+
+  // Dynamic categories from data
+  const categoryOptions = [
+    { id: 'all', label: 'Toutes les catégories', count: formations.length },
+    ...Array.from(new Set(formations.map(f => f.categorie).filter(Boolean))).map(cat => ({
+      id: cat as string,
+      label: (cat as string).charAt(0).toUpperCase() + (cat as string).slice(1).replace(/-/g, ' '),
+      count: formations.filter(f => f.categorie === cat).length,
+    })),
+  ]
+  const statusOptions = [
+    { id: 'all',       label: 'Tous les statuts', count: formations.length },
+    { id: 'publie',    label: 'Publié',            count: formations.filter(f => f.statut === 'publie').length },
+    { id: 'brouillon', label: 'Brouillon',         count: formations.filter(f => f.statut === 'brouillon').length },
+    { id: 'archive',   label: 'Archivé',           count: formations.filter(f => f.statut === 'archive').length },
   ]
 
-  const categories = [
-    { id: 'all', name: 'Toutes les catégories', count: formations.length },
-    { id: 'certification', name: 'Certifications', count: formations.filter(f => f.category === 'certification').length },
-    { id: 'masterclass', name: 'Masterclasses', count: formations.filter(f => f.category === 'masterclass').length },
-    { id: 'workshop', name: 'Workshops', count: formations.filter(f => f.category === 'workshop').length },
-    { id: 'programme', name: 'Programmes', count: formations.filter(f => f.category === 'programme').length }
-  ]
-
-  const levels = [
-    { id: 'all', name: 'Tous les niveaux' },
-    { id: 'débutant', name: 'Débutant' },
-    { id: 'intermédiaire', name: 'Intermédiaire' },
-    { id: 'avancé', name: 'Avancé' },
-    { id: 'expert', name: 'Expert' }
-  ]
-
-  const statuses = [
-    { id: 'all', name: 'Tous les statuts', count: formations.length },
-    { id: 'draft', name: 'Brouillon', count: formations.filter(f => f.status === 'draft').length },
-    { id: 'published', name: 'Publié', count: formations.filter(f => f.status === 'published').length },
-    { id: 'archived', name: 'Archivé', count: formations.filter(f => f.status === 'archived').length }
-  ]
-
-  const sortOptions = [
-    { id: 'created', name: 'Plus récent' },
-    { id: 'title', name: 'Titre A-Z' },
-    { id: 'title', name: 'Titre Z-A' },
-    { id: 'students', name: 'Plus populaire' },
-    { id: 'rating', name: 'Mieux noté' },
-    { id: 'price-low', name: 'Prix croissant' },
-    { id: 'price-high', name: 'Prix décroissant' }
-  ]
-
-  const filteredFormations = formations.filter(formation => {
-    const matchesSearch = formation.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      formation.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      formation.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-
-    const matchesCategory = selectedCategory === 'all' || formation.category === selectedCategory
-    const matchesLevel = selectedLevel === 'all' || formation.level === selectedLevel
-    const matchesStatus = selectedStatus === 'all' || formation.status === selectedStatus
-
-    return matchesSearch && matchesCategory && matchesLevel && matchesStatus
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'title':
-        return a.title.localeCompare(b.title)
-      case 'title-z':
-        return b.title.localeCompare(a.title)
-      case 'students':
-        return b.students - a.students
-      case 'rating':
-        return b.rating - a.rating
-      case 'price-low':
-        return a.price - b.price
-      case 'price-high':
-        return b.price - a.price
-      default:
-        return new Date(b.createdAt) - new Date(a.createdAt)
-    }
-  })
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'certification': return 'bg-blue-100 text-blue-700'
-      case 'masterclass': return 'bg-blue-100 text-blue-700'
-      case 'workshop': return 'bg-blue-100 text-blue-700'
-      case 'programme': return 'bg-red-100 text-red-700'
-      default: return 'bg-gray-100 text-gray-700'
+  // ── CRUD handlers ────────────────────────────────────────────────────────────
+  async function doDelete(id: number) {
+    try {
+      const res = await fetch(`/api/formations/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const d = await res.json()
+        throw new Error(d.error ?? 'Erreur lors de la suppression')
+      }
+      setSelected(s => s.filter(x => x !== id))
+      await loadFormations()
+      showToast('Formation supprimée avec succès')
+    } catch (e: any) {
+      showToast(e.message, 'error')
+    } finally {
+      setConfirmDelete(null)
     }
   }
 
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case 'débutant': return 'bg-blue-100 text-blue-700'
-      case 'intermédiaire': return 'bg-red-100 text-red-700'
-      case 'avancé': return 'bg-red-100 text-red-700'
-      case 'expert': return 'bg-red-100 text-red-700'
-      default: return 'bg-gray-100 text-gray-700'
+  async function doBulkDelete() {
+    try {
+      await Promise.all(selected.map(id => fetch(`/api/formations/${id}`, { method: 'DELETE' })))
+      setSelected([])
+      await loadFormations()
+      showToast(`${selected.length} formation(s) supprimée(s)`)
+    } catch {
+      showToast('Erreur lors de la suppression', 'error')
+    } finally {
+      setConfirmBulk(false)
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-700'
-      case 'published': return 'bg-blue-100 text-blue-700'
-      case 'archived': return 'bg-gray-100 text-gray-700'
-      default: return 'bg-gray-100 text-gray-700'
+  async function doDuplicate(f: Formation) {
+    try {
+      const res = await fetch('/api/formations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `${f.title} (Copie)`,
+          description: f.description,
+          objectifs: f.objectifs,
+          duree: f.duree,
+          modules: f.modules,
+          methodes: f.methodes,
+          certification: f.certification,
+          categorie: f.categorie,
+          statut: 'brouillon',
+          imageUrl: f.imageUrl,
+        }),
+      })
+      if (!res.ok) throw new Error('Erreur lors de la duplication')
+      await loadFormations()
+      showToast('Formation dupliquée (brouillon créé)')
+    } catch (e: any) {
+      showToast(e.message, 'error')
     }
   }
 
-  const handleSelectFormation = (formationId: string) => {
-    setSelectedFormations(prev =>
-      prev.includes(formationId)
-        ? prev.filter(id => id !== formationId)
-        : [...prev, formationId]
-    )
-  }
-
-  const handleSelectAllFormations = () => {
-    if (selectedFormations.length === filteredFormations.length) {
-      setSelectedFormations([])
-    } else {
-      setSelectedFormations(filteredFormations.map(f => f.id))
+  async function doTogglePublish(f: Formation) {
+    const newStatut = f.statut === 'publie' ? 'brouillon' : 'publie'
+    try {
+      const res = await fetch(`/api/formations/${f.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ statut: newStatut }),
+      })
+      if (!res.ok) throw new Error('Erreur lors de la mise à jour')
+      await loadFormations()
+      showToast(newStatut === 'publie' ? 'Formation publiée' : 'Formation dépubliée')
+    } catch (e: any) {
+      showToast(e.message, 'error')
     }
   }
 
-  const handleDeleteFormation = async (formationId: string) => {
-    // API call to delete formation
-    console.log('Deleting formation:', formationId)
-    // In real implementation, this would call an API
+  function doExportCSV() {
+    const headers = ['ID', 'Titre', 'Catégorie', 'Statut', 'Niveau', 'Prix', 'Étudiants', 'Note', 'Créé le']
+    const rows = filtered.map(f => [
+      f.id, `"${f.title}"`, f.categorie ?? '', f.statut, f.level ?? '',
+      f.price ?? '', f.enrollmentCount ?? '', f.rating ?? '',
+      new Date(f.createdAt).toLocaleDateString('fr-FR'),
+    ])
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url  = URL.createObjectURL(blob)
+    const a    = Object.assign(document.createElement('a'), { href: url, download: `formations-${Date.now()}.csv` })
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
-  const handleDuplicateFormation = async (formationId: string) => {
-    // API call to duplicate formation
-    console.log('Duplicating formation:', formationId)
-    // In real implementation, this would call an API
-  }
+  // ── Selection helpers ────────────────────────────────────────────────────────
+  const toggleOne = (id: number) =>
+    setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])
+  const togglePage = () =>
+    setSelected(s => s.length === paginated.length ? [] : paginated.map(f => f.id))
+  const allPageSelected = paginated.length > 0 && paginated.every(f => selected.includes(f.id))
 
-  const handleExportFormations = () => {
-    // Export formations data to CSV/Excel
-    console.log('Exporting formations...')
-    // In real implementation, this would generate and download a file
-  }
-
+  // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="w-full px-3 sm:px-4 lg:px-5 xl:px-6 2xl:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <Link href="/admin" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                <ChevronRight className="w-5 h-5 rotate-180" />
-                <span>Retour</span>
-              </Link>
-              <h1 className="text-xl font-bold text-gray-900">Formations</h1>
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl text-white text-sm font-medium transition-all ${
+          toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+        }`}>
+          {toast.type === 'error' && <AlertCircle className="w-5 h-5" />}
+          {toast.msg}
+          <button onClick={() => setToast(null)}><X className="w-4 h-4" /></button>
+        </div>
+      )}
+
+      {/* ── Confirm Delete Modal ── */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Supprimer la formation</h3>
             </div>
-
-            <div className="flex items-center space-x-4">
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Rechercher des formations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-                />
-              </div>
-
-              {/* Filters Toggle */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Filter className="w-5 h-5 text-gray-600" />
-                <span>Filtres</span>
-                {(selectedCategory !== 'all' || selectedLevel !== 'all' || selectedStatus !== 'all' || searchQuery) && (
-                  <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                )}
+            <p className="text-gray-600 mb-6">
+              Êtes-vous sûr de vouloir supprimer <strong>"{confirmDelete.title}"</strong> ?
+              Cette action est irréversible si aucune session n'est liée.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setConfirmDelete(null)}
+                className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Annuler
               </button>
-
-              {/* Actions */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => router.push('/admin/formations/new')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Nouvelle formation</span>
-                </button>
-
-                {selectedFormations.length > 0 && (
-                  <>
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2">
-                      <Download className="w-4 h-4" />
-                      <span>Exporter</span>
-                    </button>
-                    <button className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors flex items-center space-x-2">
-                      <Trash2 className="w-4 h-4" />
-                      <span>Supprimer</span>
-                    </button>
-                  </>
-                )}
-              </div>
+              <button onClick={() => doDelete(confirmDelete.id)}
+                className="px-5 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700">
+                Supprimer
+              </button>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Filters Panel */}
-          {showFilters && (
-            <div className="border-t border-gray-200 bg-white">
-              <div className="px-6 py-4 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    {categories.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name} ({category.count})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Niveau</label>
-                  <select
-                    value={selectedLevel}
-                    onChange={(e) => setSelectedLevel(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:-ring-2 focus:ring-blue-500"
-                  >
-                    {levels.map(level => (
-                      <option key={level.id} value={level.id}>{level.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    {statuses.map(status => (
-                      <option key={status.id} value={status.id}>
-                        {status.name} ({status.count})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => {
-                      setSelectedCategory('all')
-                      setSelectedLevel('all')
-                      setSelectedStatus('all')
-                      setSearchQuery('')
-                    }}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                  >
-                    Réinitialiser
-                  </button>
-                </div>
+      {/* ── Confirm Bulk Delete Modal ── */}
+      {confirmBulk && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
               </div>
+              <h3 className="text-lg font-bold text-gray-900">Suppression multiple</h3>
             </div>
-          )}
-
-          {/* Results Count */}
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-gray-600">
-              <span className="font-semibold text-gray-900">{filteredFormations.length}</span> formation{filteredFormations.length > 1 ? 's' : ''} trouvée{filteredFormations.length > 1 ? 's' : ''}
+            <p className="text-gray-600 mb-6">
+              Supprimer <strong>{selected.length} formation(s)</strong> sélectionnée(s) ?
             </p>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">
-                {selectedFormations.length} sélectionné{selectedFormations.length > 1 ? 's' : ''}
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setConfirmBulk(false)}
+                className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Annuler
+              </button>
+              <button onClick={doBulkDelete}
+                className="px-5 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700">
+                Supprimer tout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Toolbar ── */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 gap-4">
+            {/* Back + Title */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <Link href="/admin/dashboard"
+                className="flex items-center gap-1 text-gray-500 hover:text-gray-800 transition-colors text-sm">
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Tableau de bord</span>
+              </Link>
+              <span className="text-gray-300">|</span>
+              <h1 className="text-xl font-bold text-gray-900">Formations</h1>
+              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                {formations.length}
               </span>
-              {selectedFormations.length > 0 && (
-                <button
-                  onClick={() => setSelectedFormations([])}
-                  className="text-red-600 hover:text-red-700 text-sm font-medium"
-                >
+            </div>
+
+            {/* Search */}
+            <div className="flex-1 max-w-md relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Rechercher une formation…"
+                value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1) }}
+                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {search && (
+                <button onClick={() => setSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   <X className="w-4 h-4" />
-                  <span>Désélectionner</span>
                 </button>
               )}
             </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button onClick={() => setShowFilters(v => !v)}
+                className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors ${
+                  showFilters ? 'border-blue-500 text-blue-600 bg-blue-50' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}>
+                <Filter className="w-4 h-4" />
+                <span className="hidden sm:inline">Filtres</span>
+                {(catFilter !== 'all' || statusFilter !== 'all') && (
+                  <span className="w-2 h-2 bg-blue-600 rounded-full" />
+                )}
+              </button>
+
+              <button onClick={loadFormations}
+                className="p-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                title="Actualiser">
+                <RefreshCw className="w-4 h-4" />
+              </button>
+
+              <button onClick={doExportCSV}
+                className="hidden sm:flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                <Download className="w-4 h-4" />
+                <span>CSV</span>
+              </button>
+
+              {selected.length > 0 && (
+                <button onClick={() => setConfirmBulk(true)}
+                  className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">
+                  <Trash2 className="w-4 h-4" />
+                  <span>{selected.length}</span>
+                </button>
+              )}
+
+              <Link href="/admin/formations/new"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Nouvelle formation</span>
+              </Link>
+            </div>
           </div>
+        </div>
 
-          {/* Formations Grid */}
+        {/* ── Filters Bar ── */}
+        {showFilters && (
+          <div className="border-t border-gray-100 bg-gray-50">
+            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap gap-4 items-end">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Catégorie</label>
+                <select value={catFilter} onChange={e => { setCatFilter(e.target.value); setPage(1) }}
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                  {categoryOptions.map(c => (
+                    <option key={c.id} value={c.id}>{c.label} ({c.count})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Statut</label>
+                <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                  {statusOptions.map(s => (
+                    <option key={s.id} value={s.id}>{s.label} ({s.count})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Trier par</label>
+                <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                  <option value="created">Plus récent</option>
+                  <option value="title-asc">Titre A → Z</option>
+                  <option value="title-desc">Titre Z → A</option>
+                  <option value="students">Plus populaire</option>
+                  <option value="rating">Mieux noté</option>
+                  <option value="price-asc">Prix croissant</option>
+                  <option value="price-desc">Prix décroissant</option>
+                </select>
+              </div>
+              <button onClick={() => { setCatFilter('all'); setStatusFilter('all'); setSortBy('created'); setPage(1) }}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium mt-4">
+                Réinitialiser
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Main Content ── */}
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* Summary bar */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-sm text-gray-600">
+            <span className="font-semibold text-gray-900">{filtered.length}</span> formation
+            {filtered.length !== 1 ? 's' : ''} trouvée{filtered.length !== 1 ? 's' : ''}
+            {search && <span className="ml-1 text-gray-400">pour « {search} »</span>}
+          </p>
+          {selected.length > 0 && (
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-blue-600 font-medium">{selected.length} sélectionnée(s)</span>
+              <button onClick={() => setSelected([])} className="text-gray-400 hover:text-gray-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Select all page */}
+        {paginated.length > 0 && (
+          <div className="flex items-center gap-2 mb-4">
+            <button onClick={togglePage}
+              className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition-colors">
+              {allPageSelected
+                ? <CheckSquare className="w-4 h-4 text-blue-600" />
+                : <Square className="w-4 h-4" />}
+              Sélectionner cette page
+            </button>
+          </div>
+        )}
+
+        {/* ── Loading ── */}
+        {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredFormations.map((formation) => (
-              <div
-                key={formation.id}
-                className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 ${selectedFormations.includes(formation.id) ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-                  }`}
-              >
-                {/* Header */}
-                <div className="p-6 border-b border-gray-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-12 h-12 ${getCategoryColor(formation.category)} rounded-xl flex items-center justify-center`}>
-                        <BookOpen className="w-6 h-6 text-white" />
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(formation.category)}`}>
-                        {formation.category}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-red-400 fill-current" />
-                        <span className="text-sm text-gray-600">{formation.rating}</span>
-                        <span className="text-xs text-gray-500">({formation.reviews})</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {formation.originalPrice > formation.price && (
-                        <div className="flex items-center space-x-2">
-                          <span className="text-lg font-bold text-red-600">${formation.price}$</span>
-                          <span className="text-sm text-gray-500 line-through">${formation.originalPrice}$</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Image */}
-                  <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                    <BookOpen className="w-16 h-16 text-blue-600" />
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{formation.title}</h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      {formation.description}
-                    </p>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {formation.tags.slice(0, 3).map((tag, index) => (
-                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                          {tag}
-                        </span>
-                      ))}
-                      {formation.tags.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                          +{formation.tags.length - 3}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Details */}
-                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span>{formation.duration}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Target className="w-4 h-4 text-gray-400" />
-                        <span>{formation.level}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4 text-gray-400" />
-                        <span>{formation.location}</span>
-                      </div>
-                    </div>
-
-                    {/* Instructor */}
-                    <div className="border-t border-gray-100 pt-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                          <User className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{formation.instructor}</p>
-                          <p className="text-xs text-gray-500">{formation.instructorTitle}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Progress */}
-                    <div className="mt-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-600">Progression</span>
-                        <span className="text-sm font-medium text-gray-900">{formation.progress || 0}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${getProgressColor(formation.progress)}`}
-                          style={{ width: `${formation.progress || 0}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    {/* Price and CTA */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div className="text-lg font-bold text-gray-900">
-                        {formation.originalPrice > formation.price ? (
-                          <>
-                            <span className="text-lg font-bold text-red-600">${formation.price}$</span>
-                            <span className="text-sm text-gray-500 line-through">${formation.originalPrice}$</span>
-                          </>
-                        ) : (
-                          <span className="text-lg font-bold text-gray-900">${formation.price}$</span>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Link
-                          href={`/admin/formations/${formation.id}/edit`}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                        >
-                          <Edit className="w-4 h-4" />
-                          <span>Modifier</span>
-                        </Link>
-                        <Link
-                          href={`/admin/formations/${formation.id}/duplicate`}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Dupliquer</span>
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteFormation(formation.id)}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors flex items-center space-x-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span>Supprimer</span>
-                        </button>
-                      </div>
-                    </div>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-sm animate-pulse">
+                <div className="h-36 bg-gray-200 rounded-t-2xl" />
+                <div className="p-5 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-full" />
+                  <div className="h-3 bg-gray-200 rounded w-5/6" />
+                  <div className="flex gap-2 pt-2">
+                    <div className="h-8 bg-gray-200 rounded-lg flex-1" />
+                    <div className="h-8 bg-gray-200 rounded-lg w-10" />
+                    <div className="h-8 bg-gray-200 rounded-lg w-10" />
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          {/* No Results */}
-          {filteredFormations.length === 0 && (
-            <div className="text-center py-16">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-16 h-16 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune formation trouvée</h3>
-              <p className="text-gray-600 mb-4">
-                Essayez de modifier vos critères de recherche ou créer une nouvelle formation.
-              </p>
-              <button
-                onClick={() => {
-                  setSelectedCategory('all')
-                  setSelectedLevel('all')
-                  setSelectedStatus('all')
-                  setSearchQuery('')
-                  setShowFilters(false)
-                }}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                Réinitialiser les filtres
+        )}
+
+        {/* ── Error ── */}
+        {!isLoading && error && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Erreur de chargement</h3>
+            <p className="text-gray-500 mb-6 max-w-sm">{error}</p>
+            <button onClick={loadFormations}
+              className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+              <RefreshCw className="w-4 h-4" />
+              Réessayer
+            </button>
+          </div>
+        )}
+
+        {/* ── Empty ── */}
+        {!isLoading && !error && filtered.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <BookOpen className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune formation trouvée</h3>
+            <p className="text-gray-500 mb-6">
+              {formations.length === 0
+                ? "Commencez par créer votre première formation."
+                : "Aucun résultat pour ces critères. Modifiez votre recherche ou vos filtres."}
+            </p>
+            <div className="flex gap-3">
+              {(search || catFilter !== 'all' || statusFilter !== 'all') && (
+                <button
+                  onClick={() => { setSearch(''); setCatFilter('all'); setStatusFilter('all') }}
+                  className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                  Réinitialiser les filtres
+                </button>
+              )}
+              <Link href="/admin/formations/new"
+                className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                <Plus className="w-4 h-4" />
+                Créer une formation
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* ── Grid ── */}
+        {!isLoading && !error && paginated.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginated.map(f => (
+              <FormationAdminCard
+                key={f.id}
+                formation={f}
+                isSelected={selected.includes(f.id)}
+                onSelect={() => toggleOne(f.id)}
+                onEdit={() => router.push(`/admin/formations/${f.id}/edit`)}
+                onDelete={() => setConfirmDelete(f)}
+                onDuplicate={() => doDuplicate(f)}
+                onTogglePublish={() => doTogglePublish(f)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* ── Pagination ── */}
+        {!isLoading && totalPages > 1 && (
+          <div className="mt-10 flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Page {safePage} sur {totalPages} —{' '}
+              {(safePage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safePage * ITEMS_PER_PAGE, filtered.length)} sur {filtered.length}
+            </p>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}
+                className="p-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(n => n === 1 || n === totalPages || Math.abs(n - safePage) <= 1)
+                .reduce<(number | '…')[]>((acc, n, idx, arr) => {
+                  if (idx > 0 && (n as number) - (arr[idx - 1] as number) > 1) acc.push('…')
+                  acc.push(n)
+                  return acc
+                }, [])
+                .map((n, i) =>
+                  n === '…'
+                    ? <span key={`e${i}`} className="px-2 text-gray-400">…</span>
+                    : (
+                      <button key={n} onClick={() => setPage(n as number)}
+                        className={`w-9 h-9 rounded-lg text-sm font-medium border transition-colors ${
+                          safePage === n
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}>
+                        {n}
+                      </button>
+                    )
+                )}
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}
+                className="p-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-          )}
-
-          {/* Pagination */}
-          {filteredFormations.length > 0 && (
-            <div className="flex items-center justify-center mt-8">
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Précédent
-                </button>
-                <div className="flex space-x-1">
-                  {Array.from({ length: Math.ceil(filteredFormations.length / 6) }, (_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentPage(index + 1)}
-                      className={`px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 ${currentPage === index + 1 ? 'bg-blue-600 text-white' : ''
-                        }`}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setCurrentPage(Math.ceil(filteredFormations.length / 6))}
-                  disabled={currentPage >= Math.ceil(filteredFormations.length / 6)}
-                  className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Suivant
-                </button>
-              </div>
-              <div className="text-sm text-gray-700 mt-2">
-                Affichage de {(currentPage - 1) * 6 + 1} à {Math.min(currentPage * 6, filteredFormations.length)} sur {filteredFormations.length}
-              </div>
-            </div>
-          )}
-        </div>
-      </header>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
+// ── FormationAdminCard ───────────────────────────────────────────────────────
+interface CardProps {
+  formation: Formation
+  isSelected: boolean
+  onSelect: () => void
+  onEdit: () => void
+  onDelete: () => void
+  onDuplicate: () => void
+  onTogglePublish: () => void
+}
+
+function FormationAdminCard({ formation: f, isSelected, onSelect, onEdit, onDelete, onDuplicate, onTogglePublish }: CardProps) {
+  const [showMenu, setShowMenu] = useState(false)
+  const statusColor = STATUS_COLORS[f.statut] ?? 'bg-gray-100 text-gray-700 border-gray-200'
+  const statusLabel = STATUS_LABELS[f.statut] ?? f.statut
+
+  return (
+    <div className={`bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col border-2 ${
+      isSelected ? 'border-blue-500' : 'border-transparent'
+    }`}>
+      {/* Image / placeholder */}
+      <div className="relative h-36 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+        {f.imageUrl ? (
+          <img src={f.imageUrl} alt={f.title} className="w-full h-full object-cover" />
+        ) : (
+          <BookOpen className="w-12 h-12 text-blue-300" />
+        )}
+
+        {/* Checkbox */}
+        <button onClick={onSelect}
+          className="absolute top-3 left-3 w-7 h-7 rounded-lg border-2 border-white bg-white/80 shadow flex items-center justify-center hover:bg-white transition-colors">
+          {isSelected
+            ? <CheckSquare className="w-5 h-5 text-blue-600" />
+            : <Square className="w-5 h-5 text-gray-400" />}
+        </button>
+
+        {/* Status badge */}
+        <span className={`absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-semibold border ${statusColor}`}>
+          {statusLabel}
+        </span>
+      </div>
+
+      {/* Body */}
+      <div className="p-5 flex flex-col flex-1">
+        {/* Category + rating */}
+        <div className="flex items-center justify-between mb-2">
+          {f.categorie ? (
+            <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium capitalize">
+              {f.categorie.replace(/-/g, ' ')}
+            </span>
+          ) : (
+            <span className="text-xs text-gray-400">Sans catégorie</span>
+          )}
+          {f.rating ? (
+            <div className="flex items-center gap-1">
+              <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
+              <span className="text-xs font-medium text-gray-700">{f.rating.toFixed(1)}</span>
+              {f.reviewCount ? <span className="text-xs text-gray-400">({f.reviewCount})</span> : null}
+            </div>
+          ) : null}
+        </div>
+
+        {/* Title */}
+        <h3 className="font-bold text-gray-900 text-base mb-1 line-clamp-2 leading-snug">{f.title}</h3>
+        <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-1">{f.description}</p>
+
+        {/* Meta chips */}
+        <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-4">
+          {f.duree && (
+            <span className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
+              <Clock className="w-3 h-3" />{f.duree}
+            </span>
+          )}
+          {f.enrollmentCount !== undefined && (
+            <span className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
+              <Users className="w-3 h-3" />{f.enrollmentCount} inscrit(s)
+            </span>
+          )}
+          {f.price !== undefined && (
+            <span className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded font-medium text-blue-700">
+              ${f.price}
+            </span>
+          )}
+          {f.nextSession?.startDate && (
+            <span className="flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded">
+              ▶ {new Date(f.nextSession.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+            </span>
+          )}
+        </div>
+
+        {/* Instructor */}
+        {f.instructor && (
+          <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
+            <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="w-4 h-4 text-blue-600" />
+            </div>
+            <span className="truncate">{f.instructor.firstName} {f.instructor.lastName}</span>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100">
+          {/* Publish toggle */}
+          <button onClick={onTogglePublish}
+            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
+              f.statut === 'publie'
+                ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`}>
+            {f.statut === 'publie' ? 'Dépublier' : 'Publier'}
+          </button>
+
+          <button onClick={onEdit}
+            className="flex items-center justify-center w-9 h-9 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            title="Modifier">
+            <Edit className="w-4 h-4" />
+          </button>
+
+          <Link href={`/fr/formations/${f.slug}`} target="_blank"
+            className="flex items-center justify-center w-9 h-9 border border-gray-200 text-gray-500 rounded-lg hover:bg-gray-50 transition-colors"
+            title="Voir sur le site">
+            <Eye className="w-4 h-4" />
+          </Link>
+
+          {/* More menu */}
+          <div className="relative">
+            <button onClick={() => setShowMenu(v => !v)}
+              className="flex items-center justify-center w-9 h-9 border border-gray-200 text-gray-500 rounded-lg hover:bg-gray-50 transition-colors">
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 bottom-11 z-20 bg-white border border-gray-200 rounded-xl shadow-xl py-1 w-40">
+                  <button onClick={() => { onDuplicate(); setShowMenu(false) }}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <Copy className="w-4 h-4 text-gray-400" />
+                    Dupliquer
+                  </button>
+                  <button onClick={() => { onDelete(); setShowMenu(false) }}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                    <Trash2 className="w-4 h-4" />
+                    Supprimer
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

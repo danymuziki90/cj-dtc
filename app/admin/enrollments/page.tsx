@@ -34,7 +34,6 @@ type PaginationState = {
 const initialFilters = {
   status: '',
   formationId: '',
-  paymentStatus: '',
   accountStatus: '',
   startDateFrom: '',
   startDateTo: '',
@@ -53,12 +52,7 @@ const initialPagination: PaginationState = {
 const emptyStats: EnrollmentStatsSummary = {
   total: 0,
   byStatus: {},
-  byPaymentStatus: {},
   byAccountStatus: {},
-  revenue: {
-    totalAmount: 0,
-    paidAmount: 0,
-  },
   byFormation: [],
 }
 
@@ -94,7 +88,6 @@ export default function EnrollmentsPage() {
 
       if (nextFilters.status) params.append('status', nextFilters.status)
       if (nextFilters.formationId) params.append('formationId', nextFilters.formationId)
-      if (nextFilters.paymentStatus) params.append('paymentStatus', nextFilters.paymentStatus)
       if (nextFilters.accountStatus) params.append('accountStatus', nextFilters.accountStatus)
       if (nextFilters.startDateFrom) params.append('startDateFrom', nextFilters.startDateFrom)
       if (nextFilters.startDateTo) params.append('startDateTo', nextFilters.startDateTo)

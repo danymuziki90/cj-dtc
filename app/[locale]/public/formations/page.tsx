@@ -744,7 +744,7 @@ export default function FormationsPage() {
               Contacter un conseiller
             </Link>
             <Link
-              href={`/${locale}/programmes`}
+              href={`/${locale}/formations#sessions`}
               className="px-8 py-4 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-blue-900 transition-all"
             >
               Voir tous les programmes

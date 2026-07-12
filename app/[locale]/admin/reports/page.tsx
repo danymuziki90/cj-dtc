@@ -122,7 +122,7 @@ export default function AdminReportsPage() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {period === 'day' && 'Aujourd\'hui'}
+                {period === 'day' && "Aujourd'hui"}
                 {period === 'week' && 'Semaine'}
                 {period === 'month' && 'Mois'}
                 {period === 'quarter' && 'Trimestre'}

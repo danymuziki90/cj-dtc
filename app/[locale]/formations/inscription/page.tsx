@@ -483,7 +483,7 @@ function InscriptionContent() {
                                         disabled={submitting || isFull}
                                         className="px-6 py-3 bg-cjblue text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                                     >
-                                        {submitting ? 'Inscription en cours...' : isFull ? 'Liste d\'attente' : 'S\'inscrire'}
+                                        {submitting ? 'Inscription en cours...' : isFull ? "Liste d'attente" : "S'inscrire"}
                                     </button>
                                 </div>
                             </form>

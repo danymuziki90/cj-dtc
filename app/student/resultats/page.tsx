@@ -31,7 +31,7 @@ export default function StudentResultsPage() {
     {
       label: 'Evaluations',
       value: data.dashboard.results.length,
-      helper: 'Retours d evaluation deja enregistrés.',
+      helper: 'Retours d evaluation deja enregistres.',
       icon: ClipboardCheck,
       accent: 'from-[#002D72] to-[#0C4DA2]',
     },
@@ -73,7 +73,6 @@ export default function StudentResultsPage() {
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: 'Paiement valide', value: eligibility.paymentValidated },
             { label: 'Projet valide', value: eligibility.projectValidated },
             { label: 'Presence validee', value: eligibility.attendanceValidated },
             { label: 'Certificat possible', value: eligibility.eligible },

@@ -8,14 +8,18 @@ import { parseEnrollmentNotes } from '@/lib/student/enrollment-notes'
 
 export const runtime = 'nodejs'
 
-const ALLOWED_EXTENSIONS = new Set(['.pdf', '.jpg', '.jpeg', '.png', '.webp'])
+const ALLOWED_EXTENSIONS = new Set(['.pdf', '.doc', '.docx', '.zip', '.jpg', '.jpeg', '.png', '.webp'])
 const ALLOWED_MIME_TYPES = new Set([
   'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/zip',
+  'application/x-zip-compressed',
   'image/jpeg',
   'image/png',
   'image/webp',
 ])
-const MAX_FILE_SIZE = 10 * 1024 * 1024
+const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20 MB
 
 function statusLabel(status: string) {
   switch (status) {
@@ -97,13 +101,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: 'Fichier trop volumineux (max 10MB).' }, { status: 400 })
+      return NextResponse.json({ error: 'Fichier trop volumineux (max 20 MB).' }, { status: 400 })
     }
 
     const extension = extname(file.name).toLowerCase()
     if (!ALLOWED_EXTENSIONS.has(extension) || !ALLOWED_MIME_TYPES.has(file.type)) {
       return NextResponse.json(
-        { error: 'Format invalide. Utilisez uniquement PDF, JPG, PNG ou WEBP.' },
+        { error: 'Format invalide. Utilisez uniquement PDF, DOCX, DOC, ZIP, JPG, PNG ou WEBP.' },
         { status: 400 }
       )
     }

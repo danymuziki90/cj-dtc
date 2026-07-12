@@ -1,204 +1,301 @@
 'use client'
 
-import Link from 'next/link'
-import { FormEvent, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import StudentPortalNav from '@/components/student-portal/StudentPortalNav'
+import { FormEvent, useRef, useState } from 'react'
+import { Download, FileUp, NotebookText, Paperclip, UploadCloud } from 'lucide-react'
+import {
+  StudentEmptyState,
+  StudentSectionCard,
+  type StudentMetric,
+  studentInputClassName,
+  studentPrimaryButtonClassName,
+} from '@/components/ui/student-space'
+import {
+  StudentPortalError,
+  StudentPortalLoading,
+  StudentPortalPageShell,
+} from '@/components/student-portal/StudentPortalPageShell'
+import { useStudentDashboardData } from '@/components/student-portal/useStudentDashboard'
+import { formatPortalDateTime, statusToneClass } from '@/lib/student-portal/format'
 
-type Submission = {
-  id: string
-  title: string
-  status: string
-  statusLabel: 'en_attente_de_correction' | 'corrige' | 'valide'
-  fileUrl: string
-  createdAt: string
-  updatedAt: string
-  feedback: string | null
-  reviewedAt: string | null
+type SubmissionStatus = 'en_attente_de_correction' | 'corrige' | 'valide'
+
+function statusLabel(raw: string): SubmissionStatus {
+  if (raw === 'approved') return 'valide'
+  if (raw === 'rejected') return 'corrige'
+  return 'en_attente_de_correction'
 }
 
-function statusBadge(statusLabel: Submission['statusLabel']) {
-  if (statusLabel === 'valide') return 'bg-blue-100 text-blue-700'
-  if (statusLabel === 'corrige') return 'bg-red-100 text-red-700'
-  return 'bg-slate-100 text-slate-700'
-}
-
-function statusText(statusLabel: Submission['statusLabel']) {
-  if (statusLabel === 'valide') return 'Valide'
-  if (statusLabel === 'corrige') return 'Corrige'
+function statusDisplay(value: SubmissionStatus) {
+  if (value === 'valide') return 'Valide'
+  if (value === 'corrige') return 'Corrige'
   return 'En attente de correction'
 }
 
+function statusTone(value: SubmissionStatus) {
+  if (value === 'valide') return statusToneClass('approved')
+  if (value === 'corrige') return statusToneClass('rejected')
+  return statusToneClass('pending')
+}
+
 export default function StudentSubmissionsPage() {
-  const router = useRouter()
-  const [submissions, setSubmissions] = useState<Submission[]>([])
+  const { data, loading, error, refresh } = useStudentDashboardData()
+
   const [title, setTitle] = useState('')
   const [file, setFile] = useState<File | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const [uploadSuccess, setUploadSuccess] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  async function loadSubmissions() {
-    const response = await fetch('/api/student/system/submissions', { cache: 'no-store' })
-    if (response.status === 401 || response.status === 403) {
-      router.push('/student/login')
-      return
-    }
-    if (!response.ok) return
-
-    const data = await response.json()
-    setSubmissions(data.submissions || [])
+  if (loading) {
+    return (
+      <StudentPortalLoading
+        title="Mes travaux"
+        description="Deposez vos travaux, suivez leur statut et consultez les retours du formateur."
+        icon={NotebookText}
+      />
+    )
   }
 
-  useEffect(() => {
-    loadSubmissions()
-  }, [])
+  if (!data || error) {
+    return (
+      <StudentPortalError
+        title="Mes travaux"
+        description="Deposez vos travaux, suivez leur statut et consultez les retours du formateur."
+        icon={NotebookText}
+        error={error}
+      />
+    )
+  }
+
+  const submissions = data.dashboard.submissions
+  const approved = submissions.filter((s) => s.status === 'approved').length
+  const pending = submissions.filter((s) => s.status === 'pending').length
+  const reviewed = submissions.filter((s) => s.status === 'rejected').length
+
+  const metrics: StudentMetric[] = [
+    {
+      label: 'Travaux soumis',
+      value: submissions.length,
+      helper: 'Total des depots effectues.',
+      icon: FileUp,
+      accent: 'from-[#002D72] to-[#0C4DA2]',
+    },
+    {
+      label: 'Valides',
+      value: approved,
+      helper: 'Travaux acceptes par le formateur.',
+      icon: NotebookText,
+      accent: 'from-[#0C4DA2] to-[#4F8FE8]',
+    },
+    {
+      label: 'En attente',
+      value: pending,
+      helper: 'En cours de correction.',
+      icon: UploadCloud,
+      accent: 'from-[#E30613] to-[#F16C78]',
+    },
+    {
+      label: 'Corriges',
+      value: reviewed,
+      helper: 'Travaux avec retours formateur.',
+      icon: Paperclip,
+      accent: 'from-[#001737] to-[#002D72]',
+    },
+  ]
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
-    setError('')
+    setUploadError('')
+    setUploadSuccess('')
 
     if (!file) {
-      setError('Veuillez selectionner un fichier PDF ou image.')
+      setUploadError('Veuillez selectionner un fichier.')
+      return
+    }
+
+    const trimmedTitle = title.trim()
+    if (trimmedTitle.length < 3) {
+      setUploadError('Le titre doit contenir au moins 3 caracteres.')
       return
     }
 
     const formData = new FormData()
-    formData.append('title', title)
+    formData.append('title', trimmedTitle)
     formData.append('file', file)
 
-    setLoading(true)
-    const response = await fetch('/api/student/system/submissions', {
-      method: 'POST',
-      body: formData,
-    })
-    const data = await response.json()
+    setUploading(true)
+    try {
+      const response = await fetch('/api/student/system/submissions', {
+        method: 'POST',
+        body: formData,
+      })
+      const payload = await response.json().catch(() => ({}))
 
-    if (!response.ok) {
-      setError(data.error || 'Ãƒâ€°chec du tÃƒÂ©lÃƒÂ©versement.')
-      setLoading(false)
-      return
+      if (!response.ok) {
+        setUploadError(payload.error || 'Echec du depot. Veuillez reessayer.')
+        return
+      }
+
+      setUploadSuccess(`"${trimmedTitle}" depose avec succes.`)
+      setTitle('')
+      setFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      await refresh()
+    } catch {
+      setUploadError('Echec du depot. Veuillez verifier votre connexion.')
+    } finally {
+      setUploading(false)
     }
-
-    setTitle('')
-    setFile(null)
-    setLoading(false)
-    await loadSubmissions()
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+    <StudentPortalPageShell
+      title="Mes travaux"
+      description="Deposez vos travaux, suivez leur statut de correction et consultez les retours du formateur."
+      icon={NotebookText}
+      metrics={metrics}
+    >
+      {/* Formulaire de depot */}
+      <StudentSectionCard
+        eyebrow="Nouveau depot"
+        title="Remettre un travail"
+        description="Formats acceptes : PDF, DOCX, DOC, ZIP, JPG, PNG, WEBP. Taille maximale : 20 Mo."
+        icon={UploadCloud}
+      >
+        <form onSubmit={onSubmit} className="space-y-4" noValidate>
+          {uploadSuccess ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700" role="status">
+              {uploadSuccess}
+            </div>
+          ) : null}
+          {uploadError ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert">
+              {uploadError}
+            </div>
+          ) : null}
+
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Travaux et projets</h1>
-            <p className="text-sm text-slate-500">Historique des soumissions et retours de correction.</p>
-          </div>
-          <div className="flex gap-2">
-            <Link
-              href="/student/profile"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            >
-              Mon compte
-            </Link>
-            <Link
-              href="/student/dashboard"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            >
-              Dashboard
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-6">
-        <StudentPortalNav />
-        <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
-        <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Remettre un travail</h2>
-
-          {error ? <p className="mb-3 text-sm text-red-600">{error}</p> : null}
-
-          <div className="space-y-3">
+            <label htmlFor="submission-title" className="mb-1 block text-sm font-medium text-slate-700">
+              Titre du travail <span className="text-red-500">*</span>
+            </label>
             <input
+              id="submission-title"
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="Titre du projet"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Ex : Projet final module 3"
+              className={studentInputClassName}
               required
+              minLength={3}
             />
-            <input
-              type="file"
-              accept="application/pdf,image/jpeg,image/png,image/webp"
-              onChange={(event) => setFile(event.target.files?.[0] || null)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              required
-            />
-            <p className="text-xs text-slate-500">Formats autorises: PDF, JPG, PNG, WEBP (max 10MB).</p>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-4 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-70"
-          >
-            {loading ? 'Televersement...' : 'Soumettre'}
-          </button>
-        </form>
+          <div>
+            <label htmlFor="submission-file" className="mb-1 block text-sm font-medium text-slate-700">
+              Fichier <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="submission-file"
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.zip,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip,image/jpeg,image/png,image/webp"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className={studentInputClassName}
+              required
+            />
+            {file ? (
+              <p className="mt-1 text-xs text-slate-500">
+                Fichier selectionne : <strong>{file.name}</strong> ({(file.size / 1024 / 1024).toFixed(2)} Mo)
+              </p>
+            ) : null}
+          </div>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-          <table className="min-w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-semibold text-slate-700">Titre</th>
-                <th className="px-4 py-3 text-left font-semibold text-slate-700">Date soumission</th>
-                <th className="px-4 py-3 text-left font-semibold text-slate-700">Statut</th>
-                <th className="px-4 py-3 text-left font-semibold text-slate-700">Feedback</th>
-                <th className="px-4 py-3 text-left font-semibold text-slate-700">Fichier</th>
-              </tr>
-            </thead>
-            <tbody>
-              {submissions.map((submission) => (
-                <tr key={submission.id} className="border-b border-slate-100">
-                  <td className="px-4 py-3 text-slate-900">{submission.title}</td>
-                  <td className="px-4 py-3 text-slate-700">{new Date(submission.createdAt).toLocaleString('fr-FR')}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-1 text-xs font-semibold ${statusBadge(submission.statusLabel)}`}>
-                      {statusText(submission.statusLabel)}
+          <div>
+            <button
+              type="submit"
+              disabled={uploading}
+              className={`${studentPrimaryButtonClassName} disabled:opacity-70`}
+            >
+              <UploadCloud className="h-4 w-4" />
+              {uploading ? 'Depot en cours...' : 'Soumettre le travail'}
+            </button>
+          </div>
+        </form>
+      </StudentSectionCard>
+
+      {/* Liste des soumissions */}
+      <StudentSectionCard
+        eyebrow="Historique"
+        title="Tous mes depots"
+        description="Consultez le statut, les retours du formateur et telechargez vos fichiers soumis."
+        icon={NotebookText}
+      >
+        {submissions.length ? (
+          <div className="space-y-4">
+            {submissions.map((sub) => {
+              const label = statusLabel(sub.status)
+              return (
+                <article
+                  key={sub.id}
+                  className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        Depose le {formatPortalDateTime(sub.submittedAt)}
+                      </p>
+                      <h3 className="mt-1 text-lg font-semibold tracking-tight text-slate-950">
+                        {sub.title}
+                      </h3>
+                    </div>
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusTone(label)}`}
+                    >
+                      {statusDisplay(label)}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-700">
-                    {submission.feedback ? (
-                      <>
-                        <p>{submission.feedback}</p>
-                        {submission.reviewedAt ? (
-                          <p className="text-xs text-slate-500">Mis ? jour le {new Date(submission.reviewedAt).toLocaleString('fr-FR')}</p>
-                        ) : null}
-                      </>
-                    ) : (
-                      <span className="text-slate-400">Aucun feedback pour le moment</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <a href={submission.fileUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
-                      Ouvrir
+                  </div>
+
+                  {/* Feedback formateur */}
+                  {sub.reviewFeedback ? (
+                    <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm">
+                      <p className="font-semibold text-[var(--cj-blue)]">Retour du formateur</p>
+                      <p className="mt-1 text-slate-700">{sub.reviewFeedback}</p>
+                      {sub.reviewedAt ? (
+                        <p className="mt-1 text-xs text-slate-400">
+                          Mis a jour le {formatPortalDateTime(sub.reviewedAt)}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : label === 'en_attente_de_correction' ? (
+                    <p className="mt-3 text-sm text-slate-500">
+                      Aucun retour pour le moment — la correction est en cours.
+                    </p>
+                  ) : null}
+
+                  {/* Telecharger le fichier soumis */}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a
+                      href={sub.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      download
+                      className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-[var(--cj-blue)]"
+                    >
+                      <Download className="h-4 w-4" />
+                      Telecharger mon fichier
                     </a>
-                  </td>
-                </tr>
-              ))}
-              {submissions.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-500">
-                    Aucun travail soumis pour le moment.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
-        </div>
-      </main>
-    </div>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        ) : (
+          <StudentEmptyState
+            title="Aucun travail soumis"
+            description="Utilisez le formulaire ci-dessus pour deposer votre premier travail. Il apparaitra ici avec son statut de correction."
+          />
+        )}
+      </StudentSectionCard>
+    </StudentPortalPageShell>
   )
 }
-
-

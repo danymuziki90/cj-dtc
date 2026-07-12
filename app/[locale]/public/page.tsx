@@ -241,7 +241,7 @@ export default function HomePage() {
                 Formations
               </Link>
               <Link
-                href={`/${locale}/programmes`}
+                href={`/${locale}/formations#sessions`}
                 className="text-gray-600 hover:text-blue-600 transition-colors"
               >
                 Programmes
@@ -313,7 +313,7 @@ export default function HomePage() {
                 Formations
               </Link>
               <Link
-                href={`/${locale}/programmes`}
+                href={`/${locale}/formations#sessions`}
                 className="block text-gray-600 hover:text-blue-600"
               >
                 Programmes
