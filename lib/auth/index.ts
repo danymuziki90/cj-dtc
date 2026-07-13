@@ -1,7 +1,7 @@
 // CJ DTC - Authentication System
 // Version 2.0 - Production Ready
 
-import jwt from 'jose'
+import * as jwt from 'jose'
 import bcrypt from 'bcryptjs'
 import { UserRole, User } from '@/types'
 
@@ -70,7 +70,7 @@ export async function verifyAccessToken(token: string): Promise<JWTPayload | nul
       audience: JWT_AUDIENCE,
     })
     
-    return payload as JWTPayload
+    return payload as unknown as JWTPayload
   } catch (error) {
     console.error('Token verification failed:', error)
     return null
@@ -84,7 +84,7 @@ export async function verifyRefreshToken(token: string): Promise<RefreshTokenPay
       audience: JWT_AUDIENCE,
     })
     
-    return payload as RefreshTokenPayload
+    return payload as unknown as RefreshTokenPayload
   } catch (error) {
     console.error('Refresh token verification failed:', error)
     return null

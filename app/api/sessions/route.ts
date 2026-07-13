@@ -130,7 +130,6 @@ export async function POST(request: Request) {
                         ? mapParticipationTypeToFormat(participationType as ParticipationType)
                         : format) || 'presentiel',
                 maxParticipants: parseInt(maxParticipants) || 25,
-                price: parseFloat(price) || 0,
                 description,
                 prerequisites: serializeSessionMetadata(
                     {

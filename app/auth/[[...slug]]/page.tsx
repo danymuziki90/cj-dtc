@@ -6,7 +6,7 @@ export default async function AuthRedirectPage({
   params: Promise<{ slug?: string[] }>
 }) {
   const { slug } = await params
-  const suffix = slug.length ? `/${slug.join('/')}` : ''
+  const suffix = slug && slug.length ? `/${slug.join('/')}` : ''
 
   redirect(`/fr/auth${suffix}`)
 }

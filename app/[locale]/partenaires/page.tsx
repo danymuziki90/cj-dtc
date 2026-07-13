@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import { ArrowRight, Globe2, HeartHandshake, Landmark, UsersRound } from 'lucide-react'
 import Breadcrumbs from '../../../components/Breadcrumbs'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
@@ -23,13 +23,13 @@ export default async function PartenairesPage({ params }: PageProps) {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
 
-        <section className="overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,#02142f_0%,#002d72_45%,#0c4da2_100%)] px-6 py-10 text-white shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)] sm:px-8 lg:px-10 lg:py-12">
+        <section className="hero-bg-unified rounded-[32px] px-6 py-10 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)] sm:px-8 lg:px-10 lg:py-12">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
               <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-100">
                 {t.heroBadge}
               </p>
-              <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">{t.heroTitle}</h1>
+              <h1 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">{t.heroTitle}</h1>
               <p className="mt-4 max-w-3xl text-base leading-8 text-white/80 sm:text-lg">{t.heroDescription}</p>
             </div>
 

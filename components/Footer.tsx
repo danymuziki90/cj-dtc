@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -93,7 +93,7 @@ function IconChevronRight() {
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <div className="mb-5">
-      <h4 className="text-sm font-bold uppercase tracking-wider text-white">{children}</h4>
+      <h4 className="text-xs font-bold uppercase tracking-wider text-white">{children}</h4>
       <div className="mt-2 h-0.5 w-8 bg-[var(--cj-red)]" />
     </div>
   )
@@ -185,7 +185,7 @@ export default function Footer() {
               </div>
 
               {/* Tagline */}
-              <p className="text-sm leading-relaxed text-gray-300">{t.brandTagline}</p>
+              <p className="text-xs leading-relaxed text-gray-300">{t.brandTagline}</p>
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
@@ -214,13 +214,12 @@ export default function Footer() {
                   { href: `/${locale}`, label: locale === 'fr' ? 'Accueil' : 'Home' },
                   { href: `/${locale}/about`, label: locale === 'fr' ? 'À propos' : 'About' },
                   { href: `/${locale}/formations`, label: locale === 'fr' ? 'Formations' : 'Training' },
-                  { href: `/${locale}/entreprises`, label: locale === 'fr' ? 'Entreprises' : 'Businesses' },
                   { href: `/${locale}/espace-etudiants`, label: locale === 'fr' ? 'Espace étudiant' : 'Student Space' },
                   { href: `/${locale}/actualites`, label: locale === 'fr' ? 'Blog / Actualités' : 'Blog / News' },
                   { href: `/${locale}/contact`, label: locale === 'fr' ? 'Contact' : 'Contact' },
                 ].map((item) => (
                   <li key={item.href}>
-                    <Link href={item.href} className="group flex items-center gap-2 text-sm text-gray-400 transition-colors duration-200 hover:text-white">
+                    <Link href={item.href} className="group flex items-center gap-2 text-xs text-gray-400 transition-colors duration-200 hover:text-white">
                       <IconChevronRight />
                       {item.label}
                     </Link>
@@ -234,7 +233,7 @@ export default function Footer() {
               <SectionHeading>{t.sections.formations}</SectionHeading>
               <ul className="space-y-2.5">
                 <li>
-                  <Link href={`/${locale}/formations`} className="group flex items-center gap-2 text-sm text-gray-400 transition-colors duration-200 hover:text-white">
+                  <Link href={`/${locale}/formations`} className="group flex items-center gap-2 text-xs text-gray-400 transition-colors duration-200 hover:text-white">
                     <IconChevronRight />
                     {t.links.allTraining}
                   </Link>
@@ -246,7 +245,7 @@ export default function Footer() {
                   { slug: 'cj-master-system', label: 'CJ Master System' },
                 ].map((item) => (
                   <li key={item.slug}>
-                    <Link href={`/${locale}/formations/${item.slug}`} className="group flex items-center gap-2 text-sm text-gray-400 transition-colors duration-200 hover:text-white">
+                    <Link href={`/${locale}/formations/${item.slug}`} className="group flex items-center gap-2 text-xs text-gray-400 transition-colors duration-200 hover:text-white">
                       <IconChevronRight />
                       {item.label}
                     </Link>
@@ -255,102 +254,56 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Col 4 — Entreprises */}
+
+
+            {/* Col 5 — Contact */}
             <div>
-              <SectionHeading>{locale === 'fr' ? 'Entreprises' : 'Businesses'}</SectionHeading>
-              <ul className="space-y-2.5">
-                {[
-                  locale === 'fr' ? 'Solutions RH' : 'HR Solutions',
-                  locale === 'fr' ? 'Formations intra' : 'In-house training',
-                  locale === 'fr' ? 'Certifications' : 'Certifications',
-                  locale === 'fr' ? 'Conseil' : 'Consulting',
-                  locale === 'fr' ? 'Demander un devis' : 'Request a quote',
-                ].map((label) => (
-                  <li key={label}>
-                    <Link href={`/${locale}/entreprises`} className="group flex items-center gap-2 text-sm text-gray-400 transition-colors duration-200 hover:text-white">
-                      <IconChevronRight />
-                      {label}
-                    </Link>
-                  </li>
-                ))}
+              <SectionHeading>{t.sections.contact}</SectionHeading>
+              <ul className="space-y-4">
+                <li>
+                  <a href="mailto:contact@cjdevelopmenttc.org" className="group flex items-start gap-3 text-xs text-gray-400 transition-colors duration-200 hover:text-white">
+                    <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-300 group-hover:bg-white/20">
+                      <IconMail />
+                    </span>
+                    <span>
+                      <span className="block text-xs font-semibold uppercase tracking-wider text-white">{t.contactLabels.email}</span>
+                      contact@cjdevelopmenttc.org
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-300">
+                      <IconPhone />
+                    </span>
+                    <div className="text-xs text-gray-400">
+                      <span className="block text-xs font-semibold uppercase tracking-wider text-white">{t.contactLabels.drc}</span>
+                      <a href="tel:+243995136626" className="block transition-colors duration-200 hover:text-white">+243 995 136 626</a>
+                      <a href="tel:+243999482140" className="block transition-colors duration-200 hover:text-white">+243 999 482 140</a>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-300">
+                      <IconPhone />
+                    </span>
+                    <div className="text-xs text-gray-400">
+                      <span className="block text-xs font-semibold uppercase tracking-wider text-white">{t.contactLabels.guinea}</span>
+                      <a href="tel:+224626146065" className="block transition-colors duration-200 hover:text-white">+224 626 14 60 65</a>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <a href="https://wa.me/243995136626" target="_blank" rel="noopener noreferrer"
+                    className="group flex items-center gap-3 text-xs text-gray-400 transition-colors duration-200 hover:text-white">
+                    <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-300 group-hover:bg-white/20">
+                      <IconWhatsApp />
+                    </span>
+                    WhatsApp
+                  </a>
+                </li>
               </ul>
-            </div>
-
-            {/* Col 5+6 — Contact + Newsletter (span 2 on large) */}
-            <div className="space-y-8 lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0">
-
-              {/* Contact */}
-              <div>
-                <SectionHeading>{t.sections.contact}</SectionHeading>
-                <ul className="space-y-4">
-                  <li>
-                    <a href="mailto:contact@cjdevelopmenttc.org" className="group flex items-start gap-3 text-sm text-gray-400 transition-colors duration-200 hover:text-white">
-                      <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-300 group-hover:bg-white/20">
-                        <IconMail />
-                      </span>
-                      <span>
-                        <span className="block text-xs font-semibold uppercase tracking-wider text-white">{t.contactLabels.email}</span>
-                        contact@cjdevelopmenttc.org
-                      </span>
-                    </a>
-                  </li>
-                  <li>
-                    <div className="flex items-start gap-3">
-                      <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-300">
-                        <IconPhone />
-                      </span>
-                      <div className="text-sm text-gray-400">
-                        <span className="block text-xs font-semibold uppercase tracking-wider text-white">{t.contactLabels.drc}</span>
-                        <a href="tel:+243995136626" className="block transition-colors duration-200 hover:text-white">+243 995 136 626</a>
-                        <a href="tel:+243999482140" className="block transition-colors duration-200 hover:text-white">+243 999 482 140</a>
-                      </div>
-                    </div>
-                  </li>
-                  <li>
-                    <div className="flex items-start gap-3">
-                      <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-300">
-                        <IconPhone />
-                      </span>
-                      <div className="text-sm text-gray-400">
-                        <span className="block text-xs font-semibold uppercase tracking-wider text-white">{t.contactLabels.guinea}</span>
-                        <a href="tel:+224626146065" className="block transition-colors duration-200 hover:text-white">+224 626 14 60 65</a>
-                      </div>
-                    </div>
-                  </li>
-                  <li>
-                    <a href="https://wa.me/243995136626" target="_blank" rel="noopener noreferrer"
-                      className="group flex items-center gap-3 text-sm text-gray-400 transition-colors duration-200 hover:text-white">
-                      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-300 group-hover:bg-white/20">
-                        <IconWhatsApp />
-                      </span>
-                      WhatsApp
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Newsletter */}
-              <div>
-                <SectionHeading>{t.newsletter.title}</SectionHeading>
-                <p className="mb-4 text-sm text-gray-400">{t.newsletter.description}</p>
-                <div className="flex flex-col gap-2">
-                  <input
-                    type="email"
-                    placeholder={t.newsletter.placeholder}
-                    className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder-gray-500 transition-colors duration-200 focus:border-white/40 focus:bg-white/15 focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    className="w-full rounded-xl bg-[var(--cj-red)] px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 hover:shadow-lg"
-                  >
-                    {t.newsletter.button}
-                  </button>
-                </div>
-                <div className="mt-5">
-                  <SocialRow />
-                </div>
-              </div>
-
             </div>
           </div>
         </div>

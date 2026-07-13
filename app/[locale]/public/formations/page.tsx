@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -293,7 +293,7 @@ export default function FormationsPage() {
         case "rating":
           return b.rating - a.rating;
         case "newest":
-          return new Date(b.nextSession) - new Date(a.nextSession);
+          return new Date(b.nextSession || 0).getTime() - new Date(a.nextSession || 0).getTime();
         default:
           return b.students - a.students;
       }
@@ -344,8 +344,7 @@ export default function FormationsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+      <header className="hero-bg-unified">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <Link
@@ -356,7 +355,7 @@ export default function FormationsPage() {
               <span>Retour à l'accueil</span>
             </Link>
 
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
               Nos
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-blue-200">
                 {" "}

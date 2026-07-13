@@ -6,8 +6,6 @@ import {
   AlertTriangle,
   ArrowRight,
   BadgeCheck,
-  BellRing,
-  BookOpenCheck,
   CalendarClock,
   CheckCircle2,
   FileStack,
@@ -20,7 +18,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -53,19 +50,15 @@ type DashboardPayload = {
   totals: {
     sessions: number
     students: number
-    paymentsConfirmed: number
     submissionsPending: number
     certificatesIssued: number
     notificationsRecent: number
   }
   summary: {
-    expectedRevenue: number
-    collectedRevenue: number
     averageFillRate: number
     attendanceRate: number
     pendingCorrections: number
     certificatesReady: number
-    paymentConversionRate: number
     accountConversionRate: number
   }
   reports: {
@@ -77,13 +70,6 @@ type DashboardPayload = {
         fillRate: number
         availableSeats: number
         waitlistCount: number
-      }>
-    }
-    revenue: {
-      trend: Array<{
-        label: string
-        expected: number
-        collected: number
       }>
     }
     conversion: {
@@ -140,14 +126,6 @@ type DashboardPayload = {
   alerts: AlertRow[]
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('fr-FR', {
     dateStyle: 'medium',
@@ -161,8 +139,6 @@ function severityTone(severity: AlertRow['severity']) {
   if (severity === 'medium') return 'primary' as const
   return 'neutral' as const
 }
-
-const fillColors = ['#002d72', '#0f4fae', '#4a78c8', '#93b2e6', '#e30613']
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<DashboardPayload | null>(null)
@@ -237,13 +213,12 @@ export default function AdminDashboardPage() {
     )
   }
 
-  const topSessions = data.reports.fillRate.sessions.slice(0, 6)
   const actions = [
     {
       title: 'Etudiants bloques',
       count: data.actionsNow.studentsBlockedWithoutAccount.length,
       href: '/admin/students',
-      helper: 'Paiement solde mais compte non cree.',
+      helper: 'Inscription validée mais compte non créé.',
     },
     {
       title: 'Travaux en attente',
@@ -285,7 +260,7 @@ export default function AdminDashboardPage() {
           href="/admin/enrollments"
         />
         <AdminMetricCard
-          icon={BookOpenCheck}
+          icon={BadgeCheck}
           label="Taux de présence"
           value={`${data.summary.attendanceRate}%`}
           helper={`Remplissage moyen : ${data.summary.averageFillRate}% sur les sessions suivies.`}

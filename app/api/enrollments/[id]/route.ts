@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { resolveAppBaseUrl } from '@/lib/email'
@@ -21,7 +21,7 @@ export async function PUT(
     const resolvedParams = await params
     const enrollmentId = Number(resolvedParams.id)
     const body = await req.json()
-    const { status, reason, notes, paymentStatus, action } = body
+    const { status, reason, notes, action } = body
 
     if (!Number.isFinite(enrollmentId)) {
       return NextResponse.json({ error: "Identifiant d'inscription invalide" }, { status: 400 })
@@ -32,7 +32,6 @@ export async function PUT(
       include: {
         formation: true,
         session: true,
-        payments: true,
       },
     })
 
@@ -62,7 +61,7 @@ export async function PUT(
 
       const updatedEnrollment = await prisma.enrollment.findUnique({
         where: { id: enrollment.id },
-        include: { formation: true, session: true, payments: true },
+        include: { formation: true, session: true },
       })
 
       return NextResponse.json({
@@ -99,10 +98,9 @@ export async function PUT(
       where: { id: enrollmentId },
       data: {
         ...(status ? { status } : {}),
-        ...(paymentStatus ? { paymentStatus } : {}),
         ...(notes !== undefined ? { notes } : {}),
       },
-      include: { formation: true, session: true, payments: true },
+      include: { formation: true, session: true },
     })
 
     return NextResponse.json(updated)

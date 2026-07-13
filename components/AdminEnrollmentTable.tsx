@@ -10,18 +10,6 @@ import {
   adminSecondaryButtonClassName,
 } from '@/components/admin-portal/ui'
 
-type Payment = {
-  id: number
-  amount: number
-  method: string
-  status: string
-  reference: string | null
-  transactionId: string | null
-  paidAt: string | null
-  createdAt: string
-  notes: string | null
-}
-
 type EnrollmentAccount = {
   state: string
   label: string
@@ -41,13 +29,9 @@ export interface EnrollmentRow {
   address?: string
   startDate: string
   status: string
-  paymentStatus: string
-  totalAmount: number
-  paidAmount: number
   createdAt: string
   motivationLetter?: string
   notes?: string
-  payments?: Payment[]
   account?: EnrollmentAccount
   formation: {
     id: number
@@ -68,14 +52,6 @@ interface AdminEnrollmentTableProps {
   enrollments: EnrollmentRow[]
   groupBy: 'formation' | 'date'
   onPreview?: (enrollment: EnrollmentRow) => void
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(amount || 0)
 }
 
 function enrollmentStatusTone(status: string) {
@@ -101,26 +77,6 @@ function enrollmentStatusLabel(status: string) {
     completed: 'Terminee',
     waitlist: 'Liste attente',
     cancelled: 'Annulee',
-  }
-
-  return map[status] || status
-}
-
-function paymentStatusTone(status: string) {
-  const map: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> = {
-    paid: 'success',
-    partial: 'warning',
-    unpaid: 'danger',
-  }
-
-  return map[status] || 'neutral'
-}
-
-function paymentStatusLabel(status: string) {
-  const map: Record<string, string> = {
-    paid: 'Solde',
-    partial: 'Partiel',
-    unpaid: 'Non solde',
   }
 
   return map[status] || status
@@ -165,14 +121,13 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
         {Object.entries(byFormation)
           .sort(([, a], [, b]) => b.length - a.length || a[0].formation.title.localeCompare(b[0].formation.title))
           .map(([formationId, rows]) => {
-            const soldCount = rows.filter((row) => row.paymentStatus === 'paid').length
             const activeAccounts = rows.filter((row) => row.account?.state === 'active').length
             return (
               <AdminPanel key={formationId}>
                 <AdminPanelHeader
                   eyebrow="Groupe formation"
                   title={rows[0]?.formation.title || 'Formation'}
-                  description={`${rows.length} inscription(s), ${soldCount} paiement(s) soldes et ${activeAccounts} compte(s) actif(s).`}
+                  description={`${rows.length} inscription(s) et ${activeAccounts} compte(s) actif(s).`}
                   actions={<AdminBadge tone="primary">{rows.length} dossiers</AdminBadge>}
                 />
 
@@ -183,7 +138,6 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Participant</th>
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Contact</th>
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Session</th>
-                        <th className="px-4 py-3 text-left font-semibold text-slate-600">Paiement</th>
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Compte etudiant</th>
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Dossier</th>
                         <th className="px-4 py-3 text-left font-semibold text-slate-600">Inscription</th>
@@ -220,16 +174,6 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                             <p className="mt-1 text-xs text-slate-500">{enrollment.session?.location || '-'}</p>
                           </td>
                           <td className="px-4 py-4">
-                            <p className="font-semibold text-slate-900">
-                              {formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)}
-                            </p>
-                            <div className="mt-2">
-                              <AdminBadge tone={paymentStatusTone(enrollment.paymentStatus)}>
-                                {paymentStatusLabel(enrollment.paymentStatus)}
-                              </AdminBadge>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
                             {enrollment.account ? (
                               <div className="space-y-2">
                                 <AdminBadge tone={enrollment.account.tone}>{enrollment.account.label}</AdminBadge>
@@ -241,7 +185,7 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                           </td>
                           <td className="px-4 py-4">
                             <AdminBadge tone={enrollmentStatusTone(enrollment.status)}>
-                              {enrollmentStatusLabel(enrollment.status)}
+                                {enrollmentStatusLabel(enrollment.status)}
                             </AdminBadge>
                           </td>
                           <td className="px-4 py-4 text-slate-700">
@@ -310,9 +254,6 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                         <p className="text-base font-semibold text-slate-950">
                           {enrollment.firstName} {enrollment.lastName}
                         </p>
-                        <AdminBadge tone={paymentStatusTone(enrollment.paymentStatus)}>
-                          {paymentStatusLabel(enrollment.paymentStatus)}
-                        </AdminBadge>
                         <AdminBadge tone={enrollmentStatusTone(enrollment.status)}>
                           {enrollmentStatusLabel(enrollment.status)}
                         </AdminBadge>
@@ -327,7 +268,6 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                           <MapPinIcon className="h-3.5 w-3.5" />
                           {enrollment.session?.location || 'Aucun lieu'}
                         </span>
-                        <span>{formatCurrency(enrollment.paidAmount)} / {formatCurrency(enrollment.totalAmount)}</span>
                         {enrollment.account?.username ? <span>ID: {enrollment.account.username}</span> : null}
                       </div>
                     </div>

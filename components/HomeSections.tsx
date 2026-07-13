@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
@@ -27,13 +27,13 @@ const valuesData = {
       icon: '◆',
       title: 'Leadership utile',
       description:
-        'Nos formations ciblent des profils capables de décider, d'agir et de faire avancer leurs équipes dans des contextes africains et globaux.',
+        "Nos formations ciblent des profils capables de décider, d'agir et de faire avancer leurs équipes dans des contextes africains et globaux.",
     },
     {
       icon: '◆',
       title: 'Impact social mesurable',
       description:
-        'Chaque promotion vise un résultat concret : insertion, promotion, création d'entreprise ou renforcement institutionnel.',
+        "Chaque promotion vise un résultat concret : insertion, promotion, création d'entreprise ou renforcement institutionnel.",
     },
   ],
   en: [

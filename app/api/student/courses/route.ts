@@ -123,7 +123,6 @@ export async function GET(request: NextRequest) {
       location: enrollment.session?.location || null,
       format: enrollment.session?.format || null,
       status: enrollment.status,
-      paymentStatus: enrollment.paymentStatus,
       resourcesCount: relatedDocuments.length,
     }
   })

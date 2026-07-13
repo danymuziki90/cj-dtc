@@ -96,10 +96,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers,
-  session: { strategy: 'jwt', maxAge: 30 * 24 * 60 * 60 },
+  session: { strategy: 'jwt' as const, maxAge: 30 * 24 * 60 * 60 },
   pages: {
     signIn: '/fr/auth/login',
-    signUp: '/fr/auth/register',
     error: '/fr/auth/error',
   },
   callbacks: {

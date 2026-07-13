@@ -75,15 +75,14 @@ export default function FormationsPage() {
   return (
     <div className="min-h-screen bg-slate-50">
 
-      {/* ═══ HERO ═══ */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-[var(--cj-blue)] via-[#0B3A8E] to-[#001B47] text-white">
+      <header className="hero-bg-unified">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <span className="inline-block rounded-full border border-white/25 bg-white/10 px-5 py-1.5 text-xs font-semibold uppercase tracking-widest text-blue-100 mb-6">
             {isFr ? 'Catalogue officiel' : 'Official catalog'} · CJ Development Training Center
           </span>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-6">
+          <h1 className="hero-title-unified mb-6">
             {isFr ? 'Formations' : 'Training Programs'}
-            <span className="block text-[var(--cj-red)]">
+            <span className="block">
               {isFr ? '& Sessions ouvertes' : '& Open Sessions'}
             </span>
           </h1>

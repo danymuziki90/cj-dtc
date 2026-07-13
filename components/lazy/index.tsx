@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
+import Image from 'next/image'
 
 // Composant lazy loading pour les images
 export const LazyImage: React.FC<{
@@ -49,7 +50,7 @@ export const LazyImage: React.FC<{
           <div className="animate-pulse bg-gray-200 rounded-lg" style={{ width, height }}></div>
         </div>
       )}
-      <img
+      <Image
         src={src}
         alt={alt}
         className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`}
@@ -72,7 +73,6 @@ export const LazyVideo: React.FC<{
   src: string
   className?: string
   poster?: string
-  className?: string
   autoPlay?: boolean
   muted?: boolean
   loop?: boolean
@@ -101,7 +101,7 @@ export const LazyVideo: React.FC<{
       loop={loop}
       controls={controls}
       preload={preload}
-      onLoaded={handleLoad}
+      onLoadedData={handleLoad}
     >
       <source src={src} type="video/mp4" />
       Votre navigateur ne supporte pas cette vidéo.

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import {
@@ -243,6 +243,9 @@ const initialForm = {
   name: '',
   email: '',
   sessionId: '',
+  manualCredentials: false,
+  username: '',
+  password: '',
 }
 
 const initialPagination: PaginationState = {

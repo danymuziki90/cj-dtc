@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '../../../../lib/prisma'
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       totalInscriptions,
       pendingInscriptions,
       completedInscriptions,
-      totalRevenue
+      totalCertificates
     ] = await Promise.all([
       // Total des étudiants uniques
       prisma.enrollment.groupBy({
@@ -91,16 +91,13 @@ export async function GET(req: NextRequest) {
         }
       }),
       
-      // Revenu total (simulation)
-      prisma.enrollment.aggregate({
+      // Certificats émis
+      prisma.certificate.count({
         where: {
-          status: 'completed',
-          createdAt: {
+          verified: true,
+          issuedAt: {
             gte: startDate
           }
-        },
-        _sum: {
-          totalAmount: true
         }
       })
     ])
@@ -162,10 +159,10 @@ export async function GET(req: NextRequest) {
         color: 'bg-blue-100'
       },
       {
-        title: 'Revenu total',
-        value: `${totalRevenue._sum.totalAmount || 0}$`,
-        icon: '💰',
-        color: 'bg-red-100'
+        title: 'Certificats émis',
+        value: totalCertificates,
+        icon: '🏆',
+        color: 'bg-green-100'
       }
     ]
 

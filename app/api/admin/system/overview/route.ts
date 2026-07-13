@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request)
   if (auth.error) return auth.error
 
-  const [sessions, studentsCount, paymentsSuccessCount, paymentsPendingCount, submissions, certificatesCount, newsCount] =
+  const [sessions, studentsCount, submissions, certificatesCount, newsCount] =
     await Promise.all([
       prisma.trainingSession.findMany({
         select: {
@@ -26,20 +26,6 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.student.count(),
-      prisma.payment.count({
-        where: {
-          status: {
-            in: ['success', 'completed'],
-          },
-        },
-      }),
-      prisma.payment.count({
-        where: {
-          status: {
-            in: ['pending'],
-          },
-        },
-      }),
       prisma.studentSubmission.groupBy({
         by: ['status'],
         _count: {
@@ -75,8 +61,6 @@ export async function GET(request: NextRequest) {
       sessions: sessions.length,
       students: studentsCount,
       availableSpots: totalAvailableSpots,
-      paymentsConfirmed: paymentsSuccessCount,
-      paymentsPending: paymentsPendingCount,
       submissions: submissions.reduce((sum, row) => sum + row._count.status, 0),
       submissionsPending: submissionsByStatus.pending || 0,
       submissionsValidated: submissionsByStatus.approved || 0,

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import type { Metadata } from 'next'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import EntreprisesClientPage from './EntreprisesClientPage'
 

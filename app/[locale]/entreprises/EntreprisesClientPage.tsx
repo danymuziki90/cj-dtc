@@ -257,14 +257,7 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
   return (
     <div className="min-h-screen bg-white">
 
-      {/* ════════════════════════════════════════
-          1. HERO
-      ════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#001B47] via-[var(--cj-blue)] to-[#0B3A8E]">
-        {/* Dot-grid */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.06]"
-          style={{ backgroundImage: 'radial-gradient(circle,#fff 1px,transparent 1px)', backgroundSize: '32px 32px' }} />
-
+      <section className="hero-bg-unified">
         <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-36">
           <div className="max-w-3xl">
             <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-100">

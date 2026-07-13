@@ -95,7 +95,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Student not found.' }, { status: 404 })
   }
 
-  const enrollments = await prisma.enrollment.findMany({
+  const enrollments = (await prisma.enrollment.findMany({
     where: {
       email: {
         equals: student.email,
@@ -129,19 +129,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           submittedAt: true,
         },
       },
-      payments: {
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          amount: true,
-          method: true,
-          status: true,
-          reference: true,
-          transactionId: true,
-          paidAt: true,
-          createdAt: true,
-        },
-      },
       attendances: {
         orderBy: { date: 'desc' },
         select: {
@@ -163,7 +150,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         },
       },
     },
-  })
+  })) as any[]
 
   const enrollmentIds = enrollments.map((item) => item.id)
   const sessionIds = Array.from(new Set(enrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value))))
@@ -212,19 +199,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }),
   ])
 
-  const payments = enrollments.flatMap((enrollment) =>
-    enrollment.payments.map((payment) => ({
-      ...payment,
-      enrollmentId: enrollment.id,
-      formationTitle: enrollment.formation.title,
-      sessionLabel: enrollment.session
-        ? `${new Date(enrollment.session.startDate).toLocaleDateString('fr-FR')} - ${enrollment.session.location || 'En ligne'}`
-        : 'Sans session',
-    }))
-  )
+  const payments: any[] = []
 
   const attendance = enrollments.flatMap((enrollment) =>
-    enrollment.attendances.map((entry) => ({
+    enrollment.attendances.map((entry: any) => ({
       ...entry,
       enrollmentId: enrollment.id,
       formationTitle: enrollment.formation.title,
@@ -276,8 +254,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     overview: {
       totalEnrollments: enrollments.length,
       activeEnrollments: enrollments.filter((item) => ['pending', 'accepted', 'confirmed'].includes(item.status)).length,
-      settledEnrollments: enrollments.filter((item) => item.paymentStatus === 'paid').length,
-      pendingPayments: payments.filter((item) => item.status === 'pending').length,
+      settledEnrollments: 0,
+      pendingPayments: 0,
       submissionsCount: student.portalSubmissions.length,
       certificatesCount: student.portalCertificates.length + issuedCertificates.length,
       notificationsCount: notifications.length,
@@ -286,9 +264,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     enrollments: enrollments.map((enrollment) => ({
       id: enrollment.id,
       status: enrollment.status,
-      paymentStatus: enrollment.paymentStatus,
-      paidAmount: enrollment.paidAmount,
-      totalAmount: enrollment.totalAmount,
       createdAt: enrollment.createdAt,
       startDate: enrollment.startDate,
       formation: enrollment.formation,

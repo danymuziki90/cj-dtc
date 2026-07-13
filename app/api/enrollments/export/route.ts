@@ -35,9 +35,6 @@ async function enrichEnrollmentsWithAccount(enrollments: Array<any>) {
     const student = studentByEmail.get(normalizeEmail(enrollment.email)) || null
     const account = deriveEnrollmentAccountState({
       enrollmentStatus: enrollment.status,
-      paymentStatus: enrollment.paymentStatus,
-      paidAmount: enrollment.paidAmount,
-      totalAmount: enrollment.totalAmount,
       student,
     })
 
@@ -66,7 +63,6 @@ export async function GET(req: NextRequest) {
     const where: any = {}
     if (status) where.status = status
     if (formationId) where.formationId = parseInt(formationId)
-    if (paymentStatus) where.paymentStatus = paymentStatus
     if (startDateFrom || startDateTo) {
       where.startDate = {}
       if (startDateFrom) where.startDate.gte = new Date(startDateFrom)

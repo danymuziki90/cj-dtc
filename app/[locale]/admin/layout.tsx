@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export default function AdminLayout({
   children,
@@ -9,6 +10,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data: session } = useSession();
 
   const navigation = [
     { name: "Tableau de bord", href: "/admin/dashboard", icon: "📊" },
@@ -25,6 +27,10 @@ export default function AdminLayout({
     { name: "Soumissions", href: "/admin/submissions", icon: "📁" },
     { name: "Certificats", href: "/admin/certificates", icon: "🎓" },
     { name: "Soutenances", href: "/admin/defenses", icon: "🎯" },
+    { name: "Demandes B2B", href: "/admin/b2b", icon: "🏢" },
+    { name: "Contacts", href: "/admin/contacts", icon: "📞" },
+    { name: "Témoignages", href: "/admin/testimonials", icon: "💬" },
+    { name: "FAQ", href: "/admin/faq", icon: "❓" },
     { name: "Rapports", href: "/admin/reports", icon: "📈" },
     { name: "Paramètres", href: "/admin/settings", icon: "⚙️" },
   ];

@@ -173,11 +173,7 @@ export default function AboutModernPage({
         <Breadcrumbs items={[{ label: nav.about }]} homeHref={homeHref} />
 
         {/* ── S1 : Qui nous sommes ─────────────────────────────────────── */}
-        <section className="relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#02142f_0%,#002d72_50%,#0c4da2_100%)] px-8 py-12 text-white shadow-2xl sm:px-10 lg:px-12 lg:py-16">
-          {/* Déco */}
-          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-[var(--cj-red)]/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 left-8 h-56 w-56 rounded-full bg-white/5 blur-3xl" />
-
+        <section className="hero-bg-unified rounded-3xl px-8 py-12 shadow-2xl sm:px-10 lg:px-12 lg:py-16">
           <div className="relative grid gap-10 lg:grid-cols-[1fr_380px] lg:items-start">
             {/* Gauche */}
             <div>

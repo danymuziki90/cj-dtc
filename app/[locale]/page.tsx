@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import RecentSessions from '../../components/RecentSessions'
 import RecentArticles from '../../components/RecentArticles'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
@@ -19,6 +20,8 @@ const institutionalProofs = [
   { value: '50+',    labelFr: 'Promotions actives', labelEn: 'Active sessions' },
 ]
 
+const FALLBACK_IMAGES = ["/lor-de-formation.jpeg", "/books-wood.jpg", "/apropos.jpeg"]
+
 export default function HomePage() {
   const params = useParams<{ locale?: string }>()
   const locale = resolveSiteLocale(params?.locale)
@@ -27,19 +30,138 @@ export default function HomePage() {
 
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
 
+  // Image Carousel state & settings
+  const [images, setImages] = useState<string[]>(FALLBACK_IMAGES)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Fetch images from directory API
+  useEffect(() => {
+    let active = true
+    fetch('/api/hero-images')
+      .then(res => res.json())
+      .then(data => {
+        if (active && Array.isArray(data) && data.length > 0) {
+          setImages(data)
+        }
+      })
+      .catch(err => console.error("Error fetching hero images:", err))
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const startAutoplay = useCallback(() => {
+    stopAutoplay()
+    autoplayTimerRef.current = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length)
+    }, 6000) // Transition every 6 seconds
+  }, [images.length])
+
+  const stopAutoplay = useCallback(() => {
+    if (autoplayTimerRef.current) {
+      clearInterval(autoplayTimerRef.current)
+      autoplayTimerRef.current = null
+    }
+  }, [])
+
+  const resetAutoplayWithDelay = useCallback(() => {
+    stopAutoplay()
+    if (interactionTimeoutRef.current) {
+      clearTimeout(interactionTimeoutRef.current)
+    }
+    // Resume autoplay after 8 seconds of user inactivity
+    interactionTimeoutRef.current = setTimeout(() => {
+      startAutoplay()
+    }, 8000)
+  }, [startAutoplay, stopAutoplay])
+
+  useEffect(() => {
+    startAutoplay()
+    return () => {
+      stopAutoplay()
+      if (interactionTimeoutRef.current) {
+        clearTimeout(interactionTimeoutRef.current)
+      }
+    }
+  }, [startAutoplay, stopAutoplay])
+
+  const handlePrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
+    resetAutoplayWithDelay()
+  }, [images.length, resetAutoplayWithDelay])
+
+  const handleNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % images.length)
+    resetAutoplayWithDelay()
+  }, [images.length, resetAutoplayWithDelay])
+
+  const handleSelect = useCallback((index: number) => {
+    setCurrentIndex(index)
+    resetAutoplayWithDelay()
+  }, [resetAutoplayWithDelay])
+
   return (
     <div>
-      {/* ── Hero institutionnel ───────────────────────────────────────────── */}
-      <section className="relative min-h-[85vh] bg-gradient-to-br from-[#001B47] via-[#002D72] to-[#0A192F] overflow-hidden pt-28 pb-16">
-        {/* Abstract background shapes */}
-        <div className="absolute inset-0 z-0 opacity-20">
-          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-blue-500 blur-3xl" />
-          <div className="absolute top-1/2 -left-20 w-80 h-80 rounded-full bg-red-600 blur-3xl" />
-          {/* Subtle grid pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]" />
+      <section className="hero-bg-unified relative min-h-[85vh] pt-28 pb-16 overflow-hidden flex items-center">
+        {/* Background slideshow */}
+        <div className="absolute inset-0 z-0 select-none overflow-hidden">
+          {images.map((src, index) => (
+            <div
+              key={src}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+              }`}
+            >
+              <Image
+                src={src}
+                alt={`Hero Slide ${index + 1}`}
+                fill
+                priority={index === 0}
+                className={`object-cover ${index === currentIndex ? 'animate-kenburns' : ''}`}
+                sizes="100vw"
+              />
+            </div>
+          ))}
+          {/* Dark Overlay semi-transparent to ensure text readability */}
+          <div className="absolute inset-0 bg-black/60 z-20" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Directional navigation arrows (Desktop only for clean UX) */}
+        <button
+          onClick={handlePrev}
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-md transition-all duration-300 hover:bg-white/15 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/20 hidden md:flex"
+          aria-label={isFr ? "Image précédente" : "Previous image"}
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </button>
+        <button
+          onClick={handleNext}
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-md transition-all duration-300 hover:bg-white/15 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/20 hidden md:flex"
+          aria-label={isFr ? "Image suivante" : "Next image"}
+        >
+          <ChevronRight className="h-6 w-6" />
+        </button>
+
+        {/* Carousel indicators (dots) */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handleSelect(index)}
+              className={`h-2 rounded-full transition-all duration-300 focus:outline-none ${
+                index === currentIndex 
+                  ? 'w-6 bg-[var(--cj-red)]' 
+                  : 'w-2 bg-white/40 hover:bg-white/60'
+              }`}
+              aria-label={isFr ? `Aller à l'image ${index + 1}` : `Go to image ${index + 1}`}
+              aria-current={index === currentIndex ? 'true' : 'false'}
+            />
+          ))}
+        </div>
+
+        <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
             {/* Colonne gauche (Texte & Actions) */}
             <div className="lg:col-span-7 space-y-6">
@@ -50,7 +172,7 @@ export default function HomePage() {
               </div>
 
               {/* Titre */}
-              <h1 className="text-4xl font-black leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl font-montserrat">
+              <h1 className="hero-title-unified">
                 {t.heroTitle}
               </h1>
 
@@ -79,27 +201,31 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Colonne droite (Image réelle) */}
-            <div className="lg:col-span-5 relative">
-              <div className="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-blue-500/30 to-red-500/20 blur-xl opacity-80" />
-              <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-slate-900/50 p-2.5 backdrop-blur-md shadow-2xl">
-                <Image
-                  src="/lor-de-formation.jpeg"
-                  alt="CJ DTC — Graduation et formation certifiante réelle"
-                  width={600}
-                  height={450}
-                  className="h-[300px] w-full rounded-2xl object-cover sm:h-[380px] shadow-inner transition duration-500 hover:scale-[1.03]"
-                  priority={true}
-                />
-                
-                {/* Floating validation badge */}
-                <div className="absolute -bottom-4 -left-4 rounded-2xl border border-white/20 bg-slate-900/90 p-4 shadow-xl backdrop-blur-md flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-xl font-bold">
+            {/* Colonne droite (Glassmorphism validation badge) */}
+            <div className="lg:col-span-5 relative flex items-center justify-center min-h-[200px] lg:min-h-0">
+              <div className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md shadow-2xl transition duration-500 hover:scale-[1.02] max-w-sm hover:border-white/20">
+                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-tr from-blue-500/20 to-red-500/10 blur-lg opacity-50 pointer-events-none" />
+                <div className="relative space-y-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 text-2xl font-bold shadow-inner">
                     ✓
                   </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-blue-200 font-bold">{isFr ? "Preuve d'impact" : "Impact Proof"}</p>
-                    <p className="text-sm font-semibold text-white">{isFr ? "Certification reconnue" : "Recognized credential"}</p>
+                  <div className="space-y-1">
+                    <span className="inline-block rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                      {isFr ? "Vérifié" : "Verified"}
+                    </span>
+                    <h3 className="text-lg font-bold text-white leading-snug">
+                      {isFr ? "Certification Professionnelle" : "Professional Certification"}
+                    </h3>
+                    <p className="text-xs text-blue-200/80 leading-relaxed font-opensans">
+                      {isFr 
+                        ? "CJ DTC délivre des certifications vérifiables, adossées à des parcours réels et à une validation rigoureuse des acquis."
+                        : "CJ DTC issues verifiable certifications backed by real-world courses and rigorous validation of learning."
+                      }
+                    </p>
+                  </div>
+                  <div className="border-t border-white/10 pt-3 flex items-center justify-between text-[11px] font-semibold text-blue-100/90 font-opensans">
+                    <span>{isFr ? "Preuve d'impact" : "Impact Proof"}</span>
+                    <span className="text-[var(--cj-red)] font-bold">{isFr ? "Réseau Panafricain" : "Pan-African Network"}</span>
                   </div>
                 </div>
               </div>

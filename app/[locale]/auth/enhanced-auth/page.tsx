@@ -32,7 +32,7 @@ export default function EnhancedAuthPage() {
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
-  const { success, error } = useToastNotification()
+  const { success, error, info } = useToastNotification()
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}

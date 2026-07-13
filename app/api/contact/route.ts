@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { sendEmail } from '../../../lib/email'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(req: Request) {
   try {
@@ -20,6 +21,17 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
+
+    // Save contact message in DB
+    await prisma.contactMessage.create({
+      data: {
+        name: body.name,
+        email: body.email,
+        subject: body.subject,
+        message: body.message,
+        status: 'unread'
+      }
+    })
 
     // Send email using existing email service
     const emailHtml = `

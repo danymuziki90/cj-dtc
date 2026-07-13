@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -162,9 +162,8 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+    <div className="min-h-screen bg-gray-50">
+      <header className="hero-bg-unified">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <Link
@@ -175,7 +174,7 @@ export default function ContactPage() {
               <span>Retour à l'accueil</span>
             </Link>
 
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
               Contactez
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-blue-200">
                 {" "}

@@ -53,12 +53,12 @@ import {
 } from '@/lib/certificates/qr-code/simple'
 import {
   generateCertificatePDF,
-  downloadCertificatePDF,
-  printCertificatePDF,
-  shareCertificatePDF,
-  emailCertificatePDF,
-  generateBatchCertificatesPDF,
-  generateCertificateStatsPDF,
+  downloadCertificatePDF as downloadCertificatePDFService,
+  printCertificatePDF as printPDFService,
+  shareCertificatePDF as sharePDFService,
+  emailCertificatePDF as emailPDFService,
+  generateBatchCertificatesPDF as generateBatchPDFService,
+  generateCertificateStatsPDF as generateStatsPDFService,
   certificateTemplates
 } from '@/lib/certificates/pdf/services'
 
@@ -75,6 +75,17 @@ interface Certificate {
   issuedBy: string | null
   verified: boolean
   userId: string | null
+  status?: string
+  uniqueId?: string
+  studentEmail?: string
+  studentName?: string
+  formationTitle?: string
+  formationCategorie?: string
+  grade?: string
+  completionDate?: string
+  certificateUrl?: string
+  createdAt?: string
+  revokedAt?: string
 }
 
 // Formation mock data (would come from API)
@@ -92,9 +103,12 @@ export default function AdminCertificatesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [formData, setFormData] = useState({
     holderName: '',
+    studentEmail: '',
     formationId: 1,
     type: 'COMPLETION',
-    issuedAt: ''
+    issuedAt: '',
+    grade: '',
+    completionDate: ''
   })
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all')
@@ -270,8 +284,8 @@ export default function AdminCertificatesPage() {
 
   const downloadCertificatePDF = async (certificate: Certificate, template: string = 'classic') => {
     try {
-      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate, template)
-      downloadCertificatePDF(pdfData, `certificat-${certificate.code}.pdf`)
+      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate as any, template)
+      downloadCertificatePDFService(pdfData, `certificat-${certificate.code}.pdf`)
     } catch (error) {
       console.error('Erreur lors du téléchargement du PDF:', error)
       alert('Erreur lors du téléchargement du PDF')
@@ -280,8 +294,8 @@ export default function AdminCertificatesPage() {
 
   const printCertificatePDF = async (certificate: Certificate, template: string = 'classic') => {
     try {
-      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate, template)
-      printCertificatePDF(pdfData)
+      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate as any, template)
+      printPDFService(pdfData)
     } catch (error) {
       console.error('Erreur lors de l\'impression du PDF:', error)
       alert('Erreur lors de l\'impression du PDF')
@@ -290,8 +304,8 @@ export default function AdminCertificatesPage() {
 
   const shareCertificatePDF = async (certificate: Certificate) => {
     try {
-      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate)
-      await shareCertificatePDF(pdfData, certificate)
+      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate as any)
+      await sharePDFService(pdfData, certificate as any)
     } catch (error) {
       console.error('Erreur lors du partage du PDF:', error)
       alert('Erreur lors du partage du PDF')
@@ -300,8 +314,8 @@ export default function AdminCertificatesPage() {
 
   const emailCertificatePDF = async (certificate: Certificate) => {
     try {
-      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate)
-      emailCertificatePDF(pdfData, certificate)
+      const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate as any)
+      emailPDFService(pdfData, certificate as any)
     } catch (error) {
       console.error('Erreur lors de l\'envoi du PDF par email:', error)
       alert('Erreur lors de l\'envoi du PDF par email')
@@ -311,10 +325,10 @@ export default function AdminCertificatesPage() {
   const generateBatchCertificatesPDF = async () => {
     try {
       const selectedCertificatesData = certificates.filter(c => selectedCertificatesForBatch.includes(c.id))
-      const formations = mockFormations
+      const formations = mockFormations as any
       
-      const batchPdf = await generateBatchCertificatesPDF(selectedCertificatesData, formations)
-      downloadCertificatePDF(batchPdf, `certificats-batch-${Date.now()}.pdf`)
+      const batchPdf = await generateBatchPDFService(selectedCertificatesData as any[], formations)
+      downloadCertificatePDFService(batchPdf, `certificats-batch-${Date.now()}.pdf`)
       
       alert(`${selectedCertificatesForBatch.length} certificats générés avec succès!`)
       setSelectedCertificatesForBatch([])
@@ -327,9 +341,9 @@ export default function AdminCertificatesPage() {
 
   const generateStatsPDF = async () => {
     try {
-      const formations = mockFormations
-      const statsPdf = await generateCertificateStatsPDF(certificates, formations)
-      downloadCertificatePDF(statsPdf, `stats-certificats-${Date.now()}.pdf`)
+      const formations = mockFormations as any
+      const statsPdf = await generateStatsPDFService(certificates as any[], formations)
+      downloadCertificatePDFService(statsPdf, `stats-certificats-${Date.now()}.pdf`)
       
       alert('Rapport de statistiques généré avec succès!')
     } catch (error) {
@@ -430,9 +444,12 @@ export default function AdminCertificatesPage() {
         setCertificates(prev => [newCertificate, ...prev])
         setShowCreateForm(false)
         setFormData({
+          holderName: '',
           studentEmail: '',
           formationId: 1,
-          grade: 0,
+          type: 'COMPLETION',
+          issuedAt: '',
+          grade: '',
           completionDate: ''
         })
       }
@@ -629,8 +646,8 @@ export default function AdminCertificatesPage() {
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                     <span>👤 {certificate.studentName}</span>
                     <span>📅 {certificate.studentEmail}</span>
-                    <span>📅 {new Date(certificate.completionDate).toLocaleDateString('fr-FR')}</span>
-                    <span>📊 Note: <span className={`font-bold ${getGradeColor(certificate.grade)}`}>{certificate.grade}/20</span></span>
+                    <span>📅 {new Date(certificate.completionDate || 0).toLocaleDateString('fr-FR')}</span>
+                    <span>📊 Note: <span className={`font-bold ${getGradeColor(parseFloat(certificate.grade || '0'))}`}>{certificate.grade}/20</span></span>
                   </div>
                 </div>
                 
@@ -653,7 +670,7 @@ export default function AdminCertificatesPage() {
                   </div>
                   <div>
                     <span className="text-gray-600">Date de génération:</span>
-                    <p className="font-medium">{new Date(certificate.createdAt).toLocaleDateString('fr-FR')}</p>
+                    <p className="font-medium">{new Date(certificate.createdAt || 0).toLocaleDateString('fr-FR')}</p>
                   </div>
                   <div>
                     <span className="text-gray-600">Délivré par:</span>
@@ -695,8 +712,8 @@ export default function AdminCertificatesPage() {
                   onClick={() => {
                     // Simuler le téléchargement
                   const link = document.createElement('a')
-                  link.href = certificate.certificateUrl
-                  link.download = `certificat-${certificate.uniqueId}.pdf`
+                  link.href = certificate.certificateUrl || '#'
+                  link.download = `certificat-${certificate.uniqueId || ''}.pdf`
                   document.body.appendChild(link)
                   link.click()
                   document.body.removeChild(link)
@@ -715,7 +732,7 @@ export default function AdminCertificatesPage() {
                 <button
                   onClick={() => {
                     // Simuler la vérification
-                    navigator.clipboard.writeText(certificate.uniqueId)
+                    navigator.clipboard.writeText(certificate.uniqueId || '')
                     alert('Code de vérification copié dans le presse-papiers!')
                   }}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -837,7 +854,7 @@ export default function AdminCertificatesPage() {
                     type="number"
                     id="grade"
                     value={formData.grade}
-                    onChange={(e) => setFormData(prev => ({ ...prev, grade: Number(e.target.value) }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, grade: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                     max="20"
@@ -932,7 +949,7 @@ export default function AdminCertificatesPage() {
                     <p className="text-lg text-gray-700 mb-2">
                       <strong>Avec la note de</strong>
                     </p>
-                    <p className={`text-3xl font-bold ${getGradeColor(selectedCertificate.grade)}`}>
+                    <p className={`text-3xl font-bold ${getGradeColor(parseFloat(selectedCertificate.grade || '0'))}`}>
                       {selectedCertificate.grade}/20
                     </p>
                   </div>
@@ -941,7 +958,7 @@ export default function AdminCertificatesPage() {
                     <div>
                       <p>Date de complétion</p>
                       <p className="font-medium">
-                        {new Date(selectedCertificate.completionDate).toLocaleDateString('fr-FR')}
+                        {new Date(selectedCertificate.completionDate || 0).toLocaleDateString('fr-FR')}
                       </p>
                     </div>
                     <div className="text-right">
@@ -959,8 +976,8 @@ export default function AdminCertificatesPage() {
                     onClick={() => {
                       // Simuler le téléchargement
                       const link = document.createElement('a')
-                      link.href = selectedCertificate.certificateUrl
-                      link.download = `certificat-${selectedCertificate.uniqueId}.pdf`
+                      link.href = selectedCertificate.certificateUrl || '#'
+                      link.download = `certificat-${selectedCertificate.uniqueId || ''}.pdf`
                       document.body.appendChild(link)
                       link.click()
                       document.body.removeChild(link)

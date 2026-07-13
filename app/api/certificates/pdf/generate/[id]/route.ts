@@ -44,8 +44,13 @@ export async function POST(
       )
     }
 
+    const certificateData = {
+      ...certificate,
+      issuedAt: certificate.issuedAt.toISOString()
+    } as any
+
     // Validate certificate data
-    const validation = validateCertificatePDFData(certificate)
+    const validation = validateCertificatePDFData(certificateData)
     if (!validation.isValid) {
       return NextResponse.json(
         { 
@@ -64,11 +69,19 @@ export async function POST(
 
     // Get formation data
     let formation = null
-    if (certificate.formationId) {
+    if (certificateData.formationId) {
       formation = await prisma.formation.findUnique({
-        where: { id: certificate.formationId }
+        where: { id: certificateData.formationId }
       })
     }
+    const formationData = formation ? {
+      id: formation.id,
+      title: formation.title,
+      description: formation.description,
+      category: formation.categorie || '',
+      duration: formation.duree || '',
+      objectives: formation.objectifs ? [formation.objectifs] : []
+    } as any : null
 
     // Generate QR code if requested
     let qrCodeImage = null
@@ -76,7 +89,7 @@ export async function POST(
       try {
         // Import QR code generation
         const { generateCertificateQRCodeDisplay } = await import('@/lib/certificates/qr-code/simple')
-        qrCodeImage = await generateCertificateQRCodeDisplay(certificate)
+        qrCodeImage = await generateCertificateQRCodeDisplay(certificateData)
       } catch (error) {
         console.error('Error generating QR code for PDF:', error)
         // Continue without QR code if generation fails
@@ -88,15 +101,15 @@ export async function POST(
     try {
       if (template !== 'classic') {
         pdfBase64 = await generateCertificateWithTemplate(
-          certificate,
-          formation,
+          certificateData,
+          formationData,
           template as 'classic' | 'modern' | 'elegant',
           qrCodeImage || undefined
         )
       } else {
         pdfBase64 = await generateCertificatePDF(
-          certificate,
-          formation,
+          certificateData,
+          formationData,
           qrCodeImage || undefined
         )
       }
@@ -195,19 +208,32 @@ export async function GET(
       )
     }
 
+    const certificateData = {
+      ...certificate,
+      issuedAt: certificate.issuedAt.toISOString()
+    } as any
+
     // Get formation data
     let formation = null
-    if (certificate.formationId) {
+    if (certificateData.formationId) {
       formation = await prisma.formation.findUnique({
-        where: { id: certificate.formationId }
+        where: { id: certificateData.formationId }
       })
     }
+    const formationData = formation ? {
+      id: formation.id,
+      title: formation.title,
+      description: formation.description,
+      category: formation.categorie || '',
+      duration: formation.duree || '',
+      objectives: formation.objectifs ? [formation.objectifs] : []
+    } as any : null
 
     // Generate QR code
     let qrCodeImage = null
     try {
       const { generateCertificateQRCodeDisplay } = await import('@/lib/certificates/qr-code/simple')
-      qrCodeImage = await generateCertificateQRCodeDisplay(certificate)
+      qrCodeImage = await generateCertificateQRCodeDisplay(certificateData)
     } catch (error) {
       console.error('Error generating QR code for PDF:', error)
     }
@@ -216,8 +242,8 @@ export async function GET(
     let pdfBase64: string
     try {
       pdfBase64 = await generateCertificatePDF(
-        certificate,
-        formation,
+        certificateData,
+        formationData,
         qrCodeImage || undefined
       )
     } catch (error) {

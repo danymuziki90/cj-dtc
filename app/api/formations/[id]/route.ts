@@ -83,22 +83,13 @@ export async function GET(
       .filter(s => new Date(s.startDate) > now && s.status === 'ouverte')
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())[0]
 
-    // Prix
-    const sessionPrices = formation.sessions
-      .filter(s => s.price > 0)
-      .map(s => s.price)
-    
-    const price = sessionPrices.length > 0 
-      ? Math.min(...sessionPrices)
-      : undefined
-    
-    const originalPrice = sessionPrices.length > 1
-      ? Math.max(...sessionPrices)
-      : undefined
+    // Prix supprimé (gratuit ou piloté hors paiement)
+    const price = 0
+    const originalPrice = undefined
 
     // Instructeur principal
     const instructor = nextSession?.instructors?.[0]?.instructor || 
-                      formation.sessions[0]?.instructors?.[0]?.instructor
+                       formation.sessions[0]?.instructors?.[0]?.instructor
 
     // Sessions disponibles
     const availableSessions = formation.sessions
@@ -109,7 +100,7 @@ export async function GET(
         endDate: s.endDate.toISOString(),
         location: s.location || 'À définir',
         format: s.format,
-        price: s.price,
+        price: 0,
         maxParticipants: s.maxParticipants,
         currentParticipants: s.currentParticipants,
         status: s.status,
@@ -127,7 +118,7 @@ export async function GET(
         endDate: nextSession.endDate.toISOString(),
         location: nextSession.location || 'À définir',
         format: nextSession.format,
-        price: nextSession.price,
+        price: 0,
         maxParticipants: nextSession.maxParticipants,
         currentParticipants: nextSession.currentParticipants,
         status: nextSession.status,
@@ -135,7 +126,7 @@ export async function GET(
       } : undefined,
       sessions: availableSessions,
       price,
-      originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
+      originalPrice: undefined,
       instructor: instructor ? {
         id: instructor.id.toString(),
         firstName: instructor.firstName,

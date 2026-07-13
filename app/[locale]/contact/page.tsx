@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -129,11 +129,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-slate-50">
 
       {/* ── SECTION 1 — HERO ──────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--cj-blue)] via-[#003d99] to-[#c00020] py-24">
-        {/* background grid pattern */}
-        <div className="pointer-events-none absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}
-        />
+      <section className="hero-bg-unified py-24">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             {/* Left: text + CTAs */}
@@ -142,7 +138,7 @@ export default function ContactPage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
                 {t.heroBadge}
               </span>
-              <h1 className="mt-2 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="hero-title-unified mt-2">
                 {t.heroTitle}
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
@@ -285,7 +281,7 @@ export default function ContactPage() {
                     className={`flex items-center justify-between px-6 py-4 ${i !== t.schedule.length - 1 ? 'border-b border-slate-100' : ''} ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}`}
                   >
                     <span className="text-sm font-semibold text-slate-700">{row.day}</span>
-                    <span className={`text-sm font-medium ${row.hours === 'Fermé' || row.hours === 'Closed' ? 'text-[var(--cj-red)]' : 'text-slate-900'}`}>
+                    <span className={`text-sm font-medium ${row.hours === 'Ferme' || row.hours === 'Closed' ? 'text-[var(--cj-red)]' : 'text-slate-900'}`}>
                       {row.hours}
                     </span>
                   </div>

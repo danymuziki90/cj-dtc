@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
   const now = new Date()
   const studentEmail = auth.student.email
 
-  const [enrollments, submissions, portalCertificates, issuedCertificates, news, evaluations, userProfile] =
+  const [enrollmentsRaw, submissions, portalCertificates, issuedCertificates, news, evaluations, userProfile] =
     await Promise.all([
       prisma.enrollment.findMany({
         where: { email: studentEmail },
@@ -57,7 +57,6 @@ export async function GET(request: NextRequest) {
               endDate: true,
               location: true,
               format: true,
-              price: true,
               status: true,
               prerequisites: true,
               maxParticipants: true,
@@ -140,6 +139,7 @@ export async function GET(request: NextRequest) {
       }),
     ])
 
+  const enrollments = enrollmentsRaw as any[]
   const formationIds = Array.from(new Set(enrollments.map((item) => item.formationId)))
   const sessionIds = Array.from(
     new Set(enrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value)))

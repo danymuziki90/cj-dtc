@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import type { ProgramSessionType } from '@/lib/programmes/session-types'
@@ -13,18 +13,6 @@ import {
   adminSecondaryButtonClassName,
   adminTextareaClassName,
 } from '@/components/admin-portal/ui'
-
-type Payment = {
-  id: number
-  amount: number
-  method: string
-  status: string
-  reference: string | null
-  transactionId: string | null
-  notes: string | null
-  paidAt: string | null
-  createdAt: string
-}
 
 type EnrollmentAccount = {
   state: string
@@ -45,10 +33,6 @@ type Enrollment = {
   address?: string
   startDate: string
   status: string
-  paymentStatus: string
-  totalAmount: number
-  paidAmount: number
-  paymentMethod?: string | null
   createdAt: string
   motivationLetter?: string
   notes?: string
@@ -65,7 +49,6 @@ type Enrollment = {
     format: string
     maxParticipants: number
   } | null
-  payments?: Payment[]
   account?: EnrollmentAccount
 }
 
@@ -226,21 +209,7 @@ const SESSION_FIELDS: Record<ProgramSessionType, DisplaySection[]> = {
   ],
 }
 
-const METHOD_LABELS: Record<string, string> = {
-  mobile_money: 'Mobile Money',
-  card: 'Carte bancaire',
-  bank_transfer: 'Virement bancaire',
-  cash: 'Especes',
-  check: 'Cheque',
-}
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  }).format(amount || 0)
-}
 
 function normalizeFormType(value: unknown): ProgramSessionType | null {
   if (value === 'MRH' || value === 'IOP' || value === 'CONFERENCE_FORUM') {
@@ -306,22 +275,7 @@ function parseEnrollmentNotes(notes?: string) {
   }
 }
 
-function parsePaymentNotes(notes: string | null) {
-  const parsed = parseJsonObject(notes)
-  if (!parsed) return {}
 
-  return {
-    gateway: typeof parsed.gateway === 'string' ? parsed.gateway : null,
-    operator: typeof parsed.operator === 'string' ? parsed.operator : null,
-    phoneNumberMasked: typeof parsed.phoneNumberMasked === 'string' ? parsed.phoneNumberMasked : null,
-    proofUrl:
-      typeof parsed.proofUrl === 'string'
-        ? parsed.proofUrl
-        : typeof parsed.paymentProofUrl === 'string'
-        ? parsed.paymentProofUrl
-        : null,
-  }
-}
 
 function buildKnownFields(sections: DisplaySection[]) {
   return new Set(sections.flatMap((section) => section.fields.map((field) => field.key)))
@@ -334,11 +288,7 @@ function inferTypeFromEnrollment(enrollment: Enrollment): ProgramSessionType {
   })
 }
 
-function sortPayments(payments: Payment[] | undefined) {
-  return [...(payments || [])].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-}
+
 
 function enrollmentStatusTone(status: string): 'warning' | 'success' | 'danger' | 'neutral' | 'primary' {
   if (status === 'accepted') return 'success'

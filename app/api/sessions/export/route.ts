@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
         session.format,
         session.currentParticipants.toString(),
         session.maxParticipants.toString(),
-        session.price.toString(),
+        '0',
         session.status,
         session.enrollments.map(e => `${e.firstName} ${e.lastName} (${e.email})`).join('; ')
       ])
@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
         session.format,
         session.currentParticipants.toString(),
         session.maxParticipants.toString(),
-        session.price.toString(),
+        '0',
         session.status,
         session.enrollments.map(e => `${e.firstName} ${e.lastName} (${e.email})`).join('; ')
       ])

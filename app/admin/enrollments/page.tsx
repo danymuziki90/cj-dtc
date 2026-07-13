@@ -34,7 +34,6 @@ type PaginationState = {
 const initialFilters = {
   status: '',
   formationId: '',
-  paymentStatus: '',
   accountStatus: '',
   startDateFrom: '',
   startDateTo: '',
@@ -53,9 +52,7 @@ const initialPagination: PaginationState = {
 const emptyStats: EnrollmentStatsSummary = {
   total: 0,
   byStatus: {},
-  byPaymentStatus: { unpaid: 0, partial: 0, paid: 0 },
   byAccountStatus: {},
-  revenue: { totalAmount: 0, paidAmount: 0 },
   byFormation: [],
 }
 

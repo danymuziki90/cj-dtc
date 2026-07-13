@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
 import { deriveEnrollmentAccountState, provisionStudentAccountFromEnrollment } from '../../../lib/student/account-provisioning'
 import { resolveAppBaseUrl, sendEmail } from '../../../lib/email'
@@ -62,9 +62,7 @@ async function findStudentsForEmails(emails: string[]) {
   })
 }
 
-async function attachEnrollmentAccountState<T extends { email: string; status: string; paymentStatus: string; paidAmount: number; totalAmount: number }>(
-  enrollments: T[],
-) {
+async function attachEnrollmentAccountState(enrollments: any[]) {
   const students = await findStudentsForEmails(enrollments.map((enrollment) => enrollment.email))
   const studentByEmail = new Map(students.map((student) => [normalizeEmail(student.email), student]))
 
@@ -72,9 +70,6 @@ async function attachEnrollmentAccountState<T extends { email: string; status: s
     const student = studentByEmail.get(normalizeEmail(enrollment.email)) || null
     const account = deriveEnrollmentAccountState({
       enrollmentStatus: enrollment.status,
-      paymentStatus: enrollment.paymentStatus,
-      paidAmount: enrollment.paidAmount,
-      totalAmount: enrollment.totalAmount,
       student,
     })
 
@@ -89,32 +84,16 @@ async function attachEnrollmentAccountState<T extends { email: string; status: s
   })
 }
 
-function buildEnrollmentStatsFromRows(
-  rows: Array<{
-    status: string
-    paymentStatus: string
-    paidAmount: number
-    totalAmount: number
-    formation: { id: number; title: string }
-    account?: { state: string } | null
-  }>,
-) {
+function buildEnrollmentStatsFromRows(rows: any[]) {
   const byStatus: Record<string, number> = {}
-  const byPaymentStatus: Record<string, number> = {}
   const byAccountStatus: Record<string, number> = {}
   const byFormation = new Map<number, { id: number; title: string; count: number }>()
-  let totalAmount = 0
-  let paidAmount = 0
 
   for (const row of rows) {
     byStatus[row.status] = (byStatus[row.status] || 0) + 1
-    byPaymentStatus[row.paymentStatus] = (byPaymentStatus[row.paymentStatus] || 0) + 1
     if (row.account?.state) {
       byAccountStatus[row.account.state] = (byAccountStatus[row.account.state] || 0) + 1
     }
-
-    totalAmount += row.totalAmount || 0
-    paidAmount += row.paidAmount || 0
 
     const existingFormation = byFormation.get(row.formation.id)
     if (existingFormation) {
@@ -131,12 +110,7 @@ function buildEnrollmentStatsFromRows(
   return {
     total: rows.length,
     byStatus,
-    byPaymentStatus,
     byAccountStatus,
-    revenue: {
-      totalAmount,
-      paidAmount,
-    },
     byFormation: Array.from(byFormation.values()).sort((left, right) => right.count - left.count),
   }
 }
@@ -146,9 +120,6 @@ async function buildEnrollmentStats(where: EnrollmentWhere) {
     where,
     select: {
       status: true,
-      paymentStatus: true,
-      paidAmount: true,
-      totalAmount: true,
       email: true,
       formation: {
         select: {
@@ -179,22 +150,6 @@ const enrollmentInclude = {
       location: true,
       format: true,
       maxParticipants: true,
-    },
-  },
-  payments: {
-    select: {
-      id: true,
-      amount: true,
-      method: true,
-      status: true,
-      reference: true,
-      transactionId: true,
-      paidAt: true,
-      createdAt: true,
-      notes: true,
-    },
-    orderBy: {
-      createdAt: 'desc' as const,
     },
   },
 }
@@ -322,10 +277,8 @@ export async function POST(req: Request) {
     }
 
     // Depuis la refonte 2026 : tout étudiant qui s'inscrit est immédiatement actif.
-    // Il n'y a plus d'étape de validation manuelle par l'admin.
     let status = 'confirmed'
     let onWaitlist = false
-    let totalAmount = 0
 
     if (sessionId) {
       const session = await prisma.trainingSession.findUnique({
@@ -346,17 +299,14 @@ export async function POST(req: Request) {
 
       const currentEnrollments = session.enrollments.length
       const isFull = currentEnrollments >= session.maxParticipants
-      totalAmount = session.price || 0
 
       if (isFull) {
         status = 'waitlist'
         onWaitlist = true
       }
-      // Toutes les sessions non pleines → confirmed directement (payantes ou gratuites)
     }
 
     const normalizedEmail = String(email).trim().toLowerCase()
-    // Provisioning immédiat pour toutes les inscriptions confirmées (pas seulement gratuites)
     const immediateAccessEnrollment = !onWaitlist && Boolean(sessionId)
     const registrationDate = new Date()
 
@@ -372,9 +322,6 @@ export async function POST(req: Request) {
         sessionId: sessionId ? parseInt(sessionId) : null,
         startDate: registrationDate,
         status,
-        paymentStatus: 'unpaid',
-        totalAmount,
-        paidAmount: 0,
       },
       include: {
         formation: {
@@ -439,7 +386,7 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json()
-    const { enrollmentId, status, paymentStatus, notes } = body
+    const { enrollmentId, status, notes } = body
 
     if (!enrollmentId || !status) {
       return NextResponse.json(
@@ -467,7 +414,6 @@ export async function PATCH(req: Request) {
       where: { id: parseInt(enrollmentId) },
       data: {
         status,
-        ...(paymentStatus && { paymentStatus }),
         ...(notes && { notes }),
       },
       include: {
@@ -497,7 +443,6 @@ export async function PATCH(req: Request) {
               <p>Prochaines etapes:</p>
               <ul>
                 <li>Confirmation de votre participation</li>
-                <li>Effectuer le paiement si necessaire</li>
                 <li>Recevoir les details d'acces a la plateforme</li>
               </ul>
             `,
@@ -568,26 +513,6 @@ export async function PATCH(req: Request) {
       }
     }
 
-    if (paymentStatus === 'unpaid' && oldEnrollment.paymentStatus !== 'unpaid') {
-      try {
-        await sendEmail({
-          to: enrollment.email,
-          subject: `Rappel: Paiement requis pour ${enrollment.formation.title}`,
-          html: `
-            <h2>Rappel de paiement</h2>
-            <p>Bonjour ${enrollment.firstName},</p>
-            <p>Nous avons remarque que le paiement pour votre inscription a <strong>${enrollment.formation.title}</strong> est requis.</p>
-            <div style="margin: 20px 0; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b;">
-              <p><strong>Montant a payer:</strong> $${(enrollment.totalAmount - enrollment.paidAmount).toLocaleString()}</p>
-            </div>
-            <p>Veuillez nous contacter pour effectuer le paiement.</p>
-          `,
-        })
-      } catch (error) {
-        console.error('Erreur envoi rappel paiement:', error)
-      }
-    }
-
     return NextResponse.json(enrollment)
   } catch (error) {
     console.error('Update enrollment error:', error)
@@ -597,8 +522,3 @@ export async function PATCH(req: Request) {
     )
   }
 }
-
-
-
-
-

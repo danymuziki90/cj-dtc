@@ -307,17 +307,6 @@ model Enrollment {
   motivationLetter    String?
   notes               String?
 
-  // Suivi des paiements
-  paymentStatus       String   @default("unpaid") // unpaid, partial, paid
-  totalAmount         Float    @default(0)
-  paidAmount          Float    @default(0)
-  paymentMethod       String?  // card, bank_transfer, check, cash
-  paymentDate         DateTime?
-  invoiceNumber       String?  @unique
-  
-  // Relations
-  payments            Payment[]
-  invoices            Invoice[]
   waitlist            Waitlist[]
   attendances         Attendance[]
 
@@ -351,7 +340,6 @@ model Enrollment {
   @@index([email])
   @@index([startDate])
   @@index([status])
-  @@index([paymentStatus])
   @@index([source])
 }
 
@@ -367,7 +355,6 @@ model TrainingSession {
   format            String      @map("mode") // presentiel, distanciel, hybride
   maxParticipants   Int         @default(25)
   currentParticipants Int       @default(0)
-  price             Float       @default(0)
   status            String      @default("ouverte") // ouverte, fermee, complete, annulee, terminee
   description       String?
   prerequisites     String?
@@ -382,6 +369,7 @@ model TrainingSession {
   certificates      Certificate[]
   waitlist          Waitlist[]
   attendances       Attendance[]
+  events            SessionEvent[]
   @@index([formationId])
   @@index([startDate])
   @@index([status])
@@ -533,48 +521,6 @@ model Evaluation {
   @@index([overallRating])
 }
 
-model Payment {
-  id            Int       @id @default(autoincrement())
-  enrollmentId  Int
-  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  amount        Float
-  method        String    // card, mobile_money, bank_transfer, cash, check
-  status        String    @default("pending") // pending, completed, failed, refunded
-  transactionId String?   @unique
-  reference     String?   // Référence de paiement
-  notes         String?
-  paidAt        DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@index([enrollmentId])
-  @@index([status])
-  @@index([transactionId])
-  @@index([paidAt])
-}
-
-model Invoice {
-  id            Int       @id @default(autoincrement())
-  enrollmentId  Int
-  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  invoiceNumber String    @unique
-  amount        Float
-  taxAmount     Float     @default(0)
-  totalAmount   Float
-  status        String    @default("draft") // draft, sent, paid, cancelled, overdue
-  pdfUrl        String?
-  dueDate       DateTime?
-  paidDate      DateTime?
-  sentAt        DateTime?
-  notes         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@index([enrollmentId])
-  @@index([invoiceNumber])
-  @@index([status])
-  @@index([dueDate])
-}
 
 model Waitlist {
   id          Int      @id @default(autoincrement())
@@ -609,4 +555,80 @@ model Attendance {
   @@index([enrollmentId])
   @@index([date])
   @@index([status])
+}
+
+model B2BRequest {
+  id             Int      @id @default(autoincrement())
+  company        String
+  contactName    String
+  position       String?
+  email          String
+  phone          String?
+  sector         String?
+  employees      String?
+  needType       String
+  message        String?
+  status         String   @default("pending") // pending, contacted, qualified, archived
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("unread") // unread, read, replied, archived
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Testimonial {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String?
+  quote     String
+  approved  Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([approved])
+}
+
+model FAQ {
+  id        Int      @id @default(autoincrement())
+  question  String
+  answer    String
+  category  String   @default("General")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([category])
+}
+
+model SessionEvent {
+  id          Int             @id @default(autoincrement())
+  sessionId   Int
+  session     TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  date        DateTime
+  startTime   String          // ex. "09:00"
+  endTime     String          // ex. "12:00"
+  type        String          // "class", "exam", "meeting", "other"
+  location    String?         // zoom link, room number
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([sessionId])
+  @@index([date])
 }

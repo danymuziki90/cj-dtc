@@ -23,20 +23,21 @@ async function runTests() {
 
     try {
         console.log('1️⃣  Test d\'email d\'acceptation...')
-        const acceptanceResult = await sendAcceptanceEmail(testEnrollment)
+        const acceptanceResult = await sendAcceptanceEmail(testEnrollment.email, testEnrollment.formation.title)
         console.log('✅ Email d\'acceptation:', acceptanceResult)
         console.log()
 
         console.log('2️⃣  Test d\'email de rejet (avec raison)...')
         const rejectionResult = await sendRejectionEmail(
-            testEnrollment,
+            testEnrollment.email,
+            testEnrollment.formation.title,
             'Nous avons reçu trop de candidatures pour cette formation'
         )
         console.log('✅ Email de rejet:', rejectionResult)
         console.log()
 
         console.log('3️⃣  Test d\'email de rejet (sans raison)...')
-        const rejectionResultNoReason = await sendRejectionEmail(testEnrollment)
+        const rejectionResultNoReason = await sendRejectionEmail(testEnrollment.email, testEnrollment.formation.title)
         console.log('✅ Email de rejet (sans raison):', rejectionResultNoReason)
         console.log()
 

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
@@ -69,7 +69,7 @@ const LoadingOverlay: React.FC = () => {
             <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
               <div 
                 className="bg-cjblue h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min(progress, 100)}%` }}
+                style={{ width: `${Math.min(progress || 0, 100)}%` }}
               ></div>
             </div>
           )}
@@ -113,7 +113,7 @@ export const PageLoader: React.FC<{
   message = 'Chargement...', 
   children 
 }) => {
-  const { isLoading: isPageLoading } = useLoading()
+  const { isLoading: isPageLoading, setLoading } = useLoading()
 
   React.useEffect(() => {
     isPageLoading !== isLoading && setLoading(isLoading, message)

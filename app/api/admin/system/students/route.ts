@@ -1,13 +1,11 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { hashPassword } from '@/lib/auth-portal/password'
-import { resolveAppBaseUrl, sendStudentPortalAccessEmail, withEmailTimeout } from '@/lib/email'
-import { syncEnrollmentPaymentStatus } from '@/lib/payments/status'
-import { isEnrollmentPaymentSettled } from '@/lib/student/account-provisioning'
+import { withEmailTimeout, sendStudentPortalAccessEmail, resolveAppBaseUrl } from '@/lib/email'
 
 const createStudentSchema = z.object({
   name: z.string().min(3),
@@ -96,9 +94,6 @@ async function resolveEligibleEnrollmentForStudentCreation(email: string) {
     select: {
       id: true,
       status: true,
-      paymentStatus: true,
-      paidAmount: true,
-      totalAmount: true,
       createdAt: true,
       formation: {
         select: {
@@ -122,21 +117,9 @@ async function resolveEligibleEnrollmentForStudentCreation(email: string) {
     }
   }
 
-  const paymentSnapshots = await Promise.all(
-    enrollments.map(async (enrollment) => {
-      const syncedPayment = enrollment.totalAmount > 0 ? await syncEnrollmentPaymentStatus(enrollment.id) : null
-
-      return {
-        ...enrollment,
-        paymentStatus: syncedPayment?.paymentStatus || enrollment.paymentStatus,
-        paidAmount: syncedPayment?.paidAmount ?? enrollment.paidAmount,
-      }
-    }),
-  )
-
   return {
-    latestEnrollment: paymentSnapshots[0],
-    settledEnrollment: paymentSnapshots.find((enrollment) => isEnrollmentPaymentSettled(enrollment)) || null,
+    latestEnrollment: enrollments[0],
+    settledEnrollment: enrollments.find((enrollment) => enrollment.status === 'confirmed' || enrollment.status === 'completed' || enrollment.status === 'accepted') || null,
   }
 }
 
@@ -246,9 +229,6 @@ export async function GET(request: NextRequest) {
         ? {
             id: enrollment.id,
             status: enrollment.status,
-            paymentStatus: enrollment.paymentStatus,
-            paidAmount: enrollment.paidAmount,
-            totalAmount: enrollment.totalAmount,
             formationTitle: enrollment.formation.title,
             session: enrollment.session,
           }
@@ -328,12 +308,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!settledEnrollment) {
-      const paymentSnapshot = {
-        paymentStatus: latestEnrollment.paymentStatus,
-        paidAmount: latestEnrollment.paidAmount,
-        totalAmount: latestEnrollment.totalAmount,
-      }
-
       await writeAdminAuditLog({
         request,
         adminId: auth.admin.id,
@@ -341,23 +315,20 @@ export async function POST(request: NextRequest) {
         action: 'student.create.blocked',
         targetType: 'student',
         targetLabel: normalizedEmail,
-        summary: `Creation de compte etudiant bloquee pour ${normalizedEmail} : paiement non solde.`,
+        summary: `Creation de compte etudiant bloquee pour ${normalizedEmail} : inscription non validee.`,
         status: 'blocked',
         metadata: {
           email: normalizedEmail,
           adminSessionId: assignedSession?.id || null,
           enrollmentId: latestEnrollment.id,
           enrollmentStatus: latestEnrollment.status,
-          paymentStatus: paymentSnapshot.paymentStatus,
-          paidAmount: paymentSnapshot.paidAmount,
-          totalAmount: paymentSnapshot.totalAmount,
           formationTitle: latestEnrollment.formation.title,
           sessionStartDate: latestEnrollment.session?.startDate?.toISOString() || null,
           sessionLocation: latestEnrollment.session?.location || null,
         },
       })
 
-      return NextResponse.json({ error: STUDENT_PAYMENT_LOCK_MESSAGE }, { status: 409 })
+      return NextResponse.json({ error: "Le compte etudiant ne peut etre cree qu'apres validation de l'inscription." }, { status: 409 })
     }
 
     const manualUsername = parsed.data.username?.trim() ? parsed.data.username.trim().toLowerCase() : null

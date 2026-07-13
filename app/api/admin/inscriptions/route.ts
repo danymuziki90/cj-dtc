@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '../../../../lib/prisma'
+import { writeAdminAuditLog } from '@/lib/admin/audit'
 
 export async function GET(req: NextRequest) {
   try {
@@ -51,6 +52,18 @@ export async function PUT(req: NextRequest) {
       include: {
         formation: true
       }
+    })
+
+    // Write audit log
+    await writeAdminAuditLog({
+      request: req,
+      adminUsername: session.user?.email || 'Admin',
+      action: 'UPDATE_ENROLLMENT',
+      targetType: 'Enrollment',
+      targetId: String(updatedInscription.id),
+      targetLabel: `${updatedInscription.firstName} ${updatedInscription.lastName}`,
+      summary: `Mise à jour de l'inscription ID ${updatedInscription.id} au statut ${status}`,
+      metadata: { enrollmentId: updatedInscription.id, status }
     })
 
     return NextResponse.json(updatedInscription)

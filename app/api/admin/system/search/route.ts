@@ -72,7 +72,6 @@ export async function GET(request: NextRequest) {
         lastName: true,
         email: true,
         status: true,
-        paymentStatus: true,
         formation: {
           select: {
             title: true,
@@ -80,37 +79,7 @@ export async function GET(request: NextRequest) {
         },
       },
     }),
-    prisma.payment.findMany({
-      where: {
-        OR: [
-          { reference: { contains: query, mode: 'insensitive' } },
-          { transactionId: { contains: query, mode: 'insensitive' } },
-          { enrollment: { email: { contains: query, mode: 'insensitive' } } },
-          { enrollment: { formation: { title: { contains: query, mode: 'insensitive' } } } },
-        ],
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      select: {
-        id: true,
-        amount: true,
-        status: true,
-        reference: true,
-        transactionId: true,
-        enrollment: {
-          select: {
-            email: true,
-            firstName: true,
-            lastName: true,
-            formation: {
-              select: {
-                title: true,
-              },
-            },
-          },
-        },
-      },
-    }),
+    Promise.resolve([]),
   ])
 
   const payload = {
@@ -133,16 +102,10 @@ export async function GET(request: NextRequest) {
       id: item.id,
       label: `${item.firstName} ${item.lastName}`.trim(),
       subtitle: `${item.formation.title} · ${item.email}`,
-      badge: `${item.status} / ${item.paymentStatus}`,
+      badge: item.status,
       href: `/admin/enrollments?search=${encodeURIComponent(item.email)}`,
     })),
-    payments: payments.map((item) => ({
-      id: item.id,
-      label: `${item.enrollment.firstName} ${item.enrollment.lastName}`.trim(),
-      subtitle: `${item.enrollment.formation.title} · ${item.reference || item.transactionId || 'sans reference'}`,
-      badge: item.status,
-      href: `/admin/payments?search=${encodeURIComponent(item.reference || item.transactionId || item.enrollment.email)}`,
-    })),
+    payments: [],
   }
 
   return NextResponse.json({

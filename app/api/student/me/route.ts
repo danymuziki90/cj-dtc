@@ -8,7 +8,7 @@ export const runtime = "nodejs"
 
 export async function GET(req: Request) {
     try {
-        const cookieStore = cookies()
+        const cookieStore = await cookies()
         const token = cookieStore.get('student-token')?.value
 
         if (!token) {

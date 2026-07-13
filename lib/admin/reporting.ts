@@ -37,12 +37,6 @@ function resolvePeriodStart(period: ReportingPeriod) {
   return new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
 }
 
-function getAgeBucketLabel(daysOpen: number) {
-  if (daysOpen <= 7) return '0-7 jours'
-  if (daysOpen <= 30) return '8-30 jours'
-  return '31+ jours'
-}
-
 function getSeverityWeight(severity: AlertSeverity) {
   if (severity === 'critical') return 4
   if (severity === 'high') return 3
@@ -56,11 +50,6 @@ function formatPeriodLabel(period: ReportingPeriod) {
   if (period === '365d') return '12 derniers mois'
   if (period === 'all') return 'historique complet'
   return '30 derniers jours'
-}
-
-function isEnrollmentSettled(enrollment: { paidAmount: number; totalAmount: number }) {
-  if (enrollment.totalAmount <= 0) return true
-  return enrollment.paidAmount >= enrollment.totalAmount
 }
 
 function slugify(input: string) {
@@ -100,8 +89,6 @@ export type AdminReportingSnapshot = {
     notificationsRecent: number
   }
   summary: {
-    expectedRevenue: number
-    collectedRevenue: number
     averageFillRate: number
     attendanceRate: number
     pendingCorrections: number
@@ -126,16 +113,6 @@ export type AdminReportingSnapshot = {
         waitlistCount: number
         documentCount: number
         fillRate: number
-      }>
-    }
-    revenue: {
-      expected: number
-      collected: number
-      outstanding: number
-      trend: Array<{
-        label: string
-        expected: number
-        collected: number
       }>
     }
     attendance: {
@@ -209,8 +186,6 @@ export type AdminReportingSnapshot = {
         email: string
         formationTitle: string
         sessionLabel: string
-        paidAmount: number
-        totalAmount: number
       }>
     }
   }
@@ -259,8 +234,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
   const [
     sessions,
     studentsCount,
-    confirmedPaymentsCount,
-    pendingPaymentsCount,
     recentNotifications,
     portalPendingSubmissions,
     legacyPendingSubmissions,
@@ -268,7 +241,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     attendanceRows,
     certificatesCount,
     recentEnrollments,
-    outstandingEnrollments,
     endedCandidateEnrollments,
     activeEnrollmentsByFormation,
   ] = await Promise.all([
@@ -303,20 +275,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
       },
     }),
     prisma.student.count(),
-    prisma.payment.count({
-      where: {
-        status: {
-          in: ['success', 'completed', 'paid'],
-        },
-      },
-    }),
-    prisma.payment.count({
-      where: {
-        status: {
-          in: ['pending', 'processing', 'submitted'],
-        },
-      },
-    }),
     prisma.adminNotification.findMany({
       where: since ? { createdAt: { gte: since } } : undefined,
       orderBy: { createdAt: 'desc' },
@@ -418,9 +376,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
         lastName: true,
         email: true,
         status: true,
-        paymentStatus: true,
-        totalAmount: true,
-        paidAmount: true,
         createdAt: true,
         formation: {
           select: {
@@ -438,24 +393,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     }),
     prisma.enrollment.findMany({
       where: {
-        status: { notIn: ['rejected', 'cancelled'] },
-      },
-      orderBy: { createdAt: 'asc' },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        createdAt: true,
-        paymentStatus: true,
-        totalAmount: true,
-        paidAmount: true,
-        formation: { select: { title: true } },
-        session: { select: { startDate: true, location: true } },
-      },
-    }),
-    prisma.enrollment.findMany({
-      where: {
         status: { in: COMPLETED_ENROLLMENT_STATUSES },
         session: {
           endDate: { lt: now },
@@ -467,9 +404,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
         firstName: true,
         lastName: true,
         email: true,
-        paymentStatus: true,
-        totalAmount: true,
-        paidAmount: true,
         certificateIssued: true,
         formation: {
           select: {
@@ -544,23 +478,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     ? round(sessionMetrics.reduce((sum, session) => sum + session.fillRate, 0) / sessionMetrics.length)
     : 0
   const fullSessions = sessionMetrics.filter((session) => session.fillRate >= 100).length
-
-  const revenueExpected = recentEnrollments.reduce((sum, enrollment) => sum + (enrollment.totalAmount || 0), 0)
-  const revenueCollected = recentEnrollments.reduce((sum, enrollment) => sum + (enrollment.paidAmount || 0), 0)
-  const revenueOutstanding = Math.max(0, revenueExpected - revenueCollected)
-
-  const trendMap = new Map<string, { label: string; expected: number; collected: number }>()
-  for (const enrollment of recentEnrollments) {
-    const bucketDate = enrollment.session?.startDate || enrollment.createdAt
-    const label = new Intl.DateTimeFormat('fr-FR', { month: 'short', year: '2-digit' }).format(bucketDate)
-    const bucket = trendMap.get(label) || { label, expected: 0, collected: 0 }
-    bucket.expected += enrollment.totalAmount || 0
-    bucket.collected += enrollment.paidAmount || 0
-    trendMap.set(label, bucket)
-  }
-  const revenueTrend = Array.from(trendMap.values())
-
-  const agingMap = new Map<string, { label: string; count: number; amount: number }>()
 
   const attendanceTotals = attendanceRows.reduce(
     (acc, row) => {
@@ -662,7 +579,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
 
   const eligibleNotIssued = endedCandidateEnrollments
     .filter((enrollment) => !enrollment.certificateIssued)
-    .filter((enrollment) => isEnrollmentSettled(enrollment))
     .map((enrollment) => {
       const totalAttendance = enrollment.attendances.length
       const validAttendance = enrollment.attendances.filter((entry) => ATTENDED_STATUSES.has(entry.status.toLowerCase())).length
@@ -681,7 +597,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     .sort((a, b) => new Date(a.sessionEndDate).getTime() - new Date(b.sessionEndDate).getTime())
 
   const blockedWithoutAccount = recentEnrollments
-    .filter((enrollment) => isEnrollmentSettled(enrollment))
     .filter((enrollment) => !studentEmailSet.has(normalizeEmail(enrollment.email)))
     .map((enrollment) => ({
       enrollmentId: enrollment.id,
@@ -689,12 +604,8 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
       email: enrollment.email,
       formationTitle: enrollment.formation.title,
       sessionLabel: formatSessionLabel(enrollment.session?.startDate, enrollment.session?.location),
-      paidAmount: enrollment.paidAmount,
-      totalAmount: enrollment.totalAmount,
     }))
-    .sort((a, b) => b.totalAmount - a.totalAmount)
 
-  const conversionSettled = recentEnrollments.filter((enrollment) => isEnrollmentSettled(enrollment)).length
   const conversionAccounts = recentEnrollments.filter((enrollment) => studentEmailSet.has(normalizeEmail(enrollment.email))).length
 
   const waitlistToPromote = sessionMetrics
@@ -709,7 +620,7 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     }))
 
   const actionsNow = {
-    studentsBlockedWithoutAccount: blockedWithoutAccount.slice(0, 8).map(({ paidAmount, totalAmount, ...item }) => item),
+    studentsBlockedWithoutAccount: blockedWithoutAccount.slice(0, 8),
     submissionsPendingReview: submissionQueue.slice(0, 8).map(({ email, status, ...item }) => item),
     waitlistToPromote,
     certificatesToIssue: eligibleNotIssued.slice(0, 8).map(({ email, sessionEndDate, attendanceRate, ...item }) => item),
@@ -820,19 +731,15 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     totals: {
       sessions: sessions.length,
       students: studentsCount,
-      paymentsConfirmed: confirmedPaymentsCount,
       submissionsPending: portalPendingSubmissions.length + legacyPendingSubmissions.length,
       certificatesIssued: certificatesCount,
       notificationsRecent: recentNotifications.length,
     },
     summary: {
-      expectedRevenue: round(revenueExpected, 0),
-      collectedRevenue: round(revenueCollected, 0),
       averageFillRate: fillRateAverage,
       attendanceRate,
       pendingCorrections: portalPendingSubmissions.length + legacyPendingSubmissions.length,
       certificatesReady: eligibleNotIssued.length,
-      paymentConversionRate: percentage(conversionSettled, recentEnrollments.length),
       accountConversionRate: percentage(conversionAccounts, recentEnrollments.length),
     },
     reports: {
@@ -840,11 +747,6 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
         averageRate: fillRateAverage,
         fullSessions,
         sessions: sessionMetrics,
-      },
-      revenue: {
-        expected: round(revenueExpected, 0),
-        collected: round(revenueCollected, 0),
-        trend: revenueTrend,
       },
       attendance: {
         overallRate: attendanceRate,
@@ -866,13 +768,10 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
       },
       conversion: {
         totalEnrollments: recentEnrollments.length,
-        settledPayments: conversionSettled,
         studentAccounts: conversionAccounts,
-        paymentRate: percentage(conversionSettled, recentEnrollments.length),
         accountRate: percentage(conversionAccounts, recentEnrollments.length),
         stages: [
           { stage: 'Inscriptions', value: recentEnrollments.length },
-          { stage: 'Paiements soldes', value: conversionSettled },
           { stage: 'Comptes crees', value: conversionAccounts },
         ],
         blockedWithoutAccount,
@@ -882,4 +781,3 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     alerts: sortedAlerts,
   }
 }
-

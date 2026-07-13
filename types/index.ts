@@ -139,12 +139,6 @@ export interface Enrollment {
   endDate?: Date;
   expectedEndDate?: Date;
   
-  // Financial
-  totalAmount: number;
-  paidAmount: number;
-  paymentStatus: PaymentStatus;
-  paymentMethod?: string;
-  
   // Documents
   identityDocument?: string;
   cvDocument?: string;
@@ -417,84 +411,7 @@ export interface SubmissionFile {
   uploadedAt: Date;
 }
 
-// PAYMENT TYPES
-export interface Payment {
-  id: number;
-  enrollmentId: number;
-  enrollment: Enrollment;
-  
-  // Payment Details
-  amount: number;
-  currency: string;
-  method: string;
-  status: string;
-  transactionId?: string;
-  reference?: string;
-  gateway?: string;
-  
-  // Dates
-  paidAt?: Date;
-  dueDate?: Date;
-  
-  // Refunds
-  refundAmount?: number;
-  refundReason?: string;
-  refundedAt?: Date;
-  
-  // Metadata
-  notes?: string;
-  metadata?: string;
-  
-  createdAt: Date;
-  updatedAt: Date;
-}
 
-export enum PaymentStatus {
-  UNPAID = 'UNPAID',
-  PARTIAL = 'PARTIAL',
-  PAID = 'PAID',
-  OVERDUE = 'OVERDUE',
-  REFUNDED = 'REFUNDED',
-}
-
-// INVOICE TYPES
-export interface Invoice {
-  id: number;
-  enrollmentId: number;
-  enrollment: Enrollment;
-  
-  // Invoice Details
-  invoiceNumber: string;
-  amount: number;
-  taxAmount: number;
-  totalAmount: number;
-  currency: string;
-  
-  // Status
-  status: string;
-  
-  // Dates
-  issueDate: Date;
-  dueDate?: Date;
-  paidDate?: Date;
-  sentAt?: Date;
-  
-  // Documents
-  pdfUrl?: string;
-  
-  // Billing Info
-  billingName?: string;
-  billingAddress?: string;
-  billingEmail?: string;
-  billingPhone?: string;
-  
-  // Notes
-  notes?: string;
-  terms?: string;
-  
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 // ATTENDANCE TYPES
 export interface Attendance {
@@ -623,7 +540,6 @@ export interface AdminDashboard {
   stats: DashboardStats;
   recentEnrollments: Enrollment[];
   upcomingSessions: TrainingSession[];
-  pendingPayments: Payment[];
   systemAlerts: SystemAlert[];
 }
 
@@ -642,14 +558,10 @@ export interface SearchFilters {
   category?: string;
   type?: FormationType;
   status?: FormationStatus;
-  priceRange?: {
-    min: number;
-    max: number;
-  };
   duration?: string;
   format?: string;
   language?: string;
-  sortBy?: 'title' | 'price' | 'duration' | 'createdAt' | 'popularity';
+  sortBy?: 'title' | 'duration' | 'createdAt' | 'popularity';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;

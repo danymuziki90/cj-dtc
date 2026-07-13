@@ -7,7 +7,6 @@ const reportTypeSchema = z.enum([
   'students',
   'formations',
   'inscriptions',
-  'revenue',
   'fill_rate',
   'attendance',
   'submissions',
@@ -32,7 +31,7 @@ function buildReport(type: z.infer<typeof reportTypeSchema>, snapshot: AdminRepo
     return {
       id: `students-${snapshot.period}`,
       title: `Rapport etudiants - ${snapshot.periodLabel}`,
-      description: 'Suivi du passage inscription, paiement et creation de compte etudiant.',
+      description: 'Suivi du passage inscription et creation de compte etudiant.',
       type,
       generatedAt,
       preview: {
@@ -63,26 +62,13 @@ function buildReport(type: z.infer<typeof reportTypeSchema>, snapshot: AdminRepo
     return {
       id: `inscriptions-${snapshot.period}`,
       title: `Rapport inscriptions - ${snapshot.periodLabel}`,
-      description: 'Pipeline inscription, paiement et comptes crees.',
+      description: 'Pipeline inscription et comptes crees.',
       type,
       generatedAt,
       preview: {
         stages: snapshot.reports.conversion.stages,
-        paymentRate: snapshot.reports.conversion.paymentRate,
         accountRate: snapshot.reports.conversion.accountRate,
-        pendingPayments: snapshot.actionsNow.paymentsToValidate.slice(0, 5),
       },
-    }
-  }
-
-  if (type === 'revenue') {
-    return {
-      id: `revenue-${snapshot.period}`,
-      title: `Rapport financier - ${snapshot.periodLabel}`,
-      description: 'Encaissements, attendu, reste a recouvrer et anciennete des impayes.',
-      type,
-      generatedAt,
-      preview: snapshot.reports.revenue,
     }
   }
 
@@ -122,7 +108,7 @@ function buildReport(type: z.infer<typeof reportTypeSchema>, snapshot: AdminRepo
   return {
     id: `conversion-${snapshot.period}`,
     title: `Rapport conversion - ${snapshot.periodLabel}`,
-    description: 'Conversion inscription -> paiement -> compte etudiant.',
+    description: 'Conversion inscription -> compte etudiant.',
     type,
     generatedAt,
     preview: snapshot.reports.conversion,
@@ -136,7 +122,6 @@ export async function GET(request: NextRequest) {
   const snapshot = await buildAdminReportingSnapshot(parsePeriod(request.nextUrl.searchParams.get('period')))
   const reports = [
     'fill_rate',
-    'revenue',
     'attendance',
     'submissions',
     'certificates',

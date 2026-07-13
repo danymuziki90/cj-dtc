@@ -148,32 +148,10 @@ function StudentRegisterForm() {
 
   return (
     <main className="min-h-screen bg-[linear-gradient(135deg,#f8fbff_0%,#eef5ff_58%,#fff4f5_100%)] px-4 py-8">
-      <div className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-        {/* Panneau gauche */}
-        <section className="rounded-[30px] bg-[linear-gradient(135deg,#02142f_0%,#002d72_56%,#0c4da2_100%)] p-8 text-white shadow-[0_30px_90px_-40px_rgba(0,45,114,0.65)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Espace Etudiant</p>
-          <h1 className="mt-5 text-4xl font-semibold leading-tight">Creer votre compte etudiant</h1>
-          <p className="mt-4 text-sm leading-7 text-white/80">
-            Une fois le compte cree, vous accedez directement a votre tableau de bord — sans validation requise.
-          </p>
-          <ul className="mt-6 space-y-3 text-sm text-white/70">
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 text-white/40">&#10003;</span>
-              Acces immediat a vos sessions et ressources
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 text-white/40">&#10003;</span>
-              Depot et suivi de vos travaux
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 text-white/40">&#10003;</span>
-              Telechargement de vos certificats
-            </li>
-          </ul>
-        </section>
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-xl items-center justify-center">
 
         {/* Formulaire */}
-        <section className="rounded-[28px] border border-white bg-white p-6 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.45)] sm:p-8">
+        <section className="w-full rounded-[28px] border border-white bg-white p-6 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.45)] sm:p-8">
           <h2 className="text-2xl font-semibold text-slate-950">Creer un compte</h2>
           <p className="mt-2 text-sm text-slate-600">
             Les champs marques <span className="text-red-500">*</span> sont obligatoires.

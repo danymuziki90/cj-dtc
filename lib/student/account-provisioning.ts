@@ -4,7 +4,6 @@ import { prisma } from '@/lib/prisma'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
 import { hashPassword } from '@/lib/auth-portal/password'
 import { resolveAppBaseUrl, sendStudentPortalAccessEmail, withEmailTimeout } from '@/lib/email'
-import { syncEnrollmentPaymentStatus, toCanonicalPaymentStatus } from '@/lib/payments/status'
 
 export type EnrollmentAccountState =
   | 'awaiting_payment'
@@ -31,9 +30,6 @@ type AccountStateDescriptor = {
 
 type AccountStateInput = {
   enrollmentStatus: string
-  paymentStatus: string
-  paidAmount: number
-  totalAmount: number
   student?: StudentSnapshot
 }
 
@@ -47,7 +43,7 @@ type ProvisionParams = {
 
 type ProvisionResult = {
   eligible: boolean
-  reason: 'not_found' | 'waitlist' | 'payment_pending' | 'ineligible' | null
+  reason: 'not_found' | 'waitlist' | 'ineligible' | null
   accountCreated: boolean
   accountActivated: boolean
   credentials: { username: string; password: string } | null
@@ -60,9 +56,6 @@ type ProvisionResult = {
   enrollment: {
     id: number
     status: string
-    paymentStatus: string
-    paidAmount: number
-    totalAmount: number
   } | null
   accountStatus: AccountStateDescriptor | null
   notifications: {
@@ -110,14 +103,9 @@ function generateStudentNumber() {
   return `STU${Date.now().toString().slice(-8)}${randomBytes(2).toString('hex').toUpperCase()}`
 }
 
-export function isEnrollmentPaymentSettled(input: {
-  paymentStatus: string
-  paidAmount: number
-  totalAmount: number
-}) {
-  if (input.totalAmount <= 0) return true
-  if (input.paidAmount >= input.totalAmount) return true
-  return toCanonicalPaymentStatus(input.paymentStatus) === 'success'
+export function isEnrollmentPaymentSettled(input: any) {
+  // Sans module de paiement, toutes les inscriptions sont considérées comme réglées.
+  return true
 }
 
 export function deriveEnrollmentAccountState(input: AccountStateInput): AccountStateDescriptor {
@@ -144,10 +132,9 @@ export function deriveEnrollmentAccountState(input: AccountStateInput): AccountS
     }
   }
 
-  // Refonte 2026 : le statut de paiement ne bloque plus la création du compte.
+  // Refonte : le statut de paiement ne bloque plus la création du compte.
   // Tout étudiant inscrit (pending, accepted, confirmed, completed) et non en
   // liste d'attente obtient immédiatement un accès étudiant.
-  // Le champ paymentStatus reste en base pour traçabilité financière éventuelle.
 
   if (!student) {
     return {
@@ -230,15 +217,8 @@ export async function provisionStudentAccountFromEnrollment({
     }
   }
 
-  const syncedPayment =
-    enrollment.totalAmount > 0 ? await syncEnrollmentPaymentStatus(enrollment.id) : null
-  const paymentStatus = syncedPayment?.paymentStatus || enrollment.paymentStatus
-  const paidAmount = syncedPayment?.paidAmount ?? enrollment.paidAmount
-
   let currentEnrollment = {
     ...enrollment,
-    paymentStatus,
-    paidAmount,
   }
 
   const normalizedEmail = normalizeEmail(enrollment.email)
@@ -259,9 +239,6 @@ export async function provisionStudentAccountFromEnrollment({
 
   const initialAccountStatus = deriveEnrollmentAccountState({
     enrollmentStatus: currentEnrollment.status,
-    paymentStatus: currentEnrollment.paymentStatus,
-    paidAmount: currentEnrollment.paidAmount,
-    totalAmount: currentEnrollment.totalAmount,
     student: existingStudent,
   })
 
@@ -283,9 +260,6 @@ export async function provisionStudentAccountFromEnrollment({
       enrollment: {
         id: currentEnrollment.id,
         status: currentEnrollment.status,
-        paymentStatus: currentEnrollment.paymentStatus,
-        paidAmount: currentEnrollment.paidAmount,
-        totalAmount: currentEnrollment.totalAmount,
       },
       accountStatus: initialAccountStatus,
       notifications: {
@@ -313,9 +287,6 @@ export async function provisionStudentAccountFromEnrollment({
       enrollment: {
         id: currentEnrollment.id,
         status: currentEnrollment.status,
-        paymentStatus: currentEnrollment.paymentStatus,
-        paidAmount: currentEnrollment.paidAmount,
-        totalAmount: currentEnrollment.totalAmount,
       },
       accountStatus: initialAccountStatus,
       notifications: {
@@ -467,9 +438,6 @@ export async function provisionStudentAccountFromEnrollment({
         enrollmentId: currentEnrollment.id,
         formationTitle: currentEnrollment.formation.title,
         sessionId: currentEnrollment.session?.id || null,
-        paymentStatus: currentEnrollment.paymentStatus,
-        paidAmount: currentEnrollment.paidAmount,
-        totalAmount: currentEnrollment.totalAmount,
         username: student.username,
         credentialsEmailSent,
       },
@@ -478,9 +446,6 @@ export async function provisionStudentAccountFromEnrollment({
 
   const accountStatus = deriveEnrollmentAccountState({
     enrollmentStatus: currentEnrollment.status,
-    paymentStatus: currentEnrollment.paymentStatus,
-    paidAmount: currentEnrollment.paidAmount,
-    totalAmount: currentEnrollment.totalAmount,
     student,
   })
 
@@ -507,9 +472,6 @@ export async function provisionStudentAccountFromEnrollment({
     enrollment: {
       id: currentEnrollment.id,
       status: currentEnrollment.status,
-      paymentStatus: currentEnrollment.paymentStatus,
-      paidAmount: currentEnrollment.paidAmount,
-      totalAmount: currentEnrollment.totalAmount,
     },
     accountStatus,
     notifications: {
@@ -518,4 +480,3 @@ export async function provisionStudentAccountFromEnrollment({
     },
   }
 }
-

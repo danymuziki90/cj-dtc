@@ -31,10 +31,9 @@ export async function GET(
       include: {
         enrollment: {
           include: {
-            user: {
+            student: {
               select: {
                 id: true,
-                name: true,
                 email: true,
                 firstName: true,
                 lastName: true,
@@ -52,7 +51,6 @@ export async function GET(
         session: {
           select: {
             id: true,
-            title: true,
             startDate: true,
             endDate: true,
             location: true,
@@ -101,38 +99,34 @@ export async function GET(
         verified: certificate.verified,
         userId: certificate.userId,
         // User information
-        user: certificate.enrollment?.user ? {
-          id: certificate.enrollment?.user.id,
-          name: certificate.enrollment?.user.name || '',
-          email: certificate.enrollment?.user.email || '',
-          firstName: certificate.enrollment?.user.firstName || '',
-          lastName: certificate.enrollment?.lastName || '',
+        user: (certificate as any).enrollment?.student ? {
+          id: (certificate as any).enrollment?.student.id,
+          name: `${(certificate as any).enrollment?.student.firstName} ${(certificate as any).enrollment?.student.lastName}`.trim(),
+          email: (certificate as any).enrollment?.student.email || '',
+          firstName: (certificate as any).enrollment?.student.firstName || '',
+          lastName: (certificate as any).enrollment?.student.lastName || '',
         } : null,
         // Formation information
-        formation: certificate.formation ? {
-          id: certificate.formation.id,
-          title: certificate.formation.title,
-          description: certificate.formation.description,
+        formation: (certificate as any).formation ? {
+          id: (certificate as any).formation.id,
+          title: (certificate as any).formation.title,
+          description: (certificate as any).formation.description,
         } : null,
         // Session information
-        session: certificate.session ? {
-          id: certificate.session.id,
-          title: certificate.session.title,
-          startDate: certificate.session.startDate,
-          endDate: certificate.session.endDate,
-          location: certificate.session.location,
+        session: (certificate as any).session ? {
+          id: (certificate as any).session.id,
+          title: (certificate as any).formation?.title || 'Session de formation',
+          startDate: (certificate as any).session.startDate,
+          endDate: (certificate as any).session.endDate,
+          location: (certificate as any).session.location,
         } : null,
         // Enrollment information
-        enrollment: certificate.enrollment ? {
-          enrollmentCode: certificate.enrollment.enrollmentCode,
-          startDate: certificate.enrollment.startDate,
-          endDate: certificate.enrollment.endDate,
-          progress: certificate.enrollment.progress,
-          status: certificate.enrollment.status,
-          totalAmount: certificate.enrollment.totalAmount,
-          paidAmount: certificate.enrollment.paidAmount,
-          paymentStatus: certificate.enrollment.paymentStatus,
-          paymentMethod: certificate.enrollment.paymentMethod,
+        enrollment: (certificate as any).enrollment ? {
+          enrollmentCode: (certificate as any).enrollment.enrollmentCode,
+          startDate: (certificate as any).enrollment.startDate,
+          endDate: (certificate as any).enrollment.endDate,
+          progress: (certificate as any).enrollment.progress,
+          status: (certificate as any).enrollment.status,
         } : null,
         // Verification URL
         verificationUrl: `https://cjdtc.com/verification/${certificate.code}`,

@@ -480,17 +480,19 @@ export async function generateCertificateWithTemplate(
     const pageHeight = pdf.internal.pageSize.getHeight()
 
     // Apply template colors
-    pdf.setFillColor(...templateConfig.colors.background)
+    const bgColors = templateConfig.colors.background as [number, number, number]
+    const primaryColors = templateConfig.colors.primary as [number, number, number]
+    pdf.setFillColor(...bgColors)
     pdf.rect(0, 0, pageWidth, pageHeight, 'F')
 
     // Custom border based on template
-    pdf.setDrawColor(...templateConfig.colors.primary)
+    pdf.setDrawColor(...primaryColors)
     pdf.setLineWidth(3)
     pdf.rect(15, 15, pageWidth - 30, pageHeight - 30)
 
     // Header with template styling
     pdf.setFontSize(32)
-    pdf.setTextColor(...templateConfig.colors.primary)
+    pdf.setTextColor(...primaryColors)
     pdf.setFont('helvetica', 'bold')
     pdf.text('CERTIFICAT DE RÉUSSITE', pageWidth / 2, 40, { align: 'center' })
 

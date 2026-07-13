@@ -53,18 +53,9 @@ export async function GET(req: Request) {
         .filter(s => new Date(s.startDate) > now && s.status === 'ouverte')
         .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())[0]
 
-      // Calculer les prix depuis les sessions
-      const sessionPrices = formation.sessions
-        .filter(s => s.price > 0)
-        .map(s => s.price)
-      
-      const price = sessionPrices.length > 0 
-        ? Math.min(...sessionPrices)
-        : undefined
-      
-      const originalPrice = sessionPrices.length > 1
-        ? Math.max(...sessionPrices)
-        : undefined
+      // Prix supprimé (gratuit ou piloté hors paiement)
+      const price = 0
+      const originalPrice = undefined
 
       // Instructeur principal (premier instructeur de la première session)
       const instructor = nextSession?.instructors?.[0]?.instructor || 
@@ -86,13 +77,13 @@ export async function GET(req: Request) {
           endDate: nextSession.endDate.toISOString(),
           location: nextSession.location || 'À définir',
           format: nextSession.format,
-          price: nextSession.price,
+          price: 0,
           maxParticipants: nextSession.maxParticipants,
           currentParticipants: nextSession.currentParticipants,
           status: nextSession.status
         } : undefined,
         price,
-        originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
+        originalPrice: undefined,
         instructor: instructor ? {
           id: instructor.id.toString(),
           firstName: instructor.firstName,

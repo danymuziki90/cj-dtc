@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -44,6 +44,16 @@ interface Certificate {
   issuedBy: string | null
   verified: boolean
   userId: string | null
+  status?: string
+  uniqueId?: string
+  studentEmail?: string
+  studentName?: string
+  formationTitle?: string
+  formationCategorie?: string
+  grade?: string
+  completionDate?: string
+  certificateUrl?: string
+  createdAt?: string
 }
 
 export default function StudentCertificatesPage() {
@@ -305,14 +315,14 @@ export default function StudentCertificatesPage() {
                   <p className="text-gray-600 mb-2">{certificate.formationCategorie}</p>
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                     <span>👤 {certificate.studentName}</span>
-                    <span>📅 <FormattedDate date={certificate.completionDate} /></span>
-                    <span>📊 Note: <span className={`font-bold ${getGradeColor(certificate.grade)}`}>{certificate.grade}/20</span></span>
+                    <span>📅 <FormattedDate date={certificate.completionDate || ''} /></span>
+                    <span>📊 Note: <span className={`font-bold ${getGradeColor(parseFloat(certificate.grade || '0'))}`}>{certificate.grade}/20</span></span>
                   </div>
                 </div>
 
                 <div className="mt-4 sm:mt-0 text-right">
-                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(certificate.status)}`}>
-                    {getStatusLabel(certificate.status)}
+                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(certificate.status || '')}`}>
+                    {getStatusLabel(certificate.status || '')}
                   </span>
                 </div>
               </div>
@@ -329,7 +339,7 @@ export default function StudentCertificatesPage() {
                   </div>
                   <div>
                     <span className="text-gray-600">Date de génération:</span>
-                    <p className="font-medium"><FormattedDate date={certificate.createdAt} /></p>
+                    <p className="font-medium"><FormattedDate date={certificate.createdAt || ''} /></p>
                   </div>
                 </div>
               </div>
@@ -362,7 +372,7 @@ export default function StudentCertificatesPage() {
                   📥 Télécharger
                 </button>
                 <button
-                  onClick={() => setVerificationCode(certificate.uniqueId)}
+                  onClick={() => setVerificationCode(certificate.uniqueId || '')}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   🔍 Vérifier
@@ -436,7 +446,7 @@ export default function StudentCertificatesPage() {
                     <p className="text-lg text-gray-700 mb-2">
                       <strong>Avec la note de</strong>
                     </p>
-                    <p className={`text-3xl font-bold ${getGradeColor(selectedCertificate.grade)}`}>
+                    <p className={`text-3xl font-bold ${getGradeColor(parseFloat(selectedCertificate.grade || '0'))}`}>
                       {selectedCertificate.grade}/20
                     </p>
                   </div>
@@ -445,7 +455,7 @@ export default function StudentCertificatesPage() {
                     <div>
                       <p>Date de complétion</p>
                       <p className="font-medium">
-                        <FormattedDate date={selectedCertificate.completionDate} />
+                        <FormattedDate date={selectedCertificate.completionDate || ''} />
                       </p>
                     </div>
                     <div className="text-right">
@@ -468,7 +478,7 @@ export default function StudentCertificatesPage() {
                   <button
                     onClick={() => {
                       setSelectedCertificate(null)
-                      setVerificationCode(selectedCertificate.uniqueId)
+                      setVerificationCode(selectedCertificate.uniqueId || '')
                     }}
                     className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >

@@ -8,7 +8,6 @@ import {
   GraduationCap,
   LayoutDashboard,
   Award,
-  BookOpen,
   User,
 } from 'lucide-react'
 

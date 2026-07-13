@@ -19,7 +19,7 @@ async function loginAsAdmin(page: Page, request: APIRequestContext) {
 
   expect(loginResponse.ok()).toBeTruthy()
 
-  const setCookie = await loginResponse.headerValue('set-cookie')
+  const setCookie = loginResponse.headers()['set-cookie']
   const tokenMatch = setCookie?.match(/admin_token=([^;]+)/)
   expect(tokenMatch?.[1]).toBeTruthy()
 

@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       niveau: formData.get('niveau'),
       motivation: formData.get('motivation'),
       documents: JSON.parse(formData.get('documents') as string),
-      userId: session.user.id
+      userId: (session.user as any).id || (session.user as any).studentId || null
     }
 
     // Validation basique
@@ -67,6 +67,10 @@ export async function GET(req: NextRequest) {
     
     if (!session || session.user?.role !== 'student') {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
+    }
+
+    if (!session.user?.email) {
+      return NextResponse.json({ error: 'Email de session manquant' }, { status: 400 })
     }
 
     // Récupérer les inscriptions de l'étudiant

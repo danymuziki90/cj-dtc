@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -33,9 +33,9 @@ export default function VerificationPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [certificateNumber, setCertificateNumber] = useState('')
-  const [verificationResult, setVerificationResult] = useState(null)
+  const [verificationResult, setVerificationResult] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [recentVerifications, setRecentVerifications] = useState([])
+  const [recentVerifications, setRecentVerifications] = useState<any[]>([])
 
   // Mock data - would come from API
   const mockCertificate = {
@@ -133,13 +133,13 @@ export default function VerificationPage() {
     setIsLoading(false)
   }
 
-  const handleDownloadCertificate = (certificate) => {
+  const handleDownloadCertificate = (certificate: any) => {
     // In real implementation, this would download the PDF
     console.log('Downloading certificate:', certificate.certificateNumber)
     window.open(certificate.pdfUrl, '_blank')
   }
 
-  const handleShareCertificate = (certificate) => {
+  const handleShareCertificate = (certificate: any) => {
     // In real implementation, this would share the certificate
     const shareUrl = certificate.verificationUrl
     if (navigator.share) {
@@ -222,7 +222,7 @@ export default function VerificationPage() {
                 <div className="text-sm text-gray-600">Taux de réussite</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{stats.satisfactionScore}</div>
+                <div className="text-2xl font-bold text-red-600">{stats.satisfactionRate}%</div>
                 <div className="text-sm text-gray-600">Satisfaction</div>
               </div>
             </div>
@@ -437,7 +437,7 @@ export default function VerificationPage() {
                           Compétences Acquises
                         </h4>
                         <div className="flex flex-wrap gap-2">
-                          {verificationResult.certificate.skills.map((skill, index) => (
+                          {verificationResult.certificate.skills.map((skill: any, index: number) => (
                             <span
                               key={index}
                               className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"

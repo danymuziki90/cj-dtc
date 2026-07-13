@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -23,7 +23,11 @@ import {
   TrendingUp,
   BarChart3,
   Users,
-  TargetIcon
+  TargetIcon,
+  Download,
+  QrCode,
+  Smartphone,
+  Share2
 } from 'lucide-react'
 
 // QR Code services

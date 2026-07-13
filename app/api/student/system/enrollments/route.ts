@@ -77,11 +77,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Cette formation n\'est pas disponible.' }, { status: 422 })
   }
 
-  let session: { id: number; price: number; formationId: number } | null = null
+  let session: { id: number; formationId: number } | null = null
   if (sessionId) {
     session = await prisma.trainingSession.findUnique({
       where: { id: sessionId },
-      select: { id: true, price: true, formationId: true },
+      select: { id: true, formationId: true },
     })
 
     if (!session || session.formationId !== formationId) {
@@ -121,9 +121,6 @@ export async function POST(request: NextRequest) {
       sessionId: session?.id || null,
       startDate: new Date(),
       status: 'pending',
-      paymentStatus: 'unpaid',
-      totalAmount: session?.price || 0,
-      paidAmount: 0,
     },
     select: {
       id: true,

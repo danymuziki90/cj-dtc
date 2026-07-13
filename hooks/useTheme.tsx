@@ -44,10 +44,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'))
   }
 
-  const setTheme = (newTheme: Theme) => {
-    setTheme(newTheme)
-  }
-
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
@@ -94,16 +90,14 @@ export const useThemeColors = () => {
   }
 }
 
-// Hook pour les classes de thème conditionnelles
 export const useConditionalClasses = (classes: string) => {
   const { theme } = useTheme()
   
   return `${classes} ${theme === 'dark' ? 'dark' : 'light'}`
 }
 
-// Hook pour les couleurs de thème
-export const useThemeColors = () => {
-  const { colors } = useThemeColors()
+export const useThemeStyles = () => {
+  const { theme } = useTheme()
   
   return {
     text: theme === 'dark' ? 'text-gray-100' : 'text-gray-900',

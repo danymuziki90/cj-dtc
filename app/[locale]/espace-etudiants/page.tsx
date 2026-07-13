@@ -91,9 +91,7 @@ function EspaceEtudiantsContent() {
   const [submissionFile, setSubmissionFile] = useState<File | null>(null);
   const [submissionError, setSubmissionError] = useState("");
 
-  const [proofPaymentId, setProofPaymentId] = useState("");
-  const [proofFile, setProofFile] = useState<File | null>(null);
-  const [proofError, setProofError] = useState("");
+
 
   async function loadDashboard() {
     setLoading(true);
@@ -194,33 +192,7 @@ function EspaceEtudiantsContent() {
     await loadDashboard();
   }
 
-  async function submitProof(event: FormEvent) {
-    event.preventDefault();
-    setProofError("");
 
-    if (!proofFile) {
-      setProofError("Selectionnez un fichier preuve (PDF/image).");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", proofFile);
-    if (proofPaymentId) formData.append("paymentId", proofPaymentId);
-
-    const response = await fetch("/api/student/system/payments/proof", {
-      method: "POST",
-      body: formData,
-    });
-    const payload = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      setProofError(payload.error || "Echec du televersement.");
-      return;
-    }
-
-    setProofFile(null);
-    await loadDashboard();
-  }
 
   if (loading) {
     return (
@@ -360,13 +332,6 @@ function EspaceEtudiantsContent() {
       accent: "from-[#003b96] via-[var(--cj-blue)] to-[#0f172a]",
     },
     {
-      label: "Paiements valides",
-      value: metrics.successfulPayments ?? 0,
-      helper: "Transactions confirmees et prises en compte.",
-      icon: Wallet,
-      accent: "from-[var(--cj-red)] via-[#bb111d] to-[#4a0b14]",
-    },
-    {
       label: "Progression",
       value: `${completionRate}%`,
       helper: "Avancement global sur votre session en cours.",
@@ -456,9 +421,7 @@ function EspaceEtudiantsContent() {
       </header>
 
       <main className="relative z-10 mx-auto max-w-7xl space-y-8 px-4 pb-12 pt-6 sm:px-6 lg:px-8">
-        <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,#02142f_0%,#002d72_42%,#0c4da2_100%)] p-6 text-white shadow-[0_38px_110px_-45px_rgba(0,0,0,0.75)] sm:p-8">
-          <div className="pointer-events-none absolute -left-10 top-20 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-10 top-0 h-52 w-52 rounded-full bg-[rgba(227,6,19,0.20)] blur-3xl" />
+        <section className="hero-bg-unified rounded-[34px] p-6 shadow-[0_38px_110px_-45px_rgba(0,0,0,0.75)] sm:p-8">
           <div className="relative grid gap-8 xl:grid-cols-[1.5fr_0.95fr]">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
@@ -765,171 +728,7 @@ function EspaceEtudiantsContent() {
               </div>
             </SectionCard>
 
-            <SectionCard
-              eyebrow="Paiements"
-              title="Paiements et certificat"
-              description="Suivez vos transactions, envoyez un justificatif et controlez votre niveau d'eligibilite au certificat."
-              icon={Wallet}
-            >
-              <div className="grid gap-4 xl:grid-cols-[1.2fr_0.9fr]">
-                <div className="space-y-3">
-                  <div className="rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-4">
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                      <ShieldCheck className="h-4 w-4 text-[var(--cj-blue)]" />
-                      Controle des conditions
-                    </div>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-white bg-white/85 p-4">
-                        <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
-                          Paiement
-                        </p>
-                        <p
-                          className={`mt-2 text-sm font-semibold ${eligibility.paymentValidated ? "text-emerald-700" : "text-amber-600"}`}
-                        >
-                          {eligibility.paymentValidated
-                            ? "Valide"
-                            : "En attente"}
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-white bg-white/85 p-4">
-                        <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
-                          Projet
-                        </p>
-                        <p
-                          className={`mt-2 text-sm font-semibold ${eligibility.projectValidated ? "text-emerald-700" : "text-amber-600"}`}
-                        >
-                          {eligibility.projectValidated
-                            ? "Valide"
-                            : "A finaliser"}
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-white bg-white/85 p-4">
-                        <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
-                          Presence
-                        </p>
-                        <p
-                          className={`mt-2 text-sm font-semibold ${eligibility.attendanceValidated ? "text-emerald-700" : "text-amber-600"}`}
-                        >
-                          {eligibility.attendanceValidated
-                            ? "Validee"
-                            : "Non validee"}
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-white bg-white/85 p-4">
-                        <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
-                          Certificat
-                        </p>
-                        <p
-                          className={`mt-2 text-sm font-semibold ${eligibility.eligible ? "text-[var(--cj-blue)]" : "text-[var(--cj-red)]"}`}
-                        >
-                          {eligibility.eligible ? "Eligible" : "Non eligible"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
 
-                  {payments.length ? (
-                    payments.slice(0, 4).map((payment: any) => (
-                      <div
-                        key={payment.id}
-                        className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_12px_35px_-28px_rgba(15,23,42,0.45)]"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-950">
-                              {payment.formationTitle}
-                            </p>
-                            <p className="mt-1 text-sm text-slate-600">
-                              {formatCurrency(payment.amount)} via{" "}
-                              {payment.method}
-                            </p>
-                          </div>
-                          <span
-                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(payment.status)}`}
-                          >
-                            {payment.status}
-                          </span>
-                        </div>
-                        <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
-                          <span>Reference #{payment.id}</span>
-                          {payment.proofUrl ? (
-                            <a
-                              href={payment.proofUrl}
-                              className="font-semibold text-[var(--cj-blue)] underline-offset-4 hover:underline"
-                            >
-                              Telecharger la preuve
-                            </a>
-                          ) : (
-                            <span>Pas de preuve envoyee</span>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <EmptyState
-                      title="Aucun paiement enregistre"
-                      description="Vos transactions et justificatifs apparaitront ici des leur creation."
-                    />
-                  )}
-                </div>
-
-                <form
-                  onSubmit={submitProof}
-                  className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(227,6,19,0.10)] text-[var(--cj-red)]">
-                      <Upload className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">
-                        Envoyer un justificatif
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        Ajoutez votre preuve de paiement pour verification.
-                      </p>
-                    </div>
-                  </div>
-
-                  {proofError ? (
-                    <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
-                      {proofError}
-                    </p>
-                  ) : null}
-
-                  <div className="mt-5 space-y-3">
-                    <select
-                      value={proofPaymentId}
-                      onChange={(event) =>
-                        setProofPaymentId(event.target.value)
-                      }
-                      className={formFieldClassName}
-                    >
-                      <option value="">Dernier paiement (auto)</option>
-                      {payments.map((payment: any) => (
-                        <option key={payment.id} value={String(payment.id)}>
-                          #{payment.id} - {payment.formationTitle}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="file"
-                      accept="application/pdf,image/jpeg,image/png,image/webp"
-                      onChange={(event) =>
-                        setProofFile(event.target.files?.[0] || null)
-                      }
-                      className={formFieldClassName}
-                    />
-                    <button
-                      type="submit"
-                      className={`${studentPrimaryButtonClassName} w-full`}
-                    >
-                      Envoyer la preuve
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </SectionCard>
 
             <SectionCard
               eyebrow="Travaux"

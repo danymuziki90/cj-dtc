@@ -1,7 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { Award, BadgeCheck, Download, Award, ShieldCheck } from 'lucide-react'
+import {
+  Award,
+  BadgeCheck,
+  Download,
+  ShieldCheck,
+} from "lucide-react";
 import {
   StudentEmptyState,
   StudentSectionCard,

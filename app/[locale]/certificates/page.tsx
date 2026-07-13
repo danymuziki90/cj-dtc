@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -25,7 +25,10 @@ import {
   SearchIcon,
   ChevronRight,
   BarChart3,
-  TargetIcon
+  TargetIcon,
+  DownloadCloud,
+  Mail as MailIcon,
+  Flag
 } from 'lucide-react'
 import { 
   generateCertificateQRCodeDisplay, 
@@ -39,9 +42,9 @@ import {
 import {
   generateCertificatePDF,
   downloadCertificatePDF,
-  printCertificatePDF,
-  shareCertificatePDF,
-  emailCertificatePDF,
+  printCertificatePDF as printPDFService,
+  shareCertificatePDF as sharePDFService,
+  emailCertificatePDF as emailPDFService,
   certificateTemplates
 } from '@/lib/certificates/pdf/services'
 
@@ -220,7 +223,7 @@ export default function CertificatesPage() {
   const printCertificatePDF = async (certificate: Certificate, template: string = 'classic') => {
     try {
       const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate, template)
-      printCertificatePDF(pdfData)
+      printPDFService(pdfData)
     } catch (error) {
       console.error('Erreur lors de l\'impression du PDF:', error)
       alert('Erreur lors de l\'impression du PDF')
@@ -230,7 +233,7 @@ export default function CertificatesPage() {
   const shareCertificatePDF = async (certificate: Certificate) => {
     try {
       const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate)
-      await shareCertificatePDF(pdfData, certificate)
+      await sharePDFService(pdfData, certificate as any)
     } catch (error) {
       console.error('Erreur lors du partage du PDF:', error)
       alert('Erreur lors du partage du PDF')
@@ -240,7 +243,7 @@ export default function CertificatesPage() {
   const emailCertificatePDF = async (certificate: Certificate) => {
     try {
       const pdfData = pdfs[certificate.id] || await generateCertificatePDF(certificate)
-      emailCertificatePDF(pdfData, certificate)
+      emailPDFService(pdfData, certificate as any)
     } catch (error) {
       console.error('Erreur lors de l\'envoi du PDF par email:', error)
       alert('Erreur lors de l\'envoi du PDF par email')

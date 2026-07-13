@@ -134,7 +134,6 @@ export async function GET(request: NextRequest) {
         ? `${new Date(enrollment.session.startDate).toLocaleDateString('fr-FR')} - ${enrollment.session.location || 'En ligne'}`
         : 'Sans session',
       status: enrollment.status,
-      paymentStatus: enrollment.paymentStatus,
     })),
   })
 }

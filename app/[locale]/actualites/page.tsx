@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
@@ -119,11 +119,10 @@ export default function ActualitesPage() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
 
-        <section className="relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#002D72_0%,#003b96_65%,#E30613_150%)] px-6 py-10 text-white shadow-xl sm:px-8">
-          <div className="pointer-events-none absolute -right-16 -top-14 h-52 w-52 rounded-full bg-white/10 blur-3xl" />
+        <section className="hero-bg-unified rounded-3xl px-6 py-10 shadow-xl sm:px-8">
           <div className="relative">
             <p className="text-sm uppercase tracking-[0.25em] text-white/85">{t.heroEyebrow}</p>
-            <h1 className="mt-3 text-5xl font-extrabold leading-tight text-white sm:text-6xl">{t.heroTitle}</h1>
+            <h1 className="mt-3 text-3xl font-extrabold leading-tight text-white sm:text-4xl">{t.heroTitle}</h1>
             <p className="mt-3 max-w-3xl text-base text-white/90 sm:text-lg">{t.heroDescription}</p>
             <div className="mt-5 inline-flex rounded-full bg-white/12 px-4 py-2 text-sm font-medium">
               {loading ? t.loading : `${pagination.total} ${t.totalSuffix}`}

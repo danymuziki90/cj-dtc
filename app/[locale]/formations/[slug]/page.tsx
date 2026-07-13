@@ -167,7 +167,7 @@ export default function FormationDetailPage() {
               </div>
 
               {/* Titre */}
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
                 {formation.title}
               </h1>
 

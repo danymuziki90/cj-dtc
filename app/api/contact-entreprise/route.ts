@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { sendEmail } from '../../../lib/email'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
 
@@ -24,6 +25,22 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
+
+    // Save corporate request in DB
+    await prisma.b2BRequest.create({
+      data: {
+        company: body.company,
+        contactName: body.contactName,
+        position: body.position || null,
+        email: body.email,
+        phone: body.phone || null,
+        sector: body.sector || null,
+        employees: body.employees || null,
+        needType: body.needType,
+        message: body.message || null,
+        status: 'pending'
+      }
+    })
 
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;">

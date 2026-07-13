@@ -1,30 +1,17 @@
 'use client'
 
-import { BadgeCheck, CircleDollarSign, Clock3, CreditCard, Layers3, UserRoundCheck } from 'lucide-react'
+import { BadgeCheck, Clock3, Layers3, UserRoundCheck } from 'lucide-react'
 import { AdminMetricCard, AdminPanel, AdminPanelHeader, AdminBadge } from '@/components/admin-portal/ui'
 
 export type EnrollmentStatsSummary = {
   total: number
   byStatus: Record<string, number>
-  byPaymentStatus: Record<string, number>
   byAccountStatus: Record<string, number>
-  revenue: {
-    totalAmount: number
-    paidAmount: number
-  }
   byFormation: Array<{
     id: number
     title: string
     count: number
   }>
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  }).format(amount)
 }
 
 export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsSummary }) {
@@ -69,11 +56,11 @@ export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsS
         <AdminPanelHeader
           eyebrow="Distribution"
           title="Lecture rapide du portefeuille d'inscriptions"
-          description="Croisez les statuts de dossier, de paiement, de compte et le poids de chaque formation sans quitter la page."
+          description="Croisez les statuts de dossier, de compte et le poids de chaque formation sans quitter la page."
         />
 
         <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_320px]">
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Statut dossier</p>
               <div className="mt-4 flex flex-wrap gap-2">
@@ -84,28 +71,12 @@ export default function EnrollmentStats({ summary }: { summary: EnrollmentStatsS
               </div>
             </div>
             <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 px-4 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Statut paiement</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <AdminBadge tone="danger">Non soldes: {summary.byPaymentStatus?.unpaid ?? 0}</AdminBadge>
-                <AdminBadge tone="warning">Partiels: {summary.byPaymentStatus?.partial ?? 0}</AdminBadge>
-                <AdminBadge tone="success">Soldes: {summary.byPaymentStatus?.paid ?? 0}</AdminBadge>
-              </div>
-            </div>
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Statut compte</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <AdminBadge tone="warning">Paiement requis: {summary.byAccountStatus.awaiting_payment || 0}</AdminBadge>
                 <AdminBadge tone="primary">A creer: {summary.byAccountStatus.pending_creation || 0}</AdminBadge>
                 <AdminBadge tone="success">Actifs: {summary.byAccountStatus.active || 0}</AdminBadge>
                 <AdminBadge tone="danger">Suspendus: {summary.byAccountStatus.suspended || 0}</AdminBadge>
               </div>
-            </div>
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 px-4 py-4 md:col-span-2 xl:col-span-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Valeur portefeuille</p>
-              <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
-                {formatCurrency(summary.revenue.totalAmount)}
-              </p>
-              <p className="mt-2 text-sm text-slate-500">Montant theorique total des inscriptions visibles.</p>
             </div>
           </div>
 

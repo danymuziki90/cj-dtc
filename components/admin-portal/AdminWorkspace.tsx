@@ -24,6 +24,10 @@ import {
   ShieldIcon,
   Users,
   XIcon,
+  Building2,
+  Mail,
+  MessageSquare,
+  HelpCircle,
 } from 'lucide-react'
 
 type AdminWorkspaceProps = {
@@ -37,7 +41,7 @@ type NavItem = {
   icon: LucideIcon
 }
 
-// Ordre métier : Pilotage → Sessions → Étudiants → Inscriptions → Travaux → Certificats → Notifications → Actualités → Paramètres
+// Ordre métier : Pilotage → Sessions → Étudiants → Inscriptions → Travaux → Certificats → Notifications → Actualités → B2B → Contacts → Témoignages → FAQ → Paramètres
 const navItems: NavItem[] = [
   {
     href: '/admin/dashboard',
@@ -86,6 +90,30 @@ const navItems: NavItem[] = [
     label: 'Actualités',
     caption: 'Contenus et annonces',
     icon: Newspaper,
+  },
+  {
+    href: '/admin/b2b',
+    label: 'Demandes B2B',
+    caption: 'CRM et opportunités',
+    icon: Building2,
+  },
+  {
+    href: '/admin/contacts',
+    label: 'Contacts',
+    caption: 'Suivi des messages',
+    icon: Mail,
+  },
+  {
+    href: '/admin/testimonials',
+    label: 'Témoignages',
+    caption: 'Avis et modération',
+    icon: MessageSquare,
+  },
+  {
+    href: '/admin/faq',
+    label: 'FAQ',
+    caption: 'Questions fréquentes',
+    icon: HelpCircle,
   },
   {
     href: '/admin/settings',
