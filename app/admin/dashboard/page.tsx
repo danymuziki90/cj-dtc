@@ -263,7 +263,7 @@ export default function AdminDashboardPage() {
   )
 
   const quickModuleStats = [
-    { title: 'Formations', count: statsData.totalFormations, helper: 'Catalogue de formations actives', href: '/admin/sessions', icon: GraduationCap },
+    { title: 'Formations', count: statsData.totalFormations, helper: 'Catalogue de formations actives', href: '/admin/formations', icon: GraduationCap },
     { title: 'Étudiants', count: statsData.totalStudents, helper: 'Comptes et profils d\'élèves', href: '/admin/students', icon: Users },
     { title: 'Travaux', count: statsData.totalAssignments, helper: 'TP, devoirs et corrections', href: '/admin/submissions', icon: FolderKanban },
     { title: 'Actualités', count: kpiData.totals.newsPublished, helper: 'Articles de blog et annonces', href: '/admin/articles', icon: Newspaper },
@@ -338,7 +338,7 @@ export default function AdminDashboardPage() {
             value={kpiData.totals.sessionsOpen}
             helper="Cohorters de formation actives"
             tone="primary"
-            href="/admin/sessions"
+            href="/admin/formations"
           />
           <DashboardKpiCard
             icon={CalendarDays}
@@ -346,7 +346,7 @@ export default function AdminDashboardPage() {
             value={kpiData.totals.sessionsFuture}
             helper="Démarrages planifiés prochainement"
             tone="neutral"
-            href="/admin/sessions"
+            href="/admin/formations"
           />
           <DashboardKpiCard
             icon={FileStack}

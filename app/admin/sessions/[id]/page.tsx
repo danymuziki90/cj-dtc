@@ -167,8 +167,8 @@ export default function SessionDetailPage() {
             <div className="p-6">
                 <div className="text-center">
                     <p className="text-gray-500">Session non trouvée.</p>
-                    <Link href="/admin/sessions" className="text-blue-600 hover:text-blue-800">
-                        Retour à la liste
+                    <Link href="/admin/formations" className="text-blue-600 hover:text-blue-800">
+                        Retour aux formations
                     </Link>
                 </div>
             </div>
@@ -180,10 +180,10 @@ export default function SessionDetailPage() {
             {/* Header */}
             <div className="mb-6">
                 <Link
-                    href="/admin/sessions"
+                    href={`/admin/formations?formationId=${session.formationId}`}
                     className="text-blue-600 hover:text-blue-800 flex items-center mb-4"
                 >
-                    ← Retour aux sessions
+                    ← Retour à la formation
                 </Link>
                 <div className="flex justify-between items-start">
                     <div>

@@ -60,6 +60,7 @@ export default function AdminFormationsPage() {
   const [error, setError]               = useState<string | null>(null)
   const [toast, setToast]               = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
   const [sessionMgmtFormation, setSessionMgmtFormation] = useState<Formation | null>(null)
+  const [showSelectFormationForSession, setShowSelectFormationForSession] = useState(false)
 
   // ── Filters / sort ──────────────────────────────────────────────────────────
   const [search, setSearch]             = useState('')
@@ -93,6 +94,29 @@ export default function AdminFormationsPage() {
   }, [])
 
   useEffect(() => { loadFormations() }, [loadFormations])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const action = params.get('action')
+      const paramFormationId = params.get('formationId') || params.get('manageSessionsFor')
+
+      if (action === 'create-session' || params.get('createSession') === 'true') {
+        setShowSelectFormationForSession(true)
+        // Nettoyer l'URL
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, '', newUrl)
+      } else if (paramFormationId && formations.length > 0) {
+        const found = formations.find(f => f.id === Number(paramFormationId))
+        if (found) {
+          setSessionMgmtFormation(found)
+        }
+        // Nettoyer l'URL
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, '', newUrl)
+      }
+    }
+  }, [formations])
 
   function showToast(msg: string, type: 'success' | 'error' = 'success') {
     setToast({ msg, type })
@@ -596,8 +620,66 @@ export default function AdminFormationsPage() {
           formationId={sessionMgmtFormation.id}
           formationTitle={sessionMgmtFormation.title}
           onClose={() => setSessionMgmtFormation(null)}
-          onSuccess={loadFormations}
+          onSuccess={() => {
+            loadFormations()
+            showToast('Session enregistrée avec succès !', 'success')
+          }}
         />
+      )}
+
+      {showSelectFormationForSession && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between border-b pb-4 mb-4">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-blue-600" />
+                <span>Sélectionner une formation</span>
+              </h3>
+              <button
+                onClick={() => setShowSelectFormationForSession(false)}
+                className="rounded-full p-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition"
+              >
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <p className="text-sm text-slate-500 mb-4">
+              Veuillez sélectionner la formation pour laquelle vous souhaitez créer ou gérer une session.
+            </p>
+
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {formations.length === 0 ? (
+                <p className="text-center text-sm text-slate-400 py-8">Aucune formation disponible.</p>
+              ) : (
+                formations.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => {
+                      setSessionMgmtFormation(f)
+                      setShowSelectFormationForSession(false)
+                    }}
+                    className="w-full text-left p-3.5 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all flex items-center justify-between group"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-slate-900 text-sm group-hover:text-blue-700 transition truncate">{f.title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5 truncate">{f.description}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition shrink-0 ml-2" />
+                  </button>
+                ))
+              )}
+            </div>
+
+            <div className="mt-6 border-t pt-4 flex justify-end">
+              <button
+                onClick={() => setShowSelectFormationForSession(false)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

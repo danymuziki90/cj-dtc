@@ -262,6 +262,7 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
         currentParticipants: true,
         formation: {
           select: {
+            id: true,
             title: true,
           },
         },
@@ -460,6 +461,7 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     return {
       sessionId: session.id,
       formationTitle: session.formation.title,
+      formationId: session.formation.id,
       startDate: session.startDate.toISOString(),
       endDate: session.endDate.toISOString(),
       location: session.location || null,
@@ -614,6 +616,7 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     .map((session) => ({
       sessionId: session.sessionId,
       formationTitle: session.formationTitle,
+      formationId: session.formationId,
       sessionLabel: formatSessionLabel(new Date(session.startDate), session.location),
       availableSeats: session.availableSeats,
       waitlistCount: session.waitlistCount,
@@ -645,7 +648,7 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
       title: `Session imminente: ${session.formationTitle}`,
       message: `Demarrage le ${new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(new Date(session.startDate))} avec ${session.occupiedSeats}/${session.maxParticipants} places occupees.`,
       actionLabel: 'Voir la session',
-      actionHref: `/admin/sessions#session-${session.sessionId}`,
+      actionHref: `/admin/formations?formationId=${session.formationId}`,
       createdAt: session.startDate,
     })
   }
@@ -697,7 +700,7 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
       title: `Liste d'attente a promouvoir: ${item.formationTitle}`,
       message: `${item.availableSeats} place(s) libre(s) pour ${item.waitlistCount} attente(s).`,
       actionLabel: 'Voir la session',
-      actionHref: `/admin/sessions#session-${item.sessionId}`,
+      actionHref: `/admin/formations?formationId=${item.formationId}`,
       createdAt: now.toISOString(),
     })
   }

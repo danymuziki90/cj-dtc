@@ -671,43 +671,51 @@ function EspaceEtudiantsContent() {
         </section>
 
         {/* NAVIGATION TABS WITH MICRO-ANIMATIONS */}
-        <nav className="flex flex-wrap gap-2 border-b border-slate-200 pb-px">
-          {[
-            { id: "overview", label: "Tableau de bord", icon: BarChart3, count: null },
-            { id: "formations", label: "Mes formations", icon: BookOpen, count: totalFormationsCount },
-            { id: "travaux", label: "Mes travaux", icon: FileText, count: pendingAssignmentsCount, activeCount: true },
-            { id: "news", label: "Actualités", icon: Newspaper, count: news.length },
-            { id: "calendrier", label: "Calendrier", icon: Calendar, count: null },
-            { id: "notifications", label: "Notifications", icon: Bell, count: totalNotifications },
-            { id: "support", label: "Support & Questions", icon: HelpCircle, count: null },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`group flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5
-                  ${
-                    isActive
-                      ? "border-[var(--cj-blue)] text-[var(--cj-blue)] bg-white/30 rounded-t-xl"
-                      : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 rounded-t-xl"
-                  }`}
-              >
-                <Icon className={`h-4 w-4 transition-transform group-hover:scale-110 ${isActive ? "text-[var(--cj-blue)]" : "text-slate-400"}`} />
-                {tab.label}
-                {tab.count !== null && tab.count > 0 && (
-                  <span
-                    className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold shadow-sm
-                      ${tab.activeCount ? "bg-[var(--cj-red)] text-white" : "bg-slate-200 text-slate-700"}`}
-                  >
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+        <div className="rounded-[24px] border border-slate-200/80 bg-white/95 p-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md">
+          <nav className="flex flex-wrap gap-1.5">
+            {[
+              { id: "overview", label: "Tableau de bord", icon: BarChart3, count: null },
+              { id: "formations", label: "Mes formations", icon: BookOpen, count: totalFormationsCount },
+              { id: "travaux", label: "Mes travaux", icon: FileText, count: pendingAssignmentsCount, activeCount: true },
+              { id: "news", label: "Actualités", icon: Newspaper, count: news.length },
+              { id: "calendrier", label: "Calendrier", icon: Calendar, count: null },
+              { id: "notifications", label: "Notifications", icon: Bell, count: totalNotifications },
+              { id: "support", label: "Support & Questions", icon: HelpCircle, count: null },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`group flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-100
+                    ${
+                      isActive
+                        ? "bg-[var(--cj-blue)] text-white shadow-lg shadow-blue-900/10 animate-fade-in"
+                        : "text-slate-700 hover:bg-slate-100 hover:text-[var(--cj-blue)]"
+                    }`}
+                >
+                  <Icon className={`h-4 w-4 transition-transform group-hover:scale-110 ${isActive ? "text-white" : "text-slate-500 group-hover:text-[var(--cj-blue)]"}`} />
+                  {tab.label}
+                  {tab.count !== null && tab.count > 0 && (
+                    <span
+                      className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold shadow-sm transition-colors
+                        ${
+                          isActive
+                            ? "bg-white text-[var(--cj-blue)]"
+                            : tab.activeCount
+                              ? "bg-[var(--cj-red)] text-white"
+                              : "bg-slate-200 text-slate-700"
+                        }`}
+                    >
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
 
         {/* SECTION 2: STATS CARD ROW - VUE D'ENSEMBLE */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

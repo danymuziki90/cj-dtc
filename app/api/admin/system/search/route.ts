@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
         status: true,
         formation: {
           select: {
+            id: true,
             title: true,
           },
         },
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       label: item.formation.title,
       subtitle: `${new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(item.startDate)} · ${item.location || 'Lieu a definir'}`,
       badge: item.status,
-      href: `/admin/sessions#session-${item.id}`,
+      href: `/admin/formations?formationId=${item.formation.id}`,
     })),
     enrollments: enrollments.map((item) => ({
       id: item.id,

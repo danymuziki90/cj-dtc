@@ -437,7 +437,72 @@ export async function GET(request: NextRequest) {
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
+  const assignmentSubmissions = mappedAssignments.flatMap((assign) => 
+    assign.submissions.map((sub) => ({
+      ...sub,
+      assignmentTitle: assign.title,
+    }))
+  )
+
   const notifications = [
+    // 1. Inscriptions à des formations
+    ...enrollments.map((item) => ({
+      id: `enrollment-${item.id}`,
+      type: 'info',
+      title: item.status === 'confirmed' || item.status === 'accepted' ? 'Inscription confirmée' : 'Inscription enregistrée',
+      message: `Votre inscription à la formation "${item.formation.title}" a été enregistrée (Statut : ${item.status}).`,
+      createdAt: new Date(item.createdAt),
+    })),
+    // 2. Nouveaux devoirs publiés
+    ...mappedAssignments.map((item) => ({
+      id: `assignment-pub-${item.id}`,
+      type: 'reminder',
+      title: 'Nouveau travail publié',
+      message: `Le devoir "${item.title}" a été mis en ligne pour la formation "${item.formation.title}". Rendu limite : ${new Date(item.deadline).toLocaleDateString('fr-FR')}.`,
+      createdAt: new Date(item.publishDate || item.createdAt),
+    })),
+    // 3. Soumission initiale de devoirs
+    ...assignmentSubmissions.map((item) => ({
+      id: `assignment-sub-${item.id}`,
+      type: 'info',
+      title: 'Travail rendu',
+      message: `Vous avez déposé votre travail pour le devoir "${item.assignmentTitle}".`,
+      createdAt: new Date(item.submittedAt),
+    })),
+    // 4. Corrections de devoirs officiels
+    ...assignmentSubmissions
+      .filter((item) => item.status === 'graded' || item.status === 'returned')
+      .map((item) => ({
+        id: `assignment-corr-${item.id}`,
+        type: 'correction',
+        title: 'Note ou retour publié',
+        message: `Votre travail pour "${item.assignmentTitle}" a été corrigé par l'administration (Statut: ${item.status}${item.grade !== null && item.grade !== undefined ? ` | Note: ${item.grade}/20` : ''}${item.reviewFeedback ? ` | Retour: ${item.reviewFeedback}` : ''}).`,
+        createdAt: item.gradedAt ? new Date(item.gradedAt) : new Date(item.submittedAt),
+      })),
+    // 5. Nouvelles ressources pédagogiques
+    ...resources.map((item) => ({
+      id: `resource-${item.id}`,
+      type: 'info',
+      title: 'Nouveau document disponible',
+      message: `Le document "${item.title}" (${item.category}) a été ajouté à votre espace de formation.`,
+      createdAt: new Date(item.createdAt),
+    })),
+    // 6. Certificats délivrés
+    ...issuedCertificates.map((item) => ({
+      id: `cert-issue-core-${item.id}`,
+      type: 'correction',
+      title: 'Certificat disponible',
+      message: `Votre certificat officiel de formation pour "${item.formation?.title || 'votre formation'}" a été délivré.`,
+      createdAt: new Date(item.issuedAt),
+    })),
+    ...portalCertificates.map((item) => ({
+      id: `cert-issue-portal-${item.id}`,
+      type: 'correction',
+      title: 'Certificat disponible',
+      message: `Votre certificat de formation pour "${item.title || 'votre formation'}" est disponible.`,
+      createdAt: new Date(item.createdAt),
+    })),
+    // 7. Actualités générales
     ...news.map((item) => ({
       id: `news-${item.id}`,
       type: 'info',
@@ -445,6 +510,7 @@ export async function GET(request: NextRequest) {
       message: item.content,
       createdAt: item.createdAt,
     })),
+    // 8. Notifications importantes ciblées ou globales
     ...adminNotifications.map((item) => ({
       id: `admin-notification-${item.id}`,
       type: item.type,
@@ -452,15 +518,25 @@ export async function GET(request: NextRequest) {
       message: item.message,
       createdAt: item.createdAt,
     })),
+    // 9. Dépôt de fichiers généraux
+    ...mappedSubmissions.map((item) => ({
+      id: `submission-dep-${item.id}`,
+      type: 'info',
+      title: 'Fichier déposé',
+      message: `Vous avez mis en ligne le document "${item.title}".`,
+      createdAt: new Date(item.submittedAt),
+    })),
+    // 10. Corrections de fichiers généraux
     ...mappedSubmissions
-      .filter((item) => item.status !== 'pending')
+      .filter((item) => item.status !== 'pending' && item.reviewStatus !== 'pending')
       .map((item) => ({
-        id: `submission-${item.id}`,
+        id: `submission-corr-${item.id}`,
         type: 'correction',
-        title: 'Mise a jour de travail',
-        message: `${item.title}: statut ${item.status}${item.reviewFeedback ? ` - ${item.reviewFeedback}` : ''}`,
+        title: 'Fichier vérifié',
+        message: `Votre document "${item.title}" a été vérifié par l'administration (Statut: ${item.status}${item.reviewFeedback ? ` | Retour: ${item.reviewFeedback}` : ''}).`,
         createdAt: item.reviewedAt ? new Date(item.reviewedAt) : new Date(item.updatedAt),
       })),
+    // 11. Rappels automatiques de début de session
     ...(currentEnrollment?.session &&
     new Date(currentEnrollment.session.startDate).getTime() > now.getTime()
       ? [
@@ -475,12 +551,13 @@ export async function GET(request: NextRequest) {
           },
         ]
       : []),
+    // 12. Réponses aux questions de l'étudiant
     ...questions
       .filter((item) => item.adminReply)
       .map((item) => ({
         id: `reply-${item.id}`,
         type: 'info',
-        title: 'Reponse a votre question',
+        title: 'Réponse à votre question',
         message: item.adminReply as string,
         createdAt: item.adminReplyAt ? new Date(item.adminReplyAt) : new Date(item.createdAt),
       })),

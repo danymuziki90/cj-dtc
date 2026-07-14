@@ -358,7 +358,7 @@ export function HeroBanner({
         
         <div className="flex flex-wrap gap-2.5">
           <Link
-            href="/admin/sessions"
+            href="/admin/formations?action=create-session"
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-xs font-bold text-[var(--admin-primary)] shadow-lg shadow-blue-900/20 hover:bg-slate-50 transition"
           >
             📅 Créer une session

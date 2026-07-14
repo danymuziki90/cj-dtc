@@ -1,11 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function NewSessionPage() {
     const router = useRouter()
+
+    useEffect(() => {
+        router.replace('/admin/formations?action=create-session')
+    }, [router])
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         startDate: '',
