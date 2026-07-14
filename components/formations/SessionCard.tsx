@@ -218,7 +218,7 @@ export default function SessionCard({ session: s, locale }: Props) {
               type="button"
               onClick={() =>
                 router.push(
-                  `/${locale}/espace-etudiants/confirm-inscription?formationId=${s.formation.id}&sessionId=${s.id}`
+                  `/${locale}/formations/inscription?session=${s.id}`
                 )
               }
               className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
@@ -229,7 +229,7 @@ export default function SessionCard({ session: s, locale }: Props) {
             >
               {isFull
                 ? (locale === 'fr' ? "Liste d'attente" : 'Waitlist')
-                : (locale === 'fr' ? 'Réserver ma place' : 'Reserve my spot')}
+                : (locale === 'fr' ? "S'inscrire" : 'Register')}
             </button>
           </div>
         </div>

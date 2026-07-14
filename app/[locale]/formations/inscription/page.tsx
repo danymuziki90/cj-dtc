@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
 import { Suspense, useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Calendar, MapPinIcon, Clock, Users, DollarSign, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react'
 import { FormattedDate } from '@/components/FormattedDate'
@@ -36,6 +36,8 @@ interface TrainingSession {
 
 function InscriptionContent() {
     const router = useRouter()
+    const params = useParams()
+    const locale = params?.locale as string || 'fr'
     const searchParams = useSearchParams()
     const sessionId = searchParams.get('session')
 
@@ -128,6 +130,11 @@ function InscriptionContent() {
                 const result = await response.json()
                 setOnWaitlist(result.onWaitlist || false)
                 setSuccess(true)
+                if (!result.onWaitlist && result.studentAccount) {
+                    setTimeout(() => {
+                        router.push(`/${locale}/espace-etudiants`)
+                    }, 1500)
+                }
             } else {
                 const error = await response.json()
                 alert(error.error || 'Erreur lors de l\'inscription')
@@ -191,17 +198,13 @@ function InscriptionContent() {
                                 </h1>
                                 <p className="text-gray-600 mb-6">
                                     Votre inscription à la formation <strong>{session?.formation.title}</strong> a été enregistrée.
-                                    Vous recevrez un email de confirmation dans les plus brefs délais.
                                 </p>
-                                <div className="space-y-4">
+                                <div className="space-y-4 mb-6">
                                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                        <h3 className="font-semibold text-blue-900 mb-2">Prochaines étapes :</h3>
-                                        <ul className="text-blue-800 text-sm space-y-1">
-                                            <li>• Vérification de votre dossier d'inscription</li>
-                                            <li>• Confirmation de paiement si nécessaire</li>
-                                            <li>• Réception des informations de connexion</li>
-                                            <li>• Accès à la plateforme d'apprentissage</li>
-                                        </ul>
+                                        <h3 className="font-semibold text-blue-950 mb-2 animate-pulse">Connexion automatique en cours...</h3>
+                                        <p className="text-blue-800 text-sm">
+                                            Vous allez être redirigé vers votre espace étudiant dans quelques instants.
+                                        </p>
                                     </div>
                                 </div>
                             </>

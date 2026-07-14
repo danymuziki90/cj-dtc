@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -285,6 +285,25 @@ export default function StudentAssignmentsPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Documents Ressources */}
+                {assignment.files && assignment.files.length > 0 && (
+                  <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4 mb-6">
+                    <h4 className="font-semibold text-blue-900 mb-2">📁 Documents Ressources & Consignes</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {assignment.files.map((file) => (
+                        <a
+                          key={file.id}
+                          href={file.url}
+                          download={file.originalName}
+                          className="inline-flex items-center gap-1.5 bg-white border border-blue-200 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-900 hover:bg-blue-50 transition-colors"
+                        >
+                          📎 {file.originalName} ({Math.ceil(file.size / 1024)} KB)
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Instructions */}
                 {assignment.instructions && (

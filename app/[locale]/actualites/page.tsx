@@ -119,12 +119,15 @@ export default function ActualitesPage() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
 
-        <section className="hero-bg-unified rounded-3xl px-6 py-10 shadow-xl sm:px-8">
-          <div className="relative">
-            <p className="text-sm uppercase tracking-[0.25em] text-white/85">{t.heroEyebrow}</p>
-            <h1 className="mt-3 text-3xl font-extrabold leading-tight text-white sm:text-4xl">{t.heroTitle}</h1>
-            <p className="mt-3 max-w-3xl text-base text-white/90 sm:text-lg">{t.heroDescription}</p>
-            <div className="mt-5 inline-flex rounded-full bg-white/12 px-4 py-2 text-sm font-medium">
+        <section className="cj-hero-card mb-8">
+          <div className="relative z-10">
+            <span className="cj-eyebrow-dark">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
+              {t.heroEyebrow}
+            </span>
+            <h1 className="cj-hero-title mb-4 font-montserrat">{t.heroTitle}</h1>
+            <p className="text-base text-blue-100/90 leading-relaxed font-opensans max-w-2xl">{t.heroDescription}</p>
+            <div className="mt-6 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-blue-100">
               {loading ? t.loading : `${pagination.total} ${t.totalSuffix}`}
             </div>
           </div>
@@ -220,7 +223,7 @@ export default function ActualitesPage() {
           {news.map((item) => (
             <article
               key={item.id}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="cj-card-interactive overflow-hidden p-0"
             >
               <Link href={`/${locale}/actualites/${item.slug}`} className="block">
                 <div className="relative h-44 w-full bg-slate-100">
@@ -233,16 +236,19 @@ export default function ActualitesPage() {
 
                 <div className="p-5">
                   <div className="mb-3 flex items-center justify-between gap-2">
-                    <span className="inline-flex rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
+                    <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
                       {item.category || t.defaultCategory}
                     </span>
-                    <time className="text-xs text-slate-500">{formatDate(item.publicationDate, locale)}</time>
+                    <time className="text-xs text-slate-500 font-medium font-opensans">{formatDate(item.publicationDate, locale)}</time>
                   </div>
 
-                  <h2 className="text-xl font-bold leading-tight text-cjblue">{item.title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.excerpt || stripHtml(item.content).slice(0, 170)}</p>
+                  <h2 className="text-lg font-black leading-tight text-[var(--cj-blue)] font-montserrat">{item.title}</h2>
+                  <p className="mt-2 text-xs leading-relaxed text-slate-600 font-opensans">{item.excerpt || stripHtml(item.content).slice(0, 150)}...</p>
 
-                  <div className="mt-4 text-sm font-semibold text-cjblue">{t.readMore} →</div>
+                  <div className="mt-4 text-xs font-bold text-[var(--cj-red)] uppercase tracking-wider flex items-center gap-1">
+                    <span>{t.readMore}</span>
+                    <span>→</span>
+                  </div>
                 </div>
               </Link>
             </article>

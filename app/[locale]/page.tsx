@@ -654,70 +654,70 @@ export default function HomePage() {
       </section>
 
       {/* ── Closing footer ─────────────────────────────────────────────── */}
-      <section className="bg-slate-900 text-white py-20 sm:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-15">
-          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-blue-600 blur-3xl" />
-        </div>
-        
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center mb-14">
-            <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-blue-200">
-              {isFr ? 'Accès directs' : 'Direct Access'}
-            </span>
-            <h2 className="mt-5 text-3xl font-black sm:text-4xl font-montserrat">
-              {isFr ? 'Choisissez votre parcours.' : 'Choose your path.'}
-            </h2>
-            <p className="mt-4 text-base text-slate-300 font-opensans leading-relaxed">
-              {isFr
-                ? 'Sélectionnez le canal adapté à votre situation pour commencer votre collaboration avec CJ Development.'
-                : 'Select the channel suited to your needs to start working with CJ Development.'}
-            </p>
-          </div>
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="cj-cta-banner relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(227,6,19,0.18),transparent_45%)]" />
+          
+          <div className="relative z-10">
+            <div className="mx-auto max-w-3xl text-center mb-14">
+              <span className="cj-eyebrow-dark">
+                {isFr ? 'Accès directs' : 'Direct Access'}
+              </span>
+              <h2 className="mt-5 text-3xl font-black sm:text-4xl font-montserrat text-white">
+                {isFr ? 'Choisissez votre parcours.' : 'Choose your path.'}
+              </h2>
+              <p className="mt-4 text-base text-blue-100 font-opensans leading-relaxed">
+                {isFr
+                  ? 'Sélectionnez le canal adapté à votre situation pour commencer votre collaboration avec CJ Development.'
+                  : 'Select the channel suited to your needs to start working with CJ Development.'}
+              </p>
+            </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            {[
-              {
-                title: isFr ? 'Je veux me former' : 'I want to train',
-                description: isFr
-                  ? 'Découvrez nos programmes certifiants, vérifiez les sessions ouvertes et réservez votre place.'
-                  : 'Discover our certified programs, check open sessions and reserve your seat.',
-                href: `/${locale}/formations`,
-                label: isFr ? 'Voir les programmes' : 'View programs'
-              },
-              {
-                title: isFr ? 'Je représente une entreprise' : 'I represent a business',
-                description: isFr
-                  ? 'Explorez nos solutions sur-mesure de formation, de recrutement et d’accompagnement RH.'
-                  : 'Explore our tailored training, recruiting and HR consulting solutions.',
-                href: `/${locale}/services`,
-                label: isFr ? 'Découvrir l’offre B2B' : 'Discover B2B services'
-              },
-              {
-                title: isFr ? 'Je suis déjà étudiant' : 'I am already a student',
-                description: isFr
-                  ? 'Accédez à votre espace sécurisé, suivez vos cours, téléchargez vos documents et certificats.'
-                  : 'Log in to your secure portal, view courses, download documents and credentials.',
-                href: `/${locale}/espace-etudiants`,
-                label: isFr ? 'Accéder à mon espace' : 'Log in to my portal'
-              },
-            ].map((item) => (
-              <Link
-                key={item.title}
-                href={item.href}
-                className="group rounded-3xl border border-white/10 bg-white/5 p-8 text-left transition duration-300 hover:border-[var(--cj-red)] hover:bg-white/10 hover:scale-[1.02] shadow-xl flex flex-col justify-between"
-              >
-                <div>
-                  <h3 className="text-xl font-bold text-white group-hover:text-[var(--cj-red)] transition font-montserrat">{item.title}</h3>
-                  <p className="mt-4 text-sm leading-relaxed text-slate-300 font-opensans">{item.description}</p>
-                </div>
-                <span className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-blue-200 group-hover:text-[var(--cj-red)] transition">
-                  {item.label}
-                  <svg className="h-4 w-4 transform transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </span>
-              </Link>
-            ))}
+            <div className="grid gap-6 lg:grid-cols-3">
+              {[
+                {
+                  title: isFr ? 'Je veux me former' : 'I want to train',
+                  description: isFr
+                    ? 'Découvrez nos programmes certifiants, vérifiez les sessions ouvertes et réservez votre place.'
+                    : 'Discover our certified programs, check open sessions and reserve your seat.',
+                  href: `/${locale}/formations`,
+                  label: isFr ? 'Voir les programmes' : 'View programs'
+                },
+                {
+                  title: isFr ? 'Je représente une entreprise' : 'I represent a business',
+                  description: isFr
+                    ? 'Explorez nos solutions sur-mesure de formation, de recrutement et d’accompagnement RH.'
+                    : 'Explore our tailored training, recruiting and HR consulting solutions.',
+                  href: `/${locale}/services`,
+                  label: isFr ? 'Découvrir l’offre B2B' : 'Discover B2B services'
+                },
+                {
+                  title: isFr ? 'Je suis déjà étudiant' : 'I am already a student',
+                  description: isFr
+                    ? 'Accédez à votre espace sécurisé, suivez vos cours, téléchargez vos documents et certificats.'
+                    : 'Log in to your secure portal, view courses, download documents and credentials.',
+                  href: `/${locale}/espace-etudiants`,
+                  label: isFr ? 'Accéder à mon espace' : 'Log in to my portal'
+                },
+              ].map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className="group rounded-2xl border border-white/10 bg-white/5 p-8 text-left transition duration-300 hover:border-[var(--cj-red)] hover:bg-white/10 hover:scale-[1.02] shadow-xl flex flex-col justify-between"
+                >
+                  <div>
+                    <h3 className="text-xl font-bold text-white group-hover:text-[var(--cj-red)] transition font-montserrat">{item.title}</h3>
+                    <p className="mt-4 text-sm leading-relaxed text-blue-100 font-opensans">{item.description}</p>
+                  </div>
+                  <span className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-blue-200 group-hover:text-[var(--cj-red)] transition">
+                    {item.label}
+                    <svg className="h-4 w-4 transform transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>

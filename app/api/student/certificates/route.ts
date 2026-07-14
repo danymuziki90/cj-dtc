@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,24 +11,53 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
-    const certificates = [
-      {
-        id: 1,
-        studentName: session.user.name || 'Étudiant Test',
-        studentEmail: session.user.email,
-        formationTitle: 'Développement Web',
-        formationCategorie: 'Programmation',
-        completionDate: '2025-06-15',
-        grade: 18,
-        uniqueId: 'CJ-2025-001-ABC123',
-        qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=CJ-2025-001-ABC123',
-        certificateUrl: 'https://example.com/certificates/CJ-2025-001-ABC123.pdf',
-        status: 'generated',
-        createdAt: new Date('2025-06-15').toISOString(),
-      },
-    ]
+    const studentEmail = session.user.email
 
-    return NextResponse.json(certificates)
+    if (!studentEmail) {
+      return NextResponse.json({ error: 'Email de l\'étudiant non configuré dans la session' }, { status: 400 })
+    }
+
+    const dbCertificates = await prisma.certificate.findMany({
+      where: {
+        enrollment: {
+          email: studentEmail
+        }
+      },
+      include: {
+        formation: {
+          select: {
+            title: true,
+            categorie: true
+          }
+        },
+        session: {
+          select: {
+            startDate: true,
+            endDate: true
+          }
+        }
+      },
+      orderBy: { issuedAt: 'desc' }
+    })
+
+    const mapped = dbCertificates.map((cert) => ({
+      id: cert.id,
+      code: cert.code,
+      holderName: cert.holderName,
+      formationId: cert.formationId,
+      sessionId: cert.sessionId,
+      enrollmentId: cert.enrollmentId,
+      type: cert.type,
+      issuedAt: cert.issuedAt.toISOString(),
+      issuedBy: cert.issuedBy || 'CJ DTC',
+      verified: cert.verified,
+      userId: cert.userId,
+      formationTitle: cert.formation?.title || 'Formation Générale',
+      formationCategorie: cert.formation?.categorie || 'Autres',
+      completionDate: cert.session ? new Date(cert.session.endDate).toISOString().split('T')[0] : cert.issuedAt.toISOString().split('T')[0]
+    }))
+
+    return NextResponse.json(mapped)
   } catch (error) {
     console.error('Erreur lors du chargement des certificats:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })

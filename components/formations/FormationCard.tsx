@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { 
   Clock, 
+  Calendar,
   Users, 
   TargetIcon, 
   MapPinIcon, 
@@ -244,6 +245,40 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
                   {formation.instructor.title}
                 </p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Sessions ouvertes associées */}
+        {formation.sessions && formation.sessions.length > 0 && (
+          <div className="border-t border-gray-100 pt-4 mt-4 text-left">
+            <h4 className="text-xs font-bold text-gray-900 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-blue-600" />
+              <span>Prochaines sessions ouvertes</span>
+            </h4>
+            <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+              {formation.sessions.map((session: any) => {
+                const available = session.maxParticipants - (session.currentParticipants || 0)
+                const isFull = available <= 0
+                return (
+                  <div key={session.id} className="flex items-center justify-between text-xs bg-slate-50 p-2 rounded-lg border border-slate-100 hover:border-blue-200 transition-colors">
+                    <div>
+                      <p className="font-semibold text-gray-800">
+                        {new Date(session.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} ({session.format})
+                      </p>
+                      <p className="text-[10px] text-gray-500">
+                        {session.location} • {isFull ? 'Complet' : `${available} place(s)`}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/${locale}/formations/inscription?session=${session.id}`}
+                      className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium text-[10px] transition-colors whitespace-nowrap"
+                    >
+                      S'inscrire
+                    </Link>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

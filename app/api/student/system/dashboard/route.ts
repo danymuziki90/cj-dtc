@@ -48,6 +48,8 @@ export async function GET(request: NextRequest) {
               id: true,
               title: true,
               categorie: true,
+              imageUrl: true,
+              description: true,
             },
           },
           session: {
@@ -144,6 +146,55 @@ export async function GET(request: NextRequest) {
   const sessionIds = Array.from(
     new Set(enrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value)))
   )
+
+  // Fetch active assignments for the student's formations and sessions
+  const assignmentsRaw = await prisma.assignment.findMany({
+    where: {
+      formationId: { in: formationIds },
+      OR: [
+        { sessionId: null },
+        { sessionId: { in: sessionIds } }
+      ],
+      status: 'publie',
+      publishDate: { lte: new Date() }
+    },
+    include: {
+      formation: {
+        select: {
+          id: true,
+          title: true,
+          categorie: true,
+        }
+      },
+      files: true,
+      submissions: {
+        where: {
+          studentEmail: { equals: studentEmail, mode: 'insensitive' },
+        },
+        include: {
+          files: true,
+        },
+        orderBy: { submittedAt: 'desc' },
+      },
+    },
+    orderBy: { deadline: 'asc' },
+  })
+
+  const mappedAssignments = assignmentsRaw.map((assignment) => ({
+    ...assignment,
+    allowedFileTypes: (assignment.allowedFileTypes || '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+    submissions: assignment.submissions.map((submission) => ({
+      ...submission,
+      reviewFeedback: submission.feedback,
+      files: submission.files.map((file) => ({
+        ...file,
+        type: file.mimeType,
+      })),
+    })),
+  }))
 
   const adminNotifications = await prisma.adminNotification.findMany({
     where: {
@@ -253,6 +304,8 @@ export async function GET(request: NextRequest) {
       enrollmentId: item.id,
       formationTitle: item.formation.title,
       formationCategory: item.formation.categorie,
+      formationImageUrl: item.formation.imageUrl,
+      formationDescription: item.formation.description,
       sessionId: session.id,
       sessionType: sessionMeta.metadata.sessionType || null,
       startDate: session.startDate,
@@ -495,6 +548,8 @@ export async function GET(request: NextRequest) {
         ? {
             enrollmentId: currentEnrollment.id,
             formationTitle: currentEnrollment.formation.title,
+            formationImageUrl: currentEnrollment.formation.imageUrl,
+            formationDescription: currentEnrollment.formation.description,
             sessionId: currentEnrollment.session?.id,
             sessionType: currentEnrollment.session
               ? parseSessionMetadata(currentEnrollment.session.prerequisites).metadata.sessionType || null
@@ -529,10 +584,12 @@ export async function GET(request: NextRequest) {
       sessionsHistory,
       resources,
       submissions: mappedSubmissions,
+      assignments: mappedAssignments,
       certificates,
       certificateEligibility,
       questions,
       notifications,
+      news,
       attendance,
       results,
       progress: {

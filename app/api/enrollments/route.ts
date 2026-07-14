@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
 import { deriveEnrollmentAccountState, provisionStudentAccountFromEnrollment } from '../../../lib/student/account-provisioning'
 import { resolveAppBaseUrl, sendEmail } from '../../../lib/email'
+import { signStudentToken, STUDENT_AUTH_COOKIE, STUDENT_TOKEN_MAX_AGE, getAuthCookieOptions } from '../../../lib/auth-portal/jwt'
 
 export const runtime = 'nodejs'
 
@@ -349,7 +350,7 @@ export async function POST(req: Request) {
         })
       : null
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         ...enrollment,
         onWaitlist,
@@ -363,11 +364,26 @@ export async function POST(req: Request) {
         message: onWaitlist
           ? "Inscription en liste d'attente (session complète)"
           : immediateAccessEnrollment
-          ? "Inscription enregistrée avec succès. Votre accès étudiant est en cours d'activation."
+          ? "Inscription enregistrée avec succès. Redirection..."
           : 'Inscription enregistree avec succes',
       },
       { status: 201 }
     )
+
+    if (studentAccount?.student?.id) {
+      try {
+        const token = await signStudentToken({
+          sub: studentAccount.student.id,
+          studentId: studentAccount.student.id,
+          username: studentAccount.student.username || studentAccount.student.email,
+        })
+        response.cookies.set(STUDENT_AUTH_COOKIE, token, getAuthCookieOptions(STUDENT_TOKEN_MAX_AGE))
+      } catch (tokenError) {
+        console.error('Error signing auto-login token:', tokenError)
+      }
+    }
+
+    return response
   } catch (error: any) {
     console.error('Enrollment POST error:', error)
     if (error.code === 'P2002') {

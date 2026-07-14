@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
+import { writeFile, mkdir } from 'fs/promises'
+import { join, extname } from 'path'
+import { randomUUID } from 'crypto'
 
 export const runtime = 'nodejs'
 
@@ -40,22 +43,36 @@ export async function GET(request: NextRequest) {
     const auth = await requireStudent(request)
     if (auth.error) return auth.error
 
+    const studentEnrollments = await prisma.enrollment.findMany({
+      where: {
+        OR: [
+          { studentId: auth.student.id },
+          { email: { equals: auth.student.email, mode: 'insensitive' } },
+        ],
+        status: { in: ENROLLMENT_STATUSES_WITH_ACCESS }
+      },
+      select: {
+        formationId: true,
+        sessionId: true
+      }
+    })
+
+    const formationIds = studentEnrollments.map(e => e.formationId)
+    const sessionIds = studentEnrollments.map(e => e.sessionId).filter(Boolean) as number[]
+
     const assignments = await prisma.assignment.findMany({
       where: {
-        formation: {
-          enrollments: {
-            some: {
-              OR: [
-                { studentId: auth.student.id },
-                { email: { equals: auth.student.email, mode: 'insensitive' } },
-              ],
-              status: { in: ENROLLMENT_STATUSES_WITH_ACCESS },
-            },
-          },
-        },
+        formationId: { in: formationIds },
+        OR: [
+          { sessionId: null },
+          { sessionId: { in: sessionIds } }
+        ],
+        status: 'publie',
+        publishDate: { lte: new Date() }
       },
       include: {
         formation: true,
+        files: true,
         submissions: {
           where: {
             studentEmail: { equals: auth.student.email, mode: 'insensitive' },
@@ -63,7 +80,7 @@ export async function GET(request: NextRequest) {
           include: {
             files: true,
           },
-          orderBy: { submittedAt: 'asc' },
+          orderBy: { submittedAt: 'desc' },
         },
       },
       orderBy: { deadline: 'asc' },
@@ -153,19 +170,41 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    try {
+      await prisma.adminNotification.create({
+        data: {
+          title: '📥 Nouveau dépôt de devoir',
+          message: `L'étudiant ${auth.student.email} (${auth.student.firstName} ${auth.student.lastName}) a remis son travail pour "${assignment.title}".`,
+          type: 'info',
+          target: 'admin',
+          createdBy: auth.student.email,
+        }
+      })
+    } catch (err) {
+      console.error('Failed to create admin notification for submission:', err)
+    }
+
+    const uploadDir = join(process.cwd(), 'public', 'uploads', 'student-submissions', auth.student.id)
+    await mkdir(uploadDir, { recursive: true })
+
     for (const [index, file] of files.entries()) {
+      const extension = extname(file.name).toLowerCase()
+      const fileName = `${Date.now()}-${randomUUID()}${extension}`
+      const filePath = join(uploadDir, fileName)
+      
       const buffer = await file.arrayBuffer()
-      const base64 = Buffer.from(buffer).toString('base64')
-      const mimeType = file.type || 'application/octet-stream'
+      await writeFile(filePath, Buffer.from(buffer))
+
+      const fileUrl = `/uploads/student-submissions/${auth.student.id}/${fileName}`
 
       await prisma.submissionFile.create({
         data: {
           submissionId: submission.id,
-          name: `assignment-${assignmentId}-${submission.id}-${index}`,
+          name: file.name,
           originalName: file.name,
           size: file.size,
-          mimeType,
-          url: `data:${mimeType};base64,${base64}`,
+          mimeType: file.type || 'application/octet-stream',
+          url: fileUrl,
         },
       })
     }

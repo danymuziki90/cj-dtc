@@ -23,6 +23,16 @@ export async function GET(req: Request) {
               include: {
                 instructor: true
               }
+            },
+            enrollments: {
+              where: {
+                status: {
+                  notIn: ['waitlist', 'rejected', 'cancelled']
+                }
+              },
+              select: {
+                id: true
+              }
             }
           },
           orderBy: { startDate: 'asc' }
@@ -79,7 +89,7 @@ export async function GET(req: Request) {
           format: nextSession.format,
           price: 0,
           maxParticipants: nextSession.maxParticipants,
-          currentParticipants: nextSession.currentParticipants,
+          currentParticipants: nextSession.enrollments?.length || 0,
           status: nextSession.status
         } : undefined,
         price,
@@ -100,8 +110,22 @@ export async function GET(req: Request) {
         hasCoaching: false,
         hasAccompaniment: false,
         featured: enrollmentCount > 50 || (rating && rating >= 4.5),
-        // Enlever les relations lourdes de la réponse
-        sessions: undefined,
+        sessions: formation.sessions
+          .filter(s => s.status === 'ouverte')
+          .map(s => ({
+            id: s.id,
+            startDate: s.startDate.toISOString(),
+            endDate: s.endDate.toISOString(),
+            startTime: s.startTime,
+            endTime: s.endTime,
+            location: s.location || 'À définir',
+            format: s.format,
+            price: 0,
+            maxParticipants: s.maxParticipants,
+            currentParticipants: s.enrollments?.length || 0,
+            status: s.status,
+            availableSeats: Math.max(0, s.maxParticipants - (s.enrollments?.length || 0))
+          })),
         enrollments: undefined,
         evaluations: undefined
       }

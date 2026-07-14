@@ -174,61 +174,63 @@ export default function VerificationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <div className="flex justify-center space-x-4 mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                <ShieldIcon className="w-8 h-8 text-white" />
+    <div className="bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
+        {/* Header Section floating card */}
+        <section className="cj-hero-card mb-10 text-center flex flex-col items-center">
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="flex justify-center space-x-4 mb-6">
+              <div className="w-12 h-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
+                <ShieldIcon className="w-6 h-6 text-white" />
               </div>
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                <QrCode className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
+                <QrCode className="w-6 h-6 text-white" />
               </div>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h1 className="cj-hero-title mb-6">
               Vérification de
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">
+              <span className="text-blue-200">
                 {" "}Certificats
               </span>
             </h1>
             
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
-              Vérifiez l'authenticité des certificats CJ DTC grâce à notre système de vérification sécurisé avec QR codes
+            <p className="max-w-2xl text-base leading-8 text-blue-100/90 sm:text-lg mb-8">
+              Vérifiez l'authenticité des certificats CJ DTC grâce à notre système de vérification sécurisé avec QR codes.
             </p>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 max-w-4xl mx-auto">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{stats.totalCertificates}</div>
-                <div className="text-sm text-gray-600">Certificats émis</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{stats.issuedThisMonth}</div>
-                <div className="text-sm text-gray-600">Ce mois</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{stats.verificationCount}</div>
-                <div className="text-sm text-gray-600">Vérifications</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{stats.averageScore}%</div>
-                <div className="text-sm text-gray-600">Score moyen</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{stats.completionRate}%</div>
-                <div className="text-sm text-gray-600">Taux de réussite</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{stats.satisfactionRate}%</div>
-                <div className="text-sm text-gray-600">Satisfaction</div>
+            
+            {/* Stats inside card */}
+            <div className="w-full border-t border-white/10 pt-8 mt-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 max-w-4xl mx-auto">
+                <div className="text-center">
+                  <div className="text-2xl font-black text-white font-montserrat">{stats.totalCertificates}</div>
+                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Certificats émis</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-black text-white font-montserrat">{stats.issuedThisMonth}</div>
+                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Ce mois</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-black text-white font-montserrat">{stats.verificationCount}</div>
+                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Vérifications</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-black text-[var(--cj-red)] font-montserrat">{stats.averageScore}%</div>
+                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Score moyen</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-black text-white font-montserrat">{stats.completionRate}%</div>
+                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Taux de réussite</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-black text-[var(--cj-red)] font-montserrat">{stats.satisfactionRate}%</div>
+                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Satisfaction</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </section>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -616,6 +618,7 @@ export default function VerificationPage() {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   )
 }

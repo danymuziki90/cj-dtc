@@ -429,5 +429,436 @@ a:hover {
   will-change: transform;
 }
 
+/* Animations custom pour le Dashboard Administrateur */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Delay classes */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+
+/* Dark Mode Overrides pour l'espace d'administration */
+.dark .admin-theme {
+  --admin-surface: #0a0f1d;
+  --admin-primary: #3b82f6;
+  --admin-primary-800: #1d4ed8;
+  --admin-primary-700: #2563eb;
+  --admin-primary-500: #60a5fa;
+  --admin-primary-200: #1e293b;
+  --admin-primary-100: #0f172a;
+  --admin-primary-50: #0c1020;
+  --admin-accent: #f87171;
+  --admin-accent-700: #ef4444;
+  --admin-accent-200: #451a1a;
+  --admin-accent-100: #2d1010;
+  --admin-accent-50: #1c0a0a;
+  background: #0a0f1d !important;
+  color: #e2e8f0 !important;
+}
+
+/* Arrière-plans sombres */
+.dark .admin-theme aside,
+.dark .admin-theme header,
+.dark .admin-theme main {
+  color: #e2e8f0 !important;
+}
+
+.dark .admin-theme .bg-white {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+/* Bordures sombres */
+.dark .admin-theme .border-slate-200,
+.dark .admin-theme .border-slate-100,
+.dark .admin-theme .border-white\/70,
+.dark .admin-theme .border-white\/80,
+.dark .admin-theme .border-white\/92 {
+  border-color: #334155 !important;
+}
+
+/* Textes sombres */
+.dark .admin-theme .text-slate-950,
+.dark .admin-theme .text-slate-900,
+.dark .admin-theme .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+.dark .admin-theme .text-slate-700,
+.dark .admin-theme .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark .admin-theme .text-slate-500,
+.dark .admin-theme .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+/* États survolés et conteneurs secondaires */
+.dark .admin-theme .bg-slate-50,
+.dark .admin-theme .bg-slate-50\/70,
+.dark .admin-theme .bg-slate-50\/60,
+.dark .admin-theme .bg-slate-50\/80 {
+  background-color: #151d30 !important;
+}
+
+.dark .admin-theme .hover\:bg-slate-50:hover,
+.dark .admin-theme .hover\:bg-slate-50\/70:hover,
+.dark .admin-theme .hover\:bg-slate-50\/60:hover {
+  background-color: #1e293b !important;
+}
+
+.dark .admin-theme .bg-slate-100 {
+  background-color: #273549 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Translucides */
+.dark .admin-theme .bg-white\/90,
+.dark .admin-theme .bg-white\/92,
+.dark .admin-theme .bg-white\/80,
+.dark .admin-theme .bg-white\/85 {
+  background-color: rgba(30, 41, 59, 0.85) !important;
+}
+
+/* Surcharges formulaires */
+.dark .admin-theme input,
+.dark .admin-theme select,
+.dark .admin-theme textarea {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .admin-theme input::placeholder,
+.dark .admin-theme textarea::placeholder {
+  color: #475569 !important;
+}
+
+/* Cartes transparentes */
+.dark .admin-theme .bg-gradient-to-br.from-white.to-white {
+  background-image: linear-gradient(to bottom right, #1e293b, #151d30) !important;
+}
+
+.dark .admin-theme .bg-gradient-to-br.from-slate-50.to-white {
+  background-image: linear-gradient(to bottom right, #151d30, #1e293b) !important;
+}
+
+.dark .admin-theme .bg-gradient-to-br.from-emerald-50.to-white {
+  background-image: linear-gradient(to bottom right, #022c22, #0f172a) !important;
+  color: #34d399 !important;
+}
+
+.dark .admin-theme .bg-gradient-to-br.from-amber-50.to-white {
+  background-image: linear-gradient(to bottom right, #451a03, #0f172a) !important;
+  color: #fbbf24 !important;
+}
+
+.dark .admin-theme .bg-gradient-to-br.from-rose-50.to-white {
+  background-image: linear-gradient(to bottom right, #4c0519, #0f172a) !important;
+  color: #f87171 !important;
+}
+
+.dark .admin-theme .bg-emerald-50 {
+  background-color: #022c22 !important;
+  color: #34d399 !important;
+  border-color: #065f46 !important;
+}
+
+.dark .admin-theme .text-emerald-800,
+.dark .admin-theme .text-emerald-900,
+.dark .admin-theme .text-emerald-700 {
+  color: #34d399 !important;
+}
+
+.dark .admin-theme .bg-amber-50 {
+  background-color: #451a03 !important;
+  color: #fbbf24 !important;
+  border-color: #92400e !important;
+}
+
+.dark .admin-theme .text-amber-800,
+.dark .admin-theme .text-amber-900,
+.dark .admin-theme .text-amber-700 {
+  color: #fbbf24 !important;
+}
+
+/* ==========================================
+   DESIGN SYSTEM - CJ DEVELOPMENT TRAINING CENTER
+   ========================================== */
+
+/* 1. Page & Layout margins */
+.cj-container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80rem; /* 7xl = 1280px */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+@media (min-width: 640px) {
+  .cj-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .cj-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* 2. Floating Hero Card */
+.cj-hero-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #02142f 0%, #002d72 50%, #0c4da2 100%) !important;
+  color: #ffffff !important;
+  border-radius: 1.5rem; /* 3xl = 24px */
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+}
+@media (min-width: 640px) {
+  .cj-hero-card {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .cj-hero-card {
+    padding-left: 3rem;
+    padding-right: 3rem;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+.cj-hero-card::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  top: -5rem;
+  right: -5rem;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 9999px;
+  background-color: rgba(227, 6, 19, 0.2);
+  filter: blur(64px);
+  z-index: 0;
+}
+
+.cj-hero-card::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  bottom: -4rem;
+  left: 2rem;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.05);
+  filter: blur(64px);
+  z-index: 0;
+}
+
+/* 3. Typography & Titles */
+.cj-hero-title {
+  margin-top: 1.25rem;
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 900; /* font-black */
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+}
+@media (min-width: 640px) {
+  .cj-hero-title {
+    font-size: 3rem; /* text-5xl */
+  }
+}
+@media (min-width: 1024px) {
+  .cj-hero-title {
+    font-size: 3.75rem; /* text-6xl */
+  }
+}
+
+.cj-section-title {
+  margin-top: 0.5rem;
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 900; /* font-black */
+  color: var(--cj-blue) !important;
+}
+@media (min-width: 640px) {
+  .cj-section-title {
+    font-size: 2.25rem; /* text-4xl */
+  }
+}
+
+/* 4. Eyebrows & Badges */
+.cj-eyebrow-dark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.1);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+}
+
+.cj-eyebrow-light {
+  display: inline-block;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--cj-red) !important;
+}
+
+/* 5. Buttons */
+.cj-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem; /* xl */
+  background-color: var(--cj-red) !important;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  box-shadow: 0 10px 15px -3px rgba(227, 6, 19, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+.cj-btn-primary:hover {
+  background-color: var(--cj-red-700) !important;
+  transform: translateY(-1px);
+}
+
+.cj-btn-secondary-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem; /* xl */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  transition: all 0.2s ease-in-out;
+}
+.cj-btn-secondary-dark:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.cj-btn-secondary-light {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem; /* xl */
+  border: 1px solid #cbd5e1; /* border-slate-300 */
+  background-color: #ffffff !important;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #334155 !important; /* text-slate-700 */
+  transition: all 0.2s ease-in-out;
+}
+.cj-btn-secondary-light:hover {
+  background-color: #f8fafc !important; /* bg-slate-50 */
+}
+
+/* 6. Cards & Containers */
+.cj-card-static {
+  border-radius: 1.5rem; /* 3xl */
+  border: 1px solid #e2e8f0; /* slate-200 */
+  background-color: #ffffff !important;
+  padding: 2rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.cj-card-interactive {
+  border-radius: 1rem; /* 2xl */
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff !important;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+.cj-card-interactive:hover {
+  transform: translateY(-0.25rem);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 7. Final Call-To-Action (CTA) Banner */
+.cj-cta-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem; /* 3xl */
+  background: linear-gradient(135deg, #02142f 0%, #002d72 55%, #0c4da2 100%) !important;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  color: #ffffff !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+@media (min-width: 640px) {
+  .cj-cta-banner {
+    padding-left: 3rem;
+    padding-right: 3rem;
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+}
+
+.cj-cta-banner::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(227, 6, 19, 0.18), transparent 45%);
+}
+
+
+
 
 

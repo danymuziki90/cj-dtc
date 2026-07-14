@@ -19,51 +19,54 @@ export default async function PartenairesPage({ params }: PageProps) {
   const t = copy[locale]
 
   return (
-    <div className="bg-slate-50">
+    <div className="bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
 
-        <section className="hero-bg-unified rounded-[32px] px-6 py-10 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)] sm:px-8 lg:px-10 lg:py-12">
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        {/* Hero Section floating card */}
+        <section className="cj-hero-card mb-10">
+          <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
-              <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-100">
+              <span className="cj-eyebrow-dark mb-4">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
                 {t.heroBadge}
-              </p>
-              <h1 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">{t.heroTitle}</h1>
-              <p className="mt-4 max-w-3xl text-base leading-8 text-white/80 sm:text-lg">{t.heroDescription}</p>
+              </span>
+              <h1 className="cj-hero-title mb-4 font-montserrat">{t.heroTitle}</h1>
+              <p className="max-w-3xl text-base leading-8 text-blue-100/90 sm:text-lg font-opensans">{t.heroDescription}</p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
               {t.stats.map((label, index) => (
-                <div key={label} className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-                  <p className="text-xs uppercase tracking-[0.16em] text-blue-100">{label}</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">{t.statValues[index]}</p>
+                <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur shadow-lg">
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-blue-200">{label}</p>
+                  <p className="mt-2 text-2xl font-black text-white font-montserrat">{t.statValues[index]}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
+        {/* Section Cards */}
         <section className="mt-10">
-          <div className="max-w-3xl">
-            <h2 className="text-3xl font-semibold tracking-tight text-slate-950">{t.sectionTitle}</h2>
-            <p className="mt-3 text-base leading-8 text-slate-600">{t.sectionDescription}</p>
+          <div className="max-w-3xl mb-8">
+            <h2 className="text-3xl font-black text-[var(--cj-blue)] font-montserrat tracking-tight">{t.sectionTitle}</h2>
+            <p className="mt-3 text-base leading-relaxed text-slate-600 font-opensans">{t.sectionDescription}</p>
           </div>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2">
             {t.cards.map((card, index) => {
               const Icon = icons[index]
               return (
-                <article key={card.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-cjblue/10 text-cjblue">
+                <article key={card.title} className="cj-card-interactive">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--cj-blue-50)] text-[var(--cj-blue)]">
                     <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-5 text-xl font-semibold text-slate-950">{card.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{card.description}</p>
-                  <ul className="mt-5 space-y-3 text-sm text-slate-700">
+                  <h3 className="mt-5 text-xl font-bold text-slate-900 font-montserrat">{card.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-650 font-opensans">{card.description}</p>
+                  <ul className="mt-5 space-y-3 text-sm text-slate-700 font-opensans">
                     {card.bullets.map((item) => (
                       <li key={item} className="flex items-start gap-3">
-                        <span className="mt-2 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-cjred" />
+                        <span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-[var(--cj-red)]" />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -74,31 +77,38 @@ export default async function PartenairesPage({ params }: PageProps) {
           </div>
         </section>
 
+        {/* Network & Final CTA Grid */}
         <section className="mt-10 grid gap-6 lg:grid-cols-[1fr_0.95fr]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">{t.networkTitle}</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">{t.networkDescription}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
+          <div className="cj-card-static">
+            <h2 className="text-2xl font-black text-slate-900 font-montserrat tracking-tight mb-4">{t.networkTitle}</h2>
+            <p className="text-sm leading-relaxed text-slate-600 font-opensans mb-6">{t.networkDescription}</p>
+            <div className="flex flex-wrap gap-2">
               {network.map((item) => (
-                <span key={item} className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700">
+                <span key={item} className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700">
                   {item}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-200">CJ DTC</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight">{t.ctaTitle}</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-300 sm:text-base">{t.ctaDescription}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href={`/${locale}/contact`} className="inline-flex items-center gap-2 rounded-2xl bg-[var(--cj-red)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700">
-                {t.primaryCta}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href={`/${locale}/contact`} className="inline-flex items-center rounded-2xl border border-white/15 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
-                {t.secondaryCta}
-              </Link>
+          <div className="cj-cta-banner">
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              <div>
+                <span className="cj-eyebrow-dark mb-4">
+                  CJ DTC
+                </span>
+                <h2 className="text-2xl font-black text-white font-montserrat mb-4">{t.ctaTitle}</h2>
+                <p className="text-sm leading-relaxed text-blue-100 font-opensans mb-8">{t.ctaDescription}</p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Link href={`/${locale}/contact`} className="cj-btn-primary">
+                  {t.primaryCta}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href={`/${locale}/contact`} className="cj-btn-secondary-dark">
+                  {t.secondaryCta}
+                </Link>
+              </div>
             </div>
           </div>
         </section>

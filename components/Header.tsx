@@ -197,7 +197,6 @@ export default function Header() {
       { href: `/${locale}`, label: labels.home },
       { href: `/${locale}/about`, label: labels.about },
       { href: `/${locale}/formations`, label: labels.formations },
-      { href: `/${locale}/formations#sessions`, label: labels.sessions },
       { href: `/${locale}/entreprises`, label: labels.entreprises },
       { href: `/${locale}/actualites`, label: labels.news },
       { href: `/${locale}/espace-etudiants`, label: labels.studentSpace },

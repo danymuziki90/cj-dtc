@@ -72,49 +72,10 @@ export default function StudentCertificatesPage() {
 
   const fetchCertificates = async () => {
     try {
-      // Mock data - would come from API
-      const mockCertificates: Certificate[] = [
-        {
-          id: 1,
-          code: 'CJ-DTC-2024-0001',
-          holderName: 'Marie Mwamba',
-          formationId: 1,
-          sessionId: 1,
-          enrollmentId: 1,
-          type: 'COMPLETION',
-          issuedAt: '2024-01-20T00:00:00Z',
-          issuedBy: 'CJ DTC',
-          verified: true,
-          userId: 'user-1'
-        },
-        {
-          id: 2,
-          code: 'CJ-DTC-2024-0002',
-          holderName: 'Jean-Pierre Lukoki',
-          formationId: 2,
-          sessionId: 2,
-          enrollmentId: 2,
-          type: 'EXCELLENCE',
-          issuedAt: '2024-01-25T00:00:00Z',
-          issuedBy: 'CJ DTC',
-          verified: true,
-          userId: 'user-2'
-        },
-        {
-          id: 3,
-          code: 'CJ-DTC-2023-0003',
-          holderName: 'Sarah Kabeya',
-          formationId: 3,
-          sessionId: 3,
-          enrollmentId: 3,
-          type: 'COMPLETION',
-          issuedAt: '2023-12-15T00:00:00Z',
-          issuedBy: 'CJ DTC',
-          verified: true,
-          userId: 'user-3'
-        }
-      ]
-      setCertificates(mockCertificates)
+      const res = await fetch('/api/student/certificates')
+      if (!res.ok) throw new Error('Erreur lors de la récupération des certificats')
+      const data = await res.json()
+      setCertificates(data || [])
     } catch (error) {
       console.error('Erreur lors du chargement des certificats:', error)
     } finally {

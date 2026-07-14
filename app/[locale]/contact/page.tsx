@@ -126,36 +126,30 @@ export default function ContactPage() {
   const labelCls = 'mb-1.5 block text-sm font-semibold text-slate-700'
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
-      {/* ── SECTION 1 — HERO ──────────────────────────────────────────────── */}
-      <section className="hero-bg-unified py-24">
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+        {/* ── SECTION 1 — HERO ──────────────────────────────────────────────── */}
+        <section className="cj-hero-card mb-10">
+          <div className="relative z-10 grid gap-12 lg:grid-cols-2 lg:items-center">
             {/* Left: text + CTAs */}
             <div>
-              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white/90">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+              <span className="cj-eyebrow-dark mb-4">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
                 {t.heroBadge}
               </span>
-              <h1 className="hero-title-unified mt-2">
+              <h1 className="cj-hero-title mb-4 font-montserrat">
                 {t.heroTitle}
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
+              <p className="max-w-xl text-base leading-8 text-blue-100/90 sm:text-lg font-opensans">
                 {t.heroSubtitle}
               </p>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <a
-                  href="#contact-form"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[var(--cj-blue)] shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
-                >
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <a href="#contact-form" className="cj-btn-primary">
                   {t.heroCta1}
                   <ArrowRight className="h-4 w-4" />
                 </a>
-                <Link
-                  href={`/${locale}/formations`}
-                  className="inline-flex items-center gap-2 rounded-xl border-2 border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
-                >
+                <Link href={`/${locale}/formations`} className="cj-btn-secondary-dark">
                   {t.heroCta2}
                 </Link>
               </div>
@@ -163,10 +157,10 @@ export default function ContactPage() {
 
             {/* Right: trust card */}
             <div className="flex justify-center lg:justify-end">
-              <div className="w-full max-w-sm rounded-2xl border border-white/20 bg-white/10 p-8 backdrop-blur-sm">
+              <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md shadow-2xl">
                 <div className="mb-6 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-green-400" />
-                  <span className="text-xs font-semibold uppercase tracking-wider text-white/80">
+                  <span className="h-2 w-2 rounded-full bg-green-450 animate-pulse" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-blue-200">
                     {t.heroBadge}
                   </span>
                 </div>
@@ -176,23 +170,22 @@ export default function ContactPage() {
                     { value: '10+', label: locale === 'fr' ? 'Pays' : 'Countries' },
                     { value: '8 500+', label: locale === 'fr' ? 'Étudiants' : 'Students' },
                   ].map((stat) => (
-                    <div key={stat.label} className="text-center">
-                      <div className="text-2xl font-extrabold text-white">{stat.value}</div>
-                      <div className="mt-1 text-xs text-white/60">{stat.label}</div>
+                    <div key={stat.label} className="text-center font-opensans">
+                      <div className="text-2xl font-black text-white font-montserrat">{stat.value}</div>
+                      <div className="mt-1 text-[10px] uppercase font-bold tracking-wider text-blue-200">{stat.label}</div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-6 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-center">
-                  <CheckCircle2 className="mx-auto mb-1 h-5 w-5 text-green-400" />
-                  <p className="text-xs font-semibold text-white/90">
+                <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-center">
+                  <CheckCircle2 className="mx-auto mb-1 h-5 w-5 text-emerald-400" />
+                  <p className="text-xs font-bold text-white leading-relaxed">
                     {locale === 'fr' ? 'Réponse garantie sous 24h' : 'Guaranteed reply within 24h'}
                   </p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* ── SECTION 2 — CONTACT CHANNELS ─────────────────────────────────── */}
       <section id="contact-channels" className="py-20">
@@ -522,35 +515,30 @@ export default function ContactPage() {
       </section>
 
       {/* ── SECTION 6 — FINAL CTA ─────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-slate-900 via-[#001a4d] to-[var(--cj-blue)] py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <span className="mb-4 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white/80">
+      <section className="cj-cta-banner mt-10">
+        <div className="mx-auto max-w-4xl text-center">
+          <span className="cj-eyebrow-dark mb-4">
             {t.ctaBadge}
           </span>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h2 className="mt-2 text-3xl font-black text-white font-montserrat sm:text-4xl lg:text-5xl">
             {t.ctaTitle}
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-blue-100 font-opensans">
             {t.ctaDescription}
           </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <Link
-              href={`/${locale}/formations`}
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[var(--cj-blue)] shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
-            >
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link href={`/${locale}/formations`} className="cj-btn-primary">
               {t.ctaBtn1}
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <a
-              href="#contact-form"
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
-            >
+            <a href="#contact-form" className="cj-btn-secondary-dark">
               {t.ctaBtn2}
             </a>
           </div>
         </div>
       </section>
 
+      </div>
     </div>
   )
 }

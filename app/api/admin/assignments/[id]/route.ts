@@ -11,10 +11,19 @@ const updateAssignmentSchema = z.object({
   description: z.string().trim().min(3).max(2000).optional(),
   type: z.enum(['tp', 'exam', 'project']).optional(),
   formationId: z.coerce.number().int().positive().optional(),
+  sessionId: z.coerce.number().int().positive().nullable().optional(),
   deadline: z.string().min(10).optional(),
   maxFileSize: z.coerce.number().int().min(1).max(100).optional(),
   allowedFileTypes: z.array(z.string().trim().min(1).max(20)).max(12).optional(),
   instructions: z.string().trim().max(5000).nullable().optional(),
+  status: z.enum(['brouillon', 'publie', 'archive']).optional(),
+  publishDate: z.string().optional(),
+  files: z.array(z.object({
+    name: z.string(),
+    originalName: z.string(),
+    size: z.number(),
+    url: z.string()
+  })).optional()
 })
 
 function parseAssignmentId(value: string) {
@@ -49,14 +58,14 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     const parsed = updateAssignmentSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Donnees invalides.', details: parsed.error.flatten() },
+        { error: 'Données invalides.', details: parsed.error.flatten() },
         { status: 400 }
       )
     }
 
     const existing = await prisma.assignment.findUnique({
       where: { id },
-      select: { id: true, title: true },
+      select: { id: true, title: true, status: true },
     })
     if (!existing) return NextResponse.json({ error: 'Travail introuvable.' }, { status: 404 })
 
@@ -66,6 +75,8 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       return NextResponse.json({ error: 'Date limite invalide.' }, { status: 400 })
     }
 
+    const pubDate = data.publishDate ? new Date(data.publishDate) : undefined
+
     if (data.formationId) {
       const formation = await prisma.formation.findUnique({
         where: { id: data.formationId },
@@ -74,18 +85,49 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       if (!formation) return NextResponse.json({ error: 'Formation introuvable.' }, { status: 404 })
     }
 
+    if (data.sessionId) {
+      const session = await prisma.trainingSession.findUnique({
+        where: { id: data.sessionId },
+        select: { id: true },
+      })
+      if (!session) return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 })
+    }
+
+    // Prepare update payload
+    const updatePayload: any = {
+      title: data.title,
+      description: data.description,
+      type: data.type,
+      formationId: data.formationId,
+      sessionId: data.sessionId === undefined ? undefined : data.sessionId,
+      deadline,
+      maxFileSize: data.maxFileSize,
+      allowedFileTypes: data.allowedFileTypes ? data.allowedFileTypes.join(',') : undefined,
+      instructions: data.instructions === undefined ? undefined : data.instructions,
+      status: data.status,
+      publishDate: pubDate
+    }
+
+    // Handle files update if provided
+    if (data.files) {
+      // Delete old files first
+      await prisma.assignmentFile.deleteMany({
+        where: { assignmentId: id }
+      })
+      // Connect new files
+      updatePayload.files = {
+        create: data.files.map(f => ({
+          name: f.name,
+          originalName: f.originalName,
+          size: f.size,
+          url: f.url
+        }))
+      }
+    }
+
     const assignment = await prisma.assignment.update({
       where: { id },
-      data: {
-        title: data.title,
-        description: data.description,
-        type: data.type,
-        formationId: data.formationId,
-        deadline,
-        maxFileSize: data.maxFileSize,
-        allowedFileTypes: data.allowedFileTypes ? data.allowedFileTypes.join(',') : undefined,
-        instructions: data.instructions === undefined ? undefined : data.instructions || null,
-      },
+      data: updatePayload,
       include: {
         formation: {
           select: {
@@ -94,12 +136,37 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
             slug: true,
           },
         },
+        session: {
+          select: {
+            id: true,
+            startDate: true,
+            endDate: true,
+          }
+        },
+        files: true,
         submissions: {
           include: { files: true },
           orderBy: { submittedAt: 'desc' },
         },
       },
     })
+
+    if (assignment.status === 'publie' && existing.status !== 'publie') {
+      try {
+        await prisma.adminNotification.create({
+          data: {
+            title: '📚 Nouveau devoir disponible',
+            message: `Le devoir "${assignment.title}" est disponible pour la formation "${assignment.formation.title}". Date limite de remise : ${assignment.deadline.toLocaleString('fr-FR')}.`,
+            type: 'info',
+            target: assignment.sessionId ? 'session' : 'all',
+            sessionId: assignment.sessionId || null,
+            createdBy: auth.admin.username,
+          }
+        })
+      } catch (err) {
+        console.error('Failed to create assignment notification:', err)
+      }
+    }
 
     await writeAdminAuditLog({
       request,

@@ -370,6 +370,7 @@ model TrainingSession {
   waitlist          Waitlist[]
   attendances       Attendance[]
   events            SessionEvent[]
+  assignments       Assignment[]
   @@index([formationId])
   @@index([startDate])
   @@index([status])
@@ -433,24 +434,43 @@ model Document {
 }
 
 model Assignment {
-  id                Int      @id @default(autoincrement())
+  id                Int             @id @default(autoincrement())
   title             String
   description       String
-  type              String   // tp, exam, project
+  type              String          // tp, exam, project
   formationId       Int
-  formation         Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  formation         Formation       @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  sessionId         Int?
+  session           TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   deadline          DateTime
-  maxFileSize       Int      @default(10) // MB
-  allowedFileTypes  String   @default("pdf,doc,docx,txt,zip")
+  maxFileSize       Int             @default(10) // MB
+  allowedFileTypes  String          @default("pdf,doc,docx,txt,zip")
   instructions      String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  status            String          @default("publie") // brouillon, publie, archive
+  publishDate       DateTime        @default(now())
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   submissions       Submission[]
+  files             AssignmentFile[]
   
   @@index([formationId])
+  @@index([sessionId])
   @@index([deadline])
   @@index([type])
+}
+
+model AssignmentFile {
+  id           Int        @id @default(autoincrement())
+  assignmentId Int
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  name         String
+  originalName String
+  size         Int
+  url          String
+  uploadedAt   DateTime   @default(now())
+
+  @@index([assignmentId])
 }
 
 model Submission {

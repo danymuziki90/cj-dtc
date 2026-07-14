@@ -317,3 +317,202 @@ export function AdminEmptyState({
     </div>
   )
 }
+
+// ─── HeroBanner ─────────────────────────────────────────────────────────────
+export function HeroBanner({
+  adminName = 'Administrateur',
+  actionCount = 0,
+  currentDateString,
+  currentTimeString,
+}: {
+  adminName?: string
+  actionCount?: number
+  currentDateString: string
+  currentTimeString: string
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-[30px] border border-white/80 bg-gradient-to-r from-[var(--admin-primary)] to-[var(--admin-primary-700)] p-6 md:p-8 text-white shadow-xl transition-all duration-300">
+      {/* Decorative background shapes */}
+      <div className="absolute right-0 top-0 -mr-16 -mt-16 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+      <div className="absolute bottom-0 left-1/3 -mb-12 h-32 w-32 rounded-full bg-[var(--admin-accent)]/20 blur-xl" />
+      
+      <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center justify-center rounded-xl bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
+              🧑‍💻 Espace Admin
+            </span>
+            <span className="text-xs opacity-80 font-medium">
+              {currentDateString} • {currentTimeString}
+            </span>
+          </div>
+          <h2 className="mt-3 text-2xl font-black md:text-3xl text-white">
+            Bonjour, {adminName} 👋
+          </h2>
+          <p className="mt-2 text-sm text-blue-100 max-w-xl">
+            {actionCount > 0 
+              ? `Vous avez ${actionCount} tâches prioritaires ou alertes en attente d'action aujourd'hui.` 
+              : "Tout est sous contrôle ! Aucune alerte critique en attente aujourd'hui."}
+          </p>
+        </div>
+        
+        <div className="flex flex-wrap gap-2.5">
+          <Link
+            href="/admin/sessions"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-xs font-bold text-[var(--admin-primary)] shadow-lg shadow-blue-900/20 hover:bg-slate-50 transition"
+          >
+            📅 Créer une session
+          </Link>
+          <Link
+            href="/admin/articles"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--admin-accent)] px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-red-950/20 hover:bg-[var(--admin-accent-700)] transition"
+          >
+            📢 Publier actualité
+          </Link>
+          <Link
+            href="/admin/submissions"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/15 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-sm hover:bg-white/25 transition border border-white/10"
+          >
+            📋 Créer un travail
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── DashboardKpiCard ───────────────────────────────────────────────────────
+export function DashboardKpiCard({
+  icon: Icon,
+  label,
+  value,
+  helper,
+  trend,
+  trendDirection = 'up',
+  tone = 'primary',
+  href,
+}: {
+  icon: LucideIcon
+  label: string
+  value: string | number
+  helper?: string
+  trend?: string
+  trendDirection?: 'up' | 'down' | 'neutral'
+  tone?: Tone
+  href?: string
+}) {
+  const trendColors = {
+    up: 'text-emerald-500 bg-emerald-500/10',
+    down: 'text-rose-500 bg-rose-500/10',
+    neutral: 'text-slate-400 bg-slate-400/10',
+  }
+  
+  const content = (
+    <article className={clsx(
+      'group relative overflow-hidden rounded-[26px] border p-5 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5',
+      toneClasses[tone],
+    )}>
+      <div className="flex items-start justify-between">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+          <p className="mt-3.5 text-3xl font-black tracking-tight text-slate-900 group-hover:scale-[1.02] transition-transform origin-left">{value}</p>
+        </div>
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/95 text-slate-700 ring-1 ring-black/5 shadow-sm group-hover:bg-[var(--admin-primary)] group-hover:text-white transition-all duration-300">
+          <Icon className="h-5 w-5" />
+        </span>
+      </div>
+      
+      <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100/50 pt-3">
+        <p className="truncate text-xs text-slate-500">{helper}</p>
+        {trend ? (
+          <span className={clsx('inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-bold', trendColors[trendDirection])}>
+            {trendDirection === 'up' ? '↑' : trendDirection === 'down' ? '↓' : '•'} {trend}
+          </span>
+        ) : null}
+      </div>
+    </article>
+  )
+
+  if (href) {
+    return <Link href={href} className="block">{content}</Link>
+  }
+  return content
+}
+
+// ─── ActivityTimelineItem ────────────────────────────────────────────────────
+export function ActivityTimelineItem({
+  title,
+  description,
+  time,
+  type = 'info',
+}: {
+  title: string
+  description: string
+  time: string
+  type?: 'inscription' | 'assignment' | 'exam' | 'certificate' | 'info' | 'critical'
+}) {
+  const typeMap = {
+    inscription: 'bg-blue-500 text-white ring-blue-100',
+    assignment: 'bg-amber-500 text-white ring-amber-100',
+    exam: 'bg-purple-500 text-white ring-purple-100',
+    certificate: 'bg-emerald-500 text-white ring-emerald-100',
+    info: 'bg-slate-400 text-white ring-slate-100',
+    critical: 'bg-rose-500 text-white ring-rose-100',
+  }
+  
+  return (
+    <div className="relative pl-6 pb-5 last:pb-0 group">
+      {/* Timeline line */}
+      <span className="absolute left-[9px] top-3 bottom-0 w-0.5 bg-slate-200 group-last:hidden" />
+      
+      {/* Circle dot */}
+      <span className={clsx(
+        'absolute left-0 top-1.5 flex h-5 w-5 items-center justify-center rounded-full ring-4 text-[9px] transition-transform duration-300 group-hover:scale-110 shadow-sm',
+        typeMap[type]
+      )}>
+        {type === 'inscription' ? '👤' : type === 'assignment' ? '📂' : type === 'exam' ? '📝' : type === 'certificate' ? '🎓' : '•'}
+      </span>
+      
+      <div className="min-w-0">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs font-bold text-slate-900">{title}</p>
+          <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">{time}</span>
+        </div>
+        <p className="mt-1 text-xs text-slate-650 leading-normal">{description}</p>
+      </div>
+    </div>
+  )
+}
+
+// ─── ModuleQuickCard ─────────────────────────────────────────────────────────
+export function ModuleQuickCard({
+  title,
+  count,
+  helper,
+  href,
+  icon: Icon,
+}: {
+  title: string
+  count: number | string
+  helper: string
+  href: string
+  icon: LucideIcon
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex flex-col justify-between rounded-[24px] border border-slate-200 bg-white p-5 transition-all duration-300 hover:border-[var(--admin-primary-200)] hover:shadow-md hover:-translate-y-0.5"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--admin-primary-50)] text-[var(--admin-primary)] transition-colors duration-300 group-hover:bg-[var(--admin-primary)] group-hover:text-white">
+          <Icon className="h-4.5 w-4.5" />
+        </span>
+        <span className="text-2xl font-black text-slate-950 group-hover:text-[var(--admin-primary)] transition-colors">{count}</span>
+      </div>
+      <div className="mt-4">
+        <h4 className="text-sm font-bold text-slate-950">{title}</h4>
+        <p className="mt-1 text-xs text-slate-500 line-clamp-1">{helper}</p>
+      </div>
+    </Link>
+  )
+}

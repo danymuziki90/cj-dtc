@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import {
   PlusIcon, SearchIcon, Filter, Edit, Trash, Eye, Download,
   BookOpen, Clock, Users, TargetIcon, StarIcon, ChevronRight,
   UserIcon, XIcon, AlertCircle, Copy, RotateCw, CheckSquare,
   SquareIcon, ChevronLeft, ChevronDown
 } from 'lucide-react'
+import SessionsManagerModal from '@/components/admin/SessionsManagerModal'
 
 interface Formation {
   id: number
@@ -58,6 +59,7 @@ export default function AdminFormationsPage() {
   const [isLoading, setIsLoading]       = useState(true)
   const [error, setError]               = useState<string | null>(null)
   const [toast, setToast]               = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
+  const [sessionMgmtFormation, setSessionMgmtFormation] = useState<Formation | null>(null)
 
   // ── Filters / sort ──────────────────────────────────────────────────────────
   const [search, setSearch]             = useState('')
@@ -541,6 +543,7 @@ export default function AdminFormationsPage() {
                 onDelete={() => setConfirmDelete(f)}
                 onDuplicate={() => doDuplicate(f)}
                 onTogglePublish={() => doTogglePublish(f)}
+                onManageSessions={() => setSessionMgmtFormation(f)}
               />
             ))}
           </div>
@@ -587,6 +590,15 @@ export default function AdminFormationsPage() {
           </div>
         )}
       </div>
+
+      {sessionMgmtFormation && (
+        <SessionsManagerModal
+          formationId={sessionMgmtFormation.id}
+          formationTitle={sessionMgmtFormation.title}
+          onClose={() => setSessionMgmtFormation(null)}
+          onSuccess={loadFormations}
+        />
+      )}
     </div>
   )
 }
@@ -600,9 +612,12 @@ interface CardProps {
   onDelete: () => void
   onDuplicate: () => void
   onTogglePublish: () => void
+  onManageSessions: () => void
 }
 
-function FormationAdminCard({ formation: f, isSelected, onSelect, onEdit, onDelete, onDuplicate, onTogglePublish }: CardProps) {
+function FormationAdminCard({ formation: f, isSelected, onSelect, onEdit, onDelete, onDuplicate, onTogglePublish, onManageSessions }: CardProps) {
+  const params = useParams()
+  const locale = params?.locale as string || 'fr'
   const [showMenu, setShowMenu] = useState(false)
   const statusColor = STATUS_COLORS[f.statut] ?? 'bg-gray-100 text-gray-700 border-gray-200'
   const statusLabel = STATUS_LABELS[f.statut] ?? f.statut
@@ -695,12 +710,17 @@ function FormationAdminCard({ formation: f, isSelected, onSelect, onEdit, onDele
         <div className="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100">
           {/* Publish toggle */}
           <button onClick={onTogglePublish}
-            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
+            className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
               f.statut === 'publie'
-                ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200'
+                : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
             }`}>
             {f.statut === 'publie' ? 'Dépublier' : 'Publier'}
+          </button>
+
+          <button onClick={onManageSessions}
+            className="flex-1 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold border border-blue-200 transition-colors">
+            Sessions
           </button>
 
           <button onClick={onEdit}
@@ -709,7 +729,7 @@ function FormationAdminCard({ formation: f, isSelected, onSelect, onEdit, onDele
             <Edit className="w-4 h-4" />
           </button>
 
-          <Link href={`/fr/formations/${f.slug}`} target="_blank"
+          <Link href={`/${locale}/formations/${f.slug}`} target="_blank"
             className="flex items-center justify-center w-9 h-9 border border-gray-200 text-gray-500 rounded-lg hover:bg-gray-50 transition-colors"
             title="Voir sur le site">
             <Eye className="w-4 h-4" />

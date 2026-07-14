@@ -255,54 +255,46 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
   const visible    = showAll ? solutions : solutions.slice(0, 6)
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
-      <section className="hero-bg-unified">
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-36">
-          <div className="max-w-3xl">
-            <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-100">
-              <HeartHandshake className="h-3.5 w-3.5" />
-              {t.heroBadge}
-            </span>
-            <h1 className="mb-6 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl"
-              style={{ fontFamily: 'Montserrat, sans-serif' }}>
-              {t.heroTitle}
-            </h1>
-            <p className="mb-10 max-w-2xl text-lg leading-relaxed text-blue-100">{t.heroSub}</p>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <a href="#contact"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--cj-red)] px-7 py-4 text-sm font-bold text-white shadow-xl shadow-red-900/30 transition hover:bg-red-700 hover:-translate-y-0.5">
-                <MessageCircleIcon className="h-4 w-4" />
-                {t.heroCta1}
-              </a>
-              <a href="#solutions"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-white/40 px-7 py-4 text-sm font-semibold text-white transition hover:bg-white/10">
-                {t.heroCta2}
-                <ArrowRight className="h-4 w-4" />
-              </a>
+        {/* Hero Section floating card */}
+        <section className="cj-hero-card mb-10">
+          <div className="relative z-10">
+            <div className="max-w-4xl">
+              <span className="cj-eyebrow-dark">
+                <HeartHandshake className="h-3.5 w-3.5 text-[var(--cj-red)] animate-pulse" />
+                {t.heroBadge}
+              </span>
+              <h1 className="cj-hero-title mb-6 leading-tight">
+                {t.heroTitle}
+              </h1>
+              <p className="mb-8 max-w-2xl text-base leading-8 text-blue-100/90 sm:text-lg">{t.heroSub}</p>
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <a href="#contact" className="cj-btn-primary">
+                  <MessageCircleIcon className="h-4 w-4" />
+                  {t.heroCta1}
+                </a>
+                <a href="#solutions" className="cj-btn-secondary-dark">
+                  {t.heroCta2}
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* Stats bar inside card */}
+            <div className="mt-10 border-t border-white/10 pt-8">
+              <dl className="grid grid-cols-2 gap-y-6 gap-x-4 divide-x divide-white/10 sm:grid-cols-4">
+                {TRUST_STATS.map((s, idx) => (
+                  <div key={s.value} className={`text-center ${idx === 0 ? '' : 'sm:pl-4'}`}>
+                    <dt className="text-3xl font-black text-white sm:text-4xl font-montserrat">{s.value}</dt>
+                    <dd className="mt-1 text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">{isFr ? s.fr : s.en}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
-        </div>
-
-        {/* Stats bar */}
-        <div className="relative border-t border-white/10 bg-black/20">
-          <dl className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/10 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
-            {TRUST_STATS.map(s => (
-              <div key={s.value} className="py-6 text-center">
-                <dt className="text-3xl font-black text-white">{s.value}</dt>
-                <dd className="mt-1 text-xs font-semibold text-blue-200">{isFr ? s.fr : s.en}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        {/* Wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 48" fill="none" className="w-full">
-            <path d="M0 48 C360 0 1080 0 1440 48 L1440 48 L0 48Z" fill="white" />
-          </svg>
-        </div>
-      </section>
+        </section>
 
       {/* ════════════════════════════════════════
           2. POURQUOI CJ DEVELOPMENT
@@ -525,20 +517,21 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
       {/* ════════════════════════════════════════
           9. CTA + FORMULAIRE
       ════════════════════════════════════════ */}
-      <section id="contact" className="scroll-mt-20 bg-gradient-to-br from-[#001B47] via-[var(--cj-blue)] to-[#0B3A8E] py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-14 lg:grid-cols-2 lg:items-start">
-
+      <section id="contact" className="scroll-mt-20 mt-10">
+        <div className="cj-cta-banner relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(227,6,19,0.18),transparent_45%)]" />
+          
+          <div className="relative z-10 grid gap-14 lg:grid-cols-2 lg:items-start text-white">
             {/* Texte gauche */}
-            <div className="text-white">
-              <span className="mb-4 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-100">
+            <div>
+              <span className="cj-eyebrow-dark mb-4">
                 {t.ctaBadge}
               </span>
-              <h2 className="mb-6 text-3xl font-black leading-tight sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              <h2 className="mb-6 text-3xl font-black leading-tight sm:text-4xl font-montserrat">
                 {t.ctaTitle}
               </h2>
-              <p className="mb-8 text-base leading-relaxed text-blue-100">{t.ctaSub}</p>
-              <ul className="mb-10 space-y-3">
+              <p className="mb-8 text-base leading-relaxed text-blue-100 font-opensans">{t.ctaSub}</p>
+              <ul className="mb-10 space-y-3 font-opensans">
                 {(isFr
                   ? ['Réponse sous 48h', 'Premier échange sans engagement', 'Devis détaillé et personnalisé', 'Expertise panafricaine reconnue']
                   : ['Response within 48h', 'First meeting with no commitment', 'Detailed personalised quote', 'Recognised pan-African expertise']
@@ -549,7 +542,7 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
                   </li>
                 ))}
               </ul>
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-6">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wide text-blue-200">
                   {isFr ? 'Contact direct' : 'Direct contact'}
                 </p>
@@ -561,14 +554,15 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
             </div>
 
             {/* Formulaire droite */}
-            <div className="rounded-3xl border border-white/15 bg-white/10 p-8 backdrop-blur-sm">
-              <h3 className="mb-1 text-xl font-black text-white">{t.ctaBtn1}</h3>
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md shadow-2xl">
+              <h3 className="mb-4 text-xl font-black text-white font-montserrat">{t.ctaBtn1}</h3>
               <EntrepriseContactForm locale={locale} />
             </div>
           </div>
         </div>
       </section>
 
+      </div>
     </div>
   )
 }

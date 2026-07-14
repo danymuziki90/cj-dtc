@@ -11,10 +11,19 @@ const assignmentSchema = z.object({
   description: z.string().trim().min(3).max(2000),
   type: z.enum(['tp', 'exam', 'project']),
   formationId: z.coerce.number().int().positive(),
+  sessionId: z.coerce.number().int().positive().nullable().optional(),
   deadline: z.string().min(10),
   maxFileSize: z.coerce.number().int().min(1).max(100).default(10),
   allowedFileTypes: z.array(z.string().trim().min(1).max(20)).max(12).optional(),
   instructions: z.string().trim().max(5000).optional(),
+  status: z.enum(['brouillon', 'publie', 'archive']).optional().default('publie'),
+  publishDate: z.string().optional(),
+  files: z.array(z.object({
+    name: z.string(),
+    originalName: z.string(),
+    size: z.number(),
+    url: z.string()
+  })).optional()
 })
 
 function parseAllowedFileTypes(value: string | null | undefined) {
@@ -45,6 +54,16 @@ export async function GET(request: NextRequest) {
             slug: true,
           },
         },
+        session: {
+          select: {
+            id: true,
+            startDate: true,
+            endDate: true,
+            location: true,
+            format: true,
+          }
+        },
+        files: true,
         submissions: {
           include: {
             files: true,
@@ -71,7 +90,7 @@ export async function POST(request: NextRequest) {
     const parsed = assignmentSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Donnees invalides.', details: parsed.error.flatten() },
+        { error: 'Données invalides.', details: parsed.error.flatten() },
         { status: 400 }
       )
     }
@@ -82,6 +101,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Date limite invalide.' }, { status: 400 })
     }
 
+    const pubDate = data.publishDate ? new Date(data.publishDate) : new Date()
+
     const formation = await prisma.formation.findUnique({
       where: { id: data.formationId },
       select: { id: true, title: true },
@@ -90,16 +111,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Formation introuvable.' }, { status: 404 })
     }
 
+    if (data.sessionId) {
+      const sessionExists = await prisma.trainingSession.findUnique({
+        where: { id: data.sessionId }
+      })
+      if (!sessionExists) {
+        return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 })
+      }
+    }
+
     const assignment = await prisma.assignment.create({
       data: {
         title: data.title,
         description: data.description,
         type: data.type,
         formationId: data.formationId,
+        sessionId: data.sessionId || null,
         deadline,
         maxFileSize: data.maxFileSize,
         allowedFileTypes: (data.allowedFileTypes?.length ? data.allowedFileTypes : ['pdf', 'doc', 'docx', 'zip']).join(','),
         instructions: data.instructions || null,
+        status: data.status,
+        publishDate: pubDate,
+        files: {
+          create: data.files?.map(f => ({
+            name: f.name,
+            originalName: f.originalName,
+            size: f.size,
+            url: f.url
+          })) || []
+        }
       },
       include: {
         formation: {
@@ -109,11 +150,36 @@ export async function POST(request: NextRequest) {
             slug: true,
           },
         },
+        session: {
+          select: {
+            id: true,
+            startDate: true,
+            endDate: true,
+          }
+        },
+        files: true,
         submissions: {
           include: { files: true },
         },
       },
     })
+
+    if (assignment.status === 'publie') {
+      try {
+        await prisma.adminNotification.create({
+          data: {
+            title: '📚 Nouveau devoir disponible',
+            message: `Le devoir "${assignment.title}" est disponible pour la formation "${formation.title}". Date limite de remise : ${deadline.toLocaleString('fr-FR')}.`,
+            type: 'info',
+            target: assignment.sessionId ? 'session' : 'all',
+            sessionId: assignment.sessionId || null,
+            createdBy: auth.admin.username,
+          }
+        })
+      } catch (err) {
+        console.error('Failed to create assignment notification:', err)
+      }
+    }
 
     await writeAdminAuditLog({
       request,
@@ -123,9 +189,10 @@ export async function POST(request: NextRequest) {
       targetType: 'Assignment',
       targetId: String(assignment.id),
       targetLabel: assignment.title,
-      summary: `Creation du travail "${assignment.title}" pour ${formation.title}.`,
+      summary: `Création du travail "${assignment.title}" pour ${formation.title}.`,
       metadata: {
         formationId: formation.id,
+        sessionId: assignment.sessionId,
         deadline: assignment.deadline.toISOString(),
         type: assignment.type,
       },

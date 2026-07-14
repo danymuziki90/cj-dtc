@@ -129,10 +129,11 @@ export default function FormationDetailPage() {
   const levelColor = formation.level ? levelColors[formation.level] : 'bg-gray-100 text-gray-700 border-gray-200'
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumb & Back */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        
+        {/* Back Link */}
+        <div className="mb-6">
           <Link
             href={`/${locale}/formations`}
             className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
@@ -141,215 +142,269 @@ export default function FormationDetailPage() {
             <span>Retour au catalogue</span>
           </Link>
         </div>
-      </div>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Left: Info principale */}
-            <div className="lg:col-span-2">
-              {/* Badges */}
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                {formation.featured && (
-                  <span className="px-3 py-1 bg-white/20 text-white rounded-full text-sm font-semibold">
-                    ⭐ Formation vedette
+        {/* Hero Section floating card */}
+        <section className="cj-hero-card mb-10">
+          <div className="relative z-10">
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Left: Main Info */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Badges */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {formation.featured && (
+                    <span className="cj-eyebrow-dark">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
+                      ⭐ Formation vedette
+                    </span>
+                  )}
+                  <span className="cj-eyebrow-dark">
+                    {formation.categorie?.replace(/-/g, ' ')}
                   </span>
-                )}
-                <span className="px-3 py-1 bg-white/20 text-white rounded-full text-sm">
-                  {formation.categorie?.replace(/-/g, ' ')}
-                </span>
-                {formation.level && (
-                  <span className={`px-3 py-1 rounded-full text-sm border ${levelColor}`}>
-                    {formation.level.charAt(0).toUpperCase() + formation.level.slice(1)}
-                  </span>
-                )}
+                  {formation.level && (
+                    <span className="cj-eyebrow-dark">
+                      {formation.level.charAt(0).toUpperCase() + formation.level.slice(1)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Title */}
+                <h1 className="cj-hero-title mb-4 leading-tight">
+                  {formation.title}
+                </h1>
+
+                {/* Short description */}
+                <p className="text-base text-blue-100/90 leading-relaxed font-opensans">
+                  {formation.shortDescription || formation.description}
+                </p>
+
+                {/* Meta info */}
+                <div className="flex flex-wrap items-center gap-6 text-blue-100/90 text-sm font-semibold pt-4">
+                  {formation.rating && (
+                    <div className="flex items-center gap-2">
+                      <StarIcon className="w-4 h-4 text-yellow-300 fill-current animate-pulse" />
+                      <span className="text-white">{formation.rating}</span>
+                      <span className="opacity-80">({formation.reviewCount || 0} avis)</span>
+                    </div>
+                  )}
+                  {formation.enrollmentCount !== undefined && (
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-blue-300" />
+                      <span>{formation.enrollmentCount} apprenants inscrits</span>
+                    </div>
+                  )}
+                  {formation.duree && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-blue-300" />
+                      <span>{formation.duree}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Titre */}
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-                {formation.title}
-              </h1>
-
-              {/* Description courte */}
-              <p className="text-xl text-blue-100 mb-6 leading-relaxed">
-                {formation.shortDescription || formation.description}
-              </p>
-
-              {/* Meta info */}
-              <div className="flex flex-wrap items-center gap-6 text-blue-100">
-                {formation.rating && (
-                  <div className="flex items-center gap-2">
-                    <StarIcon className="w-5 h-5 text-yellow-300 fill-current" />
-                    <span className="font-semibold text-white">{formation.rating}</span>
-                    <span>({formation.reviewCount || 0} avis)</span>
-                  </div>
-                )}
-                {formation.enrollmentCount !== undefined && (
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    <span>{formation.enrollmentCount} étudiants inscrits</span>
-                  </div>
-                )}
-                {formation.duree && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
-                    <span>{formation.duree}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right: Card d'inscription */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-2xl p-6 text-gray-900">
-                {/* Prix */}
-                <div className="mb-6">
-                  {formation.price !== undefined ? (
-                    <>
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-4xl font-bold text-blue-600">
-                          ${formation.price}
-                        </span>
-                        {hasDiscount && (
-                          <>
-                            <span className="text-xl text-gray-500 line-through">
-                              ${formation.originalPrice}
-                            </span>
-                            <span className="px-2 py-1 bg-red-500 text-white rounded-full text-sm font-bold">
-                              -{discountPercent}%
-                            </span>
-                          </>
+              {/* Right: Registration Card */}
+              <div className="lg:col-span-1">
+                <div className="cj-card-static text-gray-900 shadow-xl border border-slate-200">
+                  {/* Prix */}
+                  <div className="mb-6">
+                    {formation.price !== undefined ? (
+                      <>
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-4xl font-black text-[var(--cj-blue)] font-montserrat">
+                            ${formation.price}
+                          </span>
+                          {hasDiscount && (
+                            <>
+                              <span className="text-lg text-gray-500 line-through">
+                                ${formation.originalPrice}
+                              </span>
+                              <span className="px-2 py-0.5 bg-[var(--cj-red)] text-white rounded-full text-xs font-bold">
+                                -{discountPercent}%
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        {formation.nextSession && (
+                          <p className="text-xs text-gray-500 font-medium font-opensans">
+                            Prochaine session : {new Date(formation.nextSession.startDate).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </p>
                         )}
+                      </>
+                    ) : (
+                      <p className="text-2xl font-black text-[var(--cj-blue)] font-montserrat">Prix sur demande</p>
+                    )}
+                  </div>
+
+                  {/* CTA Principal */}
+                  <div className="space-y-3">
+                    {formation.nextSession ? (
+                      <Link
+                        href={`/${locale}/formations/inscription?session=${formation.nextSession.id}`}
+                        className="cj-btn-primary w-full text-center py-3.5"
+                      >
+                        S'inscrire à la session
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/${locale}/contact?subject=Formation: ${formation.title}`}
+                        className="cj-btn-primary w-full text-center py-3.5"
+                      >
+                        Nous contacter (Pas de session)
+                      </Link>
+                    )}
+
+                    <Link
+                      href={`/${locale}/contact?subject=Formation: ${formation.title}`}
+                      className="cj-btn-secondary-light w-full text-center py-3"
+                    >
+                      Demander des informations
+                    </Link>
+                  </div>
+
+                  {/* Sessions disponibles */}
+                  {formation.sessions && formation.sessions.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h3 className="font-bold text-slate-800 text-xs mb-3 flex items-center gap-1.5 uppercase tracking-wider">
+                        <Calendar className="w-4 h-4 text-blue-600" />
+                        <span>Sessions programmées</span>
+                      </h3>
+                      <div className="space-y-3">
+                        {formation.sessions.map((session: any) => {
+                          const available = session.maxParticipants - (session.currentParticipants || 0)
+                          const isFull = available <= 0
+                          return (
+                            <div key={session.id} className="border border-slate-100 rounded-xl p-3 bg-slate-50 text-xs">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <p className="font-bold text-slate-900">
+                                    {new Date(session.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                                  </p>
+                                  <p className="text-slate-500 font-medium">{session.format} • {session.location}</p>
+                                </div>
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  isFull ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                                }`}>
+                                  {isFull ? 'Complet' : `${available} place(s)`}
+                                </span>
+                              </div>
+                              <Link
+                                href={`/${locale}/formations/inscription?session=${session.id}`}
+                                className={`w-full block text-center py-2 rounded-lg font-bold transition-all text-xs ${
+                                  isFull
+                                    ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                                    : 'bg-[var(--cj-blue)] hover:bg-[var(--cj-blue-700)] text-white shadow-sm'
+                                }`}
+                              >
+                                {isFull ? 'Rejoindre la liste d\'attente' : 'S\'inscrire à cette session'}
+                              </Link>
+                            </div>
+                          )
+                        })}
                       </div>
-                      {formation.nextSession && (
-                        <p className="text-sm text-gray-600">
-                          Prochaine session : {new Date(formation.nextSession.startDate).toLocaleDateString('fr-FR', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                          })}
-                        </p>
+                    </div>
+                  )}
+
+                  {/* Inclusions */}
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h3 className="font-bold text-slate-800 text-xs mb-3 uppercase tracking-wider">Cette formation inclut :</h3>
+                    <ul className="space-y-2">
+                      {formation.hasCertificate && (
+                        <li className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                          <Award className="w-4 h-4 text-blue-600" />
+                          <span>Certificat de formation</span>
+                        </li>
                       )}
-                    </>
-                  ) : (
-                    <p className="text-2xl font-semibold text-gray-700">Prix sur demande</p>
-                  )}
-                </div>
+                      {formation.hasSupports && (
+                        <li className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                          <BookOpen className="w-4 h-4 text-blue-600" />
+                          <span>Supports de cours complets</span>
+                        </li>
+                      )}
+                      {formation.hasPracticalExercises && (
+                        <li className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                          <TrendingUp className="w-4 h-4 text-blue-600" />
+                          <span>Exercices pratiques</span>
+                        </li>
+                      )}
+                      {formation.hasCoaching && (
+                        <li className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                          <UserIcon className="w-4 h-4 text-blue-600" />
+                          <span>Coaching personnalisé</span>
+                        </li>
+                      )}
+                      {formation.hasAccompaniment && (
+                        <li className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                          <ShieldIcon className="w-4 h-4 text-blue-600" />
+                          <span>Accompagnement post-formation</span>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
 
-                {/* CTA Principal */}
-                <Link
-                  href={`/${locale}/inscription?formation=${formation.slug}`}
-                  className="w-full block text-center px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105 shadow-lg mb-3"
-                >
-                  S'inscrire maintenant
-                </Link>
+                  {/* Format & Lieu */}
+                  <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
+                    {formation.format && (
+                      <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                        <FormatIcon className="w-4 h-4 text-gray-400" />
+                        <span>
+                          {formation.format === 'en_ligne' ? 'Formation 100% en ligne' :
+                           formation.format === 'presentiel' ? 'Formation en présentiel' :
+                           'Formation hybride'}
+                        </span>
+                      </div>
+                    )}
+                    {formation.nextSession?.location && (
+                      <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                        <MapPinIcon className="w-4 h-4 text-gray-400" />
+                        <span>{formation.nextSession.location}</span>
+                      </div>
+                    )}
+                  </div>
 
-                <Link
-                  href={`/${locale}/contact?subject=Formation: ${formation.title}`}
-                  className="w-full block text-center px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
-                >
-                  Demander des informations
-                </Link>
-
-                {/* Inclusions */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h3 className="font-semibold text-gray-900 mb-3">Cette formation inclut :</h3>
-                  <ul className="space-y-2">
-                    {formation.hasCertificate && (
-                      <li className="flex items-center gap-2 text-sm text-gray-700">
-                        <Award className="w-4 h-4 text-blue-600" />
-                        <span>Certificat de formation</span>
-                      </li>
-                    )}
-                    {formation.hasSupports && (
-                      <li className="flex items-center gap-2 text-sm text-gray-700">
-                        <BookOpen className="w-4 h-4 text-blue-600" />
-                        <span>Supports de cours complets</span>
-                      </li>
-                    )}
-                    {formation.hasPracticalExercises && (
-                      <li className="flex items-center gap-2 text-sm text-gray-700">
-                        <TrendingUp className="w-4 h-4 text-blue-600" />
-                        <span>Exercices pratiques</span>
-                      </li>
-                    )}
-                    {formation.hasCoaching && (
-                      <li className="flex items-center gap-2 text-sm text-gray-700">
-                        <UserIcon className="w-4 h-4 text-blue-600" />
-                        <span>Coaching personnalisé</span>
-                      </li>
-                    )}
-                    {formation.hasAccompaniment && (
-                      <li className="flex items-center gap-2 text-sm text-gray-700">
-                        <ShieldIcon className="w-4 h-4 text-blue-600" />
-                        <span>Accompagnement post-formation</span>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-
-                {/* Format & Lieu */}
-                <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
-                  {formation.format && (
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <FormatIcon className="w-4 h-4 text-gray-400" />
-                      <span>
-                        {formation.format === 'en_ligne' ? 'Formation 100% en ligne' :
-                         formation.format === 'presentiel' ? 'Formation en présentiel' :
-                         'Formation hybride'}
-                      </span>
-                    </div>
-                  )}
-                  {formation.nextSession?.location && (
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <MapPinIcon className="w-4 h-4 text-gray-400" />
-                      <span>{formation.nextSession.location}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="mt-6 pt-6 border-t border-gray-200 flex items-center justify-between">
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
-                    <Heart className="w-5 h-5" />
-                    <span className="text-sm">Sauvegarder</span>
-                  </button>
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
-                    <Share2 className="w-5 h-5" />
-                    <span className="text-sm">Partager</span>
-                  </button>
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
-                    <Download className="w-5 h-5" />
-                    <span className="text-sm">Télécharger</span>
-                  </button>
+                  {/* Actions */}
+                  <div className="mt-6 pt-6 border-t border-gray-200 flex items-center justify-between">
+                    <button className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors">
+                      <Heart className="w-4 h-4" />
+                      <span className="text-[11px] font-bold uppercase tracking-wider">Sauvegarder</span>
+                    </button>
+                    <button className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors">
+                      <Share2 className="w-4 h-4" />
+                      <span className="text-[11px] font-bold uppercase tracking-wider">Partager</span>
+                    </button>
+                    <button className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors">
+                      <Download className="w-4 h-4" />
+                      <span className="text-[11px] font-bold uppercase tracking-wider">Télécharger</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* Tabs Navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-30 mb-8 rounded-2xl shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex gap-8">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`py-4 px-2 border-b-2 font-medium transition-colors ${
+              className={`py-4 px-2 border-b-2 font-bold text-sm transition-colors ${
                 activeTab === 'overview'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'border-[var(--cj-blue)] text-[var(--cj-blue)]'
+                  : 'border-transparent text-slate-500 hover:text-slate-900'
               }`}
             >
               Vue d'ensemble
             </button>
             <button
               onClick={() => setActiveTab('program')}
-              className={`py-4 px-2 border-b-2 font-medium transition-colors ${
+              className={`py-4 px-2 border-b-2 font-bold text-sm transition-colors ${
                 activeTab === 'program'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'border-[var(--cj-blue)] text-[var(--cj-blue)]'
+                  : 'border-transparent text-slate-500 hover:text-slate-900'
               }`}
             >
               Programme détaillé
@@ -357,10 +412,10 @@ export default function FormationDetailPage() {
             {formation.instructor && (
               <button
                 onClick={() => setActiveTab('instructor')}
-                className={`py-4 px-2 border-b-2 font-medium transition-colors ${
+                className={`py-4 px-2 border-b-2 font-bold text-sm transition-colors ${
                   activeTab === 'instructor'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                    ? 'border-[var(--cj-blue)] text-[var(--cj-blue)]'
+                    : 'border-transparent text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Formateur
@@ -371,8 +426,8 @@ export default function FormationDetailPage() {
       </div>
 
       {/* Content */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-6">
+        <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
@@ -380,34 +435,34 @@ export default function FormationDetailPage() {
               {activeTab === 'overview' && (
                 <div className="space-y-8">
                   {/* Description */}
-                  <div className="bg-white rounded-lg shadow-md p-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  <div className="cj-card-static p-8">
+                    <h2 className="text-2xl font-black text-slate-900 mb-4 font-montserrat">
                       À propos de cette formation
                     </h2>
-                    <p className="text-gray-700 leading-relaxed">
+                    <p className="text-slate-700 leading-relaxed font-opensans">
                       {formation.description}
                     </p>
                   </div>
 
                   {/* Objectifs */}
                   {objectives.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-md p-8">
+                    <div className="cj-card-static p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <TargetIcon className="w-6 h-6 text-blue-600" />
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--cj-blue-50)] text-[var(--cj-blue)]">
+                          <TargetIcon className="w-5 h-5" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-black text-slate-900 font-montserrat">
                           Objectifs pédagogiques
                         </h2>
                       </div>
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-slate-600 mb-4 font-opensans">
                         À l'issue de cette formation, vous serez capable de :
                       </p>
-                      <ul className="space-y-3">
+                      <ul className="space-y-3 font-opensans">
                         {objectives.map((obj, index) => (
                           <li key={index} className="flex items-start gap-3">
-                            <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                            <span className="text-gray-700">{obj}</span>
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-slate-700">{obj}</span>
                           </li>
                         ))}
                       </ul>
@@ -416,12 +471,12 @@ export default function FormationDetailPage() {
 
                   {/* Compétences acquises */}
                   {skills.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-md p-8">
+                    <div className="cj-card-static p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <ZapIcon className="w-6 h-6 text-purple-600" />
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-50 text-purple-600">
+                          <ZapIcon className="w-5 h-5" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-black text-slate-900 font-montserrat">
                           Compétences développées
                         </h2>
                       </div>
@@ -429,7 +484,7 @@ export default function FormationDetailPage() {
                         {skills.map((skill, index) => (
                           <span
                             key={index}
-                            className="px-4 py-2 bg-purple-50 text-purple-700 rounded-lg font-medium"
+                            className="px-4 py-2 bg-purple-50 text-purple-700 rounded-xl font-semibold text-sm"
                           >
                             {skill}
                           </span>
@@ -440,22 +495,22 @@ export default function FormationDetailPage() {
 
                   {/* Public cible */}
                   {publicTargets.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-md p-8">
+                    <div className="cj-card-static p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                          <Users className="w-6 h-6 text-green-600" />
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                          <Users className="w-5 h-5" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-black text-slate-900 font-montserrat">
                           Public cible
                         </h2>
                       </div>
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-slate-600 mb-4 font-opensans">
                         Cette formation s'adresse à :
                       </p>
-                      <div className="grid md:grid-cols-2 gap-3">
+                      <div className="grid md:grid-cols-2 gap-3 font-opensans">
                         {publicTargets.map((target, index) => (
-                          <div key={index} className="flex items-center gap-2 text-gray-700">
-                            <ChevronRight className="w-4 h-4 text-blue-600" />
+                          <div key={index} className="flex items-center gap-2 text-slate-700">
+                            <ChevronRight className="w-4 h-4 text-[var(--cj-blue)]" />
                             <span>{target}</span>
                           </div>
                         ))}
@@ -465,34 +520,34 @@ export default function FormationDetailPage() {
 
                   {/* Prérequis */}
                   {formation.prerequisites && (
-                    <div className="bg-white rounded-lg shadow-md p-8">
+                    <div className="cj-card-static p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <ShieldIcon className="w-6 h-6 text-orange-600" />
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+                          <ShieldIcon className="w-5 h-5" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-black text-slate-900 font-montserrat">
                           Prérequis
                         </h2>
                       </div>
-                      <p className="text-gray-700">{formation.prerequisites}</p>
+                      <p className="text-slate-700 font-opensans">{formation.prerequisites}</p>
                     </div>
                   )}
 
                   {/* Méthodes pédagogiques */}
                   {methods.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-md p-8">
+                    <div className="cj-card-static p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                          <PlayCircle className="w-6 h-6 text-indigo-600" />
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                          <PlayCircle className="w-5 h-5" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-black text-slate-900 font-montserrat">
                           Méthodes pédagogiques
                         </h2>
                       </div>
-                      <ul className="space-y-2">
+                      <ul className="space-y-2 font-opensans">
                         {methods.map((method, index) => (
-                          <li key={index} className="flex items-start gap-2 text-gray-700">
-                            <span className="text-blue-600">•</span>
+                          <li key={index} className="flex items-start gap-2 text-slate-700">
+                            <span className="text-[var(--cj-blue)]">•</span>
                             <span>{method}</span>
                           </li>
                         ))}
@@ -502,14 +557,17 @@ export default function FormationDetailPage() {
 
                   {/* Certification */}
                   {formation.certification && (
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-8 border border-blue-100">
-                      <div className="flex items-center gap-3 mb-4">
-                        <Award className="w-8 h-8 text-blue-600" />
-                        <h2 className="text-2xl font-bold text-gray-900">
-                          Certification
-                        </h2>
+                    <div className="rounded-3xl bg-[linear-gradient(135deg,#02142f_0%,#002d72_55%,#0c4da2_100%)] p-8 text-white shadow-md border border-slate-800 relative overflow-hidden">
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(227,6,19,0.18),transparent_45%)]" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Award className="w-8 h-8 text-[var(--cj-red)]" />
+                          <h2 className="text-2xl font-black text-white font-montserrat">
+                            Certification
+                          </h2>
+                        </div>
+                        <p className="text-blue-100 font-opensans leading-relaxed">{formation.certification}</p>
                       </div>
-                      <p className="text-gray-700">{formation.certification}</p>
                     </div>
                   )}
                 </div>
@@ -517,20 +575,20 @@ export default function FormationDetailPage() {
 
               {/* Program Tab */}
               {activeTab === 'program' && (
-                <div className="bg-white rounded-lg shadow-md p-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                <div className="cj-card-static p-8">
+                  <h2 className="text-2xl font-black text-slate-900 mb-6 font-montserrat">
                     Programme détaillé
                   </h2>
                   {modules.length > 0 ? (
                     <div className="space-y-4">
                       {modules.map((module, index) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-6">
+                        <div key={index} className="border border-slate-200 rounded-2xl p-6 transition duration-200 hover:border-[var(--cj-blue)] hover:bg-slate-50/50">
                           <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <span className="text-blue-600 font-bold">{index + 1}</span>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--cj-blue-50)] text-[var(--cj-blue)] font-bold flex-shrink-0">
+                              <span>{index + 1}</span>
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                              <h3 className="text-lg font-bold text-slate-950 font-montserrat mb-2">
                                 {module}
                               </h3>
                             </div>
@@ -539,7 +597,7 @@ export default function FormationDetailPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-600">
+                    <p className="text-slate-600 font-opensans">
                       Le programme détaillé sera communiqué lors de l'inscription.
                     </p>
                   )}
@@ -548,12 +606,12 @@ export default function FormationDetailPage() {
 
               {/* Instructor Tab */}
               {activeTab === 'instructor' && formation.instructor && (
-                <div className="bg-white rounded-lg shadow-md p-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                <div className="cj-card-static p-8">
+                  <h2 className="text-2xl font-black text-slate-900 mb-6 font-montserrat">
                     Votre formateur
                   </h2>
-                  <div className="flex items-start gap-6">
-                    <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row items-start gap-6">
+                    <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center flex-shrink-0 shadow-inner">
                       {formation.instructor.photoUrl ? (
                         <img
                           src={formation.instructor.photoUrl}
@@ -565,25 +623,25 @@ export default function FormationDetailPage() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      <h3 className="text-xl font-bold text-slate-900 font-montserrat mb-1">
                         {formation.instructor.firstName} {formation.instructor.lastName}
                       </h3>
-                      <p className="text-blue-600 font-medium mb-4">
+                      <p className="text-[var(--cj-blue)] font-semibold text-sm mb-4">
                         {formation.instructor.title}
                       </p>
                       {formation.instructor.bio && (
-                        <p className="text-gray-700 leading-relaxed mb-4">
+                        <p className="text-slate-600 leading-relaxed font-opensans mb-4 text-sm">
                           {formation.instructor.bio}
                         </p>
                       )}
                       {formation.instructor.expertise && formation.instructor.expertise.length > 0 && (
                         <div>
-                          <p className="font-semibold text-gray-900 mb-2">Domaines d'expertise :</p>
+                          <p className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-2">Domaines d'expertise :</p>
                           <div className="flex flex-wrap gap-2">
                             {formation.instructor.expertise.map((exp, index) => (
                               <span
                                 key={index}
-                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
+                                className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold"
                               >
                                 {exp}
                               </span>
@@ -600,16 +658,16 @@ export default function FormationDetailPage() {
             {/* Sidebar */}
             <div className="lg:col-span-1 space-y-6">
               {/* Contact rapide */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="font-bold text-gray-900 mb-4">
+              <div className="cj-card-interactive">
+                <h3 className="text-lg font-bold text-slate-950 font-montserrat mb-2">
                   Besoin d'aide ?
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Nos conseillers sont là pour répondre à toutes vos questions
+                <p className="text-xs text-slate-600 mb-4 font-opensans leading-relaxed">
+                  Nos conseillers sont là pour répondre à toutes vos questions et vous accompagner.
                 </p>
                 <Link
                   href={`/${locale}/contact`}
-                  className="w-full block text-center px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="cj-btn-primary w-full text-center py-2.5"
                 >
                   <MessageCircleIcon className="w-4 h-4 inline mr-2" />
                   Nous contacter
@@ -618,13 +676,13 @@ export default function FormationDetailPage() {
 
               {/* Tags */}
               {formation.tags && formation.tags.length > 0 && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h3 className="font-bold text-gray-900 mb-4">Tags</h3>
+                <div className="cj-card-interactive">
+                  <h3 className="text-lg font-bold text-slate-950 font-montserrat mb-3">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {formation.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm"
+                        className="px-3 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg text-xs font-medium"
                       >
                         #{tag}
                       </span>
@@ -639,9 +697,9 @@ export default function FormationDetailPage() {
 
       {/* Formations similaires */}
       {similarFormations.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl font-black text-slate-950 mb-8 font-montserrat">
               Formations similaires
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -654,22 +712,24 @@ export default function FormationDetailPage() {
       )}
 
       {/* CTA Final */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-blue-700">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
+      <section className="cj-cta-banner mt-10">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-black text-white mb-4 font-montserrat sm:text-4xl">
             Prêt à vous lancer ?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Inscrivez-vous maintenant et commencez votre transformation professionnelle
+          <p className="text-base text-blue-100 mb-8 font-opensans leading-relaxed">
+            Inscrivez-vous maintenant et commencez votre transformation professionnelle avec CJ DTC.
           </p>
           <Link
             href={`/${locale}/inscription?formation=${formation.slug}`}
-            className="inline-block px-8 py-4 bg-white text-blue-600 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 shadow-xl"
+            className="cj-btn-primary"
           >
             S'inscrire à cette formation
           </Link>
         </div>
       </section>
+
+      </div>
     </div>
   )
 }
