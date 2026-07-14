@@ -102,10 +102,22 @@ export default function AdminFormationsPage() {
       const paramFormationId = params.get('formationId') || params.get('manageSessionsFor')
 
       if (action === 'create-session' || params.get('createSession') === 'true') {
-        setShowSelectFormationForSession(true)
-        // Nettoyer l'URL
-        const newUrl = window.location.pathname
-        window.history.replaceState({}, '', newUrl)
+        if (formations.length > 0) {
+          const found = formations.find(
+            (f) =>
+              f.slug === 'conference-forum' ||
+              f.title.toLowerCase().includes('conférence / forum') ||
+              f.title.toLowerCase().includes('conference / forum')
+          )
+          if (found) {
+            setSessionMgmtFormation(found)
+          } else {
+            setShowSelectFormationForSession(true)
+          }
+          // Nettoyer l'URL
+          const newUrl = window.location.pathname
+          window.history.replaceState({}, '', newUrl)
+        }
       } else if (paramFormationId && formations.length > 0) {
         const found = formations.find(f => f.id === Number(paramFormationId))
         if (found) {

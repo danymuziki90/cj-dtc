@@ -19,6 +19,13 @@ interface Assignment {
   allowedFileTypes: string[]
   instructions: string
   createdAt: string
+  files?: Array<{
+    id: number
+    name: string
+    originalName: string
+    size: number
+    url: string
+  }>
   submissions: Array<{
     id: number
     status: 'submitted' | 'graded' | 'returned'

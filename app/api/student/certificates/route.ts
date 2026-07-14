@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { requireStudent } from '@/lib/auth-portal/guards'
 
+export const runtime = "nodejs"
+
+// GET /api/student/certificates - Liste des certificats actifs de l'étudiant connecté
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const auth = await requireStudent(req)
+    if (auth.error) return auth.error
 
-    if (!session || session.user?.role !== 'student') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+    const studentId = auth.student.id
+    const studentEmail = auth.student.email
 
-    const studentEmail = session.user.email
-
-    if (!studentEmail) {
-      return NextResponse.json({ error: 'Email de l\'étudiant non configuré dans la session' }, { status: 400 })
-    }
-
+    // Récupérer les certificats de l'étudiant (par ID ou par e-mail d'inscription)
     const dbCertificates = await prisma.certificate.findMany({
       where: {
-        enrollment: {
-          email: studentEmail
-        }
+        status: 'actif',
+        OR: [
+          { studentId },
+          {
+            enrollment: {
+              email: studentEmail
+            }
+          }
+        ]
       },
       include: {
         formation: {
@@ -52,6 +55,8 @@ export async function GET(req: NextRequest) {
       issuedBy: cert.issuedBy || 'CJ DTC',
       verified: cert.verified,
       userId: cert.userId,
+      status: cert.status,
+      fileUrl: cert.fileUrl,
       formationTitle: cert.formation?.title || 'Formation Générale',
       formationCategorie: cert.formation?.categorie || 'Autres',
       completionDate: cert.session ? new Date(cert.session.endDate).toISOString().split('T')[0] : cert.issuedAt.toISOString().split('T')[0]
@@ -59,7 +64,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(mapped)
   } catch (error) {
-    console.error('Erreur lors du chargement des certificats:', error)
+    console.error('Erreur lors du chargement des certificats de l\'étudiant:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

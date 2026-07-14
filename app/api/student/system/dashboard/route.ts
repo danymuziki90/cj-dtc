@@ -77,11 +77,17 @@ export async function GET(request: NextRequest) {
       }),
       prisma.certificate.findMany({
         where: {
-          enrollment: {
-            is: {
-              email: studentEmail,
-            },
-          },
+          status: 'actif',
+          OR: [
+            { studentId: auth.student.id },
+            {
+              enrollment: {
+                is: {
+                  email: studentEmail,
+                },
+              },
+            }
+          ]
         },
         orderBy: { issuedAt: 'desc' },
         include: {
@@ -576,7 +582,7 @@ export async function GET(request: NextRequest) {
       formation: certificate.formation,
       session: certificate.session,
       source: 'certificate',
-      fileUrl: null,
+      fileUrl: certificate.fileUrl,
     })),
     ...portalCertificates.map((certificate) => ({
       id: `portal-${certificate.id}`,

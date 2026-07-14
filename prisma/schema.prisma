@@ -47,6 +47,7 @@ model Student {
   portalSubmissions  StudentSubmission[]
   portalCertificates StudentCertificate[]
   enrollments        Enrollment[]
+  certificates       Certificate[]
 
   @@index([username])
   @@index([adminSessionId])
@@ -272,10 +273,15 @@ model Certificate {
   issuedBy   String?
   user       User?    @relation(fields: [userId], references: [id])
   userId     String?
+  fileUrl    String?
+  status     String   @default("actif") // actif, archive, revoque
+  studentId  String?
+  student    Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
 
   @@index([formationId])
   @@index([sessionId])
   @@index([enrollmentId])
+  @@index([studentId])
   @@index([type])
 }
 
