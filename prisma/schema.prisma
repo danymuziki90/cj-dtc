@@ -315,6 +315,7 @@ model Enrollment {
 
   waitlist            Waitlist[]
   attendances         Attendance[]
+  formAnswers         SessionFormAnswer[]
 
   // Certificats
   certificateIssued   Boolean  @default(false)
@@ -377,6 +378,7 @@ model TrainingSession {
   attendances       Attendance[]
   events            SessionEvent[]
   assignments       Assignment[]
+  formQuestions     SessionFormQuestion[]
   @@index([formationId])
   @@index([startDate])
   @@index([status])
@@ -657,4 +659,61 @@ model SessionEvent {
 
   @@index([sessionId])
   @@index([date])
+}
+
+// =============================================
+// FORMULAIRE D'INSCRIPTION PERSONNALISÉ
+// =============================================
+
+model SessionFormTemplate {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  questions   SessionFormQuestion[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SessionFormQuestion {
+  id          Int      @id @default(autoincrement())
+  sessionId   Int
+  session     TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  templateId  Int?
+  template    SessionFormTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  label       String
+  type        String   // text_short | text_long | number | date | select | radio | checkbox | yes_no | file_upload
+  helpText    String?
+  required    Boolean  @default(false)
+  order       Int      @default(0)
+  options     String?  // JSON array ["Option A", "Option B"] pour select/radio/checkbox
+  fileTypes   String?  // JSON array ["pdf","docx"] pour file_upload
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  answers     SessionFormAnswer[]
+
+  @@index([sessionId])
+  @@index([order])
+  @@index([templateId])
+}
+
+model SessionFormAnswer {
+  id           Int      @id @default(autoincrement())
+  questionId   Int
+  question     SessionFormQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  enrollmentId Int
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  textValue    String?  // text_short, text_long, date, yes_no, number
+  jsonValue    String?  // JSON array pour checkbox
+  fileUrl      String?  // file_upload stockage URL
+  fileName     String?  // nom original du fichier
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([questionId, enrollmentId])
+  @@index([questionId])
+  @@index([enrollmentId])
 }
