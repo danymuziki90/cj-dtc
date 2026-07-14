@@ -3,8 +3,9 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
 import {
   CalendarDays, Clock, MapPin, Users, Trash, Edit, Plus, Copy, X,
-  Image as ImageIcon, Upload, AlertCircle, Check, Archive, RefreshCw, Eye
+  Image as ImageIcon, Upload, AlertCircle, Check, Archive, RefreshCw, Eye, ClipboardList,
 } from 'lucide-react'
+import SessionFormBuilder from './SessionFormBuilder'
 
 type SessionItem = {
   id: number
@@ -70,6 +71,9 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
   const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+
+  // Tab in right panel: 'general' | 'form'
+  const [rightTab, setRightTab] = useState<'general' | 'form'>('general')
 
   // Form states
   const [form, setForm] = useState(initialForm)
@@ -487,22 +491,56 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
 
           {/* RIGHT PANEL: Form editor */}
           <div className="p-6 overflow-y-auto bg-slate-50/50 flex flex-col h-full">
-            <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                {editingId ? <Edit className="w-5 h-5 text-blue-600" /> : <Plus className="w-5 h-5 text-blue-600" />}
-                <span>{editingId ? 'Modifier la session' : 'Créer une session'}</span>
-              </h3>
+            {/* Panel header + tabs */}
+            <div className="border-b border-slate-200 pb-3 mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                  {editingId ? <Edit className="w-5 h-5 text-blue-600" /> : <Plus className="w-5 h-5 text-blue-600" />}
+                  <span>{editingId ? 'Modifier la session' : 'Créer une session'}</span>
+                </h3>
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="text-xs text-rose-600 hover:underline font-semibold"
+                  >
+                    Annuler la modification
+                  </button>
+                )}
+              </div>
+
+              {/* Tabs — uniquement visible en mode édition */}
               {editingId && (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="text-xs text-rose-600 hover:underline font-semibold"
-                >
-                  Annuler la modification
-                </button>
+                <div className="inline-flex rounded-xl bg-slate-100 p-0.5 border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setRightTab('general')}
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                      rightTab === 'general'
+                        ? 'bg-white text-blue-700 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <Edit className="h-3 w-3" />
+                    Paramètres
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRightTab('form')}
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                      rightTab === 'form'
+                        ? 'bg-white text-blue-700 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <ClipboardList className="h-3 w-3" />
+                    Formulaire d'inscription
+                  </button>
+                </div>
               )}
             </div>
 
+            {(!editingId || rightTab === 'general') && (
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
@@ -723,6 +761,14 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
                 </button>
               </div>
             </form>
+            )} {/* end rightTab === 'general' */}
+
+            {/* Onglet Formulaire d'inscription — uniquement si session existante */}
+            {editingId && rightTab === 'form' && (
+              <div className="mt-0">
+                <SessionFormBuilder sessionId={editingId} />
+              </div>
+            )}
           </div>
 
         </div>

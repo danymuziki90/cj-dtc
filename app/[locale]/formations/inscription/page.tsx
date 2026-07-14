@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, MapPinIcon, Clock, Users, DollarSign, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react'
+import { Calendar, MapPinIcon, Clock, Users, DollarSign, CheckCircle, ArrowLeft, AlertCircle, FileUp } from 'lucide-react'
 import { FormattedDate } from '@/components/FormattedDate'
 
 interface TrainingSession {
@@ -34,6 +34,18 @@ interface TrainingSession {
     }
 }
 
+// ── Type questions personnalisées ───────────────────────────────────────────
+interface FormQuestion {
+    id: number
+    label: string
+    type: string
+    helpText: string | null
+    required: boolean
+    order: number
+    options: string[]
+    fileTypes: string[]
+}
+
 function InscriptionContent() {
     const router = useRouter()
     const params = useParams()
@@ -46,6 +58,11 @@ function InscriptionContent() {
     const [submitting, setSubmitting] = useState(false)
     const [success, setSuccess] = useState(false)
     const [onWaitlist, setOnWaitlist] = useState(false)
+
+    // Questions personnalisées
+    const [customQuestions, setCustomQuestions] = useState<FormQuestion[]>([])
+    const [customAnswers, setCustomAnswers] = useState<Record<number, string | string[]>>({})
+    const [customErrors, setCustomErrors] = useState<Record<number, string>>({})
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -67,13 +84,20 @@ function InscriptionContent() {
 
     const loadSession = async () => {
         try {
-            const response = await fetch(`/api/sessions/${sessionId}`)
-            if (response.ok) {
-                const data = await response.json()
+            const [sessionRes, questionsRes] = await Promise.all([
+                fetch(`/api/sessions/${sessionId}`),
+                fetch(`/api/sessions/${sessionId}/form-questions`),
+            ])
+            if (sessionRes.ok) {
+                const data = await sessionRes.json()
                 setSession(data)
             } else {
                 alert('Session non trouvée')
                 router.push('/formations')
+            }
+            if (questionsRes.ok) {
+                const qData = await questionsRes.json()
+                setCustomQuestions(Array.isArray(qData) ? qData : [])
             }
         } catch (error) {
             console.error('Erreur chargement session:', error)
@@ -93,6 +117,25 @@ function InscriptionContent() {
         }))
     }
 
+    // Validation côté client des champs personnalisés
+    const validateCustom = (): boolean => {
+        const errors: Record<number, string> = {}
+        for (const q of customQuestions) {
+            if (!q.required) continue
+            const val = customAnswers[q.id]
+            const isEmpty =
+                val === undefined ||
+                val === null ||
+                (typeof val === 'string' && !val.trim()) ||
+                (Array.isArray(val) && val.length === 0)
+            if (isEmpty) {
+                errors[q.id] = 'Ce champ est obligatoire'
+            }
+        }
+        setCustomErrors(errors)
+        return Object.keys(errors).length === 0
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -101,11 +144,19 @@ function InscriptionContent() {
             return
         }
 
+        if (!validateCustom()) {
+            // Scroll vers la première erreur
+            const firstErrorEl = document.querySelector('[data-question-error]')
+            firstErrorEl?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            return
+        }
+
         if (!session) return
 
         setSubmitting(true)
 
         try {
+            // 1. Créer l'enrollment
             const enrollmentData = {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
@@ -120,28 +171,52 @@ function InscriptionContent() {
 
             const response = await fetch('/api/enrollments', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(enrollmentData)
             })
 
-            if (response.ok) {
-                const result = await response.json()
-                setOnWaitlist(result.onWaitlist || false)
-                setSuccess(true)
-                if (!result.onWaitlist && result.studentAccount) {
-                    setTimeout(() => {
-                        router.push(`/${locale}/espace-etudiants`)
-                    }, 1500)
-                }
-            } else {
+            if (!response.ok) {
                 const error = await response.json()
-                alert(error.error || 'Erreur lors de l\'inscription')
+                alert(error.error || "Erreur lors de l'inscription")
+                return
+            }
+
+            const result = await response.json()
+
+            // 2. Soumettre les réponses personnalisées si présent
+            if (customQuestions.length > 0 && result.enrollmentId) {
+                const answers = customQuestions.map((q) => {
+                    const val = customAnswers[q.id]
+                    if (q.type === 'checkbox') {
+                        return {
+                            questionId: q.id,
+                            jsonValue: Array.isArray(val) ? val : [],
+                        }
+                    }
+                    return {
+                        questionId: q.id,
+                        textValue: typeof val === 'string' ? val : '',
+                    }
+                })
+
+                await fetch(`/api/sessions/${session.id}/form-answers`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enrollmentId: result.enrollmentId, answers }),
+                })
+                // On ignore les erreurs de réponses (non bloquant)
+            }
+
+            setOnWaitlist(result.onWaitlist || false)
+            setSuccess(true)
+            if (!result.onWaitlist && result.studentAccount) {
+                setTimeout(() => {
+                    router.push(`/${locale}/espace-etudiants`)
+                }, 1500)
             }
         } catch (error) {
             console.error('Erreur:', error)
-            alert('Erreur lors de l\'inscription')
+            alert("Erreur lors de l'inscription")
         } finally {
             setSubmitting(false)
         }
@@ -449,6 +524,112 @@ function InscriptionContent() {
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cjblue focus:border-transparent"
                                     ></textarea>
                                 </div>
+
+                                {/* ── Questions personnalisées ─────────────── */}
+                                {customQuestions.length > 0 && (
+                                    <div className="border-t border-gray-200 pt-6 space-y-5">
+                                        <h3 className="text-lg font-semibold text-gray-900">
+                                            Questions complémentaires
+                                        </h3>
+                                        {customQuestions.map((q) => {
+                                            const error = customErrors[q.id]
+                                            const val = customAnswers[q.id]
+                                            const setVal = (v: string | string[]) =>
+                                                setCustomAnswers((prev) => ({ ...prev, [q.id]: v }))
+
+                                            return (
+                                                <div key={q.id} data-question-error={error ? true : undefined}>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        {q.label}
+                                                        {q.required && <span className="text-red-500 ml-1">*</span>}
+                                                    </label>
+                                                    {q.helpText && (
+                                                        <p className="text-xs text-gray-500 mb-1.5">{q.helpText}</p>
+                                                    )}
+
+                                                    {/* Rendu selon le type */}
+                                                    {q.type === 'text_short' && (
+                                                        <input type="text" value={typeof val === 'string' ? val : ''} onChange={(e) => setVal(e.target.value)}
+                                                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-cjblue focus:border-transparent text-sm ${error ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
+                                                    )}
+                                                    {q.type === 'text_long' && (
+                                                        <textarea value={typeof val === 'string' ? val : ''} onChange={(e) => setVal(e.target.value)} rows={3}
+                                                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-cjblue focus:border-transparent text-sm resize-none ${error ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
+                                                    )}
+                                                    {q.type === 'number' && (
+                                                        <input type="number" value={typeof val === 'string' ? val : ''} onChange={(e) => setVal(e.target.value)}
+                                                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-cjblue focus:border-transparent text-sm ${error ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
+                                                    )}
+                                                    {q.type === 'date' && (
+                                                        <input type="date" value={typeof val === 'string' ? val : ''} onChange={(e) => setVal(e.target.value)}
+                                                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-cjblue focus:border-transparent text-sm ${error ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
+                                                    )}
+                                                    {q.type === 'select' && (
+                                                        <select value={typeof val === 'string' ? val : ''} onChange={(e) => setVal(e.target.value)}
+                                                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-cjblue focus:border-transparent text-sm bg-white ${error ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}>
+                                                            <option value="">-- Choisir --</option>
+                                                            {q.options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+                                                        </select>
+                                                    )}
+                                                    {q.type === 'radio' && (
+                                                        <div className="space-y-2">
+                                                            {q.options.map((opt) => (
+                                                                <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                                                    <input type="radio" name={`q_${q.id}`} value={opt} checked={val === opt}
+                                                                        onChange={() => setVal(opt)} className="accent-cjblue" />
+                                                                    <span className="text-sm text-gray-700">{opt}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {q.type === 'checkbox' && (
+                                                        <div className="space-y-2">
+                                                            {q.options.map((opt) => {
+                                                                const checked = Array.isArray(val) && val.includes(opt)
+                                                                return (
+                                                                    <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                                                        <input type="checkbox" checked={checked}
+                                                                            onChange={() => {
+                                                                                const current = Array.isArray(val) ? val : []
+                                                                                setVal(checked ? current.filter((v) => v !== opt) : [...current, opt])
+                                                                            }} className="accent-cjblue" />
+                                                                        <span className="text-sm text-gray-700">{opt}</span>
+                                                                    </label>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                    {q.type === 'yes_no' && (
+                                                        <div className="flex gap-4">
+                                                            {['Oui', 'Non'].map((opt) => (
+                                                                <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                                                    <input type="radio" name={`q_${q.id}`} value={opt} checked={val === opt}
+                                                                        onChange={() => setVal(opt)} className="accent-cjblue" />
+                                                                    <span className="text-sm text-gray-700">{opt}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {q.type === 'file_upload' && (
+                                                        <div className={`border-2 border-dashed rounded-md p-4 text-center ${error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-gray-50'}`}>
+                                                            <FileUp className="h-6 w-6 text-gray-400 mx-auto mb-1" />
+                                                            <p className="text-xs text-gray-500">
+                                                                Téléversement : {q.fileTypes.length > 0 ? q.fileTypes.map(t => `.${t}`).join(', ') : 'tous types'}
+                                                            </p>
+                                                            <p className="text-xs text-gray-400 mt-1">
+                                                                (Fonctionnalité d'upload de fichier — contactez l'administration pour transmettre votre document)
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {error && (
+                                                        <p className="mt-1 text-xs text-red-600 font-semibold">{error}</p>
+                                                    )}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                )}
 
                                 <div className="flex items-start gap-3">
                                     <input
