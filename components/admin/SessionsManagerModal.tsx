@@ -111,6 +111,7 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
     setForm(initialForm)
     setEditingId(null)
     setError(null)
+    setRightTab('general')
   }
 
   const startEdit = (session: SessionItem) => {

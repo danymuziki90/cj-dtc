@@ -184,7 +184,7 @@ function InscriptionContent() {
             const result = await response.json()
 
             // 2. Soumettre les réponses personnalisées si présent
-            if (customQuestions.length > 0 && result.enrollmentId) {
+            if (customQuestions.length > 0 && result.id) {
                 const answers = customQuestions.map((q) => {
                     const val = customAnswers[q.id]
                     if (q.type === 'checkbox') {
@@ -202,7 +202,7 @@ function InscriptionContent() {
                 await fetch(`/api/sessions/${session.id}/form-answers`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ enrollmentId: result.enrollmentId, answers }),
+                    body: JSON.stringify({ enrollmentId: result.id, answers }),
                 })
                 // On ignore les erreurs de réponses (non bloquant)
             }

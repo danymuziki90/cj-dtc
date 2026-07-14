@@ -5,7 +5,7 @@ import {
   Plus, Trash2, GripVertical, ChevronUp, ChevronDown, Save,
   BookMarked, Layers, AlertCircle, CheckCircle2, Loader2,
   Type, AlignLeft, Hash, Calendar, List, Circle, CheckSquare,
-  ToggleLeft, FileUp, X, Edit2, Eye,
+  ToggleLeft, FileUp, X, Edit2,
 } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -709,11 +709,4 @@ export default function SessionFormBuilder({ sessionId }: Props) {
   )
 }
 
-// Export de ChevronDown pour usage interne dans le dropdown
-function ChevronDown({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-    </svg>
-  )
-}
+
