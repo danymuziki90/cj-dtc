@@ -546,9 +546,9 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
                 <p className="mb-2 text-xs font-bold uppercase tracking-wide text-blue-200">
                   {isFr ? 'Contact direct' : 'Direct contact'}
                 </p>
-                <a href="mailto:corporate@cjdevelopmenttc.org"
+                <a href="mailto:contact@cjdevelopmenttc.org"
                   className="text-sm font-semibold text-white transition-colors hover:text-[var(--cj-red)] break-all">
-                  corporate@cjdevelopmenttc.org
+                  contact@cjdevelopmenttc.org
                 </a>
               </div>
             </div>

@@ -399,6 +399,16 @@ export async function provisionStudentAccountFromEnrollment({
     }
   }
 
+  // Link the enrollment to the student in the database if not already done
+  if (student && enrollment.studentId !== student.id) {
+    await prisma.enrollment.update({
+      where: { id: enrollment.id },
+      data: { studentId: student.id },
+    })
+    currentEnrollment.studentId = student.id
+  }
+
+
   let credentialsEmailSent = false
   let credentialsEmailError: string | null = null
 

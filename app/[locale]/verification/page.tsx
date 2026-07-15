@@ -602,7 +602,7 @@ export default function VerificationPage() {
               Système de Vérification de Certificats Sécurisé
             </p>
             <div className="flex justify-center space-x-6">
-              <a href="mailto:verification@cjdtc.com" className="text-gray-400 hover:text-white">
+              <a href="mailto:contact@cjdevelopmenttc.org" className="text-gray-400 hover:text-white">
                 Contact Support
               </a>
               <a href="/fr/a-propos" className="text-gray-400 hover:text-white">

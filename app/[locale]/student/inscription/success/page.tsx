@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -112,7 +112,7 @@ export default function InscriptionSuccessPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-gray-600">Email</p>
-                <p className="font-medium text-blue-600">contact@cjdtc.com</p>
+                <p className="font-medium text-blue-600">contact@cjdevelopmenttc.org</p>
               </div>
               <div>
                 <p className="text-gray-600">Téléphone</p>

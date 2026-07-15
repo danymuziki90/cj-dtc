@@ -3,7 +3,18 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, Clock3, Download, FileText, FolderOpen, GraduationCap, MessageSquare, Upload } from 'lucide-react'
+import {
+  CheckCircle2,
+  Clock3,
+  Download,
+  FileText,
+  FolderOpen,
+  GraduationCap,
+  MessageSquare,
+  Upload,
+  AlertCircle,
+  Loader2,
+} from 'lucide-react'
 import {
   StudentEmptyState,
   StudentPageShell,
@@ -11,133 +22,146 @@ import {
   studentInputClassName,
   studentMutedButtonClassName,
   studentPrimaryButtonClassName,
-  studentSecondaryButtonClassName,
-  studentStatusClass,
   type StudentMetric,
 } from '@/components/ui/student-space'
 
-interface Submission {
+interface Assignment {
   id: number
   title: string
-  fileName: string
-  filePath: string
-  fileSize: number
-  status: string
-  submittedAt: string
-  feedback: string | null
+  description: string
+  type: string // tp, exam, project
+  deadline: string
+  instructions: string | null
   formation: {
     id: number
     title: string
   }
-}
-
-interface Formation {
-  id: number
-  title: string
+  files: Array<{
+    id: number
+    name: string
+    originalName: string
+    size: number
+    url: string
+  }>
+  submissions: Array<{
+    id: number
+    status: string // submitted, graded, returned
+    submittedAt: string
+    feedback: string | null
+    grade?: number | null
+    files: Array<{
+      id: number
+      name: string
+      size: number
+      url: string
+    }>
+  }>
 }
 
 export default function TravauxPage() {
   const params = useParams<{ locale?: string }>()
   const locale = params?.locale || 'fr'
 
-  const [submissions, setSubmissions] = useState<Submission[]>([])
-  const [formations, setFormations] = useState<Formation[]>([])
+  const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [formData, setFormData] = useState({
-    title: '',
-    formationId: '',
-    file: null as File | null,
-  })
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchFormations()
-    fetchSubmissions()
-  }, [])
+  // Tracking upload states
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null)
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
 
-  const metrics = useMemo<StudentMetric[]>(() => {
-    const approvedCount = submissions.filter((item) => item.status === 'approved').length
-    return [
-      {
-        label: 'Travaux soumis',
-        value: submissions.length,
-        helper: 'Depot enregistre depuis votre espace personnel.',
-        icon: FolderOpen,
-        accent: 'from-[#0c4da2] via-[var(--cj-blue)] to-[#02142f]',
-      },
-      {
-        label: 'Formations liees',
-        value: formations.length,
-        helper: 'Parcours disponibles pour vos rendus.',
-        icon: GraduationCap,
-        accent: 'from-[#003b96] via-[var(--cj-blue)] to-[#0f172a]',
-      },
-      {
-        label: 'Travaux valides',
-        value: approvedCount,
-        helper: 'Soumissions deja approuvees.',
-        icon: CheckCircle2,
-        accent: 'from-[var(--cj-red)] via-[#bb111d] to-[#4a0b14]',
-      },
-    ]
-  }, [formations.length, submissions])
-
-  const fetchFormations = async () => {
+  const fetchAssignments = async () => {
     try {
-      const response = await fetch('/api/enrollments')
-      const data = await response.json()
-      const uniqueFormations = Array.from(
-        new Map(data.map((item: any) => [item.formation.id, item.formation])).values(),
-      ) as Formation[]
-      setFormations(uniqueFormations)
+      const response = await fetch('/api/student/assignments')
+      if (response.ok) {
+        const data = await response.json()
+        setAssignments(data)
+      } else {
+        console.error('Failed to load assignments:', response.statusText)
+      }
     } catch (error) {
-      console.error('Erreur lors du chargement des formations:', error)
-    }
-  }
-
-  const fetchSubmissions = async () => {
-    setLoading(true)
-    try {
-      setSubmissions([])
-    } catch (error) {
-      console.error('Erreur lors du chargement des travaux:', error)
+      console.error('Erreur lors du chargement des devoirs:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSubmit = async (event: FormEvent) => {
+  useEffect(() => {
+    fetchAssignments()
+  }, [])
+
+  const metrics = useMemo<StudentMetric[]>(() => {
+    const totalCount = assignments.length
+    const submittedCount = assignments.filter((a) => a.submissions && a.submissions.length > 0).length
+    const pendingCount = assignments.filter(
+      (a) => (!a.submissions || a.submissions.length === 0) && new Date(a.deadline).getTime() >= Date.now()
+    ).length
+
+    return [
+      {
+        label: 'Travaux assignés',
+        value: totalCount,
+        helper: 'Total des TP et examens publiés pour vos cours.',
+        icon: FolderOpen,
+        accent: 'from-[#0c4da2] via-[var(--cj-blue)] to-[#02142f]',
+      },
+      {
+        label: 'Déposés',
+        value: submittedCount,
+        helper: 'Rendus enregistrés avec succès.',
+        icon: CheckCircle2,
+        accent: 'from-emerald-500 to-teal-700',
+      },
+      {
+        label: 'À remettre',
+        value: pendingCount,
+        helper: 'Travaux en attente avant la date limite.',
+        icon: Clock3,
+        accent: 'from-[var(--cj-red)] via-[#bb111d] to-[#4a0b14]',
+      },
+    ]
+  }, [assignments])
+
+  const handleUploadSubmit = async (assignmentId: number, event: FormEvent) => {
     event.preventDefault()
-    if (!formData.file || !formData.title || !formData.formationId) {
-      alert('Veuillez remplir tous les champs')
+    if (!uploadFile) {
+      setUploadError('Veuillez sélectionner un fichier.')
       return
     }
 
     setUploading(true)
+    setUploadError(null)
+    setUploadSuccess(null)
+
     try {
       const submitData = new FormData()
-      submitData.append('file', formData.file)
-      submitData.append('title', formData.title)
-      submitData.append('formationId', formData.formationId)
+      submitData.append('assignmentId', String(assignmentId))
+      submitData.append('fileCount', '1')
+      submitData.append('file_0', uploadFile)
 
-      const response = await fetch('/api/student-submissions', {
+      const response = await fetch('/api/student/assignments', {
         method: 'POST',
         body: submitData,
       })
 
-      if (response.ok) {
-        alert('Travail soumis avec succes!')
-        setShowForm(false)
-        setFormData({ title: '', formationId: '', file: null })
-        fetchSubmissions()
-      } else {
-        const error = await response.json()
-        alert(`Erreur: ${error.error || 'Erreur lors de la soumission'}`)
+      const resData = await response.json()
+      if (!response.ok) {
+        throw new Error(resData.error || 'Erreur lors du dépôt.')
       }
-    } catch (error) {
-      console.error('Erreur lors de la soumission:', error)
-      alert('Erreur lors de la soumission du travail')
+
+      setUploadSuccess('Votre travail a été déposé avec succès !')
+      setUploadFile(null)
+      setSelectedAssignmentId(null)
+      await fetchAssignments()
+
+      setTimeout(() => {
+        setUploadSuccess(null)
+      }, 3000)
+    } catch (error: any) {
+      console.error('Erreur lors du dépôt:', error)
+      setUploadError(error.message || 'Erreur lors de la soumission du travail.')
     } finally {
       setUploading(false)
     }
@@ -146,38 +170,80 @@ export default function TravauxPage() {
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const sizes = ['Bytes', 'KB', 'MB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`
   }
 
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      submitted: 'Soumis',
-      reviewed: 'En revision',
-      approved: 'Approuve',
-      rejected: 'Rejete',
+  const getAssignmentStatus = (assign: Assignment) => {
+    const hasSub = assign.submissions && assign.submissions.length > 0
+    if (hasSub) {
+      return {
+        label: 'Déposé',
+        color: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+        textColor: 'text-emerald-700',
+      }
     }
-    return labels[status] || status
+
+    const isPast = new Date(assign.deadline).getTime() < Date.now()
+    if (isPast) {
+      return {
+        label: 'Date dépassée',
+        color: 'border-red-200 bg-red-50 text-red-800',
+        textColor: 'text-red-700',
+      }
+    }
+
+    return {
+      label: 'À faire',
+      color: 'border-orange-200 bg-orange-50 text-orange-850',
+      textColor: 'text-orange-700',
+    }
+  }
+
+  const getSubmissionStatusLabel = (status: string) => {
+    switch (status) {
+      case 'submitted':
+        return 'Déposé (En attente)'
+      case 'graded':
+        return 'Corrigé'
+      case 'returned':
+        return 'Renvoyé pour correction'
+      default:
+        return status
+    }
+  }
+
+  const getSubmissionStatusColor = (status: string) => {
+    switch (status) {
+      case 'graded':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-100'
+      case 'returned':
+        return 'bg-red-50 text-red-700 border-red-100'
+      case 'submitted':
+      default:
+        return 'bg-blue-50 text-blue-700 border-blue-100'
+    }
   }
 
   if (loading) {
     return (
       <StudentPageShell
         locale={locale}
-        eyebrow="Espace etudiant"
+        eyebrow="Espace étudiant"
         title="Travaux et projets"
-        description="Chargement de vos soumissions, des formations rattachees et des informations de depot."
+        description="Chargement de vos devoirs, examens et travaux académiques..."
         icon={FolderOpen}
       >
         <StudentSectionCard
           eyebrow="Travaux"
-          title="Preparation des soumissions"
-          description="Nous recuperons votre historique de depots et vos formations disponibles."
+          title="Préparation des évaluations"
+          description="Veuillez patienter pendant la synchronisation avec le catalogue d'apprentissage."
           icon={FileText}
         >
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
-            Chargement des travaux...
+          <div className="flex justify-center items-center py-20 text-slate-500 text-sm">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600 mr-2" />
+            <span>Récupération de vos devoirs...</span>
           </div>
         </StudentSectionCard>
       </StudentPageShell>
@@ -187,184 +253,256 @@ export default function TravauxPage() {
   return (
     <StudentPageShell
       locale={locale}
-      eyebrow="Espace etudiant"
+      eyebrow="Espace étudiant"
       title="Travaux et projets"
-      description="Deposez vos travaux pratiques, suivez les retours de validation et gardez une vue claire sur vos livrables."
+      description="Déposez vos travaux pratiques (TP), suivez les retours de correction de vos formateurs et consultez vos notes."
       icon={FolderOpen}
       metrics={metrics}
-      actions={
-        <button onClick={() => setShowForm((current) => !current)} className={studentSecondaryButtonClassName}>
-          <Upload className="h-4 w-4" />
-          {showForm ? 'Fermer le formulaire' : 'Nouveau travail'}
-        </button>
-      }
     >
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <StudentSectionCard
-          eyebrow="Depot"
-          title="Soumettre un nouveau travail"
-          description="Choisissez la formation concernee, ajoutez un titre clair et chargez votre livrable au bon format."
-          icon={Upload}
-        >
-          {showForm ? (
-            <form onSubmit={handleSubmit} className="space-y-4 rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-5">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">Titre du travail *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(event) => setFormData({ ...formData, title: event.target.value })}
-                  className={studentInputClassName}
-                  placeholder="Ex: TP1 - Gestion des ressources humaines"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">Formation *</label>
-                <select
-                  required
-                  value={formData.formationId}
-                  onChange={(event) => setFormData({ ...formData, formationId: event.target.value })}
-                  className={studentInputClassName}
-                >
-                  <option value="">Selectionner une formation</option>
-                  {formations.map((formation) => (
-                    <option key={formation.id} value={formation.id.toString()}>
-                      {formation.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">Fichier *</label>
-                <input
-                  type="file"
-                  required
-                  onChange={(event) => setFormData({ ...formData, file: event.target.files?.[0] || null })}
-                  className={studentInputClassName}
-                  accept=".pdf,.doc,.docx,.zip,.rar"
-                />
-                {formData.file ? (
-                  <p className="mt-3 text-sm text-slate-500">
-                    Fichier selectionne: {formData.file.name} ({formatFileSize(formData.file.size)})
-                  </p>
-                ) : null}
-              </div>
-              <div className="flex flex-wrap gap-3 pt-2">
-                <button type="submit" disabled={uploading} className={`${studentPrimaryButtonClassName} disabled:cursor-not-allowed disabled:opacity-60`}>
-                  {uploading ? 'Envoi en cours...' : 'Soumettre le travail'}
-                </button>
-                <button type="button" onClick={() => setShowForm(false)} className={studentMutedButtonClassName}>
-                  Annuler
-                </button>
-              </div>
-            </form>
-          ) : (
-            <StudentEmptyState
-              title="Aucun depot en cours"
-              description="Ouvrez le formulaire pour ajouter un livrable, le rattacher a une formation et le transmettre a l'equipe pedagogique."
-              action={
-                <button onClick={() => setShowForm(true)} className={studentPrimaryButtonClassName}>
-                  <Upload className="h-4 w-4" />
-                  Commencer une soumission
-                </button>
-              }
-            />
-          )}
-        </StudentSectionCard>
+      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        
+        {/* Left Column: Active Assignments List */}
+        <div className="space-y-6">
+          <StudentSectionCard
+            eyebrow="Évaluations"
+            title="Mes travaux en cours & TP"
+            description="Chaque carte correspond à un devoir assigné à l'une de vos formations actives."
+            icon={FileText}
+          >
+            {assignments.length === 0 ? (
+              <StudentEmptyState
+                title="Aucun travail assigné"
+                description="L'administration n'a planifié aucun examen ou TP pour vos formations en cours pour le moment."
+              />
+            ) : (
+              <div className="space-y-6">
+                {assignments.map((assign) => {
+                  const status = getAssignmentStatus(assign)
+                  const isFuture = new Date(assign.deadline).getTime() >= Date.now()
 
-        <StudentSectionCard
-          eyebrow="Conseils"
-          title="Cadre de soumission"
-          description="Quelques repaires utiles pour rendre vos livrables plus lisibles et plus faciles a traiter."
-          icon={MessageSquare}
-        >
-          <div className="space-y-3">
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-semibold text-slate-950">Formats acceptes</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">PDF, DOC, DOCX, ZIP et RAR selon le type de rendu demande.</p>
-            </div>
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-semibold text-slate-950">Bon titrage</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Indiquez la session, le numero du travail et un intitule court pour accelerer la verification.</p>
-            </div>
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-semibold text-slate-950">Suivi</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Une fois soumis, votre travail apparait dans l'historique avec son statut et les retours eventuels.</p>
-            </div>
-            <div className="rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--cj-red)]">Navigation utile</p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <Link href={`/${locale}/espace-etudiants/supports`} className={studentMutedButtonClassName}>
-                  Voir les supports
-                </Link>
-                <Link href={`/${locale}/espace-etudiants`} className={studentMutedButtonClassName}>
-                  Retour au dashboard
-                </Link>
+                  return (
+                    <article
+                      key={assign.id}
+                      className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.4)] transition duration-300 hover:shadow-[0_22px_55px_-30px_rgba(0,45,114,0.35)]"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div className="space-y-1.5">
+                          <span className="inline-flex rounded-full bg-blue-50 border border-blue-100 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-700">
+                            {assign.type.toUpperCase()}
+                          </span>
+                          <h4 className="text-lg font-bold text-slate-950 tracking-tight">{assign.title}</h4>
+                          <p className="text-xs text-slate-500">Formation : <span className="font-semibold text-slate-700">{assign.formation?.title}</span></p>
+                        </div>
+                        <div className="text-right">
+                          <span className={`inline-block rounded-full border px-3 py-0.5 text-xs font-semibold ${status.color}`}>
+                            {status.label}
+                          </span>
+                          <p className="text-[10px] text-slate-400 font-semibold mt-1">
+                            Date limite : {new Date(assign.deadline).toLocaleDateString('fr-FR')}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 space-y-4">
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Description :</p>
+                          <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{assign.description}</p>
+                        </div>
+
+                        {/* Instruction Files */}
+                        {assign.files && assign.files.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Consignes & Fichiers joints :</p>
+                            <div className="mt-2 space-y-1.5">
+                              {assign.files.map((file) => (
+                                <a
+                                  key={file.id}
+                                  href={file.url}
+                                  download={file.originalName}
+                                  className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 underline font-medium"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  {file.originalName} ({formatFileSize(file.size)})
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Submission History */}
+                        {assign.submissions && assign.submissions.length > 0 && (
+                          <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+                            <p className="text-xs font-bold text-slate-800 mb-2">Votre copie soumise :</p>
+                            <div className="space-y-3">
+                              {assign.submissions.map((sub) => (
+                                <div key={sub.id} className="rounded-xl border border-slate-150 bg-white p-3 shadow-sm text-xs">
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-semibold text-slate-900">Soumission</span>
+                                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${getSubmissionStatusColor(sub.status)}`}>
+                                      {getSubmissionStatusLabel(sub.status)}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-slate-400 mt-1">
+                                    Transmis le {new Date(sub.submittedAt).toLocaleString('fr-FR')}
+                                  </p>
+
+                                  {/* Submitted files list */}
+                                  {sub.files && sub.files.length > 0 && (
+                                    <div className="mt-2 space-y-1 pt-2 border-t border-slate-100">
+                                      {sub.files.map((f) => (
+                                        <a
+                                          key={f.id}
+                                          href={f.url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-1.5 text-[10px] text-blue-600 hover:underline font-semibold"
+                                        >
+                                          <FileText className="w-3.5 h-3.5 text-slate-400" />
+                                          {f.name} ({formatFileSize(f.size)})
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {/* Reviewer feedback */}
+                                  {sub.feedback && (
+                                    <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/60 p-2.5 text-[10px] text-slate-700">
+                                      <span className="font-bold text-[var(--cj-blue)]">Feedback formateur :</span>{' '}
+                                      {sub.feedback}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Upload action form */}
+                        <div className="pt-2">
+                          {isFuture ? (
+                            selectedAssignmentId === assign.id ? (
+                              <form
+                                onSubmit={(e) => handleUploadSubmit(assign.id, e)}
+                                className="space-y-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-4"
+                              >
+                                {uploadSuccess && (
+                                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-800">
+                                    {uploadSuccess}
+                                  </div>
+                                )}
+                                {uploadError && (
+                                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-800">
+                                    {uploadError}
+                                  </div>
+                                )}
+
+                                <div>
+                                  <label className="mb-1.5 block text-xs font-bold text-slate-700">
+                                    Fichier de rendu (PDF, DOCX, ZIP...) *
+                                  </label>
+                                  <input
+                                    type="file"
+                                    required
+                                    onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                                    className={studentInputClassName}
+                                    accept=".pdf,.doc,.docx,.zip,.rar,.jpg,.jpeg,.png"
+                                  />
+                                </div>
+
+                                <div className="flex gap-2">
+                                  <button
+                                    type="submit"
+                                    disabled={uploading}
+                                    className={`${studentPrimaryButtonClassName} text-xs py-2 disabled:opacity-60`}
+                                  >
+                                    {uploading ? 'Téléversement...' : 'Valider mon dépôt'}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedAssignmentId(null)
+                                      setUploadFile(null)
+                                      setUploadError(null)
+                                    }}
+                                    className={studentMutedButtonClassName}
+                                  >
+                                    Annuler
+                                  </button>
+                                </div>
+                              </form>
+                            ) : (
+                              <button
+                                onClick={() => setSelectedAssignmentId(assign.id)}
+                                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-blue-700)] transition shadow-sm"
+                              >
+                                <Upload className="w-3.5 h-3.5" />
+                                Déposer mon travail
+                              </button>
+                            )
+                          ) : (
+                            <button
+                              disabled
+                              className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-200 py-2 text-xs font-semibold text-slate-400 cursor-not-allowed"
+                            >
+                              Dépôt verrouillé (date limite dépassée)
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            )}
+          </StudentSectionCard>
+        </div>
+
+        {/* Right Column: Information & Guidelines */}
+        <div className="space-y-6">
+          <StudentSectionCard
+            eyebrow="Conseils"
+            title="Consignes générales de dépôt"
+            description="Prenez connaissance de notre cadre pédagogique pour le traitement rapide de vos livrables."
+            icon={MessageSquare}
+          >
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-bold text-slate-900 uppercase tracking-wide">Fichiers autorisés</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                  Les formats usuels PDF, DOC, DOCX et les archives ZIP/RAR sont autorisés. Pensez à compresser vos fichiers si nécessaire.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-bold text-slate-900 uppercase tracking-wide">Date limite de rigueur</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                  Les dépôts sont automatiquement verrouillés par le serveur dès l'heure limite dépassée.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-bold text-slate-900 uppercase tracking-wide">Grille de notation</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                  Chaque correction donne lieu à des commentaires détaillés du formateur disponibles sous votre copie, avec notification automatique.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-blue-150 bg-blue-50/50 p-5">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-3">Navigation</p>
+                <div className="flex flex-wrap gap-2">
+                  <Link href={`/${locale}/espace-etudiants`} className={studentMutedButtonClassName}>
+                    Retour au Dashboard
+                  </Link>
+                  <Link href={`/${locale}/espace-etudiants/mes-formations`} className={studentMutedButtonClassName}>
+                    Mes formations
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        </StudentSectionCard>
+          </StudentSectionCard>
+        </div>
+
       </div>
-
-      <StudentSectionCard
-        eyebrow="Historique"
-        title="Travaux deja soumis"
-        description="Retrouvez vos depots, leur statut de validation et les retours pedagogiques deja publies."
-        icon={FileText}
-      >
-        {submissions.length === 0 ? (
-          <StudentEmptyState
-            title="Aucun travail soumis pour le moment"
-            description="Votre historique de rendus apparaitra ici des que vous aurez transmis un premier livrable."
-            action={
-              <button onClick={() => setShowForm(true)} className={studentPrimaryButtonClassName}>
-                Soumettre votre premier travail
-              </button>
-            }
-          />
-        ) : (
-          <div className="space-y-4">
-            {submissions.map((submission) => (
-              <div
-                key={submission.id}
-                className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.4)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_55px_-30px_rgba(0,45,114,0.35)]"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <p className="text-lg font-semibold text-slate-950">{submission.title}</p>
-                    <p className="mt-2 text-sm text-slate-600">Formation: {submission.formation.title}</p>
-                    <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
-                      <span className="inline-flex items-center gap-1">
-                        <Clock3 className="h-3.5 w-3.5" />
-                        Soumis le {new Date(submission.submittedAt).toLocaleDateString('fr-FR')}
-                      </span>
-                      <span>{submission.fileName} ({formatFileSize(submission.fileSize)})</span>
-                    </div>
-                  </div>
-                  <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${studentStatusClass(submission.status)}`}>
-                    {getStatusLabel(submission.status)}
-                  </span>
-                </div>
-
-                {submission.feedback ? (
-                  <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-sm text-slate-700">
-                    <span className="font-semibold text-[var(--cj-blue)]">Feedback:</span> {submission.feedback}
-                  </div>
-                ) : null}
-
-                <div className="mt-4 flex flex-wrap gap-3 border-t border-slate-200 pt-4">
-                  <a href={`/${submission.filePath}`} download={submission.fileName} className={studentMutedButtonClassName}>
-                    <Download className="h-4 w-4" />
-                    Telecharger
-                  </a>
-                  {submission.feedback ? <button className={studentMutedButtonClassName}>Voir le feedback</button> : null}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </StudentSectionCard>
     </StudentPageShell>
   )
 }

@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
@@ -70,6 +73,41 @@ export default function HomeSections({ locale }: HomeSectionsProps) {
   const isFr = resolvedLocale === 'fr'
   const values = isFr ? valuesData.fr : valuesData.en
 
+  const [dbTestimonials, setDbTestimonials] = useState<any[]>([])
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/testimonials')
+      .then((res) => res.json())
+      .then((data) => {
+        if (active && Array.isArray(data) && data.length > 0) {
+          setDbTestimonials(data)
+        }
+      })
+      .catch((err) => console.error('Error fetching testimonials:', err))
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((part) => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
+  const testimonialsList = dbTestimonials.length > 0
+    ? dbTestimonials.map((item: any) => ({
+        name: item.name,
+        initials: getInitials(item.name),
+        location: item.location || (isFr ? 'Kinshasa, RDC' : 'Kinshasa, DRC'),
+        quote: item.quote,
+      }))
+    : t.testimonials
+
   return (
     <div className="w-full">
       {/* ── Valeurs institutionnelles ──────────────────────────────────── */}
@@ -120,7 +158,7 @@ export default function HomeSections({ locale }: HomeSectionsProps) {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            {t.testimonials.map((item) => (
+            {testimonialsList.map((item) => (
               <figure
                 key={item.name}
                 className="relative rounded-2xl border border-slate-200 bg-slate-50 p-7 shadow-sm"

@@ -143,6 +143,17 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Link existing enrollments to this new student
+    await prisma.enrollment.updateMany({
+      where: {
+        email: { equals: normalizedEmail, mode: 'insensitive' },
+        studentId: null,
+      },
+      data: {
+        studentId: student.id,
+      },
+    })
+
     const token = await signStudentToken({
       sub: student.id,
       studentId: student.id,

@@ -40,7 +40,12 @@ export async function GET(request: NextRequest) {
   const [enrollmentsRaw, submissions, portalCertificates, issuedCertificates, news, evaluations, userProfile] =
     await Promise.all([
       prisma.enrollment.findMany({
-        where: { email: studentEmail },
+        where: {
+          OR: [
+            { studentId: auth.student.id },
+            { email: { equals: studentEmail, mode: 'insensitive' } },
+          ],
+        },
         orderBy: { createdAt: 'desc' },
         include: {
           formation: {
@@ -148,9 +153,12 @@ export async function GET(request: NextRequest) {
     ])
 
   const enrollments = enrollmentsRaw as any[]
-  const formationIds = Array.from(new Set(enrollments.map((item) => item.formationId)))
+  const activeEnrollments = enrollments.filter((e) =>
+    ['accepted', 'confirmed', 'completed'].includes(e.status)
+  )
+  const formationIds = Array.from(new Set(activeEnrollments.map((item) => item.formationId)))
   const sessionIds = Array.from(
-    new Set(enrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value)))
+    new Set(activeEnrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value)))
   )
 
   // Fetch active assignments for the student's formations and sessions

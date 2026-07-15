@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react'
 
 interface FAQItem {
@@ -57,10 +57,28 @@ const faqItems: FAQItem[] = [
 
 export default function FormationFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const [dbFaqs, setDbFaqs] = useState<FAQItem[]>([])
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/faq')
+      .then((res) => res.json())
+      .then((data) => {
+        if (active && Array.isArray(data) && data.length > 0) {
+          setDbFaqs(data)
+        }
+      })
+      .catch((err) => console.error('Error fetching FAQs:', err))
+    return () => {
+      active = false
+    }
+  }, [])
 
   const toggleQuestion = (index: number) => {
     setOpenIndex(openIndex === index ? null : index)
   }
+
+  const faqList = dbFaqs.length > 0 ? dbFaqs : faqItems
 
   return (
     <section className="py-20 bg-gray-50">
@@ -80,7 +98,7 @@ export default function FormationFAQ() {
 
         {/* FAQ Items */}
         <div className="space-y-4">
-          {faqItems.map((item, index) => (
+          {faqList.map((item, index) => (
             <div
               key={index}
               className="bg-white rounded-lg border border-gray-200 overflow-hidden transition-all hover:shadow-md"

@@ -848,7 +848,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <MailIcon className="w-4 h-4" />
-                  <span>info@cjdtc.com</span>
+                  <span>contact@cjdevelopmenttc.org</span>
                 </div>
               </div>
             </div>

@@ -29,6 +29,8 @@ export default function HomePage() {
   const isFr = locale === 'fr'
 
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const [dbFaqs, setDbFaqs] = useState<any[]>([])
+  const [dbTestimonials, setDbTestimonials] = useState<any[]>([])
 
   // Image Carousel state & settings
   const [images, setImages] = useState<string[]>(FALLBACK_IMAGES)
@@ -47,6 +49,25 @@ export default function HomePage() {
         }
       })
       .catch(err => console.error("Error fetching hero images:", err))
+
+    fetch('/api/faq')
+      .then(res => res.json())
+      .then(data => {
+        if (active && Array.isArray(data) && data.length > 0) {
+          setDbFaqs(data)
+        }
+      })
+      .catch(err => console.error("Error fetching FAQs:", err))
+
+    fetch('/api/testimonials')
+      .then(res => res.json())
+      .then(data => {
+        if (active && Array.isArray(data) && data.length > 0) {
+          setDbTestimonials(data)
+        }
+      })
+      .catch(err => console.error("Error fetching testimonials:", err))
+
     return () => {
       active = false
     }
@@ -553,35 +574,44 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            {[
-              {
-                role: isFr ? 'Ancien Participant' : 'Alumni',
-                name: 'Amina K.',
-                location: isFr ? 'Kinshasa, RDC' : 'Kinshasa, DRC',
-                quote: isFr 
-                  ? "Grâce au programme IOP, j'ai décroché un poste de Responsable RH deux mois après ma formation. La qualité pratique de l'enseignement et le mentorat individuel ont fait toute la différence."
-                  : "Thanks to the IOP program, I landed an HR Manager position two months after graduation. The practical quality of training and individual mentorship made all the difference.",
-                company: 'Directrice RH — IOP Promotion 2024'
-              },
-              {
-                role: isFr ? 'Entreprise Partenaire' : 'Corporate Client',
-                name: 'Patricia M.',
-                location: isFr ? 'Conakry, Guinée' : 'Conakry, Guinea',
-                quote: isFr
-                  ? "Nous avons confié la formation de nos managers à CJ Development. Les cas réels travaillés en session ont permis une application immédiate, améliorant notre efficacité opérationnelle de manière mesurable."
-                  : "We entrusted our managers' training to CJ Development. The real cases studied in session enabled immediate application, improving operational efficiency in a measurable way.",
-                company: 'Directrice Talent Management'
-              },
-              {
-                role: isFr ? 'Étudiant Actif' : 'Active Student',
-                name: 'Ousmane S.',
-                location: isFr ? 'Dakar, Sénégal' : 'Dakar, Senegal',
-                quote: isFr
-                  ? "Le format blended learning s'adapte parfaitement à mon emploi du temps de professionnel. L'application directe sur le terrain et la rigueur de l'accompagnement me permettent de progresser chaque semaine."
-                  : "The blended learning format fits my professional schedule perfectly. Direct field application and the strict support allow me to progress week after week.",
-                company: 'Participant — Leadership & Influence'
-              }
-            ].map((tst, i) => (
+            {((dbTestimonials && dbTestimonials.length > 0)
+              ? dbTestimonials.map((item: any) => ({
+                  role: isFr ? 'Diplômé / Partenaire' : 'Alumni / Partner',
+                  name: item.name,
+                  location: item.location || (isFr ? 'Kinshasa, RDC' : 'Kinshasa, DRC'),
+                  quote: item.quote,
+                  company: isFr ? 'CJ DTC Alumni' : 'CJ DTC Alumni'
+                }))
+              : [
+                  {
+                    role: isFr ? 'Ancien Participant' : 'Alumni',
+                    name: 'Amina K.',
+                    location: isFr ? 'Kinshasa, RDC' : 'Kinshasa, DRC',
+                    quote: isFr 
+                      ? "Grâce au programme IOP, j'ai décroché un poste de Responsable RH deux mois après ma formation. La qualité pratique de l'enseignement et le mentorat individuel ont fait toute la différence."
+                      : "Thanks to the IOP program, I landed an HR Manager position two months after graduation. The practical quality of training and individual mentorship made all the difference.",
+                    company: 'Directrice RH — IOP Promotion 2024'
+                  },
+                  {
+                    role: isFr ? 'Entreprise Partenaire' : 'Corporate Client',
+                    name: 'Patricia M.',
+                    location: isFr ? 'Conakry, Guinée' : 'Conakry, Guinea',
+                    quote: isFr
+                      ? "Nous avons confié la formation de nos managers à CJ Development. Les cas réels travaillés en session ont permis une application immédiate, améliorant notre efficacité opérationnelle de manière mesurable."
+                      : "We entrusted our managers' training to CJ Development. The real cases studied in session enabled immediate application, improving operational efficiency in a measurable way.",
+                    company: 'Directrice Talent Management'
+                  },
+                  {
+                    role: isFr ? 'Étudiant Actif' : 'Active Student',
+                    name: 'Ousmane S.',
+                    location: isFr ? 'Dakar, Sénégal' : 'Dakar, Senegal',
+                    quote: isFr
+                      ? "Le format blended learning s'adapte parfaitement à mon emploi du temps de professionnel. L'application directe sur le terrain et la rigueur de l'accompagnement me permettent de progresser chaque semaine."
+                      : "The blended learning format fits my professional schedule perfectly. Direct field application and the strict support allow me to progress week after week.",
+                    company: 'Participant — Leadership & Influence'
+                  }
+                ]
+            ).map((tst, i) => (
               <div key={i} className="relative rounded-3xl border border-slate-200 bg-white p-8 shadow-sm hover:shadow-md transition">
                 <span className="absolute top-6 right-6 text-5xl font-serif text-[var(--cj-blue)]/10 select-none">“</span>
                 <span className="inline-flex items-center rounded-full bg-[var(--cj-red)]/10 px-3 py-1 text-xs font-semibold text-[var(--cj-red)] uppercase tracking-wider mb-6">
@@ -621,7 +651,7 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-4">
-            {(t.faqItems || []).map((item: { question: string; answer: string }, index: number) => {
+            {((dbFaqs && dbFaqs.length > 0) ? dbFaqs : (t.faqItems || [])).map((item: { question: string; answer: string }, index: number) => {
               const isOpen = openFaqIndex === index
               return (
                 <div 

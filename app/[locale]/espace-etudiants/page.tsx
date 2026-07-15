@@ -304,6 +304,14 @@ function EspaceEtudiantsContent() {
 
     // Add assignment deadlines
     assignments.forEach((assign: any) => {
+      const hasSub = assign.submissions && assign.submissions.length > 0;
+      const isPast = new Date(assign.deadline).getTime() < Date.now();
+      const isClose = (new Date(assign.deadline).getTime() - Date.now()) < 3 * 24 * 60 * 60 * 1000;
+      
+      let evtColor = "bg-orange-500";
+      if (hasSub) evtColor = "bg-emerald-500";
+      else if (isPast || isClose) evtColor = "bg-red-500";
+
       events.push({
         id: `assign-${assign.id}`,
         date: new Date(assign.deadline),
@@ -311,7 +319,7 @@ function EspaceEtudiantsContent() {
         description: `Devoir de type "${assign.type.toUpperCase()}" pour la formation ${assign.formation?.title}`,
         category: "Travaux",
         icon: FileText,
-        color: "bg-red-500",
+        color: evtColor,
       });
     });
 
@@ -325,7 +333,7 @@ function EspaceEtudiantsContent() {
           description: `Format : ${session.format || "En ligne"} | Lieu : ${session.location || "DTC Central"}`,
           category: "Sessions",
           icon: GraduationCap,
-          color: "bg-emerald-500",
+          color: "bg-blue-600",
         });
       }
       if (session.endDate) {
@@ -336,7 +344,7 @@ function EspaceEtudiantsContent() {
           description: `Fermeture académique de la session`,
           category: "Sessions",
           icon: Award,
-          color: "bg-blue-600",
+          color: "bg-indigo-600",
         });
       }
     });
@@ -354,12 +362,42 @@ function EspaceEtudiantsContent() {
 
   const getAssignmentStatus = (assign: any) => {
     const hasSub = assign.submissions && assign.submissions.length > 0;
-    if (hasSub) return { label: "Déposé", color: "border-emerald-200 bg-emerald-50 text-emerald-700" };
+    if (hasSub) {
+      return { 
+        label: "Déposé", 
+        color: "border-emerald-250 bg-emerald-50 text-emerald-800",
+        theme: "green",
+        icon: CheckCircle2
+      };
+    }
 
-    const isPast = new Date(assign.deadline).getTime() < Date.now();
-    if (isPast) return { label: "En retard", color: "border-red-200 bg-red-50 text-red-700" };
+    const deadlineTime = new Date(assign.deadline).getTime();
+    const isPast = deadlineTime < Date.now();
+    if (isPast) {
+      return { 
+        label: "En retard", 
+        color: "border-red-250 bg-red-50 text-red-800",
+        theme: "red",
+        icon: AlertCircle
+      };
+    }
 
-    return { label: "À faire", color: "border-blue-200 bg-blue-50 text-blue-700" };
+    const isClose = (deadlineTime - Date.now()) < 3 * 24 * 60 * 60 * 1000;
+    if (isClose) {
+      return { 
+        label: "À remettre", 
+        color: "border-red-250 bg-red-50 text-red-800",
+        theme: "red",
+        icon: Clock
+      };
+    }
+
+    return { 
+      label: "En cours", 
+      color: "border-orange-200 bg-orange-50 text-orange-800",
+      theme: "orange",
+      icon: Activity
+    };
   };
 
   if (loading) {
@@ -719,49 +757,69 @@ function EspaceEtudiantsContent() {
 
         {/* SECTION 2: STATS CARD ROW - VUE D'ENSEMBLE */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-sm transition hover:shadow-md">
+          {/* Card 1: Sessions (Bleu) */}
+          <div className="group relative overflow-hidden rounded-[26px] border border-blue-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 hover:bg-blue-50/20">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-[var(--cj-blue)]" />
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Sessions</span>
-              <GraduationCap className="h-5 w-5 text-blue-600" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-transform duration-300 group-hover:scale-110 shadow-sm border border-blue-100">
+                <GraduationCap className="h-4 w-4" />
+              </div>
             </div>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{totalFormationsCount}</p>
-            <p className="text-[10px] text-slate-500 mt-1">Inscriptions enregistrées</p>
+            <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{totalFormationsCount}</p>
+            <p className="text-[10px] text-slate-500 mt-1 font-medium">Inscriptions enregistrées</p>
           </div>
 
-          <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-sm transition hover:shadow-md">
+          {/* Card 2: En cours (Orange) */}
+          <div className="group relative overflow-hidden rounded-[26px] border border-orange-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-orange-200 hover:bg-orange-50/20">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">En cours</span>
-              <Activity className="h-5 w-5 text-emerald-600 animate-pulse" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-orange-600 transition-transform duration-300 group-hover:scale-110 shadow-sm border border-orange-100">
+                <Activity className="h-4 w-4 animate-pulse" />
+              </div>
             </div>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{activeSessionsCount}</p>
-            <p className="text-[10px] text-slate-500 mt-1">Sessions actives</p>
+            <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{activeSessionsCount}</p>
+            <p className="text-[10px] text-slate-500 mt-1 font-medium">Sessions actives</p>
           </div>
 
-          <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-sm transition hover:shadow-md">
+          {/* Card 3: À remettre (Rouge) */}
+          <div className="group relative overflow-hidden rounded-[26px] border border-red-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-200 hover:bg-red-50/20">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 to-[var(--cj-red)]" />
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">À remettre</span>
-              <Clock className="h-5 w-5 text-amber-600" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition-transform duration-300 group-hover:scale-110 shadow-sm border border-red-100">
+                <Clock className="h-4 w-4" />
+              </div>
             </div>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{pendingAssignmentsCount}</p>
-            <p className="text-[10px] text-slate-500 mt-1">Travaux restants</p>
+            <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{pendingAssignmentsCount}</p>
+            <p className="text-[10px] text-slate-500 mt-1 font-medium">Travaux restants</p>
           </div>
 
-          <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-sm transition hover:shadow-md">
+          {/* Card 4: Déposés (Vert) */}
+          <div className="group relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 hover:bg-emerald-50/20">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-500" />
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Déposés</span>
-              <CheckCircle className="h-5 w-5 text-emerald-600" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform duration-300 group-hover:scale-110 shadow-sm border border-emerald-100">
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
             </div>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{submittedAssignmentsCount}</p>
-            <p className="text-[10px] text-slate-500 mt-1">Travaux soumis</p>
+            <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{submittedAssignmentsCount}</p>
+            <p className="text-[10px] text-slate-500 mt-1 font-medium">Travaux soumis</p>
           </div>
 
-          <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-sm transition hover:shadow-md">
+          {/* Card 5: Actualités (Violet/Indigo) */}
+          <div className="group relative overflow-hidden rounded-[26px] border border-indigo-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200 hover:bg-indigo-50/20">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-600" />
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Actualités</span>
-              <Newspaper className="h-5 w-5 text-slate-600" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-transform duration-300 group-hover:scale-110 shadow-sm border border-indigo-100">
+                <Newspaper className="h-4 w-4" />
+              </div>
             </div>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{news.length}</p>
-            <p className="text-[10px] text-slate-500 mt-1">Annonces récentes</p>
+            <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{news.length}</p>
+            <p className="text-[10px] text-slate-500 mt-1 font-medium">Annonces récentes</p>
           </div>
         </section>
 
@@ -839,11 +897,15 @@ function EspaceEtudiantsContent() {
                   <div className="space-y-3">
                     {assignments.slice(0, 3).map((assign: any) => {
                       const status = getAssignmentStatus(assign);
+                      const iconBg = 
+                        status.theme === "green" ? "bg-emerald-50 text-emerald-600" :
+                        status.theme === "orange" ? "bg-orange-50 text-orange-600" :
+                        "bg-red-50 text-red-600";
                       
                       return (
                         <div key={assign.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-white shadow-sm hover:translate-x-1 transition-transform">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-red-50 text-red-600">
+                            <div className={`p-2 rounded-lg ${iconBg}`}>
                               <FileText className="w-4 h-4" />
                             </div>
                             <div>
@@ -886,19 +948,19 @@ function EspaceEtudiantsContent() {
 
                   <div className="grid gap-4 md:grid-cols-2">
                     {news.slice(0, 2).map((item: any) => (
-                      <div key={item.id} className="group overflow-hidden rounded-xl border border-slate-100 bg-white hover:-translate-y-1 transition-all">
+                      <div key={item.id} className="group overflow-hidden rounded-xl border border-slate-100 bg-white hover:-translate-y-1 transition-all border-l-4 border-l-indigo-500">
                         {item.imageData ? (
                           <img src={item.imageData} alt={item.title} className="w-full h-32 object-cover" />
                         ) : (
-                          <div className="w-full h-32 bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
-                            <Newspaper className="w-8 h-8 text-slate-500" />
+                          <div className="w-full h-32 bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-950 flex items-center justify-center">
+                            <Newspaper className="w-8 h-8 text-indigo-300/85" />
                           </div>
                         )}
                         <div className="p-4">
-                          <span className="inline-block text-[9px] font-bold text-[var(--cj-red)] uppercase tracking-wider mb-1">
+                          <span className="inline-block text-[9px] font-bold text-indigo-600 uppercase tracking-wider mb-1">
                             {item.category}
                           </span>
-                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-[var(--cj-blue)] transition line-clamp-1">
+                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-700 transition line-clamp-1">
                             {item.title}
                           </h4>
                           <p className="mt-1 text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
@@ -906,7 +968,7 @@ function EspaceEtudiantsContent() {
                           </p>
                           <button
                             onClick={() => setSelectedNewsForModal(item)}
-                            className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-[var(--cj-blue)]"
+                            className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-700"
                           >
                             Lire la suite
                             <ArrowRight className="w-3.5 h-3.5" />
@@ -1019,97 +1081,100 @@ function EspaceEtudiantsContent() {
               </div>
 
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {sessionsHistory.map((item: any) => (
-                  <div
-                    key={item.enrollmentId}
-                    className="group flex flex-col justify-between overflow-hidden rounded-[26px] border border-white bg-white shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300"
-                  >
-                    <div>
-                      {/* Course cover using formationImageUrl or gradient fallback */}
-                      {item.formationImageUrl ? (
-                        <div className="relative h-44 overflow-hidden">
-                          <img
-                            src={item.formationImageUrl}
-                            alt={item.formationTitle}
-                            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                      ) : (
-                        <div className={`relative h-44 bg-gradient-to-br ${getGradientForCategory(item.formationCategory)} flex items-center justify-center p-6 text-center text-white`}>
-                          <div className="absolute inset-0 bg-black/10" />
-                          <GraduationCap className="absolute top-4 right-4 w-10 h-10 text-white/20" />
-                          <p className="relative font-extrabold text-sm tracking-wide line-clamp-3">
-                            {item.formationTitle}
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="p-5">
-                        <span className="inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-[9px] font-bold text-slate-600 uppercase tracking-wider">
-                          {item.formationCategory || "Programme"}
-                        </span>
-                        
-                        <h4 className="mt-3 text-sm font-bold text-slate-900 leading-snug line-clamp-2">
-                          {item.formationTitle}
-                        </h4>
-                        
-                        <p className="mt-2 text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
-                          {item.formationDescription || "Aucune description fournie par l'administration."}
-                        </p>
-
-                        <div className="mt-4 space-y-2 border-t border-slate-100 pt-4">
-                          <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-slate-400 font-medium">Dates</span>
-                            <span className="font-semibold text-slate-700">
-                              {formatDateShort(item.startDate)} - {formatDateShort(item.endDate)}
-                            </span>
+                {sessionsHistory.map((item: any) => {
+                  const borderL = item.sessionLifecycle === "active" ? "border-l-4 border-l-orange-500" : "border-l-4 border-l-blue-600";
+                  return (
+                    <div
+                      key={item.enrollmentId}
+                      className={`group flex flex-col justify-between overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300 ${borderL}`}
+                    >
+                      <div>
+                        {/* Course cover using formationImageUrl or gradient fallback */}
+                        {item.formationImageUrl ? (
+                          <div className="relative h-44 overflow-hidden">
+                            <img
+                              src={item.formationImageUrl}
+                              alt={item.formationTitle}
+                              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
                           </div>
-                          <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-slate-400 font-medium">Statut</span>
-                            <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${statusClass(item.enrollmentStatus)}`}>
-                              {item.enrollmentStatus}
-                            </span>
+                        ) : (
+                          <div className={`relative h-44 bg-gradient-to-br ${getGradientForCategory(item.formationCategory)} flex items-center justify-center p-6 text-center text-white`}>
+                            <div className="absolute inset-0 bg-black/10" />
+                            <GraduationCap className="absolute top-4 right-4 w-10 h-10 text-white/20" />
+                            <p className="relative font-extrabold text-sm tracking-wide line-clamp-3">
+                              {item.formationTitle}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="p-5">
+                          <span className={`inline-block rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${item.sessionLifecycle === "active" ? "bg-orange-50 text-orange-700 border border-orange-100" : "bg-blue-50 text-blue-700 border border-blue-100"}`}>
+                            {item.formationCategory || "Programme"}
+                          </span>
+                          
+                          <h4 className="mt-3 text-sm font-bold text-slate-900 leading-snug line-clamp-2">
+                            {item.formationTitle}
+                          </h4>
+                          
+                          <p className="mt-2 text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
+                            {item.formationDescription || "Aucune description fournie par l'administration."}
+                          </p>
+
+                          <div className="mt-4 space-y-2 border-t border-slate-100 pt-4">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-slate-400 font-medium">Dates</span>
+                              <span className="font-semibold text-slate-700">
+                                {formatDateShort(item.startDate)} - {formatDateShort(item.endDate)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-slate-400 font-medium">Statut</span>
+                              <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${statusClass(item.enrollmentStatus)}`}>
+                                {item.enrollmentStatus}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="px-5 pb-5">
-                      {/* Individual progress bar (mapped to session progression if active) */}
-                      {item.sessionLifecycle === "active" ? (
-                        <div className="space-y-1 mb-4">
-                          <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-slate-400 font-medium">Progression</span>
-                            <span className="font-bold text-[var(--cj-blue)]">{completionRate}%</span>
+                      <div className="px-5 pb-5">
+                        {/* Individual progress bar (mapped to session progression if active) */}
+                        {item.sessionLifecycle === "active" ? (
+                          <div className="space-y-1 mb-4">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-slate-400 font-medium">Progression</span>
+                              <span className="font-bold text-orange-600">{completionRate}%</span>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500" style={{ width: `${completionRate}%` }} />
+                            </div>
                           </div>
-                          <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-blue-600 to-indigo-600" style={{ width: `${completionRate}%` }} />
+                        ) : (
+                          <div className="space-y-1 mb-4">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-slate-400 font-medium">Progression</span>
+                              <span className="font-bold text-slate-500">
+                                {item.sessionLifecycle === "completed" ? "100%" : "0%"}
+                              </span>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                              <div className="h-full bg-slate-300" style={{ width: item.sessionLifecycle === "completed" ? "100%" : "0%" }} />
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-1 mb-4">
-                          <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-slate-400 font-medium">Progression</span>
-                            <span className="font-bold text-slate-500">
-                              {item.sessionLifecycle === "completed" ? "100%" : "0%"}
-                            </span>
-                          </div>
-                          <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-                            <div className="h-full bg-slate-300" style={{ width: item.sessionLifecycle === "completed" ? "100%" : "0%" }} />
-                          </div>
-                        </div>
-                      )}
+                        )}
 
-                      <Link
-                        href={`${basePath}/elearning`}
-                        className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-blue-700)] transition text-center shadow-sm"
-                      >
-                        Continuer
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
+                        <Link
+                          href={`${basePath}/elearning`}
+                          className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-blue-700)] transition text-center shadow-sm"
+                        >
+                          Continuer
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {sessionsHistory.length === 0 && (
                   <div className="col-span-full py-12 text-center">
@@ -1139,15 +1204,19 @@ function EspaceEtudiantsContent() {
                 {assignments.map((assign: any) => {
                   const status = getAssignmentStatus(assign);
                   const isFuture = new Date(assign.deadline).getTime() >= Date.now();
+                  const borderL = 
+                    status.theme === "green" ? "border-l-4 border-l-emerald-500" :
+                    status.theme === "orange" ? "border-l-4 border-l-orange-500" :
+                    "border-l-4 border-l-red-500";
                   
                   return (
                     <div
                       key={assign.id}
-                      className="group overflow-hidden rounded-2xl border border-white bg-white p-5 shadow-sm transition hover:shadow-md"
+                      className={`group overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md ${borderL}`}
                     >
                       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
                         <div className="space-y-1">
-                          <span className="inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-[9px] font-bold text-slate-600 uppercase tracking-wider">
+                          <span className={`inline-block rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${status.color}`}>
                             {assign.type.toUpperCase()}
                           </span>
                           <h4 className="text-base font-bold text-slate-900">{assign.title}</h4>
@@ -1191,6 +1260,14 @@ function EspaceEtudiantsContent() {
                               <p className="text-xs text-slate-400 italic font-medium">Aucun fichier de consigne attaché.</p>
                             )}
                           </div>
+
+                          {/* Consignes text description */}
+                          {assign.instructions && (
+                            <div className="mt-4 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                              <p className="text-xs font-semibold text-slate-700 mb-1">Consignes / Instructions :</p>
+                              <p className="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">{assign.instructions}</p>
+                            </div>
+                          )}
                         </div>
 
                         {/* Submissions section */}
@@ -1289,7 +1366,7 @@ function EspaceEtudiantsContent() {
                 {news.map((item: any) => (
                   <div
                     key={item.id}
-                    className="group flex flex-col justify-between overflow-hidden rounded-[26px] border border-white bg-white shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300"
+                    className="group flex flex-col justify-between overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300 border-l-4 border-l-indigo-500"
                   >
                     <div>
                       {item.imageData ? (
@@ -1301,13 +1378,13 @@ function EspaceEtudiantsContent() {
                           />
                         </div>
                       ) : (
-                        <div className="relative h-48 bg-gradient-to-br from-slate-700 via-slate-800 to-slate-950 flex items-center justify-center text-white">
-                          <Newspaper className="w-12 h-12 text-slate-600" />
+                        <div className="relative h-48 bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-950 flex items-center justify-center text-white">
+                          <Newspaper className="w-12 h-12 text-indigo-300/80" />
                         </div>
                       )}
 
                       <div className="p-5 space-y-2">
-                        <div className="flex items-center justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                        <div className="flex items-center justify-between text-[9px] font-bold text-indigo-500 uppercase tracking-wider">
                           <span>{item.category || "Général"}</span>
                           <span>{formatDateShort(item.createdAt)}</span>
                         </div>

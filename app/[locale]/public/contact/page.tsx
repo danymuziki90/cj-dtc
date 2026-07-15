@@ -35,6 +35,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale || "fr";
 
@@ -55,8 +56,8 @@ export default function ContactPage() {
     {
       icon: MailIcon,
       title: "Email",
-      details: "info@cjdtc.com",
-      link: "mailto:info@cjdtc.com",
+      details: "contact@cjdevelopmenttc.org",
+      link: "mailto:contact@cjdevelopmenttc.org",
     },
     {
       icon: Clock,
@@ -72,27 +73,27 @@ export default function ContactPage() {
       title: "Orientation Étudiants",
       description:
         "Conseil personnalisé pour choisir la formation adaptée à vos objectifs",
-      email: "students@cjdtc.com",
+      email: "contact@cjdevelopmenttc.org",
     },
     {
       icon: Building,
       title: "Services Entreprises",
-      description: "Formations sur mesure et consulting pour vos équipes",
-      email: "corporate@cjdtc.com",
+      description: "Formations sur mesure and consulting pour vos équipes",
+      email: "contact@cjdevelopmenttc.org",
     },
     {
       icon: Globe,
       title: "Partenariats Internationaux",
       description:
         "Collaborations avec les institutions et organisations internationales",
-      email: "partners@cjdtc.com",
+      email: "contact@cjdevelopmenttc.org",
     },
     {
       icon: MessageSquare,
       title: "Support Technique",
       description:
         "Assistance pour la plateforme e-learning et les questions techniques",
-      email: "support@cjdtc.com",
+      email: "contact@cjdevelopmenttc.org",
     },
   ];
 
@@ -127,16 +128,35 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    // Simuler l'envoi du formulaire
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Valider les champs côté client
+    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+      setSubmitError(locale === "fr" ? "Veuillez remplir tous les champs requis." : "Please fill in all required fields.");
+      setIsSubmitting(false);
+      return;
+    }
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
 
-    // Réinitialiser le formulaire après 5 secondes
-    setTimeout(() => {
-      setIsSubmitted(false);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || (locale === "fr" ? "Erreur lors de l'envoi de la demande. Veuillez réessayer." : "Error sending request. Please try again."));
+      }
+
+      setIsSubmitted(true);
       setFormData({
         name: "",
         email: "",
@@ -146,7 +166,16 @@ export default function ContactPage() {
         message: "",
         interest: "general",
       });
-    }, 5000);
+      
+      // Réinitialiser l'état de succès après 5 secondes
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 5000);
+    } catch (err: any) {
+      setSubmitError(err.message || (locale === "fr" ? "Une erreur est survenue lors de l'envoi." : "An error occurred during submission."));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (
@@ -242,20 +271,22 @@ export default function ContactPage() {
               </h2>
 
               {isSubmitted ? (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
-                  <CheckCircle className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-blue-900 mb-2">
-                    Message envoyé avec succès !
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-8 text-center">
+                  <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-emerald-900 mb-2">
+                    Votre demande a été envoyée avec succès.
                   </h3>
-                  <p className="text-blue-700 mb-4">
-                    Nous vous répondrons dans les plus brefs délais.
+                  <p className="text-emerald-700 mb-4">
+                    Notre équipe vous répondra dans les meilleurs délais.
                   </p>
-                  <div className="text-sm text-blue-600">
-                    Redirection automatique...
-                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {submitError && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm font-medium">
+                      {submitError}
+                    </div>
+                  )}
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label
