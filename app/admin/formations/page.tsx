@@ -414,11 +414,11 @@ export default function AdminFormationsPage() {
                 </button>
               )}
 
-              <Link href="/admin/formations/new"
+              <button onClick={() => setShowSelectFormationForSession(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
                 <PlusIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Nouvelle formation</span>
-              </Link>
+                <span className="hidden sm:inline">Créer une session</span>
+              </button>
             </div>
           </div>
         </div>

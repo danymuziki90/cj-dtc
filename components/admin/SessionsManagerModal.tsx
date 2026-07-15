@@ -56,6 +56,7 @@ const initialForm = {
   imageUrl: '',
   description: '',
   status: 'ouverte',
+  registrationDeadline: '',
 }
 
 function toDateInputValue(rawDate: string) {
@@ -72,12 +73,33 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
+  // List of all formations and active formation selection state
+  const [allFormations, setAllFormations] = useState<any[]>([])
+  const [currentFormationId, setCurrentFormationId] = useState(formationId)
+  const [currentFormationTitle, setCurrentFormationTitle] = useState(formationTitle)
+
   // Tab in right panel: 'general' | 'form'
   const [rightTab, setRightTab] = useState<'general' | 'form'>('general')
 
   // Form states
   const [form, setForm] = useState(initialForm)
   const [editingId, setEditingId] = useState<number | null>(null)
+
+  // Fetch all formations
+  useEffect(() => {
+    const fetchFormations = async () => {
+      try {
+        const res = await fetch('/api/formations')
+        if (res.ok) {
+          const data = await res.json()
+          setAllFormations(data)
+        }
+      } catch (e) {
+        console.error('Error loading formations list:', e)
+      }
+    }
+    fetchFormations()
+  }, [])
 
   // Load sessions of the current formation
   const loadSessions = async () => {
@@ -88,7 +110,7 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
       if (!response.ok) throw new Error('Impossible de charger les sessions.')
       const data = (await response.json()) as SessionItem[]
       // Filter for this formation only
-      const filtered = data.filter((s) => s.formationId === formationId)
+      const filtered = data.filter((s) => s.formationId === currentFormationId)
       setSessions(filtered)
     } catch (e: any) {
       setError(e.message)
@@ -99,13 +121,16 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
 
   useEffect(() => {
     loadSessions()
+  }, [currentFormationId])
+
+  useEffect(() => {
     // Listen for Escape key
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [formationId])
+  }, [])
 
   const resetForm = () => {
     setForm(initialForm)
@@ -131,6 +156,7 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
       imageUrl: session.adminMeta?.imageUrl || session.imageUrl || '',
       description: session.description || '',
       status: session.status || 'ouverte',
+      registrationDeadline: toDateInputValue(session.adminMeta?.registrationDeadline || ''),
     })
   }
 
@@ -151,6 +177,7 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
       imageUrl: session.adminMeta?.imageUrl || session.imageUrl || '',
       description: session.description || '',
       status: 'ouverte', // Set status to open by default for the duplicate
+      registrationDeadline: toDateInputValue(session.adminMeta?.registrationDeadline || ''),
     })
     setSuccessMsg('Session clonée ! Renseignez les nouvelles dates puis enregistrez.')
     setTimeout(() => setSuccessMsg(null), 4000)
@@ -174,7 +201,7 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          formationId,
+          formationId: currentFormationId,
           startDate: new Date(form.startDate).toISOString(),
           endDate: new Date(form.endDate).toISOString(),
           startTime: form.startTime,
@@ -190,6 +217,7 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
           participationType: form.participationType,
           durationLabel: form.durationLabel,
           customTitle: form.customTitle,
+          registrationDeadline: form.registrationDeadline ? new Date(form.registrationDeadline).toISOString() : null,
         }),
       })
 
@@ -323,7 +351,7 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
         <div className="px-6 py-4 bg-gradient-to-r from-blue-700 to-blue-800 text-white flex items-center justify-between flex-shrink-0">
           <div>
             <span className="text-xs font-semibold uppercase tracking-wider text-blue-200">Gestion des sessions</span>
-            <h2 className="text-xl font-bold truncate max-w-2xl">{formationTitle}</h2>
+            <h2 className="text-xl font-bold truncate max-w-2xl">{currentFormationTitle}</h2>
           </div>
           <button
             type="button"
@@ -544,6 +572,28 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
             {(!editingId || rightTab === 'general') && (
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
+                {editingId === null && allFormations.length > 0 && (
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Formation associée *</label>
+                    <select
+                      value={currentFormationId}
+                      onChange={(e) => {
+                        const newId = Number(e.target.value)
+                        setCurrentFormationId(newId)
+                        const found = allFormations.find(f => f.id === newId)
+                        if (found) {
+                          setCurrentFormationTitle(found.title)
+                        }
+                      }}
+                      className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:border-blue-600 focus:outline-none"
+                    >
+                      {allFormations.map(f => (
+                        <option key={f.id} value={f.id}>{f.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Titre libre (facultatif)</label>
                   <input
@@ -645,6 +695,16 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
                     onChange={(e) => setForm((prev) => ({ ...prev, endTime: e.target.value }))}
                     className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:border-blue-600 focus:outline-none"
                     required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Date limite d'inscription</label>
+                  <input
+                    type="date"
+                    value={form.registrationDeadline}
+                    onChange={(e) => setForm((prev) => ({ ...prev, registrationDeadline: e.target.value }))}
+                    className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:border-blue-600 focus:outline-none"
                   />
                 </div>
 

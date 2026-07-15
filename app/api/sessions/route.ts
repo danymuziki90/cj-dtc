@@ -56,6 +56,7 @@ export async function GET() {
                     participationType:
                         parsedMetadata.metadata.participationType || normalizeParticipationType(session.format),
                     imageUrl: resolvedImageUrl,
+                    registrationDeadline: parsedMetadata.metadata.registrationDeadline || null,
                 },
             }
         })
@@ -94,6 +95,7 @@ export async function POST(request: Request) {
             customTitle,
             participationType,
             prerequisitesText,
+            registrationDeadline,
         } = body
 
         // Validation des données
@@ -141,6 +143,7 @@ export async function POST(request: Request) {
                             ((participationType as ParticipationType) || normalizeParticipationType(format)) ??
                             'presentiel',
                         imageUrl: imageUrl || null,
+                        registrationDeadline: registrationDeadline || null,
                     },
                     prerequisitesText ?? prerequisites
                 ),

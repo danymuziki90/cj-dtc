@@ -8,6 +8,7 @@ export type SessionAdminMetadata = {
   paymentInfo?: string
   participationType?: ParticipationType
   imageUrl?: string
+  registrationDeadline?: string
 }
 
 const METADATA_PREFIX = 'CJ_SESSION_META:'

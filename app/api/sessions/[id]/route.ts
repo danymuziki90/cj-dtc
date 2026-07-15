@@ -62,6 +62,7 @@ export async function GET(
         participationType:
           parsedMetadata.metadata.participationType || normalizeParticipationType(session.format),
         imageUrl: resolvedImageUrl,
+        registrationDeadline: parsedMetadata.metadata.registrationDeadline || null,
       },
     })
   } catch (error) {
@@ -105,6 +106,7 @@ export async function PUT(
       customTitle,
       participationType,
       prerequisitesText,
+      registrationDeadline,
     } = body
 
     const existingSession = await prisma.trainingSession.findUnique({
@@ -134,6 +136,10 @@ export async function PUT(
           ? (participationType as ParticipationType)
           : parsedExistingMetadata.metadata.participationType || normalizeParticipationType(format),
       imageUrl: imageUrl !== undefined ? (imageUrl as string) : parsedExistingMetadata.metadata.imageUrl,
+      registrationDeadline:
+        registrationDeadline !== undefined
+          ? (registrationDeadline as string)
+          : parsedExistingMetadata.metadata.registrationDeadline,
     }
 
     const nextPrerequisitesText =
@@ -168,7 +174,8 @@ export async function PUT(
           paymentInfo !== undefined ||
           customTitle !== undefined ||
           participationType !== undefined ||
-          imageUrl !== undefined) && {
+          imageUrl !== undefined ||
+          registrationDeadline !== undefined) && {
           prerequisites: serializeSessionMetadata(mergedMetadata, nextPrerequisitesText),
         }),
         ...(objectives !== undefined && { objectives }),
