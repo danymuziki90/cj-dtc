@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
+import { uploadToR2 } from '@/lib/r2'
+import { randomUUID } from 'crypto'
 
 const DEFAULT_CATEGORY = 'General'
 const DEFAULT_PAGE_SIZE = 8
@@ -10,13 +12,26 @@ const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 
 const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'])
 const DATE_INPUT_REGEX = /^\d{4}-\d{2}-\d{2}$/
+const MIME_MAP: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+}
 
 const newsSchema = z.object({
-  title: z.string().trim().min(3).max(180),
-  content: z.string().trim().min(10),
-  category: z.string().trim().min(2).max(80).optional(),
-  tags: z.array(z.string().trim().min(1).max(40)).max(15).optional(),
-  publicationDate: z.string().regex(DATE_INPUT_REGEX).optional(),
+  title: z.string({
+    required_error: "Le titre est obligatoire",
+    invalid_type_error: "Le titre doit être une chaîne de caractères"
+  }).trim().min(3, "Le titre doit contenir au moins 3 caractères").max(180, "Le titre ne doit pas dépasser 180 caractères"),
+  content: z.string({
+    required_error: "Le contenu est obligatoire",
+    invalid_type_error: "Le contenu doit être une chaîne de caractères"
+  }).trim().min(10, "Le contenu doit contenir au moins 10 caractères"),
+  category: z.string().trim().max(80, "La catégorie ne doit pas dépasser 80 caractères").optional().nullable().or(z.literal('')),
+  tags: z.array(z.string().trim().min(1, "Un tag ne peut pas être vide").max(40, "Un tag ne doit pas dépasser 40 caractères")).max(15, "Vous ne pouvez pas ajouter plus de 15 tags").optional(),
+  publicationDate: z.string().optional().nullable().or(z.literal('')),
   imageDataUrl: z.string().trim().optional().nullable(),
   published: z.boolean().optional(),
 })
@@ -56,9 +71,22 @@ function parseTags(value?: string | null) {
     .filter(Boolean)
 }
 
-function resolvePublicationDate(rawDate?: string) {
-  const value = rawDate && DATE_INPUT_REGEX.test(rawDate) ? rawDate : new Date().toISOString().slice(0, 10)
-  return new Date(`${value}T00:00:00.000Z`)
+function resolvePublicationDate(rawDate?: string | null) {
+  if (!rawDate) {
+    return new Date()
+  }
+  const dateStr = rawDate.trim()
+  if (!dateStr) {
+    return new Date()
+  }
+  if (DATE_INPUT_REGEX.test(dateStr)) {
+    return new Date(`${dateStr}T00:00:00.000Z`)
+  }
+  const parsed = new Date(dateStr)
+  if (Number.isNaN(parsed.getTime())) {
+    return new Date()
+  }
+  return parsed
 }
 
 function parsePositiveInteger(value: string | null, fallback: number) {
@@ -72,25 +100,48 @@ function estimateBase64Size(base64: string) {
   return Math.floor((base64.length * 3) / 4) - padding
 }
 
-function normalizeImageDataUrl(value?: string | null) {
-  const normalized = value?.trim()
-  if (!normalized) return null
+async function handleImageUpload(imageDataUrl?: string | null): Promise<string | null> {
+  const value = imageDataUrl?.trim()
+  if (!value) return null
 
-  const match = normalized.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$/)
-  if (!match) throw new Error('Image format is invalid.')
+  // If it's already an uploaded URL, keep it
+  if (
+    value.startsWith('http://') ||
+    value.startsWith('https://') ||
+    value.startsWith('/uploads/') ||
+    value.startsWith('/api/r2/file/')
+  ) {
+    return value
+  }
+
+  // If it's a data URL, upload to R2
+  const match = value.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$/)
+  if (!match) {
+    throw new Error("Le format de l'image est invalide.")
+  }
 
   const mimeType = match[1].toLowerCase()
   if (!ACCEPTED_IMAGE_TYPES.has(mimeType)) {
-    throw new Error('Image type is not allowed.')
+    throw new Error("Le type de l'image n'est pas autorisé (JPEG, PNG, WEBP, GIF uniquement).")
   }
 
   const base64 = match[2].replace(/\s/g, '')
   const bytes = estimateBase64Size(base64)
   if (bytes > MAX_IMAGE_BYTES) {
-    throw new Error('Image size exceeds 2 MB.')
+    throw new Error("L'image est trop volumineuse (maximum 2 Mo).")
   }
 
-  return `data:${mimeType};base64,${base64}`
+  const buffer = Buffer.from(base64, 'base64')
+  const ext = MIME_MAP[mimeType] || 'jpg'
+  const fileName = `${randomUUID()}.${ext}`
+
+  try {
+    const url = await uploadToR2(buffer, fileName, 'actualites', mimeType)
+    return url
+  } catch (error: any) {
+    console.error('[R2 Image Upload Error]:', error)
+    throw new Error(`Échec de l'envoi de l'image vers Cloudflare R2: ${error.message || error}`)
+  }
 }
 
 function mapNewsItem(item: any) {
@@ -202,25 +253,41 @@ export async function POST(request: NextRequest) {
 
   const parsed = newsSchema.safeParse(await request.json())
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid payload', details: parsed.error.flatten() }, { status: 400 })
+    const errorDetails = parsed.error.flatten().fieldErrors
+    const formattedErrors = Object.entries(errorDetails)
+      .map(([field, msgs]) => {
+        const fieldName = field === 'title' ? 'Titre' :
+                          field === 'content' ? 'Contenu' :
+                          field === 'category' ? 'Catégorie' :
+                          field === 'publicationDate' ? 'Date de publication' :
+                          field === 'imageDataUrl' ? 'Image' :
+                          field === 'published' ? 'Statut de publication' : field
+        return `${fieldName} : ${msgs?.join(', ')}`
+      })
+      .join(' ; ')
+    return NextResponse.json({
+      error: `Champs invalides - ${formattedErrors}`,
+      details: errorDetails
+    }, { status: 400 })
   }
 
   const sanitizedContent = sanitizeRichText(parsed.data.content)
   if (sanitizedContent.length < 10) {
-    return NextResponse.json({ error: 'Content is too short after sanitization.' }, { status: 400 })
+    return NextResponse.json({ error: 'Le contenu est trop court après nettoyage.' }, { status: 400 })
   }
 
   let imageData: string | null = null
   try {
-    imageData = normalizeImageDataUrl(parsed.data.imageDataUrl)
+    imageData = await handleImageUpload(parsed.data.imageDataUrl)
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Image is invalid.' },
+      { error: error instanceof Error ? error.message : 'Image invalide.' },
       { status: 400 }
     )
   }
 
   const tags = normalizeTags(parsed.data.tags).join(',')
+  const finalCategory = parsed.data.category?.trim() || DEFAULT_CATEGORY
 
   const article = await (prisma as any).news.create({
     data: {
@@ -228,7 +295,7 @@ export async function POST(request: NextRequest) {
       content: sanitizedContent,
       published: parsed.data.published ?? false,
       author: auth.admin.username || 'Admin',
-      category: parsed.data.category || DEFAULT_CATEGORY,
+      category: finalCategory,
       tags,
       imageData,
       publicationDate: resolvePublicationDate(parsed.data.publicationDate),
