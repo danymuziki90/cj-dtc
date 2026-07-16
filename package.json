@@ -13,6 +13,7 @@
     "build": "prisma generate && node scripts/next-build-with-memory.js",
     "start": "next start",
     "lint": "eslint .",
+    "deploy": "vercel --prod --no-wait",
     "test:e2e": "playwright test",
     "prisma:generate": "prisma generate",
     "prisma:generate-safe": "node scripts/prisma-generate-retry.js",
