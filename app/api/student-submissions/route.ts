@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
+import { uploadToR2 } from '../../../lib/r2'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,6 +60,7 @@ export async function GET(request: NextRequest) {
 // POST /api/student-submissions - Soumettre un travail
 export async function POST(request: NextRequest) {
   try {
+    console.log('[API Student Submissions] Requête POST reçue')
     const formData = await request.formData()
     const file = formData.get('file') as File
     const title = formData.get('title') as string
@@ -68,35 +68,27 @@ export async function POST(request: NextRequest) {
     const email = formData.get('email') as string // À récupérer depuis la session
 
     if (!file || !title || !formationId) {
+      console.warn('[API Student Submissions] Données requises manquantes')
       return NextResponse.json(
         { error: 'Fichier, titre et formation sont requis' },
         { status: 400 }
       )
     }
 
-    // Créer le dossier uploads s'il n'existe pas
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'student-submissions')
-    try {
-      await mkdir(uploadsDir, { recursive: true })
-    } catch (error) {
-      // Le dossier existe déjà
-    }
-
-    // Générer un nom de fichier unique
-    const timestamp = Date.now()
-    const fileExtension = file.name.split('.').pop()
-    const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-    const filePath = join('uploads', 'student-submissions', fileName)
-
-    // Sauvegarder le fichier
+    console.log(`[API Student Submissions] Fichier: ${file.name} (${file.size} octets), titre: ${title}, formationId: ${formationId}`)
+    const fileExtension = file.name.split('.').pop() || 'bin'
+    const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    await writeFile(join(process.cwd(), 'public', filePath), buffer)
+    
+    console.log(`[API Student Submissions] Lancement upload R2. Clé: travaux/${fileName}`)
+    const filePath = await uploadToR2(buffer, fileName, 'travaux', file.type)
+    console.log(`[API Student Submissions] Upload réussi. URL: ${filePath}`)
 
     // TODO: Créer une entrée dans le modèle StudentSubmission
     // Pour l'instant, on retourne une confirmation
     return NextResponse.json({
-      id: timestamp,
+      id: Date.now(),
       title,
       fileName: file.name,
       filePath,
@@ -108,10 +100,10 @@ export async function POST(request: NextRequest) {
         title: 'Formation'
       }
     }, { status: 201 })
-  } catch (error) {
-    console.error('Erreur lors de la soumission du travail:', error)
+  } catch (error: any) {
+    console.error('[API Student Submissions] Erreur lors de la soumission:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la soumission du travail' },
+      { error: `Erreur lors de la soumission du travail : ${error.message || error}` },
       { status: 500 }
     )
   }

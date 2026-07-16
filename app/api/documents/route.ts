@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin, requireStudent } from '@/lib/auth-portal/guards'
 import { ADMIN_AUTH_COOKIE, STUDENT_AUTH_COOKIE } from '@/lib/auth-portal/jwt'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
+import { uploadToR2 } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
@@ -136,6 +135,7 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
+    console.log('[API Documents] Requête POST reçue')
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const title = String(formData.get('title') || '').trim()
@@ -146,17 +146,18 @@ export async function POST(request: NextRequest) {
     const isPublic = String(formData.get('isPublic') || 'false') === 'true'
 
     if (!file || !title || !category) {
+      console.warn('[API Documents] Données requises manquantes')
       return NextResponse.json({ error: 'File, title and category are required.' }, { status: 400 })
     }
 
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'documents')
-    await mkdir(uploadsDir, { recursive: true })
-
+    console.log(`[API Documents] Fichier: ${file.name} (${file.size} octets), titre: ${title}, catégorie: ${category}`)
+    const r2Folder = sessionId ? 'sessions' : 'formations'
     const safeFileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`
-    const absoluteFilePath = join(uploadsDir, safeFileName)
-    const relativeFilePath = join('uploads', 'documents', safeFileName).replace(/\\/g, '/')
     const buffer = Buffer.from(await file.arrayBuffer())
-    await writeFile(absoluteFilePath, buffer)
+    
+    console.log(`[API Documents] Lancement upload R2. Clé: ${r2Folder}/${safeFileName}`)
+    const relativeFilePath = await uploadToR2(buffer, safeFileName, r2Folder, file.type || 'application/octet-stream')
+    console.log(`[API Documents] Upload R2 réussi. URL: ${relativeFilePath}`)
 
     const document = await prisma.document.create({
       data: {
@@ -200,8 +201,8 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(document, { status: 201 })
-  } catch (error) {
-    console.error('Erreur lors de l upload du document:', error)
-    return NextResponse.json({ error: 'Erreur lors de l upload du document' }, { status: 500 })
+  } catch (error: any) {
+    console.error('[API Documents] Erreur lors de l upload du document:', error)
+    return NextResponse.json({ error: `Erreur lors de l'upload du document : ${error.message || error}` }, { status: 500 })
   }
 }

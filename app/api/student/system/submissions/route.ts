@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mkdir, writeFile } from 'fs/promises'
-import { extname, join } from 'path'
+import { extname } from 'path'
 import { randomUUID } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
 import { parseEnrollmentNotes } from '@/lib/student/enrollment-notes'
+import { uploadToR2 } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
@@ -88,39 +88,44 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
+    console.log(`[API Student System Submissions] Requête POST par étudiant ID: ${auth.student.id}`)
     const formData = await request.formData()
     const title = (formData.get('title') as string | null)?.trim()
     const file = formData.get('file') as File | null
 
     if (!title || title.length < 3) {
+      console.warn('[API Student System Submissions] Titre manquant ou trop court')
       return NextResponse.json({ error: 'Titre requis (minimum 3 caracteres).' }, { status: 400 })
     }
 
     if (!file) {
+      console.warn('[API Student System Submissions] Fichier manquant')
       return NextResponse.json({ error: 'Fichier requis.' }, { status: 400 })
     }
 
+    console.log(`[API Student System Submissions] Fichier reçu: ${file.name} (${file.size} octets), titre: ${title}`)
     if (file.size > MAX_FILE_SIZE) {
+      console.warn('[API Student System Submissions] Fichier trop volumineux')
       return NextResponse.json({ error: 'Fichier trop volumineux (max 20 MB).' }, { status: 400 })
     }
 
     const extension = extname(file.name).toLowerCase()
     if (!ALLOWED_EXTENSIONS.has(extension) || !ALLOWED_MIME_TYPES.has(file.type)) {
+      console.warn(`[API Student System Submissions] Format invalide: extension: ${extension}, type: ${file.type}`)
       return NextResponse.json(
         { error: 'Format invalide. Utilisez uniquement PDF, DOCX, DOC, ZIP, JPG, PNG ou WEBP.' },
         { status: 400 }
       )
     }
 
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'student-submissions', auth.student.id)
-    await mkdir(uploadDir, { recursive: true })
-
+    const r2Folder = `travaux/${auth.student.id}`
     const fileName = `${Date.now()}-${randomUUID()}${extension}`
-    const filePath = join(uploadDir, fileName)
     const bytes = await file.arrayBuffer()
-    await writeFile(filePath, Buffer.from(bytes))
-
-    const fileUrl = `/uploads/student-submissions/${auth.student.id}/${fileName}`
+    
+    console.log(`[API Student System Submissions] Lancement upload R2. Clé: ${r2Folder}/${fileName}`)
+    const fileUrl = await uploadToR2(Buffer.from(bytes), fileName, r2Folder, file.type)
+    console.log(`[API Student System Submissions] R2 Upload réussi. URL: ${fileUrl}`)
+    
     const submission = await prisma.studentSubmission.create({
       data: {
         studentId: auth.student.id,
@@ -140,8 +145,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     )
-  } catch (error) {
-    console.error('Student submission upload error:', error)
-    return NextResponse.json({ error: 'Échec du téléversement.' }, { status: 500 })
+  } catch (error: any) {
+    console.error('[API Student System Submissions] Erreur critique:', error)
+    return NextResponse.json({ error: `Échec du téléversement : ${error.message || error}` }, { status: 500 })
   }
 }

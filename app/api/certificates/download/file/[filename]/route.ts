@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin, requireStudent } from '@/lib/auth-portal/guards'
-import { readFile } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
+import { downloadFromR2 } from '@/lib/r2'
 
 export const runtime = "nodejs"
 
@@ -62,14 +60,15 @@ export async function GET(
             }
         }
 
-        const filePath = join(process.cwd(), 'uploads', 'certificates', filename)
-        if (!existsSync(filePath)) {
-            return NextResponse.json({ error: 'Fichier physique introuvable sur le serveur' }, { status: 404 })
+        let fileBuffer: Buffer
+        try {
+            fileBuffer = await downloadFromR2(`certificats/${filename}`)
+        } catch (downloadError) {
+            console.error('Download from R2 failed:', downloadError)
+            return NextResponse.json({ error: 'Fichier physique introuvable sur R2' }, { status: 404 })
         }
 
-        const fileBuffer = await readFile(filePath)
-
-        return new NextResponse(fileBuffer, {
+        return new NextResponse(new Uint8Array(fileBuffer), {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',

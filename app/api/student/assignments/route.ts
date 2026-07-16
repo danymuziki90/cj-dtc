@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
-import { writeFile, mkdir } from 'fs/promises'
-import { join, extname } from 'path'
+import { extname } from 'path'
 import { randomUUID } from 'crypto'
+import { uploadToR2 } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
@@ -184,18 +184,14 @@ export async function POST(request: NextRequest) {
       console.error('Failed to create admin notification for submission:', err)
     }
 
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'student-submissions', auth.student.id)
-    await mkdir(uploadDir, { recursive: true })
+    const r2Folder = `travaux/${auth.student.id}`
 
     for (const [index, file] of files.entries()) {
       const extension = extname(file.name).toLowerCase()
       const fileName = `${Date.now()}-${randomUUID()}${extension}`
-      const filePath = join(uploadDir, fileName)
       
-      const buffer = await file.arrayBuffer()
-      await writeFile(filePath, Buffer.from(buffer))
-
-      const fileUrl = `/uploads/student-submissions/${auth.student.id}/${fileName}`
+      const buffer = Buffer.from(await file.arrayBuffer())
+      const fileUrl = await uploadToR2(buffer, fileName, r2Folder, file.type)
 
       await prisma.submissionFile.create({
         data: {

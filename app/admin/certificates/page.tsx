@@ -241,8 +241,16 @@ export default function AdminCertificatesPage() {
         })
 
         if (!uploadRes.ok) {
-          const uploadError = await uploadRes.json()
-          throw new Error(uploadError.error || 'Erreur lors du téléversement du fichier.')
+          let errMsg = 'Erreur lors du téléversement du fichier.'
+          try {
+            const uploadError = await uploadRes.json()
+            errMsg = uploadError.error || errMsg
+          } catch (jsonErr) {
+            const text = await uploadRes.text().catch(() => '')
+            errMsg = `Erreur serveur R2 (${uploadRes.status}): ${uploadRes.statusText || 'Internal Server Error'}. ${text.slice(0, 150)}`
+          }
+          console.error("[Certificates] Échec de l'upload du PDF:", errMsg)
+          throw new Error(errMsg)
         }
 
         const uploadData = await uploadRes.json()

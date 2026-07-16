@@ -29,6 +29,7 @@ type SessionItem = {
     paymentInfo?: string | null
     participationType?: 'en_ligne' | 'hybride' | 'presentiel' | null
     imageUrl?: string | null
+    registrationDeadline?: string | null
   }
 }
 
@@ -262,7 +263,18 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
         body: formData,
       })
 
-      if (!response.ok) throw new Error("Erreur pendant l'upload.")
+      if (!response.ok) {
+        let errMsg = "Erreur pendant l'upload."
+        try {
+          const errData = await response.json()
+          errMsg = errData.error || errMsg
+        } catch (jsonErr) {
+          const text = await response.text().catch(() => '')
+          errMsg = `Erreur serveur R2 (${response.status}): ${response.statusText || 'Internal Server Error'}. ${text.slice(0, 150)}`
+        }
+        console.error("[SessionsManager] Échec du téléversement de l'image:", errMsg)
+        throw new Error(errMsg)
+      }
       const data = await response.json()
       setForm((prev) => ({ ...prev, imageUrl: data.url }))
       setSuccessMsg('Image téléversée avec succès !')

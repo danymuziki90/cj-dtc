@@ -260,6 +260,8 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
               {formation.sessions.map((session: any) => {
                 const available = session.maxParticipants - (session.currentParticipants || 0)
                 const isFull = available <= 0
+                const statusText = isFull ? 'Complet' : 'Ouverte'
+                const statusColor = isFull ? 'bg-red-100 text-red-700' : 'bg-green-150 text-green-800'
                 return (
                   <div key={session.id} className="flex items-center justify-between text-xs bg-slate-50 p-2 rounded-lg border border-slate-100 hover:border-blue-200 transition-colors">
                     <div>
@@ -267,15 +269,24 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
                         {new Date(session.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} ({session.format})
                       </p>
                       <p className="text-[10px] text-gray-500">
-                        {session.location} • {isFull ? 'Complet' : `${available} place(s)`}
+                        {session.location} • {isFull ? 'Complet' : `${available} place(s) restante(s)`}
                       </p>
                     </div>
-                    <Link
-                      href={`/${locale}/formations/inscription?session=${session.id}`}
-                      className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium text-[10px] transition-colors whitespace-nowrap"
-                    >
-                      S'inscrire
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${statusColor}`}>
+                        {statusText}
+                      </span>
+                      <Link
+                        href={`/${locale}/formations/inscription?session=${session.id}`}
+                        className={`px-2.5 py-1.5 rounded font-bold text-[10px] transition-colors whitespace-nowrap ${
+                          isFull
+                            ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
+                        }`}
+                      >
+                        {isFull ? (locale === 'fr' ? "Attente" : "Waitlist") : (locale === 'fr' ? "S'inscrire" : "Register")}
+                      </Link>
+                    </div>
                   </div>
                 )
               })}

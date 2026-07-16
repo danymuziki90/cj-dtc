@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
-import { mkdir, writeFile } from 'fs/promises'
-import { extname, join } from 'path'
+import { extname } from 'path'
 import { NextRequest, NextResponse } from 'next/server'
+import { uploadToR2 } from '@/lib/r2'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
@@ -51,14 +51,9 @@ async function storeAttachment(studentId: string, file: File) {
     throw new Error('Format invalide. Utilisez PDF, JPG, PNG, WEBP, TXT, DOC ou DOCX.')
   }
 
-  const uploadDir = join(process.cwd(), 'public', 'uploads', 'student-communications', studentId)
-  await mkdir(uploadDir, { recursive: true })
-
   const fileName = `${Date.now()}-${randomUUID()}${extension}`
-  const absoluteFilePath = join(uploadDir, fileName)
-  const fileUrl = `/uploads/student-communications/${studentId}/${fileName}`
   const buffer = Buffer.from(await file.arrayBuffer())
-  await writeFile(absoluteFilePath, buffer)
+  const fileUrl = await uploadToR2(buffer, fileName, `etudiants/${studentId}`, file.type || 'application/octet-stream')
 
   return {
     id: randomUUID(),

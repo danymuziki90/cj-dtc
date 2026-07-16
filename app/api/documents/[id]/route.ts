@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import * as path from 'path'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
+import { deleteFromR2 } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
@@ -39,10 +38,20 @@ export async function DELETE(
     }
 
     try {
-      const filePath = path.join(process.cwd(), 'public', document.filePath)
-      await fs.unlink(filePath)
+      let r2Key = document.filePath
+      if (r2Key.startsWith('http://') || r2Key.startsWith('https://')) {
+        try {
+          const urlObj = new URL(r2Key)
+          r2Key = decodeURIComponent(urlObj.pathname.slice(1))
+        } catch (e) {}
+      } else if (r2Key.startsWith('/uploads/')) {
+        r2Key = r2Key.replace(/^\/uploads\//, '')
+      } else {
+        r2Key = r2Key.replace(/^\//, '')
+      }
+      await deleteFromR2(r2Key)
     } catch (fileError) {
-      console.warn('Erreur lors de la suppression du fichier:', fileError)
+      console.warn('Erreur lors de la suppression du fichier sur R2:', fileError)
     }
 
     await prisma.document.delete({

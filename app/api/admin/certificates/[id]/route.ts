@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
-import { unlink } from 'fs/promises'
-import { join } from 'path'
+import { deleteFromR2 } from '@/lib/r2'
 
 export const runtime = "nodejs"
 
@@ -127,15 +126,14 @@ export async function DELETE(
             return NextResponse.json({ error: 'Certificat introuvable' }, { status: 404 })
         }
 
-        // Optionnel : Supprimer le fichier PDF physique associé s'il est local
+        // Supprimer le fichier de Cloudflare R2
         if (certificate.fileUrl && certificate.fileUrl.startsWith('/api/certificates/download/file/')) {
             const fileName = certificate.fileUrl.split('/').pop()
             if (fileName) {
                 try {
-                    const filePath = join(process.cwd(), 'uploads', 'certificates', fileName)
-                    await unlink(filePath)
+                    await deleteFromR2(`certificats/${fileName}`)
                 } catch (e) {
-                    console.warn(`Impossible de supprimer le fichier PDF physique: ${fileName}`, e)
+                    console.warn(`Impossible de supprimer le fichier du certificat sur R2: ${fileName}`, e)
                 }
             }
         }

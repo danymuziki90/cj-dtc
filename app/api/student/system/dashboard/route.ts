@@ -310,6 +310,63 @@ export async function GET(request: NextRequest) {
       : null
   const attendanceValidated = attendanceRecordedCount === 0 ? true : (attendanceRate || 0) >= 80
 
+  // Fetch all open sessions for the student to browse/register
+  const openSessionsRaw = await prisma.trainingSession.findMany({
+    where: {
+      status: 'ouverte',
+      startDate: { gte: now },
+    },
+    include: {
+      formation: {
+        select: {
+          id: true,
+          title: true,
+          categorie: true,
+          imageUrl: true,
+          description: true,
+        }
+      },
+      enrollments: {
+        where: {
+          status: {
+            notIn: ['waitlist', 'rejected', 'cancelled']
+          }
+        },
+        select: {
+          id: true
+        }
+      }
+    },
+    orderBy: { startDate: 'asc' }
+  })
+
+  const registeredSessionIds = new Set(
+    enrollments
+      .map((e) => e.sessionId)
+      .filter((id): id is number => Boolean(id))
+  )
+
+  const availableSessions = openSessionsRaw
+    .filter((s) => !registeredSessionIds.has(s.id))
+    .map((s) => {
+      const parsedMetadata = parseSessionMetadata(s.prerequisites)
+      return {
+        id: s.id,
+        formationId: s.formationId,
+        formationTitle: s.formation.title,
+        formationCategory: s.formation.categorie,
+        formationImageUrl: s.formation.imageUrl,
+        startDate: s.startDate,
+        endDate: s.endDate,
+        location: s.location,
+        format: s.format,
+        status: s.status,
+        availableSpots: Math.max(0, s.maxParticipants - s.enrollments.length),
+        maxParticipants: s.maxParticipants,
+        durationLabel: parsedMetadata.metadata.durationLabel || null,
+      }
+    })
+
   const sessionsHistory = enrollmentsWithSession.map((item) => {
     const session = item.session!
     const notes = parseEnrollmentNotes(item.notes)
@@ -673,6 +730,7 @@ export async function GET(request: NextRequest) {
           }
         : null,
       sessionsHistory,
+      availableSessions,
       resources,
       submissions: mappedSubmissions,
       assignments: mappedAssignments,

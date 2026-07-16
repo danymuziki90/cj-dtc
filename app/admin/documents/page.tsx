@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -41,6 +41,8 @@ export default function DocumentsPage() {
         isPublic: ''
     })
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
     const [uploadForm, setUploadForm] = useState({
         title: '',
@@ -97,13 +99,13 @@ export default function DocumentsPage() {
 
     const handleFileUpload = async (e: React.FormEvent) => {
         e.preventDefault()
-        const file = fileInputRef.current?.files?.[0]
-        if (!file) return
+        if (!selectedFile) return
 
         setUploading(true)
+        setError(null)
         try {
             const formData = new FormData()
-            formData.append('file', file)
+            formData.append('file', selectedFile)
             formData.append('title', uploadForm.title)
             formData.append('description', uploadForm.description)
             formData.append('category', uploadForm.category)
@@ -126,12 +128,25 @@ export default function DocumentsPage() {
                     sessionId: '',
                     isPublic: false
                 })
+                setSelectedFile(null)
                 if (fileInputRef.current) {
                     fileInputRef.current.value = ''
                 }
+            } else {
+                let errMsg = "Erreur lors de l'importation."
+                try {
+                    const data = await response.json()
+                    errMsg = data.error || errMsg
+                } catch (jsonErr) {
+                    const text = await response.text().catch(() => '')
+                    errMsg = `Erreur serveur R2 (${response.status}): ${response.statusText || 'Internal Server Error'}. ${text.slice(0, 150)}`
+                }
+                console.error("[DocumentsPage] Échec de l'upload:", errMsg)
+                setError(errMsg)
             }
-        } catch (error) {
-            console.error('Impossible d importer le document:', error)
+        } catch (error: any) {
+            console.error('Impossible d\'importer le document:', error)
+            setError(error.message || "Erreur réseau lors de l'importation.")
         } finally {
             setUploading(false)
         }
@@ -254,7 +269,7 @@ export default function DocumentsPage() {
             </div>
 
             {/* Formulaire d'upload caché */}
-            <form onSubmit={handleFileUpload} className="hidden">
+            <div className="hidden">
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -262,17 +277,24 @@ export default function DocumentsPage() {
                     onChange={(e) => {
                         const file = e.target.files?.[0]
                         if (file) {
+                            setSelectedFile(file)
                             setUploadForm(prev => ({ ...prev, title: file.name }))
                         }
                     }}
                 />
-            </form>
+            </div>
 
             {/* Modal d'upload */}
-            {fileInputRef.current?.files?.[0] && (
+            {selectedFile && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+                    <form onSubmit={handleFileUpload} className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
                         <h3 className="text-lg font-semibold mb-4">Importer un document</h3>
+
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-md">
+                                {error}
+                            </div>
+                        )}
 
                         <div className="space-y-4">
                             <div>
@@ -353,6 +375,8 @@ export default function DocumentsPage() {
                             <button
                                 type="button"
                                 onClick={() => {
+                                    setSelectedFile(null)
+                                    setError(null)
                                     if (fileInputRef.current) {
                                         fileInputRef.current.value = ''
                                     }
@@ -377,7 +401,7 @@ export default function DocumentsPage() {
                                 {uploading ? 'Import en cours...' : 'Enregistrer le document'}
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             )}
 

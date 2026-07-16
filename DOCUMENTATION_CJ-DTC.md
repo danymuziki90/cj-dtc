@@ -63,11 +63,19 @@
 - Node.js runtime
 - Système d'authentification: NextAuth.js + JWT
 
-**Base de Données**
-- PostgreSQL 
-- Prisma ORM v5.8.0
+**Base de Données & Auth**
+- PostgreSQL via Supabase (cloud-hosted)
+- Supabase Auth (gestion utilisateurs et sessions)
+- Prisma ORM v5.8.0 (migrations et accès données)
 - 45 modèles de données
 - 101 routes API
+
+**Stockage Fichiers**
+- **Cloudflare R2** — solution unique de stockage objet
+- Compatible API AWS S3 (SDK `@aws-sdk/client-s3`)
+- Aucun coût de sortie (egress gratuit)
+- CDN global via URL publique personnalisée
+- Fallback filesystem local en développement
 
 **Fonctionnalités avancées**
 - Internationalization (FR/EN) avec next-intl
@@ -82,10 +90,10 @@
 - Docker (containerization)
 - Configuration CI/CD
 
-**Security**
+**Sécurité**
 - Chiffrement Bcrypt
 - JWT tokens
-- Middleware de protection
+- Middleware de protection des routes
 - Audit logging complet
 
 ---
@@ -1178,17 +1186,37 @@ Protections appliquées:
 - Rate limiting (pas spam)
 - Bounce tracking
 
-### 3. Stockage Images
+### 3. Stockage Fichiers
 
-**Cloudinary**
-- CDN pour images formations
-- Resizing automatique
-- Cacheing optimisé
-- Backup online
+**Cloudflare R2** — solution unique et centralisée de stockage
+- Compatible API AWS S3 (SDK `@aws-sdk/client-s3`)
+- CDN global via URL publique personnalisée ou domaine `r2.dev`
+- **Aucun coût de sortie** (egress gratuit)
+- Fallback filesystem local automatique en développement
+- Proxy interne `/api/r2/file/[...key]` pour les fichiers non publics
 
-**Alternative: Unsplash**
-- Stock images libres
-- Pour illustrations
+**Structure de dossiers R2 :**
+
+| Dossier | Contenu |
+|---|---|
+| `formations/` | Images, documents et ressources des formations |
+| `sessions/` | Fichiers liés aux sessions de formation |
+| `travaux/` | Travaux, devoirs et projets soumis par les étudiants |
+| `certificats/` | Certificats PDF générés ou téléversés (accès sécurisé) |
+| `actualites/` | Images et médias des actualités et articles |
+| `galerie/` | Photos et vidéos de la galerie de l'établissement |
+| `partenaires/` | Logos et documents des partenaires |
+| `etudiants/` | Photos de profil et documents personnels des étudiants |
+| `logos/` | Logos de l'établissement et éléments de branding |
+
+**Variables d'environnement requises :**
+```env
+CLOUDFLARE_R2_ACCOUNT_ID=your-cloudflare-account-id
+CLOUDFLARE_R2_ACCESS_KEY_ID=your-r2-access-key-id
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
+CLOUDFLARE_R2_BUCKET_NAME=cjdtc-bucket
+CLOUDFLARE_R2_PUBLIC_URL=https://pub-1e5e8ef317024ae7900f84ad344983d0.r2.dev
+```
 
 ### 4. Analytics
 

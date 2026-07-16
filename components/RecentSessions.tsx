@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -82,34 +82,17 @@ function selectSessions(data: SessionItem[]) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const activeStatuses = new Set(['ouverte', 'open', 'complete', 'complet', 'full', 'fermee', 'closed'])
-
-  const activeOrUpcoming = data
+  // Filtrer uniquement pour les sessions ouvertes (statut ouverte ou open)
+  const openSessions = data
     .filter((session) => {
-      const start = new Date(session.startDate)
-      return start >= today && activeStatuses.has((session.status || '').toLowerCase())
+      const status = (session.status || '').toLowerCase()
+      return status === 'ouverte' || status === 'open'
     })
     .sort((a, b) => {
-      const createdDiff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      if (createdDiff !== 0) return createdDiff
       return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     })
 
-  const selected = [...activeOrUpcoming]
-
-  if (selected.length < 3) {
-    const selectedIds = new Set(selected.map((item) => item.id))
-    const recent = [...data]
-      .filter((session) => !selectedIds.has(session.id))
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-    for (const session of recent) {
-      selected.push(session)
-      if (selected.length >= 3) break
-    }
-  }
-
-  return selected.slice(0, 3)
+  return openSessions.slice(0, 6)
 }
 
 export default function RecentSessions() {
@@ -168,8 +151,14 @@ export default function RecentSessions() {
     <section className="bg-gradient-to-b from-white to-gray-50 py-16">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-bold text-cjblue">{t.title}</h2>
-          <p className="mx-auto max-w-2xl text-lg text-gray-600">{t.description}</p>
+          <h2 className="mb-4 text-4xl font-bold text-cjblue">
+            {locale === 'fr' ? 'Sessions ouvertes' : 'Open Sessions'}
+          </h2>
+          <p className="mx-auto max-w-2xl text-lg text-gray-600">
+            {locale === 'fr' 
+              ? 'Découvrez nos sessions de formation actuellement ouvertes aux inscriptions.' 
+              : 'Discover our training sessions currently open for registration.'}
+          </p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-3">
@@ -179,62 +168,74 @@ export default function RecentSessions() {
             const headerImage = session.adminMeta?.imageUrl || session.imageUrl || '/logo.png'
 
             return (
-              <Link key={session.id} href={`/${locale}/formations#sessions`} className="group">
-                <article className="transform overflow-hidden rounded-xl border border-blue-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
-                  <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-cjblue to-blue-700">
-                    <img
-                      src={headerImage}
-                      alt={title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${statusClasses(session.status)}`}>
-                      {statusLabel(session.status, locale)}
+              <div key={session.id} className="group flex flex-col justify-between overflow-hidden rounded-xl border border-blue-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                <div>
+                  <Link href={`/${locale}/formations/${session.formation.slug}`}>
+                    <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-cjblue to-blue-700">
+                      <img
+                        src={headerImage}
+                        alt={title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${statusClasses(session.status)}`}>
+                        {statusLabel(session.status, locale)}
+                      </div>
+                      <div className="absolute right-3 top-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+                        {session.adminMeta?.sessionType || session.formation.categorie || t.defaultType}
+                      </div>
                     </div>
-                    <div className="absolute right-3 top-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
-                      {session.adminMeta?.sessionType || session.formation.categorie || t.defaultType}
-                    </div>
-                  </div>
+                  </Link>
 
-                  <div className="flex min-h-[22rem] flex-col p-6">
+                  <div className="p-6">
                     <p className="mb-2 text-xs uppercase tracking-[0.18em] text-gray-400">
                       {formatDateRange(session.startDate, session.endDate, locale)}
                     </p>
 
-                    <h3 className="mb-3 line-clamp-2 text-xl font-bold text-cjblue transition-colors group-hover:text-[var(--cj-red)]">
-                      {title}
-                    </h3>
+                    <Link href={`/${locale}/formations/${session.formation.slug}`}>
+                      <h3 className="mb-3 line-clamp-2 text-xl font-bold text-cjblue transition-colors hover:text-[var(--cj-red)]">
+                        {title}
+                      </h3>
+                    </Link>
 
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <p>{session.location}</p>
+                    <div className="space-y-2 text-sm text-gray-600 mb-4">
+                      <p className="font-semibold">{session.location || (locale === 'fr' ? 'À définir' : 'TBD')}</p>
                       <p>{formatLabel(session.format, locale)} · {session.startTime} - {session.endTime}</p>
-                      <p>{availableSpots} {t.spotsLabel} {session.maxParticipants}</p>
-                    </div>
-
-                    <div className="mt-4 flex-grow">
-                      <p className="line-clamp-3 text-sm text-gray-600">
-                        {session.formation.description || t.fallbackDescription}
+                      <p className="text-emerald-700 font-medium">
+                        {availableSpots} {t.spotsLabel} {session.maxParticipants}
                       </p>
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-gray-200 pt-4">
-                      <p className="text-lg font-bold text-cjblue">{formatPrice(session.price, locale)}</p>
-                      <span className="rounded-lg bg-blue-50 px-4 py-2 font-semibold text-cjblue transition-colors group-hover:bg-red-50 group-hover:text-[var(--cj-red)]">
-                        {t.viewSession}
-                      </span>
-                    </div>
+                    <p className="line-clamp-3 text-sm text-gray-550">
+                      {session.formation.description || t.fallbackDescription}
+                    </p>
                   </div>
-                </article>
-              </Link>
+                </div>
+
+                <div className="p-6 pt-0">
+                  <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4">
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase tracking-wider">{locale === 'fr' ? 'Tarif' : 'Price'}</p>
+                      <p className="text-xl font-extrabold text-cjblue">{formatPrice(session.price, locale)}</p>
+                    </div>
+                    <Link
+                      href={`/${locale}/formations/inscription?session=${session.id}`}
+                      className="rounded-lg bg-[var(--cj-red)] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#bb111d] transition-colors"
+                    >
+                      {locale === 'fr' ? "S'inscrire" : 'Register'}
+                    </Link>
+                  </div>
+                </div>
+              </div>
             )
           })}
         </div>
 
         <div className="mt-12 text-center">
           <Link
-            href={`/${locale}/formations#sessions`}
+            href={`/${locale}/formations`}
             className="inline-block rounded-lg bg-[var(--cj-blue)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--cj-red)]"
           >
-            {t.viewAll}
+            {locale === 'fr' ? 'Voir toutes les sessions' : 'View all sessions'}
           </Link>
         </div>
       </div>
