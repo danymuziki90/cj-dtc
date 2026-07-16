@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  PlusIcon, SearchIcon, Filter, Edit, Trash, Eye, Download,
+  PlusIcon, SearchIcon, Filter, Edit, Trash, Eye,
   BookOpen, Clock, Users, TargetIcon, StarIcon, ChevronRight,
   UserIcon, XIcon, AlertCircle, Copy, RotateCw, CheckSquare,
   SquareIcon, ChevronLeft, ChevronDown
@@ -253,20 +253,6 @@ export default function AdminFormationsPage() {
     }
   }
 
-  function doExportCSV() {
-    const headers = ['ID', 'Titre', 'Catégorie', 'Statut', 'Niveau', 'Prix', 'Étudiants', 'Note', 'Créé le']
-    const rows = filtered.map(f => [
-      f.id, `"${f.title}"`, f.categorie ?? '', f.statut, f.level ?? '',
-      f.price ?? '', f.enrollmentCount ?? '', f.rating ?? '',
-      new Date(f.createdAt).toLocaleDateString('fr-FR'),
-    ])
-    const csv = [headers, ...rows].map(r => r.join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const url  = URL.createObjectURL(blob)
-    const a    = Object.assign(document.createElement('a'), { href: url, download: `formations-${Date.now()}.csv` })
-    a.click()
-    URL.revokeObjectURL(url)
-  }
 
   // ── Selection helpers ────────────────────────────────────────────────────────
   const toggleOne = (id: number) =>
@@ -400,11 +386,6 @@ export default function AdminFormationsPage() {
                 <RotateCw className="w-4 h-4" />
               </button>
 
-              <button onClick={doExportCSV}
-                className="hidden sm:flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                <Download className="w-4 h-4" />
-                <span>CSV</span>
-              </button>
 
               {selected.length > 0 && (
                 <button onClick={() => setConfirmBulk(true)}
