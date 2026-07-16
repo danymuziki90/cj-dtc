@@ -47,65 +47,54 @@ export default function SessionDetailPage() {
     const [participants, setParticipants] = useState<Participant[]>([])
     const [loading, setLoading] = useState(true)
 
-    // Mock data
-    const mockSession: Session = {
-        id: parseInt(sessionId),
-        formationId: 1,
-        formationTitle: 'Management des Ressources Humaines (MRH)',
-        startDate: '2026-02-15',
-        endDate: '2026-02-20',
-        startTime: '09:00',
-        endTime: '17:00',
-        location: 'Kinshasa, RDC',
-        format: 'presentiel',
-        maxParticipants: 25,
-        currentParticipants: 18,
-        price: 150000,
-        status: 'ouverte',
-        description: 'Session intensive de formation en Management des Ressources Humaines avec focus sur les pratiques africaines.',
-        prerequisites: 'Diplôme de niveau Bac+3 minimum, expérience professionnelle souhaitée.',
-        objectives: 'Maîtriser les fondamentaux du MRH, développer des compétences en recrutement et gestion des talents.',
-        createdAt: '2026-01-10'
-    }
-
-    const mockParticipants: Participant[] = [
-        {
-            id: 1,
-            name: 'Marie Kabila',
-            email: 'marie.kabila@email.com',
-            phone: '+243 81 234 5678',
-            registrationDate: '2026-01-15',
-            paymentStatus: 'paye',
-            attendanceStatus: 'en_cours'
-        },
-        {
-            id: 2,
-            name: 'Jean-Pierre Mbeki',
-            email: 'jp.mbeki@email.com',
-            phone: '+243 82 345 6789',
-            registrationDate: '2026-01-12',
-            paymentStatus: 'paye',
-            attendanceStatus: 'en_cours'
-        },
-        {
-            id: 3,
-            name: 'Sophie Nkosi',
-            email: 'sophie.nkosi@email.com',
-            phone: '+243 83 456 7890',
-            registrationDate: '2026-01-20',
-            paymentStatus: 'partiel',
-            attendanceStatus: 'en_cours'
-        }
-    ]
-
     useEffect(() => {
-        // Simulation du chargement
-        setTimeout(() => {
-            setSession(mockSession)
-            setParticipants(mockParticipants)
-            setLoading(false)
-        }, 1000)
+        if (!sessionId) return
+        setLoading(true)
+        fetch(`/api/sessions/${sessionId}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Erreur de chargement")
+                return res.json()
+            })
+            .then(data => {
+                const parsedSession = {
+                    ...data,
+                    formationTitle: data.formation?.title || "Formation",
+                    price: data.price || 0,
+                    startDate: data.startDate,
+                    endDate: data.endDate,
+                }
+                setSession(parsedSession)
+                
+                const parsedParticipants = (data.enrollments || []).map((e: any) => ({
+                    id: e.id,
+                    name: `${e.firstName} ${e.lastName}`,
+                    email: e.email,
+                    phone: e.phone || '',
+                    registrationDate: e.createdAt,
+                    paymentStatus: 'paye',
+                    attendanceStatus: 'en_cours'
+                }))
+                setParticipants(parsedParticipants)
+            })
+            .catch(err => {
+                console.error(err)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
     }, [sessionId])
+
+    const handleDelete = async () => {
+        if (!confirm("Êtes-vous sûr de vouloir supprimer cette session ?\nCette opération est irréversible.")) return
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' })
+            if (!res.ok) throw new Error("Erreur lors de la suppression")
+            router.push('/admin/sessions')
+        } catch (error) {
+            console.error(error)
+            alert("Erreur lors de la suppression de la session")
+        }
+    }
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -180,10 +169,10 @@ export default function SessionDetailPage() {
             {/* Header */}
             <div className="mb-6">
                 <Link
-                    href={`/admin/formations?formationId=${session.formationId}`}
+                    href="/admin/sessions"
                     className="text-blue-600 hover:text-blue-800 flex items-center mb-4"
                 >
-                    ← Retour à la formation
+                    ← Retour aux sessions
                 </Link>
                 <div className="flex justify-between items-start">
                     <div>
@@ -193,23 +182,26 @@ export default function SessionDetailPage() {
                     <div className="flex space-x-3">
                         <Link
                             href={`/admin/sessions/${session.id}/events`}
-                            className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+                            className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-semibold flex items-center"
                         >
                             📅 Gérer l'agenda
                         </Link>
                         <Link
                             href={`/admin/sessions/${session.id}/form-answers`}
-                            className="bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors"
+                            className="bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors text-sm font-semibold flex items-center"
                         >
                             📋 Réponses formulaire
                         </Link>
                         <Link
-                            href={`/admin/sessions/${session.id}/edit`}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                            href="/admin/sessions"
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold flex items-center"
                         >
                             Modifier
                         </Link>
-                        <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                        <button 
+                            onClick={handleDelete}
+                            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold"
+                        >
                             Supprimer
                         </button>
                     </div>

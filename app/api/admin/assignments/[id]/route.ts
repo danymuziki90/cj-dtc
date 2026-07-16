@@ -11,7 +11,7 @@ const updateAssignmentSchema = z.object({
   description: z.string().trim().min(3).max(2000).optional(),
   type: z.enum(['tp', 'exam', 'project']).optional(),
   formationId: z.coerce.number().int().positive().optional(),
-  sessionId: z.coerce.number().int().positive().nullable().optional(),
+  sessionId: z.coerce.number().int().positive().optional(),
   deadline: z.string().min(10).optional(),
   maxFileSize: z.coerce.number().int().min(1).max(100).optional(),
   allowedFileTypes: z.array(z.string().trim().min(1).max(20)).max(12).optional(),

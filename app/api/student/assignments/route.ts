@@ -130,11 +130,12 @@ export async function POST(request: NextRequest) {
         ],
         formationId: assignment.formationId,
         status: { in: ENROLLMENT_STATUSES_WITH_ACCESS },
+        ...(assignment.sessionId && { sessionId: assignment.sessionId }),
       },
       select: { id: true },
     })
     if (!enrollment) {
-      return NextResponse.json({ error: 'Vous n etes pas inscrit a cette formation.' }, { status: 403 })
+      return NextResponse.json({ error: 'Vous n\'êtes pas inscrit à la session spécifique requise pour ce devoir.' }, { status: 403 })
     }
 
     const allowedTypes = parseAllowedFileTypes(assignment.allowedFileTypes).map(normalizeExtension)
