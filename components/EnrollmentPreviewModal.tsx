@@ -290,6 +290,16 @@ function inferTypeFromEnrollment(enrollment: Enrollment): ProgramSessionType {
 
 
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'En attente',
+  accepted: 'Accepté',
+  rejected: 'Refusé',
+  waitlist: 'En liste d\'attente',
+  cancelled: 'Annulé',
+  confirmed: 'Confirmé',
+  completed: 'Terminé'
+}
+
 function enrollmentStatusTone(status: string): 'warning' | 'success' | 'danger' | 'neutral' | 'primary' {
   if (status === 'accepted') return 'success'
   if (status === 'confirmed' || status === 'completed') return 'primary'
@@ -647,6 +657,54 @@ export default function EnrollmentPreviewModal({
                   onStatusChange()
                 }}
               />
+            </AdminPanel>
+
+            {/* Historique des décisions */}
+            <AdminPanel className="p-5">
+              <h3 className="mb-3 text-lg font-semibold text-slate-900">📜 Historique des décisions</h3>
+              <div className="space-y-4">
+                <div className="flex gap-3 text-xs border-l-2 border-slate-200 pl-4 relative pb-2">
+                  <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-slate-400" />
+                  <div>
+                    <p className="font-bold text-slate-700">Dossier créé</p>
+                    <p className="text-[10px] text-slate-400 font-semibold">
+                      <FormattedDate date={record.createdAt} options={{ dateStyle: 'short', timeStyle: 'short' } as Intl.DateTimeFormatOptions} />
+                    </p>
+                  </div>
+                </div>
+
+                {notesInfo.parsed?.history && Array.isArray(notesInfo.parsed.history) && notesInfo.parsed.history.length > 0 ? (
+                  (notesInfo.parsed.history as any[]).map((entry: any, index: number) => (
+                    <div key={index} className="flex gap-3 text-xs border-l-2 border-slate-200 pl-4 relative pb-2 font-sans">
+                      <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-blue-600" />
+                      <div className="space-y-1">
+                        <p className="font-extrabold text-slate-800">
+                          Statut : <span className="text-slate-500 font-semibold">{STATUS_LABELS[entry.fromStatus] || entry.fromStatus}</span> →{' '}
+                          <span className="text-blue-600 font-bold">{STATUS_LABELS[entry.toStatus] || entry.toStatus}</span>
+                        </p>
+                        {entry.reason && (
+                          <p className="text-slate-650 bg-slate-50 border border-slate-200 rounded-lg p-2 mt-1">
+                            « {entry.reason} »
+                          </p>
+                        )}
+                        <p className="text-[10px] text-slate-400 font-bold flex flex-wrap items-center gap-1.5 mt-1">
+                          <span>Par @{entry.adminUsername}</span>
+                          <span>•</span>
+                          <span>
+                            <FormattedDate date={entry.timestamp} options={{ dateStyle: 'short', timeStyle: 'short' } as Intl.DateTimeFormatOptions} />
+                          </span>
+                          <span>•</span>
+                          <span className={entry.emailSent ? 'text-emerald-600 font-extrabold' : 'text-slate-450 font-semibold'}>
+                            {entry.emailSent ? '📧 Email envoyé' : '📧 Pas d\'email envoyé'}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-slate-400 italic">Aucun changement de statut enregistré.</p>
+                )}
+              </div>
             </AdminPanel>
 
             <AdminPanel className="bg-slate-50/80 p-5 text-sm text-slate-700">

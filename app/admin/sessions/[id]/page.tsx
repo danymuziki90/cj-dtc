@@ -229,8 +229,8 @@ export default function SessionDetailPage() {
             <div className="p-6">
                 <div className="text-center">
                     <p className="text-gray-500">Session non trouvée.</p>
-                    <Link href="/admin/formations" className="text-blue-600 hover:text-blue-800">
-                        Retour aux formations
+                    <Link href="/admin/sessions" className="text-blue-600 hover:text-blue-800">
+                        Retour aux sessions
                     </Link>
                 </div>
             </div>

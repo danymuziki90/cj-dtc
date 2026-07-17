@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       where: {
         email: access.student.email,
         status: {
-          notIn: ['rejected', 'cancelled'],
+          in: ['accepted', 'confirmed', 'completed'],
         },
       },
       select: {

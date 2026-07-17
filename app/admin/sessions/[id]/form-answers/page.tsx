@@ -169,7 +169,7 @@ export default function SessionFormAnswersPage() {
             Ajoutez des questions depuis la gestion des sessions.
           </p>
           <Link
-            href="/admin/formations"
+            href="/admin/sessions"
             className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
           >
             Gérer les sessions

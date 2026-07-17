@@ -92,6 +92,32 @@ export default function AdminSessionsPage() {
   const [viewStudents, setViewStudents]         = useState<Session | null>(null)
   const [showEditModal, setShowEditModal]        = useState<Session | null>(null)
 
+  // ── Create / Edit form ────────────────────────────────────────────────────
+  const [showForm, setShowForm]         = useState(false)
+  const [editingSession, setEditingSession] = useState<Session | null>(null)
+  const [formLoading, setFormLoading]   = useState(false)
+  const [customQuestions, setCustomQuestions] = useState<any[]>([])
+  const [importSessionId, setImportSessionId] = useState<string>('')
+  const [formData, setFormData]         = useState({
+    formationId: '',
+    startDate: '',
+    endDate: '',
+    startTime: '09:00',
+    endTime: '17:00',
+    location: '',
+    format: 'presentiel',
+    maxParticipants: 25,
+    description: '',
+    objectives: '',
+    status: 'ouverte',
+    customTitle: '',
+    registrationDeadline: '',
+    imageUrl: '',
+  })
+
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
+
   // ── Session Documents (Supports pédagogiques) ──────────────────────────────
   const [sessionDocuments, setSessionDocuments] = useState<any[]>([])
   const [docLoading, setDocLoading]             = useState(false)
@@ -109,10 +135,11 @@ export default function AdminSessionsPage() {
       return
     }
 
+    const sessionId = editingSession.id
     async function loadDocuments() {
       setDocLoading(true)
       try {
-        const res = await fetch(`/api/documents?sessionId=${editingSession.id}`)
+        const res = await fetch(`/api/documents?sessionId=${sessionId}`)
         if (res.ok) {
           const data = await res.json()
           setSessionDocuments(data)
@@ -184,32 +211,6 @@ export default function AdminSessionsPage() {
     }
   }
 
-  // ── Create / Edit form ────────────────────────────────────────────────────
-  const [showForm, setShowForm]         = useState(false)
-  const [editingSession, setEditingSession] = useState<Session | null>(null)
-  const [formLoading, setFormLoading]   = useState(false)
-  const [customQuestions, setCustomQuestions] = useState<any[]>([])
-  const [importSessionId, setImportSessionId] = useState<string>('')
-  const [formData, setFormData]         = useState({
-    formationId: '',
-    startDate: '',
-    endDate: '',
-    startTime: '09:00',
-    endTime: '17:00',
-    location: '',
-    format: 'presentiel',
-    maxParticipants: 25,
-    description: '',
-    objectives: '',
-    status: 'ouverte',
-    customTitle: '',
-    registrationDeadline: '',
-    imageUrl: '',
-  })
-
-  const [uploadingImage, setUploadingImage] = useState(false)
-  const [imageError, setImageError] = useState<string | null>(null)
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -278,7 +279,8 @@ export default function AdminSessionsPage() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       if (params.get('action') === 'create-session' || params.get('createSession') === 'true') {
-        openCreate()
+        const formationIdParam = params.get('formationId') || ''
+        openCreate(formationIdParam)
         // Nettoyer l'URL
         const newUrl = window.location.pathname
         window.history.replaceState({}, '', newUrl)
@@ -396,10 +398,10 @@ export default function AdminSessionsPage() {
   }
 
   // ── Form submit ───────────────────────────────────────────────────────────
-  function openCreate() {
+  function openCreate(preselectedFormationId: string = '') {
     setEditingSession(null)
     setFormData({
-      formationId: '',
+      formationId: preselectedFormationId,
       startDate: '',
       endDate: '',
       startTime: '09:00',
