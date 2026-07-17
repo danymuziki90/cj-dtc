@@ -326,8 +326,8 @@ export default function StudentDashboardPage() {
                     <strong>Date:</strong>{' '}
                     {data.dashboard.currentSession.startDate
                       ? `${new Date(data.dashboard.currentSession.startDate).toLocaleDateString('fr-FR')} - ${new Date(
-                          data.dashboard.currentSession.endDate || data.dashboard.currentSession.startDate
-                        ).toLocaleDateString('fr-FR')}`
+                        data.dashboard.currentSession.endDate || data.dashboard.currentSession.startDate
+                      ).toLocaleDateString('fr-FR')}`
                       : '-'}
                   </p>
                   <p><strong>Type parcours:</strong> {data.dashboard.currentSession.sessionType || '-'}</p>
@@ -387,9 +387,14 @@ export default function StudentDashboardPage() {
                       {new Date(row.startDate).toLocaleDateString('fr-FR')} -{' '}
                       {new Date(row.endDate).toLocaleDateString('fr-FR')} | {row.location}
                     </p>
-                    <p className="text-xs text-slate-500">
-                      Type: {row.sessionType || '-'} | Statut inscription: {row.enrollmentStatus}
-                    </p>
+                    <div className="text-xs text-slate-500 flex items-center gap-1.5 mt-1.5">
+                      <span>Type : {row.sessionType || '-'}</span>
+                      <span>•</span>
+                      <span>Statut :</span>
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${statusClass(row.enrollmentStatus)}`}>
+                        {translateEnrollmentStatus(row.enrollmentStatus)}
+                      </span>
+                    </div>
                   </div>
                 ))}
                 {data.dashboard.sessionsHistory.length === 0 ? (
