@@ -398,10 +398,11 @@ export default function AdminSessionsPage() {
   }
 
   // ── Form submit ───────────────────────────────────────────────────────────
-  function openCreate(preselectedFormationId: string = '') {
+  function openCreate(preselectedFormationId?: string | React.MouseEvent) {
+    const defaultFormationId = typeof preselectedFormationId === 'string' ? preselectedFormationId : ''
     setEditingSession(null)
     setFormData({
-      formationId: preselectedFormationId,
+      formationId: defaultFormationId,
       startDate: '',
       endDate: '',
       startTime: '09:00',
