@@ -107,6 +107,10 @@ interface Session {
   endDate: string
   formationId: number
   format: string
+  formation?: {
+    id: number
+    title: string
+  } | null
 }
 
 const FILE_TYPE_OPTIONS = [

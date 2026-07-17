@@ -118,3 +118,86 @@ export async function PATCH(
     return NextResponse.json({ error: 'Erreur lors du réordonnancement' }, { status: 500 })
   }
 }
+
+// ── PUT /api/sessions/[id]/form-questions ──────────────────────────────────
+// Enregistre en lot (batch) toutes les questions d'une session.
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const sessionId = parseId(id, 'Session ID')
+    const body = await req.json()
+
+    if (!Array.isArray(body)) {
+      return NextResponse.json({ error: 'Format invalide : tableau attendu' }, { status: 400 })
+    }
+
+    // Sécurisation de l'opération en transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Récupérer les questions existantes de la session
+      const existing = await tx.sessionFormQuestion.findMany({
+        where: { sessionId },
+        select: { id: true }
+      })
+      const existingIds = existing.map(q => q.id)
+      const incomingIds = body.filter((q: any) => q.id).map((q: any) => q.id)
+
+      // 2. Identifier et supprimer les questions qui ne sont plus présentes
+      const toDelete = existingIds.filter(id => !incomingIds.includes(id))
+      if (toDelete.length > 0) {
+        await tx.sessionFormQuestion.deleteMany({
+          where: { id: { in: toDelete }, sessionId }
+        })
+      }
+
+      // 3. Upsert des questions entrantes
+      const upserted = []
+      for (let i = 0; i < body.length; i++) {
+        const q = body[i]
+        const optionsJson = Array.isArray(q.options) && q.options.length > 0 ? JSON.stringify(q.options) : null
+        const fileTypesJson = Array.isArray(q.fileTypes) && q.fileTypes.length > 0 ? JSON.stringify(q.fileTypes) : null
+
+        if (q.id) {
+          // Mise à jour
+          const updated = await tx.sessionFormQuestion.update({
+            where: { id: q.id, sessionId },
+            data: {
+              label: q.label.trim(),
+              type: q.type,
+              helpText: q.helpText?.trim() || null,
+              required: Boolean(q.required),
+              order: i,
+              options: optionsJson,
+              fileTypes: fileTypesJson,
+            }
+          })
+          upserted.push(updated)
+        } else {
+          // Création
+          const created = await tx.sessionFormQuestion.create({
+            data: {
+              sessionId,
+              label: q.label.trim(),
+              type: q.type,
+              helpText: q.helpText?.trim() || null,
+              required: Boolean(q.required),
+              order: i,
+              options: optionsJson,
+              fileTypes: fileTypesJson,
+            }
+          })
+          upserted.push(created)
+        }
+      }
+      return upserted
+    })
+
+    return NextResponse.json(result)
+  } catch (err: any) {
+    console.error('PUT batch form-questions error:', err)
+    return NextResponse.json({ error: 'Erreur lors de la sauvegarde des questions' }, { status: 500 })
+  }
+}
+

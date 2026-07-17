@@ -87,6 +87,8 @@ export default function AdminSessionsPage() {
   const [showForm, setShowForm]         = useState(false)
   const [editingSession, setEditingSession] = useState<Session | null>(null)
   const [formLoading, setFormLoading]   = useState(false)
+  const [customQuestions, setCustomQuestions] = useState<any[]>([])
+  const [importSessionId, setImportSessionId] = useState<string>('')
   const [formData, setFormData]         = useState({
     formationId: '',
     startDate: '',
@@ -236,11 +238,12 @@ export default function AdminSessionsPage() {
           description: session.description,
           objectives: session.objectives,
           status: 'ouverte',
+          duplicateFromSessionId: session.id,
         }),
       })
       if (!res.ok) throw new Error('Erreur lors de la duplication')
       await load()
-      showToast('Session dupliquée avec succès')
+      showToast('Session et questions dupliquées avec succès')
     } catch (e: any) {
       showToast(e.message, 'error')
     }
@@ -262,6 +265,8 @@ export default function AdminSessionsPage() {
       objectives: '',
       status: 'ouverte',
     })
+    setCustomQuestions([])
+    setImportSessionId('')
     setShowForm(true)
   }
 
@@ -280,6 +285,25 @@ export default function AdminSessionsPage() {
       objectives: session.objectives ?? '',
       status: session.status,
     })
+    setCustomQuestions([])
+    setImportSessionId('')
+
+    // Charger les questions personnalisées existantes
+    fetch(`/api/sessions/${session.id}/form-questions`)
+      .then(res => res.json())
+      .then(data => {
+        const parsed = Array.isArray(data) ? data.map(q => ({
+          ...q,
+          options: q.options ? JSON.parse(q.options) : [],
+          fileTypes: q.fileTypes ? JSON.parse(q.fileTypes) : ['pdf', 'docx', 'jpg', 'png']
+        })) : []
+        setCustomQuestions(parsed)
+      })
+      .catch((err) => {
+        console.error('Erreur lors de la récupération des questions:', err)
+        setCustomQuestions([])
+      })
+
     setShowForm(true)
   }
 
@@ -306,9 +330,32 @@ export default function AdminSessionsPage() {
         const d = await res.json()
         throw new Error(d.error ?? 'Erreur lors de la sauvegarde')
       }
+
+      const savedSession = await res.json()
+      const savedSessionId = savedSession.id
+
+      // Sauvegarde des questions par lot (batch)
+      const qRes = await fetch(`/api/sessions/${savedSessionId}/form-questions`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customQuestions.map((q) => ({
+          id: q.id,
+          label: q.label,
+          type: q.type,
+          helpText: q.helpText,
+          required: q.required,
+          options: q.options,
+          fileTypes: q.fileTypes,
+        })))
+      })
+
+      if (!qRes.ok) {
+        throw new Error('La session a été enregistrée, mais erreur lors de la sauvegarde des questions.')
+      }
+
       await load()
       setShowForm(false)
-      showToast(editingSession ? 'Session modifiée avec succès' : 'Session créée avec succès')
+      showToast(editingSession ? 'Session et questions modifiées avec succès' : 'Session et questions créées avec succès')
     } catch (e: any) {
       showToast(e.message, 'error')
     } finally {
@@ -898,6 +945,259 @@ export default function AdminSessionsPage() {
                   placeholder="À l'issue de cette session, les participants seront capables de…"
                   className="w-full px-3.5 py-2.5 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:outline-none"
                 />
+              </div>
+
+              {/* Formulaire de questions personnalisées */}
+              <div className="md:col-span-2 border-t border-slate-100 pt-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">Formulaire d'inscription personnalisé</h3>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Configurez des questions spécifiques pour les étudiants s'inscrivant à cette session.</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {/* Importer depuis une autre session */}
+                    {sessions.length > 1 && (
+                      <div className="flex items-center gap-1.5">
+                        <select
+                          value={importSessionId}
+                          onChange={(e) => setImportSessionId(e.target.value)}
+                          className="px-2 py-1.5 text-[10px] border border-slate-200 bg-white rounded-lg focus:outline-none font-bold text-slate-600 max-w-[150px]"
+                        >
+                          <option value="">-- Importer depuis... --</option>
+                          {sessions
+                            .filter(s => s.id !== (editingSession?.id ?? -1))
+                            .map(s => (
+                              <option key={s.id} value={s.id}>
+                                #{s.id} - {s.formation?.title || 'Session'}
+                              </option>
+                            ))
+                          }
+                        </select>
+                        <button
+                          type="button"
+                          disabled={!importSessionId}
+                          onClick={async () => {
+                            if (!confirm("Voulez-vous importer les questions de cette session ? Cela remplacera les questions actuelles.")) return
+                            try {
+                              const r = await fetch(`/api/sessions/${importSessionId}/form-questions`)
+                              if (r.ok) {
+                                const qData = await r.json()
+                                const parsed = Array.isArray(qData) ? qData.map(q => ({
+                                  label: q.label,
+                                  type: q.type,
+                                  helpText: q.helpText,
+                                  required: q.required,
+                                  options: q.options ? JSON.parse(q.options) : [],
+                                  fileTypes: q.fileTypes ? JSON.parse(q.fileTypes) : []
+                                })) : []
+                                setCustomQuestions(parsed)
+                                showToast("Questions importées avec succès")
+                              } else {
+                                showToast("Erreur lors de l'import", "error")
+                              }
+                            } catch {
+                              showToast("Erreur lors de l'import", "error")
+                            }
+                          }}
+                          className="px-2.5 py-1.5 bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[10px] rounded-lg hover:bg-slate-200 disabled:opacity-50"
+                        >
+                          Copier
+                        </button>
+                      </div>
+                    )}
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomQuestions(prev => [
+                          ...prev,
+                          {
+                            label: '',
+                            type: 'text_short',
+                            helpText: '',
+                            required: false,
+                            options: [],
+                            fileTypes: ['pdf', 'docx', 'jpg', 'png']
+                          }
+                        ])
+                      }}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 hover:text-blue-800 text-xs font-bold rounded-lg transition"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Ajouter une question
+                    </button>
+                  </div>
+                </div>
+
+                {customQuestions.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-8 text-center text-xs text-slate-400">
+                    Aucune question personnalisée définie pour cette session. Les étudiants répondront uniquement au formulaire d'inscription général.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {customQuestions.map((q, index) => {
+                      const updateQuestion = (updates: any) => {
+                        setCustomQuestions(prev => prev.map((item, idx) => idx === index ? { ...item, ...updates } : item))
+                      }
+
+                      const moveQuestion = (dir: 'up' | 'down') => {
+                        if (dir === 'up' && index === 0) return
+                        if (dir === 'down' && index === customQuestions.length - 1) return
+                        const targetIdx = dir === 'up' ? index - 1 : index + 1
+                        setCustomQuestions(prev => {
+                          const list = [...prev]
+                          const temp = list[index]
+                          list[index] = list[targetIdx]
+                          list[targetIdx] = temp
+                          return list
+                        })
+                      }
+
+                      const removeQuestion = () => {
+                        setCustomQuestions(prev => prev.filter((_, idx) => idx !== index))
+                      }
+
+                      return (
+                        <div key={index} className="p-4 rounded-2xl border border-slate-200 bg-slate-50/20 space-y-3 relative group">
+                          {/* Contrôles de position et suppression */}
+                          <div className="absolute right-3 top-3 flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => moveQuestion('up')}
+                              disabled={index === 0}
+                              className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                              title="Monter"
+                            >
+                              <ChevronDown className="h-3.5 w-3.5 rotate-180" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveQuestion('down')}
+                              disabled={index === customQuestions.length - 1}
+                              className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                              title="Descendre"
+                            >
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={removeQuestion}
+                              className="p-1 hover:bg-red-50 rounded text-slate-400 hover:text-red-600"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+
+                          {/* Libellé et Type */}
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 pr-20">
+                            <div className="md:col-span-8">
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Libellé de la question *</label>
+                              <input
+                                type="text"
+                                required
+                                value={q.label}
+                                onChange={e => updateQuestion({ label: e.target.value })}
+                                placeholder="ex. Nom de votre entreprise, Années d'expérience, etc."
+                                className="w-full px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none font-bold text-slate-800"
+                              />
+                            </div>
+                            <div className="md:col-span-4">
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Type de champ</label>
+                              <select
+                                value={q.type}
+                                onChange={e => updateQuestion({ type: e.target.value, options: [], fileTypes: ['pdf', 'docx', 'jpg', 'png'] })}
+                                className="w-full px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none font-bold text-slate-800"
+                              >
+                                <option value="text_short">Réponse courte</option>
+                                <option value="text_long">Paragraphe (texte long)</option>
+                                <option value="number">Nombre</option>
+                                <option value="date">Date</option>
+                                <option value="yes_no">Oui / Non</option>
+                                <option value="select">Liste déroulante</option>
+                                <option value="radio">Choix unique (radio)</option>
+                                <option value="checkbox">Choix multiple (cases à cocher)</option>
+                                <option value="file_upload">Téléversement de fichier</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Aide à la saisie (Help text) et Obligatoire */}
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                            <div className="md:col-span-9">
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Aide à la saisie (optionnel)</label>
+                              <input
+                                type="text"
+                                value={q.helpText || ''}
+                                onChange={e => updateQuestion({ helpText: e.target.value })}
+                                placeholder="ex. Renseignez votre poste actuel de préférence"
+                                className="w-full px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none text-slate-600 font-semibold"
+                              />
+                            </div>
+                            <div className="md:col-span-3 flex items-center h-full pt-4">
+                              <label className="inline-flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={q.required}
+                                  onChange={e => updateQuestion({ required: e.target.checked })}
+                                  className="accent-[var(--admin-primary)]"
+                                />
+                                <span className="text-xs font-bold text-slate-700">Obligatoire</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Options dynamiques (pour select, radio, checkbox) */}
+                          {['select', 'radio', 'checkbox'].includes(q.type) && (
+                            <div className="p-3 bg-white rounded-xl border border-slate-200/60 space-y-2">
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Options du choix (séparées par des virgules)</label>
+                              <input
+                                type="text"
+                                required
+                                value={q.options.join(', ')}
+                                onChange={e => {
+                                  const opts = e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                                  updateQuestion({ options: opts })
+                                }}
+                                placeholder="ex. Débutant, Intermédiaire, Avancé"
+                                className="w-full px-3 py-2 text-xs border border-slate-200 bg-slate-50/30 rounded-lg focus:outline-none font-semibold text-slate-700"
+                              />
+                              <p className="text-[9px] text-slate-400 font-medium">Saisissez les différentes options possibles en les séparant par des virgules.</p>
+                            </div>
+                          )}
+
+                          {/* Types de fichiers (pour file_upload) */}
+                          {q.type === 'file_upload' && (
+                            <div className="p-3 bg-white rounded-xl border border-slate-200/60 space-y-2">
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Extensions de fichier autorisées</label>
+                              <div className="flex flex-wrap gap-4">
+                                {['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'].map((ext) => {
+                                  const list = q.fileTypes || []
+                                  const checked = list.includes(ext)
+                                  return (
+                                    <label key={ext} className="inline-flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-600">
+                                      <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        onChange={() => {
+                                          const newList = checked ? list.filter(t => t !== ext) : [...list, ext]
+                                          updateQuestion({ fileTypes: newList })
+                                        }}
+                                        className="accent-[var(--admin-primary)]"
+                                      />
+                                      .{ext.toUpperCase()}
+                                    </label>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Boutons */}
