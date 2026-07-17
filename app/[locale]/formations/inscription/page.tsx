@@ -138,7 +138,7 @@ function InscriptionContent() {
                 const data = await sessionRes.json()
                 setSession(data)
             } else {
-                alert('Session non trouvée')
+                alert('La session de formation demandée est introuvable.')
                 router.push('/formations')
             }
             if (questionsRes.ok) {
@@ -147,7 +147,7 @@ function InscriptionContent() {
             }
         } catch (error) {
             console.error('Erreur chargement session:', error)
-            alert('Erreur lors du chargement de la session')
+            alert('Erreur lors du chargement de la session de formation.')
         } finally {
             setLoading(false)
         }
@@ -176,7 +176,7 @@ function InscriptionContent() {
                 (Array.isArray(val) && val.length === 0) ||
                 (q.type === 'file_upload' && !(val && typeof val === 'object' && !Array.isArray(val) && 'fileUrl' in val))
             if (isEmpty) {
-                errors[q.id] = 'Ce champ est obligatoire'
+                errors[q.id] = 'Veuillez remplir ce champ obligatoire.'
             }
         }
         setCustomErrors(errors)

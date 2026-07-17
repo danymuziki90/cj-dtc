@@ -340,7 +340,7 @@ export default function AdminInscriptionsPage() {
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p className="font-medium text-gray-900">{selectedInscription.formation.title}</p>
                     <p className="text-sm text-gray-600 mt-1">{selectedInscription.formation.description}</p>
-                    <p className="text-sm text-gray-500 mt-2">Catégorie: {selectedInscription.formation.categorie}</p>
+                    <p className="text-sm text-gray-500 mt-2">Catégorie : {selectedInscription.formation.categorie}</p>
                   </div>
                 </div>
 
@@ -357,7 +357,7 @@ export default function AdminInscriptionsPage() {
                 {/* Réponses aux questions de session */}
                 {selectedInscription.formAnswers && selectedInscription.formAnswers.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Réponses complémentaires (Session)</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Réponses complémentaires (Session de formation)</h3>
                     <div className="bg-gray-50 rounded-lg p-4 divide-y divide-gray-200/60">
                       {selectedInscription.formAnswers.map((ans) => {
                         let displayValue = '—'
@@ -402,7 +402,7 @@ export default function AdminInscriptionsPage() {
 
                 {/* Current Status */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Statut actuel</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Statut de l'inscription</h3>
                   <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(selectedInscription.status)}`}>
                     {getStatusLabel(selectedInscription.status)}
                   </span>
@@ -426,7 +426,7 @@ export default function AdminInscriptionsPage() {
                           disabled={updating}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                         >
-                          {updating ? 'Traitement...' : 'Accepter et attribuer matricule'}
+                          {updating ? 'Traitement...' : 'Accepter et attribuer un matricule'}
                         </button>
                         <button
                           onClick={() => updateInscriptionStatus(selectedInscription.id, 'rejected')}

@@ -298,7 +298,7 @@ export default function CombinedAdminFormationsPage() {
       })
       if (!res.ok) throw new Error('Erreur de modification du statut')
       await loadAllData()
-      showToast(`Statut de session mis à jour en : ${newStatus}`)
+      showToast(`Statut de la session mis à jour en : ${newStatus}`)
     } catch (e: any) {
       showToast(e.message, 'error')
     }
@@ -524,7 +524,7 @@ export default function CombinedAdminFormationsPage() {
             {activeTab === 'sessions' ? 'Planification des Sessions' : 'Catalogue des Formations'}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            {activeTab === 'sessions' ? 'Administrez le calendrier des cohortes et le taux de remplissage' : 'Gérez les fiches formations et thématiques académiques'}
+            {activeTab === 'sessions' ? 'Administrez le calendrier des cohortes et le taux de remplissage des sessions' : 'Gérez les fiches formations et thématiques académiques'}
           </p>
         </div>
 
@@ -547,11 +547,11 @@ export default function CombinedAdminFormationsPage() {
               }`}
             >
               <BookOpen className="w-3.5 h-3.5" />
-              Templates Formations
+              Modèles de formations
             </button>
           </div>
 
-          {activeTab === 'sessions' ? (
+          {activeTab === 'sessions' && (
             <button
               onClick={openCreateSession}
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow-md transition"
@@ -559,14 +559,6 @@ export default function CombinedAdminFormationsPage() {
               <PlusIcon className="h-4 w-4" />
               Créer une session
             </button>
-          ) : (
-            <Link
-              href="/admin/formations/new"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow-md transition"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Créer une formation
-            </Link>
           )}
         </div>
       </div>
