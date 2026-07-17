@@ -101,6 +101,7 @@ export default function RecentSessions() {
   const t = copy[locale]
   const [sessions, setSessions] = useState<SessionItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
     async function fetchSessions() {
@@ -117,6 +118,12 @@ export default function RecentSessions() {
     }
 
     fetchSessions()
+
+    fetch('/api/student/auth/me')
+      .then((res) => {
+        if (res.ok) setIsLoggedIn(true)
+      })
+      .catch(() => {})
   }, [])
 
   if (loading) {
