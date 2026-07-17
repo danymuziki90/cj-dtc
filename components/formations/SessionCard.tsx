@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock3, MapPinIcon, Users, Monitor, Layers } from 'lucide-react'
@@ -77,6 +78,16 @@ const FORMAT_ICONS = {
 
 export default function SessionCard({ session: s, locale }: Props) {
   const router = useRouter()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/student/auth/me')
+      .then((res) => {
+        if (res.ok) setIsLoggedIn(true)
+      })
+      .catch(() => {})
+  }, [])
+
   const available = Math.max(0, s.maxParticipants - (s.currentParticipants || 0))
   const isFull = available <= 0
   const fmt = normalizeFormat(s.format)
@@ -216,11 +227,13 @@ export default function SessionCard({ session: s, locale }: Props) {
             </Link>
             <button
               type="button"
-              onClick={() =>
-                router.push(
-                  `/${locale}/formations/inscription?session=${s.id}`
-                )
-              }
+              onClick={() => {
+                if (isLoggedIn) {
+                  router.push(`/${locale}/espace-etudiants/confirm-inscription?formationId=${s.formationId}&sessionId=${s.id}`)
+                } else {
+                  router.push(`/${locale}/espace-etudiants?formationId=${s.formationId}&sessionId=${s.id}`)
+                }
+              }}
               className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
                 isFull
                   ? 'bg-red-100 text-red-700 hover:bg-red-200'

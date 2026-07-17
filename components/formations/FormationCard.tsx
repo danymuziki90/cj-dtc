@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { 
   Clock, 
@@ -55,6 +56,16 @@ const categoryColors = {
 }
 
 export default function FormationCard({ formation, locale = 'fr', featured }: FormationCardProps) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/student/auth/me')
+      .then((res) => {
+        if (res.ok) setIsLoggedIn(true)
+      })
+      .catch(() => {})
+  }, [])
+
   const FormatIcon = formation.format ? formatIcons[formation.format] : Monitor
   const hasDiscount = formation.originalPrice && formation.price && formation.originalPrice > formation.price
   const discountPercent = hasDiscount ? calculateDiscount(formation.originalPrice!, formation.price!) : 0
@@ -277,7 +288,11 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
                         {statusText}
                       </span>
                       <Link
-                        href={`/${locale}/formations/inscription?session=${session.id}`}
+                        href={
+                          isLoggedIn
+                            ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${formation.id}&sessionId=${session.id}`
+                            : `/${locale}/espace-etudiants?formationId=${formation.id}&sessionId=${session.id}`
+                        }
                         className={`px-2.5 py-1.5 rounded font-bold text-[10px] transition-colors whitespace-nowrap ${
                           isFull
                             ? 'bg-red-50 text-red-700 hover:bg-red-100'

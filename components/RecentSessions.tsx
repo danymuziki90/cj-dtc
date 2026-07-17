@@ -218,7 +218,11 @@ export default function RecentSessions() {
                       <p className="text-xl font-extrabold text-cjblue">{formatPrice(session.price, locale)}</p>
                     </div>
                     <Link
-                      href={`/${locale}/formations/inscription?session=${session.id}`}
+                      href={
+                        isLoggedIn
+                          ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formation.id}&sessionId=${session.id}`
+                          : `/${locale}/espace-etudiants?formationId=${session.formation.id}&sessionId=${session.id}`
+                      }
                       className="rounded-lg bg-[var(--cj-red)] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#bb111d] transition-colors"
                     >
                       {locale === 'fr' ? "S'inscrire" : 'Register'}

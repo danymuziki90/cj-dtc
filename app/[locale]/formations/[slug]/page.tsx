@@ -60,6 +60,16 @@ export default function FormationDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'program' | 'instructor'>('overview')
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/student/auth/me')
+      .then((res) => {
+        if (res.ok) setIsLoggedIn(true)
+      })
+      .catch(() => {})
+  }, [])
+
   useEffect(() => {
     async function loadFormation() {
       setIsLoading(true)
@@ -242,7 +252,11 @@ export default function FormationDetailPage() {
                   <div className="space-y-3">
                     {formation.nextSession ? (
                       <Link
-                        href={`/${locale}/formations/inscription?session=${formation.nextSession.id}`}
+                        href={
+                          isLoggedIn
+                            ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${formation.id}&sessionId=${formation.nextSession.id}`
+                            : `/${locale}/espace-etudiants?formationId=${formation.id}&sessionId=${formation.nextSession.id}`
+                        }
                         className="cj-btn-primary w-full text-center py-3.5"
                       >
                         S'inscrire à la session
@@ -291,7 +305,11 @@ export default function FormationDetailPage() {
                                 </span>
                               </div>
                               <Link
-                                href={`/${locale}/formations/inscription?session=${session.id}`}
+                                href={
+                                  isLoggedIn
+                                    ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${formation.id}&sessionId=${session.id}`
+                                    : `/${locale}/espace-etudiants?formationId=${formation.id}&sessionId=${session.id}`
+                                }
                                 className={`w-full block text-center py-2 rounded-lg font-bold transition-all text-xs ${
                                   isFull
                                     ? 'bg-red-50 text-red-700 hover:bg-red-100'

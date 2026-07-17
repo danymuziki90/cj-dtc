@@ -1288,7 +1288,7 @@ function EspaceEtudiantsContent() {
 
                       <div className="px-5 pb-5">
                         <Link
-                          href={`/${locale}/formations/inscription?session=${session.id}`}
+                          href={`/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formationId}&sessionId=${session.id}`}
                           className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-red)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-red-700)] transition text-center shadow-sm"
                         >
                           S'inscrire à cette session
