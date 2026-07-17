@@ -32,6 +32,15 @@ interface Session {
   createdAt: string
   updatedAt: string
   enrollments: { id: number }[]
+  adminMeta?: {
+    customTitle?: string | null
+    sessionType?: string | null
+    durationLabel?: string | null
+    paymentInfo?: string | null
+    participationType?: string | null
+    imageUrl?: string | null
+    registrationDeadline?: string | null
+  }
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.FC<any> }> = {
@@ -101,7 +110,52 @@ export default function AdminSessionsPage() {
     description: '',
     objectives: '',
     status: 'ouverte',
+    customTitle: '',
+    registrationDeadline: '',
+    imageUrl: '',
   })
+
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setImageError(null)
+    setUploadingImage(true)
+
+    try {
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Veuillez sélectionner une image.')
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Image trop volumineuse (max 5 Mo).')
+      }
+
+      const bodyData = new FormData()
+      bodyData.append('file', file)
+      bodyData.append('folder', 'sessions')
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: bodyData,
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Erreur lors de l'upload")
+      }
+
+      const data = await res.json()
+      setFormData(prev => ({ ...prev, imageUrl: data.url }))
+    } catch (err: any) {
+      console.error(err)
+      setImageError(err.message || "Erreur de téléversement.")
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   // ── Load ──────────────────────────────────────────────────────────────────
   const load = useCallback(async () => {
@@ -264,9 +318,13 @@ export default function AdminSessionsPage() {
       description: '',
       objectives: '',
       status: 'ouverte',
+      customTitle: '',
+      registrationDeadline: '',
+      imageUrl: '',
     })
     setCustomQuestions([])
     setImportSessionId('')
+    setImageError(null)
     setShowForm(true)
   }
 
@@ -284,9 +342,13 @@ export default function AdminSessionsPage() {
       description: session.description ?? '',
       objectives: session.objectives ?? '',
       status: session.status,
+      customTitle: session.adminMeta?.customTitle ?? '',
+      registrationDeadline: session.adminMeta?.registrationDeadline ? session.adminMeta.registrationDeadline.split('T')[0] : '',
+      imageUrl: session.imageUrl ?? '',
     })
     setCustomQuestions([])
     setImportSessionId('')
+    setImageError(null)
 
     // Charger les questions personnalisées existantes
     fetch(`/api/sessions/${session.id}/form-questions`)
@@ -324,6 +386,9 @@ export default function AdminSessionsPage() {
           ...formData,
           formationId: parseInt(formData.formationId),
           maxParticipants: Number(formData.maxParticipants),
+          registrationDeadline: formData.registrationDeadline || null,
+          customTitle: formData.customTitle || null,
+          imageUrl: formData.imageUrl || null,
         }),
       })
       if (!res.ok) {
@@ -829,6 +894,20 @@ export default function AdminSessionsPage() {
                 </select>
               </div>
 
+              {/* Nom personnalisé de la session */}
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Nom de la session (Optionnel)
+                </label>
+                <input
+                  type="text"
+                  value={formData.customTitle}
+                  onChange={e => setFormData(p => ({ ...p, customTitle: e.target.value }))}
+                  placeholder="ex. Promotion 2026 - Cohorte A (par défaut : titre de la formation)"
+                  className="w-full px-3.5 py-2.5 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:outline-none font-bold text-slate-800"
+                />
+              </div>
+
               {/* Dates */}
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Date de début *</label>
@@ -848,6 +927,19 @@ export default function AdminSessionsPage() {
                   onChange={e => setFormData(p => ({ ...p, endDate: e.target.value }))}
                   className="w-full px-3.5 py-2.5 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:outline-none font-bold text-slate-800"
                   required
+                />
+              </div>
+
+              {/* Date limite d'inscription */}
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Date limite d'inscription (Optionnel)
+                </label>
+                <input
+                  type="date"
+                  value={formData.registrationDeadline}
+                  onChange={e => setFormData(p => ({ ...p, registrationDeadline: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:outline-none font-bold text-slate-800"
                 />
               </div>
 
@@ -921,6 +1013,71 @@ export default function AdminSessionsPage() {
                     <option key={k} value={k}>{v.label}</option>
                   ))}
                 </select>
+              </div>
+
+              {/* Image de couverture */}
+              <div className="md:col-span-2 border-t border-slate-100 pt-5">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Image de couverture (Cloudflare R2)
+                </label>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  {formData.imageUrl ? (
+                    <div className="relative w-full sm:w-48 h-32 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 shrink-0">
+                      <img
+                        src={formData.imageUrl}
+                        alt="Aperçu couverture"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFormData(p => ({ ...p, imageUrl: '' }))}
+                        className="absolute top-2 right-2 p-1.5 bg-red-650 hover:bg-red-700 text-white rounded-full transition shadow"
+                        title="Supprimer l'image"
+                      >
+                        <XCircle className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-full sm:w-48 h-32 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-4 text-center bg-slate-50 text-slate-400 shrink-0">
+                      <Plus className="h-6 w-6 mb-1 text-slate-350" />
+                      <span className="text-[10px] font-semibold">Aucune image</span>
+                    </div>
+                  )}
+
+                  <div className="flex-1 w-full space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="hidden"
+                      id="session-image-input"
+                    />
+                    <label
+                      htmlFor="session-image-input"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl cursor-pointer shadow-sm transition"
+                    >
+                      {uploadingImage ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin text-[var(--admin-primary)]" />
+                          <span>Envoi en cours...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4" />
+                          <span>Choisir une image</span>
+                        </>
+                      )}
+                    </label>
+                    <p className="text-[9px] text-slate-450 leading-relaxed">
+                      Format conseillé : 16:9. Extensions : PNG, JPG, JPEG, WEBP. Max 5 Mo.
+                    </p>
+                    {imageError && (
+                      <p className="text-[10px] text-red-600 font-semibold">{imageError}</p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Description */}

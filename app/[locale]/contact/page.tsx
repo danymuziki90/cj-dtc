@@ -274,7 +274,7 @@ export default function ContactPage() {
                     className={`flex items-center justify-between px-6 py-4 ${i !== t.schedule.length - 1 ? 'border-b border-slate-100' : ''} ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}`}
                   >
                     <span className="text-sm font-semibold text-slate-700">{row.day}</span>
-                    <span className={`text-sm font-medium ${row.hours === 'Ferme' || row.hours === 'Closed' ? 'text-[var(--cj-red)]' : 'text-slate-900'}`}>
+                    <span className={`text-sm font-medium ${row.hours === 'Fermé' || row.hours === 'Closed' ? 'text-[var(--cj-red)]' : 'text-slate-900'}`}>
                       {row.hours}
                     </span>
                   </div>

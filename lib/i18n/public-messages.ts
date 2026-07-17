@@ -1182,7 +1182,43 @@ export const publicMessages = {
         {
           question: 'Can companies train their employees?',
           answer:
-            'Absolutely. We offer in-company training, team coaching   services: {
+            'Absolutely. We offer in-company training, team coaching and custom programs for organizations. Contact our corporate team.',
+        },
+        {
+          question: 'Can I request a quote?',
+          answer:
+            'Yes. Use the form below, select the Business or Partnership reason, and our team will send you a detailed proposal within 24h.',
+        },
+      ],
+      // ── CTA final ──────────────────────────────────────────────────
+      ctaBadge: 'Time to take action',
+      ctaTitle: 'Ready to develop your skills?',
+      ctaDescription:
+        'Our team is ready to support you in your training project or in developing the skills of your organization.',
+      ctaBtn1: 'Start my enrollment',
+      ctaBtn2: 'Contact an advisor',
+      // ── Legacy ─────────────────────────────────────────────────────
+      quickHelp: 'Need to move fast?',
+      sessionsCta: 'View our sessions',
+      callNow: 'Call now',
+      cards: [
+        { title: 'Email', detail: 'Average response within 24h' },
+        { title: 'Phone', detail: 'Mon - Fri, 8:00am to 6:00pm' },
+        { title: 'Location', detail: 'On-site and online support' },
+        { title: 'Response time', detail: 'Each message is handled by our team' },
+      ],
+      supportEyebrow: 'Human support',
+      supportTitle: 'Let us talk about your training project',
+      supportDescription:
+        'Whether you are a student, professional or organization, we guide you toward the most suitable session.',
+      highlights: [
+        { title: 'Professional guidance', description: 'A dedicated contact helps you find the right program.' },
+        { title: 'Results-oriented approach', description: 'We respond with practical solutions for your needs.' },
+      ],
+      priorityChannel: 'Priority channel',
+    },
+  },
+  services: {
     fr: {
       breadcrumb: 'Services',
       metadataTitle: 'Services',
@@ -1238,44 +1274,6 @@ export const publicMessages = {
       ctaTitle: 'Vous avez un besoin spécifique ?',
       ctaDescription: 'Nous pouvons construire une intervention ponctuelle ou un accompagnement plus large selon votre contexte.',
       primaryCta: 'Parler à un expert',
-      secondaryCta: 'Voir nos programmes',
-    },atiques RH, analyse des ecarts et recommandations actionnables pour fiabiliser vos processus.',
-          bullets: ['Cartographie des processus', 'Analyse des risques', 'Plan d amelioration priorise'],
-        },
-        {
-          slug: 'recrutement',
-          title: 'Recrutement',
-          description: 'Appui au sourcing, a l evaluation et a l integration de profils alignes avec votre culture et vos objectifs.',
-          bullets: ['Definition du besoin', 'Evaluation des candidats', 'Integration et suivi'],
-        },
-        {
-          slug: 'formations-entreprise',
-          title: 'Formations sur mesure',
-          description: 'Programmes adaptes a votre contexte, a vos metiers et a vos enjeux de performance.',
-          bullets: ['Ingenierie pedagogique', 'Formats flexibles', 'Mesure des acquis'],
-        },
-        {
-          slug: 'gouvernance',
-          title: 'Gouvernance et consulting',
-          description: 'Accompagnement sur la structure, les roles, les responsabilites et la prise de decision.',
-          bullets: ['Clarification organisationnelle', 'Cadres de pilotage', 'Conseil strategique'],
-        },
-        {
-          slug: 'coaching',
-          title: 'Coaching executif',
-          description: 'Parcours d accompagnement pour dirigeants, managers et talents en transition.',
-          bullets: ['Leadership', 'Communication', 'Execution des priorites'],
-        },
-      ],
-      processTitle: 'Comment nous travaillons',
-      processSteps: [
-        'Cadrage du besoin et priorites de l organisation',
-        'Proposition d intervention adaptee au contexte',
-        'Execution, suivi et recommandations mesurables',
-      ],
-      ctaTitle: 'Vous avez un besoin specifique ?',
-      ctaDescription: 'Nous pouvons construire une intervention ponctuelle ou un accompagnement plus large selon votre contexte.',
-      primaryCta: 'Parler a un expert',
       secondaryCta: 'Voir nos programmes',
     },
     en: {
