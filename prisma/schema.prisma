@@ -717,3 +717,10 @@ model SessionFormAnswer {
   @@index([questionId])
   @@index([enrollmentId])
 }
+
+model EmailTemplate {
+  id        String   @id // e.g. "accepted", "rejected", "waitlist", "cancelled"
+  subject   String
+  body      String   @db.Text
+  updatedAt DateTime @updatedAt
+}

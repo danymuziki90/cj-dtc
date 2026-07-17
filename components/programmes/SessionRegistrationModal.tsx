@@ -7,6 +7,7 @@ import type { ProgramSessionType } from '@/lib/programmes/session-types'
 type SessionCardData = {
   id: number
   formation: {
+    id: number
     title: string
   }
   startDate: string
@@ -34,11 +35,7 @@ type SectionConfig = {
   fields: FieldConfig[]
 }
 
-const PAWAPAY_OPERATOR_OPTIONS = [
-  { value: 'airtel', label: 'Airtel RDC' },
-  { value: 'orange', label: 'Orange RDC' },
-  { value: 'vodacom', label: 'Vodacom RDC' },
-]
+// PawaPay supprimé
 
 const MRH_SECTIONS: SectionConfig[] = [
   {
@@ -361,10 +358,7 @@ export default function SessionRegistrationModal({ open, locale, session, progra
   const [result, setResult] = useState<{
     kind: 'success' | 'error'
     message: string
-    paymentId?: number
-    paymentStatus?: string
   } | null>(null)
-  const [checkingPawaPayStatus, setCheckingPawaPayStatus] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -372,7 +366,6 @@ export default function SessionRegistrationModal({ open, locale, session, progra
     setErrors({})
     setResult(null)
     setSubmitting(false)
-    setCheckingPawaPayStatus(false)
   }, [open, sections])
 
   if (!open || !session) return null
@@ -404,18 +397,6 @@ export default function SessionRegistrationModal({ open, locale, session, progra
       }
     }
 
-    if (session.price > 0) {
-      const paymentOperator = values.paymentOperator
-      if (typeof paymentOperator !== 'string' || !paymentOperator.trim()) {
-        nextErrors.paymentOperator = 'Selectionnez votre operateur Mobile Money.'
-      }
-
-      const paymentPhoneNumber = values.paymentPhoneNumber
-      if (typeof paymentPhoneNumber !== 'string' || paymentPhoneNumber.trim().length < 6) {
-        nextErrors.paymentPhoneNumber = 'Entrez le numero Mobile Money a debiter.'
-      }
-    }
-
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
@@ -428,33 +409,17 @@ export default function SessionRegistrationModal({ open, locale, session, progra
 
     try {
       const payload = {
+        firstName: String(values.firstName || ''),
+        lastName: String(values.lastName || ''),
+        email: String(values.email || ''),
+        phone: String(values.whatsapp || values.phone || ''),
+        address: typeof values.address === 'string' ? values.address : '',
+        motivationLetter: typeof values.motivationLetter === 'string' ? values.motivationLetter : '',
+        formationId: session.formation.id,
         sessionId: session.id,
-        formType: programType,
-        personal: {
-          firstName: String(values.firstName || ''),
-          lastName: String(values.lastName || ''),
-          email: String(values.email || ''),
-          whatsapp: String(values.whatsapp || ''),
-          address: typeof values.address === 'string' ? values.address : '',
-          dateOfBirth: typeof values.dateOfBirth === 'string' ? values.dateOfBirth : '',
-        },
-        answers: {
-          ...values,
-          locale,
-        },
-        payment: {
-          provider: 'pawapay',
-          method: 'mobile_money',
-          currency: 'USD',
-          phoneNumber: isFreeSession ? undefined : String(values.paymentPhoneNumber || values.whatsapp || ''),
-          operator:
-            !isFreeSession && typeof values.paymentOperator === 'string'
-              ? values.paymentOperator
-              : undefined,
-        },
       }
 
-      const response = await fetch('/create-payment', {
+      const response = await fetch('/api/enrollments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -464,13 +429,15 @@ export default function SessionRegistrationModal({ open, locale, session, progra
         throw new Error(data.error || 'Inscription impossible.')
       }
 
-      const action = data.payment?.action
       setResult({
         kind: 'success',
-        message: action?.message || "Inscription enregistree avec succes.",
-        paymentId: data.payment?.id,
-        paymentStatus: data.payment?.status,
+        message: data.message || "Inscription enregistrée avec succès. Redirection...",
       })
+
+      // Redirection automatique après succès
+      setTimeout(() => {
+        window.location.href = '/student/dashboard'
+      }, 2000)
     } catch (error) {
       setResult({
         kind: 'error',
@@ -478,43 +445,6 @@ export default function SessionRegistrationModal({ open, locale, session, progra
       })
     } finally {
       setSubmitting(false)
-    }
-  }
-
-  const checkPawaPayStatus = async () => {
-    if (!result?.paymentId) return
-    setCheckingPawaPayStatus(true)
-
-    try {
-      const response = await fetch(`/api/payments/pawapay/status?paymentId=${result.paymentId}`)
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Impossible de verifier le statut PawaPay.')
-      }
-
-      setResult((prev) =>
-        prev
-          ? {
-              ...prev,
-              kind: 'success',
-              message: `Statut paiement: ${data.status}`,
-              paymentStatus: data.status,
-            }
-          : prev
-      )
-    } catch (error) {
-      setResult((prev) =>
-        prev
-          ? {
-              ...prev,
-              kind: 'error',
-              message: error instanceof Error ? error.message : 'Erreur de verification.',
-            }
-          : prev
-      )
-    } finally {
-      setCheckingPawaPayStatus(false)
     }
   }
 
@@ -658,75 +588,17 @@ export default function SessionRegistrationModal({ open, locale, session, progra
                   </p>
                 </section>
               ) : (
-                <section className="rounded-xl border border-slate-200 p-4">
-                  <h4 className="text-base font-semibold text-slate-900">Paiement et conditions</h4>
-                  <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                    Paiement disponible: <strong>PawaPay Mobile Money</strong>
-                  </div>
-                  <div className="mt-3 grid gap-3 md:grid-cols-2">
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-slate-700">
-                        Operateur Mobile Money *
-                      </label>
-                      <select
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                        value={typeof values.paymentOperator === 'string' ? values.paymentOperator : ''}
-                        onChange={(event) => onChangeValue('paymentOperator', event.target.value)}
-                      >
-                        <option value="">Selectionner votre operateur...</option>
-                        {PAWAPAY_OPERATOR_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.paymentOperator ? (
-                        <p className="mt-1 text-xs text-red-600">{errors.paymentOperator}</p>
-                      ) : null}
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-slate-700">
-                        Numero Mobile Money *
-                      </label>
-                      <input
-                        type="tel"
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                        value={typeof values.paymentPhoneNumber === 'string' ? values.paymentPhoneNumber : ''}
-                        onChange={(event) => onChangeValue('paymentPhoneNumber', event.target.value)}
-                        placeholder="Ex: 2439XXXXXXXX"
-                        data-testid="registration-payment-phone"
-                      />
-                      {errors.paymentPhoneNumber ? (
-                        <p className="mt-1 text-xs text-red-600">{errors.paymentPhoneNumber}</p>
-                      ) : null}
-                    </div>
-                  </div>
-                  <p className="mt-3 text-xs text-slate-500">
-                    Choisissez le reseau a debiter puis saisissez le numero Mobile Money sur lequel le paiement sera preleve.
-                    Le montant preleve correspond au prix de la session.
+                <section className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                  <h4 className="text-base font-semibold text-slate-950">Session payante</h4>
+                  <p className="mt-3 text-sm text-slate-800">
+                    Cette session est payante. Votre inscription sera enregistrée et vous recevrez vos accès de connexion par e-mail après validation.
                   </p>
                 </section>
               )}
 
               {result ? (
                 <div className="space-y-2">
-                  <p className={`text-sm ${result.kind === 'success' ? 'text-blue-700' : 'text-red-700'}`}>{result.message}</p>
-                  {!isFreeSession && result.paymentStatus ? (
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Statut paiement: {result.paymentStatus}
-                    </p>
-                  ) : null}
-                  {!isFreeSession && result.paymentStatus === 'pending' && result.paymentId ? (
-                    <button
-                      type="button"
-                      onClick={checkPawaPayStatus}
-                      disabled={checkingPawaPayStatus}
-                      className="inline-flex items-center gap-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800 disabled:opacity-60"
-                    >
-                      {checkingPawaPayStatus ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                      Verifier le statut PawaPay
-                    </button>
-                  ) : null}
+                  <p className={`text-sm ${result.kind === 'success' ? 'text-emerald-700' : 'text-red-700'}`}>{result.message}</p>
                 </div>
               ) : null}
 
@@ -736,7 +608,7 @@ export default function SessionRegistrationModal({ open, locale, session, progra
                 </button>
                 <button type="submit" disabled={submitting} className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {submitting ? 'Traitement...' : isFreeSession ? "Confirmer l'inscription" : "Valider l'inscription"}
+                  {submitting ? 'Traitement...' : "Valider l'inscription"}
                 </button>
               </div>
             </form>

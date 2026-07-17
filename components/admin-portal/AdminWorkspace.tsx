@@ -44,6 +44,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'Pilotage', caption: 'KPI, alertes et priorités', icon: LayoutDashboard },
   { href: '/admin/formations', label: 'Formations', caption: 'Catalogue et programmes', icon: BookOpenCheck },
+  { href: '/admin/sessions', label: 'Sessions', caption: 'Planification et cohortes', icon: CalendarDays },
   { href: '/admin/students', label: 'Étudiants', caption: 'Comptes et accès', icon: Users },
   { href: '/admin/enrollments', label: 'Inscriptions', caption: 'Suivi et consultation', icon: FileStack },
   { href: '/admin/submissions', label: 'Travaux', caption: 'Livrables et corrections', icon: FolderKanban },
@@ -271,7 +272,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                   </div>
                   <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1">
                     <ShieldIcon className="h-3 w-3 text-emerald-600" />
-                    <span className="text-[10px] font-semibold text-emerald-700">Session sÃ©curisÃ©e Â· JWT</span>
+                    <span className="text-[10px] font-semibold text-emerald-700">Session sécurisée · JWT</span>
                   </div>
                 </div>
                 <div className="mt-1 space-y-0.5 px-1">
@@ -280,7 +281,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                     className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-750 transition hover:bg-slate-50"
                   >
                     <Settings2 className="h-3.5 w-3.5" />
-                    ParamÃ¨tres
+                    Paramètres
                   </Link>
                   <button
                     type="button"
@@ -289,7 +290,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                     className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-bold text-rose-650 transition hover:bg-rose-50 disabled:opacity-50"
                   >
                     <LogOut className="h-3.5 w-3.5" />
-                    {loggingOut ? 'DÃ©connexionâ€¦' : 'Se dÃ©connecter'}
+                    {loggingOut ? 'Déconnexion…' : 'Se déconnecter'}
                   </button>
                 </div>
               </div>
@@ -453,7 +454,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                     className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-750 transition hover:bg-white"
                   >
                     <PlusIcon className="h-4 w-4 text-[var(--admin-primary)]" />
-                    CrÃ©er : {action.label}
+                    Créer : {action.label}
                   </Link>
                 )
               })}
@@ -464,7 +465,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                 className="flex w-full items-center gap-2 rounded-2xl border border-[var(--admin-accent-200)] bg-[var(--admin-accent-50)] px-4 py-3 text-sm font-bold text-[var(--admin-accent-700)] transition disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
-                {loggingOut ? 'DÃ©connexionâ€¦' : 'Se dÃ©connecter'}
+                {loggingOut ? 'Déconnexion…' : 'Se déconnecter'}
               </button>
             </div>
           </div>

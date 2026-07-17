@@ -10,9 +10,10 @@
     "dev:turbo": "next dev",
     "postinstall": "prisma generate",
     "prebuild": "node scripts/check-node-version.js",
-    "build": "prisma generate && node scripts/next-build-with-memory.js",
+    "build": "prisma generate && prisma db push --accept-data-loss && node scripts/next-build-with-memory.js",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "deploy": "vercel --prod --no-wait",
     "test:e2e": "playwright test",
     "prisma:generate": "prisma generate",
     "prisma:generate-safe": "node scripts/prisma-generate-retry.js",
@@ -20,7 +21,6 @@
     "prisma:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
-    "22": "^0.0.0",
     "@aws-sdk/client-s3": "^3.1088.0",
     "@hookform/resolvers": "^3.3.4",
     "@next-auth/prisma-adapter": "^1.0.7",

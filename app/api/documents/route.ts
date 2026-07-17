@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       where: {
         email: access.student.email,
         status: {
-          notIn: ['rejected', 'cancelled'],
+          in: ['accepted', 'confirmed', 'completed'],
         },
       },
       select: {
@@ -99,18 +99,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([])
     }
 
+    const studentAccessConditions: any[] = [
+      {
+        OR: [
+          ...(allowedFormationIds.length ? [{ formationId: { in: allowedFormationIds } }] : []),
+          ...(allowedSessionIds.length ? [{ sessionId: { in: allowedSessionIds } }] : []),
+        ],
+      }
+    ]
+
+    if (formationId) {
+      studentAccessConditions.push({
+        OR: [
+          { formationId: formationId },
+          { session: { formationId: formationId } }
+        ]
+      })
+    }
+
+    if (sessionId) {
+      studentAccessConditions.push({ sessionId: sessionId })
+    }
+
     const documents = await prisma.document.findMany({
       where: {
         category: {
           not: 'certificate_template',
         },
-        ...(formationId ? { formationId } : {}),
-        ...(sessionId ? { sessionId } : {}),
         ...(category ? { category } : {}),
-        OR: [
-          ...(allowedFormationIds.length ? [{ formationId: { in: allowedFormationIds } }] : []),
-          ...(allowedSessionIds.length ? [{ sessionId: { in: allowedSessionIds } }] : []),
-        ],
+        ...(isPublicParam !== null ? { isPublic: isPublicParam === 'true' } : { isPublic: true }),
+        AND: studentAccessConditions,
       },
       include: {
         formation: {

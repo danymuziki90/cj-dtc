@@ -141,24 +141,16 @@ async function createFreeRegistrationFixture(
     price: 0,
   })
 
-  const registrationResponse = await request.post('/api/programmes/register', {
+  const registrationResponse = await request.post('/api/enrollments', {
     data: {
+      firstName: options.firstName,
+      lastName: options.lastName,
+      email: options.email,
+      phone: '+243990000111',
+      address: 'Kinshasa',
+      motivationLetter: 'Valider le flux automatique du compte etudiant.',
+      formationId: session.formation.id,
       sessionId: session.id,
-      personal: {
-        firstName: options.firstName,
-        lastName: options.lastName,
-        email: options.email,
-        whatsapp: '+243990000111',
-        address: 'Kinshasa',
-      },
-      answers: {
-        expectations: 'Valider le flux automatique du compte etudiant.',
-      },
-      payment: {
-        provider: 'pawapay',
-        method: 'mobile_money',
-        currency: 'USD',
-      },
     },
   })
 

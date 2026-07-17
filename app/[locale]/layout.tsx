@@ -8,7 +8,7 @@ import I18nProvider from '../i18n'
 
 interface LayoutProps {
   children: ReactNode
-  params: Promise<{ locale: string }> | { locale: string }
+  params: Promise<{ locale: string }>
 }
 
 export const metadata: Metadata = {

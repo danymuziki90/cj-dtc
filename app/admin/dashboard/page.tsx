@@ -338,7 +338,7 @@ export default function AdminDashboardPage() {
             value={kpiData.totals.sessionsOpen}
             helper="Cohorters de formation actives"
             tone="primary"
-            href="/admin/formations"
+            href="/admin/sessions"
           />
           <DashboardKpiCard
             icon={CalendarDays}
@@ -346,7 +346,7 @@ export default function AdminDashboardPage() {
             value={kpiData.totals.sessionsFuture}
             helper="Démarrages planifiés prochainement"
             tone="neutral"
-            href="/admin/formations"
+            href="/admin/sessions"
           />
           <DashboardKpiCard
             icon={FileStack}

@@ -1,9 +1,9 @@
-# Checklist de deploiement production
+# Checklist de déploiement production
 
-## 1. Variables d environnement
-Renseigner les variables listees dans `/.env.production.example`.
+## 1. Variables d'environnement
+Renseigner les variables listées dans `/.env.production.example`.
 
-Variables critiques:
+Variables critiques :
 - `DATABASE_URL`
 - `NEXTAUTH_URL`
 - `NEXTAUTH_SECRET`
@@ -17,16 +17,13 @@ Variables critiques:
 - `MAIL_FROM`
 - `MAIL_TLS_SERVERNAME`
 - `NEXT_PUBLIC_APP_URL`
-- `PAWAPAY_API_KEY`
-- `PAWAPAY_CALLBACK_URL`
 
-Notes:
-- garder `ADMIN_ALLOW_EMERGENCY_LOGIN=false` en production
-- pour la configuration SMTP actuelle, `MAIL_TLS_SERVERNAME=web-hosting.com` est requis
-- si vous passez PawaPay en live, remplacer aussi `PAWAPAY_API_URL`
+Notes :
+- Garder `ADMIN_ALLOW_EMERGENCY_LOGIN=false` en production.
+- Pour la configuration SMTP actuelle, `MAIL_TLS_SERVERNAME=web-hosting.com` est requis.
 
-## 2. Base de donnees
-Le portail admin / etudiant depend de ces tables:
+## 2. Base de données
+Le portail admin / étudiant dépend de ces tables :
 - `Student`
 - `AdminTrainingSession`
 - `PasswordResetToken`
@@ -35,23 +32,24 @@ Le portail admin / etudiant depend de ces tables:
 - `StudentCertificate`
 - `AdminAuditLog`
 
-Si la base de production n a pas encore ces tables, executer une fois:
-- `/scripts/sql/admin_student_portal_bootstrap.sql`
+Pour appliquer ces tables en production en toute sécurité, exécutez simplement les migrations Prisma standard :
+- `npx prisma migrate deploy`
 
-Important:
-- ne pas lancer `prisma db push --accept-data-loss` en production sur cette base actuelle
-- le projet a un historique Prisma derive; le bootstrap SQL additif est la voie sure ici
+> [!NOTE]
+> L'initialisation non destructive de ces tables a été intégrée directement dans le système de migrations Prisma (migration `20260707120000_link_enrollments_to_students`). Il n'est plus nécessaire d'exécuter manuellement de script SQL sur votre console Supabase de production.
 
-## 3. Verification avant mise en ligne
-Verifier:
-- login admin OK
-- creation etudiant OK
-- login etudiant OK
-- email automatique des acces OK
-- creation paiement session OK
+Important :
+- Ne pas lancer `prisma db push --accept-data-loss` en production sur cette base actuelle.
 
-## 4. Validation deja faite localement
-Valide sur cette branche:
-- TypeScript cible: OK
-- E2E critiques Playwright: 3/3 OK
-- SMTP reel: OK
+## 3. Vérification avant mise en ligne
+Vérifier :
+- Login admin OK
+- Création étudiant / inscription session OK
+- Login étudiant automatique après inscription OK
+- E-mail automatique des accès OK
+
+## 4. Validation déjà faite localement
+Validé sur cette branche :
+- TypeScript cible : OK
+- E2E critiques Playwright : OK
+- SMTP réel : OK

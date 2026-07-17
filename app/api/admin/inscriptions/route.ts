@@ -14,7 +14,13 @@ export async function GET(req: NextRequest) {
 
     const inscriptions = await prisma.enrollment.findMany({
       include: {
-        formation: true
+        formation: true,
+        session: true,
+        formAnswers: {
+          include: {
+            question: true
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     })

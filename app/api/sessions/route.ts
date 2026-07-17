@@ -96,6 +96,7 @@ export async function POST(request: Request) {
             participationType,
             prerequisitesText,
             registrationDeadline,
+            duplicateFromSessionId,
         } = body
 
         // Validation des données
@@ -155,6 +156,31 @@ export async function POST(request: Request) {
                 formation: true
             }
         })
+
+        // Duplication des questions si demandé
+        if (duplicateFromSessionId) {
+            const parsedDupId = parseInt(duplicateFromSessionId)
+            if (!isNaN(parsedDupId)) {
+                const originalQuestions = await prisma.sessionFormQuestion.findMany({
+                    where: { sessionId: parsedDupId },
+                    orderBy: { order: 'asc' }
+                })
+                if (originalQuestions.length > 0) {
+                    await prisma.sessionFormQuestion.createMany({
+                        data: originalQuestions.map(q => ({
+                            sessionId: session.id,
+                            label: q.label,
+                            type: q.type,
+                            helpText: q.helpText,
+                            required: q.required,
+                            order: q.order,
+                            options: q.options,
+                            fileTypes: q.fileTypes,
+                        }))
+                    })
+                }
+            }
+        }
 
         return NextResponse.json(session, { status: 201 })
     } catch (error) {

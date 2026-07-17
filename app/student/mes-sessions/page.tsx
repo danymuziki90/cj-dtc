@@ -23,6 +23,46 @@ import {
   statusToneClass,
 } from "@/lib/student-portal/format";
 
+function translateEnrollmentStatus(status: string) {
+  const map: Record<string, string> = {
+    pending: 'En attente',
+    accepted: 'Accepté',
+    confirmed: 'Confirmé',
+    rejected: 'Non retenu',
+    waitlist: 'Sur liste d\'attente',
+    cancelled: 'Annulé',
+    completed: 'Terminé'
+  }
+  return map[status] || status
+}
+
+function statusClass(value: string) {
+  const normalized = value.toLowerCase()
+  if (
+    normalized.includes('success') ||
+    normalized.includes('paid') ||
+    normalized.includes('approved') ||
+    normalized.includes('confirmed') ||
+    normalized.includes('accepted')
+  ) {
+    return 'bg-emerald-50 text-emerald-700 border border-emerald-250'
+  }
+  if (normalized.includes('waitlist')) {
+    return 'bg-amber-50 text-amber-700 border border-amber-250'
+  }
+  if (normalized.includes('pending') || normalized.includes('wait') || normalized.includes('partial')) {
+    return 'bg-blue-50 text-blue-700 border border-blue-200'
+  }
+  if (
+    normalized.includes('failed') ||
+    normalized.includes('rejected') ||
+    normalized.includes('cancel')
+  ) {
+    return 'bg-rose-50 text-rose-700 border border-rose-200'
+  }
+  return 'bg-slate-50 text-slate-700 border border-slate-200'
+}
+
 function sessionTypeLabel(value: string | null | undefined) {
   if (!value) return "Session";
   return value.replace(/_/g, " ");
@@ -243,11 +283,13 @@ export default function StudentSessionsPage() {
                       {session.location || "En ligne"} &middot; {session.format}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                    <p>
-                      <strong className="text-slate-900">Inscription:</strong>{" "}
-                      {session.enrollmentStatus}
-                    </p>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 flex flex-col justify-center">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <strong className="text-slate-900">Inscription :</strong>
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${statusClass(session.enrollmentStatus)}`}>
+                        {translateEnrollmentStatus(session.enrollmentStatus)}
+                      </span>
+                    </div>
                     <p className="mt-1">
                       <strong className="text-slate-900">Heures:</strong>{" "}
                       {session.hours}h

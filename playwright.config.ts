@@ -21,7 +21,7 @@ export default defineConfig({
     video: 'off',
   },
   webServer: {
-    command: `cmd /c "set NODE_OPTIONS=--max-old-space-size=8192&& set NEXT_TEST_WASM=1&& scripts\\use-node22.cmd npx next dev --webpack --port ${serverPort}"`,
+    command: `cmd /c "set NODE_OPTIONS=--max-old-space-size=8192&& set NEXT_TEST_WASM=1&& npx next dev --webpack --port ${serverPort}"`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

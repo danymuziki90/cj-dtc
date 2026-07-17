@@ -112,7 +112,7 @@ function toPlainTextEmail(lines: Array<string | null | undefined>) {
   return lines.filter((line): line is string => Boolean(line && line.trim())).join('\n')
 }
 
-function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
+export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
   const supportEmail = escapeHtml(getSupportEmail())
   const actionBlock = options.action
     ? `

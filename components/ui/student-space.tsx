@@ -66,6 +66,14 @@ export function studentStatusClass(value: string) {
   }
 
   if (
+    ['waitlist'].some((token) =>
+      hasStatusToken(value, token),
+    )
+  ) {
+    return 'border-amber-200 bg-amber-50 text-amber-700'
+  }
+
+  if (
     ['pending', 'review', 'submitted', 'processing', 'partial', 'upcoming', 'scheduled', 'waiting'].some((token) =>
       hasStatusToken(value, token),
     )

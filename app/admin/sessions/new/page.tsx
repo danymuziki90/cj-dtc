@@ -8,7 +8,7 @@ export default function NewSessionPage() {
     const router = useRouter()
 
     useEffect(() => {
-        router.replace('/admin/formations?action=create-session')
+        router.replace('/admin/sessions?action=create-session')
     }, [router])
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({

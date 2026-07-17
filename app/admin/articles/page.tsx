@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
@@ -176,6 +176,7 @@ export default function AdminActualitesPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [filters, setFilters] = useState({
     search: '',
     category: 'all',
@@ -248,10 +249,13 @@ export default function AdminActualitesPage() {
   function resetForm() {
     setEditingId(null)
     setForm(emptyFormState())
+    setError(null)
   }
 
   function startEdit(item: NewsItem) {
     setEditingId(item.id)
+    setError(null)
+    setSuccessMessage(null)
     setForm({
       title: item.title,
       content: item.content,
@@ -293,6 +297,7 @@ export default function AdminActualitesPage() {
     event.preventDefault()
     setSaving(true)
     setError(null)
+    setSuccessMessage(null)
 
     const payload = {
       title: form.title.trim(),
@@ -318,7 +323,11 @@ export default function AdminActualitesPage() {
         throw new Error(body?.error || 'Enregistrement impossible.')
       }
 
+      const isEditing = Boolean(editingId)
       resetForm()
+      setSuccessMessage(isEditing ? 'Actualité mise à jour avec succès !' : 'Actualité enregistrée avec succès !')
+      setTimeout(() => setSuccessMessage(null), 5000)
+
       const refreshed = await loadNews(page)
       if (refreshed.pagination.pageCount > 0 && page > refreshed.pagination.pageCount) {
         setPage(refreshed.pagination.pageCount)
@@ -481,6 +490,10 @@ export default function AdminActualitesPage() {
 
           {error ? (
             <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+          ) : null}
+
+          {successMessage ? (
+            <p className="mt-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">{successMessage}</p>
           ) : null}
 
           <div className="mt-4">

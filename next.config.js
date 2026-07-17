@@ -5,7 +5,7 @@ const nextConfig = {
   // Avoid repeated static generation retries on heavier routes during CI/local build.
   staticPageGenerationTimeout: 300,
   typescript: {
-    ignoreBuildErrors: true, // Unblock Vercel deployment despite TS errors
+    ignoreBuildErrors: false, // Block Vercel deployment if TypeScript errors exist (code compiles perfectly)
   },
   images: {
     remotePatterns: [

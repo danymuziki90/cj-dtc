@@ -115,27 +115,44 @@ type DashboardPayload = {
   }
 }
 
+function translateEnrollmentStatus(status: string) {
+  const map: Record<string, string> = {
+    pending: "En attente",
+    accepted: "Accepté",
+    confirmed: "Confirmé",
+    rejected: "Non retenu",
+    waitlist: "Sur liste d'attente",
+    cancelled: "Annulé",
+    completed: "Terminé",
+  }
+  return map[status] || status
+}
+
 function statusClass(value: string) {
   const normalized = value.toLowerCase()
   if (
     normalized.includes('success') ||
     normalized.includes('paid') ||
     normalized.includes('approved') ||
-    normalized.includes('confirmed')
+    normalized.includes('confirmed') ||
+    normalized.includes('accepted')
   ) {
-    return 'bg-blue-100 text-blue-700'
+    return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+  }
+  if (normalized.includes('waitlist')) {
+    return 'bg-amber-50 text-amber-700 border border-amber-200'
   }
   if (normalized.includes('pending') || normalized.includes('wait') || normalized.includes('partial')) {
-    return 'bg-red-100 text-red-700'
+    return 'bg-blue-50 text-blue-700 border border-blue-200'
   }
   if (
     normalized.includes('failed') ||
     normalized.includes('rejected') ||
     normalized.includes('cancel')
   ) {
-    return 'bg-red-100 text-red-700'
+    return 'bg-rose-50 text-rose-700 border border-rose-200'
   }
-  return 'bg-slate-100 text-slate-700'
+  return 'bg-slate-50 text-slate-700 border border-slate-200'
 }
 
 export default function StudentDashboardPage() {
@@ -326,8 +343,8 @@ export default function StudentDashboardPage() {
                     <strong>Date:</strong>{' '}
                     {data.dashboard.currentSession.startDate
                       ? `${new Date(data.dashboard.currentSession.startDate).toLocaleDateString('fr-FR')} - ${new Date(
-                          data.dashboard.currentSession.endDate || data.dashboard.currentSession.startDate
-                        ).toLocaleDateString('fr-FR')}`
+                        data.dashboard.currentSession.endDate || data.dashboard.currentSession.startDate
+                      ).toLocaleDateString('fr-FR')}`
                       : '-'}
                   </p>
                   <p><strong>Type parcours:</strong> {data.dashboard.currentSession.sessionType || '-'}</p>
@@ -387,9 +404,14 @@ export default function StudentDashboardPage() {
                       {new Date(row.startDate).toLocaleDateString('fr-FR')} -{' '}
                       {new Date(row.endDate).toLocaleDateString('fr-FR')} | {row.location}
                     </p>
-                    <p className="text-xs text-slate-500">
-                      Type: {row.sessionType || '-'} | Statut inscription: {row.enrollmentStatus}
-                    </p>
+                    <div className="text-xs text-slate-500 flex items-center gap-1.5 mt-1.5">
+                      <span>Type : {row.sessionType || '-'}</span>
+                      <span>•</span>
+                      <span>Statut :</span>
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${statusClass(row.enrollmentStatus)}`}>
+                        {translateEnrollmentStatus(row.enrollmentStatus)}
+                      </span>
+                    </div>
                   </div>
                 ))}
                 {data.dashboard.sessionsHistory.length === 0 ? (

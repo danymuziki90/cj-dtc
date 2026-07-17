@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
-import { Award, BookOpen, Download, FileText, Filter, GraduationCap, Layers3 } from 'lucide-react'
+import { Award, BookOpen, Download, FileText, Filter, GraduationCap, Layers3, Video, FileArchive } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentPageShell,
@@ -118,12 +118,18 @@ function SupportsContent() {
   }
 
   const getCategoryMeta = (category: string) => {
-    const map: Record<string, { label: string; icon: typeof BookOpen }> = {
+    const map: Record<string, { label: string; icon: any }> = {
       syllabus: { label: 'Syllabus', icon: BookOpen },
-      presentation: { label: 'Presentation', icon: Layers3 },
+      presentation: { label: 'Présentation', icon: Layers3 },
       exercise: { label: 'Exercice', icon: GraduationCap },
       resource: { label: 'Ressource', icon: FileText },
-      certificate_template: { label: 'Modele de certificat', icon: Award },
+      certificate_template: { label: 'Modèle de certificat', icon: Award },
+      pdf: { label: 'Document PDF', icon: FileText },
+      word: { label: 'Document Word', icon: FileText },
+      powerpoint: { label: 'PowerPoint', icon: Layers3 },
+      zip: { label: 'Archive ZIP', icon: FileArchive },
+      video: { label: 'Support Vidéo', icon: Video },
+      other: { label: 'Support de cours', icon: FileText },
     }
 
     return map[category] || { label: category, icon: FileText }

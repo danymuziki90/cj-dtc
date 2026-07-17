@@ -58,13 +58,13 @@ function parseAnswer(ans: FormAnswer): string {
 function groupByEnrollment(
   questions: FormQuestion[],
   answers: FormAnswer[]
-): Array<{ enrollment: FormAnswer['enrollment']; answers: Map<number, string> }> {
-  const map = new Map<number, { enrollment: FormAnswer['enrollment']; answers: Map<number, string> }>()
+): Array<{ enrollment: FormAnswer['enrollment']; answers: Map<number, FormAnswer> }> {
+  const map = new Map<number, { enrollment: FormAnswer['enrollment']; answers: Map<number, FormAnswer> }>()
   for (const a of answers) {
     if (!map.has(a.enrollmentId)) {
       map.set(a.enrollmentId, { enrollment: a.enrollment, answers: new Map() })
     }
-    map.get(a.enrollmentId)!.answers.set(a.questionId, parseAnswer(a))
+    map.get(a.enrollmentId)!.answers.set(a.questionId, a)
   }
   return Array.from(map.values())
 }
@@ -169,7 +169,7 @@ export default function SessionFormAnswersPage() {
             Ajoutez des questions depuis la gestion des sessions.
           </p>
           <Link
-            href="/admin/formations"
+            href="/admin/sessions"
             className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
           >
             Gérer les sessions
@@ -268,11 +268,35 @@ export default function SessionFormAnswersPage() {
                     </div>
                   </td>
                   {questions.map((q) => {
-                    const val = ansMap.get(q.id) || '—'
-                    const empty = val === '—'
+                    const ans = ansMap.get(q.id)
+                    if (!ans) {
+                      return (
+                        <td key={q.id} className="max-w-[160px] px-4 py-3">
+                          <span className="text-slate-300 italic text-xs">—</span>
+                        </td>
+                      )
+                    }
+
+                    if (q.type === 'file_upload' && ans.fileUrl) {
+                      return (
+                        <td key={q.id} className="max-w-[160px] px-4 py-3">
+                          <a
+                            href={ans.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 underline max-w-full"
+                          >
+                            <Download className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{ans.fileName || 'Fichier'}</span>
+                          </a>
+                        </td>
+                      )
+                    }
+
+                    const val = parseAnswer(ans)
                     return (
                       <td key={q.id} className="max-w-[160px] px-4 py-3">
-                        <span className={`truncate block text-xs ${empty ? 'text-slate-300 italic' : 'text-slate-700 font-medium'}`}>
+                        <span className="truncate block text-xs text-slate-700 font-medium">
                           {val}
                         </span>
                       </td>
@@ -320,17 +344,42 @@ export default function SessionFormAnswersPage() {
               {/* Réponses */}
               <div className="max-h-[60vh] overflow-y-auto divide-y divide-slate-100 p-2">
                 {questions.map((q) => {
-                  const val = row?.answers.get(q.id) || '—'
-                  const empty = val === '—'
+                  const ans = row?.answers.get(q.id)
+                  if (!ans) {
+                    return (
+                      <div key={q.id} className="px-4 py-3">
+                        <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                          {q.label}
+                          {q.required && <span className="ml-1 text-red-400">*</span>}
+                        </p>
+                        <p className="text-sm font-semibold text-slate-300 italic">—</p>
+                      </div>
+                    )
+                  }
+
                   return (
                     <div key={q.id} className="px-4 py-3">
                       <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
                         {q.label}
                         {q.required && <span className="ml-1 text-red-400">*</span>}
                       </p>
-                      <p className={`text-sm font-semibold ${empty ? 'text-slate-300 italic' : 'text-slate-800'}`}>
-                        {val}
-                      </p>
+                      {q.type === 'file_upload' && ans.fileUrl ? (
+                        <p className="text-sm font-semibold text-slate-800">
+                          <a
+                            href={ans.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 underline"
+                          >
+                            <Download className="h-4 w-4" />
+                            {ans.fileName || 'Télécharger le fichier'}
+                          </a>
+                        </p>
+                      ) : (
+                        <p className="text-sm font-semibold text-slate-800">
+                          {parseAnswer(ans)}
+                        </p>
+                      )}
                     </div>
                   )
                 })}

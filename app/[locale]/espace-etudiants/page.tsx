@@ -59,6 +59,19 @@ function statusClass(value: string) {
   return studentStatusClass(value);
 }
 
+function translateEnrollmentStatus(status: string) {
+  const map: Record<string, string> = {
+    pending: 'En attente',
+    accepted: 'Accepté',
+    confirmed: 'Confirmé',
+    rejected: 'Non retenu',
+    waitlist: 'Sur liste d\'attente',
+    cancelled: 'Annulé',
+    completed: 'Terminé'
+  }
+  return map[status] || status
+}
+
 function lifecycleLabel(value?: string | null) {
   if (value === "upcoming") return "À venir";
   if (value === "active") return "Active";
@@ -1138,7 +1151,7 @@ function EspaceEtudiantsContent() {
                             <div className="flex items-center justify-between text-[10px]">
                               <span className="text-slate-400 font-medium">Statut</span>
                               <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${statusClass(item.enrollmentStatus)}`}>
-                                {item.enrollmentStatus}
+                                {translateEnrollmentStatus(item.enrollmentStatus)}
                               </span>
                             </div>
                           </div>
@@ -1171,40 +1184,79 @@ function EspaceEtudiantsContent() {
                           </div>
                         )}
 
-                        <Link
-                          href={`${basePath}/elearning`}
-                          className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-blue-700)] transition text-center shadow-sm mb-3"
-                        >
-                          Continuer
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </Link>
+                        {['accepted', 'confirmed', 'completed'].includes(item.enrollmentStatus) ? (
+                          <>
+                            <Link
+                              href={`${basePath}/elearning`}
+                              className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-blue-700)] transition text-center shadow-sm mb-3"
+                            >
+                              Continuer
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </Link>
 
-                        <div className="grid grid-cols-3 gap-2 mt-1 text-center border-t border-slate-100 pt-3">
-                          <button
-                            onClick={() => setActiveTab("calendrier")}
-                            className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
-                            title="Consulter le calendrier"
-                          >
-                            <Calendar className="w-4 h-4 mb-1 text-slate-400" />
-                            Calendrier
-                          </button>
-                          <Link
-                            href={`${basePath}/supports?formationId=${item.formationId}`}
-                            className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
-                            title="Accéder aux supports de cours"
-                          >
-                            <BookOpen className="w-4 h-4 mb-1 text-slate-400" />
-                            Supports
-                          </Link>
-                          <button
-                            onClick={() => setActiveTab("travaux")}
-                            className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
-                            title="Consulter vos devoirs et travaux"
-                          >
-                            <FileText className="w-4 h-4 mb-1 text-slate-400" />
-                            Travaux
-                          </button>
-                        </div>
+                            <div className="grid grid-cols-3 gap-2 mt-1 text-center border-t border-slate-100 pt-3">
+                              <button
+                                onClick={() => setActiveTab("calendrier")}
+                                className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
+                                title="Consulter le calendrier"
+                              >
+                                <Calendar className="w-4 h-4 mb-1 text-slate-400" />
+                                Calendrier
+                              </button>
+                              <Link
+                                href={`${basePath}/supports?formationId=${item.formationId}`}
+                                className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
+                                title="Accéder aux supports de cours"
+                              >
+                                <BookOpen className="w-4 h-4 mb-1 text-slate-400" />
+                                Supports
+                              </Link>
+                              <button
+                                onClick={() => setActiveTab("travaux")}
+                                className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
+                                title="Consulter vos devoirs et travaux"
+                              >
+                                <FileText className="w-4 h-4 mb-1 text-slate-400" />
+                                Travaux
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-center text-xs space-y-1">
+                            {item.enrollmentStatus === 'waitlist' && (
+                              <>
+                                <p className="font-extrabold text-amber-700">⏳ En liste d'attente</p>
+                                <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                                  Votre candidature a été placée sur liste d'attente. Nous vous contacterons dès qu'une place se libèrera.
+                                </p>
+                              </>
+                            )}
+                            {item.enrollmentStatus === 'pending' && (
+                              <>
+                                <p className="font-extrabold text-blue-700">🔍 Candidature en examen</p>
+                                <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                                  Nos équipes examinent votre dossier. Une décision vous sera notifiée très prochainement par e-mail.
+                                </p>
+                              </>
+                            )}
+                            {item.enrollmentStatus === 'rejected' && (
+                              <>
+                                <p className="font-extrabold text-red-600">❌ Candidature non retenue</p>
+                                <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                                  Votre dossier n'a pas été retenu pour cette session. N'hésitez pas à postuler à d'autres parcours.
+                                </p>
+                              </>
+                            )}
+                            {item.enrollmentStatus === 'cancelled' && (
+                              <>
+                                <p className="font-extrabold text-slate-650">🚫 Inscription annulée</p>
+                                <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                                  Cette inscription a été annulée. Veuillez contacter le secrétariat pour toute question.
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -1288,7 +1340,7 @@ function EspaceEtudiantsContent() {
 
                       <div className="px-5 pb-5">
                         <Link
-                          href={`/${locale}/formations/inscription?session=${session.id}`}
+                          href={`/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formationId}&sessionId=${session.id}`}
                           className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-red)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-red-700)] transition text-center shadow-sm"
                         >
                           S'inscrire à cette session

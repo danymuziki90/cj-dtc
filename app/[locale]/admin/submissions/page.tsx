@@ -107,6 +107,10 @@ interface Session {
   endDate: string
   formationId: number
   format: string
+  formation?: {
+    id: number
+    title: string
+  } | null
 }
 
 const FILE_TYPE_OPTIONS = [
@@ -282,8 +286,8 @@ export default function AdminSubmissionsPage() {
   // Create / Update Devoir
   const handleSubmitAssignment = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formTitle.trim() || !formFormationId || !formDeadline) {
-      showNotification('Veuillez remplir tous les champs obligatoires (*)', 'error')
+    if (!formTitle.trim() || !formSessionId || !formDeadline) {
+      showNotification('Veuillez sélectionner une session et remplir tous les champs obligatoires (*)', 'error')
       return
     }
 
@@ -292,7 +296,7 @@ export default function AdminSubmissionsPage() {
       description: formDescription,
       type: formType,
       formationId: parseInt(formFormationId),
-      sessionId: formSessionId ? parseInt(formSessionId) : null,
+      sessionId: parseInt(formSessionId),
       deadline: new Date(formDeadline).toISOString(),
       maxFileSize: formMaxFileSize,
       allowedFileTypes: formAllowedFileTypes,
@@ -1282,43 +1286,40 @@ export default function AdminSubmissionsPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="assign-formation" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Formation concernée *</label>
+                  <label htmlFor="assign-session" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Session concernée *</label>
                   <select
-                    id="assign-formation"
-                    value={formFormationId}
+                    id="assign-session"
+                    value={formSessionId}
                     onChange={(e) => {
-                      setFormFormationId(e.target.value)
-                      setFormSessionId('') // reset cohorte
+                      const selectedSessId = e.target.value
+                      setFormSessionId(selectedSessId)
+                      const matchedSession = sessions.find(s => s.id === parseInt(selectedSessId))
+                      if (matchedSession) {
+                        setFormFormationId(String(matchedSession.formationId))
+                      } else {
+                        setFormFormationId('')
+                      }
                     }}
                     className="w-full px-3 py-2 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)] font-bold text-slate-800"
                     required
                   >
-                    <option value="">Sélectionner la formation</option>
-                    {formations.map((f) => (
-                      <option key={f.id} value={f.id}>{f.title}</option>
+                    <option value="">-- Choisir la session --</option>
+                    {sessions.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.formation?.title || `Session #${s.id}`} - Cohorte #{s.id} ({s.format})
+                      </option>
                     ))}
                   </select>
                 </div>
 
-                <div>
-                  <label htmlFor="assign-session" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Cohorte spécifique (Optionnel)</label>
-                  <select
-                    id="assign-session"
-                    value={formSessionId}
-                    onChange={(e) => setFormSessionId(e.target.value)}
-                    disabled={!formFormationId}
-                    className="w-full px-3 py-2 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)] font-bold text-slate-800 disabled:opacity-50"
-                  >
-                    <option value="">Toutes les cohortes actives</option>
-                    {sessions
-                      .filter((s) => !formFormationId || s.formationId === parseInt(formFormationId))
-                      .map((s) => (
-                        <option key={s.id} value={s.id}>
-                          Cohorte #{s.id} ({s.format}) - Début: {new Date(s.startDate).toLocaleDateString('fr-FR')}
-                        </option>
-                      ))}
-                  </select>
-                </div>
+                {formFormationId && (
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Formation associée (automatique)</label>
+                    <div className="w-full px-3.5 py-2 text-xs border border-slate-200 bg-slate-100 rounded-xl font-bold text-slate-655">
+                      {formations.find(f => f.id === parseInt(formFormationId))?.title || 'Formation'}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor="assign-deadline" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Date limite de dépôt *</label>
