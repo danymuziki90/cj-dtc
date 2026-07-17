@@ -61,8 +61,54 @@ function InscriptionContent() {
 
     // Questions personnalisées
     const [customQuestions, setCustomQuestions] = useState<FormQuestion[]>([])
-    const [customAnswers, setCustomAnswers] = useState<Record<number, string | string[]>>({})
+    const [customAnswers, setCustomAnswers] = useState<Record<number, string | string[] | { fileUrl: string, fileName: string }>>({})
     const [customErrors, setCustomErrors] = useState<Record<number, string>>({})
+    const [uploadingFiles, setUploadingFiles] = useState<Record<number, boolean>>({})
+
+    const handleFileUpload = async (questionId: number, file: File, allowedTypes: string[]) => {
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || ''
+        if (allowedTypes.length > 0 && !allowedTypes.includes(fileExt)) {
+            alert(`Format de fichier non autorisé. Autorisé(s) : ${allowedTypes.map(t => `.${t}`).join(', ')}`)
+            return
+        }
+
+        setUploadingFiles(prev => ({ ...prev, [questionId]: true }))
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('folder', 'submissions')
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            })
+
+            if (!res.ok) {
+                const errData = await res.json()
+                throw new Error(errData.error || "Erreur de téléversement")
+            }
+
+            const data = await res.json()
+            setCustomAnswers(prev => ({
+                ...prev,
+                [questionId]: {
+                    fileUrl: data.url,
+                    fileName: file.name
+                }
+            }))
+            // Clear any error
+            setCustomErrors(prev => {
+                const next = { ...prev }
+                delete next[questionId]
+                return next
+            })
+        } catch (error: any) {
+            console.error('File upload error:', error)
+            alert(`Échec du téléversement : ${error.message || error}`)
+        } finally {
+            setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
+        }
+    }
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -127,7 +173,8 @@ function InscriptionContent() {
                 val === undefined ||
                 val === null ||
                 (typeof val === 'string' && !val.trim()) ||
-                (Array.isArray(val) && val.length === 0)
+                (Array.isArray(val) && val.length === 0) ||
+                (q.type === 'file_upload' && (typeof val !== 'object' || !val.fileUrl))
             if (isEmpty) {
                 errors[q.id] = 'Ce champ est obligatoire'
             }
@@ -191,6 +238,14 @@ function InscriptionContent() {
                         return {
                             questionId: q.id,
                             jsonValue: Array.isArray(val) ? val : [],
+                        }
+                    }
+                    if (q.type === 'file_upload') {
+                        const fileObj = typeof val === 'object' && val !== null ? (val as any) : {}
+                        return {
+                            questionId: q.id,
+                            fileUrl: fileObj.fileUrl || null,
+                            fileName: fileObj.fileName || null,
                         }
                     }
                     return {
@@ -610,17 +665,61 @@ function InscriptionContent() {
                                                             ))}
                                                         </div>
                                                     )}
-                                                    {q.type === 'file_upload' && (
-                                                        <div className={`border-2 border-dashed rounded-md p-4 text-center ${error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-gray-50'}`}>
-                                                            <FileUp className="h-6 w-6 text-gray-400 mx-auto mb-1" />
-                                                            <p className="text-xs text-gray-500">
-                                                                Téléversement : {q.fileTypes.length > 0 ? q.fileTypes.map(t => `.${t}`).join(', ') : 'tous types'}
-                                                            </p>
-                                                            <p className="text-xs text-gray-400 mt-1">
-                                                                (Fonctionnalité d'upload de fichier — contactez l'administration pour transmettre votre document)
-                                                            </p>
-                                                        </div>
-                                                    )}
+                                                    {q.type === 'file_upload' && (() => {
+                                                         const isUploading = uploadingFiles[q.id]
+                                                         const fileObj = typeof val === 'object' && val !== null ? (val as any) : null
+                                                         
+                                                         return (
+                                                             <div className={`border-2 border-dashed rounded-md p-5 text-center transition ${
+                                                                 error ? 'border-red-400 bg-red-50/50' : 
+                                                                 fileObj ? 'border-blue-300 bg-blue-50/20' : 'border-gray-300 bg-gray-50/50 hover:bg-gray-50'
+                                                             }`}>
+                                                                 {isUploading ? (
+                                                                     <div className="py-4">
+                                                                         <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-cjblue mb-2"></div>
+                                                                         <p className="text-xs text-gray-500 font-semibold">Téléversement du document en cours...</p>
+                                                                     </div>
+                                                                 ) : fileObj ? (
+                                                                     <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-blue-100 shadow-sm max-w-md mx-auto">
+                                                                         <div className="flex items-center gap-2 overflow-hidden pr-2">
+                                                                             <span className="text-xl shrink-0">📄</span>
+                                                                             <span className="text-xs font-bold text-gray-700 truncate">{fileObj.fileName}</span>
+                                                                         </div>
+                                                                         <button
+                                                                             type="button"
+                                                                             onClick={() => setCustomAnswers(p => {
+                                                                                 const next = { ...p }
+                                                                                 delete next[q.id]
+                                                                                 return next
+                                                                             })}
+                                                                             className="text-red-500 hover:text-red-700 text-xs font-black px-2 py-1 rounded hover:bg-red-50 transition"
+                                                                         >
+                                                                             Supprimer
+                                                                         </button>
+                                                                     </div>
+                                                                 ) : (
+                                                                     <label className="cursor-pointer block py-2">
+                                                                         <FileUp className="h-7 w-7 text-gray-400 mx-auto mb-1.5" />
+                                                                         <span className="text-xs font-bold text-cjblue hover:text-blue-700 block mb-1">
+                                                                             Cliquez pour téléverser votre fichier
+                                                                         </span>
+                                                                         <p className="text-[10px] text-gray-400">
+                                                                             Formats autorisés : {q.fileTypes && q.fileTypes.length > 0 ? q.fileTypes.map(t => `.${t}`).join(', ') : 'tous types'} (max 10 Mo)
+                                                                         </p>
+                                                                         <input
+                                                                             type="file"
+                                                                             className="hidden"
+                                                                             accept={q.fileTypes && q.fileTypes.length > 0 ? q.fileTypes.map(t => `.${t}`).join(',') : '*/*'}
+                                                                             onChange={(e) => {
+                                                                                 const file = e.target.files?.[0]
+                                                                                 if (file) handleFileUpload(q.id, file, q.fileTypes || [])
+                                                                             }}
+                                                                         />
+                                                                     </label>
+                                                                 )}
+                                                             </div>
+                                                         )
+                                                     })()}
 
                                                     {error && (
                                                         <p className="mt-1 text-xs text-red-600 font-semibold">{error}</p>
