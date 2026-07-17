@@ -1173,7 +1173,7 @@ export default function AdminSessionsPage() {
                               <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Extensions de fichier autorisées</label>
                               <div className="flex flex-wrap gap-4">
                                 {['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'].map((ext) => {
-                                  const list = q.fileTypes || []
+                                  const list = (q.fileTypes || []) as string[]
                                   const checked = list.includes(ext)
                                   return (
                                     <label key={ext} className="inline-flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-600">
@@ -1181,7 +1181,7 @@ export default function AdminSessionsPage() {
                                         type="checkbox"
                                         checked={checked}
                                         onChange={() => {
-                                          const newList = checked ? list.filter(t => t !== ext) : [...list, ext]
+                                          const newList = checked ? list.filter((t: string) => t !== ext) : [...list, ext]
                                           updateQuestion({ fileTypes: newList })
                                         }}
                                         className="accent-[var(--admin-primary)]"
