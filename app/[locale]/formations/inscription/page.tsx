@@ -174,7 +174,7 @@ function InscriptionContent() {
                 val === null ||
                 (typeof val === 'string' && !val.trim()) ||
                 (Array.isArray(val) && val.length === 0) ||
-                (q.type === 'file_upload' && (typeof val !== 'object' || !val.fileUrl))
+                (q.type === 'file_upload' && !(val && typeof val === 'object' && !Array.isArray(val) && 'fileUrl' in val))
             if (isEmpty) {
                 errors[q.id] = 'Ce champ est obligatoire'
             }
