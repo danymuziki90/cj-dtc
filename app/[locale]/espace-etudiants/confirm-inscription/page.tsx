@@ -30,8 +30,16 @@ type TrainingSession = {
   endTime: string
   location?: string | null
   format: string
-  price: number
+  status?: string
   formation: Formation
+  adminMeta?: {
+    paymentInfo?: string | null
+    customTitle?: string | null
+    sessionType?: string | null
+    durationLabel?: string | null
+    participationType?: string | null
+    registrationDeadline?: string | null
+  } | null
 }
 
 type AuthState = 'checking' | 'authenticated' | 'anonymous'
@@ -183,11 +191,12 @@ function ConfirmInscriptionContent() {
 
       try {
         if (sessionId) {
-          const sessionsResponse = await fetch('/api/sessions', { cache: 'no-store' })
-          if (!sessionsResponse.ok) throw new Error('Impossible de charger la session.')
-          const sessions = (await sessionsResponse.json()) as TrainingSession[]
-          const selectedSession = sessions.find((item) => item.id === sessionId && item.formationId === formationId)
-          if (!selectedSession) throw new Error('Session introuvable pour cette formation.')
+          const sessionRes = await fetch(`/api/sessions/${sessionId}`, { cache: 'no-store' })
+          if (!sessionRes.ok) throw new Error('Impossible de charger la session.')
+          const selectedSession = (await sessionRes.json()) as TrainingSession
+          if (!selectedSession || selectedSession.formationId !== formationId) {
+            throw new Error('Session introuvable pour cette formation.')
+          }
           if (active) {
             setSession(selectedSession)
             setFormation(selectedSession.formation)
@@ -427,9 +436,9 @@ function ConfirmInscriptionContent() {
                 <p className="mt-2 text-sm font-semibold text-slate-950">{value}</p>
               </div>
             ))}
-            {session ? (
+            {session && (session as any).adminMeta?.paymentInfo ? (
               <div className="rounded-3xl border border-blue-100 bg-blue-50/70 p-4 text-sm text-slate-700">
-                Montant indicatif: <span className="font-semibold text-slate-950">{formatCurrency(session.price)}</span>
+                Informations tarifaires : <span className="font-semibold text-slate-950">{(session as any).adminMeta.paymentInfo}</span>
               </div>
             ) : null}
           </div>

@@ -8,6 +8,15 @@ function parseId(raw: string, name = 'ID') {
   return n
 }
 
+// ── helper : désérialise les champs JSON stockés en string ─────────────────
+function serializeQuestion(q: any) {
+  return {
+    ...q,
+    options: q.options ? (() => { try { return JSON.parse(q.options) } catch { return [] } })() : [],
+    fileTypes: q.fileTypes ? (() => { try { return JSON.parse(q.fileTypes) } catch { return [] } })() : [],
+  }
+}
+
 // ── GET /api/sessions/[id]/form-questions ──────────────────────────────────
 // Récupère toutes les questions d'une session, triées par ordre
 export async function GET(
@@ -23,7 +32,7 @@ export async function GET(
       orderBy: { order: 'asc' },
     })
 
-    return NextResponse.json(questions)
+    return NextResponse.json(questions.map(serializeQuestion))
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 })
   }

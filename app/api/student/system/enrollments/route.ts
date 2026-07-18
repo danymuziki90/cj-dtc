@@ -77,12 +77,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Cette formation n\'est pas disponible.' }, { status: 422 })
   }
 
-  let session: { id: number; formationId: number } | null = null
+  let session: { id: number; formationId: number; startDate: Date; endDate: Date; location: string | null; prerequisites: string | null } | null = null
   if (sessionId) {
     session = await prisma.trainingSession.findUnique({
       where: { id: sessionId },
-      select: { id: true, formationId: true },
-    })
+      select: { id: true, formationId: true, startDate: true, endDate: true, location: true, prerequisites: true },
+    }) as any
 
     if (!session || session.formationId !== formationId) {
       return NextResponse.json({ error: 'Session invalide pour cette formation.' }, { status: 400 })
@@ -129,6 +129,62 @@ export async function POST(request: NextRequest) {
       formation: { select: { id: true, title: true, slug: true } },
     },
   })
+
+  // Send confirmation email
+  try {
+    const datesText = session
+      ? `${new Date(session.startDate).toLocaleDateString('fr-FR')} au ${new Date(session.endDate).toLocaleDateString('fr-FR')}`
+      : new Date(enrollment.createdAt).toLocaleDateString('fr-FR')
+
+    const sessionMeta = session
+      ? (session.prerequisites?.startsWith('{')
+          ? JSON.parse(session.prerequisites)
+          : null)
+      : null
+    const sessionTitle = sessionMeta?.customTitle || (session ? `#${session.id}` : '')
+
+    const variables: Record<string, string> = {
+      Nom_etudiant: `${auth.student.firstName} ${auth.student.lastName}`,
+      Formation: enrollment.formation.title,
+      Session: sessionTitle,
+      Dates: datesText,
+      Lieu: session?.location || 'À distance',
+      Coordonnees_contact: process.env.CONTACT_EMAIL || 'contact@cjdevelopmenttc.org',
+      Signature: 'CJ Development Training Center',
+    }
+
+    const replaceVars = (text: string) => {
+      return text.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] || variables[key.toLowerCase()] || '')
+    }
+
+    // Try to load a template for status 'pending'
+    const template = await prisma.emailTemplate.findUnique({ where: { id: 'pending' } })
+
+    let emailSubject = `Demande d'inscription reçue - ${enrollment.formation.title}`
+    let emailBody = `Bonjour ${variables.Nom_etudiant},\n\nNous avons bien reçu votre demande d'inscription à la formation ${enrollment.formation.title}.\n\nVotre demande est actuellement en cours d'examen par nos services.`
+
+    if (template) {
+      emailSubject = replaceVars(template.subject)
+      emailBody = replaceVars(template.body)
+    }
+
+    const { sendEmail, renderBrandedEmailLayout } = await import('@/lib/email')
+    const htmlContent = renderBrandedEmailLayout({
+      eyebrow: 'Inscription',
+      title: emailSubject,
+      introHtml: emailBody.replace(/\n/g, '<br />'),
+      bodyHtml: ''
+    })
+
+    await sendEmail({
+      to: auth.student.email,
+      subject: emailSubject,
+      html: htmlContent,
+      text: emailBody
+    })
+  } catch (emailErr) {
+    console.error("Erreur lors de l'envoi de l'email de confirmation d'inscription :", emailErr)
+  }
 
   return NextResponse.json({ success: true, enrollment }, { status: 201 })
 }

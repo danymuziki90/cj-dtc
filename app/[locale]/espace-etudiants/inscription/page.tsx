@@ -79,23 +79,18 @@ export default function InscriptionPage() {
     setSuccess(false)
 
     try {
-      const data = new FormData()
-      data.append('firstName', formData.firstName)
-      data.append('lastName', formData.lastName)
-      data.append('email', formData.email)
-      data.append('phone', formData.phone)
-      data.append('address', formData.address)
-      data.append('formationId', formData.formationId)
-      data.append('startDate', formData.startDate)
-      data.append('notes', formData.notes)
-
-      if (motivationFile) {
-        data.append('motivation', motivationFile)
-      }
-
       const response = await fetch('/api/enrollments', {
         method: 'POST',
-        body: data
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone || null,
+          address: formData.address || null,
+          formationId: formData.formationId,
+          notes: formData.notes || null,
+        }),
       })
 
       const responseData = await response.json()

@@ -11,7 +11,6 @@ import {
   GraduationCap,
   MapPinIcon,
   MonitorSmartphone,
-  Wallet,
 } from "lucide-react";
 import { FormattedDate } from "@/components/FormattedDate";
 import {
@@ -28,9 +27,6 @@ interface Enrollment {
   id: number;
   status: string;
   startDate: string;
-  paymentStatus: string;
-  totalAmount: number;
-  paidAmount: number;
   formation: {
     id: number;
     title: string;
@@ -46,24 +42,6 @@ interface Enrollment {
   } | null;
 }
 
-function paymentStatusClass(status: string) {
-  const value = String(status || "").toLowerCase();
-  if (value === "paid")
-    return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (value === "partial")
-    return "border-blue-200 bg-blue-50 text-[var(--cj-blue)]";
-  if (value === "unpaid") return "border-red-200 bg-red-50 text-red-700";
-  return "border-slate-200 bg-slate-100 text-slate-700";
-}
-
-function paymentStatusLabel(status: string) {
-  const labels: Record<string, string> = {
-    unpaid: "Non paye",
-    partial: "Partiel",
-    paid: "Paye",
-  };
-  return labels[status] || status;
-}
 
 function enrollmentStatusLabel(status: string) {
   const labels: Record<string, string> = {
@@ -75,14 +53,6 @@ function enrollmentStatusLabel(status: string) {
     completed: "Termine",
   };
   return labels[status] || status;
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-  }).format(amount);
 }
 
 export default function MesFormationsPage() {
@@ -100,9 +70,6 @@ export default function MesFormationsPage() {
     const completedCount = enrollments.filter(
       (item) => item.status === "completed",
     ).length;
-    const paidCount = enrollments.filter(
-      (item) => item.paymentStatus === "paid",
-    ).length;
     const activeSessions = enrollments.filter((item) => item.session).length;
 
     return [
@@ -119,13 +86,6 @@ export default function MesFormationsPage() {
         helper: "Inscriptions rattachees a une session planifiee.",
         icon: CalendarDays,
         accent: "from-[#003b96] via-[var(--cj-blue)] to-[#0f172a]",
-      },
-      {
-        label: "Paiements valides",
-        value: paidCount,
-        helper: "Parcours avec reglement complet enregistre.",
-        icon: Wallet,
-        accent: "from-[var(--cj-red)] via-[#bb111d] to-[#4a0b14]",
       },
       {
         label: "Formations terminees",
@@ -215,20 +175,6 @@ export default function MesFormationsPage() {
         ) : (
           <div className="space-y-4">
             {enrollments.map((enrollment) => {
-              const paymentProgress =
-                enrollment.totalAmount > 0
-                  ? Math.max(
-                      0,
-                      Math.min(
-                        100,
-                        Math.round(
-                          (enrollment.paidAmount / enrollment.totalAmount) *
-                            100,
-                        ),
-                      ),
-                    )
-                  : 0;
-
               return (
                 <div
                   key={enrollment.id}
@@ -249,15 +195,10 @@ export default function MesFormationsPage() {
                       >
                         {enrollmentStatusLabel(enrollment.status)}
                       </span>
-                      <span
-                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${paymentStatusClass(enrollment.paymentStatus)}`}
-                      >
-                        {paymentStatusLabel(enrollment.paymentStatus)}
-                      </span>
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
+                  <div className="mt-5 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         <CalendarDays className="h-4 w-4 text-[var(--cj-blue)]" />
@@ -292,22 +233,6 @@ export default function MesFormationsPage() {
                       <p className="mt-2 text-sm font-medium text-slate-900">
                         {enrollment.session?.location || "A preciser"}
                       </p>
-                    </div>
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                        <Wallet className="h-4 w-4 text-[var(--cj-blue)]" />
-                        Paiement
-                      </div>
-                      <p className="mt-2 text-sm font-medium text-slate-900">
-                        {formatCurrency(enrollment.paidAmount)} /{" "}
-                        {formatCurrency(enrollment.totalAmount)}
-                      </p>
-                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
-                        <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,var(--cj-red)_0%,var(--cj-blue)_100%)]"
-                          style={{ width: `${paymentProgress}%` }}
-                        />
-                      </div>
                     </div>
                   </div>
 
