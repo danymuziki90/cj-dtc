@@ -140,9 +140,12 @@ export default function MesFormationsPage() {
   const fetchEnrollments = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/enrollments");
+      const response = await fetch("/api/student/system/dashboard");
+      if (!response.ok) {
+        throw new Error("Erreur lors du chargement des formations");
+      }
       const data = await response.json();
-      setEnrollments(data);
+      setEnrollments(data.dashboard?.enrollments || []);
     } catch (error) {
       console.error("Erreur lors du chargement des formations:", error);
     } finally {

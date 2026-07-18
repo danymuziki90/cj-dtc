@@ -34,6 +34,7 @@ export default function MonComptePage() {
   const [profile, setProfile] = useState<StudentProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -78,26 +79,29 @@ export default function MonComptePage() {
   const fetchProfile = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/enrollments')
+      const response = await fetch('/api/student/system/profile', { cache: 'no-store' })
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement du profil')
+      }
       const data = await response.json()
-      if (data.length > 0) {
-        const enrollment = data[0]
+      if (data && data.student) {
+        const student = data.student
         setProfile({
-          firstName: enrollment.firstName,
-          lastName: enrollment.lastName,
-          email: enrollment.email,
-          phone: enrollment.phone,
-          address: enrollment.address,
-          enrollmentsCount: data.length,
-          certificatesCount: 0,
-          totalFormations: new Set(data.map((item: any) => item.formation.id)).size,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          email: student.email,
+          phone: student.whatsapp || student.phone || '',
+          address: student.address,
+          enrollmentsCount: data.metrics?.sessionsCount || 0,
+          certificatesCount: data.metrics?.certificatesCount || 0,
+          totalFormations: data.metrics?.sessionsCount || 0,
         })
         setFormData({
-          firstName: enrollment.firstName,
-          lastName: enrollment.lastName,
-          email: enrollment.email,
-          phone: enrollment.phone || '',
-          address: enrollment.address || '',
+          firstName: student.firstName || '',
+          lastName: student.lastName || '',
+          email: student.email || '',
+          phone: student.whatsapp || student.phone || '',
+          address: student.address || '',
         })
       } else {
         setProfile(null)
@@ -112,13 +116,35 @@ export default function MonComptePage() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
+    setSaving(true)
     try {
+      const response = await fetch('/api/student/system/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          whatsapp: formData.phone,
+          address: formData.address,
+        }),
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de la mise à jour')
+      }
+
       alert('Profil mis a jour avec succes!')
       setEditing(false)
       fetchProfile()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur lors de la mise a jour:', error)
-      alert('Erreur lors de la mise a jour du profil')
+      alert(error.message || 'Erreur lors de la mise a jour du profil')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -300,8 +326,8 @@ export default function MonComptePage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3 pt-2">
-                    <button type="submit" className={studentPrimaryButtonClassName}>
-                      Enregistrer les modifications
+                    <button type="submit" disabled={saving} className={studentPrimaryButtonClassName}>
+                      {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
                     </button>
                     <button
                       type="button"

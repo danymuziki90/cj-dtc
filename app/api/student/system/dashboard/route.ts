@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               title: true,
+              slug: true,
               categorie: true,
               imageUrl: true,
               description: true,
@@ -693,6 +694,7 @@ export async function GET(request: NextRequest) {
       photoUrl: userProfile?.image || null,
     },
     dashboard: {
+      enrollments: enrollmentsRaw,
       currentSession: currentEnrollment
         ? {
             enrollmentId: currentEnrollment.id,
