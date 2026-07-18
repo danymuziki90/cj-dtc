@@ -55,6 +55,7 @@ export async function POST(req: Request) {
 
     const emailSent = await sendEmail({
       to: process.env.CONTACT_EMAIL || process.env.MAIL_USER || 'contact@cjdevelopmenttc.org',
+      replyTo: body.email,
       subject: `Contact: ${body.subject}`,
       html: emailHtml
     })

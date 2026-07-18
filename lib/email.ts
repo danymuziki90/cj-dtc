@@ -6,6 +6,7 @@ export type EmailMessage = {
   html: string
   text?: string
   from?: string
+  replyTo?: string
 }
 
 type StudentPortalAccessEmailParams = {
@@ -230,6 +231,9 @@ export async function sendEmail(
   if (!transporter) {
     console.log('---------------------------------------------------------')
     console.log(`MOCK EMAIL TO: ${Array.isArray(message.to) ? message.to.join(', ') : message.to}`)
+    if (message.replyTo) {
+      console.log(`REPLY-TO: ${message.replyTo}`)
+    }
     console.log(`SUBJECT: ${message.subject}`)
     console.log(`CONTENT: ${message.html.substring(0, 160)}...`)
     console.log('---------------------------------------------------------')
@@ -240,6 +244,7 @@ export async function sendEmail(
   const result = await transporter.sendMail({
     from: resolveMailFrom(message),
     to: message.to,
+    replyTo: message.replyTo,
     subject: message.subject,
     html: message.html,
     text: message.text,
