@@ -469,6 +469,29 @@ function ConfirmInscriptionContent() {
                 </div>
               ) : null}
 
+              {/* Informations du profil (Lecture seule) */}
+              {studentInfo && (
+                <div className="space-y-3 bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs">
+                  <h4 className="font-bold text-slate-800 uppercase tracking-wider mb-1">
+                    Informations du profil étudiant
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-slate-400 block font-semibold">Nom complet</span>
+                      <span className="font-bold text-slate-850">{studentInfo.name}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block font-semibold">Email</span>
+                      <span className="font-bold text-slate-850 break-all">{studentInfo.email}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block font-semibold">Identifiant</span>
+                      <span className="font-bold text-slate-850">{studentInfo.username || 'Non défini'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Questions complémentaires */}
               {customQuestions.length > 0 && (
                 <div className="border-t border-slate-200 pt-5 mt-5 space-y-4">
