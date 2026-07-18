@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   ArrowRight,
-  Phone,
   MailIcon,
   MapPinIcon,
   Clock,
@@ -48,10 +47,10 @@ export default function ContactPage() {
       link: "https://maps.google.com/?q=CJ+DTC+Kinshasa",
     },
     {
-      icon: Phone,
-      title: "Téléphone",
-      details: "+243 123 456 789",
-      link: "tel:+243123456789",
+      icon: MessageSquare,
+      title: "WhatsApp",
+      details: "+243 995 136 626",
+      link: "https://wa.me/243995136626?text=Bonjour%2C%20je%20souhaite%20obtenir%20des%20informations.",
     },
     {
       icon: MailIcon,
