@@ -72,6 +72,7 @@ function ConfirmInscriptionContent() {
   }`
 
   const [authState, setAuthState] = useState<AuthState>('checking')
+  const [studentInfo, setStudentInfo] = useState<{ id: string; name: string; email: string; username: string } | null>(null)
   const [formation, setFormation] = useState<Formation | null>(null)
   const [session, setSession] = useState<TrainingSession | null>(null)
   const [loading, setLoading] = useState(true)
@@ -159,7 +160,18 @@ function ConfirmInscriptionContent() {
       setError('')
 
       const authResponse = await fetch('/api/student/auth/me', { cache: 'no-store' })
-      if (active) setAuthState(authResponse.ok ? 'authenticated' : 'anonymous')
+      if (authResponse.ok) {
+        const authData = await authResponse.json()
+        if (active) {
+          setAuthState('authenticated')
+          setStudentInfo(authData.student)
+        }
+      } else {
+        if (active) {
+          setAuthState('anonymous')
+          setStudentInfo(null)
+        }
+      }
 
       if (!formationId) {
         if (active) {
