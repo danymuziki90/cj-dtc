@@ -828,7 +828,7 @@ export const publicMessages = {
       contactSectionBadge: 'Comment nous joindre',
       contactSectionTitle: 'Tous les moyens de contact',
       contactSectionDescription:
-        'Choisissez le canal le plus adapté à votre besoin. Nous sommes accessibles par e-mail, WhatsApp, téléphone et en présentiel.',
+        'Choisissez le canal le plus adapté à votre besoin. Nous sommes accessibles par e-mail, WhatsApp et en présentiel.',
       channels: [
         {
           id: 'email',
@@ -849,16 +849,6 @@ export const publicMessages = {
           cta: 'Ouvrir WhatsApp',
           href: 'https://wa.me/243995136626',
           available: 'Quelques minutes (heures ouvrables)',
-        },
-        {
-          id: 'phone',
-          icon: 'Phone',
-          label: 'Téléphone',
-          value: '+243 999 482 140',
-          description: 'Lundi – Vendredi, 8h00 à 18h00 (RDC).',
-          cta: 'Appeler maintenant',
-          href: 'tel:+243999482140',
-          available: 'Lun – Ven, 8h – 18h',
         },
         {
           id: 'address',
@@ -1031,7 +1021,7 @@ export const publicMessages = {
       contactSectionBadge: 'How to reach us',
       contactSectionTitle: 'All contact channels',
       contactSectionDescription:
-        'Choose the channel that suits your need best. We are reachable by email, WhatsApp, phone and in person.',
+        'Choose the channel that suits your need best. We are reachable by email, WhatsApp and in person.',
       channels: [
         {
           id: 'email',
@@ -1052,16 +1042,6 @@ export const publicMessages = {
           cta: 'Open WhatsApp',
           href: 'https://wa.me/243995136626',
           available: 'A few minutes (business hours)',
-        },
-        {
-          id: 'phone',
-          icon: 'Phone',
-          label: 'Phone',
-          value: '+243 999 482 140',
-          description: 'Monday – Friday, 8am to 6pm (DRC time).',
-          cta: 'Call now',
-          href: 'tel:+243999482140',
-          available: 'Mon – Fri, 8am – 6pm',
         },
         {
           id: 'address',

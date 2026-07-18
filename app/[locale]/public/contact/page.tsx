@@ -242,10 +242,10 @@ export default function ContactPage() {
                     href={info.link}
                     className="text-blue-600 hover:text-blue-700 text-sm font-medium mt-2 inline-block"
                   >
-                    {info.title === "Téléphone"
-                      ? "Appeler"
+                    {info.title === "WhatsApp"
+                      ? "Discuter sur WhatsApp"
                       : info.title === "Email"
-                        ? "Envoyer un email"
+                        ? "Envoyer un e-mail"
                         : "Voir sur la carte"}
                   </a>
                 )}
