@@ -366,7 +366,12 @@ export async function GET(request: NextRequest) {
         availableSpots: Math.max(0, s.maxParticipants - s.enrollments.length),
         maxParticipants: s.maxParticipants,
         durationLabel: parsedMetadata.metadata.durationLabel || null,
+        registrationDeadline: parsedMetadata.metadata.registrationDeadline || null,
       }
+    })
+    .filter((session) => {
+      const deadline = session.registrationDeadline
+      return session.availableSpots > 0 && (!deadline || new Date(deadline).getTime() >= now.getTime())
     })
 
   const sessionsHistory = enrollmentsWithSession.map((item) => {

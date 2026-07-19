@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
+import { requireAdmin } from '@/lib/auth-portal/guards'
 import {
     mapParticipationTypeToFormat,
     normalizeParticipationType,
@@ -12,9 +13,17 @@ import {
 export const runtime = "nodejs"
 
 // GET /api/sessions - Récupérer toutes les sessions
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
+        const adminAccess = await requireAdmin(request)
+        const isAdmin = !adminAccess.error
+        const now = new Date()
         const sessions = await prisma.trainingSession.findMany({
+            where: isAdmin ? undefined : {
+                status: 'ouverte',
+                startDate: { gte: now },
+                formation: { statut: 'publie' },
+            },
             include: {
                 formation: {
                     select: {
@@ -59,9 +68,13 @@ export async function GET() {
                     registrationDeadline: parsedMetadata.metadata.registrationDeadline || null,
                 },
             }
+        }).filter((session) => {
+            if (isAdmin) return true
+            const deadline = session.adminMeta.registrationDeadline
+            return (!deadline || new Date(deadline).getTime() >= now.getTime()) && session.currentParticipants < session.maxParticipants
         })
 
-        return NextResponse.json(sessionsWithCount)
+        return NextResponse.json(sessionsWithCount, { headers: { 'Cache-Control': 'no-store, max-age=0, must-revalidate' } })
     } catch (error) {
         console.error('Erreur lors de la récupération des sessions:', error)
         return NextResponse.json(
@@ -72,7 +85,9 @@ export async function GET() {
 }
 
 // POST /api/sessions - Créer une nouvelle session
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+    const auth = await requireAdmin(request)
+    if (auth.error) return auth.error
     try {
         const body = await request.json()
         const {
@@ -97,6 +112,7 @@ export async function POST(request: Request) {
             prerequisitesText,
             registrationDeadline,
             duplicateFromSessionId,
+            status,
         } = body
 
         // Validation des données
@@ -150,7 +166,7 @@ export async function POST(request: Request) {
                 ),
                 objectives,
                 imageUrl,
-                status: 'ouverte'
+                status: ['ouverte', 'fermee', 'complete', 'annulee', 'terminee'].includes(status) ? status : 'fermee'
             },
             include: {
                 formation: true

@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/auth-portal/guards'
 import {
   mapParticipationTypeToFormat,
   normalizeParticipationType,
@@ -11,7 +12,7 @@ import {
 
 // GET /api/sessions/[id] - Recuperer une session specifique
 export async function GET(
-  _request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -44,7 +45,14 @@ export async function GET(
       return NextResponse.json({ error: 'Session non trouvee' }, { status: 404 })
     }
 
+    const adminAccess = await requireAdmin(request)
+    const isAdmin = !adminAccess.error
     const parsedMetadata = parseSessionMetadata(session.prerequisites)
+    const deadline = parsedMetadata.metadata.registrationDeadline
+    const registrationOpen = !deadline || new Date(deadline).getTime() >= Date.now()
+    if (!isAdmin && (session.status !== 'ouverte' || session.formation.statut !== 'publie' || session.startDate < new Date() || !registrationOpen)) {
+      return NextResponse.json({ error: 'Session non disponible' }, { status: 404 })
+    }
     const resolvedImageUrl = parsedMetadata.metadata.imageUrl || session.imageUrl || null
 
     return NextResponse.json({
@@ -73,9 +81,11 @@ export async function GET(
 
 // PUT /api/sessions/[id] - Modifier une session
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return auth.error
   try {
     const resolvedParams = await params
     const sessionId = parseInt(resolvedParams.id)
@@ -195,9 +205,11 @@ export async function PUT(
 
 // DELETE /api/sessions/[id] - Supprimer une session
 export async function DELETE(
-  _request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return auth.error
   try {
     const resolvedParams = await params
     const sessionId = parseInt(resolvedParams.id)
