@@ -47,6 +47,7 @@ export async function POST(
     const baseOrder = (lastQ?.order ?? -1) + 1
 
     // Crée les nouvelles questions dans la session cible
+    // skipDuplicates évite les doublons si le template est appliqué plusieurs fois
     await prisma.sessionFormQuestion.createMany({
       data: templateQuestions.map((q, i) => ({
         sessionId: sid,
@@ -59,6 +60,7 @@ export async function POST(
         options: q.options,
         fileTypes: q.fileTypes,
       })),
+      skipDuplicates: true,
     })
 
     const created = await prisma.sessionFormQuestion.findMany({

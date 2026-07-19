@@ -94,23 +94,27 @@ export async function PUT(
       return NextResponse.json({ error: 'Statut invalide' }, { status: 400 })
     }
 
-    // Helper function to parse notes
+    // Helper function to parse notes — robust against malformed JSON
     function parseNotes(notesStr?: string | null) {
-      if (!notesStr) return { answers: {}, formType: null, adminComment: '', history: [] }
+      if (!notesStr || typeof notesStr !== 'string') {
+        return { answers: {}, formType: null, adminComment: '', history: [] }
+      }
+      if (!notesStr.startsWith('{')) {
+        // Plain string comment — not JSON
+        return { answers: {}, formType: null, adminComment: notesStr, history: [] }
+      }
       try {
-        const parsed = typeof notesStr === 'string' && notesStr.startsWith('{') ? JSON.parse(notesStr) : null
-        if (parsed) {
-          return {
-            answers: parsed.answers || {},
-            formType: parsed.formType || null,
-            adminComment: parsed.adminComment !== undefined ? parsed.adminComment : '',
-            history: Array.isArray(parsed.history) ? parsed.history : []
-          }
+        const parsed = JSON.parse(notesStr)
+        return {
+          answers: parsed.answers || {},
+          formType: parsed.formType || null,
+          adminComment: typeof parsed.adminComment === 'string' ? parsed.adminComment : '',
+          history: Array.isArray(parsed.history) ? parsed.history : [],
         }
       } catch (err) {
-        console.error("Notes parse error:", err)
+        console.error('[enrollment PUT] Notes JSON parse error, using plain text fallback:', err)
+        return { answers: {}, formType: null, adminComment: notesStr, history: [] }
       }
-      return { answers: {}, formType: null, adminComment: notesStr || '', history: [] }
     }
 
     const notesObj = parseNotes(notes !== undefined ? notes : enrollment.notes)
@@ -215,12 +219,21 @@ export async function PUT(
         history: notesObj.history
       })
     } else if (notes !== undefined) {
-      const commentVal = typeof notes === 'string' && notes.startsWith('{') ? JSON.parse(notes).adminComment : notes
+      let commentVal: string
+      if (typeof notes === 'string' && notes.startsWith('{')) {
+        try {
+          commentVal = JSON.parse(notes).adminComment ?? ''
+        } catch {
+          commentVal = notes
+        }
+      } else {
+        commentVal = typeof notes === 'string' ? notes : ''
+      }
       updatedNotes = JSON.stringify({
         answers: notesObj.answers,
         formType: notesObj.formType,
         adminComment: commentVal,
-        history: notesObj.history
+        history: notesObj.history,
       })
     }
 
@@ -234,8 +247,20 @@ export async function PUT(
     })
 
     return NextResponse.json(updated)
-  } catch (error) {
-    console.error('Error updating enrollment:', error)
-    return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 })
+  } catch (error: any) {
+    // Log complet pour diagnostics Vercel
+    console.error('[enrollment PUT] Erreur inattendue:', {
+      message: error?.message,
+      code: error?.code,
+      meta: error?.meta,
+      stack: error?.stack,
+    })
+    const userMessage =
+      error?.code === 'P2025'
+        ? 'Inscription introuvable (ID invalide ou supprimée).'
+        : error?.code === 'P2002'
+        ? 'Conflit de données — veuillez réessayer.'
+        : `Erreur interne : ${error?.message || 'Erreur lors de la mise à jour'}`
+    return NextResponse.json({ error: userMessage }, { status: 500 })
   }
 }
