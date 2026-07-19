@@ -17,7 +17,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (adminAuth.error) {
     const studentAuth = await requireStudent(request)
     if (studentAuth.error) return studentAuth.error
-    if (!document.isPublic || !document.sessionId) return NextResponse.json({ error: 'Acces refuse' }, { status: 403 })
+    // Allow enrolled students to download documents linked to their session,
+    // regardless of the isPublic flag (public = visible in lists, not a download gate).
+    if (!document.sessionId) return NextResponse.json({ error: 'Acces refuse' }, { status: 403 })
     const enrollment = await prisma.enrollment.findFirst({
       where: { email: studentAuth.student.email, sessionId: document.sessionId, status: { in: ['accepted', 'confirmed', 'completed'] } },
       select: { id: true },

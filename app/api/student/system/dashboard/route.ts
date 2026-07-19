@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
   const now = new Date()
   const studentEmail = auth.student.email
 
+  try {
   const [enrollmentsRaw, submissions, portalCertificates, issuedCertificates, news, evaluations, userProfile] =
     await Promise.all([
       prisma.enrollment.findMany({
@@ -737,4 +738,11 @@ export async function GET(request: NextRequest) {
       },
     },
   })
+  } catch (error: any) {
+    console.error('[Dashboard] Erreur lors de la récupération des données:', error)
+    return NextResponse.json(
+      { error: 'Erreur lors du chargement du tableau de bord. Veuillez réessayer.' },
+      { status: 500 },
+    )
+  }
 }
