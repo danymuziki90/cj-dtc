@@ -76,7 +76,7 @@ export default function DocumentsPage() {
 
             const response = await fetch(`/api/documents?${params}`)
             const data = await response.json()
-            setDocuments(data)
+            setDocuments(Array.isArray(data) ? data : [])
         } catch (error) {
             console.error('Impossible de charger les documents:', error)
         } finally {
@@ -88,14 +88,20 @@ export default function DocumentsPage() {
         try {
             const response = await fetch('/api/formations')
             const data = await response.json()
-            setFormations(data)
+            // /api/formations returns { formations, stats? }; normalise the
+            // payload before rendering select options.
+            setFormations(Array.isArray(data) ? data : (Array.isArray(data?.formations) ? data.formations : []))
         } catch (error) {
             console.error('Impossible de charger les formations:', error)
         }
     }
 
     const fetchSessions = async () => {
-        try { const response = await fetch('/api/sessions'); setSessions(await response.json()) } catch (error) { console.error('Impossible de charger les sessions:', error) }
+        try {
+            const response = await fetch('/api/sessions')
+            const data = await response.json()
+            setSessions(Array.isArray(data) ? data : (Array.isArray(data?.sessions) ? data.sessions : []))
+        } catch (error) { console.error('Impossible de charger les sessions:', error) }
     }
 
     useEffect(() => {
