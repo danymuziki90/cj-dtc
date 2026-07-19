@@ -30,9 +30,12 @@ interface Formation {
     title: string
 }
 
+interface TrainingSession { id: number; formationId: number; startDate: string; endDate: string; formation: { title: string } }
+
 export default function DocumentsPage() {
     const [documents, setDocuments] = useState<Document[]>([])
     const [formations, setFormations] = useState<Formation[]>([])
+    const [sessions, setSessions] = useState<TrainingSession[]>([])
     const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)
     const [filters, setFilters] = useState({
@@ -47,18 +50,21 @@ export default function DocumentsPage() {
     const [uploadForm, setUploadForm] = useState({
         title: '',
         description: '',
-        category: 'syllabus',
+        category: 'cours',
         formationId: '',
         sessionId: '',
-        isPublic: false
+        isPublic: true
     })
 
     const categories = [
-        { value: 'syllabus', label: 'Syllabus/Programme' },
+        { value: 'cours', label: 'Cours' },
+        { value: 'tp', label: 'TP / exercice pratique' },
+        { value: 'guide', label: 'Guide' },
         { value: 'presentation', label: 'Presentation' },
         { value: 'exercise', label: 'Exercice' },
-        { value: 'resource', label: 'Ressource' },
-        { value: 'certificate_template', label: 'Modele de certificat' }
+        { value: 'video', label: 'Vidéo' },
+        { value: 'documentation', label: 'Documentation' },
+        { value: 'ressource', label: 'Ressource complémentaire' }
     ]
 
     const fetchDocuments = async () => {
@@ -88,9 +94,14 @@ export default function DocumentsPage() {
         }
     }
 
+    const fetchSessions = async () => {
+        try { const response = await fetch('/api/sessions'); setSessions(await response.json()) } catch (error) { console.error('Impossible de charger les sessions:', error) }
+    }
+
     useEffect(() => {
         fetchDocuments()
         fetchFormations()
+        fetchSessions()
     }, [])
 
     useEffect(() => {
@@ -123,10 +134,10 @@ export default function DocumentsPage() {
                 setUploadForm({
                     title: '',
                     description: '',
-                    category: 'syllabus',
+                    category: 'cours',
                     formationId: '',
                     sessionId: '',
-                    isPublic: false
+                    isPublic: true
                 })
                 setSelectedFile(null)
                 if (fileInputRef.current) {
@@ -273,7 +284,7 @@ export default function DocumentsPage() {
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.jpg,.jpeg,.png"
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.mp4"
                     onChange={(e) => {
                         const file = e.target.files?.[0]
                         if (file) {
@@ -340,6 +351,13 @@ export default function DocumentsPage() {
                             </div>
 
                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Session associée *</label>
+                                <select required value={uploadForm.sessionId} onChange={(e) => { const target = sessions.find((session) => session.id === Number(e.target.value)); setUploadForm(prev => ({ ...prev, sessionId: e.target.value, formationId: target ? String(target.formationId) : prev.formationId })) }} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Sélectionner une session</option>
+                                    {sessions.map(session => <option key={session.id} value={session.id}>{session.formation?.title || 'Formation'} — {new Date(session.startDate).toLocaleDateString('fr-FR')}</option>)}
+                                </select>
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Formation associee
                                 </label>
@@ -348,7 +366,7 @@ export default function DocumentsPage() {
                                     onChange={(e) => setUploadForm(prev => ({ ...prev, formationId: e.target.value }))}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    <option value="">Aucune</option>
+                                    <option value="">Déduite de la session</option>
                                     {formations.map(formation => (
                                         <option key={formation.id} value={formation.id}>
                                             {formation.title}

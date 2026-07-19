@@ -1,664 +1,90 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  BadgeCheck,
-  CalendarCheck2,
-  MailIcon,
-  MapPinIcon,
-  Clock3,
-  Send,
-  CheckCircle,
-  Facebook,
-  Twitter,
-  Linkedin,
-  Instagram,
-  Youtube,
-  MessageSquare,
-  Users,
-  Building,
-  Globe,
-  Flag,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, Landmark, Mail, MapPin, Send, ShieldCheck } from "lucide-react";
+import AdvisorContactSection from "@/components/AdvisorContactSection";
+
+const faqs = [
+  ["Comment choisir la formation adaptée ?", "Un conseiller analyse votre profil, votre niveau et vos objectifs afin de vous orienter vers le programme le plus pertinent."],
+  ["Puis-je suivre une formation à distance ?", "Oui. Selon le programme, nos parcours sont proposés en ligne, en présentiel ou dans un format hybride."],
+  ["Sous quel délai recevrai-je une réponse ?", "Nous répondons rapidement pendant les heures d'ouverture, et au plus tard sous 24 heures ouvrées pour les demandes par e-mail ou formulaire."],
+];
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
-    subject: "",
-    message: "",
-    interest: "general",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale || "fr";
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
-  const contactInfo = [
-    {
-      icon: MapPinIcon,
-      title: "Adresse",
-      details: "Avenue des Aviateurs, Commune de la Gombe",
-      city: "Kinshasa, République Démocratique du Congo",
-      link: "https://maps.google.com/?q=CJ+DTC+Kinshasa",
-    },
-    {
-      icon: MessageSquare,
-      title: "WhatsApp",
-      details: "+243 995 136 626",
-      link: "https://wa.me/243995136626?text=Bonjour%2C%20je%20souhaite%20obtenir%20des%20informations.",
-    },
-    {
-      icon: MailIcon,
-      title: "Email",
-      details: "contact@cjdevelopmenttc.org",
-      link: "mailto:contact@cjdevelopmenttc.org",
-    },
-    {
-      icon: Clock,
-      title: "Heures d'ouverture",
-      details: "Lun-Ven: 8h00 - 18h00",
-      details2: "Sam: 9h00 - 13h00",
-    },
-  ];
-
-  const services = [
-    {
-      icon: Users,
-      title: "Orientation Étudiants",
-      description:
-        "Conseil personnalisé pour choisir la formation adaptée à vos objectifs",
-      email: "contact@cjdevelopmenttc.org",
-    },
-    {
-      icon: Building,
-      title: "Services Entreprises",
-      description: "Formations sur mesure and consulting pour vos équipes",
-      email: "contact@cjdevelopmenttc.org",
-    },
-    {
-      icon: Globe,
-      title: "Partenariats Internationaux",
-      description:
-        "Collaborations avec les institutions et organisations internationales",
-      email: "contact@cjdevelopmenttc.org",
-    },
-    {
-      icon: MessageSquare,
-      title: "Support Technique",
-      description:
-        "Assistance pour la plateforme e-learning et les questions techniques",
-      email: "contact@cjdevelopmenttc.org",
-    },
-  ];
-
-  const faqs = [
-    {
-      question: "Quels sont les prérequis pour s'inscrire à vos formations ?",
-      answer:
-        "Les prérequis varient selon les programmes. La plupart de nos certifications requièrent une expérience professionnelle de 2-3 ans, tandis que nos workshops sont accessibles à tous. Consultez la fiche de chaque formation pour plus de détails.",
-    },
-    {
-      question: "Proposez-vous des formations en ligne ?",
-      answer:
-        "Oui, nous proposons des formations 100% en ligne, en présentiel et en format hybride. Nos programmes en ligne incluent des sessions live, des ressources interactives et un accompagnement personnalisé.",
-    },
-    {
-      question: "Comment puis-je financer ma formation ?",
-      answer:
-        "Nous proposons plusieurs options de financement : paiement en plusieurs fois, partenariats avec des entreprises, et des bourses pour les étudiants méritants. Contactez-nous pour discuter des options disponibles.",
-    },
-    {
-      question: "Les certifications sont-elles reconnues internationalement ?",
-      answer:
-        "Oui, nos certifications sont reconnues par les institutions internationales et préparent aux certifications SHRM, PMP, et autres standards mondiaux.",
-    },
-    {
-      question: "Quel est le processus d'admission ?",
-      answer:
-        "Le processus inclut une soumission en ligne, un entretien (pour certains programmes), et une confirmation d'admission. Le processus complet prend généralement 2-3 semaines.",
-    },
-  ];
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    // Valider les champs côté client
-    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
-      setSubmitError(locale === "fr" ? "Veuillez remplir tous les champs requis." : "Please fill in all required fields.");
-      setIsSubmitting(false);
-      return;
-    }
-
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStatus("sending");
     try {
-      const res = await fetch("/api/contact", {
+      const response = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || (locale === "fr" ? "Erreur lors de l'envoi de la demande. Veuillez réessayer." : "Error sending request. Please try again."));
-      }
-
-      setIsSubmitted(true);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        company: "",
-        subject: "",
-        message: "",
-        interest: "general",
-      });
-      
-      // Réinitialiser l'état de succès après 5 secondes
-      setTimeout(() => {
-        setIsSubmitted(false);
-      }, 5000);
-    } catch (err: any) {
-      setSubmitError(err.message || (locale === "fr" ? "Une erreur est survenue lors de l'envoi." : "An error occurred during submission."));
-    } finally {
-      setIsSubmitting(false);
+      if (!response.ok) throw new Error("Contact request failed");
+      setForm({ name: "", email: "", subject: "", message: "" });
+      setStatus("success");
+    } catch {
+      setStatus("error");
     }
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="hero-bg-unified">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <Link
-              href={`/${locale}`}
-              className="inline-flex items-center space-x-2 text-blue-200 hover:text-white mb-8"
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-              <span>Retour à l'accueil</span>
-            </Link>
-
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-              Contactez
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-blue-200">
-                {" "}
-                CJ DTC
-              </span>
-            </h1>
-
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-              Notre équipe est à votre disposition pour répondre à toutes vos
-              questions et vous accompagner dans votre parcours de formation
-            </p>
-          </div>
-        </div>
-      </header>
-
-      {/* Contact Info Cards */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {contactInfo.map((info, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
-              >
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4">
-                  <info.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {info.title}
-                </h3>
-                <div className="text-gray-600">
-                  <p>{info.details}</p>
-                  {info.details2 && <p>{info.details2}</p>}
-                </div>
-                {info.link && (
-                  <a
-                    href={info.link}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium mt-2 inline-block"
-                  >
-                    {info.title === "WhatsApp"
-                      ? "Discuter sur WhatsApp"
-                      : info.title === "Email"
-                        ? "Envoyer un e-mail"
-                        : "Voir sur la carte"}
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Form and Services */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16">
-            {/* Contact Form */}
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Envoyez-nous un
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">
-                  {" "}
-                  Message
-                </span>
-              </h2>
-
-              {isSubmitted ? (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-8 text-center">
-                  <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-emerald-900 mb-2">
-                    Votre demande a été envoyée avec succès.
-                  </h3>
-                  <p className="text-emerald-700 mb-4">
-                    Notre équipe vous répondra dans les meilleurs délais.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {submitError && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm font-medium">
-                      {submitError}
-                    </div>
-                  )}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label
-                        htmlFor="name"
-                        className="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Nom complet *
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Votre nom"
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Email *
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="votre.email@example.com"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label
-                        htmlFor="phone"
-                        className="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Téléphone
-                      </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="+243 XXX XXX XXX"
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="company"
-                        className="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Entreprise
-                      </label>
-                      <input
-                        type="text"
-                        id="company"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Nom de votre entreprise"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="interest"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Centre d'intérêt
-                    </label>
-                    <select
-                      id="interest"
-                      name="interest"
-                      value={formData.interest}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="general">Information générale</option>
-                      <option value="formation">Inscription formation</option>
-                      <option value="enterprise">Services entreprise</option>
-                      <option value="partnership">Partenariat</option>
-                      <option value="technical">Support technique</option>
-                      <option value="other">Autre</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="subject"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Sujet *
-                    </label>
-                    <input
-                      type="text"
-                      id="subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Sujet de votre message"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="message"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Message *
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      required
-                      rows={6}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      placeholder="Décrivez votre demande ou question..."
-                    ></textarea>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Envoi en cours...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-5 h-5" />
-                        <span>Envoyer le message</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-            </div>
-
-            {/* Services */}
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Services Spécialisés
-              </h2>
-              <p className="text-gray-600 mb-8">
-                Contactez directement nos équipes spécialisées selon vos besoins
-              </p>
-
-              <div className="space-y-6">
-                {services.map((service, index) => (
-                  <div
-                    key={index}
-                    className="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <service.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          {service.title}
-                        </h3>
-                        <p className="text-gray-600 mb-3">
-                          {service.description}
-                        </p>
-                        <a
-                          href={`mailto:${service.email}`}
-                          className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center space-x-1"
-                        >
-                          <MailIcon className="w-4 h-4" />
-                          <span>{service.email}</span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Quick Links */}
-              <div className="mt-8 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Liens Rapides
-                </h3>
-                <div className="space-y-3">
-                  <Link
-                    href={`/${locale}/formations`}
-                    className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                    <span>Voir toutes nos formations</span>
-                  </Link>
-                  <Link
-                    href={`/${locale}/about`}
-                    className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                    <span>En savoir plus sur CJ DTC</span>
-                  </Link>
-                  <Link
-                    href={`/${locale}/verification`}
-                    className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                    <span>Vérifier un certificat</span>
-                  </Link>
-                </div>
-              </div>
+    <main className="min-h-screen bg-white text-slate-900">
+      <section className="relative isolate overflow-hidden bg-slate-950 py-16 text-white sm:py-20 lg:py-24">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(37,99,235,.45),transparent_32%),radial-gradient(circle_at_80%_0%,rgba(14,165,233,.25),transparent_28%)]" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Link href={`/${locale}`} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-100 transition hover:text-white"><ArrowLeft className="h-4 w-4" />Retour à l&apos;accueil</Link>
+          <div className="mt-12 max-w-3xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-blue-100"><ShieldCheck className="h-4 w-4" />CJ Development Training Center</span>
+            <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">Parlons de votre projet de formation.</h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">Une question, un besoin de formation pour votre équipe ou un projet de partenariat ? Notre équipe vous accompagne avec des réponses claires et adaptées.</p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <a href="#contact-form" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-blue-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-50">Envoyer un message <ArrowRight className="h-4 w-4" /></a>
+              <a href="https://wa.me/243995136626?text=Bonjour%2C%20je%20souhaite%20obtenir%20des%20informations." target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-5 py-3 font-bold text-white transition hover:bg-white/10">Discuter sur WhatsApp</a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Questions
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">
-                {" "}
-                Fréquentes
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600">
-              Les réponses aux questions les plus courantes sur nos formations
-            </p>
-          </div>
+      <AdvisorContactSection />
 
-          <div className="space-y-6">
-            {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-lg overflow-hidden"
-              >
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    {faq.question}
-                  </h3>
-                  <p className="text-gray-600">{faq.answer}</p>
+      <section id="contact-form" className="scroll-mt-8 py-16 sm:py-20">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.08fr_.92fr] lg:px-8">
+          <div>
+            <span className="text-sm font-bold uppercase tracking-[0.16em] text-blue-700">Formulaire de contact</span>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Expliquez-nous votre besoin</h2>
+            <p className="mt-4 max-w-xl leading-7 text-slate-600">Décrivez votre demande : un conseiller vous répondra avec les informations utiles pour avancer sereinement.</p>
+            {status === "success" ? (
+              <div role="status" className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-emerald-950"><CheckCircle2 className="h-8 w-8 text-emerald-600" /><h3 className="mt-3 font-bold">Votre message a bien été envoyé.</h3><p className="mt-1 text-sm text-emerald-800">Notre équipe revient vers vous dans les meilleurs délais.</p></div>
+            ) : (
+              <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_12px_32px_rgba(15,23,42,.08)] sm:p-8">
+                {status === "error" && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700">Une erreur est survenue. Veuillez réessayer ou nous écrire directement par e-mail.</p>}
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <label className="text-sm font-bold text-slate-700">Nom complet<input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="Votre nom" /></label>
+                  <label className="text-sm font-bold text-slate-700">E-mail<input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="vous@exemple.com" /></label>
                 </div>
-              </div>
-            ))}
+                <label className="block text-sm font-bold text-slate-700">Sujet<input required value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="Ex. Information sur une formation" /></label>
+                <label className="block text-sm font-bold text-slate-700">Message<textarea required rows={6} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="mt-2 w-full resize-none rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="Comment pouvons-nous vous aider ?" /></label>
+                <button disabled={status === "sending"} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 font-bold text-white transition hover:bg-blue-700 disabled:cursor-wait disabled:opacity-60"><Send className="h-4 w-4" />{status === "sending" ? "Envoi en cours..." : "Envoyer le message"}</button>
+              </form>
+            )}
           </div>
 
-          <div className="text-center mt-12">
-            <p className="text-gray-600 mb-4">
-              Vous ne trouvez pas réponse à votre question ?
-            </p>
-            <Link
-              href="/fr/contact"
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              <MessageSquare className="w-5 h-5" />
-              <span>Contacter notre équipe</span>
-            </Link>
-          </div>
+          <aside className="space-y-5 lg:pt-12">
+            <div className="rounded-2xl bg-slate-950 p-7 text-white sm:p-8"><Landmark className="h-7 w-7 text-blue-300" /><h2 className="mt-5 text-2xl font-bold">Passez nous voir</h2><p className="mt-3 leading-7 text-slate-300">Avenue des Aviateurs, Commune de la Gombe<br />Kinshasa, République Démocratique du Congo</p><a href="https://maps.google.com/?q=CJ+DTC+Kinshasa" target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 font-bold text-blue-200 transition hover:text-white">Voir sur Google Maps <MapPin className="h-4 w-4" /></a></div>
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-7 sm:p-8"><Mail className="h-7 w-7 text-blue-700" /><h2 className="mt-5 text-xl font-bold text-slate-950">Besoin d&apos;une réponse détaillée ?</h2><p className="mt-2 leading-7 text-slate-600">Pour les partenariats, les formations en entreprise ou les demandes documentées, privilégiez l&apos;e-mail.</p><a href="mailto:contact@cjdevelopmenttc.org" className="mt-5 inline-flex break-all font-bold text-blue-700 underline-offset-4 hover:underline">contact@cjdevelopmenttc.org</a></div>
+          </aside>
         </div>
       </section>
 
-      {/* Social Media */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Suivez-nous sur les
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">
-                {" "}
-                Réseaux Sociaux
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600">
-              Restez connecté avec notre communauté et nos actualités
-            </p>
-          </div>
-
-          <div className="flex justify-center space-x-6">
-            <a
-              href="https://facebook.com/cjdtc"
-              className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
-            >
-              <Facebook className="w-6 h-6" />
-            </a>
-            <a
-              href="https://twitter.com/cjdtc"
-              className="w-12 h-12 bg-blue-400 rounded-full flex items-center justify-center text-white hover:bg-blue-500 transition-colors"
-            >
-              <Twitter className="w-6 h-6" />
-            </a>
-            <a
-              href="https://linkedin.com/company/cjdtc"
-              className="w-12 h-12 bg-blue-700 rounded-full flex items-center justify-center text-white hover:bg-blue-800 transition-colors"
-            >
-              <Linkedin className="w-6 h-6" />
-            </a>
-            <a
-              href="https://instagram.com/cjdtc"
-              className="w-12 h-12 bg-gradient-to-br from-blue-500 to-red-500 rounded-full flex items-center justify-center text-white hover:from-blue-600 hover:to-red-600 transition-colors"
-            >
-              <Instagram className="w-6 h-6" />
-            </a>
-            <a
-              href="https://youtube.com/cjdtc"
-              className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white hover:bg-red-700 transition-colors"
-            >
-              <Youtube className="w-6 h-6" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Map Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Retrouvez-nous
-            </h2>
-            <p className="text-xl text-gray-600">
-              Venez nous rendre visite dans nos locaux
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="h-96 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-              <div className="text-center">
-                <MapPinIcon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  CJ DTC Headquarters
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Avenue des Aviateurs, Commune de la Gombe
-                </p>
-                <p className="text-gray-600">
-                  Kinshasa, République Démocratique du Congo
-                </p>
-                <a
-                  href="https://maps.google.com/?q=CJ+DTC+Kinshasa"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"
-                >
-                  <MapPinIcon className="w-5 h-5" />
-                  <span>Voir sur Google Maps</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+      <section className="bg-slate-50 py-16 sm:py-20"><div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8"><div className="text-center"><span className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-blue-700"><CircleHelp className="h-4 w-4" />Questions fréquentes</span><h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Avant de nous écrire</h2></div><div className="mt-10 space-y-4">{faqs.map(([question, answer]) => <details key={question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><summary className="cursor-pointer list-none pr-8 font-bold text-slate-900">{question}<span className="float-right text-xl text-blue-600 transition group-open:rotate-45">+</span></summary><p className="mt-4 leading-7 text-slate-600">{answer}</p></details>)}</div></div></section>
+    </main>
   );
 }

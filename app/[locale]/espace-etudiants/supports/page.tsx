@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
-import { Award, BookOpen, Download, FileText, Filter, GraduationCap, Layers3, Video, FileArchive } from 'lucide-react'
+import { Award, BookOpen, Download, ExternalLink, FileText, Filter, GraduationCap, Layers3, Video, FileArchive, ChevronDown } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentPageShell,
@@ -28,6 +28,12 @@ interface Document {
     id: number
     title: string
   } | null
+  session: {
+    id: number
+    startDate: string
+    endDate: string
+    location: string | null
+  } | null
 }
 
 interface Formation {
@@ -44,6 +50,7 @@ function SupportsContent() {
   const [formations, setFormations] = useState<Formation[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedFormation, setSelectedFormation] = useState<string>(searchParams.get('formationId') || '')
+  const [openSessions, setOpenSessions] = useState<Record<number, boolean>>({})
 
   useEffect(() => {
     fetchFormations()
@@ -95,6 +102,7 @@ function SupportsContent() {
     try {
       const params = new URLSearchParams()
       params.append('isPublic', 'true')
+      params.append('scope', 'pedagogical')
       if (selectedFormation) {
         params.append('formationId', selectedFormation)
       }
@@ -102,6 +110,7 @@ function SupportsContent() {
       const response = await fetch(`/api/documents?${params}`)
       const data = await response.json()
       setDocuments(data)
+      setOpenSessions(Object.fromEntries(data.filter((item: Document) => item.session).map((item: Document) => [item.session!.id, true])))
     } catch (error) {
       console.error('Erreur lors du chargement des documents:', error)
     } finally {
@@ -120,6 +129,9 @@ function SupportsContent() {
   const getCategoryMeta = (category: string) => {
     const map: Record<string, { label: string; icon: any }> = {
       syllabus: { label: 'Syllabus', icon: BookOpen },
+      cours: { label: 'Cours', icon: BookOpen },
+      tp: { label: 'TP', icon: GraduationCap },
+      guide: { label: 'Guide', icon: FileText },
       presentation: { label: 'Présentation', icon: Layers3 },
       exercise: { label: 'Exercice', icon: GraduationCap },
       resource: { label: 'Ressource', icon: FileText },
@@ -134,6 +146,17 @@ function SupportsContent() {
 
     return map[category] || { label: category, icon: FileText }
   }
+
+  const sessionGroups = useMemo(() => {
+    const groups = new Map<number, { session: NonNullable<Document['session']>; formation: Document['formation']; documents: Document[] }>()
+    documents.forEach((document) => {
+      if (!document.session) return
+      const current = groups.get(document.session.id)
+      if (current) current.documents.push(document)
+      else groups.set(document.session.id, { session: document.session, formation: document.formation, documents: [document] })
+    })
+    return Array.from(groups.values())
+  }, [documents])
 
   if (loading) {
     return (
@@ -216,7 +239,7 @@ function SupportsContent() {
       <StudentSectionCard
         eyebrow="Documents"
         title="Bibliotheque disponible"
-        description="Chaque support affiche sa categorie, sa formation de rattachement et un acces direct au telechargement."
+        description="Vos ressources sont regroupées par session afin de garder une bibliothèque claire et contextualisée."
         icon={FileText}
       >
         {documents.length === 0 ? (
@@ -230,8 +253,19 @@ function SupportsContent() {
             }
           />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {documents.map((document) => {
+          <div className="space-y-4">
+            {sessionGroups.map((group) => (
+              <section key={group.session.id} className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+                <button
+                  type="button"
+                  onClick={() => setOpenSessions((current) => ({ ...current, [group.session.id]: !current[group.session.id] }))}
+                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-white"
+                >
+                  <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--cj-red)]">{group.formation?.title || 'Formation'}</p><h3 className="mt-1 font-semibold text-slate-950">Session du {new Date(group.session.startDate).toLocaleDateString('fr-FR')}</h3><p className="mt-1 text-sm text-slate-500">{group.documents.length} support{group.documents.length > 1 ? 's' : ''}{group.session.location ? ` · ${group.session.location}` : ''}</p></div>
+                  <ChevronDown className={`h-5 w-5 text-slate-500 transition ${openSessions[group.session.id] ? 'rotate-180' : ''}`} />
+                </button>
+                {openSessions[group.session.id] ? <div className="grid gap-4 border-t border-slate-200 bg-white p-4 md:grid-cols-2 xl:grid-cols-3">
+            {group.documents.map((document) => {
               const category = getCategoryMeta(document.category)
               const CategoryIcon = category.icon
 
@@ -255,21 +289,28 @@ function SupportsContent() {
                   ) : null}
 
                   <div className="mt-4 space-y-2 text-sm text-slate-500">
-                    <p>{document.formation ? `Formation: ${document.formation.title}` : 'Document transversal'}</p>
+                    <p>{document.formation ? `Formation: ${document.formation.title}` : 'Formation'}</p>
+                    <p>Session: {document.session ? new Date(document.session.startDate).toLocaleDateString('fr-FR') : '—'}</p>
                     <p>Taille: {formatFileSize(document.fileSize)}</p>
                     <p>Ajoute le {new Date(document.createdAt).toLocaleDateString('fr-FR')}</p>
                   </div>
 
                   <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4">
                     <span className="text-xs uppercase tracking-[0.18em] text-slate-400">{document.fileName}</span>
-                    <a href={`/${document.filePath}`} download={document.fileName} className={studentPrimaryButtonClassName}>
+                    <div className="flex gap-2">
+                    <a href={`/api/documents/${document.id}`} download={document.fileName} className={studentPrimaryButtonClassName}>
                       <Download className="h-4 w-4" />
                       Telecharger
                     </a>
+                    {['application/pdf', 'video/'].some((type) => document.mimeType.startsWith(type)) ? <a href={`/api/documents/${document.id}?disposition=inline`} target="_blank" rel="noreferrer" className={studentMutedButtonClassName} aria-label={`Ouvrir ${document.title}`}><ExternalLink className="h-4 w-4" />Ouvrir</a> : null}
+                    </div>
                   </div>
                 </div>
               )
             })}
+                </div> : null}
+              </section>
+            ))}
           </div>
         )}
       </StudentSectionCard>

@@ -14,6 +14,11 @@ export async function GET(
     }
     
     const r2Key = key.join('/')
+    // Pedagogical resources are intentionally served only through
+    // /api/documents/:id, which checks the student's enrollment first.
+    if (r2Key.startsWith('supports/')) {
+      return NextResponse.json({ error: 'Utilisez le point d’accès sécurisé du document.' }, { status: 403 })
+    }
     const fileBuffer = await downloadFromR2(r2Key)
     
     const ext = r2Key.split('.').pop()?.toLowerCase()
