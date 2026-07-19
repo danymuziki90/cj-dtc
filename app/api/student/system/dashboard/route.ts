@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
 import { parseSessionMetadata } from '@/lib/sessions/metadata'
+import { getPublishedSessions } from '@/lib/sessions/published'
 import { getStudentQuestions, parseEnrollmentNotes } from '@/lib/student/enrollment-notes'
 
 function getSessionHours(session: { startDate: Date; endDate: Date; prerequisites?: string | null }) {
@@ -314,35 +315,7 @@ export async function GET(request: NextRequest) {
   const attendanceValidated = attendanceRecordedCount === 0 ? true : (attendanceRate || 0) >= 80
 
   // Fetch all open sessions for the student to browse/register
-  const openSessionsRaw = await prisma.trainingSession.findMany({
-    where: {
-      status: 'ouverte',
-      startDate: { gte: now },
-    },
-    include: {
-      formation: {
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          categorie: true,
-          imageUrl: true,
-          description: true,
-        }
-      },
-      enrollments: {
-        where: {
-          status: {
-            notIn: ['waitlist', 'rejected', 'cancelled']
-          }
-        },
-        select: {
-          id: true
-        }
-      }
-    },
-    orderBy: { startDate: 'asc' }
-  })
+  const openSessionsRaw = await getPublishedSessions(now)
 
   const registeredSessionIds = new Set(
     enrollments
@@ -371,10 +344,6 @@ export async function GET(request: NextRequest) {
         durationLabel: parsedMetadata.metadata.durationLabel || null,
         registrationDeadline: parsedMetadata.metadata.registrationDeadline || null,
       }
-    })
-    .filter((session) => {
-      const deadline = session.registrationDeadline
-      return session.availableSpots > 0 && (!deadline || new Date(deadline).getTime() >= now.getTime())
     })
 
   const sessionsHistory = enrollmentsWithSession.map((item) => {
