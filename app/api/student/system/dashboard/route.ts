@@ -318,7 +318,6 @@ export async function GET(request: NextRequest) {
     where: {
       status: 'ouverte',
       startDate: { gte: now },
-      formation: { statut: 'publie' },
     },
     include: {
       formation: {

@@ -899,6 +899,35 @@ function EspaceEtudiantsContent() {
                   </div>
                 )}
 
+                {/* Sessions ouvertes : visible dès l'arrivée sur le tableau de bord. */}
+                <section className="rounded-2xl border border-blue-100 bg-[linear-gradient(135deg,#f8fbff_0%,#eef5ff_100%)] p-6 shadow-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--cj-red)]">Découvrir</p>
+                      <h3 className="mt-1 text-lg font-bold text-slate-900">Sessions ouvertes</h3>
+                      <p className="mt-1 text-xs text-slate-500">Inscrivez-vous aux prochaines sessions actuellement disponibles.</p>
+                    </div>
+                    <button onClick={() => setActiveTab("formations")} className="text-xs font-bold text-[var(--cj-blue)] hover:underline">Voir toutes</button>
+                  </div>
+                  {availableSessions.length > 0 ? (
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      {availableSessions.slice(0, 3).map((session: any) => (
+                        <article key={session.id} className="overflow-hidden rounded-xl border border-white bg-white shadow-sm">
+                          <div className="p-4">
+                            <span className="inline-flex rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-emerald-700">Inscriptions ouvertes</span>
+                            <h4 className="mt-3 line-clamp-2 text-sm font-bold text-slate-900">{session.formationTitle}</h4>
+                            <p className="mt-2 text-[11px] text-slate-600">{formatDateShort(session.startDate)} · {session.format}</p>
+                            <p className="mt-1 text-[11px] font-semibold text-[var(--cj-blue)]">{session.availableSpots} place{session.availableSpots > 1 ? 's' : ''} restante{session.availableSpots > 1 ? 's' : ''}</p>
+                            <Link href={`/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formationId}&sessionId=${session.id}`} className="mt-4 inline-flex w-full items-center justify-center gap-1 rounded-lg bg-[var(--cj-blue)] px-3 py-2 text-[11px] font-bold text-white transition hover:bg-[var(--cj-blue-700)]">S'inscrire <ArrowRight className="h-3 w-3" /></Link>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-5 rounded-xl border border-dashed border-blue-200 bg-white/70 p-4 text-center text-xs text-slate-500">Aucune session ouverte n’est disponible pour le moment.</p>
+                  )}
+                </section>
+
                 {/* Next deadlines preview */}
                 <div className="rounded-2xl border border-white bg-white/60 p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">

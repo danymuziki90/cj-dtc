@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
             where: isAdmin ? undefined : {
                 status: 'ouverte',
                 startDate: { gte: now },
-                formation: { statut: 'publie' },
             },
             include: {
                 formation: {

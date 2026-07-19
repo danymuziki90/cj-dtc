@@ -50,7 +50,7 @@ export async function GET(
     const parsedMetadata = parseSessionMetadata(session.prerequisites)
     const deadline = parsedMetadata.metadata.registrationDeadline
     const registrationOpen = !deadline || new Date(deadline).getTime() >= Date.now()
-    if (!isAdmin && (session.status !== 'ouverte' || session.formation.statut !== 'publie' || session.startDate < new Date() || !registrationOpen)) {
+    if (!isAdmin && (session.status !== 'ouverte' || session.startDate < new Date() || !registrationOpen)) {
       return NextResponse.json({ error: 'Session non disponible' }, { status: 404 })
     }
     const resolvedImageUrl = parsedMetadata.metadata.imageUrl || session.imageUrl || null
