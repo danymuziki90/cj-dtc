@@ -267,7 +267,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                     </span>
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-slate-950">Administrateur</p>
-                      <p className="truncate text-[10px] text-slate-500">admin@cj-development.com</p>
+                      <p className="truncate text-[10px] text-slate-500">contact@cjdevelopmenttc.org</p>
                     </div>
                   </div>
                   <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1">
