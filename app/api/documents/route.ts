@@ -29,7 +29,8 @@ async function resolveDocumentAccess(request: NextRequest) {
     return { error: studentAuth.error }
   }
 
-  return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+  // Pas de cookie : accès public (lecture seule, documents isPublic uniquement)
+  return { mode: 'public' as const }
 }
 
 function parseOptionalNumber(value: string | null) {
@@ -70,6 +71,26 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
       })
 
+      return NextResponse.json(documents)
+    }
+
+    // Mode public : documents isPublic uniquement, catégories pédagogiques
+    if (access.mode === 'public') {
+      const documents = await prisma.document.findMany({
+        where: {
+          isPublic: true,
+          category: { not: 'certificate_template' },
+          ...(pedagogicalOnly ? { category: { in: PEDAGOGICAL_CATEGORIES }, sessionId: { not: null } } : {}),
+          ...(formationId ? { formationId } : {}),
+          ...(sessionId ? { sessionId } : {}),
+          ...(category ? { category } : {}),
+        },
+        include: {
+          formation: { select: { id: true, title: true } },
+          session: { select: { id: true, startDate: true, endDate: true, location: true, format: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
       return NextResponse.json(documents)
     }
 

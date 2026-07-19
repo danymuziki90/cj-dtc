@@ -90,8 +90,9 @@ function SupportsContent() {
   const fetchFormations = async () => {
     try {
       const response = await fetch('/api/formations')
+      if (!response.ok) return
       const data = await response.json()
-      setFormations(data)
+      setFormations(Array.isArray(data) ? data : (Array.isArray(data?.formations) ? data.formations : []))
     } catch (error) {
       console.error('Erreur lors du chargement des formations:', error)
     }
@@ -108,9 +109,14 @@ function SupportsContent() {
       }
 
       const response = await fetch(`/api/documents?${params}`)
+      if (!response.ok) {
+        setDocuments([])
+        return
+      }
       const data = await response.json()
-      setDocuments(data)
-      setOpenSessions(Object.fromEntries(data.filter((item: Document) => item.session).map((item: Document) => [item.session!.id, true])))
+      const list: Document[] = Array.isArray(data) ? data : []
+      setDocuments(list)
+      setOpenSessions(Object.fromEntries(list.filter((item) => item.session).map((item) => [item.session!.id, true])))
     } catch (error) {
       console.error('Erreur lors du chargement des documents:', error)
     } finally {
