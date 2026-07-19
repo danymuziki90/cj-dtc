@@ -254,10 +254,16 @@ export default function StudentDashboardPage() {
 
           <div className="flex items-center gap-2">
             <Link
+              href="/student/ressources"
+              className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
+            >
+              Voir les supports
+            </Link>
+            <Link
               href="/student/submissions"
               className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
-              Travaux
+              Soumettre un travail
             </Link>
             <Link
               href="/student/profile"
@@ -435,6 +441,20 @@ export default function StudentDashboardPage() {
                 <div className="h-2 rounded-full bg-blue-600" style={{ width: `${completionRate}%` }} />
               </div>
               <p className="mt-1 text-xs text-slate-500">Avancement global: {completionRate}%</p>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Link
+                  href="/student/ressources"
+                  className="flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-100 transition"
+                >
+                  Voir les supports
+                </Link>
+                <Link
+                  href="/student/submissions"
+                  className="flex items-center justify-center rounded-lg bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                >
+                  Soumettre un travail
+                </Link>
+              </div>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white p-4">
@@ -456,14 +476,21 @@ export default function StudentDashboardPage() {
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <h2 className="mb-3 text-lg font-semibold text-slate-900">Ressources pedagogiques</h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-slate-900">Ressources pedagogiques</h2>
+                <Link
+                  href="/student/ressources"
+                  className="text-sm font-semibold text-blue-600 hover:underline"
+                >
+                  Voir tous les supports →
+                </Link>
+              </div>
               <div className="space-y-2">
                 {data.dashboard.resources.slice(0, 10).map((resource) => (
                   <a
                     key={resource.id}
-                    href={resource.filePath.startsWith('/') ? resource.filePath : `/${resource.filePath}`}
-                    target="_blank"
-                    rel="noreferrer"
+                    href={`/api/documents/${resource.id}`}
+                    download={resource.fileName}
                     className="block rounded border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50"
                   >
                     <p className="font-medium text-slate-900">{resource.title}</p>
@@ -474,6 +501,12 @@ export default function StudentDashboardPage() {
                   <p className="text-sm text-slate-500">Aucune ressource partagee pour le moment.</p>
                 ) : null}
               </div>
+              <Link
+                href="/student/ressources"
+                className="mt-4 flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                Voir les supports pédagogiques
+              </Link>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white p-4">
