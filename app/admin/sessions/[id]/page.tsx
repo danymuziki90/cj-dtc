@@ -254,6 +254,12 @@ export default function SessionDetailPage() {
                     </div>
                     <div className="flex space-x-3">
                         <Link
+                            href={`/admin/documents?sessionId=${session.id}&formationId=${session.formationId}`}
+                            className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors text-sm font-semibold flex items-center"
+                        >
+                            📚 Gérer les supports pédagogiques
+                        </Link>
+                        <Link
                             href={`/admin/sessions/${session.id}/events`}
                             className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-semibold flex items-center"
                         >

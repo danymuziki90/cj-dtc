@@ -5,9 +5,12 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   ArrowRight,
+  ArrowUpRight,
+  BadgeCheck,
+  CalendarCheck2,
   MailIcon,
   MapPinIcon,
-  Clock,
+  Clock3,
   Send,
   CheckCircle,
   Facebook,

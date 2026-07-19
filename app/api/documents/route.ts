@@ -7,6 +7,8 @@ import { uploadToR2 } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
+const PEDAGOGICAL_CATEGORIES = ['cours', 'tp', 'guide', 'presentation', 'video', 'documentation', 'ressource']
+
 async function resolveDocumentAccess(request: NextRequest) {
   const hasAdminCookie = Boolean(request.cookies.get(ADMIN_AUTH_COOKIE)?.value)
   const hasStudentCookie = Boolean(request.cookies.get(STUDENT_AUTH_COOKIE)?.value)
@@ -45,6 +47,7 @@ export async function GET(request: NextRequest) {
     const formationId = parseOptionalNumber(searchParams.get('formationId'))
     const sessionId = parseOptionalNumber(searchParams.get('sessionId'))
     const category = searchParams.get('category')?.trim() || null
+    const pedagogicalOnly = searchParams.get('scope') === 'pedagogical'
     const isPublicParam = searchParams.get('isPublic')
 
     if (access.mode === 'admin') {
@@ -53,6 +56,7 @@ export async function GET(request: NextRequest) {
           ...(formationId ? { formationId } : {}),
           ...(sessionId ? { sessionId } : {}),
           ...(category ? { category } : {}),
+          ...(pedagogicalOnly ? { category: { in: PEDAGOGICAL_CATEGORIES }, sessionId: { not: null } } : {}),
           ...(isPublicParam !== null ? { isPublic: isPublicParam === 'true' } : {}),
         },
         include: {
@@ -82,16 +86,11 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    const allowedFormationIds = Array.from(new Set(enrollments.map((item) => item.formationId)))
     const allowedSessionIds = Array.from(
       new Set(enrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value))),
     )
 
-    if (!allowedFormationIds.length && !allowedSessionIds.length) {
-      return NextResponse.json([])
-    }
-
-    if (formationId && !allowedFormationIds.includes(formationId)) {
+    if (!allowedSessionIds.length) {
       return NextResponse.json([])
     }
 
@@ -99,36 +98,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([])
     }
 
-    const studentAccessConditions: any[] = [
-      {
-        OR: [
-          ...(allowedFormationIds.length ? [{ formationId: { in: allowedFormationIds } }] : []),
-          ...(allowedSessionIds.length ? [{ sessionId: { in: allowedSessionIds } }] : []),
-        ],
-      }
-    ]
-
-    if (formationId) {
-      studentAccessConditions.push({
-        OR: [
-          { formationId: formationId },
-          { session: { formationId: formationId } }
-        ]
-      })
-    }
-
-    if (sessionId) {
-      studentAccessConditions.push({ sessionId: sessionId })
-    }
-
     const documents = await prisma.document.findMany({
       where: {
-        category: {
-          not: 'certificate_template',
-        },
+        ...(pedagogicalOnly ? { category: { in: PEDAGOGICAL_CATEGORIES } } : { category: { not: 'certificate_template' } }),
+        // A student can only receive documents bound to one of their confirmed sessions.
+        // Formation-level access is deliberately not used here.
+        sessionId: { in: allowedSessionIds },
         ...(category ? { category } : {}),
         ...(isPublicParam !== null ? { isPublic: isPublicParam === 'true' } : { isPublic: true }),
-        AND: studentAccessConditions,
+        ...(formationId ? { formationId } : {}),
       },
       include: {
         formation: {
@@ -163,18 +141,27 @@ export async function POST(request: NextRequest) {
     const sessionId = parseOptionalNumber(String(formData.get('sessionId') || '').trim() || null)
     const isPublic = String(formData.get('isPublic') || 'false') === 'true'
 
-    if (!file || !title || !category) {
+    if (!file || !title || !category || !sessionId) {
       console.warn('[API Documents] Données requises manquantes')
-      return NextResponse.json({ error: 'File, title and category are required.' }, { status: 400 })
+      return NextResponse.json({ error: 'Le fichier, le titre, la categorie et la session sont obligatoires.' }, { status: 400 })
+    }
+
+    const session = await prisma.trainingSession.findUnique({
+      where: { id: sessionId },
+      select: { id: true, formationId: true },
+    })
+    if (!session) return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 })
+    if (formationId && formationId !== session.formationId) {
+      return NextResponse.json({ error: 'La formation doit correspondre a celle de la session.' }, { status: 400 })
     }
 
     console.log(`[API Documents] Fichier: ${file.name} (${file.size} octets), titre: ${title}, catégorie: ${category}`)
-    const r2Folder = sessionId ? 'sessions' : 'formations'
+    const r2Folder = `supports/session-${sessionId}`
     const safeFileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`
     const buffer = Buffer.from(await file.arrayBuffer())
     
     console.log(`[API Documents] Lancement upload R2. Clé: ${r2Folder}/${safeFileName}`)
-    const relativeFilePath = await uploadToR2(buffer, safeFileName, r2Folder, file.type || 'application/octet-stream')
+    const relativeFilePath = await uploadToR2(buffer, safeFileName, r2Folder, file.type || 'application/octet-stream', true)
     console.log(`[API Documents] Upload R2 réussi. URL: ${relativeFilePath}`)
 
     const document = await prisma.document.create({
@@ -185,9 +172,10 @@ export async function POST(request: NextRequest) {
         filePath: relativeFilePath,
         fileSize: file.size,
         mimeType: file.type || 'application/octet-stream',
-        formationId,
+        formationId: session.formationId,
         sessionId,
         category,
+        // Publication means visible to enrolled students; access remains session-scoped.
         isPublic,
         uploadedBy: auth.admin.id,
       },

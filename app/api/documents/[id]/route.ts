@@ -1,10 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { requireAdmin } from '@/lib/auth-portal/guards'
+import { requireAdmin, requireStudent } from '@/lib/auth-portal/guards'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
-import { deleteFromR2 } from '@/lib/r2'
+import { deleteFromR2, downloadFromR2 } from '@/lib/r2'
 
 export const runtime = 'nodejs'
+
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const documentId = Number((await params).id)
+  if (!Number.isFinite(documentId)) return NextResponse.json({ error: 'ID de document invalide' }, { status: 400 })
+
+  const document = await prisma.document.findUnique({ where: { id: documentId } })
+  if (!document) return NextResponse.json({ error: 'Document non trouve' }, { status: 404 })
+
+  const adminAuth = await requireAdmin(request)
+  if (adminAuth.error) {
+    const studentAuth = await requireStudent(request)
+    if (studentAuth.error) return studentAuth.error
+    if (!document.isPublic || !document.sessionId) return NextResponse.json({ error: 'Acces refuse' }, { status: 403 })
+    const enrollment = await prisma.enrollment.findFirst({
+      where: { email: studentAuth.student.email, sessionId: document.sessionId, status: { in: ['accepted', 'confirmed', 'completed'] } },
+      select: { id: true },
+    })
+    if (!enrollment) return NextResponse.json({ error: 'Acces refuse' }, { status: 403 })
+  }
+
+  try {
+    const key = document.filePath.replace(/^\//, '')
+    const bytes = await downloadFromR2(key)
+    const disposition = request.nextUrl.searchParams.get('disposition') === 'inline' ? 'inline' : 'attachment'
+    const safeName = document.fileName.replace(/["\\]/g, '_')
+    return new NextResponse(new Uint8Array(bytes), { headers: {
+      'Content-Type': document.mimeType || 'application/octet-stream',
+      'Content-Length': String(bytes.length),
+      'Content-Disposition': `${disposition}; filename="${safeName}"`,
+      'Cache-Control': 'private, no-store',
+    } })
+  } catch (error) {
+    console.error('Erreur de telechargement du document:', error)
+    return NextResponse.json({ error: 'Fichier indisponible' }, { status: 404 })
+  }
+}
 
 export async function DELETE(
   request: NextRequest,

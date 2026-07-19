@@ -34,7 +34,8 @@ export async function uploadToR2(
   buffer: Buffer,
   fileName: string,
   folder: string,
-  mimeType: string
+  mimeType: string,
+  privateStorage = false,
 ): Promise<string> {
   // Normalize folder prefix to fit the strategy (remove trailing slash)
   const cleanFolder = folder.replace(/\/$/, '')
@@ -55,6 +56,12 @@ export async function uploadToR2(
       )
       console.log(`[R2] Upload réussi pour la clé R2: ${key}`)
       
+      // Private assets must never receive a public R2 URL. Their key is kept in
+      // the database and the application authorizes every download.
+      if (privateStorage) {
+        return key
+      }
+
       // For certificates, they should always be downloaded securely via API
       if (cleanFolder === 'certificats') {
         return `/api/certificates/download/file/${fileName}`
@@ -81,7 +88,7 @@ export async function uploadToR2(
     try {
       // Local filesystem fallback
       // Private files (e.g., certificates) are stored outside public/ directory
-      const isPrivate = cleanFolder === 'certificats'
+      const isPrivate = privateStorage || cleanFolder === 'certificats'
       const baseDir = isPrivate
         ? join(process.cwd(), 'uploads', cleanFolder)
         : join(process.cwd(), 'public', 'uploads', cleanFolder)
@@ -96,7 +103,9 @@ export async function uploadToR2(
       await writeFile(filePath, buffer)
       console.log(`[R2 fallback] Fichier écrit sur disque: ${filePath}`)
 
-      const finalPath = isPrivate
+      const finalPath = privateStorage
+        ? key
+        : isPrivate
         ? `/api/certificates/download/file/${fileName}`
         : `/uploads/${key}`
       console.log(`[R2 fallback] URL générée: ${finalPath}`)
@@ -202,4 +211,3 @@ export async function deleteFromR2(key: string): Promise<void> {
     }
   }
 }
-
