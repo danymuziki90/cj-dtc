@@ -20,14 +20,29 @@ export async function PUT(
     }
 
     const body = await req.json()
-    const { name, location, quote, approved, order } = body
+    const { name, location, quote, approved, order, status, adminReply, title, rating, photoUrl, showName, showPhoto } = body
 
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
     if (location !== undefined) updateData.location = location
     if (quote !== undefined) updateData.quote = quote
-    if (approved !== undefined) updateData.approved = approved
+    if (approved !== undefined) {
+      updateData.approved = approved
+      updateData.status = approved ? 'approved' : 'pending'
+      updateData.publishedAt = approved ? new Date() : null
+    }
+    if (status !== undefined && ['pending', 'approved', 'rejected'].includes(status)) {
+      updateData.status = status
+      updateData.approved = status === 'approved'
+      updateData.publishedAt = status === 'approved' ? new Date() : null
+    }
     if (order !== undefined) updateData.order = order
+    if (adminReply !== undefined) updateData.adminReply = String(adminReply || '').trim() || null
+    if (title !== undefined) updateData.title = String(title || '').trim() || null
+    if (rating !== undefined) updateData.rating = Number(rating) || null
+    if (photoUrl !== undefined) updateData.photoUrl = String(photoUrl || '').trim() || null
+    if (showName !== undefined) updateData.showName = Boolean(showName)
+    if (showPhoto !== undefined) updateData.showPhoto = Boolean(showPhoto)
 
     const updated = await prisma.testimonial.update({
       where: { id: testimonialId },

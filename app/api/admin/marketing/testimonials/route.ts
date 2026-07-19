@@ -11,6 +11,11 @@ export async function GET(req: NextRequest) {
     }
 
     const testimonials = await prisma.testimonial.findMany({
+      include: {
+        student: { select: { firstName: true, lastName: true, email: true } },
+        formation: { select: { title: true } },
+        session: { select: { id: true, startDate: true } },
+      },
       orderBy: [
         { order: 'asc' },
         { createdAt: 'desc' }

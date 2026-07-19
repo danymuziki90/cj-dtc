@@ -48,6 +48,7 @@ model Student {
   portalCertificates StudentCertificate[]
   enrollments        Enrollment[]
   certificates       Certificate[]
+  testimonials       Testimonial[]
 
   @@index([username])
   @@index([adminSessionId])
@@ -243,6 +244,7 @@ model Formation {
   documents     Document[]
   evaluations   Evaluation[]
   assignments    Assignment[]
+  testimonials   Testimonial[]
 }
 
 model Article {
@@ -379,6 +381,7 @@ model TrainingSession {
   events            SessionEvent[]
   assignments       Assignment[]
   formQuestions     SessionFormQuestion[]
+  testimonials      Testimonial[]
   @@index([formationId])
   @@index([startDate])
   @@index([status])
@@ -628,6 +631,29 @@ model Testimonial {
   approved  Boolean  @default(false)
   order     Int      @default(0)
   createdAt DateTime @default(now())
+
+  // Student-submitted testimonial workflow. Legacy admin-created quotes keep
+  // working because all new relations are optional.
+  studentId       String?
+  student         Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  formationId     Int?
+  formation       Formation? @relation(fields: [formationId], references: [id], onDelete: SetNull)
+  sessionId       Int?
+  session         TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  title           String?
+  rating          Int?
+  photoUrl        String?
+  showName        Boolean @default(false)
+  showPhoto       Boolean @default(false)
+  status          String  @default("pending") // pending, approved, rejected
+  adminReply      String?
+  publishedAt     DateTime?
+  updatedAt       DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([formationId])
+  @@index([sessionId])
+  @@index([status])
 
   @@index([approved])
 }
