@@ -179,6 +179,7 @@ export async function GET(request: NextRequest) {
         select: {
           id: true,
           title: true,
+          slug: true,
           categorie: true,
         }
       },
@@ -317,12 +318,14 @@ export async function GET(request: NextRequest) {
     where: {
       status: 'ouverte',
       startDate: { gte: now },
+      formation: { statut: 'publie' },
     },
     include: {
       formation: {
         select: {
           id: true,
           title: true,
+          slug: true,
           categorie: true,
           imageUrl: true,
           description: true,
@@ -356,6 +359,7 @@ export async function GET(request: NextRequest) {
         id: s.id,
         formationId: s.formationId,
         formationTitle: s.formation.title,
+        formationSlug: s.formation.slug,
         formationCategory: s.formation.categorie,
         formationImageUrl: s.imageUrl || s.formation.imageUrl || null,
         startDate: s.startDate,

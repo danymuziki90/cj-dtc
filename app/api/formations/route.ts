@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
+import { parseSessionMetadata } from '@/lib/sessions/metadata'
 
 export const runtime = "nodejs"
+
+function isPublicRegistration(session: { status: string; startDate: Date; maxParticipants: number; enrollments?: { id: number }[]; prerequisites?: string | null }) {
+  if (session.status !== 'ouverte' || session.startDate < new Date()) return false
+  if ((session.enrollments?.length || 0) >= session.maxParticipants) return false
+  const deadline = parseSessionMetadata(session.prerequisites).metadata.registrationDeadline
+  return !deadline || new Date(deadline).getTime() >= Date.now()
+}
 
 export async function GET(req: Request) {
   try {
@@ -60,7 +68,7 @@ export async function GET(req: Request) {
       // Trouver la prochaine session
       const now = new Date()
       const nextSession = formation.sessions
-        .filter(s => new Date(s.startDate) > now && s.status === 'ouverte')
+        .filter(s => isPublicRegistration(s))
         .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())[0]
 
       // Prix supprimé (gratuit ou piloté hors paiement)
@@ -111,7 +119,7 @@ export async function GET(req: Request) {
         hasAccompaniment: false,
         featured: enrollmentCount > 50 || (rating && rating >= 4.5),
         sessions: formation.sessions
-          .filter(s => s.status === 'ouverte')
+          .filter(s => isPublicRegistration(s))
           .map(s => ({
             id: s.id,
             startDate: s.startDate.toISOString(),
@@ -215,4 +223,3 @@ export async function POST(req: Request) {
     }, { status: 500 })
   }
 }
-

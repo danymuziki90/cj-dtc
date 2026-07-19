@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, Landmark, Mail, MapPin, Send, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, HelpCircle, Landmark, Mail, MapPin, Send, ShieldCheck } from "lucide-react";
 import AdvisorContactSection from "@/components/AdvisorContactSection";
 
 const faqs = [
@@ -38,7 +38,8 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <section className="relative isolate overflow-hidden bg-slate-950 py-16 text-white sm:py-20 lg:py-24">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(37,99,235,.45),transparent_32%),radial-gradient(circle_at_80%_0%,rgba(14,165,233,.25),transparent_28%)]" />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(37,99,235,.5),transparent_34%),radial-gradient(circle_at_88%_8%,rgba(14,165,233,.28),transparent_30%)]" />
+        <div className="absolute inset-0 -z-10 opacity-[.14] [background-image:linear-gradient(rgba(255,255,255,.22)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.22)_1px,transparent_1px)] [background-size:48px_48px]" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Link href={`/${locale}`} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-100 transition hover:text-white"><ArrowLeft className="h-4 w-4" />Retour à l&apos;accueil</Link>
           <div className="mt-12 max-w-3xl">
@@ -48,6 +49,11 @@ export default function ContactPage() {
             <div className="mt-8 flex flex-wrap gap-4">
               <a href="#contact-form" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-blue-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-50">Envoyer un message <ArrowRight className="h-4 w-4" /></a>
               <a href="https://wa.me/243995136626?text=Bonjour%2C%20je%20souhaite%20obtenir%20des%20informations." target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-5 py-3 font-bold text-white transition hover:bg-white/10">Discuter sur WhatsApp</a>
+            </div>
+            <div className="mt-12 grid max-w-2xl gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/[.07] p-4 backdrop-blur"><p className="text-2xl font-bold">24 h</p><p className="mt-1 text-xs leading-5 text-slate-300">Délai de réponse maximal ouvré</p></div>
+              <div className="rounded-2xl border border-white/10 bg-white/[.07] p-4 backdrop-blur"><p className="text-2xl font-bold">3</p><p className="mt-1 text-xs leading-5 text-slate-300">Canaux directs pour nous joindre</p></div>
+              <div className="rounded-2xl border border-white/10 bg-white/[.07] p-4 backdrop-blur"><p className="text-2xl font-bold">100 %</p><p className="mt-1 text-xs leading-5 text-slate-300">Accompagnement personnalisé</p></div>
             </div>
           </div>
         </div>
@@ -64,7 +70,8 @@ export default function ContactPage() {
             {status === "success" ? (
               <div role="status" className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-emerald-950"><CheckCircle2 className="h-8 w-8 text-emerald-600" /><h3 className="mt-3 font-bold">Votre message a bien été envoyé.</h3><p className="mt-1 text-sm text-emerald-800">Notre équipe revient vers vous dans les meilleurs délais.</p></div>
             ) : (
-              <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_12px_32px_rgba(15,23,42,.08)] sm:p-8">
+              <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_70px_-42px_rgba(15,23,42,.45)] sm:p-8">
+                <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-700"><Clock3 className="h-4 w-4 shrink-0 text-blue-700" /><span>Les champs renseignés nous permettent d’orienter votre demande efficacement.</span></div>
                 {status === "error" && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700">Une erreur est survenue. Veuillez réessayer ou nous écrire directement par e-mail.</p>}
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label className="text-sm font-bold text-slate-700">Nom complet<input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="Votre nom" /></label>
@@ -84,7 +91,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-16 sm:py-20"><div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8"><div className="text-center"><span className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-blue-700"><CircleHelp className="h-4 w-4" />Questions fréquentes</span><h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Avant de nous écrire</h2></div><div className="mt-10 space-y-4">{faqs.map(([question, answer]) => <details key={question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><summary className="cursor-pointer list-none pr-8 font-bold text-slate-900">{question}<span className="float-right text-xl text-blue-600 transition group-open:rotate-45">+</span></summary><p className="mt-4 leading-7 text-slate-600">{answer}</p></details>)}</div></div></section>
+      <section className="bg-slate-50 py-16 sm:py-20"><div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8"><div className="text-center"><span className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-blue-700"><HelpCircle className="h-4 w-4" />Questions fréquentes</span><h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Avant de nous écrire</h2></div><div className="mt-10 space-y-4">{faqs.map(([question, answer]) => <details key={question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><summary className="cursor-pointer list-none pr-8 font-bold text-slate-900">{question}<span className="float-right text-xl text-blue-600 transition group-open:rotate-45">+</span></summary><p className="mt-4 leading-7 text-slate-600">{answer}</p></details>)}</div></div></section>
     </main>
   );
 }

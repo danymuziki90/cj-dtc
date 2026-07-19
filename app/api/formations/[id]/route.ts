@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '../../../../lib/prisma'
+import { parseSessionMetadata } from '@/lib/sessions/metadata'
 
 export const runtime = "nodejs"
+
+function isPublicRegistration(session: { status: string; startDate: Date; maxParticipants: number; currentParticipants: number; prerequisites?: string | null }) {
+  if (session.status !== 'ouverte' || session.startDate < new Date() || session.currentParticipants >= session.maxParticipants) return false
+  const deadline = parseSessionMetadata(session.prerequisites).metadata.registrationDeadline
+  return !deadline || new Date(deadline).getTime() >= Date.now()
+}
 
 // GET /api/formations/[id] - Récupérer une formation spécifique avec toutes les données enrichies
 export async function GET(
@@ -67,6 +74,10 @@ export async function GET(
     }
 
     // Enrichir les données
+    if (formation.statut !== 'publie') {
+      return NextResponse.json({ error: 'Formation non disponible' }, { status: 404 })
+    }
+
     const enrollmentCount = formation.enrollments.length
     const evaluations = formation.evaluations
     
@@ -80,7 +91,7 @@ export async function GET(
     // Prochaine session
     const now = new Date()
     const nextSession = formation.sessions
-      .filter(s => new Date(s.startDate) > now && s.status === 'ouverte')
+      .filter(s => isPublicRegistration(s))
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())[0]
 
     // Prix supprimé (gratuit ou piloté hors paiement)
@@ -93,7 +104,7 @@ export async function GET(
 
     // Sessions disponibles
     const availableSessions = formation.sessions
-      .filter(s => s.status === 'ouverte' && new Date(s.startDate) > now)
+      .filter(s => isPublicRegistration(s))
       .map(s => ({
         id: s.id,
         startDate: s.startDate.toISOString(),

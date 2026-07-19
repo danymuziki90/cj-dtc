@@ -1272,10 +1272,10 @@ function EspaceEtudiantsContent() {
                 )}
               </div>
 
-              {/* Prochaines sessions disponibles */}
+              {/* Sessions ouvertes */}
               <div className="mt-12 space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Prochaines sessions disponibles</h3>
+                  <h3 className="text-lg font-bold text-slate-900">Sessions ouvertes</h3>
                   <p className="text-xs text-slate-500">
                     Découvrez les opportunités d'apprentissage ouvertes à l'inscription.
                   </p>
@@ -1338,10 +1338,16 @@ function EspaceEtudiantsContent() {
                         </div>
                       </div>
 
-                      <div className="px-5 pb-5">
+                      <div className="px-5 pb-5 flex gap-2">
+                        <Link
+                          href={`/${locale}/formations/${session.formationSlug}`}
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 py-2 text-xs font-semibold text-slate-700 hover:border-[var(--cj-blue)] hover:text-[var(--cj-blue)] transition text-center"
+                        >
+                          Voir les détails
+                        </Link>
                         <Link
                           href={`/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formationId}&sessionId=${session.id}`}
-                          className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-red)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-red-700)] transition text-center shadow-sm"
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-red)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-red-700)] transition text-center shadow-sm"
                         >
                           S'inscrire à cette session
                           <ArrowRight className="w-3.5 h-3.5" />
