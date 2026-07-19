@@ -10,15 +10,21 @@ function searchDir(dir, query) {
       if (file !== 'node_modules' && file !== '.git' && file !== '.next') {
         searchDir(fullPath, query);
       }
-    } else if (file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.js') || file.endsWith('.json')) {
-      const content = fs.readFileSync(fullPath, 'utf8');
-      if (content.toLowerCase().includes(query.toLowerCase())) {
-        console.log(`Found "${query}" in: ${fullPath}`);
+    } else {
+      // Skip binary-looking paths
+      if (file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.ico') || file.endsWith('.woff') || file.endsWith('.woff2') || file.endsWith('.pdf')) {
+        continue;
       }
+      try {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        if (content.toLowerCase().includes(query.toLowerCase())) {
+          console.log(`Found "${query}" in: ${fullPath}`);
+        }
+      } catch (e) {}
     }
   }
 }
 
-console.log('Searching for "votre nom"...');
-searchDir('e:/cjdtc/cj-dtc-main', "votre nom");
+console.log('Searching for "entreprise"...');
+searchDir('e:/cjdtc/cj-dtc-main', "entreprise");
 console.log('Finished.');

@@ -21,11 +21,11 @@ async function main() {
   }
 
   // Check enrollments
-  const enrollments = await prisma.sessionEnrollment.findMany({
+  const enrollments = await prisma.enrollment.findMany({
     include: {
       session: { include: { formation: { select: { title: true } } } },
       student: { select: { email: true, firstName: true, lastName: true } },
-      answers: { include: { question: { select: { label: true } } } }
+      formAnswers: { include: { question: { select: { label: true } } } }
     },
     take: 5,
     orderBy: { createdAt: 'desc' }
@@ -34,9 +34,11 @@ async function main() {
   console.log('\n=== ENROLLMENTS (last 5) ===');
   for (const e of enrollments) {
     console.log(`Enrollment ID=${e.id} | student=${e.student?.email} | session=${e.session?.formation?.title} | status=${e.status}`);
-    console.log(`  Answers count: ${e.answers.length}`);
-    for (const a of e.answers) {
-      console.log(`    - "${a.question?.label}": "${a.textValue || a.fileUrl || '(empty)'}"`);
+    console.log(`  Answers count: ${e.formAnswers?.length || 0}`);
+    if (e.formAnswers) {
+      for (const a of e.formAnswers) {
+        console.log(`    - "${a.question?.label}": "${a.textValue || a.fileUrl || '(empty)'}"`);
+      }
     }
   }
 

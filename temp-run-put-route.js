@@ -6,7 +6,7 @@ async function delay(ms) {
 }
 
 async function main() {
-  const enrollmentId = 22;
+  const enrollmentId = 23;
   const status = 'accepted'; // accepted is a valid template ID
   const reason = 'Félicitations, votre inscription a été validée.';
   const adminId = 'some-admin-id';
