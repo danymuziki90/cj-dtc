@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
@@ -130,6 +130,7 @@ function SocialRow() {
 // ── Main component ────────────────────────────────────────────────────────────
 export default function Footer() {
   const params = useParams<{ locale?: string }>()
+  const pathname = usePathname() || ''
   const locale = resolveSiteLocale(params?.locale)
   const t = copy[locale]
   const currentYear = new Date().getFullYear()
@@ -147,11 +148,12 @@ export default function Footer() {
     },
   }
   const cta = ctaBanner[locale]
+  const hideTrainingCta = ['/about', '/a-propos', '/formations', '/entreprises', '/contact'].some((path) => pathname.endsWith(path))
 
   return (
     <footer className="relative overflow-hidden text-white">
       {/* ── SECTION A — Pre-footer CTA Banner ──────────────────────────────── */}
-      <section className="bg-[var(--cj-blue)] py-12">
+      {!hideTrainingCta && <section className="bg-[var(--cj-blue)] py-12">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:px-6 lg:flex-row lg:px-8">
           <div className="text-center lg:text-left">
             <p className="text-xl font-bold text-white sm:text-2xl">{cta.heading}</p>
@@ -164,7 +166,7 @@ export default function Footer() {
             {cta.cta}
           </a>
         </div>
-      </section>
+      </section>}
 
       {/* ── SECTION B — Main footer body ───────────────────────────────────── */}
       <div className="bg-gradient-to-br from-slate-900 via-[#001a4d] to-slate-900">

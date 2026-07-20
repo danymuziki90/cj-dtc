@@ -10,6 +10,10 @@ interface Testimonial {
   quote: string;
   approved: boolean;
   order: number;
+  status?: 'pending' | 'approved' | 'rejected';
+  rating?: number | null;
+  formation?: { title: string } | null;
+  session?: { id: number; startDate: string } | null;
 }
 
 export default function AdminTestimonialsPage() {
@@ -130,6 +134,16 @@ export default function AdminTestimonialsPage() {
       console.error(err);
       error("Impossible de modifier l'approbation.");
     }
+  };
+
+  const setReviewStatus = async (item: Testimonial, status: 'approved' | 'rejected') => {
+    try {
+      const res = await fetch(`/api/admin/marketing/testimonials/${item.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+      if (!res.ok) throw new Error('Erreur');
+      const updated = await res.json();
+      setTestimonials(prev => prev.map(t => t.id === item.id ? updated : t));
+      success(status === 'approved' ? 'Témoignage approuvé et publié.' : 'Témoignage refusé. Il ne sera pas publié.');
+    } catch { error('Impossible de mettre à jour le statut.'); }
   };
 
   const deleteTestimonial = async (id: number) => {
@@ -278,6 +292,11 @@ export default function AdminTestimonialsPage() {
                   <p className="text-xs text-slate-600 italic whitespace-pre-wrap mb-4">
                     "{item.quote}"
                   </p>
+                  <div className="space-y-1 text-[11px] text-slate-500">
+                    {item.formation && <p>Formation : {item.formation.title}</p>}
+                    {item.session && <p>Session du {new Date(item.session.startDate).toLocaleDateString('fr-FR')}</p>}
+                    {item.rating && <p>Note : {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}</p>}
+                  </div>
                 </div>
 
                 <div className="flex justify-between items-center border-t border-slate-200/50 pt-4 mt-2">

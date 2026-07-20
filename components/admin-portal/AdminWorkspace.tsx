@@ -52,6 +52,7 @@ const navItems: NavItem[] = [
   { href: '/admin/certificates', label: 'Certificats', caption: 'Délivrance et vérification', icon: GraduationCap },
   { href: '/admin/notifications', label: 'Notifications', caption: 'Messages et relances', icon: BellRing },
   { href: '/admin/articles', label: 'Actualités', caption: 'Contenus et annonces', icon: Newspaper },
+  { href: '/admin/testimonials', label: 'Témoignages', caption: 'Validation avant publication', icon: MessageSquare },
   { href: '/admin/settings', label: 'Paramètres', caption: 'Sécurité et configuration', icon: Settings2 },
 ]
 
