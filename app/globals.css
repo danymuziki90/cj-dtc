@@ -918,7 +918,115 @@ a:hover {
   background: radial-gradient(circle at top right, rgba(227, 6, 19, 0.18), transparent 45%);
 }
 
+/* ==========================================================================
+   Uniformisation des couleurs de texte sur les sections à arrière-plan bleu
+   (Charte graphique CJ Development Training Center)
+   ========================================================================== */
 
+/* Sélecteurs de conteneurs à fond bleu */
+.cj-cta-banner,
+.cj-hero-card,
+[class*="bg-[linear-gradient(135deg,#02142f"],
+[class*="bg-[linear-gradient(120deg,#001737"],
+[class*="bg-[linear-gradient(135deg,#041224"],
+[class*="from-[#02142f]"],
+[class*="from-[#002d72]"],
+[class*="from-[#001737]"],
+[class*="from-[#041224]"],
+.bg-blue-900,
+.bg-blue-950 {
+  /* Assurer que la couleur de texte par défaut est le blanc */
+  color: #ffffff !important;
+}
 
+/* Titres H1, H2, H3, H4 sur fond bleu en blanc pur */
+.cj-cta-banner h1, .cj-cta-banner h2, .cj-cta-banner h3, .cj-cta-banner h4,
+.cj-hero-card h1, .cj-hero-card h2, .cj-hero-card h3, .cj-hero-card h4,
+[class*="bg-[linear-gradient(135deg,#02142f"] h1, [class*="bg-[linear-gradient(135deg,#02142f"] h2, [class*="bg-[linear-gradient(135deg,#02142f"] h3, [class*="bg-[linear-gradient(135deg,#02142f"] h4,
+[class*="bg-[linear-gradient(120deg,#001737"] h1, [class*="bg-[linear-gradient(120deg,#001737"] h2, [class*="bg-[linear-gradient(120deg,#001737"] h3, [class*="bg-[linear-gradient(120deg,#001737"] h4,
+[class*="bg-[linear-gradient(135deg,#041224"] h1, [class*="bg-[linear-gradient(135deg,#041224"] h2, [class*="bg-[linear-gradient(135deg,#041224"] h3, [class*="bg-[linear-gradient(135deg,#041224"] h4,
+[class*="from-[#02142f]"] h1, [class*="from-[#02142f]"] h2, [class*="from-[#02142f]"] h3, [class*="from-[#02142f]"] h4,
+[class*="from-[#002d72]"] h1, [class*="from-[#002d72]"] h2, [class*="from-[#002d72]"] h3, [class*="from-[#002d72]"] h4,
+[class*="from-[#001737]"] h1, [class*="from-[#001737]"] h2, [class*="from-[#001737]"] h3, [class*="from-[#001737]"] h4,
+[class*="from-[#041224]"] h1, [class*="from-[#041224]"] h2, [class*="from-[#041224]"] h3, [class*="from-[#041224]"] h4,
+.bg-blue-900 h1, .bg-blue-900 h2, .bg-blue-900 h3, .bg-blue-900 h4,
+.bg-blue-950 h1, .bg-blue-950 h2, .bg-blue-950 h3, .bg-blue-950 h4 {
+  color: #ffffff !important;
+}
 
+/* Paragraphes, listes, descriptions sur fond bleu en blanc pur */
+.cj-cta-banner p, .cj-cta-banner li, .cj-cta-banner blockquote,
+.cj-hero-card p, .cj-hero-card li, .cj-hero-card blockquote,
+[class*="bg-[linear-gradient(135deg,#02142f"] p, [class*="bg-[linear-gradient(135deg,#02142f"] li, [class*="bg-[linear-gradient(135deg,#02142f"] blockquote,
+[class*="bg-[linear-gradient(120deg,#001737"] p, [class*="bg-[linear-gradient(120deg,#001737"] li, [class*="bg-[linear-gradient(120deg,#001737"] blockquote,
+[class*="bg-[linear-gradient(135deg,#041224"] p, [class*="bg-[linear-gradient(135deg,#041224"] li, [class*="bg-[linear-gradient(135deg,#041224"] blockquote,
+[class*="from-[#02142f]"] p, [class*="from-[#02142f]"] li, [class*="from-[#02142f]"] blockquote,
+[class*="from-[#002d72]"] p, [class*="from-[#002d72]"] li, [class*="from-[#002d72]"] blockquote,
+[class*="from-[#001737]"] p, [class*="from-[#001737]"] li, [class*="from-[#001737]"] blockquote,
+[class*="from-[#041224]"] p, [class*="from-[#041224]"] li, [class*="from-[#041224]"] blockquote,
+.bg-blue-900 p, .bg-blue-900 li, .bg-blue-900 blockquote,
+.bg-blue-950 p, .bg-blue-950 li, .bg-blue-950 blockquote {
+  color: #ffffff !important;
+}
 
+/* Textes secondaires (dimmed) pour préserver la hiérarchie visuelle */
+.cj-cta-banner span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+.cj-hero-card span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+[class*="bg-[linear-gradient(135deg,#02142f"] span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+[class*="bg-[linear-gradient(120deg,#001737"] span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+[class*="bg-[linear-gradient(135deg,#041224"] span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+[class*="from-[#02142f]"] span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+[class*="from-[#002d72]"] span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+[class*="from-[#001737]"] span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+[class*="from-[#041224]"] span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+.bg-blue-900 span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400),
+.bg-blue-950 span:not([class*="bg-"]):not([class*="text-white"]):not(.text-emerald-400) {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Icônes et liens sur fond bleu */
+.cj-cta-banner svg:not(.text-emerald-400),
+.cj-hero-card svg:not(.text-emerald-400),
+[class*="bg-[linear-gradient(135deg,#02142f"] svg:not(.text-emerald-400),
+[class*="bg-[linear-gradient(120deg,#001737"] svg:not(.text-emerald-400),
+[class*="bg-[linear-gradient(135deg,#041224"] svg:not(.text-emerald-400),
+[class*="from-[#02142f]"] svg:not(.text-emerald-400),
+[class*="from-[#002d72]"] svg:not(.text-emerald-400),
+[class*="from-[#001737]"] svg:not(.text-emerald-400),
+[class*="from-[#041224]"] svg:not(.text-emerald-400),
+.bg-blue-900 svg:not(.text-emerald-400),
+.bg-blue-950 svg:not(.text-emerald-400) {
+  color: #ffffff !important;
+}
+
+/* Liens avec survol (hover) cohérent */
+.cj-cta-banner a:not([class*="bg-"]),
+.cj-hero-card a:not([class*="bg-"]),
+[class*="bg-[linear-gradient(135deg,#02142f"] a:not([class*="bg-"]),
+[class*="bg-[linear-gradient(120deg,#001737"] a:not([class*="bg-"]),
+[class*="bg-[linear-gradient(135deg,#041224"] a:not([class*="bg-"]),
+[class*="from-[#02142f]"] a:not([class*="bg-"]),
+[class*="from-[#002d72]"] a:not([class*="bg-"]),
+[class*="from-[#001737]"] a:not([class*="bg-"]),
+[class*="from-[#041224]"] a:not([class*="bg-"]),
+.bg-blue-900 a:not([class*="bg-"]),
+.bg-blue-950 a:not([class*="bg-"]) {
+  color: #ffffff !important;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.cj-cta-banner a:not([class*="bg-"]):hover,
+.cj-hero-card a:not([class*="bg-"]):hover,
+[class*="bg-[linear-gradient(135deg,#02142f"] a:not([class*="bg-"]):hover,
+[class*="bg-[linear-gradient(120deg,#001737"] a:not([class*="bg-"]):hover,
+[class*="bg-[linear-gradient(135deg,#041224"] a:not([class*="bg-"]):hover,
+[class*="from-[#02142f]"] a:not([class*="bg-"]):hover,
+[class*="from-[#002d72]"] a:not([class*="bg-"]):hover,
+[class*="from-[#001737]"] a:not([class*="bg-"]):hover,
+[class*="from-[#041224]"] a:not([class*="bg-"]):hover,
+.bg-blue-900 a:not([class*="bg-"]):hover,
+.bg-blue-950 a:not([class*="bg-"]):hover {
+  opacity: 0.8;
+}

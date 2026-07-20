@@ -74,7 +74,9 @@ export async function GET(
     }
 
     // Enrichir les données
-    if (formation.statut !== 'publie') {
+    const { searchParams } = new URL(req.url)
+    const isAdmin = searchParams.get('admin') === 'true'
+    if (formation.statut !== 'publie' && !isAdmin) {
       return NextResponse.json({ error: 'Formation non disponible' }, { status: 404 })
     }
 
@@ -193,7 +195,16 @@ export async function PUT(
       methodes, 
       certification, 
       statut,
-      imageUrl 
+      imageUrl,
+      name,
+      shortDescription,
+      gallery,
+      skillsAcquired,
+      prerequisites,
+      publicTargets,
+      level,
+      format,
+      languages
     } = body
 
     // Vérifier que la formation existe
@@ -249,7 +260,16 @@ export async function PUT(
         ...(methodes !== undefined && { methodes }),
         ...(certification !== undefined && { certification }),
         ...(statut && { statut }),
-        ...(imageUrl !== undefined && { imageUrl })
+        ...(imageUrl !== undefined && { imageUrl }),
+        ...(name !== undefined && { name }),
+        ...(shortDescription !== undefined && { shortDescription }),
+        ...(gallery !== undefined && { gallery }),
+        ...(skillsAcquired !== undefined && { skillsAcquired }),
+        ...(prerequisites !== undefined && { prerequisites }),
+        ...(publicTargets !== undefined && { publicTargets }),
+        ...(level !== undefined && { level }),
+        ...(format !== undefined && { format }),
+        ...(languages !== undefined && { languages })
       }
     })
 

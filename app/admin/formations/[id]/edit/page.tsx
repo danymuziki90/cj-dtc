@@ -19,7 +19,7 @@ export default function EditFormationPage() {
 
   useEffect(() => {
     if (!id) return
-    fetch(`/api/formations/${id}`)
+    fetch(`/api/formations/${id}?admin=true`)
       .then(r => r.json())
       .then(data => { setFormation(data); setIsLoading(false) })
       .catch(() => { setError('Impossible de charger la formation'); setIsLoading(false) })

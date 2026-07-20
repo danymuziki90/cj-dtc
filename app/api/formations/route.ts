@@ -170,7 +170,16 @@ export async function POST(req: Request) {
       certification, 
       statut = 'brouillon',
       imageUrl,
-      objectifs
+      objectifs,
+      name,
+      shortDescription,
+      gallery,
+      skillsAcquired,
+      prerequisites,
+      publicTargets,
+      level,
+      format,
+      languages
     } = body
 
     if (!title) {
@@ -211,7 +220,16 @@ export async function POST(req: Request) {
         methodes: methodes || '',
         certification: certification || '',
         statut,
-        imageUrl: imageUrl || null
+        imageUrl: imageUrl || null,
+        name: name || null,
+        shortDescription: shortDescription || null,
+        gallery: gallery || null,
+        skillsAcquired: skillsAcquired || null,
+        prerequisites: prerequisites || null,
+        publicTargets: publicTargets || null,
+        level: level || null,
+        format: format || null,
+        languages: languages || null
       }
     })
     return NextResponse.json(created, { status: 201 })

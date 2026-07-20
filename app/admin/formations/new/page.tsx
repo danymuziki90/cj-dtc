@@ -9,10 +9,6 @@ import FormationForm from '@/components/admin/FormationForm'
 export default function NewFormationPage() {
   const router = useRouter()
 
-  useEffect(() => {
-    router.replace('/admin/formations?action=create-session')
-  }, [router])
-
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

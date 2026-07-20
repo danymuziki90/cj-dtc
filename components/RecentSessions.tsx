@@ -20,12 +20,14 @@ type SessionItem = {
   currentParticipants: number
   price: number
   imageUrl?: string | null
+  description?: string | null
   formation: {
     id: number
     title: string
     slug: string
     categorie?: string | null
     description?: string | null
+    imageUrl?: string | null
   }
   adminMeta?: {
     customTitle?: string | null
@@ -172,7 +174,7 @@ export default function RecentSessions() {
           {sessions.map((session) => {
             const availableSpots = Math.max(0, (session.maxParticipants || 0) - (session.currentParticipants || 0))
             const title = session.adminMeta?.customTitle || session.formation.title
-            const headerImage = session.adminMeta?.imageUrl || session.imageUrl || '/logo.png'
+            const headerImage = session.adminMeta?.imageUrl || session.imageUrl || session.formation.imageUrl || '/logo.png'
 
             return (
               <div key={session.id} className="group flex flex-col justify-between overflow-hidden rounded-xl border border-blue-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
@@ -213,7 +215,7 @@ export default function RecentSessions() {
                     </div>
 
                     <p className="line-clamp-3 text-sm text-gray-550">
-                      {session.formation.description || t.fallbackDescription}
+                      {session.description || session.formation.description || t.fallbackDescription}
                     </p>
                   </div>
                 </div>

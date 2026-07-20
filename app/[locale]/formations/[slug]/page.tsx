@@ -29,7 +29,9 @@ import {
   MessageCircleIcon,
   PlayCircle,
   FileText,
-  ZapIcon
+  ZapIcon,
+  CheckCircle,
+  Globe,
 } from 'lucide-react'
 
 import type { Formation } from '@/lib/types/formation'
@@ -138,8 +140,8 @@ export default function FormationDetailPage() {
   const objectives = parseTextList(formation.objectifs)
   const modules = parseTextList(formation.modules)
   const methods = parseTextList(formation.methodes)
-  const skills = formation.skillsAcquired || []
-  const publicTargets = formation.publicTargets || []
+  const skills = Array.isArray(formation.skillsAcquired) ? formation.skillsAcquired : []
+  const publicTargets = Array.isArray(formation.publicTargets) ? formation.publicTargets : []
 
   const similarFormations = getSimilarFormations(allFormations, formation, 3)
 
@@ -387,6 +389,14 @@ export default function FormationDetailPage() {
                         <span>{formation.nextSession.location}</span>
                       </div>
                     )}
+                    {Array.isArray(formation.languages) && formation.languages.length > 0 && (
+                      <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                        <Globe className="w-4 h-4 text-gray-400" />
+                        <span>
+                          Langues : {formation.languages.map((l: string) => l === 'fr' ? 'Français' : l === 'en' ? 'Anglais' : l).join(', ')}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions */}
@@ -592,6 +602,32 @@ export default function FormationDetailPage() {
                           </h2>
                         </div>
                         <p className="text-white font-opensans leading-relaxed">{formation.certification}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Galerie d'images */}
+                  {Array.isArray(formation.gallery) && formation.gallery.length > 0 && (
+                    <div className="cj-card-static p-8">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                          <Layers className="w-5 h-5" />
+                        </div>
+                        <h2 className="text-2xl font-black text-slate-900 font-montserrat">
+                          Galerie photos
+                        </h2>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {formation.gallery.map((imgUrl: string, i: number) => (
+                          <div key={i} className="group relative h-40 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                            <img
+                              src={imgUrl}
+                              alt={`Galerie ${i + 1}`}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              onError={e => (e.currentTarget.style.display = 'none')}
+                            />
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}

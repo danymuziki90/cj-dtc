@@ -60,7 +60,7 @@ const quickActions = [
   { href: '/admin/articles/new', label: 'Article', icon: Newspaper },
 ]
 
-const PRIMARY_ITEMS = 5 // items shown directly in the horizontal nav
+
 
 function isActivePath(pathname: string, href: string) {
   return pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(`${href}/`))
@@ -75,18 +75,8 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
   const [darkMode, setDarkMode] = useState(false)
   const [unreadNotifications, setUnreadNotifications] = useState(0)
   const [profileOpen, setProfileOpen] = useState(false)
-  const [plusOpen, setPlusOpen] = useState(false)
 
   const profileRef = useRef<HTMLDivElement>(null)
-  const plusRef = useRef<HTMLDivElement>(null)
-
-  const primaryNav = useMemo(() => navItems.slice(0, PRIMARY_ITEMS), [])
-  const secondaryNav = useMemo(() => navItems.slice(PRIMARY_ITEMS), [])
-
-  const secondaryActive = useMemo(
-    () => secondaryNav.some((item) => isActivePath(pathname, item.href)),
-    [pathname, secondaryNav],
-  )
 
   const currentDate = useMemo(
     () =>
@@ -109,7 +99,6 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
   useEffect(() => {
     setMobileOpen(false)
     setProfileOpen(false)
-    setPlusOpen(false)
   }, [pathname])
 
   // Close dropdowns when clicking outside
@@ -117,9 +106,6 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
     function handleClickOutside(e: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false)
-      }
-      if (plusRef.current && !plusRef.current.contains(e.target as Node)) {
-        setPlusOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -311,14 +297,14 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
         </div>
       </header>
 
-      {/* â”€â”€ NAVIGATION HORIZONTALE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Navigation Horizontale ────────────────────────────────────────── */}
       <nav
         className="sticky top-14 z-30 border-b border-slate-200/60 bg-white/85 backdrop-blur-xl hidden md:block"
         aria-label="Navigation principale"
       >
         <div className="mx-auto flex max-w-screen-2xl items-center px-4 md:px-6">
-          <div className="flex items-center gap-0.5 overflow-x-auto py-1 scrollbar-none">
-            {primaryNav.map((item) => {
+          <div className="flex flex-1 items-center gap-0.5 overflow-x-auto py-1 scrollbar-none">
+            {navItems.map((item) => {
               const active = isActivePath(pathname, item.href)
               const Icon = item.icon
               return (
@@ -327,73 +313,29 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={[
-                    'group relative flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-[13px] font-semibold transition-all whitespace-nowrap',
+                    'group relative flex items-center gap-1.5 rounded-xl px-3 py-2 text-[13px] font-semibold transition-all duration-200 whitespace-nowrap',
                     active
-                      ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)]'
+                      ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm'
                       : 'text-slate-650 hover:bg-slate-50 hover:text-slate-950',
                   ].join(' ')}
                 >
-                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <Icon className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   {item.label}
+                  {item.label === 'Notifications' && unreadNotifications > 0 && (
+                    <span className="ml-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--admin-accent)] px-1 text-[9px] font-bold text-white shadow">
+                      {unreadNotifications}
+                    </span>
+                  )}
                   {active && (
-                    <span className="absolute bottom-0 left-1/2 h-0.5 w-4/5 -translate-x-1/2 rounded-full bg-[var(--admin-primary)]" />
+                    <span className="absolute bottom-0 left-1/2 h-0.5 w-4/5 -translate-x-1/2 rounded-full bg-[var(--admin-primary)] shadow" />
                   )}
                 </Link>
               )
             })}
           </div>
 
-          {/* "Plus" dropdown */}
-          <div className="relative ml-2" ref={plusRef}>
-            <button
-              type="button"
-              onClick={() => setPlusOpen((v) => !v)}
-              className={[
-                'flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-[13px] font-semibold transition-all',
-                secondaryActive
-                  ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)]'
-                  : 'text-slate-650 hover:bg-slate-50 hover:text-slate-950',
-              ].join(' ')}
-            >
-              Plus
-              <ChevronDown className={`h-3 w-3 transition-transform ${plusOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {plusOpen && (
-              <div className="absolute right-0 top-full mt-1 w-52 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xl ring-1 ring-slate-900/5 animate-fade-in-up z-50">
-                {secondaryNav.map((item) => {
-                  const active = isActivePath(pathname, item.href)
-                  const Icon = item.icon
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setPlusOpen(false)}
-                      className={[
-                        'flex items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition',
-                        active
-                          ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)]'
-                          : 'text-slate-750 hover:bg-slate-50 hover:text-slate-950',
-                      ].join(' ')}
-                    >
-                      <span className="flex items-center gap-2">
-                        <Icon className="h-3.5 w-3.5" />
-                        {item.label}
-                      </span>
-                      {item.label === 'Notifications' && unreadNotifications > 0 && (
-                        <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--admin-accent)] px-1 text-[9px] font-bold text-white">
-                          {unreadNotifications}
-                        </span>
-                      )}
-                    </Link>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
           {/* Date courante */}
-          <div className="ml-auto shrink-0 hidden xl:block">
+          <div className="ml-auto shrink-0 hidden xl:block pl-4">
             <p className="text-[11px] font-semibold capitalize text-slate-500">{currentDate}</p>
           </div>
         </div>

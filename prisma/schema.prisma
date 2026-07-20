@@ -227,27 +227,36 @@ model StudentCertificate {
 }
 
 model Formation {
-  id            Int      @id @default(autoincrement())
-  title         String
-  slug          String   @unique
-  description   String
-  objectifs     String?
-  duree         String?
-  modules       String?
-  methodes      String?
-  certification String?
-  categorie     String?
-  statut        String   @default("brouillon") // brouillon, publie, archive
-  imageUrl      String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  certificates  Certificate[]
-  enrollments   Enrollment[]
-  sessions      TrainingSession[]
-  documents     Document[]
-  evaluations   Evaluation[]
-  assignments    Assignment[]
-  testimonials   Testimonial[]
+  id               Int      @id @default(autoincrement())
+  name             String?
+  title            String
+  slug             String   @unique
+  description      String
+  shortDescription String?
+  objectifs        String?
+  duree            String?
+  modules          String?
+  methodes         String?
+  certification    String?
+  categorie        String?
+  statut           String   @default("brouillon") // brouillon, publie, archive
+  imageUrl         String?
+  gallery          Json?
+  skillsAcquired   Json?
+  prerequisites    String?
+  publicTargets    Json?
+  level            String?
+  format           String?
+  languages        Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  certificates     Certificate[]
+  enrollments      Enrollment[]
+  sessions         TrainingSession[]
+  documents        Document[]
+  evaluations      Evaluation[]
+  assignments      Assignment[]
+  testimonials     Testimonial[]
 }
 
 model Article {

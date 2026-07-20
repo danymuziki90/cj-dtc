@@ -115,7 +115,8 @@ export interface Formation {
   // Méta
   featured?: boolean
   tags?: string[]
-  language?: string[]
+  languages?: string[]
+  gallery?: string[]
   estimatedHours?: number
 }
 
