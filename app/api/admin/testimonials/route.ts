@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       include: {
         formation: { select: { id: true, title: true } },
         session:   { select: { id: true, startDate: true, location: true } },
-        student:   { select: { id: true, firstName: true, lastName: true, email: true, photoUrl: true } },
+        student:   { select: { id: true, firstName: true, lastName: true, email: true } },
       },
     }),
   ])
