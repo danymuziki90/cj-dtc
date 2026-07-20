@@ -291,22 +291,36 @@ export default function AdminSubmissionsPage() {
       return
     }
 
-    const payload = {
-      title: formTitle,
-      description: formDescription,
-      type: formType,
-      formationId: parseInt(formFormationId),
-      sessionId: parseInt(formSessionId),
-      deadline: new Date(formDeadline).toISOString(),
-      maxFileSize: formMaxFileSize,
-      allowedFileTypes: formAllowedFileTypes,
-      instructions: formInstructions || null,
-      status: formStatus,
-      publishDate: formPublishDate ? new Date(formPublishDate).toISOString() : new Date().toISOString(),
-      files: formFiles,
-    }
-
     try {
+      const deadlineDate = new Date(formDeadline)
+      if (isNaN(deadlineDate.getTime())) {
+        throw new Error('La date limite de dépôt spécifiée est invalide.')
+      }
+
+      let publishDateStr = new Date().toISOString()
+      if (formPublishDate && formPublishDate.trim()) {
+        const publishDateObj = new Date(formPublishDate)
+        if (isNaN(publishDateObj.getTime())) {
+          throw new Error("La date d'affichage aux étudiants spécifiée est invalide.")
+        }
+        publishDateStr = publishDateObj.toISOString()
+      }
+
+      const payload = {
+        title: formTitle.trim(),
+        description: formDescription,
+        type: formType,
+        formationId: parseInt(formFormationId),
+        sessionId: parseInt(formSessionId),
+        deadline: deadlineDate.toISOString(),
+        maxFileSize: formMaxFileSize,
+        allowedFileTypes: formAllowedFileTypes,
+        instructions: formInstructions || null,
+        status: formStatus,
+        publishDate: publishDateStr,
+        files: formFiles,
+      }
+
       let res
       if (editingAssignment) {
         res = await fetch(`/api/admin/assignments/${editingAssignment.id}`, {
@@ -323,14 +337,14 @@ export default function AdminSubmissionsPage() {
       }
 
       if (!res.ok) {
-        const err = await res.json()
+        const err = await res.json().catch(() => ({}))
         throw new Error(err.error || 'Erreur lors de la sauvegarde du travail')
       }
 
       showNotification(
         editingAssignment 
-          ? 'Travail d’évaluation mis à jour avec succès !' 
-          : 'Nouveau travail créé et planifié !'
+          ? 'Le devoir a été mis à jour avec succès.' 
+          : 'Le devoir a été créé et publié avec succès.'
       )
       setShowForm(false)
       loadInitialData()
@@ -594,7 +608,7 @@ export default function AdminSubmissionsPage() {
       {/* ── TOAST NOTIFICATION ───────────────────────────────────────── */}
       {toast && (
         <div
-          className={`fixed right-6 top-20 z-50 flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-bold shadow-xl transition-all animate-fade-in-up ${
+          className={`fixed right-6 top-20 z-[9999] flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-bold shadow-xl transition-all animate-fade-in-up ${
             toast.type === 'success'
               ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
               : 'border-red-200 bg-red-50 text-red-800'

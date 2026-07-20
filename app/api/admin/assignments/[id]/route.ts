@@ -75,7 +75,18 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       return NextResponse.json({ error: 'Date limite invalide.' }, { status: 400 })
     }
 
-    const pubDate = data.publishDate ? new Date(data.publishDate) : undefined
+    let pubDate = undefined
+    if (data.publishDate !== undefined) {
+      if (data.publishDate && data.publishDate.trim()) {
+        const parsedPubDate = new Date(data.publishDate)
+        if (Number.isNaN(parsedPubDate.getTime())) {
+          return NextResponse.json({ error: "Date d'affichage invalide." }, { status: 400 })
+        }
+        pubDate = parsedPubDate
+      } else {
+        pubDate = new Date()
+      }
+    }
 
     if (data.formationId) {
       const formation = await prisma.formation.findUnique({
