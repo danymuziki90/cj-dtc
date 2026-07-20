@@ -24,15 +24,15 @@ export default async function PartenairesPage({ params }: PageProps) {
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
 
         {/* Hero Section floating card */}
-        <section className="cj-hero-card mb-10">
-          <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <section className="cj-hero-card mb-6">
+          <div className="relative z-10 grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
-              <span className="cj-eyebrow-dark mb-4">
+              <span className="cj-eyebrow-dark mb-3">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
                 {t.heroBadge}
               </span>
-              <h1 className="cj-hero-title mb-4 font-montserrat">{t.heroTitle}</h1>
-              <p className="max-w-3xl text-base leading-8 text-white sm:text-lg font-opensans">{t.heroDescription}</p>
+              <h1 className="cj-hero-title mb-3 font-montserrat">{t.heroTitle}</h1>
+              <p className="max-w-3xl text-sm leading-7 text-white sm:text-base font-opensans">{t.heroDescription}</p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">

@@ -576,12 +576,12 @@ function EspaceEtudiantsContent() {
       <main className="relative z-10 mx-auto max-w-7xl space-y-8 px-4 pb-16 pt-6 sm:px-6 lg:px-8">
         
         {/* SECTION 1: HERO - Improved color contrast with #FFFFFF (text-white) */}
-        <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 p-6 text-white shadow-2xl border border-white/10 sm:p-8">
+        <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 p-5 text-white shadow-2xl border border-white/10 sm:p-6">
           <div className="pointer-events-none absolute -right-10 top-0 h-48 w-48 rounded-full bg-[rgba(227,6,19,0.15)] blur-3xl" />
           <div className="pointer-events-none absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
           
-          <div className="relative grid gap-8 xl:grid-cols-[1.5fr_0.95fr]">
-            <div className="space-y-4">
+          <div className="relative grid gap-5 xl:grid-cols-[1.5fr_0.95fr]">
+            <div className="space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-white">
                 <Sparkle className="h-3.5 w-3.5 text-yellow-300 animate-pulse" />
                 Tableau de bord étudiant
@@ -602,11 +602,11 @@ function EspaceEtudiantsContent() {
                 {heroSummary}
               </p>
 
-              <div className="grid gap-3 pt-2 md:grid-cols-3">
+              <div className="grid gap-2 pt-1 md:grid-cols-3">
                 {heroStats.map(({ icon: Icon, label, value }) => (
                   <div
                     key={label}
-                    className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+                    className="rounded-xl border border-white/5 bg-white/5 p-3 backdrop-blur-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
                   >
                     <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/60">
                       <Icon className="h-3.5 w-3.5 text-blue-400" />
@@ -619,7 +619,7 @@ function EspaceEtudiantsContent() {
                 ))}
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-2">
+              <div className="flex flex-wrap gap-2 pt-1">
                 <button
                   onClick={() => setActiveTab("travaux")}
                   className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-slate-900 transition hover:bg-slate-100 shadow"

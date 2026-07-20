@@ -259,18 +259,18 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
         {/* Hero Section floating card */}
-        <section className="cj-hero-card mb-10">
+        <section className="cj-hero-card mb-6">
           <div className="relative z-10">
             <div className="max-w-4xl">
               <span className="cj-eyebrow-dark">
                 <HeartHandshake className="h-3.5 w-3.5 text-[var(--cj-red)] animate-pulse" />
                 {t.heroBadge}
               </span>
-              <h1 className="cj-hero-title mb-6 leading-tight">
+              <h1 className="cj-hero-title mb-3 leading-tight">
                 {t.heroTitle}
               </h1>
-              <p className="mb-8 max-w-2xl text-base leading-8 text-white sm:text-lg">{t.heroSub}</p>
-              <div className="flex flex-col gap-4 sm:flex-row">
+              <p className="mb-5 max-w-2xl text-sm leading-7 text-white sm:text-base">{t.heroSub}</p>
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <a href="#contact" className="cj-btn-primary">
                   <MessageCircleIcon className="h-4 w-4" />
                   {t.heroCta1}

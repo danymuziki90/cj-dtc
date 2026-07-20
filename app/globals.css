@@ -624,31 +624,33 @@ a:hover {
   }
 }
 
-/* 2. Floating Hero Card */
+/* 2. Floating Hero Card — compact secondary pages */
 .cj-hero-card {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #02142f 0%, #002d72 50%, #0c4da2 100%) !important;
   color: #ffffff !important;
   border-radius: 1.5rem; /* 3xl = 24px */
-  padding-left: 2rem;
-  padding-right: 2rem;
-  padding-top: 3rem;
-  padding-bottom: 3rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
 }
 @media (min-width: 640px) {
   .cj-hero-card {
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
   }
 }
 @media (min-width: 1024px) {
   .cj-hero-card {
-    padding-left: 3rem;
-    padding-right: 3rem;
-    padding-top: 4rem;
-    padding-bottom: 4rem;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+    padding-top: 2.75rem;
+    padding-bottom: 2.75rem;
   }
 }
 
@@ -713,11 +715,11 @@ a:hover {
   z-index: 0;
 }
 
-/* 3. Typography & Titles */
+/* Taille de titre réduite pour les hero sections secondaires */
 .cj-hero-title {
-  margin-top: 1.25rem;
-  font-size: 2.25rem; /* text-4xl */
-  font-weight: 900; /* font-black */
+  margin-top: 0.75rem;
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 900;
   line-height: 1.15;
   letter-spacing: -0.025em;
   color: #ffffff !important;
@@ -725,12 +727,12 @@ a:hover {
 }
 @media (min-width: 640px) {
   .cj-hero-title {
-    font-size: 3rem; /* text-5xl */
+    font-size: 2.25rem; /* text-4xl */
   }
 }
 @media (min-width: 1024px) {
   .cj-hero-title {
-    font-size: 3.75rem; /* text-6xl */
+    font-size: 2.75rem; /* text-5xl compact */
   }
 }
 
@@ -748,10 +750,10 @@ a:hover {
   color: rgba(255, 255, 255, 0.80) !important;
 }
 
-/* Uniformisation h1 dans les hero-bg-unified (About, Home) */
+/* Uniformisation h1 dans les hero-bg-unified secondaires (About) */
 .hero-bg-unified h1 {
   color: #ffffff !important;
-  font-size: clamp(1.75rem, 3.5vw + 0.5rem, 3.75rem) !important;
+  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2.75rem) !important;
   line-height: 1.12 !important;
   font-weight: 900 !important;
   letter-spacing: -0.025em !important;

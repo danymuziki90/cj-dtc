@@ -154,11 +154,11 @@ export default function FormationDetailPage() {
         </div>
 
         {/* Hero Section floating card */}
-        <section className="cj-hero-card mb-10">
+        <section className="cj-hero-card mb-6">
           <div className="relative z-10">
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid lg:grid-cols-3 gap-6">
               {/* Left: Main Info */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-4">
                 {/* Badges */}
                 <div className="flex flex-wrap items-center gap-3">
                   {formation.featured && (

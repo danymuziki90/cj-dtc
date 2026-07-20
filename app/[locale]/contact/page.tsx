@@ -130,21 +130,21 @@ export default function ContactPage() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
         {/* ── SECTION 1 — HERO ──────────────────────────────────────────────── */}
-        <section className="cj-hero-card mb-10">
-          <div className="relative z-10 grid gap-12 lg:grid-cols-2 lg:items-center">
+        <section className="cj-hero-card mb-6">
+          <div className="relative z-10 grid gap-8 lg:grid-cols-2 lg:items-center">
             {/* Left: text + CTAs */}
             <div>
-              <span className="cj-eyebrow-dark mb-4">
+              <span className="cj-eyebrow-dark mb-3">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
                 {t.heroBadge}
               </span>
-              <h1 className="cj-hero-title mb-4 font-montserrat">
+              <h1 className="cj-hero-title mb-3 font-montserrat">
                 {t.heroTitle}
               </h1>
-              <p className="max-w-xl text-base leading-8 text-white sm:text-lg font-opensans">
+              <p className="max-w-xl text-sm leading-7 text-white sm:text-base font-opensans">
                 {t.heroSubtitle}
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <div className="mt-5 flex flex-col sm:flex-row gap-3">
                 <a href="#contact-form" className="cj-btn-primary">
                   {t.heroCta1}
                   <ArrowRight className="h-4 w-4" />

@@ -45,30 +45,30 @@ export default function FormationsPage() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
         {/* Hero Section floating card */}
-        <section className="cj-hero-card text-center mb-10">
+        <section className="cj-hero-card text-center mb-6">
           <div className="relative z-10 flex flex-col items-center">
             <span className="cj-eyebrow-dark">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
               {isFr ? 'Catalogue officiel' : 'Official catalog'} · CJ Development
             </span>
-            <h1 className="cj-hero-title mb-6 max-w-4xl">
+            <h1 className="cj-hero-title mb-3 max-w-4xl">
               {isFr ? 'Formations' : 'Training Programs'}
               <span className="block text-white/80">
                 {isFr ? '& Sessions ouvertes' : '& Open Sessions'}
               </span>
             </h1>
-            <p className="max-w-2xl text-base leading-8 text-white sm:text-lg mb-8">
+            <p className="max-w-2xl text-sm leading-7 text-white sm:text-base mb-5">
               {isFr
                 ? 'Découvrez nos programmes certifiants et réservez directement votre place dans une session disponible. Tout au même endroit.'
                 : 'Explore our certified programs and book your spot in an available session — all in one place.'}
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-5">
               <a href="#sessions" className="cj-btn-primary">
                 <CalendarDays className="w-4 h-4" />
                 {isFr ? 'Voir les sessions ouvertes' : 'Browse open sessions'}
               </a>
             </div>
-            <div className="w-full border-t border-white/10 pt-8 mt-2">
+            <div className="w-full border-t border-white/10 pt-5 mt-1">
               <FormationStats stats={stats} />
             </div>
           </div>

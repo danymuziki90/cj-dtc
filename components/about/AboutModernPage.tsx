@@ -173,21 +173,21 @@ export default function AboutModernPage({
         <Breadcrumbs items={[{ label: nav.about }]} homeHref={homeHref} />
 
         {/* ── S1 : Qui nous sommes ─────────────────────────────────────── */}
-        <section className="hero-bg-unified rounded-3xl px-8 py-12 shadow-2xl sm:px-10 lg:px-12 lg:py-16">
-          <div className="relative grid gap-10 lg:grid-cols-[1fr_380px] lg:items-start">
+        <section className="hero-bg-unified rounded-3xl px-6 py-8 shadow-2xl sm:px-8 sm:py-9 lg:px-10 lg:py-10">
+          <div className="relative grid gap-6 lg:grid-cols-[1fr_380px] lg:items-start">
             {/* Gauche */}
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-white/90 backdrop-blur">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)]" />
                 {t.heroEyebrow}
               </span>
-              <h1 className="cj-hero-title mt-5">
+              <h1 className="cj-hero-title mt-3">
                 {t.heroTitle}
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-8 text-white sm:text-lg">
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-white sm:text-base">
                 {t.heroDescription}
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-5 flex flex-wrap gap-3">
                 <Link
                   href={formationsHref}
                   className="inline-flex items-center gap-2 rounded-xl bg-[var(--cj-red)] px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[var(--cj-red-700)]"
