@@ -120,9 +120,12 @@ model PasswordResetToken {
 model Admin {
   id        String   @id @default(cuid())
   username  String   @unique
+  email     String   @unique @default("")
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([email])
 }
 
 model AdminNotification {
@@ -469,6 +472,8 @@ model Assignment {
   @@index([sessionId])
   @@index([deadline])
   @@index([type])
+  @@index([status])
+  @@index([publishDate])
 }
 
 model AssignmentFile {

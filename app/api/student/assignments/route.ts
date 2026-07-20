@@ -162,6 +162,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Aucun fichier valide fourni.' }, { status: 400 })
     }
 
+    // Vérifier qu'une soumission n'existe pas déjà pour cet étudiant et ce devoir
+    const existingSubmission = await prisma.submission.findFirst({
+      where: {
+        assignmentId,
+        studentEmail: { equals: auth.student.email, mode: 'insensitive' },
+      },
+      select: { id: true, status: true, submittedAt: true },
+    })
+
+    if (existingSubmission) {
+      return NextResponse.json(
+        {
+          error: 'Vous avez déjà soumis ce devoir.',
+          detail: `Soumission existante (ID: ${existingSubmission.id}) — statut : ${existingSubmission.status}. Contactez votre formateur pour toute modification.`,
+        },
+        { status: 409 }
+      )
+    }
+
     const submission = await prisma.submission.create({
       data: {
         assignmentId,

@@ -11,6 +11,8 @@ interface LayoutProps {
   params: Promise<{ locale: string }>
 }
 
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://cjdevelopmenttc.com').replace(/\/$/, '')
+
 export const metadata: Metadata = {
   title: {
     default: 'CJ Development Training Center - Formation professionnelle panafricaine',
@@ -32,11 +34,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'CJ Development Training Center',
     description: 'Batir des competences. Transformer des destins. Creer des opportunites.',
-    url: 'https://cjdevelopmenttc.com',
+    url: APP_URL,
     siteName: 'CJ DTC',
     images: [
       {
-        url: '/logo.png',
+        url: `${APP_URL}/logo.png`,
         width: 1200,
         height: 630,
         alt: 'CJ Development Training Center',
@@ -49,7 +51,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'CJ Development Training Center',
     description: 'Batir des competences. Transformer des destins.',
-    images: ['/logo.png'],
+    images: [`${APP_URL}/logo.png`],
   },
   robots: {
     index: true,
@@ -63,7 +65,12 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://cjdevelopmenttc.com',
+    canonical: APP_URL,
+    languages: {
+      'fr': `${APP_URL}/fr`,
+      'en': `${APP_URL}/en`,
+      'x-default': `${APP_URL}/fr`,
+    },
   },
 }
 
