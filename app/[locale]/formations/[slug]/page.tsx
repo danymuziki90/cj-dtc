@@ -183,12 +183,12 @@ export default function FormationDetailPage() {
                 </h1>
 
                 {/* Short description */}
-                <p className="text-base text-blue-100/90 leading-relaxed font-opensans">
+                <p className="text-base text-white leading-relaxed font-opensans">
                   {formation.shortDescription || formation.description}
                 </p>
 
                 {/* Meta info */}
-                <div className="flex flex-wrap items-center gap-6 text-blue-100/90 text-sm font-semibold pt-4">
+                <div className="flex flex-wrap items-center gap-6 text-white/80 text-sm font-semibold pt-4">
                   {formation.rating && (
                     <div className="flex items-center gap-2">
                       <StarIcon className="w-4 h-4 text-yellow-300 fill-current animate-pulse" />
@@ -584,7 +584,7 @@ export default function FormationDetailPage() {
                             Certification
                           </h2>
                         </div>
-                        <p className="text-blue-100 font-opensans leading-relaxed">{formation.certification}</p>
+                        <p className="text-white font-opensans leading-relaxed">{formation.certification}</p>
                       </div>
                     </div>
                   )}
@@ -735,7 +735,7 @@ export default function FormationDetailPage() {
           <h2 className="text-3xl font-black text-white mb-4 font-montserrat sm:text-4xl">
             Prêt à vous lancer ?
           </h2>
-          <p className="text-base text-blue-100 mb-8 font-opensans leading-relaxed">
+          <p className="text-base text-white mb-8 font-opensans leading-relaxed">
             Inscrivez-vous maintenant et commencez votre transformation professionnelle avec CJ DTC.
           </p>
           <Link

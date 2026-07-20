@@ -53,11 +53,11 @@ export default function FormationsPage() {
             </span>
             <h1 className="cj-hero-title mb-6 max-w-4xl">
               {isFr ? 'Formations' : 'Training Programs'}
-              <span className="block text-blue-200">
+              <span className="block text-white/80">
                 {isFr ? '& Sessions ouvertes' : '& Open Sessions'}
               </span>
             </h1>
-            <p className="max-w-2xl text-base leading-8 text-blue-100/90 sm:text-lg mb-8">
+            <p className="max-w-2xl text-base leading-8 text-white sm:text-lg mb-8">
               {isFr
                 ? 'Découvrez nos programmes certifiants et réservez directement votre place dans une session disponible. Tout au même endroit.'
                 : 'Explore our certified programs and book your spot in an available session — all in one place.'}

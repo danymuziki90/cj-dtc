@@ -141,7 +141,7 @@ export default function ContactPage() {
               <h1 className="cj-hero-title mb-4 font-montserrat">
                 {t.heroTitle}
               </h1>
-              <p className="max-w-xl text-base leading-8 text-blue-100/90 sm:text-lg font-opensans">
+              <p className="max-w-xl text-base leading-8 text-white sm:text-lg font-opensans">
                 {t.heroSubtitle}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4">

@@ -587,9 +587,9 @@ function EspaceEtudiantsContent() {
                 Tableau de bord étudiant
               </div>
 
-              <h2 className="text-3xl font-extrabold tracking-tight leading-tight sm:text-4xl text-white">
+              <h1 className="text-3xl font-extrabold tracking-tight leading-tight sm:text-4xl text-white">
                 Pilotage complet de votre parcours
-              </h2>
+              </h1>
 
               <div className="flex items-center gap-2">
                 <span className="text-xs text-white/60">Statut étudiant :</span>
@@ -598,7 +598,7 @@ function EspaceEtudiantsContent() {
                 </span>
               </div>
 
-              <p className="max-w-2xl text-sm leading-6 text-white/80">
+              <p className="max-w-2xl text-sm leading-6 text-white">
                 {heroSummary}
               </p>
 

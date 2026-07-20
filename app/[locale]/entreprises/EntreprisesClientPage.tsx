@@ -269,7 +269,7 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
               <h1 className="cj-hero-title mb-6 leading-tight">
                 {t.heroTitle}
               </h1>
-              <p className="mb-8 max-w-2xl text-base leading-8 text-blue-100/90 sm:text-lg">{t.heroSub}</p>
+              <p className="mb-8 max-w-2xl text-base leading-8 text-white sm:text-lg">{t.heroSub}</p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <a href="#contact" className="cj-btn-primary">
                   <MessageCircleIcon className="h-4 w-4" />
@@ -400,9 +400,9 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
       <section className="bg-gradient-to-br from-[#001B47] via-[var(--cj-blue)] to-[#0B3A8E] py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
-            <span className="mb-4 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-100">{t.methodBadge}</span>
+            <span className="mb-4 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white/80">{t.methodBadge}</span>
             <h2 className="text-3xl font-black text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.methodTitle}</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-base text-blue-100">{t.methodSub}</p>
+            <p className="mt-3 max-w-2xl mx-auto text-base text-white">{t.methodSub}</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {steps.map((step, i) => (
@@ -410,7 +410,7 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
                 <span className="mb-4 inline-block text-4xl font-black text-white/20 leading-none">{step.n}</span>
                 <div className="mb-4 h-0.5 w-12 rounded-full bg-[var(--cj-red)]" />
                 <h3 className="mb-2 text-base font-bold text-white">{step.title}</h3>
-                <p className="text-sm leading-relaxed text-blue-100">{step.desc}</p>
+                <p className="text-sm leading-relaxed text-white/80">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -530,20 +530,20 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
               <h2 className="mb-6 text-3xl font-black leading-tight sm:text-4xl font-montserrat">
                 {t.ctaTitle}
               </h2>
-              <p className="mb-8 text-base leading-relaxed text-blue-100 font-opensans">{t.ctaSub}</p>
+              <p className="mb-8 text-base leading-relaxed text-white font-opensans">{t.ctaSub}</p>
               <ul className="mb-10 space-y-3 font-opensans">
                 {(isFr
                   ? ['Réponse sous 48h', 'Premier échange sans engagement', 'Devis détaillé et personnalisé', 'Expertise panafricaine reconnue']
                   : ['Response within 48h', 'First meeting with no commitment', 'Detailed personalised quote', 'Recognised pan-African expertise']
                 ).map((pt, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-blue-100">
+                  <li key={i} className="flex items-center gap-3 text-sm text-white/90">
                     <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-400" />
                     {pt}
                   </li>
                 ))}
               </ul>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-blue-200">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-white/60">
                   {isFr ? 'Contact direct' : 'Direct contact'}
                 </p>
                 <a href="mailto:contact@cjdevelopmenttc.org"

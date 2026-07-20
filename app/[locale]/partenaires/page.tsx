@@ -32,7 +32,7 @@ export default async function PartenairesPage({ params }: PageProps) {
                 {t.heroBadge}
               </span>
               <h1 className="cj-hero-title mb-4 font-montserrat">{t.heroTitle}</h1>
-              <p className="max-w-3xl text-base leading-8 text-blue-100/90 sm:text-lg font-opensans">{t.heroDescription}</p>
+              <p className="max-w-3xl text-base leading-8 text-white sm:text-lg font-opensans">{t.heroDescription}</p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">

@@ -126,8 +126,8 @@ export default function ActualitesPage() {
               {t.heroEyebrow}
             </span>
             <h1 className="cj-hero-title mb-4 font-montserrat">{t.heroTitle}</h1>
-            <p className="text-base text-blue-100/90 leading-relaxed font-opensans max-w-2xl">{t.heroDescription}</p>
-            <div className="mt-6 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-blue-100">
+            <p className="text-base text-white leading-relaxed font-opensans max-w-2xl">{t.heroDescription}</p>
+            <div className="mt-6 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/80">
               {loading ? t.loading : `${pagination.total} ${t.totalSuffix}`}
             </div>
           </div>

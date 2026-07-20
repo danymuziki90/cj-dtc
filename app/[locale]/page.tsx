@@ -198,7 +198,7 @@ export default function HomePage() {
               </h1>
 
               {/* Description */}
-              <p className="max-w-2xl text-base sm:text-lg leading-relaxed text-blue-100/90 font-opensans">
+              <p className="max-w-2xl text-base sm:text-lg leading-relaxed text-white font-opensans">
                 {t.heroDescription}
               </p>
 
@@ -696,7 +696,7 @@ export default function HomePage() {
               <h2 className="mt-5 text-3xl font-black sm:text-4xl font-montserrat text-white">
                 {isFr ? 'Choisissez votre parcours.' : 'Choose your path.'}
               </h2>
-              <p className="mt-4 text-base text-blue-100 font-opensans leading-relaxed">
+              <p className="mt-4 text-base text-white font-opensans leading-relaxed">
                 {isFr
                   ? 'Sélectionnez le canal adapté à votre situation pour commencer votre collaboration avec CJ Development.'
                   : 'Select the channel suited to your needs to start working with CJ Development.'}
@@ -737,9 +737,9 @@ export default function HomePage() {
                 >
                   <div>
                     <h3 className="text-xl font-bold text-white group-hover:text-[var(--cj-red)] transition font-montserrat">{item.title}</h3>
-                    <p className="mt-4 text-sm leading-relaxed text-blue-100 font-opensans">{item.description}</p>
+                    <p className="mt-4 text-sm leading-relaxed text-white/85 font-opensans">{item.description}</p>
                   </div>
-                  <span className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-blue-200 group-hover:text-[var(--cj-red)] transition">
+                  <span className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-white/70 group-hover:text-[var(--cj-red)] transition">
                     {item.label}
                     <svg className="h-4 w-4 transform transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />

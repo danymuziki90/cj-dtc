@@ -181,10 +181,10 @@ export default function AboutModernPage({
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)]" />
                 {t.heroEyebrow}
               </span>
-              <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="cj-hero-title mt-5">
                 {t.heroTitle}
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-8 text-blue-100/90 sm:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-8 text-white sm:text-lg">
                 {t.heroDescription}
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -211,14 +211,14 @@ export default function AboutModernPage({
                   {t.missionEyebrow}
                 </p>
                 <h2 className="mt-3 text-xl font-bold text-white">{t.missionTitle}</h2>
-                <p className="mt-2 text-sm leading-7 text-blue-100">{t.missionDescription}</p>
+                <p className="mt-2 text-sm leading-7 text-white">{t.missionDescription}</p>
               </div>
               <div className="rounded-2xl border border-[var(--cj-red)]/30 bg-slate-950/30 p-6 backdrop-blur">
                 <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-red-200">
                   {t.visionEyebrow}
                 </p>
                 <h2 className="mt-3 text-xl font-bold text-white">{t.visionTitle}</h2>
-                <p className="mt-2 text-sm leading-7 text-blue-100">{t.visionDescription}</p>
+                <p className="mt-2 text-sm leading-7 text-white">{t.visionDescription}</p>
               </div>
             </div>
           </div>
@@ -417,7 +417,7 @@ export default function AboutModernPage({
                 <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">
                   {t.ctaTitle}
                 </h2>
-                <p className="mt-4 max-w-2xl text-base text-blue-100">
+                <p className="mt-4 max-w-2xl text-base text-white">
                   {t.ctaDescription}
                 </p>
 
@@ -427,7 +427,7 @@ export default function AboutModernPage({
                     ? ['Programmes certifiants', 'Coaching inclus', 'Suivi 12 mois', 'Réseau panafricain']
                     : ['Certified programs', 'Coaching included', '12-month follow-up', 'Pan-African network']
                   ).map((item) => (
-                    <div key={item} className="flex items-center gap-2 text-sm text-blue-100">
+                    <div key={item} className="flex items-center gap-2 text-sm text-white/90">
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
                       {item}
                     </div>

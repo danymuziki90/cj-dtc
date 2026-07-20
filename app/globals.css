@@ -652,6 +652,39 @@ a:hover {
   }
 }
 
+/* Uniformisation : tous les textes dans une hero card sont blancs */
+.cj-hero-card h1,
+.cj-hero-card h2,
+.cj-hero-card h3,
+.cj-hero-card p,
+.cj-hero-card span:not(.cj-eyebrow-dark):not([class*="bg-"]):not([class*="text-"]) {
+  color: #ffffff !important;
+}
+
+/* Support des images de fond dans les hero cards : overlay semi-transparent */
+.cj-hero-card[style*="background-image"],
+.cj-hero-card.has-bg-image {
+  background-blend-mode: overlay;
+}
+.cj-hero-card.has-bg-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(2,20,47,0.85) 0%, rgba(0,45,114,0.78) 50%, rgba(12,77,162,0.72) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Overlay sombre sur les hero-bg-unified qui ont une image de fond */
+.hero-bg-unified.has-bg-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(2,20,47,0.88) 0%, rgba(0,45,114,0.80) 50%, rgba(12,77,162,0.72) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
 .cj-hero-card::before {
   content: "";
   position: absolute;
@@ -685,9 +718,10 @@ a:hover {
   margin-top: 1.25rem;
   font-size: 2.25rem; /* text-4xl */
   font-weight: 900; /* font-black */
-  line-height: 1.25;
+  line-height: 1.15;
   letter-spacing: -0.025em;
-  color: #ffffff;
+  color: #ffffff !important;
+  font-family: 'Montserrat', sans-serif;
 }
 @media (min-width: 640px) {
   .cj-hero-title {
@@ -698,6 +732,30 @@ a:hover {
   .cj-hero-title {
     font-size: 3.75rem; /* text-6xl */
   }
+}
+
+/* Sous-titres & descriptions dans toutes les Hero Sections — blanc garanti */
+.cj-hero-card p,
+.cj-hero-card .hero-description,
+.hero-bg-unified p,
+.hero-bg-unified .hero-description {
+  color: rgba(255, 255, 255, 0.90) !important;
+}
+
+/* Textes secondaires légèrement atténués pour la hiérarchie */
+.cj-hero-card .hero-subtitle,
+.hero-bg-unified .hero-subtitle {
+  color: rgba(255, 255, 255, 0.80) !important;
+}
+
+/* Uniformisation h1 dans les hero-bg-unified (About, Home) */
+.hero-bg-unified h1 {
+  color: #ffffff !important;
+  font-size: clamp(1.75rem, 3.5vw + 0.5rem, 3.75rem) !important;
+  line-height: 1.12 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.025em !important;
+  font-family: 'Montserrat', sans-serif !important;
 }
 
 .cj-section-title {
