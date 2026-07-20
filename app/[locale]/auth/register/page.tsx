@@ -494,7 +494,7 @@ export default function StudentRegisterPage() {
                 className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <div className="text-sm text-gray-600">
-                J'accepte les <a href="/terms" className="text-blue-600 hover:text-blue-700 underline">conditions d'utilisation</a> et la <a href="/privacy" className="text-blue-600 hover:text-blue-700 underline">politique de confidentialité</a> de CJ DTC.
+                J'accepte les <Link href="/terms" className="text-blue-600 hover:text-blue-700 underline">conditions d'utilisation</Link> et la <Link href="/privacy" className="text-blue-600 hover:text-blue-700 underline">politique de confidentialité</Link> de CJ DTC.
               </div>
             </label>
             {errors.agreeTerms && (
