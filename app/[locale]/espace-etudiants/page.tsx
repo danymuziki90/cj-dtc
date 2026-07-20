@@ -41,7 +41,8 @@ import {
   UserIcon,
   X,
   Laptop,
-  CalendarDays
+  CalendarDays,
+  MessageSquareQuote,
 } from "lucide-react";
 import {
   StudentEmptyState as EmptyState,
@@ -633,6 +634,13 @@ function EspaceEtudiantsContent() {
                 >
                   <BookOpen className="h-3.5 w-3.5" />
                   <span className="text-white">Supports de cours</span>
+                </Link>
+                <Link
+                  href={`${basePath}/temoignages`}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/25 transition"
+                >
+                  <MessageSquareQuote className="h-3.5 w-3.5 text-amber-300" />
+                  <span className="text-white">Donner mon avis / Témoignage</span>
                 </Link>
                 {firstCertificate && firstCertificate.fileUrl && (
                   <a

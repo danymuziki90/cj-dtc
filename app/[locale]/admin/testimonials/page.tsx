@@ -1,338 +1,838 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from 'react';
-import { useToastNotification } from '@/components/ui/toast';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import AdminShell from '@/components/admin-portal/AdminShell'
+import {
+  AlertTriangle,
+  Check,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
+  Eye,
+  Loader2,
+  MessageSquare,
+  RefreshCw,
+  Reply,
+  Search,
+  SortAsc,
+  SortDesc,
+  Star,
+  Trash2,
+  X,
+  XCircle,
+} from 'lucide-react'
 
 interface Testimonial {
-  id: number;
-  name: string;
-  location: string | null;
-  quote: string;
-  approved: boolean;
-  order: number;
-  status?: 'pending' | 'approved' | 'rejected';
-  rating?: number | null;
-  formation?: { title: string } | null;
-  session?: { id: number; startDate: string } | null;
+  id: number
+  name: string
+  title: string | null
+  quote: string
+  location: string | null
+  rating: number | null
+  status: 'pending' | 'approved' | 'rejected'
+  approved: boolean
+  adminReply: string | null
+  showName: boolean
+  showPhoto: boolean
+  photoUrl: string | null
+  createdAt: string
+  publishedAt: string | null
+  formation: { id: number; title: string } | null
+  session: { id: number; startDate: string; location: string } | null
+  student: { id: string; firstName: string; lastName: string; email: string } | null
+}
+
+interface PaginatedResponse {
+  items: Testimonial[]
+  total: number
+  page: number
+  pageSize: number
+  pageCount: number
+}
+
+function StatusBadge({ status }: { status: string }) {
+  if (status === 'approved')
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
+        <CheckCircle2 className="h-3 w-3" /> Approuvé & Publié
+      </span>
+    )
+  if (status === 'rejected')
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-[11px] font-bold text-red-700">
+        <XCircle className="h-3 w-3" /> Refusé
+      </span>
+    )
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold text-amber-700">
+      <Loader2 className="h-3 w-3 animate-spin" /> En attente
+    </span>
+  )
+}
+
+function StarRating({ rating }: { rating: number | null }) {
+  if (!rating) return <span className="text-xs text-slate-400">—</span>
+  return (
+    <span className="inline-flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star
+          key={i}
+          className={`h-3.5 w-3.5 ${
+            i <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'
+          }`}
+        />
+      ))}
+    </span>
+  )
+}
+
+function Avatar({ name, photoUrl }: { name: string; photoUrl?: string | null }) {
+  if (photoUrl)
+    return (
+      <img
+        src={photoUrl}
+        alt={name}
+        className="h-9 w-9 rounded-full border border-slate-200 object-cover"
+      />
+    )
+  const initials = name
+    .split(' ')
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+  return (
+    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--cj-blue)] text-xs font-bold text-white shadow-sm">
+      {initials}
+    </div>
+  )
 }
 
 export default function AdminTestimonialsPage() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<Testimonial | null>(null);
+  const [data, setData] = useState<PaginatedResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [actionLoading, setAL] = useState<number | null>(null)
 
-  const [formName, setFormName] = useState('');
-  const [formLocation, setFormLocation] = useState('');
-  const [formQuote, setFormQuote] = useState('');
-  const [formApproved, setFormApproved] = useState(false);
-  const [formOrder, setFormOrder] = useState(0);
+  // Filters
+  const [status, setStatus] = useState<string>('all')
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDS] = useState('')
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [page, setPage] = useState(1)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const { success, error, info } = useToastNotification() || {
-    success: (msg: string) => alert(msg),
-    error: (msg: string) => alert(msg),
-    info: (msg: string) => alert(msg)
-  };
-
-  const fetchTestimonials = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch('/api/admin/marketing/testimonials');
-      if (!res.ok) throw new Error('Erreur de chargement');
-      const data = await res.json();
-      setTestimonials(data || []);
-    } catch (err) {
-      console.error(err);
-      error("Impossible de charger les témoignages.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Modal state
+  const [selected, setSelected] = useState<Testimonial | null>(null)
+  const [modalMode, setModalMode] = useState<
+    'view' | 'reply' | 'edit' | 'delete' | null
+  >(null)
+  const [replyText, setReplyText] = useState('')
+  const [editQuote, setEditQuote] = useState('')
+  const [editTitle, setEditTitle] = useState('')
+  const [toast, setToast] = useState<{ msg: string; type: 'ok' | 'err' } | null>(
+    null
+  )
 
   useEffect(() => {
-    fetchTestimonials();
-  }, []);
-
-  const openCreate = () => {
-    setEditingItem(null);
-    setFormName('');
-    setFormLocation('');
-    setFormQuote('');
-    setFormApproved(false);
-    setFormOrder(0);
-    setShowForm(true);
-  };
-
-  const openEdit = (item: Testimonial) => {
-    setEditingItem(item);
-    setFormName(item.name);
-    setFormLocation(item.location || '');
-    setFormQuote(item.quote);
-    setFormApproved(item.approved);
-    setFormOrder(item.order);
-    setShowForm(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formName.trim() || !formQuote.trim()) {
-      error("Veuillez remplir les champs obligatoires.");
-      return;
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => {
+      setDS(search)
+      setPage(1)
+    }, 350)
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current)
     }
+  }, [search])
 
-    const payload = {
-      name: formName,
-      location: formLocation || null,
-      quote: formQuote,
-      approved: formApproved,
-      order: formOrder
-    };
-
+  const fetchData = useCallback(async () => {
+    setLoading(true)
     try {
-      if (editingItem) {
-        // Edit testimonial
-        const res = await fetch(`/api/admin/marketing/testimonials/${editingItem.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error("Erreur de mise à jour");
-        const updated = await res.json();
-        setTestimonials(prev => prev.map(item => item.id === editingItem.id ? updated : item));
-        success("Témoignage modifié avec succès.");
-      } else {
-        // Create testimonial
-        const res = await fetch('/api/admin/marketing/testimonials', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error("Erreur de création");
-        const created = await res.json();
-        setTestimonials(prev => [created, ...prev]);
-        success("Témoignage ajouté avec succès.");
-      }
-      setShowForm(false);
-    } catch (err) {
-      console.error(err);
-      error("Erreur lors de la sauvegarde.");
+      const qs = new URLSearchParams({
+        status,
+        search: debouncedSearch,
+        sortBy,
+        sortDir,
+        page: String(page),
+        pageSize: '20',
+      })
+      const res = await fetch(`/api/admin/testimonials?${qs}`)
+      if (res.ok) setData(await res.json())
+    } finally {
+      setLoading(false)
     }
-  };
+  }, [status, debouncedSearch, sortBy, sortDir, page])
 
-  const toggleApproval = async (item: Testimonial) => {
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  function showToast(msg: string, type: 'ok' | 'err' = 'ok') {
+    setToast({ msg, type })
+    setTimeout(() => setToast(null), 3500)
+  }
+
+  function openModal(item: Testimonial, mode: typeof modalMode) {
+    setSelected(item)
+    setModalMode(mode)
+    setReplyText(item.adminReply || '')
+    setEditQuote(item.quote)
+    setEditTitle(item.title || '')
+  }
+
+  function closeModal() {
+    setSelected(null)
+    setModalMode(null)
+  }
+
+  async function doAction(id: number, action: string, extra?: object) {
+    setAL(id)
     try {
-      const res = await fetch(`/api/admin/marketing/testimonials/${item.id}`, {
-        method: 'PUT',
+      const res = await fetch(`/api/admin/testimonials/${id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approved: !item.approved })
-      });
-      if (!res.ok) throw new Error("Erreur");
-      const updated = await res.json();
-      setTestimonials(prev => prev.map(t => t.id === item.id ? updated : t));
-      success(updated.approved ? "Témoignage approuvé pour affichage public." : "Témoignage désactivé.");
-    } catch (err) {
-      console.error(err);
-      error("Impossible de modifier l'approbation.");
+        body: JSON.stringify({ action, ...extra }),
+      })
+      const payload = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        showToast(payload.error || 'Erreur serveur', 'err')
+        return
+      }
+      showToast(
+        action === 'approve'
+          ? 'Témoignage approuvé et publié sur le site.'
+          : action === 'reject'
+          ? 'Témoignage refusé.'
+          : action === 'reply'
+          ? 'Réponse envoyée à l\'étudiant.'
+          : action === 'edit'
+          ? 'Témoignage mis à jour.'
+          : 'Opération réussie.'
+      )
+      closeModal()
+      fetchData()
+    } finally {
+      setAL(null)
     }
-  };
+  }
 
-  const setReviewStatus = async (item: Testimonial, status: 'approved' | 'rejected') => {
+  async function doDelete(id: number) {
+    setAL(id)
     try {
-      const res = await fetch(`/api/admin/marketing/testimonials/${item.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
-      if (!res.ok) throw new Error('Erreur');
-      const updated = await res.json();
-      setTestimonials(prev => prev.map(t => t.id === item.id ? updated : t));
-      success(status === 'approved' ? 'Témoignage approuvé et publié.' : 'Témoignage refusé. Il ne sera pas publié.');
-    } catch { error('Impossible de mettre à jour le statut.'); }
-  };
-
-  const deleteTestimonial = async (id: number) => {
-    if (!confirm("Voulez-vous supprimer ce témoignage ?")) return;
-    try {
-      const res = await fetch(`/api/admin/marketing/testimonials/${id}`, {
-        method: 'DELETE'
-      });
-      if (!res.ok) throw new Error("Erreur");
-      setTestimonials(prev => prev.filter(t => t.id !== id));
-      success("Témoignage supprimé.");
-    } catch (err) {
-      console.error(err);
-      error("Erreur lors de la suppression.");
+      const res = await fetch(`/api/admin/testimonials/${id}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) {
+        showToast('Suppression impossible.', 'err')
+        return
+      }
+      showToast('Témoignage supprimé définitivement.')
+      closeModal()
+      fetchData()
+    } finally {
+      setAL(null)
     }
-  };
+  }
+
+  const TABS = [
+    { key: 'all', label: 'Tous' },
+    { key: 'pending', label: 'En attente' },
+    { key: 'approved', label: 'Approuvés' },
+    { key: 'rejected', label: 'Refusés' },
+  ]
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-8 bg-slate-50/50 min-h-screen">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 bg-gradient-to-r from-blue-900 to-indigo-600 bg-clip-text text-transparent">
-            Témoignages Étudiants
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Gérez et ordonnez les avis affichés en page d'accueil de la plateforme.
-          </p>
-        </div>
-        <button
-          onClick={openCreate}
-          className="px-4 py-2.5 bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-sm transition-all"
-        >
-          + Ajouter un témoignage
-        </button>
-      </div>
-
-      {showForm && (
-        <div className="mb-8 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
-          <h2 className="text-lg font-bold text-slate-900 mb-4">
-            {editingItem ? "Modifier le témoignage" : "Nouveau témoignage"}
-          </h2>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="student-name" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Nom de l'étudiant *</label>
-              <input
-                id="student-name"
-                type="text"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder="ex. Marie Mwamba"
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="student-location" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Provenance / Rôle</label>
-              <input
-                id="student-location"
-                type="text"
-                value={formLocation}
-                onChange={(e) => setFormLocation(e.target.value)}
-                placeholder="ex. Kinshasa, RDC ou Alumni"
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label htmlFor="student-quote" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Citation / Témoignage *</label>
-              <textarea
-                id="student-quote"
-                rows={3}
-                value={formQuote}
-                onChange={(e) => setFormQuote(e.target.value)}
-                placeholder="Écrire le témoignage..."
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="student-order" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Ordre d'affichage</label>
-              <input
-                id="student-order"
-                type="number"
-                value={formOrder}
-                onChange={(e) => setFormOrder(parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30"
-              />
-            </div>
-            <div className="flex items-center gap-2 mt-8">
-              <input
-                id="student-approved"
-                type="checkbox"
-                checked={formApproved}
-                onChange={(e) => setFormApproved(e.target.checked)}
-                className="rounded text-blue-900 focus:ring-blue-900 w-4 h-4"
-              />
-              <label htmlFor="student-approved" className="text-xs font-semibold text-slate-700 select-none">Approuver directement pour affichage public</label>
-            </div>
-
-            <div className="md:col-span-2 flex gap-2 justify-end mt-4">
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 font-bold text-xs"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-900 text-white rounded-xl hover:bg-blue-800 font-bold text-xs shadow-sm"
-              >
-                Enregistrer
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Grid of Testimonials */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden p-6">
-        {loading ? (
-          <div className="flex items-center justify-center py-12 text-slate-400">
-            <span>Chargement des témoignages...</span>
+    <AdminShell title="Témoignages">
+      <div className="space-y-5">
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-black text-slate-900">
+              Gestion des témoignages étudiants
+            </h1>
+            <p className="mt-0.5 text-sm text-slate-500">
+              Modérez, validez, répondez et publiez les témoignages sur la page d'accueil.
+            </p>
           </div>
-        ) : testimonials.length === 0 ? (
-          <div className="text-center py-12 text-slate-400">
-            <span className="text-4xl">💬</span>
-            <p className="text-sm mt-3">Aucun témoignage enregistré. Cliquez sur "+ Ajouter" pour en créer un.</p>
+          <button
+            onClick={fetchData}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+          >
+            <RefreshCw className="h-4 w-4" /> Actualiser
+          </button>
+        </div>
+
+        {/* Status Tabs */}
+        <div className="flex flex-wrap gap-2">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => {
+                setStatus(tab.key)
+                setPage(1)
+              }}
+              className={`rounded-xl border px-4 py-2 text-sm font-bold transition ${
+                status === tab.key
+                  ? 'border-[var(--cj-blue)] bg-[var(--cj-blue)] text-white shadow-sm'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-[var(--cj-blue)] hover:text-[var(--cj-blue)]'
+              }`}
+            >
+              {tab.label}
+              {tab.key === 'all' && data && (
+                <span
+                  className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-black ${
+                    status === tab.key
+                      ? 'bg-white/20 text-white'
+                      : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {data.total}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Search & Toolbar */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative min-w-[240px] flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
+              placeholder="Rechercher par nom d'étudiant, formation, texte..."
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none transition focus:border-[var(--cj-blue)] focus:ring-2 focus:ring-[var(--cj-blue)]/10"
+            />
+          </div>
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value)
+              setPage(1)
+            }}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-[var(--cj-blue)]"
+          >
+            <option value="createdAt">Trier par date</option>
+            <option value="rating">Trier par note</option>
+          </select>
+          <button
+            onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
+            className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600 transition hover:bg-slate-50"
+            title={
+              sortDir === 'desc'
+                ? 'Plus récents en premier'
+                : 'Plus anciens en premier'
+            }
+          >
+            {sortDir === 'desc' ? (
+              <SortDesc className="h-4 w-4" />
+            ) : (
+              <SortAsc className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+
+        {/* Table */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-7 w-7 animate-spin text-[var(--cj-blue)]" />
+          </div>
+        ) : !data?.items.length ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+            <MessageSquare className="mx-auto h-10 w-10 text-slate-300" />
+            <p className="mt-3 text-sm font-semibold text-slate-500">
+              Aucun témoignage trouvé
+            </p>
+            <p className="mt-1 text-xs text-slate-400">
+              Modifiez vos critères de recherche ou attendez de nouvelles soumissions.
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map((item) => (
-              <div
-                key={item.id}
-                className="bg-slate-50 rounded-2xl p-6 border border-slate-100 shadow-sm relative flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-sm">{item.name}</h3>
-                      {item.location && <p className="text-xs text-slate-400">{item.location}</p>}
-                    </div>
-                    <span className="text-xs font-semibold text-slate-400 bg-white border border-slate-200 px-2 py-0.5 rounded-lg">
-                      Ordre: {item.order}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 italic whitespace-pre-wrap mb-4">
-                    "{item.quote}"
-                  </p>
-                  <div className="space-y-1 text-[11px] text-slate-500">
-                    {item.formation && <p>Formation : {item.formation.title}</p>}
-                    {item.session && <p>Session du {new Date(item.session.startDate).toLocaleDateString('fr-FR')}</p>}
-                    {item.rating && <p>Note : {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}</p>}
-                  </div>
-                </div>
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <table className="w-full text-sm">
+              <thead className="border-b border-slate-100 bg-slate-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Étudiant
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Formation / Session
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Témoignage
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Note
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Statut
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {data.items.map((item) => (
+                  <tr key={item.id} className="transition-colors hover:bg-slate-50">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar
+                          name={
+                            item.showName
+                              ? item.name
+                              : item.student
+                              ? `${item.student.firstName} ${item.student.lastName}`
+                              : item.name
+                          }
+                          photoUrl={
+                            item.showPhoto
+                              ? item.photoUrl
+                              : null
+                          }
+                        />
+                        <div>
+                          <p className="font-semibold leading-tight text-slate-900">
+                            {item.name}
+                          </p>
+                          <p className="text-[11px] text-slate-400">
+                            {item.student?.email ?? '—'}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium leading-tight text-slate-800">
+                        {item.formation?.title ?? '—'}
+                      </p>
+                      {item.session?.startDate && (
+                        <p className="text-[11px] text-slate-400">
+                          {new Date(item.session.startDate).toLocaleDateString(
+                            'fr-FR',
+                            { month: 'short', year: 'numeric' }
+                          )}
+                          {item.session.location
+                            ? ` · ${item.session.location}`
+                            : ''}
+                        </p>
+                      )}
+                    </td>
+                    <td className="max-w-xs px-4 py-3">
+                      {item.title && (
+                        <p className="mb-0.5 text-xs font-semibold text-slate-900">
+                          {item.title}
+                        </p>
+                      )}
+                      <p className="line-clamp-2 text-xs leading-relaxed text-slate-600">
+                        « {item.quote} »
+                      </p>
+                      {item.adminReply && (
+                        <p className="mt-1 text-[10px] font-semibold text-[var(--cj-blue)]">
+                          ↩ Réponse envoyée
+                        </p>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <StarRating rating={item.rating} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={item.status} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="whitespace-nowrap text-xs text-slate-500">
+                        {new Date(item.createdAt).toLocaleDateString('fr-FR')}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => openModal(item, 'view')}
+                          title="Consulter le détail"
+                          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-[var(--cj-blue)]"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        {item.status !== 'approved' && (
+                          <button
+                            onClick={() => doAction(item.id, 'approve')}
+                            title="Approuver et publier"
+                            disabled={actionLoading === item.id}
+                            className="rounded-lg p-1.5 text-slate-500 transition hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-40"
+                          >
+                            {actionLoading === item.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check className="h-4 w-4" />
+                            )}
+                          </button>
+                        )}
+                        {item.status !== 'rejected' && (
+                          <button
+                            onClick={() => doAction(item.id, 'reject')}
+                            title="Refuser"
+                            disabled={actionLoading === item.id}
+                            className="rounded-lg p-1.5 text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => openModal(item, 'reply')}
+                          title="Répondre à l'étudiant"
+                          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-blue-50 hover:text-[var(--cj-blue)]"
+                        >
+                          <Reply className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => openModal(item, 'edit')}
+                          title="Corriger l'orthographe"
+                          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-amber-50 hover:text-amber-600"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => openModal(item, 'delete')}
+                          title="Supprimer définitivement"
+                          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-                <div className="flex justify-between items-center border-t border-slate-200/50 pt-4 mt-2">
+        {/* Pagination */}
+        {data && data.pageCount > 1 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-slate-500">
+              {(page - 1) * 20 + 1}–{Math.min(page * 20, data.total)} sur{' '}
+              {data.total} témoignages
+            </p>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              {Array.from({ length: Math.min(data.pageCount, 5) }, (_, i) => {
+                const p = page <= 3 ? i + 1 : page + i - 2
+                if (p < 1 || p > data.pageCount) return null
+                return (
                   <button
-                    onClick={() => toggleApproval(item)}
-                    className={`px-3 py-1.5 rounded-xl font-bold text-[10px] uppercase transition-all ${
-                      item.approved
-                        ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                        : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`rounded-lg border px-3 py-1.5 text-sm font-bold transition ${
+                      p === page
+                        ? 'border-[var(--cj-blue)] bg-[var(--cj-blue)] text-white'
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
-                    {item.approved ? '✅ Public' : '❌ Masqué'}
+                    {p}
                   </button>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => openEdit(item)}
-                      className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl text-xs"
-                      title="Modifier"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      onClick={() => deleteTestimonial(item.id)}
-                      className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 border border-red-100 text-red-600 rounded-xl text-xs"
-                      title="Supprimer"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+                )
+              })}
+              <button
+                onClick={() => setPage((p) => Math.min(data.pageCount, p + 1))}
+                disabled={page === data.pageCount}
+                className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         )}
       </div>
-    </div>
-  );
+
+      {/* Modals */}
+      {selected && modalMode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+          <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            {/* Modal header */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <h2 className="text-base font-black text-slate-900">
+                {modalMode === 'view' && 'Détail du témoignage'}
+                {modalMode === 'reply' && 'Répondre à l\'étudiant'}
+                {modalMode === 'edit' && 'Corriger le témoignage (fautes mineures)'}
+                {modalMode === 'delete' && 'Supprimer définitivement'}
+              </h2>
+              <button
+                onClick={closeModal}
+                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-4">
+              {/* VIEW */}
+              {modalMode === 'view' && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      name={selected.name}
+                      photoUrl={selected.photoUrl}
+                    />
+                    <div>
+                      <p className="font-bold text-slate-900">{selected.name}</p>
+                      <p className="text-xs text-slate-400">
+                        {selected.student?.email ?? '—'}
+                      </p>
+                    </div>
+                    <div className="ml-auto">
+                      <StatusBadge status={selected.status} />
+                    </div>
+                  </div>
+                  {selected.formation && (
+                    <p className="text-xs text-slate-500">
+                      <span className="font-semibold">Formation :</span>{' '}
+                      {selected.formation.title}
+                    </p>
+                  )}
+                  {selected.session?.startDate && (
+                    <p className="text-xs text-slate-500">
+                      <span className="font-semibold">Session :</span>{' '}
+                      {new Date(selected.session.startDate).toLocaleDateString(
+                        'fr-FR'
+                      )}{' '}
+                      {selected.session.location
+                        ? `· ${selected.session.location}`
+                        : ''}
+                    </p>
+                  )}
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                    {selected.title && (
+                      <p className="mb-1 text-sm font-bold text-slate-800">
+                        {selected.title}
+                      </p>
+                    )}
+                    <p className="text-sm leading-relaxed text-slate-700">
+                      « {selected.quote} »
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-slate-500">
+                    <StarRating rating={selected.rating} />
+                    <span>
+                      Soumis le{' '}
+                      {new Date(selected.createdAt).toLocaleDateString('fr-FR')}
+                    </span>
+                    {selected.publishedAt && (
+                      <span>
+                        Publié le{' '}
+                        {new Date(selected.publishedAt).toLocaleDateString('fr-FR')}
+                      </span>
+                    )}
+                  </div>
+                  {selected.adminReply && (
+                    <div className="rounded-xl border border-[var(--cj-blue)]/20 bg-blue-50 p-3">
+                      <p className="mb-1 text-xs font-bold text-[var(--cj-blue)]">
+                        Réponse envoyée par l'administration
+                      </p>
+                      <p className="text-sm text-slate-700">
+                        {selected.adminReply}
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {selected.status !== 'approved' && (
+                      <button
+                        onClick={() => doAction(selected.id, 'approve')}
+                        disabled={!!actionLoading}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Approuver et publier
+                      </button>
+                    )}
+                    {selected.status !== 'rejected' && (
+                      <button
+                        onClick={() => doAction(selected.id, 'reject')}
+                        disabled={!!actionLoading}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-red-700 disabled:opacity-50"
+                      >
+                        <XCircle className="h-3.5 w-3.5" /> Refuser
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* REPLY */}
+              {modalMode === 'reply' && (
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                    <p className="mb-1 text-xs font-semibold text-slate-500">
+                      Témoignage de {selected.name}
+                    </p>
+                    <p className="line-clamp-3 text-sm text-slate-700">
+                      « {selected.quote} »
+                    </p>
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-700">
+                      Votre réponse à l'étudiant
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Rédigez votre réponse officielle..."
+                      className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-[var(--cj-blue)] focus:ring-2 focus:ring-[var(--cj-blue)]/10"
+                    />
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      Cette réponse apparaîtra dans l'Espace Étudiant et sera transmise par e-mail.
+                    </p>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={closeModal}
+                      className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={() =>
+                        doAction(selected.id, 'reply', { adminReply: replyText })
+                      }
+                      disabled={!replyText.trim() || !!actionLoading}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cj-blue)] px-4 py-2 text-sm font-bold text-white transition hover:bg-[var(--cj-blue-700)] disabled:opacity-50"
+                    >
+                      {actionLoading === selected.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Reply className="h-4 w-4" />
+                      )}
+                      Envoyer la réponse
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* EDIT */}
+              {modalMode === 'edit' && (
+                <div className="space-y-3">
+                  <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-slate-600">
+                    <AlertTriangle className="mr-1 inline h-3.5 w-3.5 text-amber-600" />
+                    Correcteur éditorial : seules les corrections de forme (orthographe, grammaire) sont recommandées.
+                  </p>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-700">
+                      Titre du témoignage
+                    </label>
+                    <input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[var(--cj-blue)] focus:ring-2 focus:ring-[var(--cj-blue)]/10"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-700">
+                      Contenu du témoignage
+                    </label>
+                    <textarea
+                      rows={6}
+                      value={editQuote}
+                      onChange={(e) => setEditQuote(e.target.value)}
+                      className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[var(--cj-blue)] focus:ring-2 focus:ring-[var(--cj-blue)]/10"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={closeModal}
+                      className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={() =>
+                        doAction(selected.id, 'edit', {
+                          quote: editQuote,
+                          title: editTitle,
+                        })
+                      }
+                      disabled={!editQuote.trim() || !!actionLoading}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-amber-700 disabled:opacity-50"
+                    >
+                      {actionLoading === selected.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Edit3 className="h-4 w-4" />
+                      )}
+                      Enregistrer les modifications
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* DELETE */}
+              {modalMode === 'delete' && (
+                <div className="space-y-4 py-2 text-center">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+                    <Trash2 className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900">
+                      Supprimer ce témoignage ?
+                    </p>
+                    <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
+                      Cette action retirera définitivement ce témoignage du site et de la base de données.
+                    </p>
+                  </div>
+                  <div className="flex justify-center gap-3">
+                    <button
+                      onClick={closeModal}
+                      className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={() => doDelete(selected.id)}
+                      disabled={!!actionLoading}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {actionLoading === selected.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      Supprimer définitivement
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm font-semibold text-white shadow-xl transition-all ${
+            toast.type === 'ok' ? 'bg-emerald-600' : 'bg-red-600'
+          }`}
+        >
+          {toast.type === 'ok' ? (
+            <CheckCircle2 className="h-4 w-4" />
+          ) : (
+            <AlertTriangle className="h-4 w-4" />
+          )}
+          {toast.msg}
+        </div>
+      )}
+    </AdminShell>
+  )
 }

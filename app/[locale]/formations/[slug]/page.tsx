@@ -57,6 +57,7 @@ export default function FormationDetailPage() {
 
   const [formation, setFormation] = useState<Formation | null>(null)
   const [allFormations, setAllFormations] = useState<Formation[]>([])
+  const [formationTestimonials, setFormationTestimonials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'program' | 'instructor'>('overview')
 
@@ -94,6 +95,12 @@ export default function FormationDetailPage() {
 
     if (slug) {
       loadFormation()
+      fetch(`/api/testimonials?slug=${encodeURIComponent(slug)}`)
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          if (Array.isArray(data)) setFormationTestimonials(data)
+        })
+        .catch(() => {})
     }
   }, [slug])
 
@@ -585,6 +592,92 @@ export default function FormationDetailPage() {
                           </h2>
                         </div>
                         <p className="text-white font-opensans leading-relaxed">{formation.certification}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Témoignages des participants */}
+                  {formationTestimonials.length > 0 && (
+                    <div className="cj-card-static p-8">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+                          <StarIcon className="w-5 h-5 fill-amber-400" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-black text-slate-900 font-montserrat">
+                            Avis & Témoignages des apprenants
+                          </h2>
+                          <p className="text-xs text-slate-500 font-opensans">
+                            Témoignages vérifiés des participants à cette formation
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {formationTestimonials.map((t: any) => (
+                          <div
+                            key={t.id}
+                            className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 font-opensans"
+                          >
+                            <div className="flex items-center justify-between gap-3 mb-2">
+                              <div className="flex items-center gap-3">
+                                {t.photoUrl ? (
+                                  <img
+                                    src={t.photoUrl}
+                                    alt={t.name}
+                                    className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                                  />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-full bg-[var(--cj-blue)] text-white text-xs font-bold flex items-center justify-center">
+                                    {t.name
+                                      .split(' ')
+                                      .map((p: string) => p[0])
+                                      .join('')
+                                      .toUpperCase()
+                                      .slice(0, 2)}
+                                  </div>
+                                )}
+                                <div>
+                                  <p className="font-bold text-sm text-slate-900">{t.name}</p>
+                                  <p className="text-xs text-slate-400">
+                                    {t.session?.startDate
+                                      ? `Session du ${new Date(t.session.startDate).toLocaleDateString('fr-FR')}`
+                                      : 'Apprenant certifié'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <StarIcon
+                                    key={star}
+                                    className={`w-4 h-4 ${
+                                      star <= (t.rating || 5)
+                                        ? 'text-amber-400 fill-amber-400'
+                                        : 'text-slate-200'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+
+                            {t.title && (
+                              <h4 className="font-bold text-slate-900 text-sm mb-1">{t.title}</h4>
+                            )}
+                            <p className="text-sm text-slate-700 leading-relaxed italic">
+                              « {t.quote} »
+                            </p>
+
+                            {t.adminReply && (
+                              <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs text-blue-900">
+                                <p className="font-bold text-[var(--cj-blue)] mb-0.5">
+                                  Réponse de l'équipe pédagogique :
+                                </p>
+                                <p>{t.adminReply}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}

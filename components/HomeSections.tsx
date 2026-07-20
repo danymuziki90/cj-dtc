@@ -101,10 +101,14 @@ export default function HomeSections({ locale }: HomeSectionsProps) {
 
   const testimonialsList = dbTestimonials.length > 0
     ? dbTestimonials.map((item: any) => ({
+        id: item.id,
         name: item.name,
         initials: getInitials(item.name),
-        location: item.location || (isFr ? 'Kinshasa, RDC' : 'Kinshasa, DRC'),
+        location: item.formation?.title ? `Formation ${item.formation.title}` : (item.location || (isFr ? 'Kinshasa, RDC' : 'Kinshasa, DRC')),
         quote: item.quote,
+        title: item.title,
+        rating: item.rating || 5,
+        photoUrl: item.photoUrl,
       }))
     : t.testimonials
 
@@ -158,10 +162,10 @@ export default function HomeSections({ locale }: HomeSectionsProps) {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            {testimonialsList.map((item) => (
+            {testimonialsList.map((item: any, idx: number) => (
               <figure
-                key={item.name}
-                className="relative rounded-2xl border border-slate-200 bg-slate-50 p-7 shadow-sm"
+                key={item.id || item.name || idx}
+                className="relative rounded-2xl border border-slate-200 bg-slate-50 p-7 shadow-sm flex flex-col justify-between"
               >
                 {/* Guillemet décoratif */}
                 <span
@@ -171,23 +175,46 @@ export default function HomeSections({ locale }: HomeSectionsProps) {
                   "
                 </span>
 
-                <div className="mb-5 flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--cj-blue)] text-sm font-bold text-white">
-                    {item.initials}
+                <div>
+                  <div className="mb-5 flex items-center gap-4">
+                    {item.photoUrl ? (
+                      <img
+                        src={item.photoUrl}
+                        alt={item.name}
+                        className="h-12 w-12 rounded-full object-cover border border-slate-200 shadow-sm"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--cj-blue)] text-sm font-bold text-white shadow-sm">
+                        {item.initials}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{item.name}</p>
+                      <p className="text-xs text-slate-500">{item.location}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{item.name}</p>
-                    <p className="text-xs text-slate-500">{item.location}</p>
-                  </div>
+
+                  {item.title && (
+                    <h4 className="font-bold text-slate-900 text-sm mb-1.5">{item.title}</h4>
+                  )}
+
+                  <blockquote className="text-sm leading-7 text-slate-700 italic">
+                    « {item.quote} »
+                  </blockquote>
                 </div>
 
-                <blockquote className="text-sm leading-7 text-slate-700">
-                  « {item.quote} »
-                </blockquote>
-
-                <div className="mt-4 flex gap-0.5" aria-label="5 étoiles">
+                <div className="mt-4 flex gap-0.5" aria-label={`${item.rating || 5} étoiles`}>
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <svg key={i} className="h-4 w-4 fill-[var(--cj-red)]" viewBox="0 0 20 20" aria-hidden="true">
+                    <svg
+                      key={i}
+                      className={`h-4 w-4 ${
+                        i < (item.rating || 5)
+                          ? 'fill-[var(--cj-red)]'
+                          : 'fill-slate-200'
+                      }`}
+                      viewBox="0 0 20 20"
+                      aria-hidden="true"
+                    >
                       <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                     </svg>
                   ))}

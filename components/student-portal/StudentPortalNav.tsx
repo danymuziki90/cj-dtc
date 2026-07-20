@@ -8,7 +8,8 @@ import {
   GraduationCap,
   LayoutDashboard,
   Award,
-  User,
+  UserCircle,
+  MessageSquare,
 } from 'lucide-react'
 
 const items = [
@@ -19,7 +20,8 @@ const items = [
   { href: '/student/certificats', label: 'Certificats', icon: Award },
   { href: '/student/notifications', label: 'Notifications', icon: Bell },
   { href: '/student/submissions', label: 'Travaux', icon: BookOpen },
-  { href: '/student/profile', label: 'Profil', icon: User },
+  { href: '/student/temoignages', label: 'Témoignages', icon: MessageSquare },
+  { href: '/student/profile', label: 'Profil', icon: UserCircle },
 ]
 
 function isItemActive(pathname: string, href: string) {
