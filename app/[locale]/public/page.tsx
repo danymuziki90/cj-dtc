@@ -35,6 +35,18 @@ export default function HomePage() {
   const locale = params?.locale || "fr";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [dbTestimonials, setDbTestimonials] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/testimonials')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setDbTestimonials(data);
+        }
+      })
+      .catch(err => console.error("Error fetching testimonials:", err));
+  }, []);
 
   const heroSlides = [
     {
@@ -141,38 +153,48 @@ export default function HomePage() {
     },
   ];
 
-  const testimonials = [
-    {
-      id: 1,
-      name: "Marie Mwamba",
-      role: "Directrice RH, Mining Company RDC",
-      content:
-        "La formation MRH a transformé ma pratique professionnelle. Les standards internationaux appliqués à notre contexte africain sont exceptionnels.",
-      rating: 5,
-      image: "/testimonials/marie.jpg",
-      company: "Mining Company RDC",
-    },
-    {
-      id: 2,
-      name: "Jean-Pierre Lukoki",
-      role: "CEO, Tech Startup Kinshasa",
-      content:
-        "Le programme Leadership m'a permis de passer de manager à leader visionnaire. Investissement rentable !",
-      rating: 5,
-      image: "/testimonials/jean-pierre.jpg",
-      company: "Tech Startup Kinshasa",
-    },
-    {
-      id: 3,
-      name: "Sarah Kabeya",
-      role: "Marketing Manager, Multinationale",
-      content:
-        "Excellente approche pédagogique et réseau de qualité. J'ai décroché une promotion 6 mois après la certification.",
-      rating: 5,
-      image: "/testimonials/sarah.jpg",
-      company: "Multinationale",
-    },
-  ];
+  const testimonials = dbTestimonials.length > 0
+    ? dbTestimonials.map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        role: t.title || (locale === 'fr' ? 'Diplômé / Partenaire' : 'Alumni / Partner'),
+        content: t.quote,
+        rating: t.rating || 5,
+        image: t.photoUrl,
+        company: t.location || 'CJ DTC Alumni',
+      }))
+    : [
+        {
+          id: 1,
+          name: "Marie Mwamba",
+          role: "Directrice RH, Mining Company RDC",
+          content:
+            "La formation MRH a transformé ma pratique professionnelle. Les standards internationaux appliqués à notre contexte africain sont exceptionnels.",
+          rating: 5,
+          image: "/testimonials/marie.jpg",
+          company: "Mining Company RDC",
+        },
+        {
+          id: 2,
+          name: "Jean-Pierre Lukoki",
+          role: "CEO, Tech Startup Kinshasa",
+          content:
+            "Le programme Leadership m'a permis de passer de manager à leader visionnaire. Investissement rentable !",
+          rating: 5,
+          image: "/testimonials/jean-pierre.jpg",
+          company: "Tech Startup Kinshasa",
+        },
+        {
+          id: 3,
+          name: "Sarah Kabeya",
+          role: "Marketing Manager, Multinationale",
+          content:
+            "Excellente approche pédagogique et réseau de qualité. J'ai décroché une promotion 6 mois après la certification.",
+          rating: 5,
+          image: "/testimonials/sarah.jpg",
+          company: "Multinationale",
+        },
+      ];
 
   const partners = [
     { name: "World Bank", logo: "/partners/world-bank.png" },
@@ -639,8 +661,12 @@ export default function HomePage() {
                 </p>
 
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                    <UserIcon className="w-6 h-6 text-blue-600" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center overflow-hidden">
+                    {testimonial.image ? (
+                      <img src={testimonial.image} alt={testimonial.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserIcon className="w-6 h-6 text-blue-600" />
+                    )}
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">

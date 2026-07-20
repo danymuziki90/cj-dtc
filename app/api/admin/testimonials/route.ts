@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
       { quote: { contains: search, mode: 'insensitive' } },
       { title: { contains: search, mode: 'insensitive' } },
       { formation: { title: { contains: search, mode: 'insensitive' } } },
+      { session: { location: { contains: search, mode: 'insensitive' } } },
     ]
   }
 

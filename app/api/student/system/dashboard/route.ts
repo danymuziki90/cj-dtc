@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   const studentEmail = auth.student.email
 
   try {
-  const [enrollmentsRaw, submissions, portalCertificates, issuedCertificates, news, evaluations, userProfile] =
+  const [enrollmentsRaw, submissions, portalCertificates, issuedCertificates, news, evaluations, userProfile, testimonials] =
     await Promise.all([
       prisma.enrollment.findMany({
         where: {
@@ -152,6 +152,17 @@ export async function GET(request: NextRequest) {
         where: { email: studentEmail },
         select: {
           image: true,
+        },
+      }),
+      prisma.testimonial.findMany({
+        where: {
+          OR: [
+            { studentId: auth.student.id },
+            { student: { email: { equals: studentEmail, mode: 'insensitive' } } },
+          ],
+        },
+        include: {
+          formation: { select: { id: true, title: true } },
         },
       }),
     ])
@@ -611,6 +622,37 @@ export async function GET(request: NextRequest) {
         title: 'Réponse à votre question',
         message: item.adminReply as string,
         createdAt: item.adminReplyAt ? new Date(item.adminReplyAt) : new Date(item.createdAt),
+      })),
+    // 13. Témoignages (validation, refus ou réponse)
+    ...testimonials.map((t) => {
+      let title = 'Témoignage en cours d\'examen'
+      let type = 'info'
+      let message = `Votre témoignage pour la formation "${t.formation?.title || 'formation'}" est en attente de modération.`
+      if (t.status === 'approved') {
+        title = 'Témoignage approuvé'
+        type = 'info'
+        message = `Votre témoignage pour la formation "${t.formation?.title || 'formation'}" a été approuvé et publié.`
+      } else if (t.status === 'rejected') {
+        title = 'Témoignage refusé'
+        type = 'warning'
+        message = `Votre témoignage pour la formation "${t.formation?.title || 'formation'}" a été refusé.`
+      }
+      return {
+        id: `testimonial-status-${t.id}-${t.status}`,
+        type,
+        title,
+        message,
+        createdAt: t.updatedAt || t.createdAt,
+      }
+    }),
+    ...testimonials
+      .filter((t) => t.adminReply)
+      .map((t) => ({
+        id: `testimonial-reply-${t.id}`,
+        type: 'info',
+        title: 'Réponse à votre témoignage',
+        message: `L'administration a répondu à votre témoignage : "${t.adminReply}"`,
+        createdAt: t.updatedAt || t.createdAt,
       })),
   ]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
