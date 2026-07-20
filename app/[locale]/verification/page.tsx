@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { 
   SearchIcon, 
   Award, 
@@ -605,12 +606,12 @@ export default function VerificationPage() {
               <a href="mailto:contact@cjdevelopmenttc.org" className="text-gray-400 hover:text-white">
                 Contact Support
               </a>
-              <a href="/fr/a-propos" className="text-gray-400 hover:text-white">
+              <Link href="/fr/a-propos" className="text-gray-400 hover:text-white">
                 À Propos
-              </a>
-              <a href="/fr/contact" className="text-gray-400 hover:text-white">
+              </Link>
+              <Link href="/fr/contact" className="text-gray-400 hover:text-white">
                 Contact
-              </a>
+              </Link>
             </div>
             <p className="text-gray-500 text-sm mt-8">
               © 2024 CJ DTC. Tous droits réservés. | Certificats vérifiés en temps réel
