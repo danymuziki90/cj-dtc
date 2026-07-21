@@ -47,6 +47,20 @@ function resolveLegacyAdminRedirect(pathname: string) {
   const match = pathname.match(/^\/(fr|en)(\/admin(?:\/.*)?$)/)
   if (!match) return null
   const legacyPath = match[2]
+
+  // Bypass legacy redirect for canonical localized pages
+  const localizedBypassRoutes = [
+    '/admin/testimonials',
+    '/admin/submissions',
+  ]
+  if (
+    localizedBypassRoutes.some(
+      (route) => legacyPath === route || legacyPath.startsWith(route + '/')
+    )
+  ) {
+    return null
+  }
+
   return legacyAdminRouteMap[legacyPath] || '/admin/dashboard'
 }
 
