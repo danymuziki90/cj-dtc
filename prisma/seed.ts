@@ -39,15 +39,16 @@ async function main() {
     }
   })
 
-  await prisma.article.upsert({
-    where: { slug: 'lancement-fonio-2026' },
+  await (prisma as any).news.upsert({
+    where: { id: 'seed-news-fonio-2026' },
     update: {},
     create: {
+      id: 'seed-news-fonio-2026',
       title: 'Lancement FONIOP 2026',
-      slug: 'lancement-fonio-2026',
-      excerpt: 'FONIOP 2026 : objectif 1000 emplois en 10 pays.',
-      content: 'Contenu officiel du lancement FONIOP 2026.',
-      published: true
+      content: 'Contenu officiel du lancement FONIOP 2026. FONIOP 2026 : objectif 1000 emplois en 10 pays.',
+      published: true,
+      category: 'General',
+      tags: 'FONIOP, Emploi',
     }
   })
 

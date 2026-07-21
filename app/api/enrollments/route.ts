@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
 import { deriveEnrollmentAccountState, provisionStudentAccountFromEnrollment } from '../../../lib/student/account-provisioning'
 import { resolveAppBaseUrl, sendEmail } from '../../../lib/email'
 import { signStudentToken, STUDENT_AUTH_COOKIE, STUDENT_TOKEN_MAX_AGE, getAuthCookieOptions } from '../../../lib/auth-portal/jwt'
+import { requireAdmin } from '@/lib/auth-portal/guards'
 
 export const runtime = 'nodejs'
 
@@ -155,8 +156,11 @@ const enrollmentInclude = {
   },
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAdmin(req)
+    if (auth.error) return auth.error
+
     const url = new URL(req.url, 'http://localhost')
     const where = buildEnrollmentWhere(url)
     const accountStatusFilter = url.searchParams.get('accountStatus')?.trim() || ''
@@ -399,8 +403,11 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PATCH(req: Request) {
+export async function PATCH(req: NextRequest) {
   try {
+    const auth = await requireAdmin(req)
+    if (auth.error) return auth.error
+
     const body = await req.json()
     const { enrollmentId, status, notes } = body
 

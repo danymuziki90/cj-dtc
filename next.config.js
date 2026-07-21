@@ -36,6 +36,42 @@ const nextConfig = {
     }
     return config
   },
+  async redirects() {
+    return [
+      // Un-localized /student redirects
+      { source: '/student', destination: '/fr/espace-etudiants', permanent: true },
+      { source: '/student/dashboard', destination: '/fr/espace-etudiants', permanent: true },
+      { source: '/student/inscriptions', destination: '/fr/espace-etudiants/mes-formations', permanent: true },
+      { source: '/student/elearning', destination: '/fr/espace-etudiants/elearning', permanent: true },
+      { source: '/student/assignments', destination: '/fr/espace-etudiants/travaux', permanent: true },
+      { source: '/student/exams', destination: '/fr/espace-etudiants/resultats', permanent: true },
+      { source: '/student/certificates', destination: '/fr/espace-etudiants/mes-certificats', permanent: true },
+      { source: '/student/profile', destination: '/fr/espace-etudiants/mon-compte', permanent: true },
+      { source: '/student/settings', destination: '/fr/espace-etudiants/mon-compte', permanent: true },
+      { source: '/student/temoignages', destination: '/fr/espace-etudiants/temoignages', permanent: true },
+      { source: '/student/ressources', destination: '/fr/espace-etudiants/supports', permanent: true },
+      { source: '/student/login', destination: '/fr/auth/login', permanent: true },
+      { source: '/student/register', destination: '/fr/auth/register', permanent: true },
+      { source: '/student/forgot-password', destination: '/fr/auth/forgot-password', permanent: true },
+      { source: '/student/reset-password', destination: '/fr/auth/reset-password', permanent: true },
+
+      // Localized /:locale/student redirects
+      { source: '/:locale/student', destination: '/:locale/espace-etudiants', permanent: true },
+      { source: '/:locale/student/dashboard', destination: '/:locale/espace-etudiants', permanent: true },
+      { source: '/:locale/student/inscriptions', destination: '/:locale/espace-etudiants/mes-formations', permanent: true },
+      { source: '/:locale/student/elearning', destination: '/:locale/espace-etudiants/elearning', permanent: true },
+      { source: '/:locale/student/assignments', destination: '/:locale/espace-etudiants/travaux', permanent: true },
+      { source: '/:locale/student/exams', destination: '/:locale/espace-etudiants/resultats', permanent: true },
+      { source: '/:locale/student/certificates', destination: '/:locale/espace-etudiants/mes-certificats', permanent: true },
+      { source: '/:locale/student/profile', destination: '/:locale/espace-etudiants/mon-compte', permanent: true },
+      { source: '/:locale/student/settings', destination: '/:locale/espace-etudiants/mon-compte', permanent: true },
+      { source: '/:locale/student/temoignages', destination: '/:locale/espace-etudiants/temoignages', permanent: true },
+      { source: '/:locale/student/ressources', destination: '/:locale/espace-etudiants/supports', permanent: true },
+
+      // Admin news redirect
+      { source: '/admin/news', destination: '/admin/articles', permanent: true },
+    ]
+  },
   // Keep config lean for Next 16 compatibility.
   turbopack: {
     // Empty config to acknowledge we've reviewed Turbopack compatibility

@@ -3,15 +3,13 @@ const path = require('path')
 
 const nextBin = path.join(__dirname, '..', 'node_modules', 'next', 'dist', 'bin', 'next')
 const existingNodeOptions = process.env.NODE_OPTIONS || ''
-const memoryOption = '--max-old-space-size=4096'
+const memoryOption = '--max-old-space-size=8192'
 
-const child = spawn(process.execPath, [nextBin, 'build'], {
+const child = spawn(process.execPath, [memoryOption, nextBin, 'build'], {
   cwd: path.join(__dirname, '..'),
   env: {
     ...process.env,
-    NODE_OPTIONS: existingNodeOptions.includes('--max-old-space-size')
-      ? existingNodeOptions
-      : `${existingNodeOptions} ${memoryOption}`.trim(),
+    NODE_OPTIONS: existingNodeOptions,
   },
   stdio: 'inherit',
 })

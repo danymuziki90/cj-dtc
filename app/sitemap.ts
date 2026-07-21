@@ -26,13 +26,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   try {
-    const articles = await prisma.article.findMany({
+    const newsDelegate = (prisma as any).news
+    const news = await newsDelegate.findMany({
       where: { published: true },
-      select: { slug: true, updatedAt: true },
+      select: { id: true, title: true, updatedAt: true },
     })
-    articleUrls = articles.map(a => ({
-      url: `${baseUrl}/fr/actualites/${a.slug}`,
-      lastModified: a.updatedAt,
+
+    const createNewsSlug = (id: string, title: string) => {
+      const safeTitle = (title || '')
+        .normalize('NFKD')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+      return safeTitle ? `${id}-${safeTitle}` : id
+    }
+
+    articleUrls = news.map((item: any) => ({
+      url: `${baseUrl}/fr/actualites/${createNewsSlug(item.id, item.title)}`,
+      lastModified: item.updatedAt,
       changeFrequency: 'weekly' as const,
       priority: 0.75,
     }))
