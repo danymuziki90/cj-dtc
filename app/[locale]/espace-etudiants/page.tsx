@@ -136,6 +136,14 @@ function EspaceEtudiantsContent() {
   // News Modal State
   const [selectedNewsForModal, setSelectedNewsForModal] = useState<any | null>(null);
 
+  // Assignment submission states
+  const [selectedAssignmentForSubmission, setSelectedAssignmentForSubmission] = useState<any | null>(null);
+  const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
+  const [isSubmittingWork, setIsSubmittingWork] = useState(false);
+  const [uploadErrorMessage, setUploadErrorMessage] = useState('');
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState('');
+
+
   async function loadDashboard() {
     setLoading(true);
     try {
