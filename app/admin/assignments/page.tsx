@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { useToastNotification } from "@/components/ui/toast";
 import {
   Star,
@@ -85,7 +84,6 @@ interface SessionOption {
 }
 
 export default function AdminAssignmentsPage() {
-  const { data: session } = useSession();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [formations, setFormations] = useState<FormationOption[]>([]);
   const [sessions, setSessions] = useState<SessionOption[]>([]);
