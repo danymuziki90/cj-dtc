@@ -41,6 +41,7 @@ import {
   X,
   Laptop,
   CalendarDays,
+  Upload,
 } from "lucide-react";
 import {
   StudentEmptyState as EmptyState,

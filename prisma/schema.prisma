@@ -48,6 +48,7 @@ model Student {
   portalCertificates StudentCertificate[]
   enrollments        Enrollment[]
   certificates       Certificate[]
+  testimonials       Testimonial[]
 
   @@index([username])
   @@index([adminSessionId])
@@ -255,6 +256,7 @@ model Formation {
   documents        Document[]
   evaluations      Evaluation[]
   assignments      Assignment[]
+  testimonials     Testimonial[]
 }
 
 model Article {
@@ -391,6 +393,7 @@ model TrainingSession {
   events            SessionEvent[]
   assignments       Assignment[]
   formQuestions     SessionFormQuestion[]
+  testimonials      Testimonial[]
   @@index([formationId])
   @@index([startDate])
   @@index([status])
@@ -725,4 +728,37 @@ model EmailTemplate {
   subject   String
   body      String   @db.Text
   updatedAt DateTime @updatedAt
+}
+
+// =============================================
+// TÉMOIGNAGES ÉTUDIANTS
+// =============================================
+
+model Testimonial {
+  id          Int      @id @default(autoincrement())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  formationId Int?
+  formation   Formation? @relation(fields: [formationId], references: [id], onDelete: SetNull)
+  sessionId   Int?
+  session     TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  // Contenu du témoignage
+  rating      Int      // 1-5 étoiles
+  title       String?  // Titre optionnel
+  content     String   // Contenu complet
+
+  // Modération
+  status      String   @default("pending") // pending, approved, rejected
+  adminReply  String?  // Réponse visible par l'étudiant
+  adminNote   String?  // Note interne admin (non visible)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([formationId])
+  @@index([sessionId])
+  @@index([status])
+  @@index([createdAt])
 }

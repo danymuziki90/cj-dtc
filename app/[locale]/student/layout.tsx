@@ -42,6 +42,8 @@ export default function StudentLayout({
         targetPath = `/${locale}/espace-etudiants/inscription`
       } else if (currentPath.includes('/student/profile')) {
         targetPath = `/${locale}/espace-etudiants/mon-compte`
+      } else if (currentPath.includes('/student/temoignages')) {
+        targetPath = `/${locale}/espace-etudiants/temoignages`
       }
       router.push(targetPath)
     }
