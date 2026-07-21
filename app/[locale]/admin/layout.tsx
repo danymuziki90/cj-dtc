@@ -15,17 +15,49 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [cookieChecked, setCookieChecked] = useState(false);
+  const [hasCookie, setHasCookie] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated" && !isRedirecting) {
+    async function checkCookieAuth() {
+      if (status === "loading") return;
+
+      if (status === "authenticated") {
+        setHasCookie(false);
+        setCookieChecked(true);
+        return;
+      }
+
+      // If NextAuth is unauthenticated, check custom cookie as fallback
+      try {
+        const res = await fetch("/api/admin/auth/me");
+        if (res.ok) {
+          setHasCookie(true);
+        } else {
+          setHasCookie(false);
+        }
+      } catch (err) {
+        setHasCookie(false);
+      } finally {
+        setCookieChecked(true);
+      }
+    }
+
+    checkCookieAuth();
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "loading" || !cookieChecked) return;
+
+    if (status === "unauthenticated" && !hasCookie && !isRedirecting) {
       setIsRedirecting(true);
       const currentPath = pathname || "/admin/dashboard";
       const loginUrl = `/auth/admin-login?callbackUrl=${encodeURIComponent(currentPath)}`;
       router.push(loginUrl);
     }
-  }, [status, router, pathname, isRedirecting]);
+  }, [status, cookieChecked, hasCookie, router, pathname, isRedirecting]);
 
-  if (status === "loading") {
+  if (status === "loading" || !cookieChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -33,7 +65,9 @@ export default function AdminLayout({
     );
   }
 
-  if (!session || session.user?.role !== "ADMIN") {
+  const isAdmin = (session && (session.user?.role === "ADMIN" || session.user?.role === "SUPER_ADMIN")) || hasCookie;
+
+  if (!isAdmin) {
     return null;
   }
 

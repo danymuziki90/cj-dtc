@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getToken } from 'next-auth/jwt'
 import {
   ADMIN_AUTH_COOKIE,
   STUDENT_AUTH_COOKIE,
@@ -10,7 +11,25 @@ import { isEmergencyAdminLoginAllowed } from '@/lib/auth-portal/security'
 
 export async function requireAdmin(request: NextRequest) {
   const token = request.cookies.get(ADMIN_AUTH_COOKIE)?.value
+  
   if (!token) {
+    // Fallback: Check NextAuth token if custom cookie is missing
+    try {
+      const nextAuthToken = await getToken({
+        req: request as any,
+        secret: process.env.NEXTAUTH_SECRET,
+      })
+      if (nextAuthToken && (nextAuthToken.role === 'ADMIN' || nextAuthToken.role === 'SUPER_ADMIN')) {
+        return {
+          admin: {
+            id: nextAuthToken.sub || String(nextAuthToken.id || 'admin'),
+            username: nextAuthToken.name || nextAuthToken.email || 'admin',
+          },
+        }
+      }
+    } catch (err) {
+      console.error('requireAdmin NextAuth fallback token check failed:', err)
+    }
     return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
 
