@@ -369,12 +369,7 @@ export function HeroBanner({
           >
             📢 Publier actualité
           </Link>
-          <Link
-            href="/admin/submissions"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/15 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-sm hover:bg-white/25 transition border border-white/10"
-          >
-            📋 Créer un travail
-          </Link>
+
         </div>
       </div>
     </div>

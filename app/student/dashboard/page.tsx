@@ -260,12 +260,6 @@ export default function StudentDashboardPage() {
               Voir les supports
             </Link>
             <Link
-              href="/student/submissions"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            >
-              Soumettre un travail
-            </Link>
-            <Link
               href="/student/profile"
               className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
@@ -441,18 +435,12 @@ export default function StudentDashboardPage() {
                 <div className="h-2 rounded-full bg-blue-600" style={{ width: `${completionRate}%` }} />
               </div>
               <p className="mt-1 text-xs text-slate-500">Avancement global: {completionRate}%</p>
-              <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="mt-4 grid grid-cols-1 gap-2">
                 <Link
                   href="/student/ressources"
                   className="flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-100 transition"
                 >
                   Voir les supports
-                </Link>
-                <Link
-                  href="/student/submissions"
-                  className="flex items-center justify-center rounded-lg bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition"
-                >
-                  Soumettre un travail
                 </Link>
               </div>
             </div>

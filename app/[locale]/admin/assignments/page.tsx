@@ -272,7 +272,7 @@ export default function AdminAssignmentsPage() {
                     {assignment.submissions.length} soumission(s)
                   </div>
                   <Link
-                    href={`/admin/submissions?assignmentId=${assignment.id}`}
+                    href="/admin/enrollments"
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                   >
                     Voir les soumissions
@@ -315,7 +315,7 @@ export default function AdminAssignmentsPage() {
                   {assignment.submissions.length > 3 && (
                     <div className="mt-2 text-center">
                       <Link
-                        href={`/admin/submissions?assignmentId=${assignment.id}`}
+                        href="/admin/enrollments"
                         className="text-blue-600 hover:text-blue-700 font-medium text-sm"
                       >
                         Voir toutes les soumissions →

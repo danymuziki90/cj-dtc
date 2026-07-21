@@ -10,7 +10,6 @@ const navLinks = [
   { href: '/admin/students', label: 'Etudiants' },
   { href: '/admin/enrollments', label: 'Inscriptions' },
   { href: '/admin/payments', label: 'Paiements' },
-  { href: '/admin/submissions', label: 'Travaux' },
   { href: '/admin/certificates', label: 'Certificats' },
   { href: '/admin/notifications', label: 'Notifications' },
   { href: '/admin/articles', label: 'Actualites' },

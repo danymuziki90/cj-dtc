@@ -674,7 +674,7 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
       title: `Travail non remis: ${assignment.title}`,
       message: `${assignment.missingCount} remise(s) manquante(s) sur ${assignment.formationTitle}.`,
       actionLabel: 'Ouvrir les travaux',
-      actionHref: '/admin/submissions',
+      actionHref: '/admin/enrollments',
       createdAt: assignment.deadline,
     })
   }

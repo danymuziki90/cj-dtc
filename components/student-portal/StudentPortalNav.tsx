@@ -19,7 +19,6 @@ const items = [
   { href: '/student/resultats', label: 'Resultats', icon: BookOpen },
   { href: '/student/certificats', label: 'Certificats', icon: Award },
   { href: '/student/notifications', label: 'Notifications', icon: Bell },
-  { href: '/student/submissions', label: 'Travaux', icon: BookOpen },
   { href: '/student/temoignages', label: 'Témoignages', icon: MessageSquare },
   { href: '/student/profile', label: 'Profil', icon: UserCircle },
 ]

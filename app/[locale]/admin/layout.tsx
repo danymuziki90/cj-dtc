@@ -83,7 +83,6 @@ export default function AdminLayout({
     { name: "Formations", href: "/admin/formations", icon: "📚" },
     { name: "Cours", href: "/admin/courses-management", icon: "📖" },
     { name: "Examens", href: "/admin/exams-management", icon: "📝" },
-    { name: "Soumissions", href: "/admin/submissions", icon: "📁" },
     { name: "Certificats", href: "/admin/certificates", icon: "🎓" },
     { name: "Soutenances", href: "/admin/defenses", icon: "🎯" },
     { name: "Demandes B2B", href: "/admin/b2b", icon: "🏢" },

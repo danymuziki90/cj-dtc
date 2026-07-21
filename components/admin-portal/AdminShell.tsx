@@ -43,16 +43,7 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
     description:
       "Traitez le pipeline des demandes d'inscription, validez ou refusez chaque dossier et assurez le suivi des relances.",
   },
-  Travaux: {
-    eyebrow: 'Livrables & corrections',
-    description:
-      'Pilotez la file des travaux soumis, apportez vos corrections et validez les livrables en attente de retour.',
-  },
-  'Travaux et corrections': {
-    eyebrow: 'Livrables & corrections',
-    description:
-      'Pilotez la file des travaux soumis, apportez vos corrections et validez les livrables en attente de retour.',
-  },
+
   Certificats: {
     eyebrow: 'Délivrance & vérification',
     description:

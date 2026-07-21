@@ -36,8 +36,6 @@ const legacyAdminRouteMap: Record<string, string> = {
   '/admin/formations': '/admin/formations',
   '/admin/courses-management': '/admin/formations',
   '/admin/exams-management': '/admin/evaluations',
-  '/admin/assignments': '/admin/submissions',
-  '/admin/submissions': '/admin/submissions',
   '/admin/certificates': '/admin/certificates',
   '/admin/reports': '/admin/analytics',
   '/admin/settings': '/admin/settings',
@@ -51,7 +49,6 @@ function resolveLegacyAdminRedirect(pathname: string) {
   // Bypass legacy redirect for canonical localized pages
   const localizedBypassRoutes = [
     '/admin/testimonials',
-    '/admin/submissions',
   ]
   if (
     localizedBypassRoutes.some(
