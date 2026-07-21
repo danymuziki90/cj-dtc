@@ -26,6 +26,7 @@ import {
   HelpCircle,
   Sun,
   Moon,
+  ClipboardList,
 } from 'lucide-react'
 
 type AdminWorkspaceProps = {
@@ -43,6 +44,7 @@ const navItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'Pilotage', caption: 'KPI, alertes et priorités', icon: LayoutDashboard },
   { href: '/admin/formations', label: 'Formations', caption: 'Catalogue et programmes', icon: BookOpenCheck },
   { href: '/admin/sessions', label: 'Sessions', caption: 'Planification et cohortes', icon: CalendarDays },
+  { href: '/admin/assignments', label: 'Travaux', caption: 'TP et devoirs', icon: ClipboardList },
   { href: '/admin/documents', label: 'Supports', caption: 'Ressources par session', icon: BookOpenCheck },
   { href: '/admin/students', label: 'Étudiants', caption: 'Comptes et accès', icon: Users },
   { href: '/admin/enrollments', label: 'Inscriptions', caption: 'Suivi et consultation', icon: FileStack },
@@ -54,6 +56,7 @@ const navItems: NavItem[] = [
 
 const quickActions = [
   { href: '/admin/articles/new', label: 'Article', icon: Newspaper },
+  { href: '/admin/assignments', label: 'Travaux', icon: ClipboardList },
 ]
 
 

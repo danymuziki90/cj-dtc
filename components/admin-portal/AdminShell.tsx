@@ -124,6 +124,11 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
     description:
       'Suivez les factures émises, les montants à encaisser et les statuts de règlement par inscription.',
   },
+  Facturation: {
+    eyebrow: 'Facturation & règlements',
+    description:
+      'Suivez les factures émises, les montants à encaisser et les statuts de règlement par inscription.',
+  },
   Évaluations: {
     eyebrow: 'Retours & satisfaction',
     description:
@@ -133,6 +138,16 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
     eyebrow: 'Intervenants & expertises',
     description:
       'Gérez les profils des formateurs, leurs expertises déclarées et leurs affectations aux sessions.',
+  },
+  Travaux: {
+    eyebrow: 'TP, examens & projets',
+    description:
+      'Créez et gérez les travaux pratiques, examens et projets. Publiez-les pour les étudiants inscrits aux sessions concernées et suivez les remises.',
+  },
+  'Gestion des Travaux & TP': {
+    eyebrow: 'TP, examens & projets',
+    description:
+      'Créez et gérez les travaux pratiques, examens et projets. Publiez-les pour les étudiants inscrits aux sessions concernées et suivez les remises.',
   },
 }
 
