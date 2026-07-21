@@ -20,6 +20,7 @@ import {
   Loader2,
   Plus,
   RotateCw,
+  RefreshCw,
   Search,
   Sparkles,
   Trash2,
@@ -168,6 +169,7 @@ export default function AdminSubmissionsPage() {
   // Filters inside corrections tab
   const [corrSearch, setCorrSearch] = useState('')
   const [corrStatusFilter, setCorrStatusFilter] = useState('all') // all, remis, non-remis, note
+  const [corrSortBy, setCorrSortBy] = useState<'name' | 'date' | 'grade'>('name')
 
   // Feedback Notifications
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
@@ -467,17 +469,20 @@ export default function AdminSubmissionsPage() {
   }
 
   // Saisir note & feedback
-  const handleSaveCorrection = async () => {
-    if (!selectedAssignmentId) return
+  const handleSaveCorrection = async (statusOverride?: 'graded' | 'returned' | 'submitted') => {
+    if (!selectedAssignmentId || !selectedStudentEmail) return
 
     setSavingCorrection(true)
     try {
       const isGraded = correctionGrade.trim() !== ''
+      const defaultStatus = isGraded ? 'graded' : 'submitted'
+      const status = statusOverride || defaultStatus
+
       const payload = {
         submissionId: selectedSubmission?.id || null,
         studentEmail: selectedStudentEmail,
-        status: isGraded ? 'graded' : 'submitted',
-        grade: isGraded ? parseFloat(correctionGrade) : null,
+        status,
+        grade: correctionGrade.trim() !== '' ? parseFloat(correctionGrade) : null,
         feedback: correctionFeedback.trim() || null,
       }
 
@@ -488,24 +493,56 @@ export default function AdminSubmissionsPage() {
         body: JSON.stringify(payload),
       })
 
-      if (!res.ok) throw new Error('Erreur lors de l’enregistrement de la correction')
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || 'Erreur lors de l’enregistrement de la correction')
+      }
       const updated = await res.json()
 
-      showNotification('Note et feedback enregistrés avec succès !')
+      showNotification('Évaluation enregistrée avec succès !')
       
       // Update locally
       if (selectedSubmission) {
         setSubmissions((prev) => prev.map((s) => (s.id === selectedSubmission.id ? { ...s, ...updated } : s)))
       } else {
         // reload copies to get correct IDs
-        loadSubmissionsForAssignment(parseInt(selectedAssignmentId))
+        await loadSubmissionsForAssignment(parseInt(selectedAssignmentId))
       }
       
-      setSelectedSubmission(null)
-      setSelectedStudentEmail(null)
+      setSelectedSubmission(updated)
     } catch (err: any) {
       console.error(err)
       showNotification(err.message || 'Erreur lors de la notation', 'error')
+    } finally {
+      setSavingCorrection(false)
+    }
+  }
+
+  const handleDeleteSubmission = async (subId: number) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer définitivement cette soumission ? Cette action supprimera également les fichiers associés.')) return
+
+    setSavingCorrection(true)
+    try {
+      const res = await fetch(`/api/admin/assignments/${selectedAssignmentId}/submissions?submissionId=${subId}`, {
+        method: 'DELETE',
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || 'Erreur lors de la suppression de la copie')
+      }
+      
+      showNotification('Soumission supprimée avec succès !')
+      setSelectedSubmission(null)
+      setSelectedStudentEmail(null)
+      
+      // reload copies
+      if (selectedAssignmentId) {
+        await loadSubmissionsForAssignment(parseInt(selectedAssignmentId))
+      }
+    } catch (err: any) {
+      console.error(err)
+      showNotification(err.message || 'Erreur lors de la suppression', 'error')
     } finally {
       setSavingCorrection(false)
     }
@@ -569,7 +606,7 @@ export default function AdminSubmissionsPage() {
 
   // ── DÉPÔTS & CORRECTIONS MATRIX (Student Grid) ─────────────────────
   const studentSubmissionsMatrix = useMemo(() => {
-    return enrolledStudents.map((student) => {
+    const list = enrolledStudents.map((student) => {
       const sub = submissions.find((s) => s.studentEmail.toLowerCase() === student.email.toLowerCase())
       return {
         student,
@@ -587,13 +624,37 @@ export default function AdminSubmissionsPage() {
         matchesStatus = !!item.submission
       } else if (corrStatusFilter === 'non-remis') {
         matchesStatus = !item.submission
+      } else if (corrStatusFilter === 'submitted') {
+        matchesStatus = !!item.submission && item.submission.status === 'submitted'
+      } else if (corrStatusFilter === 'graded') {
+        matchesStatus = !!item.submission && item.submission.status === 'graded'
+      } else if (corrStatusFilter === 'returned') {
+        matchesStatus = !!item.submission && item.submission.status === 'returned'
       } else if (corrStatusFilter === 'note') {
         matchesStatus = !!item.submission && item.submission.status === 'graded'
       }
 
       return matchesSearch && matchesStatus
     })
-  }, [enrolledStudents, submissions, corrSearch, corrStatusFilter])
+
+    // Sorting
+    list.sort((a, b) => {
+      if (corrSortBy === 'name') {
+        return a.student.name.localeCompare(b.student.name)
+      } else if (corrSortBy === 'date') {
+        const dateA = a.submission ? new Date(a.submission.submittedAt).getTime() : 0
+        const dateB = b.submission ? new Date(b.submission.submittedAt).getTime() : 0
+        return dateB - dateA
+      } else if (corrSortBy === 'grade') {
+        const gradeA = a.submission && a.submission.grade !== null ? a.submission.grade : -1
+        const gradeB = b.submission && b.submission.grade !== null ? b.submission.grade : -1
+        return gradeB - gradeA
+      }
+      return 0
+    })
+
+    return list
+  }, [enrolledStudents, submissions, corrSearch, corrStatusFilter, corrSortBy])
 
   const formatSize = (bytes: number) => {
     if (bytes === 0) return '0 B'
@@ -945,8 +1006,20 @@ export default function AdminSubmissionsPage() {
                     >
                       <option value="all">Tous les dépôts</option>
                       <option value="remis">Fichiers remis</option>
-                      <option value="non-remis">Non remis</option>
-                      <option value="note">Notés</option>
+                      <option value="non-remis">Non remis (En attente)</option>
+                      <option value="submitted">En attente de correction</option>
+                      <option value="graded">Validé / Corrigé</option>
+                      <option value="returned">Refusé / À refaire</option>
+                    </select>
+
+                    <select
+                      value={corrSortBy}
+                      onChange={(e) => setCorrSortBy(e.target.value as any)}
+                      className="px-3 py-1.5 text-[11px] border border-slate-200 bg-white rounded-lg focus:outline-none font-bold text-slate-700"
+                    >
+                      <option value="name">Trier par Nom (A-Z)</option>
+                      <option value="date">Trier par Date dépôt</option>
+                      <option value="grade">Trier par Note</option>
                     </select>
                   </div>
                 </div>
@@ -985,16 +1058,35 @@ export default function AdminSubmissionsPage() {
                               }`}
                             >
                               <td className="px-6 py-4">
-                                <p className="font-extrabold text-slate-900">{student.name}</p>
-                                <p className="text-[10px] text-slate-400">{student.email}</p>
+                                <div className="flex items-center gap-3">
+                                  <div className="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-black text-slate-600 uppercase">
+                                    {student.name.slice(0, 2)}
+                                  </div>
+                                  <div>
+                                    <p className="font-extrabold text-slate-900">{student.name}</p>
+                                    <p className="text-[10px] text-slate-400">{student.email}</p>
+                                  </div>
+                                </div>
                               </td>
                               <td className="px-6 py-4">
                                 {submission ? (
                                   <div className="flex flex-col gap-0.5">
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700">
-                                      <CheckCircle className="h-3 w-3 text-emerald-600" />
-                                      Remis
-                                    </span>
+                                    {submission.status === 'graded' ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700">
+                                        <CheckCircle className="h-3 w-3 text-emerald-600" />
+                                        Validé / Corrigé
+                                      </span>
+                                    ) : submission.status === 'returned' ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700">
+                                        <AlertTriangle className="h-3 w-3 text-rose-600 animate-pulse" />
+                                        Refusé / À refaire
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700">
+                                        <Clock3 className="h-3 w-3 text-blue-600" />
+                                        Remis (En attente)
+                                      </span>
+                                    )}
                                     <span className="text-[9px] font-bold text-slate-400">
                                       {new Date(submission.submittedAt).toLocaleDateString('fr-FR')}{' '}
                                       {new Date(submission.submittedAt).toLocaleTimeString('fr-FR', {
@@ -1005,7 +1097,7 @@ export default function AdminSubmissionsPage() {
                                   </div>
                                 ) : (
                                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400">
-                                    <Clock3 className="h-3 w-3" />
+                                    <XCircle className="h-3 w-3" />
                                     Non remis
                                   </span>
                                 )}
@@ -1153,23 +1245,62 @@ export default function AdminSubmissionsPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleSaveCorrection}
-                  disabled={savingCorrection}
-                  className="w-full py-2.5 bg-[var(--admin-primary)] hover:bg-[var(--admin-primary-700)] text-white text-xs font-black rounded-xl shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {savingCorrection ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Enregistrement...
-                    </>
-                  ) : (
-                    <>
-                      <FileCheck2 className="h-4 w-4" />
-                      Enregistrer l'évaluation
-                    </>
-                  )}
-                </button>
+                <div className="space-y-3 pt-3 border-t border-slate-100">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Actions d'évaluation</p>
+                  
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => handleSaveCorrection('graded')}
+                      disabled={savingCorrection}
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      {savingCorrection ? 'Traitement...' : '✅ Valider & Enregistrer'}
+                    </button>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleSaveCorrection('returned')}
+                        disabled={savingCorrection}
+                        className="py-2 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black rounded-xl shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1"
+                        title="Refuser et renvoyer à l'étudiant"
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                        Refuser
+                      </button>
+
+                      <button
+                        onClick={() => handleSaveCorrection('returned')}
+                        disabled={savingCorrection}
+                        className="py-2 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-black rounded-xl shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1"
+                        title="Demander une nouvelle soumission"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Nouvelle Remise
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => handleSaveCorrection()}
+                      disabled={savingCorrection}
+                      className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black rounded-xl transition flex items-center justify-center gap-2"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Enregistrer (Statut auto)
+                    </button>
+
+                    {selectedSubmission && (
+                      <button
+                        onClick={() => handleDeleteSubmission(selectedSubmission.id)}
+                        disabled={savingCorrection}
+                        className="w-full py-2 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-black rounded-xl border border-red-200 transition flex items-center justify-center gap-1.5 mt-2"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Supprimer la copie
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="text-center py-16 text-slate-400">

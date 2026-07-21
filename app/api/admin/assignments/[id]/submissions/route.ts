@@ -7,7 +7,8 @@ import { requireAdmin } from '@/lib/auth-portal/guards'
 export const runtime = 'nodejs'
 
 const gradeSchema = z.object({
-  submissionId: z.coerce.number().int().positive(),
+  submissionId: z.coerce.number().int().positive().nullable().optional(),
+  studentEmail: z.string().email(),
   status: z.enum(['submitted', 'graded', 'returned']),
   grade: z.coerce.number().min(0).max(20).nullable().optional(),
   feedback: z.string().trim().max(2000).nullable().optional(),
@@ -106,28 +107,59 @@ export async function PUT(
 
     const data = parsed.data
 
-    const existingSubmission = await prisma.submission.findUnique({
-      where: { id: data.submissionId },
-      include: { assignment: true }
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId }
     })
-
-    if (!existingSubmission) {
-      return NextResponse.json({ error: 'Soumission introuvable.' }, { status: 404 })
+    if (!assignment) {
+      return NextResponse.json({ error: 'Devoir introuvable.' }, { status: 404 })
     }
 
-    const updated = await prisma.submission.update({
-      where: { id: data.submissionId },
-      data: {
-        status: data.status,
-        grade: data.grade === undefined ? undefined : data.grade,
-        feedback: data.feedback === undefined ? undefined : data.feedback,
-        gradedAt: new Date(),
-        gradedBy: auth.admin.email
-      },
-      include: {
-        files: true
-      }
-    })
+    let submission
+    if (data.submissionId) {
+      submission = await prisma.submission.findUnique({
+        where: { id: data.submissionId }
+      })
+    } else {
+      submission = await prisma.submission.findFirst({
+        where: {
+          assignmentId,
+          studentEmail: { equals: data.studentEmail, mode: 'insensitive' }
+        }
+      })
+    }
+
+    let updated
+    if (submission) {
+      updated = await prisma.submission.update({
+        where: { id: submission.id },
+        data: {
+          status: data.status,
+          grade: data.grade === undefined ? undefined : data.grade,
+          feedback: data.feedback === undefined ? undefined : data.feedback,
+          gradedAt: new Date(),
+          gradedBy: auth.admin.email
+        },
+        include: {
+          files: true
+        }
+      })
+    } else {
+      // Create new submission for grading
+      updated = await prisma.submission.create({
+        data: {
+          assignmentId,
+          studentEmail: data.studentEmail.toLowerCase(),
+          status: data.status,
+          grade: data.grade === undefined ? null : data.grade,
+          feedback: data.feedback === undefined ? null : data.feedback,
+          gradedAt: new Date(),
+          gradedBy: auth.admin.email
+        },
+        include: {
+          files: true
+        }
+      })
+    }
 
     await writeAdminAuditLog({
       request,
@@ -137,7 +169,7 @@ export async function PUT(
       targetType: 'Submission',
       targetId: String(updated.id),
       targetLabel: `Submission student: ${updated.studentEmail}`,
-      summary: `Correction du devoir "${existingSubmission.assignment.title}" soumis par ${updated.studentEmail}. Note: ${updated.grade ?? 'Non noté'}/20`,
+      summary: `Correction du devoir "${assignment.title}" soumis par ${updated.studentEmail}. Note: ${updated.grade ?? 'Non noté'}/20`,
       metadata: {
         assignmentId,
         submissionId: updated.id,
@@ -149,6 +181,62 @@ export async function PUT(
     return NextResponse.json(updated)
   } catch (error) {
     console.error('PUT /api/admin/assignments/[id]/submissions error:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const auth = await requireAdmin(request)
+    if (auth.error) return auth.error
+
+    const { searchParams } = new URL(request.url)
+    const submissionId = parseInt(searchParams.get('submissionId') || '')
+
+    if (isNaN(submissionId)) {
+      return NextResponse.json({ error: 'ID de soumission invalide.' }, { status: 400 })
+    }
+
+    const submission = await prisma.submission.findUnique({
+      where: { id: submissionId },
+      include: { files: true, assignment: true }
+    })
+
+    if (!submission) {
+      return NextResponse.json({ error: 'Soumission introuvable.' }, { status: 404 })
+    }
+
+    // Delete submission files first
+    await prisma.submissionFile.deleteMany({
+      where: { submissionId }
+    })
+
+    // Delete submission itself
+    await prisma.submission.delete({
+      where: { id: submissionId }
+    })
+
+    await writeAdminAuditLog({
+      request,
+      adminId: auth.admin.id,
+      adminUsername: auth.admin.username,
+      action: 'submission.delete',
+      targetType: 'Submission',
+      targetId: String(submissionId),
+      targetLabel: `Submission student: ${submission.studentEmail}`,
+      summary: `Suppression de la soumission de "${submission.assignment.title}" par ${submission.studentEmail}.`,
+      metadata: {
+        assignmentId: submission.assignmentId,
+        studentEmail: submission.studentEmail
+      }
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('DELETE /api/admin/assignments/[id]/submissions error:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

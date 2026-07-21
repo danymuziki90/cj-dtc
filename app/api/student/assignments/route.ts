@@ -118,7 +118,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Travail introuvable.' }, { status: 404 })
     }
 
-    if (assignment.deadline < new Date()) {
+    // Fetch existing submission first to inspect its status
+    const existingSubmission = await prisma.submission.findFirst({
+      where: {
+        assignmentId,
+        studentEmail: { equals: auth.student.email, mode: 'insensitive' },
+      },
+      select: { id: true, status: true, submittedAt: true },
+    })
+
+    const isResubmissionAllowed = existingSubmission && existingSubmission.status === 'returned'
+
+    if (assignment.deadline < new Date() && !isResubmissionAllowed) {
       return NextResponse.json({ error: 'La date limite de remise est depassee.' }, { status: 400 })
     }
 
@@ -162,16 +173,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Aucun fichier valide fourni.' }, { status: 400 })
     }
 
-    // Vérifier qu'une soumission n'existe pas déjà pour cet étudiant et ce devoir
-    const existingSubmission = await prisma.submission.findFirst({
-      where: {
-        assignmentId,
-        studentEmail: { equals: auth.student.email, mode: 'insensitive' },
-      },
-      select: { id: true, status: true, submittedAt: true },
-    })
-
-    if (existingSubmission) {
+    if (existingSubmission && !isResubmissionAllowed) {
       return NextResponse.json(
         {
           error: 'Vous avez déjà soumis ce devoir.',
@@ -181,14 +183,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const submission = await prisma.submission.create({
-      data: {
-        assignmentId,
-        studentEmail: auth.student.email,
-        status: 'submitted',
-        submittedAt: new Date(),
-      },
-    })
+    let submission
+    if (isResubmissionAllowed) {
+      // Clear old submission files first
+      await prisma.submissionFile.deleteMany({
+        where: { submissionId: existingSubmission.id }
+      })
+
+      // Reset submission fields
+      submission = await prisma.submission.update({
+        where: { id: existingSubmission.id },
+        data: {
+          status: 'submitted',
+          submittedAt: new Date(),
+          grade: null,
+          feedback: null,
+          gradedAt: null,
+          gradedBy: null,
+        }
+      })
+    } else {
+      submission = await prisma.submission.create({
+        data: {
+          assignmentId,
+          studentEmail: auth.student.email,
+          status: 'submitted',
+          submittedAt: new Date(),
+        },
+      })
+    }
 
     try {
       await prisma.adminNotification.create({

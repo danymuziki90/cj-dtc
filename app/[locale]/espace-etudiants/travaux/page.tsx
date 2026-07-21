@@ -379,74 +379,78 @@ export default function TravauxPage() {
 
                         {/* Upload action form */}
                         <div className="pt-2">
-                          {isFuture ? (
-                            selectedAssignmentId === assign.id ? (
-                              <form
-                                onSubmit={(e) => handleUploadSubmit(assign.id, e)}
-                                className="space-y-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-4"
-                              >
-                                {uploadSuccess && (
-                                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-800">
-                                    {uploadSuccess}
-                                  </div>
-                                )}
-                                {uploadError && (
-                                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-800">
-                                    {uploadError}
-                                  </div>
-                                )}
+                          {(() => {
+                            const hasResubmissionRequest = assign.submissions?.some((sub) => sub.status === 'returned')
+                            const canUpload = isFuture || hasResubmissionRequest
+                            return canUpload ? (
+                              selectedAssignmentId === assign.id ? (
+                                <form
+                                  onSubmit={(e) => handleUploadSubmit(assign.id, e)}
+                                  className="space-y-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-4"
+                                >
+                                  {uploadSuccess && (
+                                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-800">
+                                      {uploadSuccess}
+                                    </div>
+                                  )}
+                                  {uploadError && (
+                                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-800">
+                                      {uploadError}
+                                    </div>
+                                  )}
 
-                                <div>
-                                  <label className="mb-1.5 block text-xs font-bold text-slate-700">
-                                    Fichier de rendu (PDF, DOCX, ZIP...) *
-                                  </label>
-                                  <input
-                                    type="file"
-                                    required
-                                    onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                                    className={studentInputClassName}
-                                    accept=".pdf,.doc,.docx,.zip,.rar,.jpg,.jpeg,.png"
-                                  />
-                                </div>
+                                  <div>
+                                    <label className="mb-1.5 block text-xs font-bold text-slate-700">
+                                      Fichier de rendu (PDF, DOCX, ZIP...) *
+                                    </label>
+                                    <input
+                                      type="file"
+                                      required
+                                      onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                                      className={studentInputClassName}
+                                      accept=".pdf,.doc,.docx,.zip,.rar,.jpg,.jpeg,.png"
+                                    />
+                                  </div>
 
-                                <div className="flex gap-2">
-                                  <button
-                                    type="submit"
-                                    disabled={uploading}
-                                    className={`${studentPrimaryButtonClassName} text-xs py-2 disabled:opacity-60`}
-                                  >
-                                    {uploading ? 'Téléversement...' : 'Valider mon dépôt'}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedAssignmentId(null)
-                                      setUploadFile(null)
-                                      setUploadError(null)
-                                    }}
-                                    className={studentMutedButtonClassName}
-                                  >
-                                    Annuler
-                                  </button>
-                                </div>
-                              </form>
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="submit"
+                                      disabled={uploading}
+                                      className={`${studentPrimaryButtonClassName} text-xs py-2 disabled:opacity-60`}
+                                    >
+                                      {uploading ? 'Téléversement...' : 'Valider mon dépôt'}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedAssignmentId(null)
+                                        setUploadFile(null)
+                                        setUploadError(null)
+                                      }}
+                                      className={studentMutedButtonClassName}
+                                    >
+                                      Annuler
+                                    </button>
+                                  </div>
+                                </form>
+                              ) : (
+                                <button
+                                  onClick={() => setSelectedAssignmentId(assign.id)}
+                                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-blue-700)] transition shadow-sm"
+                                >
+                                  <Upload className="w-3.5 h-3.5" />
+                                  Déposer mon travail
+                                </button>
+                              )
                             ) : (
                               <button
-                                onClick={() => setSelectedAssignmentId(assign.id)}
-                                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-blue-700)] transition shadow-sm"
+                                disabled
+                                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-200 py-2 text-xs font-semibold text-slate-400 cursor-not-allowed"
                               >
-                                <Upload className="w-3.5 h-3.5" />
-                                Déposer mon travail
+                                Dépôt verrouillé (date limite dépassée)
                               </button>
                             )
-                          ) : (
-                            <button
-                              disabled
-                              className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-200 py-2 text-xs font-semibold text-slate-400 cursor-not-allowed"
-                            >
-                              Dépôt verrouillé (date limite dépassée)
-                            </button>
-                          )}
+                          })()}
                         </div>
                       </div>
                     </article>
