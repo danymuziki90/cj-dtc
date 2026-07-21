@@ -265,7 +265,7 @@ export default function AdminDashboardPage() {
   const quickModuleStats = [
     { title: 'Formations', count: statsData.totalFormations, helper: 'Catalogue de formations actives', href: '/admin/formations', icon: GraduationCap },
     { title: 'Étudiants', count: statsData.totalStudents, helper: 'Comptes et profils d\'élèves', href: '/admin/students', icon: Users },
-    { title: 'Travaux', count: statsData.totalAssignments, helper: 'TP, devoirs et corrections', href: '/admin/enrollments', icon: FolderKanban },
+    { title: 'Travaux', count: statsData.totalAssignments, helper: 'TP, devoirs et corrections', href: '/admin/assignments', icon: FolderKanban },
     { title: 'Actualités', count: kpiData.totals.newsPublished, helper: 'Articles de blog et annonces', href: '/admin/articles', icon: Newspaper },
     { title: 'Entreprises', count: kpiData.totals.notificationsTotal, helper: 'Suivi demandes B2B & CRM', href: '/admin/b2b', icon: Building2 },
     { title: 'Paramètres', count: 'Config', helper: 'Sécurité, JWT & configuration', href: '/admin/settings', icon: Settings2 },
@@ -354,7 +354,7 @@ export default function AdminDashboardPage() {
             value={kpiData.totals.assignmentsPublished}
             helper="Sujets de travaux mis en ligne"
             tone="neutral"
-            href="/admin/enrollments"
+            href="/admin/assignments"
           />
           <DashboardKpiCard
             icon={FolderKanban}
@@ -364,7 +364,7 @@ export default function AdminDashboardPage() {
             trend={kpiData.trends.submissionTrend}
             trendDirection="up"
             tone="success"
-            href="/admin/enrollments"
+            href="/admin/assignments"
           />
           <DashboardKpiCard
             icon={Newspaper}
@@ -465,7 +465,7 @@ export default function AdminDashboardPage() {
               {reportingData.actionsNow.submissionsPendingReview.slice(0, 5).map((item) => (
                 <Link
                   key={item.id}
-                  href="/admin/enrollments"
+                  href="/admin/assignments"
                   className="block rounded-2xl border border-slate-200/60 bg-slate-50/70 p-3.5 transition hover:border-[var(--admin-primary-200)] hover:bg-white dark:hover:bg-slate-800"
                 >
                   <div className="flex justify-between items-start gap-3">
