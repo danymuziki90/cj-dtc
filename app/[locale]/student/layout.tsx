@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useParams } from 'next/navigation'
 
 export default function StudentLayout({
   children,
@@ -13,6 +13,8 @@ export default function StudentLayout({
   const { data: session, status } = useSession()
   const router = useRouter()
   const pathname = usePathname()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [isRedirecting, setIsRedirecting] = useState(false)
@@ -25,8 +27,25 @@ export default function StudentLayout({
       const currentPath = pathname || '/student/dashboard'
       const loginUrl = `/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`
       router.push(loginUrl)
+    } else if (status === 'authenticated') {
+      const currentPath = pathname || ''
+      let targetPath = `/${locale}/espace-etudiants`
+      if (currentPath.includes('/student/assignments')) {
+        targetPath = `/${locale}/espace-etudiants/travaux`
+      } else if (currentPath.includes('/student/certificates')) {
+        targetPath = `/${locale}/espace-etudiants/mes-certificats`
+      } else if (currentPath.includes('/student/elearning')) {
+        targetPath = `/${locale}/espace-etudiants/elearning`
+      } else if (currentPath.includes('/student/exams')) {
+        targetPath = `/${locale}/espace-etudiants/resultats`
+      } else if (currentPath.includes('/student/inscription')) {
+        targetPath = `/${locale}/espace-etudiants/inscription`
+      } else if (currentPath.includes('/student/profile')) {
+        targetPath = `/${locale}/espace-etudiants/mon-compte`
+      }
+      router.push(targetPath)
     }
-  }, [status, router, pathname, isRedirecting])
+  }, [status, router, pathname, isRedirecting, locale])
 
 
   if (status === 'loading') {

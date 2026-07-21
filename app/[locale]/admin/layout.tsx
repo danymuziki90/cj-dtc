@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function AdminLayout({
   children,
@@ -10,7 +11,31 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  useEffect(() => {
+    if (status === "unauthenticated" && !isRedirecting) {
+      setIsRedirecting(true);
+      const currentPath = pathname || "/admin/dashboard";
+      const loginUrl = `/auth/admin-login?callbackUrl=${encodeURIComponent(currentPath)}`;
+      router.push(loginUrl);
+    }
+  }, [status, router, pathname, isRedirecting]);
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!session || session.user?.role !== "ADMIN") {
+    return null;
+  }
 
   const navigation = [
     { name: "Tableau de bord", href: "/admin/dashboard", icon: "📊" },
