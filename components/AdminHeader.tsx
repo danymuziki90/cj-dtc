@@ -9,6 +9,7 @@ const navLinks = [
   { href: '/admin/formations', label: 'Formations' },
   { href: '/admin/students', label: 'Etudiants' },
   { href: '/admin/enrollments', label: 'Inscriptions' },
+  { href: '/admin/assignments', label: 'Travaux' },
   { href: '/admin/payments', label: 'Paiements' },
   { href: '/admin/certificates', label: 'Certificats' },
   { href: '/admin/notifications', label: 'Notifications' },
