@@ -43,7 +43,6 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
     description:
       "Traitez le pipeline des demandes d'inscription, validez ou refusez chaque dossier et assurez le suivi des relances.",
   },
-
   Certificats: {
     eyebrow: 'Délivrance & vérification',
     description:
@@ -118,11 +117,6 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
     eyebrow: 'Supports pédagogiques',
     description:
       "Centralisez les supports de formation, gérez les droits d'accès et assurez la disponibilité des ressources.",
-  },
-  Facturation: {
-    eyebrow: 'Facturation & règlements',
-    description:
-      'Suivez les factures émises, les montants à encaisser et les statuts de règlement par inscription.',
   },
   Facturation: {
     eyebrow: 'Facturation & règlements',
