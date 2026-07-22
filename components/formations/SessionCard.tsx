@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock3, MapPinIcon, Users, Monitor, Layers } from 'lucide-react'
+import { useStudentAuth } from '@/lib/auth/StudentAuthContext'
 
 export type SessionItem = {
   id: number
@@ -78,15 +79,7 @@ const FORMAT_ICONS = {
 
 export default function SessionCard({ session: s, locale }: Props) {
   const router = useRouter()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-
-  useEffect(() => {
-    fetch('/api/student/auth/me')
-      .then((res) => {
-        if (res.ok) setIsLoggedIn(true)
-      })
-      .catch(() => {})
-  }, [])
+  const { isLoggedIn } = useStudentAuth()
 
   const available = Math.max(0, s.maxParticipants - (s.currentParticipants || 0))
   const isFull = available <= 0
@@ -113,6 +106,7 @@ export default function SessionCard({ session: s, locale }: Props) {
         <img
           src={image}
           alt={s.formation.title}
+          loading="lazy"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/10 to-transparent" />

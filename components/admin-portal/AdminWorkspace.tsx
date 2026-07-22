@@ -59,7 +59,6 @@ const navRow2: NavItem[] = [
   { href: '/admin/certificates', label: 'Certificats', caption: 'Délivrance et vérification', icon: GraduationCap },
   { href: '/admin/evaluations', label: 'Témoignages', caption: 'Retours et avis', icon: Star },
   { href: '/admin/articles', label: 'Actualités', caption: 'Contenus et annonces', icon: Newspaper },
-  { href: '/admin/lms', label: 'Galerie', caption: 'Médiathèque & contenus', icon: Image },
   { href: '/admin/b2b', label: 'Entreprises', caption: 'Demandes B2B & intra', icon: Building2 },
   { href: '/admin/settings', label: 'Paramètres', caption: 'Configuration & sécurité', icon: Settings2 },
 ]

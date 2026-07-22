@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import TestimonialsSection from '@/components/TestimonialsSection';
 import {
   ArrowRight,
   UserIcon,
@@ -624,65 +625,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Ce Que Disent Nos
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">
-                {" "}
-                Anciens Diplômés
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Témoignages de professionnels qui ont transformé leur carrière
-              avec CJ DTC
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial) => (
-              <div
-                key={testimonial.id}
-                className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-shadow"
-              >
-                <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <StarIcon
-                      key={i}
-                      className="w-5 h-5 text-red-400 fill-current"
-                    />
-                  ))}
-                </div>
-
-                <p className="text-gray-700 mb-6 italic">
-                  "{testimonial.content}"
-                </p>
-
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center overflow-hidden">
-                    {testimonial.image ? (
-                      <img src={testimonial.image} alt={testimonial.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <UserIcon className="w-6 h-6 text-blue-600" />
-                    )}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
-                    <p className="text-xs text-blue-600">
-                      {testimonial.company}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Dynamic Approved Testimonials */}
+      <TestimonialsSection locale={locale} />
 
       {/* Partners */}
       <section className="py-20 bg-white">

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 
@@ -77,6 +78,15 @@ export async function PATCH(
       }
     })
 
+    try {
+      revalidatePath('/')
+      revalidatePath('/[locale]', 'page')
+      revalidatePath('/fr')
+      revalidatePath('/en')
+    } catch (e) {
+      console.error('Revalidation error:', e)
+    }
+
     return NextResponse.json(updated)
   } catch (error) {
     console.error('[PATCH /api/admin/testimonials/[id]]', error)
@@ -102,6 +112,15 @@ export async function DELETE(
     await prisma.testimonial.delete({
       where: { id: testimonialId }
     })
+
+    try {
+      revalidatePath('/')
+      revalidatePath('/[locale]', 'page')
+      revalidatePath('/fr')
+      revalidatePath('/en')
+    } catch (e) {
+      console.error('Revalidation error:', e)
+    }
 
     return NextResponse.json({ success: true, message: 'Témoignage supprimé avec succès' })
   } catch (error) {

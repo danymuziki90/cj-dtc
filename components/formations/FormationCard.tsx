@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { 
   Clock, 
@@ -21,6 +20,7 @@ import {
 } from 'lucide-react'
 import type { Formation } from '@/lib/types/formation'
 import { calculateDiscount, summarizeText, parseTextList } from '@/lib/formations/catalog'
+import { useStudentAuth } from '@/lib/auth/StudentAuthContext'
 
 interface FormationCardProps {
   formation: Formation
@@ -56,15 +56,7 @@ const categoryColors = {
 }
 
 export default function FormationCard({ formation, locale = 'fr', featured }: FormationCardProps) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-
-  useEffect(() => {
-    fetch('/api/student/auth/me')
-      .then((res) => {
-        if (res.ok) setIsLoggedIn(true)
-      })
-      .catch(() => {})
-  }, [])
+  const { isLoggedIn } = useStudentAuth()
 
   const FormatIcon = formation.format ? formatIcons[formation.format] : Monitor
   const hasDiscount = formation.originalPrice && formation.price && formation.originalPrice > formation.price
@@ -96,6 +88,7 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
           <img 
             src={formation.imageUrl} 
             alt={formation.title}
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         ) : (
@@ -312,7 +305,7 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
         {/* Prix et CTA */}
         <div className="flex items-end justify-between gap-4 pt-4 border-t border-gray-100">
           <div className="min-w-0">
-            {formation.price !== undefined ? (
+            {formation.price !== undefined && formation.price > 0 ? (
               <>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-bold text-blue-600">
@@ -326,12 +319,12 @@ export default function FormationCard({ formation, locale = 'fr', featured }: Fo
                 </div>
                 {formation.nextSession && (
                   <p className="text-xs text-gray-500 mt-1 truncate">
-                    Début: {new Date(formation.nextSession.startDate).toLocaleDateString('fr-FR')}
+                    {locale === 'fr' ? 'Début' : 'Starts'}: {new Date(formation.nextSession.startDate).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')}
                   </p>
                 )}
               </>
             ) : (
-              <p className="text-sm text-gray-600">Sur demande</p>
+              <p className="text-sm font-semibold text-[var(--cj-blue)]">{locale === 'fr' ? 'Nous consulter' : 'Contact us'}</p>
             )}
           </div>
           

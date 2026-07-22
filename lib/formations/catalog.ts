@@ -186,21 +186,16 @@ export function isFormationComplete(formation: Formation): boolean {
     formation.title,
     formation.description,
     formation.categorie,
-    formation.duree,
-    formation.level,
-    formation.format
   ]
   
   return requiredFields.every(field => field && field.toString().length > 0)
 }
 
 /**
- * Filtre les formations publiées et complètes uniquement
+ * Filtre les formations publiées uniquement
  */
 export function getPublishedFormations(formations: Formation[]): Formation[] {
-  return formations.filter(
-    f => f.statut === 'publie' && isFormationComplete(f)
-  )
+  return formations.filter(f => f.statut === 'publie')
 }
 
 /**

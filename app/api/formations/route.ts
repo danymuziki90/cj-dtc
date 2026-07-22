@@ -3,6 +3,8 @@ import { prisma } from '../../../lib/prisma'
 import { parseSessionMetadata } from '@/lib/sessions/metadata'
 
 export const runtime = "nodejs"
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function isPublicRegistration(session: { status: string; startDate: Date; maxParticipants: number; enrollments?: { id: number }[]; prerequisites?: string | null }) {
   if (session.status !== 'ouverte' || session.startDate < new Date()) return false

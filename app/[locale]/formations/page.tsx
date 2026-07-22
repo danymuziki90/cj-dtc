@@ -3,16 +3,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Award, BookOpen, CalendarDays, Sparkle, TrendingUp, Users } from 'lucide-react'
+import { Award, BookOpen, CalendarDays, Search, Sparkle, TrendingUp, Users, XIcon } from 'lucide-react'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
-import type { Formation } from '@/lib/types/formation'
-import { calculateCatalogStats, getPublishedFormations } from '@/lib/formations/catalog'
+import type { Formation, FormationCatalogFilters } from '@/lib/types/formation'
+import { calculateCatalogStats, getPublishedFormations, filterFormations, sortFormations, normalizeSearchText } from '@/lib/formations/catalog'
+import { FORMATION_CATEGORIES } from '@/lib/types/formation'
 import FormationCard     from '@/components/formations/FormationCard'
 import FormationFAQ      from '@/components/formations/FormationFAQ'
 import FormationGuidance from '@/components/formations/FormationGuidance'
 import FormationStats    from '@/components/formations/FormationStats'
 import HowToRegister     from '@/components/formations/HowToRegister'
 import SessionsHub       from '@/components/formations/SessionsHub'
+import FormationCardSkeleton from '@/components/formations/FormationCardSkeleton'
+import { StudentAuthProvider } from '@/lib/auth/StudentAuthContext'
 
 export default function FormationsPage() {
   const params = useParams()
@@ -22,12 +25,15 @@ export default function FormationsPage() {
   /* ── state ── */
   const [formations, setFormations]   = useState<Formation[]>([])
   const [isLoading, setIsLoading]     = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [sortBy, setSortBy] = useState<'popular' | 'newest' | 'alphabetical' | 'rating'>('popular')
 
   /* ── data ── */
   useEffect(() => {
     let alive = true
     setIsLoading(true)
-    fetch('/api/formations')
+    fetch('/api/formations', { cache: 'no-store' })
       .then(r => r.json())
       .then(d => { if (alive) setFormations(getPublishedFormations(d.formations ?? [])) })
       .catch(console.error)
@@ -39,8 +45,37 @@ export default function FormationsPage() {
   const stats    = useMemo(() => calculateCatalogStats(formations), [formations])
   const featured = useMemo(() => formations.filter(f => f.featured).slice(0, 3), [formations])
 
+  // Full catalog with filters
+  const filters: FormationCatalogFilters = useMemo(() => ({
+    search: searchQuery,
+    category: selectedCategory,
+  }), [searchQuery, selectedCategory])
+
+  const filteredFormations = useMemo(() => {
+    const filtered = filterFormations(formations, filters)
+    return sortFormations(filtered, sortBy)
+  }, [formations, filters, sortBy])
+
+  // Categories with counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    formations.forEach(f => {
+      const cat = f.categorie || 'autre'
+      counts[cat] = (counts[cat] || 0) + 1
+    })
+    return counts
+  }, [formations])
+
+  // Only show categories that have formations
+  const activeCategories = useMemo(() => {
+    return FORMATION_CATEGORIES.filter(c => (categoryCounts[c.id] || 0) > 0)
+  }, [categoryCounts])
+
+  const hasActiveFilters = searchQuery !== '' || selectedCategory !== 'all'
+
   /* ── render ── */
   return (
+    <StudentAuthProvider>
     <div className="bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
@@ -66,6 +101,10 @@ export default function FormationsPage() {
               <a href="#sessions" className="cj-btn-primary">
                 <CalendarDays className="w-4 h-4" />
                 {isFr ? 'Voir les sessions ouvertes' : 'Browse open sessions'}
+              </a>
+              <a href="#catalogue" className="cj-btn-secondary-dark">
+                <BookOpen className="w-4 h-4" />
+                {isFr ? 'Explorer le catalogue' : 'Browse catalog'}
               </a>
             </div>
             <div className="w-full border-t border-white/10 pt-5 mt-1">
@@ -125,6 +164,151 @@ export default function FormationsPage() {
         </section>
       )}
 
+      {/* ═══ CATALOGUE COMPLET ═══ */}
+      <section id="catalogue" className="scroll-mt-20 bg-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--cj-blue)]/20 bg-[var(--cj-blue)]/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-[var(--cj-blue)] mb-3">
+              <BookOpen className="h-3.5 w-3.5" />
+              {isFr ? 'Catalogue complet' : 'Full catalog'}
+            </span>
+            <h2 className="text-3xl font-black text-slate-900 sm:text-4xl">
+              {isFr ? 'Toutes nos formations' : 'All our programs'}
+            </h2>
+            <p className="mt-2 max-w-2xl mx-auto text-base text-slate-600">
+              {isFr
+                ? 'Parcourez notre catalogue complet de formations certifiantes et trouvez le programme qui correspond à vos objectifs.'
+                : 'Browse our complete catalog of certified programs and find the one that matches your goals.'}
+            </p>
+          </div>
+
+          {/* Search & Filters Bar */}
+          <div className="mb-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+            {/* Search */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder={isFr ? 'Rechercher une formation...' : 'Search a program...'}
+                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[var(--cj-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--cj-blue)]/20"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <XIcon className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Category chips + Sort */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedCategory('all')}
+                className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                  selectedCategory === 'all'
+                    ? 'border-[var(--cj-blue)] bg-[var(--cj-blue)] text-white shadow'
+                    : 'border-slate-300 bg-white text-slate-700 hover:border-[var(--cj-blue)] hover:text-[var(--cj-blue)]'
+                }`}
+              >
+                {isFr ? 'Toutes' : 'All'} ({formations.length})
+              </button>
+              {activeCategories.map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                    selectedCategory === cat.id
+                      ? 'border-[var(--cj-blue)] bg-[var(--cj-blue)] text-white shadow'
+                      : 'border-slate-300 bg-white text-slate-700 hover:border-[var(--cj-blue)] hover:text-[var(--cj-blue)]'
+                  }`}
+                >
+                  {cat.name} ({categoryCounts[cat.id] || 0})
+                </button>
+              ))}
+
+              {/* Sort & Reset */}
+              <div className="ml-auto flex items-center gap-2">
+                <select
+                  value={sortBy}
+                  onChange={e => setSortBy(e.target.value as any)}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 focus:border-[var(--cj-blue)] focus:outline-none"
+                >
+                  <option value="popular">{isFr ? 'Plus populaires' : 'Most popular'}</option>
+                  <option value="newest">{isFr ? 'Plus récentes' : 'Newest'}</option>
+                  <option value="alphabetical">{isFr ? 'A → Z' : 'A → Z'}</option>
+                  <option value="rating">{isFr ? 'Mieux notées' : 'Top rated'}</option>
+                </select>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('all') }}
+                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700"
+                  >
+                    <XIcon className="h-3.5 w-3.5" />
+                    {isFr ? 'Réinitialiser' : 'Reset'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Results count */}
+          {!isLoading && (
+            <p className="mb-6 text-sm text-slate-500">
+              <span className="font-semibold text-slate-800">{filteredFormations.length}</span>
+              {' '}{isFr ? 'formation(s) trouvée(s)' : 'program(s) found'}
+            </p>
+          )}
+
+          {/* Loading skeletons */}
+          {isLoading && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, i) => <FormationCardSkeleton key={i} />)}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!isLoading && filteredFormations.length === 0 && (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-14 text-center shadow-sm">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-[var(--cj-blue)]">
+                <BookOpen className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-bold text-[var(--cj-blue)] mb-2">
+                {isFr ? 'Aucune formation trouvée' : 'No program found'}
+              </h3>
+              <p className="text-slate-500 mb-5">
+                {isFr
+                  ? 'Ajustez vos critères de recherche ou de filtres.'
+                  : 'Adjust your search criteria or filters.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => { setSearchQuery(''); setSelectedCategory('all') }}
+                className="rounded-xl bg-[var(--cj-red)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+              >
+                {isFr ? 'Voir toutes les formations' : 'View all programs'}
+              </button>
+            </div>
+          )}
+
+          {/* Grid */}
+          {!isLoading && filteredFormations.length > 0 && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredFormations.map(f => (
+                <FormationCard key={f.id} formation={f} locale={locale} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* ═══ SESSIONS OUVERTES ═══ */}
       <SessionsHub locale={locale} />
 
@@ -175,5 +359,6 @@ export default function FormationsPage() {
 
       </div>
     </div>
+    </StudentAuthProvider>
   )
 }

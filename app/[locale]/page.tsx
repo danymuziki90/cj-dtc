@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import RecentSessions from '../../components/RecentSessions'
 import RecentArticles from '../../components/RecentArticles'
+import TestimonialsSection from '@/components/TestimonialsSection'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
@@ -556,7 +557,8 @@ export default function HomePage() {
         </div>
       </section>
 
-
+      {/* ── Témoignages d'étudiants ─────────────────────────────────────── */}
+      <TestimonialsSection locale={locale} />
 
       {/* ── FAQ d'orientation ───────────────────────────────────────────── */}
       <section className="bg-white py-20 sm:py-24 border-b border-slate-200">

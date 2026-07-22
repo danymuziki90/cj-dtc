@@ -1,18 +1,16 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // GET /api/testimonials
 // Public route — returns only approved testimonials for the public site
 export async function GET() {
   try {
     const testimonials = await prisma.testimonial.findMany({
       where: { status: 'approved' },
-      select: {
-        id: true,
-        rating: true,
-        title: true,
-        content: true,
-        createdAt: true,
+      include: {
         student: {
           select: {
             firstName: true,
@@ -21,7 +19,16 @@ export async function GET() {
         },
         formation: {
           select: {
+            id: true,
             title: true,
+            slug: true,
+          },
+        },
+        session: {
+          select: {
+            id: true,
+            startDate: true,
+            endDate: true,
           },
         },
       },
@@ -34,11 +41,13 @@ export async function GET() {
       rating: t.rating,
       title: t.title,
       content: t.content,
+      quote: t.content,
       createdAt: t.createdAt,
       name: `${t.student.firstName} ${t.student.lastName}`.trim(),
-      quote: t.content,
-      formation: t.formation?.title ?? null,
-      // Public site compatibility fields
+      formation: t.formation?.title ?? 'Formation CJ DTC',
+      sessionDate: t.session?.startDate
+        ? new Date(t.session.startDate).toLocaleDateString('fr-FR')
+        : null,
       role: t.formation?.title ? `Étudiant — ${t.formation.title}` : 'Étudiant CJ DTC',
       company: 'CJ Development TC',
       photoUrl: null,

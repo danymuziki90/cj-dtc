@@ -19,7 +19,6 @@ const navRow2 = [
   { href: '/admin/certificates', label: 'Certificats' },
   { href: '/admin/evaluations', label: 'Témoignages' },
   { href: '/admin/articles', label: 'Actualités' },
-  { href: '/admin/lms', label: 'Galerie' },
   { href: '/admin/b2b', label: 'Entreprises' },
   { href: '/admin/settings', label: 'Paramètres' },
 ]
