@@ -9,15 +9,11 @@ type Props = {
   locale: 'fr' | 'en'
 }
 
-const TYPE_LABELS: Record<string, { fr: string; en: string }> = {
-  ALL:              { fr: 'Toutes',                en: 'All'              },
-  MRH:              { fr: 'MRH',                   en: 'MRH'             },
-  IOP:              { fr: 'IOP',                   en: 'IOP'             },
-  CONFERENCE_FORUM: { fr: 'Conférence / Forum',    en: 'Conference / Forum' },
-}
+
 
 function isOpen(status: string) {
-  return ['ouverte', 'open', 'complete', 'complet', 'full'].includes(status.toLowerCase())
+  const s = (status || '').toLowerCase().trim()
+  return !['brouillon', 'archive', 'annulee', 'cancelled', 'draft'].includes(s)
 }
 
 export default function SessionsHub({ locale }: Props) {
@@ -33,10 +29,10 @@ export default function SessionsHub({ locale }: Props) {
     setLoading(true)
     fetch('/api/sessions', { cache: 'no-store' })
       .then(r => { if (!r.ok) throw new Error('load_error'); return r.json() })
-      .then((data: SessionItem[]) => {
+      .then((data: any) => {
         if (!alive) return
-        const today = new Date(); today.setHours(0, 0, 0, 0)
-        const upcoming = data.filter(s => new Date(s.startDate) >= today && isOpen(s.status))
+        const list: SessionItem[] = Array.isArray(data) ? data : (data?.sessions || [])
+        const upcoming = list.filter(s => isOpen(s.status))
         setSessions(upcoming)
       })
       .catch(() => { if (alive) setError(locale === 'fr' ? 'Impossible de charger les sessions.' : 'Unable to load sessions.') })
@@ -63,9 +59,7 @@ export default function SessionsHub({ locale }: Props) {
 
   const totalOpen = hydrated.reduce((sum, s) => sum + s.available, 0)
 
-  const typeOptions: Array<{ value: 'ALL' | ProgramSessionType }> = [
-    { value: 'ALL' }, { value: 'MRH' }, { value: 'IOP' }, { value: 'CONFERENCE_FORUM' },
-  ]
+
 
   const formatOptions = [
     { id: 'all',       label: locale === 'fr' ? 'Tous les formats' : 'All formats' },
@@ -113,23 +107,7 @@ export default function SessionsHub({ locale }: Props) {
         {/* Filters bar */}
         <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
-            {/* Type filter chips */}
-            <div className="flex flex-wrap gap-2">
-              {typeOptions.map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setTypeFilter(opt.value)}
-                  className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
-                    typeFilter === opt.value
-                      ? 'border-[var(--cj-blue)] bg-[var(--cj-blue)] text-white shadow'
-                      : 'border-slate-300 bg-white text-slate-700 hover:border-[var(--cj-blue)] hover:text-[var(--cj-blue)]'
-                  }`}
-                >
-                  {TYPE_LABELS[opt.value]?.[locale] ?? opt.value}
-                </button>
-              ))}
-            </div>
+
 
             <div className="ml-auto flex items-center gap-2">
               <button

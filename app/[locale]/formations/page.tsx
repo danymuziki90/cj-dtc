@@ -346,9 +346,9 @@ export default function FormationsPage() {
               ? 'Rejoignez les milliers de professionnels formés par CJ Development Training Center.'
               : 'Join the thousands of professionals trained by CJ Development Training Center.'}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#sessions" className="cj-btn-primary">
-              {isFr ? 'Voir les sessions ouvertes' : 'See open sessions'}
+          <div className="flex flex-wrap gap-4 justify-center">
+            <a href="#catalogue" className="cj-btn-primary">
+              {isFr ? 'Explorer le catalogue' : 'Browse catalog'}
             </a>
             <Link href={`/${locale}/contact`} className="cj-btn-secondary-dark">
               {isFr ? 'Parler à un conseiller' : 'Talk to an advisor'}

@@ -12,6 +12,8 @@ import {
 } from '@/lib/sessions/metadata'
 
 export const runtime = "nodejs"
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 // GET /api/sessions - Récupérer toutes les sessions
 export async function GET(request: NextRequest) {
@@ -51,7 +53,7 @@ export async function GET(request: NextRequest) {
             return {
                 ...session,
                 imageUrl: resolvedImageUrl,
-                currentParticipants: session.enrollments.length,
+                currentParticipants: Array.isArray((session as any).enrollments) ? (session as any).enrollments.length : ((session as any).currentParticipants || 0),
                 prerequisitesText: parsedMetadata.prerequisitesText,
                 adminMeta: {
                     customTitle: parsedMetadata.metadata.customTitle || null,

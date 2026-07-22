@@ -6,8 +6,12 @@ export const runtime = "nodejs"
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-function isPublicRegistration(session: { status: string; startDate: Date; maxParticipants: number; enrollments?: { id: number }[]; prerequisites?: string | null }) {
-  if (session.status !== 'ouverte' || session.startDate < new Date()) return false
+function isPublicRegistration(session: { status: string; startDate: Date; endDate?: Date; maxParticipants: number; enrollments?: { id: number }[]; prerequisites?: string | null }) {
+  const statusOk = ['ouverte', 'open', 'complete', 'complet', 'active', 'publie', 'published'].includes((session.status || '').toLowerCase().trim())
+  if (!statusOk) return false
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const isUpcomingOrActive = (session.endDate && new Date(session.endDate) >= today) || (session.startDate && new Date(session.startDate) >= today)
+  if (!isUpcomingOrActive) return false
   if ((session.enrollments?.length || 0) >= session.maxParticipants) return false
   const deadline = parseSessionMetadata(session.prerequisites).metadata.registrationDeadline
   return !deadline || new Date(deadline).getTime() >= Date.now()
