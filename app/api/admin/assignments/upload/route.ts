@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
     const fileName = `${Date.now()}-${randomUUID()}${extension}`
     const buffer = await file.arrayBuffer()
     
-    console.log(`[API Admin Assignment Upload] Lancement upload R2. Clé: formations/${fileName}`)
-    const fileUrl = await uploadToR2(Buffer.from(buffer), fileName, 'formations', file.type || 'application/octet-stream')
+    console.log(`[API Admin Assignment Upload] Lancement upload R2. Clé: travaux/consignes/${fileName}`)
+    const fileUrl = await uploadToR2(Buffer.from(buffer), fileName, 'travaux/consignes', file.type || 'application/octet-stream')
     console.log(`[API Admin Assignment Upload] Upload réussi. URL: ${fileUrl}`)
 
     return NextResponse.json({

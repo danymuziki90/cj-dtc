@@ -51,7 +51,9 @@ interface Assignment {
   id: number;
   title: string;
   description: string;
+  objectives: string | null;
   type: "tp" | "exam" | "project";
+  difficulty?: "debutant" | "intermediaire" | "avance";
   deadline: string;
   maxFileSize: number;
   allowedFileTypes: string[];
@@ -286,6 +288,11 @@ export default function StudentAssignmentsPage() {
                               ? "Examen"
                               : "Projet"}
                           </span>
+                          {assignment.difficulty && (
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                              Niveau: {assignment.difficulty === "debutant" ? "Débutant" : assignment.difficulty === "intermediaire" ? "Intermédiaire" : "Avancé"}
+                            </span>
+                          )}
                           <span className="text-xs text-slate-400">
                             {assignment.formation.title}
                           </span>
@@ -301,6 +308,14 @@ export default function StudentAssignmentsPage() {
                     <p className="text-xs text-slate-600 leading-relaxed">
                       {assignment.description}
                     </p>
+
+                    {/* Objectifs pédagogiques */}
+                    {assignment.objectives && (
+                      <div className="bg-blue-50/40 border border-blue-100 rounded-2xl p-3.5 text-xs text-slate-700 leading-normal">
+                        <strong className="text-[var(--cj-blue)]">🎯 Objectifs pédagogiques :</strong>
+                        <p className="mt-1 whitespace-pre-line text-slate-650">{assignment.objectives}</p>
+                      </div>
+                    )}
 
                     {/* Fichiers de consignes */}
                     {assignment.files.length > 0 && (

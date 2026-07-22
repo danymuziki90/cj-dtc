@@ -457,6 +457,9 @@ model Assignment {
   maxFileSize       Int             @default(10) // MB
   allowedFileTypes  String          @default("pdf,doc,docx,txt,zip")
   instructions      String?
+  objectives        String?
+  difficulty        String?         @default("debutant") // debutant, intermediaire, avance
+  createdBy         String?
   status            String          @default("publie") // brouillon, publie, archive
   publishDate       DateTime        @default(now())
   createdAt         DateTime        @default(now())

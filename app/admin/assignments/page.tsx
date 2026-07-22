@@ -1,25 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useToastNotification } from "@/components/ui/toast";
 import {
-  Star,
-  Check,
-  X,
   FileText,
   Calendar,
   Download,
   Upload,
-  ChevronRight,
   Plus,
   Trash2,
-  Edit2,
+  Edit3,
   BookOpen,
-  Users,
+  Search,
+  Filter,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  X,
+  Layers,
+  Sparkles,
+  ExternalLink,
+  GraduationCap,
+  Paperclip,
 } from "lucide-react";
 
 interface AssignmentFile {
-  id: number;
+  id?: number;
   name: string;
   originalName: string;
   size: number;
@@ -50,21 +56,29 @@ interface Assignment {
   id: number;
   title: string;
   description: string;
+  objectives: string | null;
+  instructions: string | null;
   type: "tp" | "exam" | "project";
+  difficulty: "debutant" | "intermediaire" | "avance";
   formationId: number;
   formation: {
+    id: number;
     title: string;
+    slug?: string;
   };
   sessionId: number | null;
   session: {
     id: number;
     startDate: string;
     endDate: string;
+    status?: string;
   } | null;
   deadline: string;
+  publishDate: string;
+  status: "brouillon" | "publie" | "archive";
   maxFileSize: number;
   allowedFileTypes: string[];
-  instructions: string | null;
+  createdBy: string | null;
   createdAt: string;
   submissions: Submission[];
   files: AssignmentFile[];
@@ -73,6 +87,7 @@ interface Assignment {
 interface FormationOption {
   id: number;
   title: string;
+  statut?: string;
 }
 
 interface SessionOption {
@@ -80,7 +95,8 @@ interface SessionOption {
   formationId: number;
   startDate: string;
   endDate: string;
-  format: string;
+  status: string;
+  format?: string;
 }
 
 export default function AdminAssignmentsPage() {
@@ -89,21 +105,37 @@ export default function AdminAssignmentsPage() {
   const [sessions, setSessions] = useState<SessionOption[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Formulaire Devoir
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  // Recherche & Filtres
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
+
+  // Modale Formulaire Devoir (Création & Édition)
+  const [showModal, setShowModal] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [submittingDevoir, setSubmittingDevoir] = useState(false);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    objectives: "",
+    instructions: "",
     type: "tp" as "tp" | "exam" | "project",
+    difficulty: "debutant" as "debutant" | "intermediaire" | "avance",
     formationId: 0,
     sessionId: 0,
+    publishDate: "",
     deadline: "",
+    status: "publie" as "brouillon" | "publie" | "archive",
     maxFileSize: 10,
     allowedFileTypes: ["pdf", "doc", "docx", "zip"],
-    instructions: "",
   });
-  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+
+  // Fichiers joints consignes
+  const [existingFiles, setExistingFiles] = useState<AssignmentFile[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [pendingUploadFiles, setPendingUploadFiles] = useState<File[]>([]);
 
   // Correction & Notation
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
@@ -111,7 +143,7 @@ export default function AdminAssignmentsPage() {
   const [enrollmentsList, setEnrollmentsList] = useState<Array<{ email: string; name: string }>>([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
 
-  // Notation active
+  // Formulaire de notation
   const [activeSubmission, setActiveSubmission] = useState<Submission | null>(null);
   const [gradeValue, setGradeValue] = useState<string>("");
   const [feedbackValue, setFeedbackValue] = useState<string>("");
@@ -134,7 +166,7 @@ export default function AdminAssignmentsPage() {
       const response = await fetch("/api/admin/assignments");
       if (!response.ok) throw new Error("Erreur de récupération");
       const data = await response.json();
-      setAssignments(data || []);
+      setAssignments(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
       error("Impossible de récupérer les devoirs.");
@@ -149,14 +181,8 @@ export default function AdminAssignmentsPage() {
       const data = await response.json();
       const nextFormations = Array.isArray(data) ? data : [];
       setFormations(nextFormations);
-      if (nextFormations.length > 0) {
-        setFormData((prev) => ({
-          ...prev,
-          formationId: prev.formationId || nextFormations[0]?.id || 0,
-        }));
-      }
     } catch (err) {
-      console.error(err);
+      console.error("Erreur chargement formations:", err);
     }
   };
 
@@ -166,15 +192,119 @@ export default function AdminAssignmentsPage() {
       const data = await response.json();
       setSessions(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error(err);
+      console.error("Erreur chargement sessions:", err);
     }
   };
 
-  // Filtrer les sessions de la formation sélectionnée
-  const filteredSessions = sessions.filter((s) => s.formationId === formData.formationId);
+  // Sessions ouvertes filtrées par formation sélectionnée
+  const filteredSessions = useMemo(() => {
+    if (!formData.formationId) return [];
+    return sessions.filter(
+      (s) => s.formationId === formData.formationId && s.status === "ouverte"
+    );
+  }, [sessions, formData.formationId]);
 
-  const handleCreateAssignment = async (e: React.FormEvent) => {
+  // Ouverture modale Création
+  const handleOpenCreateModal = () => {
+    setEditingAssignment(null);
+    setExistingFiles([]);
+    setPendingUploadFiles([]);
+    
+    // Par défaut, première formation si disponible
+    const firstFormationId = formations[0]?.id || 0;
+    const defaultPublishDate = new Date().toISOString().slice(0, 16);
+    const defaultDeadline = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+
+    setFormData({
+      title: "",
+      description: "",
+      objectives: "",
+      instructions: "",
+      type: "tp",
+      difficulty: "debutant",
+      formationId: firstFormationId,
+      sessionId: 0,
+      publishDate: defaultPublishDate,
+      deadline: defaultDeadline,
+      status: "publie",
+      maxFileSize: 10,
+      allowedFileTypes: ["pdf", "doc", "docx", "zip"],
+    });
+
+    setShowModal(true);
+  };
+
+  // Ouverture modale Édition
+  const handleOpenEditModal = (assignment: Assignment) => {
+    setEditingAssignment(assignment);
+    setExistingFiles(assignment.files || []);
+    setPendingUploadFiles([]);
+
+    const pubDateStr = assignment.publishDate
+      ? new Date(assignment.publishDate).toISOString().slice(0, 16)
+      : new Date().toISOString().slice(0, 16);
+
+    const deadlineStr = assignment.deadline
+      ? new Date(assignment.deadline).toISOString().slice(0, 16)
+      : new Date().toISOString().slice(0, 16);
+
+    setFormData({
+      title: assignment.title || "",
+      description: assignment.description || "",
+      objectives: assignment.objectives || "",
+      instructions: assignment.instructions || "",
+      type: assignment.type || "tp",
+      difficulty: assignment.difficulty || "debutant",
+      formationId: assignment.formationId || 0,
+      sessionId: assignment.sessionId || 0,
+      publishDate: pubDateStr,
+      deadline: deadlineStr,
+      status: assignment.status || "publie",
+      maxFileSize: assignment.maxFileSize || 10,
+      allowedFileTypes: assignment.allowedFileTypes || ["pdf", "doc", "docx", "zip"],
+    });
+
+    setShowModal(true);
+  };
+
+  // Téléversement d'un fichier joint consignes vers Cloudflare R2
+  const handleUploadFileToR2 = async (file: File): Promise<AssignmentFile | null> => {
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
+
+      const res = await fetch("/api/admin/assignments/upload", {
+        method: "POST",
+        body: uploadFormData,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Échec du téléversement R2.");
+      }
+
+      const fileData = await res.json();
+      return {
+        name: fileData.name,
+        originalName: fileData.originalName,
+        size: fileData.size,
+        url: fileData.url,
+      };
+    } catch (err: any) {
+      console.error(err);
+      error(`Erreur d'envoi R2 (${file.name}) : ${err.message}`);
+      return null;
+    }
+  };
+
+  // Soumission Formulaire (Créer / Modifier)
+  const handleSubmitAssignment = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.title.trim()) {
+      error("Veuillez saisir un titre pour le travail.");
+      return;
+    }
 
     if (!formData.formationId) {
       error("Veuillez sélectionner une formation.");
@@ -184,80 +314,90 @@ export default function AdminAssignmentsPage() {
     setSubmittingDevoir(true);
 
     try {
-      let uploadedFileInfo = null;
-
-      // 1. Upload du fichier consigne vers R2 si sélectionné
-      if (attachmentFile) {
-        const uploadFormData = new FormData();
-        uploadFormData.append("file", attachmentFile);
-
-        const uploadRes = await fetch("/api/admin/assignments/upload", {
-          method: "POST",
-          body: uploadFormData,
-        });
-
-        if (!uploadRes.ok) {
-          const uploadErr = await uploadRes.json();
-          throw new Error(uploadErr.error || "Échec du téléversement du fichier.");
+      // 1. Upload des nouveaux fichiers joints vers R2
+      const newlyUploaded: AssignmentFile[] = [];
+      if (pendingUploadFiles.length > 0) {
+        setUploadingFiles(true);
+        for (const file of pendingUploadFiles) {
+          const uploaded = await handleUploadFileToR2(file);
+          if (uploaded) {
+            newlyUploaded.push(uploaded);
+          }
         }
-
-        uploadedFileInfo = await uploadRes.json();
+        setUploadingFiles(false);
       }
 
-      // 2. Création du devoir
+      const allFilesPayload = [...existingFiles, ...newlyUploaded];
+
       const payload = {
-        ...formData,
-        sessionId: formData.sessionId || undefined,
-        files: uploadedFileInfo
-          ? [
-              {
-                name: uploadedFileInfo.name,
-                originalName: uploadedFileInfo.originalName,
-                size: uploadedFileInfo.size,
-                url: uploadedFileInfo.url,
-              },
-            ]
-          : [],
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        objectives: formData.objectives.trim() || null,
+        instructions: formData.instructions.trim() || null,
+        type: formData.type,
+        difficulty: formData.difficulty,
+        formationId: Number(formData.formationId),
+        sessionId: formData.sessionId ? Number(formData.sessionId) : null,
+        publishDate: formData.publishDate ? new Date(formData.publishDate).toISOString() : new Date().toISOString(),
+        deadline: new Date(formData.deadline).toISOString(),
+        status: formData.status,
+        maxFileSize: Number(formData.maxFileSize) || 10,
+        allowedFileTypes: formData.allowedFileTypes,
+        files: allFilesPayload.map((f) => ({
+          name: f.name,
+          originalName: f.originalName,
+          size: f.size,
+          url: f.url,
+        })),
       };
 
-      const response = await fetch("/api/admin/assignments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const createErr = await response.json();
-        throw new Error(createErr.error || "Erreur lors de la création.");
+      let response;
+      if (editingAssignment) {
+        // Édition
+        response = await fetch(`/api/admin/assignments/${editingAssignment.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        // Création
+        response = await fetch("/api/admin/assignments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
       }
 
-      const newAssignment = await response.json();
-      setAssignments((prev) => [newAssignment, ...prev]);
-      setShowCreateForm(false);
-      setAttachmentFile(null);
-      setFormData({
-        title: "",
-        description: "",
-        type: "tp",
-        formationId: formations[0]?.id || 0,
-        sessionId: 0,
-        deadline: "",
-        maxFileSize: 10,
-        allowedFileTypes: ["pdf", "doc", "docx", "zip"],
-        instructions: "",
-      });
+      if (!response.ok) {
+        const resErr = await response.json();
+        throw new Error(resErr.error || "Erreur lors de l'enregistrement.");
+      }
 
-      success("Le devoir a été créé et publié avec succès !");
+      const savedAssignment = await response.json();
+
+      if (editingAssignment) {
+        setAssignments((prev) =>
+          prev.map((a) => (a.id === editingAssignment.id ? savedAssignment : a))
+        );
+        success("Travail mis à jour avec succès !");
+      } else {
+        setAssignments((prev) => [savedAssignment, ...prev]);
+        success("Nouveau travail créé et synchronisé avec succès !");
+      }
+
+      setShowModal(false);
     } catch (err: any) {
       console.error(err);
-      error(err.message || "Erreur de création.");
+      error(err.message || "Erreur lors de l'enregistrement.");
     } finally {
       setSubmittingDevoir(false);
+      setUploadingFiles(false);
     }
   };
 
+  // Suppression
   const handleDeleteAssignment = async (id: number) => {
-    if (!confirm("Voulez-vous supprimer ce devoir définitivement ?")) return;
+    if (!confirm("Êtes-vous sûr de vouloir supprimer définitivement ce devoir ? Cette action est irréversible.")) return;
 
     try {
       const response = await fetch(`/api/admin/assignments/${id}`, {
@@ -270,14 +410,14 @@ export default function AdminAssignmentsPage() {
       if (selectedAssignment?.id === id) {
         setSelectedAssignment(null);
       }
-      success("Devoir supprimé avec succès.");
+      success("Travail supprimé avec succès.");
     } catch (err) {
       console.error(err);
       error("Erreur lors de la suppression.");
     }
   };
 
-  // Charger les remises pour le devoir sélectionné
+  // Ouvrir le panneau de correction pour un devoir
   const handleOpenCorrection = async (assignment: Assignment) => {
     setSelectedAssignment(assignment);
     setActiveSubmission(null);
@@ -299,7 +439,7 @@ export default function AdminAssignmentsPage() {
     }
   };
 
-  // Soumettre une note et commentaire
+  // Enregistrer la note
   const handleSaveGrade = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedAssignment || !activeSubmission) return;
@@ -313,7 +453,7 @@ export default function AdminAssignmentsPage() {
       const payload = {
         submissionId: activeSubmission.id,
         studentEmail: activeSubmission.studentEmail,
-        status: status, // graded
+        status: status,
         grade: grade,
         feedback: feedbackValue.trim() || null,
       };
@@ -327,15 +467,13 @@ export default function AdminAssignmentsPage() {
         }
       );
 
-      if (!response.ok) throw new Error("Erreur de sauvegarde de note");
+      if (!response.ok) throw new Error("Erreur de sauvegarde");
       const updated = await response.json();
 
-      // Mettre à jour la liste des remises locale
       setSubmissionsList((prev) =>
         prev.map((sub) => (sub.id === activeSubmission.id ? { ...sub, ...updated } : sub))
       );
 
-      // Mettre à jour dans les assignments
       setAssignments((prev) =>
         prev.map((a) => {
           if (a.id === selectedAssignment.id) {
@@ -355,18 +493,19 @@ export default function AdminAssignmentsPage() {
       setActiveSubmission(null);
       setGradeValue("");
       setFeedbackValue("");
-      success("Note et évaluation enregistrées avec succès !");
+      success("Note et commentaires enregistrés !");
     } catch (err) {
       console.error(err);
-      error("Erreur lors de la sauvegarde de la note.");
+      error("Erreur lors de la sauvegarde.");
     } finally {
       setSavingGrade(false);
     }
   };
 
+  // Demander une correction ("À refaire")
   const handleRequestRevision = async (sub: Submission) => {
     if (!selectedAssignment) return;
-    const feedback = prompt("Raison ou consigne de modification pour l'étudiant :");
+    const feedback = prompt("Raison ou consignes de modification pour l'étudiant :");
     if (feedback === null) return;
 
     try {
@@ -375,7 +514,7 @@ export default function AdminAssignmentsPage() {
         studentEmail: sub.studentEmail,
         status: "returned",
         grade: null,
-        feedback: feedback.trim() || "Consigne de modification demandée.",
+        feedback: feedback.trim() || "Consigne de modification demandée par le formateur.",
       };
 
       const response = await fetch(
@@ -394,17 +533,89 @@ export default function AdminAssignmentsPage() {
         prev.map((item) => (item.id === sub.id ? { ...item, ...updated } : item))
       );
 
-      success("Demande de nouvelle soumission transmise à l'élève.");
+      success("Demande de modification transmise à l'étudiant.");
     } catch (err) {
       console.error(err);
-      error("Erreur de demande de révision.");
+      error("Erreur lors de la demande de révision.");
     }
   };
 
-  const openGradeForm = (sub: Submission) => {
-    setActiveSubmission(sub);
-    setGradeValue(sub.grade !== null ? String(sub.grade) : "");
-    setFeedbackValue(sub.feedback || "");
+  // Devoirs filtrés
+  const filteredAssignments = useMemo(() => {
+    return assignments.filter((a) => {
+      // Recherche textuelle
+      const query = searchTerm.toLowerCase();
+      const matchSearch =
+        !searchTerm ||
+        a.title.toLowerCase().includes(query) ||
+        a.description.toLowerCase().includes(query) ||
+        a.formation.title.toLowerCase().includes(query);
+
+      // Statut
+      const matchStatus = statusFilter === "all" || a.status === statusFilter;
+
+      // Type
+      const matchType = typeFilter === "all" || a.type === typeFilter;
+
+      // Difficulté
+      const matchDifficulty = difficultyFilter === "all" || a.difficulty === difficultyFilter;
+
+      return matchSearch && matchStatus && matchType && matchDifficulty;
+    });
+  }, [assignments, searchTerm, statusFilter, typeFilter, difficultyFilter]);
+
+  // Helpers pour les badges
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "publie":
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+            Publié
+          </span>
+        );
+      case "brouillon":
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+            <Clock className="w-3 h-3 text-amber-600" />
+            Brouillon
+          </span>
+        );
+      case "archive":
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full">
+            <Layers className="w-3 h-3 text-slate-500" />
+            Archivé
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getDifficultyBadge = (difficulty: string) => {
+    switch (difficulty) {
+      case "debutant":
+        return (
+          <span className="inline-flex items-center text-[10px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+            Débutant
+          </span>
+        );
+      case "intermediaire":
+        return (
+          <span className="inline-flex items-center text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">
+            Intermédiaire
+          </span>
+        );
+      case "avance":
+        return (
+          <span className="inline-flex items-center text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">
+            Avancé
+          </span>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -412,88 +623,169 @@ export default function AdminAssignmentsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 bg-gradient-to-r from-blue-900 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 bg-gradient-to-r from-blue-950 via-blue-900 to-indigo-700 bg-clip-text text-transparent">
             Gestion des Travaux & TP
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Créez, publiez des consignes et notez les devoirs rendus des étudiants.
+            Pilotez les sujets de TP, projets et examens, gérez les consignes R2 et notez les rendus étudiants.
           </p>
         </div>
         <button
-          onClick={() => setShowCreateForm(true)}
-          className="px-4 py-2.5 bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-sm transition-all"
+          onClick={handleOpenCreateModal}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95"
         >
-          + Nouveau devoir
+          <Plus className="w-4 h-4" />
+          Nouveau travail
         </button>
+      </div>
+
+      {/* Barre de Recherche & Filtres */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+        {/* Recherche textuelle */}
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Rechercher par titre, formation ou mot clé..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 transition"
+          />
+        </div>
+
+        {/* Filtres Dropdowns */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Statut */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-900/20"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="publie">Publié</option>
+            <option value="brouillon">Brouillon</option>
+            <option value="archive">Archivé</option>
+          </select>
+
+          {/* Type */}
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-900/20"
+          >
+            <option value="all">Tous les types</option>
+            <option value="tp">TP (Travail Pratique)</option>
+            <option value="exam">Examen</option>
+            <option value="project">Projet</option>
+          </select>
+
+          {/* Difficulté */}
+          <select
+            value={difficultyFilter}
+            onChange={(e) => setDifficultyFilter(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-900/20"
+          >
+            <option value="all">Toutes difficultés</option>
+            <option value="debutant">Débutant</option>
+            <option value="intermediaire">Intermédiaire</option>
+            <option value="avance">Avancé</option>
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Liste des devoirs */}
         <div className="lg:col-span-2 space-y-4">
           {loading ? (
-            <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center text-sm text-slate-500">
-              Chargement des travaux...
+            <div className="bg-white rounded-3xl border border-slate-200/80 p-12 text-center text-xs text-slate-500">
+              Chargement des travaux et TP...
             </div>
-          ) : assignments.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center text-sm text-slate-500">
-              Aucun devoir créé pour le moment.
+          ) : filteredAssignments.length === 0 ? (
+            <div className="bg-white rounded-3xl border border-slate-200/80 p-12 text-center space-y-2">
+              <FileText className="w-10 h-10 text-slate-300 mx-auto" />
+              <p className="text-sm font-bold text-slate-700">Aucun travail trouvé</p>
+              <p className="text-xs text-slate-400">
+                Ajustez vos filtres ou créez votre premier sujet de TP.
+              </p>
             </div>
           ) : (
-            assignments.map((assignment) => {
+            filteredAssignments.map((assignment) => {
               const overdue = new Date(assignment.deadline) < new Date();
+              const isSelected = selectedAssignment?.id === assignment.id;
+
               return (
                 <div
                   key={assignment.id}
-                  className={`bg-white border rounded-3xl p-6 shadow-sm transition hover:shadow-md cursor-pointer ${
-                    selectedAssignment?.id === assignment.id
-                      ? "border-blue-900 ring-2 ring-blue-900/10"
-                      : "border-slate-100"
-                  }`}
                   onClick={() => handleOpenCorrection(assignment)}
+                  className={`bg-white border rounded-3xl p-6 shadow-sm transition hover:shadow-md cursor-pointer ${
+                    isSelected
+                      ? "border-blue-900 ring-2 ring-blue-900/10 bg-blue-50/10"
+                      : "border-slate-200/80"
+                  }`}
                 >
                   <div className="flex justify-between items-start gap-4">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[var(--admin-primary)] bg-slate-50 px-2 py-0.5 rounded">
-                          {assignment.type.toUpperCase()}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-950 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                          {assignment.type === "tp"
+                            ? "TP"
+                            : assignment.type === "exam"
+                            ? "Examen"
+                            : "Projet"}
                         </span>
-                        <span className="text-[10px] text-slate-400">
-                          {assignment.formation.title}
+                        {getStatusBadge(assignment.status)}
+                        {getDifficultyBadge(assignment.difficulty)}
+                        <span className="text-xs text-slate-500 font-medium">
+                          • {assignment.formation.title}
                         </span>
                       </div>
-                      <h3 className="font-bold text-base text-slate-900 mt-1.5">
+
+                      <h3 className="font-bold text-base text-slate-900 mt-2">
                         {assignment.title}
                       </h3>
                     </div>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteAssignment(assignment.id);
-                      }}
-                      className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => handleOpenEditModal(assignment)}
+                        title="Éditer le travail"
+                        className="p-2 text-slate-400 hover:text-blue-900 hover:bg-blue-50 rounded-xl transition"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAssignment(assignment.id)}
+                        title="Supprimer le travail"
+                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   <p className="text-xs text-slate-650 mt-2 line-clamp-2 leading-relaxed">
                     {assignment.description}
                   </p>
 
+                  {/* Objectifs s'il y en a */}
+                  {assignment.objectives && (
+                    <p className="text-[11px] text-slate-500 mt-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 line-clamp-2">
+                      <strong>🎯 Objectifs :</strong> {assignment.objectives}
+                    </p>
+                  )}
+
                   {/* Fichiers joints consignes */}
-                  {assignment.files.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
+                  {assignment.files && assignment.files.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5" onClick={(e) => e.stopPropagation()}>
                       {assignment.files.map((file) => (
                         <a
-                          key={file.id}
+                          key={file.id || file.url}
                           href={file.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-[10px] bg-slate-50 border border-slate-200 rounded-full px-2.5 py-1 text-slate-700 hover:bg-slate-100"
+                          className="inline-flex items-center gap-1.5 text-[10px] bg-slate-50 border border-slate-200 rounded-full px-3 py-1 text-slate-700 hover:bg-slate-100 font-medium transition"
                         >
-                          <Download className="w-3 h-3" />
+                          <Paperclip className="w-3 h-3 text-blue-900" />
                           Consigne: {file.originalName}
                         </a>
                       ))}
@@ -502,16 +794,23 @@ export default function AdminAssignmentsPage() {
 
                   {/* Footer infos */}
                   <div className="flex flex-wrap justify-between items-center mt-4 pt-4 border-t border-slate-100 text-[10px] text-slate-400 gap-2">
-                    <span className={overdue ? "text-red-600 font-bold" : ""}>
-                      📅 Deadline: {new Date(assignment.deadline).toLocaleString("fr-FR")}
+                    <span className={overdue ? "text-rose-600 font-bold flex items-center gap-1" : "flex items-center gap-1"}>
+                      <Calendar className="w-3 h-3" />
+                      Limite: {new Date(assignment.deadline).toLocaleString("fr-FR")}
                     </span>
-                    {assignment.session && (
-                      <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600">
-                        Session: {new Date(assignment.session.startDate).toLocaleDateString("fr-FR")}
+
+                    {assignment.session ? (
+                      <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-medium">
+                        Session #{assignment.session.id} (du {new Date(assignment.session.startDate).toLocaleDateString("fr-FR")})
+                      </span>
+                    ) : (
+                      <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-medium">
+                        Toutes les sessions
                       </span>
                     )}
-                    <span className="font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded-full">
-                      {assignment.submissions.length} rendu(s)
+
+                    <span className="font-bold text-blue-950 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+                      {assignment.submissions?.length || 0} rendu(s)
                     </span>
                   </div>
                 </div>
@@ -523,19 +822,22 @@ export default function AdminAssignmentsPage() {
         {/* Panneau latéral : Notation & Suivi des rendus */}
         <div className="lg:col-span-1">
           {selectedAssignment ? (
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm sticky top-6 space-y-6">
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm sticky top-6 space-y-6">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
-                  Rendus & Notation
+                  Rendus & Evaluation
                 </h3>
-                <p className="text-[10px] text-slate-400 mt-1">
-                  Devoir: <strong>{selectedAssignment.title}</strong>
+                <p className="text-xs font-semibold text-blue-950 mt-2 line-clamp-1">
+                  {selectedAssignment.title}
+                </p>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  {selectedAssignment.formation.title}
                 </p>
               </div>
 
               {loadingSubmissions ? (
                 <div className="text-center text-xs text-slate-500 py-6">
-                  Chargement des rendus...
+                  Chargement des rendus étudiants...
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -543,11 +845,11 @@ export default function AdminAssignmentsPage() {
                   {activeSubmission && (
                     <form
                       onSubmit={handleSaveGrade}
-                      className="bg-blue-50/30 border border-blue-100 rounded-2xl p-4 space-y-3"
+                      className="bg-blue-50/40 border border-blue-200/80 rounded-2xl p-4 space-y-3"
                     >
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-blue-900">
-                          Évaluer {activeSubmission.studentName}
+                        <span className="text-xs font-bold text-blue-950">
+                          Noter {activeSubmission.studentName || activeSubmission.studentEmail}
                         </span>
                         <button
                           type="button"
@@ -570,197 +872,228 @@ export default function AdminAssignmentsPage() {
                           required
                           value={gradeValue}
                           onChange={(e) => setGradeValue(e.target.value)}
-                          placeholder="Ex: 15.5"
-                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-950 outline-none"
+                          placeholder="Ex: 16.5"
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-950 outline-none focus:ring-2 focus:ring-blue-900/20"
                         />
                       </div>
 
                       <div className="space-y-1">
                         <label className="block text-[10px] font-bold text-slate-700 uppercase">
-                          Commentaire de correction
+                          Appréciation / Correction
                         </label>
                         <textarea
                           value={feedbackValue}
                           onChange={(e) => setFeedbackValue(e.target.value)}
-                          placeholder="Points forts, axes d'amélioration..."
+                          placeholder="Remarques pédagogiques et conseils..."
                           rows={3}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-950 outline-none"
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-950 outline-none focus:ring-2 focus:ring-blue-900/20"
                         />
                       </div>
 
                       <button
                         type="submit"
                         disabled={savingGrade}
-                        className="w-full flex items-center justify-center py-2 bg-blue-900 text-white font-bold text-xs rounded-xl shadow transition"
+                        className="w-full flex items-center justify-center py-2 bg-blue-950 hover:bg-blue-900 text-white font-bold text-xs rounded-xl shadow transition"
                       >
                         Enregistrer la note
                       </button>
                     </form>
                   )}
 
-                  {/* Liste des étudiants inscrits */}
-                  <div className="space-y-3.5 max-h-[50vh] overflow-y-auto pr-1">
+                  {/* Liste des étudiants inscrits à la session */}
+                  <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
                     <span className="block text-xs font-bold text-slate-700 uppercase">
-                      Inscrits à la session ({enrollmentsList.length}) :
+                      Inscrits concernés ({enrollmentsList.length}) :
                     </span>
 
-                    {enrollmentsList.map((enrollment) => {
-                      const submission = submissionsList.find(
-                        (s) => s.studentEmail.toLowerCase() === enrollment.email.toLowerCase()
-                      );
+                    {enrollmentsList.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic">Aucun étudiant inscrit trouvé.</p>
+                    ) : (
+                      enrollmentsList.map((enrollment) => {
+                        const submission = submissionsList.find(
+                          (s) => s.studentEmail.toLowerCase() === enrollment.email.toLowerCase()
+                        );
 
-                      return (
-                        <div
-                          key={enrollment.email}
-                          className="border border-slate-100 rounded-2xl p-3 space-y-2 hover:bg-slate-50/50"
-                        >
-                          <div className="flex justify-between items-start gap-1">
-                            <div>
-                              <h4 className="font-bold text-xs text-slate-800">
-                                {enrollment.name}
-                              </h4>
-                              <p className="text-[9px] text-slate-400">{enrollment.email}</p>
+                        return (
+                          <div
+                            key={enrollment.email}
+                            className="border border-slate-200/80 rounded-2xl p-3 space-y-2 hover:bg-slate-50/60 transition"
+                          >
+                            <div className="flex justify-between items-start gap-1">
+                              <div>
+                                <h4 className="font-bold text-xs text-slate-900">
+                                  {enrollment.name}
+                                </h4>
+                                <p className="text-[9px] text-slate-400">{enrollment.email}</p>
+                              </div>
+
+                              {submission ? (
+                                submission.status === "graded" ? (
+                                  <span className="inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    Noté: {submission.grade}/20
+                                  </span>
+                                ) : submission.status === "returned" ? (
+                                  <span className="inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                    À refaire
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                    Rendu
+                                  </span>
+                                )
+                              ) : (
+                                <span className="inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-500">
+                                  Non rendu
+                                </span>
+                              )}
                             </div>
 
-                            {submission ? (
-                              submission.status === "graded" ? (
-                                <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800">
-                                  Noté: {submission.grade}/20
-                                </span>
-                              ) : submission.status === "returned" ? (
-                                <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800">
-                                  À refaire
-                                </span>
-                              ) : (
-                                <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-800">
-                                  Rendu
-                                </span>
-                              )
-                            ) : (
-                              <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-500">
-                                Non rendu
-                              </span>
+                            {/* Fichiers rendus par l'étudiant */}
+                            {submission && (
+                              <div className="space-y-1.5 pt-1">
+                                <div className="flex flex-wrap gap-1">
+                                  {submission.files.map((file) => (
+                                    <a
+                                      key={file.id}
+                                      href={file.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 bg-white border border-slate-200 rounded px-2.5 py-1 text-[9px] font-medium text-slate-700 hover:bg-slate-50"
+                                    >
+                                      <Download className="w-2.5 h-2.5 text-blue-900" />
+                                      {file.originalName}
+                                    </a>
+                                  ))}
+                                </div>
+
+                                {/* Actions sur le rendu */}
+                                <div className="flex gap-1.5 pt-1.5 border-t border-slate-100">
+                                  <button
+                                    onClick={() => {
+                                      setActiveSubmission(submission);
+                                      setGradeValue(submission.grade !== null ? String(submission.grade) : "");
+                                      setFeedbackValue(submission.feedback || "");
+                                    }}
+                                    className="flex-1 py-1 bg-blue-950 hover:bg-blue-900 text-white font-bold text-[9px] rounded-lg text-center transition"
+                                  >
+                                    Noter
+                                  </button>
+                                  <button
+                                    onClick={() => handleRequestRevision(submission)}
+                                    className="flex-1 py-1 bg-slate-100 hover:bg-amber-50 hover:text-amber-800 text-slate-700 font-bold text-[9px] rounded-lg text-center transition border border-slate-200"
+                                  >
+                                    À refaire
+                                  </button>
+                                </div>
+                              </div>
                             )}
                           </div>
-
-                          {/* Fichiers rendus */}
-                          {submission && (
-                            <div className="space-y-1.5 pt-1">
-                              <div className="flex flex-wrap gap-1">
-                                {submission.files.map((file) => (
-                                  <a
-                                    key={file.id}
-                                    href={file.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 bg-white border border-slate-200 rounded px-2 py-0.5 text-[9px] text-slate-700 hover:bg-slate-50"
-                                  >
-                                    <Download className="w-2.5 h-2.5" />
-                                    {file.originalName}
-                                  </a>
-                                ))}
-                              </div>
-
-                              {/* Actions sur le rendu */}
-                              <div className="flex gap-1.5 pt-1.5 border-t border-slate-100">
-                                <button
-                                  onClick={() => openGradeForm(submission)}
-                                  className="flex-1 py-1 bg-blue-900 hover:bg-blue-800 text-white font-bold text-[9px] rounded-lg text-center"
-                                >
-                                  Noter
-                                </button>
-                                <button
-                                  onClick={() => handleRequestRevision(submission)}
-                                  className="flex-1 py-1 bg-slate-100 hover:bg-amber-50 hover:text-amber-800 text-slate-600 font-bold text-[9px] rounded-lg text-center"
-                                >
-                                  À refaire
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="bg-white border border-slate-100 border-dashed rounded-3xl p-12 text-center text-xs text-slate-400 shadow-sm sticky top-6">
-              Sélectionnez un devoir pour afficher les rendus et noter les étudiants.
+            <div className="bg-white border border-slate-200/80 border-dashed rounded-3xl p-12 text-center space-y-2 text-slate-400 shadow-sm sticky top-6">
+              <GraduationCap className="w-8 h-8 mx-auto text-slate-300" />
+              <p className="text-xs font-semibold text-slate-600">Aucun travail sélectionné</p>
+              <p className="text-[11px]">
+                Cliquez sur un travail pour consulter les rendus des étudiants et les noter.
+              </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Modal création devoir */}
-      {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      {/* MODALE DE CREATION & EDITITION */}
+      {showModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-slate-200">
             <div className="p-6 sm:p-8">
               <div className="flex justify-between items-start mb-6">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Créer un travail (TP / Projet / Examen)
-                </h2>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-950">
+                    {editingAssignment ? "Modifier le travail" : "Nouveau travail (TP / Projet / Examen)"}
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Renseignez les détails pédagogiques, la formation et la session associée.
+                  </p>
+                </div>
                 <button
-                  onClick={() => setShowCreateForm(false)}
-                  className="text-slate-400 hover:text-slate-600"
+                  onClick={() => setShowModal(false)}
+                  className="text-slate-400 hover:text-slate-600 rounded-lg p-1"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateAssignment} className="space-y-5">
+              <form onSubmit={handleSubmitAssignment} className="space-y-5">
+                {/* Titre */}
                 <div>
-                  <label htmlFor="title" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                    Titre *
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Titre du travail *
                   </label>
                   <input
                     type="text"
-                    id="title"
                     value={formData.title}
                     onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-1 focus:ring-blue-900 outline-none text-xs"
+                    placeholder="Ex: TP 1 - Configuration d'une architecture réseau sécurisée"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs font-medium"
                     required
                   />
                 </div>
 
+                {/* Description Détaillée */}
                 <div>
-                  <label htmlFor="description" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                    Description / Description détaillée *
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Description détaillée *
                   </label>
                   <textarea
-                    id="description"
                     value={formData.description}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, description: e.target.value }))
-                    }
-                    rows={2}
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-1 focus:ring-blue-900 outline-none text-xs"
+                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                    rows={3}
+                    placeholder="Présentation générale du sujet, contexte et livrables attendus..."
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs"
                     required
                   />
                 </div>
 
+                {/* Objectifs pédagogiques */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Objectifs pédagogiques (Optionnel)
+                  </label>
+                  <textarea
+                    value={formData.objectives}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, objectives: e.target.value }))}
+                    rows={2}
+                    placeholder="Acquérir les compétences de diagnostic, maîtriser les commandes de routage..."
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs"
+                  />
+                </div>
+
+                {/* Selection Formation & Session */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="formationId" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                      Formation *
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Formation (Dynamique Supabase) *
                     </label>
                     <select
-                      id="formationId"
                       value={formData.formationId}
                       onChange={(e) =>
                         setFormData((prev) => ({
                           ...prev,
                           formationId: Number(e.target.value),
-                          sessionId: 0, // Reset session si formation change
+                          sessionId: 0, // Réinitialiser session si formation change
                         }))
                       }
-                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-1 focus:ring-blue-900 outline-none text-xs"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs font-semibold text-slate-900"
                       required
                     >
                       <option value={0} disabled>
-                        Sélectionnez une formation...
+                        Sélectionnez une formation disponible...
                       </option>
                       {formations.map((f) => (
                         <option key={f.id} value={f.id}>
@@ -771,112 +1104,205 @@ export default function AdminAssignmentsPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="sessionId" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                      Session concernée (Optionnel)
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Session concernée (Filtre Ouvertes)
                     </label>
                     <select
-                      id="sessionId"
                       value={formData.sessionId}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, sessionId: Number(e.target.value) }))
                       }
-                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-1 focus:ring-blue-900 outline-none text-xs"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs font-medium"
                     >
                       <option value={0}>Toutes les sessions de cette formation</option>
                       {filteredSessions.map((s) => (
                         <option key={s.id} value={s.id}>
-                          Session #{s.id} (du{" "}
-                          {new Date(s.startDate).toLocaleDateString("fr-FR")})
+                          Session #{s.id} (du {new Date(s.startDate).toLocaleDateString("fr-FR")})
                         </option>
                       ))}
                     </select>
+                    {formData.formationId > 0 && filteredSessions.length === 0 && (
+                      <p className="text-[10px] text-amber-600 mt-1">
+                        Aucune session ouverte pour cette formation (le travail sera associé à toute la formation).
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Type, Difficulté, Statut */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label htmlFor="type" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                      Type *
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Type de travail *
                     </label>
                     <select
-                      id="type"
                       value={formData.type}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, type: e.target.value as any }))
                       }
-                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-1 focus:ring-blue-900 outline-none text-xs"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs"
                       required
                     >
                       <option value="tp">Travail Pratique (TP)</option>
                       <option value="exam">Examen</option>
-                      <option value="project">Projet</option>
+                      <option value="project">Projet de fin de module</option>
                     </select>
                   </div>
 
                   <div>
-                    <label htmlFor="deadline" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                      Date limite de remise *
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Niveau de difficulté *
+                    </label>
+                    <select
+                      value={formData.difficulty}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, difficulty: e.target.value as any }))
+                      }
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs"
+                      required
+                    >
+                      <option value="debutant">Débutant</option>
+                      <option value="intermediaire">Intermédiaire</option>
+                      <option value="avance">Avancé</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Statut de publication *
+                    </label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, status: e.target.value as any }))
+                      }
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs font-semibold"
+                      required
+                    >
+                      <option value="publie">Publié (Visible étudiants)</option>
+                      <option value="brouillon">Brouillon (Masqué)</option>
+                      <option value="archive">Archivé</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Dates (Publication & Remise) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Date de publication *
                     </label>
                     <input
                       type="datetime-local"
-                      id="deadline"
+                      value={formData.publishDate}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, publishDate: e.target.value }))
+                      }
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Date limite de remise (Deadline) *
+                    </label>
+                    <input
+                      type="datetime-local"
                       value={formData.deadline}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, deadline: e.target.value }))
                       }
-                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-1 focus:ring-blue-900 outline-none text-xs"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs font-semibold"
                       required
                     />
                   </div>
                 </div>
 
+                {/* Consignes complémentaires */}
                 <div>
-                  <label htmlFor="instructions" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Consignes complémentaires (Optionnel)
                   </label>
                   <textarea
-                    id="instructions"
                     value={formData.instructions}
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, instructions: e.target.value }))
                     }
                     rows={3}
-                    placeholder="Consignes textuelles additionnelles..."
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-1 focus:ring-blue-900 outline-none text-xs"
+                    placeholder="Consignes textuelles additionnelles pour la remise du travail..."
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs"
                   />
                 </div>
 
-                {/* Pièce jointe consigne (R2) */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                    Pièce jointe (Fichier consigne R2)
+                {/* Pièces jointes R2 */}
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Pièces jointes consignes (Stockage Cloudflare R2)
                   </label>
+
+                  {/* Fichiers déjà attachés */}
+                  {existingFiles.length > 0 && (
+                    <div className="space-y-1.5 mb-2">
+                      <span className="text-[11px] font-semibold text-slate-600">Fichiers actuels :</span>
+                      <div className="flex flex-wrap gap-2">
+                        {existingFiles.map((file, idx) => (
+                          <div
+                            key={file.id || idx}
+                            className="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700"
+                          >
+                            <Paperclip className="w-3.5 h-3.5 text-blue-950" />
+                            <span className="font-medium">{file.originalName}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExistingFiles((prev) => prev.filter((_, i) => i !== idx))
+                              }
+                              className="text-slate-400 hover:text-rose-600"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Nouveaux fichiers à téléverser */}
                   <input
                     type="file"
-                    onChange={(e) =>
-                      setAttachmentFile(e.target.files ? e.target.files[0] : null)
-                    }
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
+                    multiple
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setPendingUploadFiles(Array.from(e.target.files));
+                      }
+                    }}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs"
                   />
-                  <p className="text-[9px] text-slate-400 mt-1">
-                    PDF, Word, ZIP, etc. Max 20 Mo. Le fichier sera hébergé sur Cloudflare R2.
+                  <p className="text-[10px] text-slate-400">
+                    PDF, Word, ZIP, Images. Max 20 Mo par fichier.
                   </p>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                {/* Boutons d'action */}
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                   <button
                     type="button"
-                    onClick={() => setShowCreateForm(false)}
-                    className="px-4 py-2 border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 text-xs font-bold transition"
+                    onClick={() => setShowModal(false)}
+                    className="px-5 py-2.5 border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 text-xs font-bold transition"
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
-                    disabled={submittingDevoir}
-                    className="px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-xl text-xs font-bold transition disabled:opacity-50"
+                    disabled={submittingDevoir || uploadingFiles}
+                    className="px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-bold transition shadow-md disabled:opacity-50"
                   >
-                    {submittingDevoir ? "Création..." : "Publier le travail"}
+                    {submittingDevoir
+                      ? "Enregistrement..."
+                      : editingAssignment
+                      ? "Mettre à jour le travail"
+                      : "Publier le travail"}
                   </button>
                 </div>
               </form>

@@ -11,11 +11,13 @@ const updateAssignmentSchema = z.object({
   description: z.string().trim().min(3).max(2000).optional(),
   type: z.enum(['tp', 'exam', 'project']).optional(),
   formationId: z.coerce.number().int().positive().optional(),
-  sessionId: z.coerce.number().int().positive().optional(),
+  sessionId: z.coerce.number().int().positive().nullable().optional(),
   deadline: z.string().min(10).optional(),
   maxFileSize: z.coerce.number().int().min(1).max(100).optional(),
   allowedFileTypes: z.array(z.string().trim().min(1).max(20)).max(12).optional(),
   instructions: z.string().trim().max(5000).nullable().optional(),
+  objectives: z.string().trim().max(5000).nullable().optional(),
+  difficulty: z.enum(['debutant', 'intermediaire', 'avance']).optional(),
   status: z.enum(['brouillon', 'publie', 'archive']).optional(),
   publishDate: z.string().optional(),
   files: z.array(z.object({
@@ -115,6 +117,8 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       maxFileSize: data.maxFileSize,
       allowedFileTypes: data.allowedFileTypes ? data.allowedFileTypes.join(',') : undefined,
       instructions: data.instructions === undefined ? undefined : data.instructions,
+      objectives: data.objectives === undefined ? undefined : data.objectives,
+      difficulty: data.difficulty,
       status: data.status,
       publishDate: pubDate
     }
