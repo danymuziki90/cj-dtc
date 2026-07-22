@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/auth-portal/guards'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+    const auth = await requireAdmin(req)
+    if (auth.error) return auth.error
 
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status') // 'all', 'pending', 'approved', 'rejected'

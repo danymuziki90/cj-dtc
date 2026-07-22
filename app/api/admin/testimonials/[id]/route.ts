@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/auth-portal/guards'
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+    const auth = await requireAdmin(req)
+    if (auth.error) return auth.error
 
     const { id } = await params
     const testimonialId = parseInt(id, 10)
@@ -92,10 +89,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+    const auth = await requireAdmin(req)
+    if (auth.error) return auth.error
 
     const { id } = await params
     const testimonialId = parseInt(id, 10)
