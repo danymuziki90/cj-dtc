@@ -97,6 +97,10 @@ interface SessionOption {
   endDate: string;
   status: string;
   format?: string;
+  formation?: {
+    id: number;
+    title: string;
+  };
 }
 
 export default function AdminAssignmentsPage() {
@@ -196,13 +200,10 @@ export default function AdminAssignmentsPage() {
     }
   };
 
-  // Sessions ouvertes filtrées par formation sélectionnée
-  const filteredSessions = useMemo(() => {
-    if (!formData.formationId) return [];
-    return sessions.filter(
-      (s) => s.formationId === formData.formationId && s.status === "ouverte"
-    );
-  }, [sessions, formData.formationId]);
+  // Sessions ouvertes (publiées et prêtes pour affectation de TP)
+  const openSessions = useMemo(() => {
+    return sessions.filter((s) => s.status === "ouverte");
+  }, [sessions]);
 
   // Ouverture modale Création
   const handleOpenCreateModal = () => {
@@ -210,8 +211,7 @@ export default function AdminAssignmentsPage() {
     setExistingFiles([]);
     setPendingUploadFiles([]);
     
-    // Par défaut, première formation si disponible
-    const firstFormationId = formations[0]?.id || 0;
+    const firstSession = openSessions[0];
     const defaultPublishDate = new Date().toISOString().slice(0, 16);
     const defaultDeadline = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
 
@@ -222,8 +222,8 @@ export default function AdminAssignmentsPage() {
       instructions: "",
       type: "tp",
       difficulty: "debutant",
-      formationId: firstFormationId,
-      sessionId: 0,
+      formationId: firstSession ? firstSession.formationId : 0,
+      sessionId: firstSession ? firstSession.id : 0,
       publishDate: defaultPublishDate,
       deadline: defaultDeadline,
       status: "publie",
@@ -306,8 +306,8 @@ export default function AdminAssignmentsPage() {
       return;
     }
 
-    if (!formData.formationId) {
-      error("Veuillez sélectionner une formation.");
+    if (!formData.sessionId) {
+      error("Veuillez sélectionner une session ouverte.");
       return;
     }
 
@@ -1074,59 +1074,45 @@ export default function AdminAssignmentsPage() {
                   />
                 </div>
 
-                {/* Selection Formation & Session */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Formation (Dynamique Supabase) *
-                    </label>
-                    <select
-                      value={formData.formationId}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          formationId: Number(e.target.value),
-                          sessionId: 0, // Réinitialiser session si formation change
-                        }))
-                      }
-                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs font-semibold text-slate-900"
-                      required
-                    >
-                      <option value={0} disabled>
-                        Sélectionnez une formation disponible...
-                      </option>
-                      {formations.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Session concernée (Filtre Ouvertes)
-                    </label>
-                    <select
-                      value={formData.sessionId}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, sessionId: Number(e.target.value) }))
-                      }
-                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs font-medium"
-                    >
-                      <option value={0}>Toutes les sessions de cette formation</option>
-                      {filteredSessions.map((s) => (
+                {/* Selection Session (Formation déduite automatiquement) */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Session de formation concernée *
+                  </label>
+                  <select
+                    value={formData.sessionId}
+                    onChange={(e) => {
+                      const selectedId = Number(e.target.value);
+                      const matchedSession = sessions.find((s) => s.id === selectedId);
+                      setFormData((prev) => ({
+                        ...prev,
+                        sessionId: selectedId,
+                        formationId: matchedSession ? matchedSession.formationId : prev.formationId,
+                      }));
+                    }}
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 outline-none text-xs font-semibold text-slate-900"
+                    required
+                  >
+                    <option value={0} disabled>
+                      Sélectionnez une session ouverte...
+                    </option>
+                    {openSessions.map((s) => {
+                      const formationTitle =
+                        s.formation?.title ||
+                        formations.find((f) => f.id === s.formationId)?.title ||
+                        `Formation #${s.formationId}`;
+                      return (
                         <option key={s.id} value={s.id}>
-                          Session #{s.id} (du {new Date(s.startDate).toLocaleDateString("fr-FR")})
+                          Session #{s.id} — {formationTitle} (du {new Date(s.startDate).toLocaleDateString("fr-FR")})
                         </option>
-                      ))}
-                    </select>
-                    {formData.formationId > 0 && filteredSessions.length === 0 && (
-                      <p className="text-[10px] text-amber-600 mt-1">
-                        Aucune session ouverte pour cette formation (le travail sera associé à toute la formation).
-                      </p>
-                    )}
-                  </div>
+                      );
+                    })}
+                  </select>
+                  {openSessions.length === 0 && (
+                    <p className="text-[11px] text-amber-600 font-medium mt-1">
+                      ⚠️ Aucune session ouverte actuellement. Veuillez ouvrir ou créer une session dans <strong>Administration → Sessions</strong>.
+                    </p>
+                  )}
                 </div>
 
                 {/* Type, Difficulté, Statut */}

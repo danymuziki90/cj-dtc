@@ -10,8 +10,8 @@ const assignmentSchema = z.object({
   title: z.string().trim().min(3).max(180),
   description: z.string().trim().min(3).max(2000),
   type: z.enum(['tp', 'exam', 'project']),
-  formationId: z.coerce.number().int().positive(),
-  sessionId: z.coerce.number().int().positive().nullable().optional(),
+  formationId: z.coerce.number().int().positive().optional(),
+  sessionId: z.coerce.number().int().positive(),
   deadline: z.string().min(10),
   maxFileSize: z.coerce.number().int().min(1).max(100).default(10),
   allowedFileTypes: z.array(z.string().trim().min(1).max(20)).max(12).optional(),
@@ -112,21 +112,28 @@ export async function POST(request: NextRequest) {
       pubDate = parsedPubDate
     }
 
-    const formation = await prisma.formation.findUnique({
-      where: { id: data.formationId },
-      select: { id: true, title: true },
-    })
-    if (!formation) {
-      return NextResponse.json({ error: 'Formation introuvable.' }, { status: 404 })
-    }
-
+    let targetFormationId = data.formationId
     if (data.sessionId) {
       const sessionExists = await prisma.trainingSession.findUnique({
-        where: { id: data.sessionId }
+        where: { id: data.sessionId },
+        select: { id: true, formationId: true }
       })
       if (!sessionExists) {
         return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 })
       }
+      targetFormationId = sessionExists.formationId
+    }
+
+    if (!targetFormationId) {
+      return NextResponse.json({ error: 'Veuillez sélectionner une session.' }, { status: 400 })
+    }
+
+    const formation = await prisma.formation.findUnique({
+      where: { id: targetFormationId },
+      select: { id: true, title: true },
+    })
+    if (!formation) {
+      return NextResponse.json({ error: 'Formation introuvable.' }, { status: 404 })
     }
 
     const assignment = await prisma.assignment.create({
@@ -134,8 +141,8 @@ export async function POST(request: NextRequest) {
         title: data.title,
         description: data.description,
         type: data.type,
-        formationId: data.formationId,
-        sessionId: data.sessionId || null,
+        formationId: targetFormationId,
+        sessionId: data.sessionId,
         deadline,
         maxFileSize: data.maxFileSize,
         allowedFileTypes: (data.allowedFileTypes?.length ? data.allowedFileTypes : ['pdf', 'doc', 'docx', 'zip']).join(','),

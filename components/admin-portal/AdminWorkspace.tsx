@@ -27,6 +27,10 @@ import {
   Sun,
   Moon,
   ClipboardList,
+  TrendingUp,
+  FileText,
+  Star,
+  Image,
 } from 'lucide-react'
 
 type AdminWorkspaceProps = {
@@ -40,19 +44,27 @@ type NavItem = {
   icon: LucideIcon
 }
 
-const navItems: NavItem[] = [
-  { href: '/admin/dashboard', label: 'Pilotage', caption: 'KPI, alertes et priorités', icon: LayoutDashboard },
+const navRow1: NavItem[] = [
+  { href: '/admin/dashboard', label: 'Dashboard', caption: 'Vue synthétique & KPI', icon: LayoutDashboard },
+  { href: '/admin/reports', label: 'Pilotage', caption: 'Centre de reporting & alertes', icon: TrendingUp },
   { href: '/admin/formations', label: 'Formations', caption: 'Catalogue et programmes', icon: BookOpenCheck },
   { href: '/admin/sessions', label: 'Sessions', caption: 'Planification et cohortes', icon: CalendarDays },
-  { href: '/admin/assignments', label: 'Travaux', caption: 'TP et devoirs', icon: ClipboardList },
-  { href: '/admin/documents', label: 'Supports', caption: 'Ressources par session', icon: BookOpenCheck },
   { href: '/admin/students', label: 'Étudiants', caption: 'Comptes et accès', icon: Users },
-  { href: '/admin/enrollments', label: 'Inscriptions', caption: 'Suivi et consultation', icon: FileStack },
-  { href: '/admin/certificates', label: 'Certificats', caption: 'Délivrance et vérification', icon: GraduationCap },
-  { href: '/admin/notifications', label: 'Notifications', caption: 'Messages et relances', icon: BellRing },
-  { href: '/admin/articles', label: 'Actualités', caption: 'Contenus et annonces', icon: Newspaper },
-  { href: '/admin/settings', label: 'Paramètres', caption: 'Sécurité et configuration', icon: Settings2 },
+  { href: '/admin/enrollments', label: 'Inscriptions', caption: 'Suivi et demandes', icon: FileStack },
+  { href: '/admin/assignments', label: 'Travaux', caption: 'TP et devoirs', icon: ClipboardList },
 ]
+
+const navRow2: NavItem[] = [
+  { href: '/admin/documents', label: 'Supports pédagogiques', caption: 'Ressources de formation', icon: FileText },
+  { href: '/admin/certificates', label: 'Certificats', caption: 'Délivrance et vérification', icon: GraduationCap },
+  { href: '/admin/evaluations', label: 'Témoignages', caption: 'Retours et avis', icon: Star },
+  { href: '/admin/articles', label: 'Actualités', caption: 'Contenus et annonces', icon: Newspaper },
+  { href: '/admin/lms', label: 'Galerie', caption: 'Médiathèque & contenus', icon: Image },
+  { href: '/admin/b2b', label: 'Entreprises', caption: 'Demandes B2B & intra', icon: Building2 },
+  { href: '/admin/settings', label: 'Paramètres', caption: 'Configuration & sécurité', icon: Settings2 },
+]
+
+const navItems = [...navRow1, ...navRow2]
 
 const quickActions = [
   { href: '/admin/articles/new', label: 'Article', icon: Newspaper },
@@ -296,56 +308,83 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
         </div>
       </header>
 
-      {/* ── Navigation Horizontale ────────────────────────────────────────── */}
+      {/* ── Navigation Horizontale Sur Deux Lignes ────────────────────────── */}
       <nav
-        className="sticky top-14 z-30 border-b border-slate-200/60 bg-white/85 backdrop-blur-xl hidden md:block"
+        className="sticky top-14 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl hidden md:block dark:bg-slate-900/90 dark:border-slate-800 shadow-sm"
         aria-label="Navigation principale"
       >
-        <div className="mx-auto flex max-w-screen-2xl items-center px-4 md:px-6">
-          <div className="flex flex-1 items-center gap-0.5 overflow-x-auto py-1 scrollbar-none">
-            {navItems.map((item) => {
-              const active = isActivePath(pathname, item.href)
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? 'page' : undefined}
-                  className={[
-                    'group relative flex items-center gap-1.5 rounded-xl px-3 py-2 text-[13px] font-semibold transition-all duration-200 whitespace-nowrap',
-                    active
-                      ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm'
-                      : 'text-slate-650 hover:bg-slate-50 hover:text-slate-950',
-                  ].join(' ')}
-                >
-                  <Icon className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  {item.label}
-                  {item.label === 'Notifications' && unreadNotifications > 0 && (
-                    <span className="ml-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--admin-accent)] px-1 text-[9px] font-bold text-white shadow">
-                      {unreadNotifications}
-                    </span>
-                  )}
-                  {active && (
-                    <span className="absolute bottom-0 left-1/2 h-0.5 w-4/5 -translate-x-1/2 rounded-full bg-[var(--admin-primary)] shadow" />
-                  )}
-                </Link>
-              )
-            })}
+        <div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-2 space-y-1.5">
+          {/* Ligne 1 : Dashboard, Pilotage, Formations, Sessions, Étudiants, Inscriptions, Travaux */}
+          <div className="flex items-center gap-2">
+            <div className="flex flex-1 items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none">
+              {navRow1.map((item) => {
+                const active = isActivePath(pathname, item.href)
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
+                    className={[
+                      'group relative flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
+                      active
+                        ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm ring-1 ring-[var(--admin-primary-200)]/60 dark:bg-blue-950/50 dark:text-blue-300 dark:ring-blue-800 font-bold'
+                        : 'text-slate-650 hover:bg-slate-100/80 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 hover:-translate-y-0.5',
+                    ].join(' ')}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                    <span>{item.label}</span>
+                    {active && (
+                      <span className="absolute bottom-0 left-1/2 h-0.5 w-4/5 -translate-x-1/2 rounded-full bg-[var(--admin-primary)] shadow" />
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+
+            {/* Date courante à droite de la 1ère ligne */}
+            <div className="ml-auto shrink-0 hidden xl:block pl-3 border-l border-slate-200/60 dark:border-slate-800">
+              <p className="text-[11px] font-semibold capitalize text-slate-500 dark:text-slate-400">{currentDate}</p>
+            </div>
           </div>
 
-          {/* Date courante */}
-          <div className="ml-auto shrink-0 hidden xl:block pl-4">
-            <p className="text-[11px] font-semibold capitalize text-slate-500">{currentDate}</p>
+          {/* Ligne 2 : Supports pédagogiques, Certificats, Témoignages, Actualités, Galerie, Entreprises, Paramètres */}
+          <div className="flex items-center gap-2 border-t border-slate-100 dark:border-slate-800/60 pt-1.5">
+            <div className="flex flex-1 items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none">
+              {navRow2.map((item) => {
+                const active = isActivePath(pathname, item.href)
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
+                    className={[
+                      'group relative flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
+                      active
+                        ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm ring-1 ring-[var(--admin-primary-200)]/60 dark:bg-blue-950/50 dark:text-blue-300 dark:ring-blue-800 font-bold'
+                        : 'text-slate-650 hover:bg-slate-100/80 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 hover:-translate-y-0.5',
+                    ].join(' ')}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                    <span>{item.label}</span>
+                    {active && (
+                      <span className="absolute bottom-0 left-1/2 h-0.5 w-4/5 -translate-x-1/2 rounded-full bg-[var(--admin-primary)] shadow" />
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* â”€â”€ MAIN CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
       <main className="relative mx-auto w-full max-w-screen-2xl flex-1 px-4 py-6 md:px-6 xl:px-8 xl:py-8">
         {children}
       </main>
 
-      {/* â”€â”€ MOBILE OVERLAY MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── MOBILE OVERLAY MENU ─────────────────────────────────────────── */}
       {mobileOpen && (
         <>
           <div
@@ -354,35 +393,66 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
             aria-hidden="true"
           />
           <div className="fixed inset-x-0 top-14 z-50 max-h-[calc(100svh-56px)] overflow-y-auto border-b border-slate-200 bg-white shadow-2xl md:hidden animate-fade-in-up">
-            <div className="p-4 space-y-1">
-              <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigation</p>
-              {navItems.map((item) => {
-                const active = isActivePath(pathname, item.href)
-                const Icon = item.icon
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={[
-                      'flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-bold transition',
-                      active
-                        ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] border border-[var(--admin-primary-100)]'
-                        : 'text-slate-750 hover:bg-slate-50',
-                    ].join(' ')}
-                  >
-                    <span className="flex items-center gap-3">
-                      <Icon className="h-4 w-4" />
-                      {item.label}
-                    </span>
-                    {item.label === 'Notifications' && unreadNotifications > 0 && (
-                      <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--admin-accent)] px-1.5 text-[10px] font-bold text-white">
-                        {unreadNotifications}
-                      </span>
-                    )}
-                  </Link>
-                )
-              })}
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  Première Ligne · Opérations & Pilotage
+                </p>
+                <div className="space-y-1">
+                  {navRow1.map((item) => {
+                    const active = isActivePath(pathname, item.href)
+                    const Icon = item.icon
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={[
+                          'flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-bold transition',
+                          active
+                            ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] border border-[var(--admin-primary-100)]'
+                            : 'text-slate-750 hover:bg-slate-50',
+                        ].join(' ')}
+                      >
+                        <span className="flex items-center gap-3">
+                          <Icon className="h-4 w-4 shrink-0" />
+                          {item.label}
+                        </span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  Deuxième Ligne · Ressources & Management
+                </p>
+                <div className="space-y-1">
+                  {navRow2.map((item) => {
+                    const active = isActivePath(pathname, item.href)
+                    const Icon = item.icon
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={[
+                          'flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-bold transition',
+                          active
+                            ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] border border-[var(--admin-primary-100)]'
+                            : 'text-slate-750 hover:bg-slate-50',
+                        ].join(' ')}
+                      >
+                        <span className="flex items-center gap-3">
+                          <Icon className="h-4 w-4 shrink-0" />
+                          {item.label}
+                        </span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
 
             <div className="border-t border-slate-100 p-4 space-y-2">

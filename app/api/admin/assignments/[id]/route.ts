@@ -90,7 +90,15 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       }
     }
 
-    if (data.formationId) {
+    let derivedFormationId = data.formationId
+    if (data.sessionId) {
+      const session = await prisma.trainingSession.findUnique({
+        where: { id: data.sessionId },
+        select: { id: true, formationId: true },
+      })
+      if (!session) return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 })
+      derivedFormationId = session.formationId
+    } else if (data.formationId) {
       const formation = await prisma.formation.findUnique({
         where: { id: data.formationId },
         select: { id: true },
@@ -98,20 +106,12 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       if (!formation) return NextResponse.json({ error: 'Formation introuvable.' }, { status: 404 })
     }
 
-    if (data.sessionId) {
-      const session = await prisma.trainingSession.findUnique({
-        where: { id: data.sessionId },
-        select: { id: true },
-      })
-      if (!session) return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 })
-    }
-
     // Prepare update payload
     const updatePayload: any = {
       title: data.title,
       description: data.description,
       type: data.type,
-      formationId: data.formationId,
+      formationId: derivedFormationId,
       sessionId: data.sessionId === undefined ? undefined : data.sessionId,
       deadline,
       maxFileSize: data.maxFileSize,
