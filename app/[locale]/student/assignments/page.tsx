@@ -9,7 +9,9 @@ interface Assignment {
   id: number
   title: string
   description: string
+  objectives?: string | null
   type: 'tp' | 'exam' | 'project'
+  difficulty?: 'debutant' | 'intermediaire' | 'avance'
   formationId: number
   formation: {
     title: string
@@ -309,6 +311,14 @@ export default function StudentAssignmentsPage() {
                         </a>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* Objectifs pédagogiques */}
+                {assignment.objectives && (
+                  <div className="bg-blue-50/60 border border-blue-100 rounded-lg p-4 mb-6 text-xs text-slate-700">
+                    <h4 className="font-semibold text-blue-900 mb-1">🎯 Objectifs pédagogiques</h4>
+                    <p className="text-gray-700 whitespace-pre-wrap">{assignment.objectives}</p>
                   </div>
                 )}
 
