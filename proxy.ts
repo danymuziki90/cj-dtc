@@ -18,8 +18,8 @@ const localeMiddleware = (request: NextRequest) => {
 
 const canonicalAdminRouteMap: Record<string, string> = {
   '/admin': '/admin/dashboard',
-  '/admin/dashboard': '/admin/dashboard',
-  '/admin/inscriptions': '/admin/inscriptions',
+  '/admin/inscriptions': '/admin/enrollments',
+  '/admin/enrollments': '/admin/enrollments',
   '/admin/students': '/admin/students',
   '/admin/students-management': '/admin/students-management',
   '/admin/formations': '/admin/formations',
