@@ -213,8 +213,12 @@ export function resolveAppBaseUrl(requestUrl?: string) {
   }
 
   if (requestUrl) {
-    const url = new URL(requestUrl)
-    return `${url.protocol}//${url.host}`
+    try {
+      const url = new URL(requestUrl, 'http://localhost:3000')
+      return `${url.protocol}//${url.host}`
+    } catch {
+      return 'http://localhost:3000'
+    }
   }
 
   return 'http://localhost:3000'

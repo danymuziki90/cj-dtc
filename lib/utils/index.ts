@@ -354,22 +354,29 @@ export function generateQRCodeData(certificateNumber: string, verificationUrl: s
 // Parse URL parameters
 export function parseUrlParams(url: string): Record<string, string> {
   const params: Record<string, string> = {}
-  const urlObj = new URL(url)
-  urlObj.searchParams.forEach((value, key) => {
-    params[key] = value
-  })
+  try {
+    const urlObj = new URL(url, 'http://localhost')
+    urlObj.searchParams.forEach((value, key) => {
+      params[key] = value
+    })
+  } catch {}
   return params
 }
 
 // Build URL with parameters
 export function buildUrlWithParams(base: string, params: Record<string, any>): string {
-  const url = new URL(base)
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      url.searchParams.set(key, String(value))
-    }
-  })
-  return url.toString()
+  try {
+    const isRelative = base.startsWith('/') || !base.includes('://')
+    const url = new URL(base, isRelative ? 'http://localhost' : undefined)
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url.searchParams.set(key, String(value))
+      }
+    })
+    return isRelative ? `${url.pathname}${url.search}` : url.toString()
+  } catch {
+    return base
+  }
 }
 
 // Download file from URL

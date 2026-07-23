@@ -30,7 +30,7 @@ export default function AdminGlobalSearch() {
   }, [])
 
   useEffect(() => {
-    if (pathname === '/admin/search') {
+    if (pathname === '/admin/search' && typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       setQuery(params.get('q') || '')
     }
