@@ -5,7 +5,7 @@ import { requireStudent } from '@/lib/auth-portal/guards'
 import { buildRateLimitIdentifier, consumeRateLimit } from '@/lib/auth-portal/rate-limit'
 
 const enrollSchema = z.object({
-  formationId: z.number().int().positive(),
+  formationId: z.number().int().positive().optional(),
   sessionId: z.number().int().positive().optional(),
 })
 
@@ -59,44 +59,58 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const parsed = enrollSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Formation invalide.' }, { status: 400 })
+    return NextResponse.json({ error: 'Session ou formation invalide.' }, { status: 400 })
   }
 
-  const { formationId, sessionId } = parsed.data
+  let formationId = parsed.data.formationId
+  const sessionId = parsed.data.sessionId
 
-  const formation = await prisma.formation.findUnique({
-    where: { id: formationId },
-    select: { id: true, title: true, statut: true },
-  })
+  let session: any = null
+  let formation: any = null
+
+  if (sessionId) {
+    session = await prisma.trainingSession.findUnique({
+      where: { id: sessionId },
+      include: { formation: true },
+    })
+
+    if (!session) {
+      return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 })
+    }
+
+    const statusLower = (session.status || '').toLowerCase().trim()
+    if (['brouillon', 'archive', 'annulee', 'cancelled', 'draft'].includes(statusLower)) {
+      return NextResponse.json({ error: 'Cette session n\'est pas ouverte actuellement.' }, { status: 422 })
+    }
+
+    formationId = session.formationId
+    formation = session.formation
+  } else if (formationId) {
+    formation = await prisma.formation.findUnique({
+      where: { id: formationId },
+    })
+  }
 
   if (!formation) {
     return NextResponse.json({ error: 'Formation introuvable.' }, { status: 404 })
   }
 
+  // Marquer la formation comme publiée si elle n'était pas encore marquée
   if (formation.statut !== 'publie') {
-    return NextResponse.json({ error: 'Cette formation n\'est pas disponible.' }, { status: 422 })
+    await prisma.formation.update({
+      where: { id: formation.id },
+      data: { statut: 'publie' },
+    }).catch(() => null)
   }
 
-  let session: { id: number; formationId: number; startDate: Date; endDate: Date; location: string | null; prerequisites: string | null } | null = null
-  if (sessionId) {
-    session = await prisma.trainingSession.findUnique({
-      where: { id: sessionId },
-      select: { id: true, formationId: true, startDate: true, endDate: true, location: true, prerequisites: true },
-    }) as any
-
-    if (!session || session.formationId !== formationId) {
-      return NextResponse.json({ error: 'Session invalide pour cette formation.' }, { status: 400 })
-    }
-  }
-
-  // Prevent duplicate active requests for the same formation from the same student account.
+  // Prévenir les doublons d'inscriptions actives pour la même session ou formation
   const existing = await prisma.enrollment.findFirst({
     where: {
-      formationId,
       OR: [
         { studentId: auth.student.id },
         { email: { equals: auth.student.email, mode: 'insensitive' } },
       ],
+      ...(sessionId ? { sessionId } : { formationId }),
       status: { notIn: ['rejected', 'cancelled'] },
     },
     select: { id: true, status: true },
@@ -104,7 +118,7 @@ export async function POST(request: NextRequest) {
 
   if (existing) {
     return NextResponse.json(
-      { error: 'Vous êtes déjà inscrit à cette formation.', enrollmentId: existing.id },
+      { error: 'Vous êtes déjà inscrit à cette session.', enrollmentId: existing.id },
       { status: 409 }
     )
   }
@@ -117,9 +131,9 @@ export async function POST(request: NextRequest) {
       email: auth.student.email,
       phone: auth.student.phone || null,
       address: auth.student.address || null,
-      formationId,
+      formationId: formation.id,
       sessionId: session?.id || null,
-      startDate: new Date(),
+      startDate: session?.startDate || new Date(),
       status: 'pending',
     },
     select: {
@@ -130,7 +144,7 @@ export async function POST(request: NextRequest) {
     },
   })
 
-  // Send confirmation email
+  // Envoi de l'email de confirmation
   try {
     const datesText = session
       ? `${new Date(session.startDate).toLocaleDateString('fr-FR')} au ${new Date(session.endDate).toLocaleDateString('fr-FR')}`
@@ -141,11 +155,11 @@ export async function POST(request: NextRequest) {
           ? JSON.parse(session.prerequisites)
           : null)
       : null
-    const sessionTitle = sessionMeta?.customTitle || (session ? `#${session.id}` : '')
+    const sessionTitle = sessionMeta?.customTitle || formation.title || (session ? `#${session.id}` : '')
 
     const variables: Record<string, string> = {
       Nom_etudiant: `${auth.student.firstName} ${auth.student.lastName}`,
-      Formation: enrollment.formation.title,
+      Formation: formation.title,
       Session: sessionTitle,
       Dates: datesText,
       Lieu: session?.location || 'À distance',
@@ -157,11 +171,10 @@ export async function POST(request: NextRequest) {
       return text.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] || variables[key.toLowerCase()] || '')
     }
 
-    // Try to load a template for status 'pending'
     const template = await prisma.emailTemplate.findUnique({ where: { id: 'pending' } })
 
-    let emailSubject = `Demande d'inscription reçue - ${enrollment.formation.title}`
-    let emailBody = `Bonjour ${variables.Nom_etudiant},\n\nNous avons bien reçu votre demande d'inscription à la formation ${enrollment.formation.title}.\n\nVotre demande est actuellement en cours d'examen par nos services.`
+    let emailSubject = `Demande d'inscription reçue - ${sessionTitle}`
+    let emailBody = `Bonjour ${variables.Nom_etudiant},\n\nNous avons bien reçu votre demande d'inscription à la session "${sessionTitle}".\n\nVotre demande est actuellement en cours d'examen par nos services.`
 
     if (template) {
       emailSubject = replaceVars(template.subject)
