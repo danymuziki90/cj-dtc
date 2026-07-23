@@ -131,17 +131,17 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                   actions={<AdminBadge tone="primary">{rows.length} dossiers</AdminBadge>}
                 />
 
-                <div className="mt-6 overflow-x-auto">
-                  <table className="min-w-full divide-y divide-slate-200 text-sm">
+                <div className="mt-6 -mx-5 px-5 overflow-x-auto scrollbar-thin">
+                  <table className="min-w-[700px] w-full divide-y divide-slate-200 text-sm">
                     <thead className="bg-slate-50/90">
                       <tr>
-                        <th className="px-4 py-3 text-left font-semibold text-slate-600">Participant</th>
-                        <th className="px-4 py-3 text-left font-semibold text-slate-600">Contact</th>
-                        <th className="px-4 py-3 text-left font-semibold text-slate-600">Session</th>
-                        <th className="px-4 py-3 text-left font-semibold text-slate-600">Compte etudiant</th>
-                        <th className="px-4 py-3 text-left font-semibold text-slate-600">Dossier</th>
-                        <th className="px-4 py-3 text-left font-semibold text-slate-600">Inscription</th>
-                        {onPreview ? <th className="px-4 py-3 text-left font-semibold text-slate-600">Action</th> : null}
+                        <th className="px-4 py-3.5 text-left font-semibold text-slate-600 min-w-[180px]">Participant</th>
+                        <th className="px-4 py-3.5 text-left font-semibold text-slate-600 min-w-[180px]">Contact</th>
+                        <th className="px-4 py-3.5 text-left font-semibold text-slate-600 min-w-[140px]">Session</th>
+                        <th className="px-4 py-3.5 text-left font-semibold text-slate-600 min-w-[140px]">Compte étudiant</th>
+                        <th className="px-4 py-3.5 text-left font-semibold text-slate-600 min-w-[120px]">Dossier</th>
+                        <th className="px-4 py-3.5 text-left font-semibold text-slate-600 min-w-[130px]">Inscription</th>
+                        {onPreview ? <th className="px-4 py-3.5 text-right font-semibold text-slate-600 min-w-[100px]">Action</th> : null}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">

@@ -701,17 +701,17 @@ export default function AdminSessionsPage() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
+          <div className="overflow-x-auto scrollbar-thin -mx-5 px-5">
+            <table className="w-full min-w-[720px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50 text-[10px] font-black uppercase tracking-wider text-slate-400">
-                  <th className="px-5 py-4">Formation / Session</th>
-                  <th className="px-5 py-4">Dates</th>
-                  <th className="px-5 py-4">Format & Lieu</th>
-                  <th className="px-5 py-4">Places</th>
-                  <th className="px-5 py-4">Taux</th>
-                  <th className="px-5 py-4">Statut</th>
-                  <th className="px-5 py-4 text-right">Actions</th>
+                  <th className="px-4 sm:px-5 py-4 min-w-[200px]">Formation / Session</th>
+                  <th className="px-4 sm:px-5 py-4 min-w-[140px]">Dates</th>
+                  <th className="px-4 sm:px-5 py-4 min-w-[140px]">Format & Lieu</th>
+                  <th className="px-4 sm:px-5 py-4 min-w-[100px]">Places</th>
+                  <th className="px-4 sm:px-5 py-4 min-w-[90px]">Taux</th>
+                  <th className="px-4 sm:px-5 py-4 min-w-[100px]">Statut</th>
+                  <th className="px-4 sm:px-5 py-4 text-right min-w-[120px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">

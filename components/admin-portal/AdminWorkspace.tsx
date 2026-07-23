@@ -306,15 +306,15 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
         </div>
       </header>
 
-      {/* ── Navigation Horizontale Sur Deux Lignes ────────────────────────── */}
+      {/* ── Navigation Horizontale Adaptative Sur Deux Lignes ────────────────────────── */}
       <nav
         className="sticky top-14 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl hidden md:block dark:bg-slate-900/90 dark:border-slate-800 shadow-sm"
         aria-label="Navigation principale"
       >
         <div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-2 space-y-1.5">
-          {/* Ligne 1 : Dashboard, Pilotage, Formations, Sessions, Étudiants, Inscriptions, Travaux */}
-          <div className="flex items-center gap-2">
-            <div className="flex flex-1 items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none">
+          {/* Ligne 1 : Opérations & Pilotage */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-1 flex-wrap items-center gap-1 sm:gap-1.5">
               {navRow1.map((item) => {
                 const active = isActivePath(pathname, item.href)
                 const Icon = item.icon
@@ -324,7 +324,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                     href={item.href}
                     aria-current={active ? 'page' : undefined}
                     className={[
-                      'group relative flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
+                      'group relative flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs lg:text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
                       active
                         ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm ring-1 ring-[var(--admin-primary-200)]/60 dark:bg-blue-950/50 dark:text-blue-300 dark:ring-blue-800 font-bold'
                         : 'text-slate-650 hover:bg-slate-100/80 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 hover:-translate-y-0.5',
@@ -346,9 +346,9 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
             </div>
           </div>
 
-          {/* Ligne 2 : Supports pédagogiques, Certificats, Témoignages, Actualités, Galerie, Entreprises, Paramètres */}
-          <div className="flex items-center gap-2 border-t border-slate-100 dark:border-slate-800/60 pt-1.5">
-            <div className="flex flex-1 items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none">
+          {/* Ligne 2 : Ressources & Management */}
+          <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 dark:border-slate-800/60 pt-1.5">
+            <div className="flex flex-1 flex-wrap items-center gap-1 sm:gap-1.5">
               {navRow2.map((item) => {
                 const active = isActivePath(pathname, item.href)
                 const Icon = item.icon
@@ -358,7 +358,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                     href={item.href}
                     aria-current={active ? 'page' : undefined}
                     className={[
-                      'group relative flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
+                      'group relative flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs lg:text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
                       active
                         ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm ring-1 ring-[var(--admin-primary-200)]/60 dark:bg-blue-950/50 dark:text-blue-300 dark:ring-blue-800 font-bold'
                         : 'text-slate-650 hover:bg-slate-100/80 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 hover:-translate-y-0.5',
@@ -378,7 +378,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
       </nav>
 
       {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
-      <main className="relative mx-auto w-full max-w-screen-2xl flex-1 px-4 py-6 md:px-6 xl:px-8 xl:py-8">
+      <main className="relative mx-auto w-full max-w-screen-2xl flex-1 px-3 py-4 sm:px-4 sm:py-6 md:px-6 xl:px-8 xl:py-8">
         {children}
       </main>
 
@@ -386,15 +386,21 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
       {mobileOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-md md:hidden"
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className="fixed inset-x-0 top-14 z-50 max-h-[calc(100svh-56px)] overflow-y-auto border-b border-slate-200 bg-white shadow-2xl md:hidden animate-fade-in-up">
+          <div className="fixed inset-x-0 top-14 z-50 max-h-[calc(100svh-56px)] overflow-y-auto border-b border-slate-200 bg-white/98 dark:bg-slate-900/98 backdrop-blur-2xl shadow-2xl md:hidden animate-fade-in-up">
             <div className="p-4 space-y-4">
+              {/* Recherche globale sur Mobile */}
+              <div className="md:hidden">
+                <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Recherche rapide</p>
+                <AdminGlobalSearch />
+              </div>
+
               <div>
                 <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  Première Ligne · Opérations & Pilotage
+                  Opérations & Pilotage
                 </p>
                 <div className="space-y-1">
                   {navRow1.map((item) => {
@@ -406,16 +412,17 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
                         className={[
-                          'flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-bold transition',
+                          'flex min-h-[44px] items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-bold transition active:scale-[0.99]',
                           active
-                            ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] border border-[var(--admin-primary-100)]'
-                            : 'text-slate-750 hover:bg-slate-50',
+                            ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] border border-[var(--admin-primary-100)] dark:bg-blue-950/60 dark:text-blue-300'
+                            : 'text-slate-750 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800',
                         ].join(' ')}
                       >
                         <span className="flex items-center gap-3">
-                          <Icon className="h-4 w-4 shrink-0" />
+                          <Icon className="h-4 w-4 shrink-0 text-[var(--admin-primary)]" />
                           {item.label}
                         </span>
+                        <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500">{item.caption}</span>
                       </Link>
                     )
                   })}
@@ -424,7 +431,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
 
               <div>
                 <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  Deuxième Ligne · Ressources & Management
+                  Ressources & Management
                 </p>
                 <div className="space-y-1">
                   {navRow2.map((item) => {
@@ -436,16 +443,17 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
                         className={[
-                          'flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-bold transition',
+                          'flex min-h-[44px] items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-bold transition active:scale-[0.99]',
                           active
-                            ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] border border-[var(--admin-primary-100)]'
-                            : 'text-slate-750 hover:bg-slate-50',
+                            ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] border border-[var(--admin-primary-100)] dark:bg-blue-950/60 dark:text-blue-300'
+                            : 'text-slate-750 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800',
                         ].join(' ')}
                       >
                         <span className="flex items-center gap-3">
-                          <Icon className="h-4 w-4 shrink-0" />
+                          <Icon className="h-4 w-4 shrink-0 text-[var(--admin-primary)]" />
                           {item.label}
                         </span>
+                        <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500">{item.caption}</span>
                       </Link>
                     )
                   })}
@@ -453,27 +461,29 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
               </div>
             </div>
 
-            <div className="border-t border-slate-100 p-4 space-y-2">
+            <div className="border-t border-slate-100 dark:border-slate-800 p-4 space-y-2">
               <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Actions rapides</p>
-              {quickActions.map((action) => {
-                const Icon = action.icon
-                return (
-                  <Link
-                    key={action.href}
-                    href={action.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-750 transition hover:bg-white"
-                  >
-                    <PlusIcon className="h-4 w-4 text-[var(--admin-primary)]" />
-                    Créer : {action.label}
-                  </Link>
-                )
-              })}
+              <div className="grid grid-cols-2 gap-2">
+                {quickActions.map((action) => {
+                  const Icon = action.icon
+                  return (
+                    <Link
+                      key={action.href}
+                      href={action.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700 px-3 py-2.5 text-xs font-bold text-slate-750 dark:text-slate-200 transition hover:bg-white active:scale-[0.98]"
+                    >
+                      <PlusIcon className="h-4 w-4 text-[var(--admin-primary)]" />
+                      {action.label}
+                    </Link>
+                  )
+                })}
+              </div>
               <button
                 type="button"
                 onClick={logout}
                 disabled={loggingOut}
-                className="flex w-full items-center gap-2 rounded-2xl border border-[var(--admin-accent-200)] bg-[var(--admin-accent-50)] px-4 py-3 text-sm font-bold text-[var(--admin-accent-700)] transition disabled:opacity-50"
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-[var(--admin-accent-200)] bg-[var(--admin-accent-50)] px-4 py-3 text-sm font-bold text-[var(--admin-accent-700)] transition active:scale-[0.98] disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
                 {loggingOut ? 'Déconnexion…' : 'Se déconnecter'}

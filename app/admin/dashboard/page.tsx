@@ -282,7 +282,7 @@ export default function AdminDashboardPage() {
         />
 
         {pedagogicalAlerts.length > 0 && (
-          <div className="rounded-[28px] border border-amber-200 bg-amber-50 dark:bg-amber-950/20 p-5 shadow-sm">
+          <div className="rounded-[28px] border border-amber-200 bg-amber-50 dark:bg-amber-950/20 p-4 sm:p-5 shadow-sm">
             <div className="flex gap-3">
               <AlertTriangle className="h-6 w-6 text-amber-600 shrink-0 mt-0.5" />
               <div>
@@ -290,12 +290,12 @@ export default function AdminDashboardPage() {
                 <p className="text-xs text-amber-700 dark:text-amber-350 mt-1">
                   Des anomalies de présence ou des devoirs non remis nécessitent votre vigilance.
                 </p>
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {pedagogicalAlerts.slice(0, 4).map((alert) => (
                     <div key={alert.id} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl p-3 border border-amber-100 dark:border-amber-900/40 flex justify-between items-center text-xs gap-4">
-                      <div>
-                        <p className="font-bold text-slate-900 dark:text-slate-100">{alert.title}</p>
-                        <p className="text-slate-600 dark:text-slate-350 mt-0.5">{alert.message}</p>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{alert.title}</p>
+                        <p className="text-slate-600 dark:text-slate-350 mt-0.5 line-clamp-1">{alert.message}</p>
                       </div>
                       <Link
                         href={alert.actionHref}
@@ -311,7 +311,7 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           <DashboardKpiCard
             icon={Users}
             label="Étudiants inscrits"
@@ -391,7 +391,7 @@ export default function AdminDashboardPage() {
               title="Pipeline d'inscriptions mensuel"
               description="Visualisation des nouvelles demandes enregistrées par mois au cours du dernier semestre."
             />
-            <div className="mt-6 h-72">
+            <div className="mt-6 h-64 sm:h-72 md:h-80 w-full min-w-0">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={statsData.monthlyStats} margin={{ left: -16, right: 12, top: 12, bottom: 0 }}>
                   <CartesianGrid vertical={false} stroke="rgba(148,163,184,0.12)" />
@@ -411,7 +411,7 @@ export default function AdminDashboardPage() {
               title="Taux d'onboarding"
               description="Inscriptions transformées en comptes étudiants actifs."
             />
-            <div className="mt-8 flex flex-col items-center justify-center text-center">
+            <div className="mt-6 flex flex-col items-center justify-center text-center">
               <div className="relative inline-flex items-center justify-center">
                 <span className="text-4xl font-black text-slate-905">{reportingData.summary.accountConversionRate}%</span>
               </div>
@@ -513,7 +513,7 @@ export default function AdminDashboardPage() {
 
         <div>
           <h3 className="text-lg font-black text-slate-950 mb-4">Cockpit des modules opérationnels</h3>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
             {quickModuleStats.map((module) => (
               <ModuleQuickCard
                 key={module.title}

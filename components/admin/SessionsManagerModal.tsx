@@ -357,18 +357,19 @@ export default function SessionsManagerModal({ formationId, formationTitle, onCl
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in text-left">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden border border-slate-200 animate-slide-up text-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in text-left">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-7xl max-h-[92vh] sm:h-[90vh] flex flex-col overflow-hidden border border-slate-200 animate-slide-up text-slate-800">
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-gradient-to-r from-blue-700 to-blue-800 text-white flex items-center justify-between flex-shrink-0">
-          <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-blue-200">Gestion des sessions</span>
-            <h2 className="text-xl font-bold truncate max-w-2xl">{currentFormationTitle}</h2>
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-gradient-to-r from-blue-700 to-blue-800 text-white flex items-center justify-between flex-shrink-0">
+          <div className="min-w-0 pr-2">
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-blue-200">Gestion des sessions</span>
+            <h2 className="text-lg sm:text-xl font-bold truncate max-w-2xl">{currentFormationTitle}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-white/20 transition-colors text-white focus:outline-none"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full hover:bg-white/20 transition-colors text-white focus:outline-none shrink-0"
+            aria-label="Fermer la modale"
           >
             <X className="w-6 h-6" />
           </button>

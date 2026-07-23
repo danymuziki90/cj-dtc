@@ -6,15 +6,15 @@ import { AlertTriangle, ArrowRight } from 'lucide-react'
 // ─── Classe CSS partagées ───────────────────────────────────────────────────
 
 export const adminInputClassName =
-  'w-full rounded-[22px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--admin-primary-200)] focus:ring-4 focus:ring-[var(--admin-primary-100)]'
-export const adminSelectClassName = `${adminInputClassName} appearance-none`
+  'w-full min-h-[44px] rounded-[22px] border border-slate-200 bg-white px-4 py-2.5 text-base sm:text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--admin-primary-200)] focus:ring-4 focus:ring-[var(--admin-primary-100)] focus-visible:outline-none'
+export const adminSelectClassName = `${adminInputClassName} appearance-none pr-8 bg-no-repeat`
 export const adminTextareaClassName = `${adminInputClassName} min-h-[120px] resize-y`
 export const adminPrimaryButtonClassName =
-  'inline-flex items-center justify-center gap-2 rounded-[22px] bg-[var(--admin-primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--admin-primary-700)] disabled:cursor-not-allowed disabled:opacity-60'
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[22px] bg-[var(--admin-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--admin-primary-700)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--admin-primary)] disabled:cursor-not-allowed disabled:opacity-60'
 export const adminSecondaryButtonClassName =
-  'inline-flex items-center justify-center gap-2 rounded-[22px] border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-[var(--admin-primary-200)] hover:bg-[var(--admin-primary-50)] hover:text-[var(--admin-primary)] disabled:cursor-not-allowed disabled:opacity-60'
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[22px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-[var(--admin-primary-200)] hover:bg-[var(--admin-primary-50)] hover:text-[var(--admin-primary)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--admin-primary)] disabled:cursor-not-allowed disabled:opacity-60'
 export const adminDangerButtonClassName =
-  'inline-flex items-center justify-center gap-2 rounded-[22px] border border-[var(--admin-accent-200)] bg-[var(--admin-accent-50)] px-4 py-3 text-sm font-semibold text-[var(--admin-accent-700)] transition hover:bg-[var(--admin-accent-100)] disabled:cursor-not-allowed disabled:opacity-60'
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[22px] border border-[var(--admin-accent-200)] bg-[var(--admin-accent-50)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-accent-700)] shadow-sm transition hover:bg-[var(--admin-accent-100)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--admin-accent)] disabled:cursor-not-allowed disabled:opacity-60'
 
 // ─── Tons visuels ────────────────────────────────────────────────────────────
 

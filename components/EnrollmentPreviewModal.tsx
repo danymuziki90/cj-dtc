@@ -480,28 +480,28 @@ export default function EnrollmentPreviewModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
-      <div className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-[32px] border border-white/70 bg-[linear-gradient(180deg,rgba(248,250,252,0.98),rgba(255,255,255,0.96))] shadow-[0_40px_110px_-60px_rgba(15,23,42,0.75)]">
-        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/92 p-5 backdrop-blur">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4 backdrop-blur-sm animate-fade-in">
+      <div className="max-h-[92vh] sm:max-h-[88vh] w-full max-w-6xl overflow-y-auto rounded-[24px] sm:rounded-[32px] border border-white/70 bg-[linear-gradient(180deg,rgba(248,250,252,0.98),rgba(255,255,255,0.96))] shadow-[0_40px_110px_-60px_rgba(15,23,42,0.75)]">
+        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 p-4 sm:p-5 backdrop-blur">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Revue inscription</p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+              <h2 className="mt-1 text-xl sm:text-2xl font-bold tracking-tight text-slate-950 truncate">
                 Inscription #{record.id} - {record.firstName} {record.lastName}
               </h2>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-2.5 flex flex-wrap gap-1.5 sm:gap-2">
                 <AdminBadge tone={enrollmentStatusTone(record.status)}>{record.status}</AdminBadge>
                 {record.account ? <AdminBadge tone={record.account.tone}>{record.account.label}</AdminBadge> : null}
                 <AdminBadge tone="neutral">{record.formation.title}</AdminBadge>
               </div>
             </div>
-            <button onClick={onClose} className={adminSecondaryButtonClassName}>
+            <button onClick={onClose} className={`${adminSecondaryButtonClassName} shrink-0`}>
               Fermer
             </button>
           </div>
         </div>
 
-        <div className="grid gap-6 p-6 lg:grid-cols-[1fr_1fr]">
+        <div className="grid gap-4 sm:gap-6 p-4 sm:p-6 lg:grid-cols-[1fr_1fr]">
           <section className="space-y-6">
             <AdminPanel className="p-5">
               <h3 className="mb-3 text-lg font-semibold text-slate-900">Profil inscription</h3>
