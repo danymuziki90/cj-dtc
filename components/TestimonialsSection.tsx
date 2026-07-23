@@ -87,7 +87,7 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
 
   const displayList = testimonials.length > 0 ? testimonials : FALLBACK_TESTIMONIALS
 
-  // Helper pour restituer le contenu du témoignage avec paragraphe(s) et alignement justifié
+  // Helper pour restituer le contenu du témoignage en italique avec paragraphe(s) et alignement justifié
   const renderContent = (rawText: string) => {
     if (!rawText) return null
     const paragraphs = rawText.split(/\n+/).filter(Boolean)
@@ -160,30 +160,46 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
                 <Quote className="absolute -right-2 -bottom-2 w-24 h-24 text-slate-100/60 pointer-events-none group-hover:text-blue-50/80 transition-colors duration-300" />
 
                 <div className="space-y-4 relative z-10">
-                  {/* Étoiles & Badge "Avis Vérifié" */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1">
-                      <div className="flex items-center gap-0.5 text-amber-400">
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <Star
-                            key={star}
-                            className={`w-3.5 h-3.5 ${
-                              star <= (t.rating || 5)
-                                ? 'fill-amber-400 text-amber-400'
-                                : 'text-slate-200 fill-slate-100'
-                            }`}
-                          />
-                        ))}
+                  {/* EN-TÊTE DE LA CARTE : Nom complet de la personne & Profil (EN HAUT) */}
+                  <div className="pb-4 border-b border-slate-100 flex items-start justify-between gap-3 font-segoe">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 text-[var(--cj-blue)] font-bold flex items-center justify-center text-[10pt] shadow-xs shrink-0 font-segoe">
+                        {t.name?.[0] || 'E'}
                       </div>
-                      <span className="text-[9.5pt] font-semibold text-slate-500 font-segoe ml-1">
-                        {(t.rating || 5).toFixed(1)}/5
-                      </span>
+                      <div className="min-w-0">
+                        <h4 className="text-[10.5pt] font-bold text-slate-900 leading-tight font-segoe truncate">
+                          {t.name}
+                        </h4>
+                        <p className="text-[9.5pt] font-medium text-slate-500 line-clamp-1 mt-0.5 font-segoe">
+                          {t.formation || (t.role ? t.role.replace('Étudiant — ', '') : 'CJ DTC')}
+                        </p>
+                      </div>
                     </div>
 
-                    <span className="inline-flex items-center gap-1 text-[9pt] font-semibold text-slate-400 uppercase tracking-wider font-segoe bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
-                      {isFr ? 'Avis Vérifié' : 'Verified Review'}
-                    </span>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="inline-flex items-center gap-1 text-[8.5pt] font-semibold text-slate-400 uppercase tracking-wider font-segoe bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+                        {isFr ? 'Avis Vérifié' : 'Verified'}
+                      </span>
+
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <div className="flex items-center gap-0.5 text-amber-400">
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <Star
+                              key={star}
+                              className={`w-3 h-3 ${
+                                star <= (t.rating || 5)
+                                  ? 'fill-amber-400 text-amber-400'
+                                  : 'text-slate-200 fill-slate-100'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[9pt] font-semibold text-slate-500 font-segoe">
+                          {(t.rating || 5).toFixed(1)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Titre du témoignage */}
@@ -193,32 +209,18 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
                     </h3>
                   )}
 
-                  {/* Corps du texte (Taille 10 pt, Segoe UI, Justifié) */}
+                  {/* Corps du texte EN ITALIQUE (Taille 10 pt, Segoe UI, Justifié) */}
                   {renderContent(t.content || t.quote || '')}
                 </div>
 
-                {/* Footer de Carte (Étudiant & Formation) */}
-                <div className="pt-5 mt-6 border-t border-slate-100 flex items-center justify-between gap-3 relative z-10 font-segoe">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 text-[var(--cj-blue)] font-bold flex items-center justify-center text-[10pt] shadow-xs shrink-0 font-segoe">
-                      {t.name?.[0] || 'E'}
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-[10pt] font-bold text-slate-900 leading-tight font-segoe truncate">
-                        {t.name}
-                      </h4>
-                      <p className="text-[9.5pt] font-semibold text-slate-500 line-clamp-1 mt-0.5 font-segoe">
-                        {t.formation || (t.role ? t.role.replace('Étudiant — ', '') : 'CJ DTC')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {t.sessionDate && (
-                    <span className="text-[9pt] text-slate-400 font-segoe shrink-0 hidden sm:inline-block">
+                {/* Pied de Carte Subtil (Date / Session) */}
+                {t.sessionDate && (
+                  <div className="pt-3 mt-4 border-t border-slate-100 flex items-center justify-end relative z-10 font-segoe">
+                    <span className="text-[8.5pt] text-slate-400 font-segoe">
                       {t.sessionDate}
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

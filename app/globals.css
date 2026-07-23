@@ -1039,6 +1039,7 @@ a:hover {
 .testimonial-body-text {
   font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   font-size: 10pt !important;
+  font-style: italic !important;
   line-height: 1.65 !important;
   text-align: justify !important;
   text-justify: inter-word !important;
