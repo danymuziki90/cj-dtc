@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useParams } from 'next/navigation'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Hero from '../../components/Hero'
 import RecentSessions from '../../components/RecentSessions'
 import RecentArticles from '../../components/RecentArticles'
 import TestimonialsSection from '@/components/TestimonialsSection'
@@ -12,16 +11,6 @@ import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
 const copy = publicMessages.home
-
-// Preuves institutionnelles fixes — données réelles sous le Hero
-const institutionalProofs = [
-  { value: '2018',   labelFr: 'Année de création', labelEn: 'Founded' },
-  { value: '8 500+', labelFr: 'Impacts réels',     labelEn: 'Real impacts' },
-  { value: '10+',    labelFr: 'Pays couverts',     labelEn: 'Countries reached' },
-  { value: '50+',    labelFr: 'Promotions actives', labelEn: 'Active sessions' },
-]
-
-const FALLBACK_IMAGES = ["/lor-de-formation.jpeg", "/books-wood.jpg", "/apropos.jpeg"]
 
 export default function HomePage() {
   const params = useParams<{ locale?: string }>()
@@ -33,23 +22,8 @@ export default function HomePage() {
   const [dbFaqs, setDbFaqs] = useState<any[]>([])
   const [dbTestimonials, setDbTestimonials] = useState<any[]>([])
 
-  // Image Carousel state & settings
-  const [images, setImages] = useState<string[]>(FALLBACK_IMAGES)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Fetch images from directory API
   useEffect(() => {
     let active = true
-    fetch('/api/hero-images')
-      .then(res => res.json())
-      .then(data => {
-        if (active && Array.isArray(data) && data.length > 0) {
-          setImages(data)
-        }
-      })
-      .catch(err => console.error("Error fetching hero images:", err))
 
     fetch('/api/faq')
       .then(res => res.json())
@@ -74,202 +48,10 @@ export default function HomePage() {
     }
   }, [])
 
-  const startAutoplay = useCallback(() => {
-    stopAutoplay()
-    autoplayTimerRef.current = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length)
-    }, 6000) // Transition every 6 seconds
-  }, [images.length])
-
-  const stopAutoplay = useCallback(() => {
-    if (autoplayTimerRef.current) {
-      clearInterval(autoplayTimerRef.current)
-      autoplayTimerRef.current = null
-    }
-  }, [])
-
-  const resetAutoplayWithDelay = useCallback(() => {
-    stopAutoplay()
-    if (interactionTimeoutRef.current) {
-      clearTimeout(interactionTimeoutRef.current)
-    }
-    // Resume autoplay after 8 seconds of user inactivity
-    interactionTimeoutRef.current = setTimeout(() => {
-      startAutoplay()
-    }, 8000)
-  }, [startAutoplay, stopAutoplay])
-
-  useEffect(() => {
-    startAutoplay()
-    return () => {
-      stopAutoplay()
-      if (interactionTimeoutRef.current) {
-        clearTimeout(interactionTimeoutRef.current)
-      }
-    }
-  }, [startAutoplay, stopAutoplay])
-
-  const handlePrev = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
-    resetAutoplayWithDelay()
-  }, [images.length, resetAutoplayWithDelay])
-
-  const handleNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % images.length)
-    resetAutoplayWithDelay()
-  }, [images.length, resetAutoplayWithDelay])
-
-  const handleSelect = useCallback((index: number) => {
-    setCurrentIndex(index)
-    resetAutoplayWithDelay()
-  }, [resetAutoplayWithDelay])
-
   return (
     <div>
-      <section className="hero-bg-unified relative min-h-[85vh] pt-28 pb-16 overflow-hidden flex items-center">
-        {/* Background slideshow */}
-        <div className="absolute inset-0 z-0 select-none overflow-hidden">
-          {images.map((src, index) => (
-            <div
-              key={src}
-              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-              }`}
-            >
-              <Image
-                src={src}
-                alt={`Hero Slide ${index + 1}`}
-                fill
-                priority={index === 0}
-                className={`object-cover ${index === currentIndex ? 'animate-kenburns' : ''}`}
-                sizes="100vw"
-              />
-            </div>
-          ))}
-          {/* Dark Overlay semi-transparent to ensure text readability */}
-          <div className="absolute inset-0 bg-black/60 z-20" />
-        </div>
-
-        {/* Directional navigation arrows (Desktop only for clean UX) */}
-        <button
-          onClick={handlePrev}
-          className="absolute left-6 top-1/2 -translate-y-1/2 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-md transition-all duration-300 hover:bg-white/15 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/20 hidden md:flex"
-          aria-label={isFr ? "Image précédente" : "Previous image"}
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </button>
-        <button
-          onClick={handleNext}
-          className="absolute right-6 top-1/2 -translate-y-1/2 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-md transition-all duration-300 hover:bg-white/15 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/20 hidden md:flex"
-          aria-label={isFr ? "Image suivante" : "Next image"}
-        >
-          <ChevronRight className="h-6 w-6" />
-        </button>
-
-        {/* Carousel indicators (dots) */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-          {images.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => handleSelect(index)}
-              className={`h-2 rounded-full transition-all duration-300 focus:outline-none ${
-                index === currentIndex 
-                  ? 'w-6 bg-[var(--cj-red)]' 
-                  : 'w-2 bg-white/40 hover:bg-white/60'
-              }`}
-              aria-label={isFr ? `Aller à l'image ${index + 1}` : `Go to image ${index + 1}`}
-              aria-current={index === currentIndex ? 'true' : 'false'}
-            />
-          ))}
-        </div>
-
-        <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
-            {/* Colonne gauche (Texte & Actions) */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Pill Eyebrow */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200 backdrop-blur-sm">
-                <span className="h-2 w-2 rounded-full bg-[var(--cj-red)] animate-pulse" aria-hidden="true" />
-                {t.heroEyebrow}
-              </div>
-
-              {/* Titre */}
-              <h1 className="hero-title-unified">
-                {t.heroTitle}
-              </h1>
-
-              {/* Description */}
-              <p className="max-w-2xl text-base sm:text-lg leading-relaxed text-white font-opensans">
-                {t.heroDescription}
-              </p>
-
-              {/* CTAs */}
-              <div className="flex flex-col gap-4 sm:flex-row pt-4">
-                <Link
-                  href={`/${locale}/formations`}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--cj-red)] px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-900/30 transition duration-300 hover:bg-[var(--cj-red-700)] hover:scale-[1.02] hover:shadow-red-900/40 group"
-                >
-                  {t.primaryCta}
-                  <svg className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-                <Link
-                  href={`/${locale}/contact`}
-                  className="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/5 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition duration-300 hover:bg-white/15 hover:scale-[1.02]"
-                >
-                  {t.secondaryCta}
-                </Link>
-              </div>
-            </div>
-
-            {/* Colonne droite (Glassmorphism validation badge) */}
-            <div className="lg:col-span-5 relative flex items-center justify-center min-h-[200px] lg:min-h-0">
-              <div className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md shadow-2xl transition duration-500 hover:scale-[1.02] max-w-sm hover:border-white/20">
-                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-tr from-blue-500/20 to-red-500/10 blur-lg opacity-50 pointer-events-none" />
-                <div className="relative space-y-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 text-2xl font-bold shadow-inner">
-                    ✓
-                  </div>
-                  <div className="space-y-1">
-                    <span className="inline-block rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                      {isFr ? "Vérifié" : "Verified"}
-                    </span>
-                    <h3 className="text-lg font-bold text-white leading-snug">
-                      {isFr ? "Certification Professionnelle" : "Professional Certification"}
-                    </h3>
-                    <p className="text-xs text-blue-200/80 leading-relaxed font-opensans">
-                      {isFr 
-                        ? "CJ DTC délivre des certifications vérifiables, adossées à des parcours réels et à une validation rigoureuse des acquis."
-                        : "CJ DTC issues verifiable certifications backed by real-world courses and rigorous validation of learning."
-                      }
-                    </p>
-                  </div>
-                  <div className="border-t border-white/10 pt-3 flex items-center justify-between text-[11px] font-semibold text-blue-100/90 font-opensans">
-                    <span>{isFr ? "Preuve d'impact" : "Impact Proof"}</span>
-                    <span className="text-[var(--cj-red)] font-bold">{isFr ? "Réseau Panafricain" : "Pan-African Network"}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bande de preuves chiffrées en grille sous le Hero */}
-          <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {institutionalProofs.map((proof) => (
-              <div
-                key={proof.value}
-                className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur-md transition duration-300 hover:bg-white/8 hover:border-white/20 shadow-md"
-              >
-                <p className="text-3xl font-black text-white sm:text-4xl font-montserrat">{proof.value}</p>
-                <p className="mt-1.5 text-xs font-semibold uppercase tracking-wider text-blue-200/95 font-opensans">
-                  {isFr ? proof.labelFr : proof.labelEn}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── Hero Section (8 messages & images synchronisés) ──────────────────────── */}
+      <Hero />
 
       {/* ── Pourquoi CJ Development ────────────────────────────────────── */}
       <section className="bg-white py-20 sm:py-24 border-b border-slate-200">

@@ -1060,3 +1060,41 @@ a:hover {
   font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif !important;
 }
 
+/* ── Hero Carousel Motion Animations ────────────────────────────────────────── */
+@keyframes heroFadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroProgressBar {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-hero-fade-in {
+  animation: heroFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-hero-progress {
+  animation: heroProgressBar 6s linear forwards;
+}
+
+.hero-title-unified {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.875rem, 4vw + 1rem, 3.25rem);
+  line-height: 1.15;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
