@@ -868,10 +868,10 @@ export default function FormationDetailPage() {
             Inscrivez-vous maintenant et commencez votre transformation professionnelle avec CJ DTC.
           </p>
           <Link
-            href={`/${locale}/inscription?formation=${formation.slug}`}
+            href={formation.nextSession ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${formation.id}&sessionId=${formation.nextSession.id}` : `/sessions`}
             className="cj-btn-primary"
           >
-            S'inscrire à cette formation
+            S'inscrire à cette session
           </Link>
         </div>
       </section>

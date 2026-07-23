@@ -41,10 +41,32 @@ function resolveLocalizedAdminRedirect(pathname: string) {
   return canonicalAdminRouteMap[match[2]] || '/admin/dashboard'
 }
 
+function resolveInscriptionRedirect(pathname: string, search: string) {
+  const norm = pathname.replace(/^\/(fr|en)/, '')
+  if (norm === '/inscription' || norm === '/formations/inscription' || norm === '/sessions/inscription') {
+    const searchParams = new URLSearchParams(search)
+    const sessionId = searchParams.get('sessionId')
+    const formationId = searchParams.get('formationId')
+    if (sessionId || formationId) {
+      const targetParams = new URLSearchParams()
+      if (sessionId) targetParams.set('sessionId', sessionId)
+      if (formationId) targetParams.set('formationId', formationId)
+      return `/espace-etudiants/confirm-inscription?${targetParams.toString()}`
+    }
+    return '/sessions'
+  }
+  return null
+}
+
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname, search } = request.nextUrl
   const localeRedirect = localeMiddleware(request)
   if (localeRedirect) return localeRedirect
+
+  const inscriptionRedirect = resolveInscriptionRedirect(pathname, search)
+  if (inscriptionRedirect) {
+    return NextResponse.redirect(new URL(inscriptionRedirect, request.url))
+  }
 
   const localizedAdminRedirectPath = resolveLocalizedAdminRedirect(pathname)
   if (localizedAdminRedirectPath) {

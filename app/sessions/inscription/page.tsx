@@ -4,7 +4,7 @@ interface Props {
   searchParams: Promise<{ sessionId?: string; formationId?: string }>
 }
 
-export default async function FormationsInscriptionRedirectPage({ searchParams }: Props) {
+export default async function SessionsInscriptionRedirectPage({ searchParams }: Props) {
   const resolvedParams = await Promise.resolve(searchParams)
   const sessionId = resolvedParams.sessionId
   const formationId = resolvedParams.formationId

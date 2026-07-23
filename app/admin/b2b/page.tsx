@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useToastNotification } from '@/components/ui/toast';
-import { RefreshCw, Search, Mail, Phone, Building2, Trash2, CheckCircle, Clock, Archive, UserCheck, MessageSquare, AlertCircle } from 'lucide-react';
+import { RefreshCw, Search, Mail, Phone, Building2, Trash2, CheckCircle, Clock, Archive, MessageSquare } from 'lucide-react';
 
 interface B2BRequest {
   id: number;
@@ -28,6 +28,7 @@ export default function AdminB2BPage() {
   const [selectedRequest, setSelectedRequest] = useState<B2BRequest | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [internalNotes, setInternalNotes] = useState<string>('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [page, setPage] = useState(1);
@@ -39,18 +40,29 @@ export default function AdminB2BPage() {
     error: (msg: string) => alert(msg),
   };
 
-  const fetchRequests = useCallback(async (isManualRefresh = false) => {
+  // Debounce search input to avoid lag while typing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const fetchRequests = useCallback(async (isSilent = false) => {
     try {
-      if (isManualRefresh) setRefreshing(true);
-      else setLoading(true);
+      if (isSilent) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
 
       const params = new URLSearchParams({
         status: statusFilter,
         page: String(page),
         limit: '10',
       });
-      if (searchQuery.trim()) {
-        params.set('search', searchQuery.trim());
+      if (debouncedSearch.trim()) {
+        params.set('search', debouncedSearch.trim());
       }
 
       const res = await fetch(`/api/admin/marketing/b2b?${params.toString()}`, {
@@ -68,13 +80,12 @@ export default function AdminB2BPage() {
       setTotalPages(data.pagination?.totalPages || 1);
       setTotalCount(data.pagination?.total || loadedRequests.length);
 
-      // Maintain or set selected request
-      if (selectedRequest) {
-        const matching = loadedRequests.find(r => r.id === selectedRequest.id);
-        if (matching) {
-          setSelectedRequest(matching);
-        }
-      }
+      // Preserve currently selected request smoothly without causing state loops
+      setSelectedRequest(prev => {
+        if (!prev) return loadedRequests[0] || null;
+        const matching = loadedRequests.find(r => r.id === prev.id);
+        return matching || prev;
+      });
     } catch (err: any) {
       console.error('Fetch B2B requests error:', err);
       error(err.message || 'Impossible de charger les demandes B2B.');
@@ -83,13 +94,14 @@ export default function AdminB2BPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [statusFilter, searchQuery, page, error, selectedRequest]);
+  }, [statusFilter, debouncedSearch, page, error]);
 
+  // Initial and parameter change fetch
   useEffect(() => {
-    fetchRequests();
-  }, [fetchRequests]);
+    fetchRequests(false);
+  }, [statusFilter, debouncedSearch, page, fetchRequests]);
 
-  // Auto-refresh every 30 seconds for automatic synchronization with public form submissions
+  // Background auto-refresh every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       fetchRequests(true);
@@ -99,6 +111,10 @@ export default function AdminB2BPage() {
 
   const updateRequest = async (id: number, payload: Partial<B2BRequest>) => {
     try {
+      // Optimistic update for immediate visual feedback
+      setRequests(prev => prev.map(req => (req.id === id ? { ...req, ...payload } : req)));
+      setSelectedRequest(prev => (prev?.id === id ? { ...prev, ...payload } : prev));
+
       const res = await fetch(`/api/admin/marketing/b2b/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -108,32 +124,31 @@ export default function AdminB2BPage() {
       const updated: B2BRequest = await res.json();
 
       setRequests(prev => prev.map(req => (req.id === id ? updated : req)));
-      if (selectedRequest?.id === id) {
-        setSelectedRequest(updated);
-      }
-      success('Statut de la demande mis à jour.');
+      setSelectedRequest(prev => (prev?.id === id ? updated : prev));
+      success('Mise à jour enregistrée.');
     } catch (err) {
       console.error(err);
       error('Erreur lors de la mise à jour de la demande.');
+      fetchRequests(true);
     }
   };
 
   const handleDeleteRequest = async (id: number) => {
     if (!confirm('Voulez-vous supprimer définitivement cette demande B2B ?')) return;
     try {
+      setRequests(prev => prev.filter(req => req.id !== id));
+      setSelectedRequest(prev => (prev?.id === id ? null : prev));
+
       const res = await fetch(`/api/admin/marketing/b2b/${id}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Erreur lors de la suppression');
 
-      setRequests(prev => prev.filter(req => req.id !== id));
-      if (selectedRequest?.id === id) {
-        setSelectedRequest(null);
-      }
       success('Demande B2B supprimée avec succès.');
     } catch (err) {
       console.error(err);
       error('Erreur lors de la suppression.');
+      fetchRequests(true);
     }
   };
 
@@ -149,11 +164,10 @@ export default function AdminB2BPage() {
     setInternalNotes(req.notes || '');
   };
 
-  // Stats calculation
+  // Stats calculations
   const pendingCount = requests.filter(r => r.status === 'pending').length;
   const contactedCount = requests.filter(r => r.status === 'contacted').length;
   const qualifiedCount = requests.filter(r => r.status === 'qualified').length;
-  const archivedCount = requests.filter(r => r.status === 'archived').length;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -238,7 +252,7 @@ export default function AdminB2BPage() {
 
       {/* Filter and Search Bar */}
       <div className="bg-white rounded-2xl border border-slate-150 p-4 mb-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Search */}
+        {/* Search Input */}
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -280,7 +294,7 @@ export default function AdminB2BPage() {
         <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-150 shadow-sm overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
             <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700">Liste des Demandes Corporate ({totalCount})</span>
-            {refreshing && <span className="text-[11px] text-blue-900 font-semibold animate-pulse">Mise à jour en cours...</span>}
+            {refreshing && <span className="text-[11px] text-blue-900 font-semibold animate-pulse">Synchronisation...</span>}
           </div>
 
           <div className="flex-1 overflow-y-auto divide-y divide-slate-100 min-h-[420px] max-h-[650px]">
@@ -294,7 +308,7 @@ export default function AdminB2BPage() {
                 <Building2 className="w-12 h-12 text-slate-300 mb-3" />
                 <p className="text-sm font-bold text-slate-700">Aucune demande B2B disponible</p>
                 <p className="text-xs text-slate-400 max-w-sm mt-1">
-                  {searchQuery ? "Aucun résultat ne correspond à votre recherche." : "Les nouvelles demandes soumises sur le site s'afficheront automatiquement ici."}
+                  {debouncedSearch ? "Aucun résultat ne correspond à votre recherche." : "Les nouvelles demandes soumises sur le site s'afficheront automatiquement ici."}
                 </p>
               </div>
             ) : (
