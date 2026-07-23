@@ -366,7 +366,7 @@ export default function StudentTestimonialsPage() {
                     </div>
 
                     {/* Texte du témoignage */}
-                    <p className="text-xs text-slate-600 leading-relaxed italic">
+                    <p className="testimonial-body-text text-slate-600 italic font-segoe">
                       "{t.content}"
                     </p>
 

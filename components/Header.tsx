@@ -196,7 +196,7 @@ export default function Header() {
     () => [
       { href: `/${locale}`, label: labels.home },
       { href: `/${locale}/about`, label: labels.about },
-      { href: `/${locale}/formations`, label: labels.formations },
+      { href: `/sessions`, label: locale === 'fr' ? 'Nos Sessions' : 'Our Sessions' },
       { href: `/${locale}/entreprises`, label: labels.entreprises },
       { href: `/${locale}/actualites`, label: labels.news },
       { href: `/${locale}/espace-etudiants`, label: labels.studentSpace },

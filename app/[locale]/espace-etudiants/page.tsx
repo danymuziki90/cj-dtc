@@ -555,7 +555,14 @@ function EspaceEtudiantsContent() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/${locale}/espace-etudiants/temoignages`}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20 transition"
+            >
+              <MessageSquare className="h-3.5 w-3.5 text-amber-300" />
+              Témoignages
+            </Link>
             <Link
               href={`${basePath}/mon-compte`}
               className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/90 hover:bg-white/10 transition"
@@ -627,6 +634,13 @@ function EspaceEtudiantsContent() {
                 >
                   <BookOpen className="h-3.5 w-3.5" />
                   <span className="text-white">Supports de cours</span>
+                </Link>
+                <Link
+                  href={`/${locale}/espace-etudiants/temoignages`}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--cj-red)] to-red-600 px-4 py-2.5 text-xs font-semibold text-white shadow-lg transition hover:brightness-110"
+                >
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  <span>Donner mon témoignage</span>
                 </Link>
                 {firstCertificate && firstCertificate.fileUrl && (
                   <a
@@ -762,10 +776,10 @@ function EspaceEtudiantsContent() {
             })}
             <Link
               href={`/${locale}/espace-etudiants/temoignages`}
-              className="group flex items-center gap-2 rounded-2xl bg-[var(--cj-blue)]/90 px-4 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--cj-blue)] focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="group flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--cj-red)] to-red-600 px-4 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-200"
             >
               <MessageSquare className="h-4 w-4 text-white transition-transform group-hover:scale-110" />
-              Partager mon expérience
+              Témoignages & Avis
             </Link>
           </nav>
         </div>
@@ -1069,6 +1083,26 @@ function EspaceEtudiantsContent() {
                   >
                     Voir toutes les notifications
                   </button>
+                </div>
+
+                {/* Témoignages / Avis Card */}
+                <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 p-5 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--cj-blue)] text-white shadow-sm">
+                      <MessageSquare className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900">Vos témoignages & avis</h4>
+                      <p className="text-[10px] text-slate-500 mt-0.5">Partagez votre expérience et donnez votre avis sur vos formations.</p>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/${locale}/espace-etudiants/temoignages`}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-bold text-white transition hover:bg-[var(--cj-blue-700)] shadow-sm"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Partager mon témoignage
+                  </Link>
                 </div>
 
                 {/* Quick Support / Questions form */}

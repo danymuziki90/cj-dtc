@@ -363,36 +363,6 @@ export default function DocumentsPage() {
                                     {sessions.map(session => <option key={session.id} value={session.id}>{session.formation?.title || 'Formation'} — {new Date(session.startDate).toLocaleDateString('fr-FR')}</option>)}
                                 </select>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Formation associee
-                                </label>
-                                <select
-                                    value={uploadForm.formationId}
-                                    onChange={(e) => setUploadForm(prev => ({ ...prev, formationId: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="">Déduite de la session</option>
-                                    {formations.map(formation => (
-                                        <option key={formation.id} value={formation.id}>
-                                            {formation.title}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id="isPublic"
-                                    checked={uploadForm.isPublic}
-                                    onChange={(e) => setUploadForm(prev => ({ ...prev, isPublic: e.target.checked }))}
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                />
-                                <label htmlFor="isPublic" className="ml-2 text-sm text-gray-700">
-                                    Document public (accessible aux etudiants)
-                                </label>
-                            </div>
                         </div>
 
                         <div className="flex justify-end space-x-3 mt-6">
@@ -428,7 +398,6 @@ export default function DocumentsPage() {
                     </form>
                 </div>
             )}
-
             {/* Liste des documents */}
             <div className="bg-white rounded-lg shadow border">
                 <div className="px-6 py-4 border-b border-gray-200">

@@ -35,7 +35,8 @@ module.exports = {
       },
       fontFamily: {
         montserrat: ['Montserrat', 'sans-serif'],
-        opensans: ['Open Sans', 'sans-serif']
+        opensans: ['Open Sans', 'sans-serif'],
+        segoe: ['"Segoe UI"', '-apple-system', 'BlinkMacSystemFont', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       }
     },
   },

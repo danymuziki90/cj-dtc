@@ -111,6 +111,7 @@ export default function AdminSessionsPage() {
     objectives: '',
     status: 'ouverte',
     customTitle: '',
+    formationType: '',
     registrationDeadline: '',
     imageUrl: '',
   })
@@ -403,6 +404,7 @@ export default function AdminSessionsPage() {
     setEditingSession(null)
     setFormData({
       formationId: defaultFormationId,
+      formationType: '',
       startDate: '',
       endDate: '',
       startTime: '09:00',
@@ -427,6 +429,7 @@ export default function AdminSessionsPage() {
     setEditingSession(session)
     setFormData({
       formationId: String(session.formationId),
+      formationType: session.adminMeta?.sessionType || session.formation?.categorie || session.formation?.title || '',
       startDate: session.startDate.split('T')[0],
       endDate: session.endDate.split('T')[0],
       startTime: session.startTime ?? '09:00',
@@ -466,8 +469,8 @@ export default function AdminSessionsPage() {
 
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!formData.formationId || !formData.startDate || !formData.endDate || !formData.location) {
-      showToast('Veuillez remplir tous les champs obligatoires (*)', 'error')
+    if (!formData.startDate || !formData.endDate || !formData.location) {
+      showToast('Veuillez remplir tous les champs obligatoires (dates, lieu, format)', 'error')
       return
     }
     setFormLoading(true)
@@ -970,23 +973,20 @@ export default function AdminSessionsPage() {
             </div>
 
             <form onSubmit={handleFormSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Formation */}
+              {/* Type / Domaine de formation */}
               <div className="md:col-span-2">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                  Formation concernée *
+                  Type / Domaine de la formation *
                 </label>
-                <select
+                <input
+                  type="text"
                   id="session-form-formation"
-                  value={formData.formationId}
-                  onChange={e => setFormData(p => ({ ...p, formationId: e.target.value }))}
+                  value={formData.formationType}
+                  onChange={e => setFormData(p => ({ ...p, formationType: e.target.value }))}
+                  placeholder="ex. Développement Web, Leadership, Gestion de Projet, Data Science, Entrepreneuriat..."
                   className="w-full px-3.5 py-2.5 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:outline-none font-bold text-slate-800"
                   required
-                >
-                  <option value="">— Sélectionner la formation —</option>
-                  {formations.map(f => (
-                    <option key={f.id} value={f.id}>{f.title}</option>
-                  ))}
-                </select>
+                />
               </div>
 
               {/* Nom personnalisé de la session */}

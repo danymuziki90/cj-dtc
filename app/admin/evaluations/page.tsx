@@ -455,18 +455,13 @@ export default function AdminEvaluationsPage() {
               </select>
             )}
 
-            <select
-              value={formationFilter}
-              onChange={e => setFormationFilter(e.target.value)}
+            <input
+              type="text"
+              value={formationFilter === 'all' ? '' : formationFilter}
+              onChange={e => setFormationFilter(e.target.value || 'all')}
+              placeholder="Filtrer par domaine/type..."
               className="px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 bg-white"
-            >
-              <option value="all">Toutes les formations</option>
-              {formations.map(f => (
-                <option key={f.id} value={f.id}>
-                  {f.title}
-                </option>
-              ))}
-            </select>
+            />
 
             <select
               value={ratingFilter}

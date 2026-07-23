@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../lib/prisma'
+import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { getPublishedSessions } from '@/lib/sessions/published'
 import {
-    mapParticipationTypeToFormat,
-    normalizeParticipationType,
-    parseSessionMetadata,
     serializeSessionMetadata,
+    parseSessionMetadata,
+    normalizeParticipationType,
+    mapParticipationTypeToFormat,
     type ManagedSessionType,
     type ParticipationType,
 } from '@/lib/sessions/metadata'
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
                 prerequisitesText: parsedMetadata.prerequisitesText,
                 adminMeta: {
                     customTitle: parsedMetadata.metadata.customTitle || null,
-                    sessionType: parsedMetadata.metadata.sessionType || null,
+                    sessionType: parsedMetadata.metadata.sessionType || (session.formation?.categorie ?? null),
                     durationLabel: parsedMetadata.metadata.durationLabel || null,
                     paymentInfo: parsedMetadata.metadata.paymentInfo || null,
                     participationType:
@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json()
         const {
             formationId,
+            formationType,
             startDate,
             endDate,
             startTime,
@@ -110,34 +111,44 @@ export async function POST(request: NextRequest) {
         } = body
 
         // Validation des données
-        if (!formationId || !startDate || !endDate || !location || !format) {
+        if (!startDate || !endDate || !location || !format) {
             return NextResponse.json(
-                { error: 'Données manquantes' },
+                { error: 'Données manquantes (dates, lieu, format)' },
                 { status: 400 }
             )
         }
 
-        // Vérifier que la formation existe
-        const formation = await prisma.formation.findUnique({
-            where: { id: parseInt(formationId) }
-        })
+        let resolvedFormationId = formationId ? parseInt(String(formationId)) : NaN
 
-        if (!formation) {
-            return NextResponse.json(
-                { error: 'Formation non trouvée' },
-                { status: 404 }
-            )
+        if (isNaN(resolvedFormationId) || !resolvedFormationId) {
+            const typeName = (formationType || sessionType || customTitle || 'Session').trim()
+            let formation = await prisma.formation.findFirst({
+                where: { title: { equals: typeName, mode: 'insensitive' } }
+            })
+            if (!formation) {
+                const slugBase = typeName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `session-${Date.now()}`
+                formation = await prisma.formation.create({
+                    data: {
+                        title: typeName,
+                        slug: `${slugBase}-${Date.now().toString(36)}`,
+                        description: description || typeName,
+                        categorie: typeName,
+                        statut: 'publie',
+                    }
+                })
+            }
+            resolvedFormationId = formation.id
         }
 
         // Créer la session
         const session = await prisma.trainingSession.create({
             data: {
-                formationId: parseInt(formationId),
+                formationId: resolvedFormationId,
                 startDate: new Date(startDate),
                 endDate: new Date(endDate),
-                startTime,
-                endTime,
-                location,
+                startTime: startTime || '09:00',
+                endTime: endTime || '17:00',
+                location: location || 'À préciser',
                 format:
                     (participationType
                         ? mapParticipationTypeToFormat(participationType as ParticipationType)
@@ -147,7 +158,7 @@ export async function POST(request: NextRequest) {
                 prerequisites: serializeSessionMetadata(
                     {
                         customTitle: customTitle || null,
-                        sessionType: (sessionType as ManagedSessionType) || undefined,
+                        sessionType: ((formationType || sessionType) as ManagedSessionType) || undefined,
                         durationLabel: durationLabel || null,
                         paymentInfo: paymentInfo || null,
                         participationType:
@@ -160,7 +171,7 @@ export async function POST(request: NextRequest) {
                 ),
                 objectives,
                 imageUrl,
-                status: ['ouverte', 'fermee', 'complete', 'annulee', 'terminee'].includes(status) ? status : 'fermee'
+                status: ['ouverte', 'fermee', 'complete', 'annulee', 'terminee'].includes(status) ? status : 'ouverte'
             },
             include: {
                 formation: true

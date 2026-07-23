@@ -188,77 +188,54 @@ export default function Footer() {
 
               {/* Tagline */}
               <p className="text-xs leading-relaxed text-gray-300">{t.brandTagline}</p>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
-                {(['15+', '10+', '8 500+'] as const).map((val, i) => (
-                  <div key={i} className="text-center">
-                    <div className="text-lg font-bold text-white">{val}</div>
-                    <div className="mt-0.5 text-xs text-blue-300">{t.stats[i]}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Social */}
-              <div>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white">{t.followUs}</p>
-                <SocialRow />
-              </div>
+              <SocialRow />
             </div>
 
-            {/* Col 2 — Navigation rapide */}
-            <div>
-              <SectionHeading>
-                {locale === 'fr' ? 'Navigation rapide' : 'Quick links'}
-              </SectionHeading>
-              <ul className="space-y-2.5">
-                {[
-                  { href: `/${locale}`, label: locale === 'fr' ? 'Accueil' : 'Home' },
-                  { href: `/${locale}/about`, label: locale === 'fr' ? 'À propos' : 'About' },
-                  { href: `/${locale}/formations`, label: locale === 'fr' ? 'Formations' : 'Training' },
-                  { href: `/${locale}/espace-etudiants`, label: locale === 'fr' ? 'Espace étudiant' : 'Student Space' },
-                  { href: `/${locale}/actualites`, label: locale === 'fr' ? 'Blog / Actualités' : 'Blog / News' },
-                  { href: `/${locale}/contact`, label: locale === 'fr' ? 'Contact' : 'Contact' },
-                ].map((item) => (
-                  <li key={item.href}>
-                    <Link href={item.href} className="group flex items-center gap-2 text-xs text-gray-400 transition-colors duration-200 hover:text-white">
-                      <IconChevronRight />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Col 3 — Nos formations */}
+            {/* Col 2 — Formations */}
             <div>
               <SectionHeading>{t.sections.formations}</SectionHeading>
               <ul className="space-y-2.5">
                 <li>
-                  <Link href={`/${locale}/formations`} className="group flex items-center gap-2 text-xs text-gray-400 transition-colors duration-200 hover:text-white">
+                  <Link href={`/${locale}/formations`} className="group inline-flex items-center gap-1.5 text-xs text-gray-300 transition-colors duration-200 hover:text-white">
                     <IconChevronRight />
                     {t.links.allTraining}
                   </Link>
                 </li>
-                {[
-                  { slug: 'iop', label: 'IOP' },
-                  { slug: 'mrh', label: 'MRH' },
-                  { slug: 'leadership', label: 'Leadership' },
-                  { slug: 'cj-master-system', label: 'CJ Master System' },
-                ].map((item) => (
-                  <li key={item.slug}>
-                    <Link href={`/${locale}/formations/${item.slug}`} className="group flex items-center gap-2 text-xs text-gray-400 transition-colors duration-200 hover:text-white">
-                      <IconChevronRight />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link href={`/${locale}/services`} className="group inline-flex items-center gap-1.5 text-xs text-gray-300 transition-colors duration-200 hover:text-white">
+                    <IconChevronRight />
+                    {t.links.services}
+                  </Link>
+                </li>
               </ul>
             </div>
 
+            {/* Col 3 — Ressources */}
+            <div>
+              <SectionHeading>{t.sections.resources}</SectionHeading>
+              <ul className="space-y-2.5">
+                <li>
+                  <Link href={`/${locale}/certificat/verifier`} className="group inline-flex items-center gap-1.5 text-xs text-gray-300 transition-colors duration-200 hover:text-white">
+                    <IconChevronRight />
+                    {t.links.verifyCertificate}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`/${locale}/espace-etudiants`} className="group inline-flex items-center gap-1.5 text-xs text-gray-300 transition-colors duration-200 hover:text-white">
+                    <IconChevronRight />
+                    {t.links.studentSpace}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`/${locale}/partenaires`} className="group inline-flex items-center gap-1.5 text-xs text-gray-300 transition-colors duration-200 hover:text-white">
+                    <IconChevronRight />
+                    {t.links.partners}
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-
-            {/* Col 5 — Contact */}
+            {/* Col 4 — Contact */}
             <div>
               <SectionHeading>{t.sections.contact}</SectionHeading>
               <ul className="space-y-4">

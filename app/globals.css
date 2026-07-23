@@ -1030,3 +1030,32 @@ a:hover {
 .bg-blue-950 a:not([class*="bg-"]):hover {
   opacity: 0.8;
 }
+
+/* ── Typographie Section Témoignages (Segoe UI & Alignement Justifié) ──────── */
+.font-segoe {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+.testimonial-body-text {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-size: 10pt !important;
+  line-height: 1.65 !important;
+  text-align: justify !important;
+  text-justify: inter-word !important;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.testimonial-card-title {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-size: 10.5pt !important;
+  line-height: 1.4 !important;
+}
+
+.testimonial-meta-text {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+

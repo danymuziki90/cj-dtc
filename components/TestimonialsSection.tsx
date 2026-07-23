@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Star, User, GraduationCap, Calendar, Quote, MessageSquarePlus, ArrowRight } from 'lucide-react'
+import { Star, Quote, MessageSquarePlus, ArrowRight, CheckCircle2 } from 'lucide-react'
 
 interface TestimonialItem {
   id: number | string
@@ -87,6 +87,24 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
 
   const displayList = testimonials.length > 0 ? testimonials : FALLBACK_TESTIMONIALS
 
+  // Helper pour restituer le contenu du témoignage avec paragraphe(s) et alignement justifié
+  const renderContent = (rawText: string) => {
+    if (!rawText) return null
+    const paragraphs = rawText.split(/\n+/).filter(Boolean)
+    return (
+      <div className="space-y-2.5">
+        {paragraphs.map((para, idx) => (
+          <p
+            key={idx}
+            className="testimonial-body-text text-slate-700 italic"
+          >
+            "{para.trim()}"
+          </p>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <section className="bg-slate-50 py-20 sm:py-24 border-b border-slate-200 overflow-hidden relative">
       {/* Texture de fond subtile */}
@@ -116,9 +134,9 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
 
         {/* Grille des cartes de Témoignages */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm animate-pulse space-y-4">
+              <div key={i} className="bg-white rounded-3xl p-6 sm:p-7 md:p-8 border border-slate-200 shadow-sm animate-pulse space-y-4">
                 <div className="h-4 bg-slate-200 rounded w-1/3"></div>
                 <div className="h-20 bg-slate-100 rounded"></div>
                 <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
@@ -132,58 +150,74 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {displayList.map(t => (
               <div
                 key={t.id}
-                className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm hover:shadow-xl hover:border-blue-200 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
+                className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 md:p-8 shadow-sm hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden font-segoe"
               >
-                <div className="space-y-4">
-                  {/* Étoiles & Badge */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-amber-400">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <Star
-                          key={star}
-                          className={`w-4 h-4 ${
-                            star <= (t.rating || 5)
-                              ? 'fill-amber-400 text-amber-400'
-                              : 'text-slate-200 fill-slate-100'
-                          }`}
-                        />
-                      ))}
+                {/* Icône de citation filigranée en arrière-plan */}
+                <Quote className="absolute -right-2 -bottom-2 w-24 h-24 text-slate-100/60 pointer-events-none group-hover:text-blue-50/80 transition-colors duration-300" />
+
+                <div className="space-y-4 relative z-10">
+                  {/* Étoiles & Badge "Avis Vérifié" */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-0.5 text-amber-400">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <Star
+                            key={star}
+                            className={`w-3.5 h-3.5 ${
+                              star <= (t.rating || 5)
+                                ? 'fill-amber-400 text-amber-400'
+                                : 'text-slate-200 fill-slate-100'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[9.5pt] font-semibold text-slate-500 font-segoe ml-1">
+                        {(t.rating || 5).toFixed(1)}/5
+                      </span>
                     </div>
 
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1 text-[9pt] font-semibold text-slate-400 uppercase tracking-wider font-segoe bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
                       {isFr ? 'Avis Vérifié' : 'Verified Review'}
                     </span>
                   </div>
 
-                  {/* Titre & Citation */}
+                  {/* Titre du témoignage */}
                   {t.title && (
-                    <h3 className="text-sm font-bold text-slate-900 group-hover:text-[var(--cj-blue)] transition font-montserrat">
+                    <h3 className="testimonial-card-title font-bold text-slate-900 group-hover:text-[var(--cj-blue)] transition font-segoe">
                       « {t.title} »
                     </h3>
                   )}
 
-                  <p className="text-xs sm:text-sm text-slate-600 font-opensans leading-relaxed italic">
-                    "{t.content || t.quote}"
-                  </p>
+                  {/* Corps du texte (Taille 10 pt, Segoe UI, Justifié) */}
+                  {renderContent(t.content || t.quote || '')}
                 </div>
 
                 {/* Footer de Carte (Étudiant & Formation) */}
-                <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 text-[var(--cj-blue)] font-bold flex items-center justify-center text-sm shadow-xs shrink-0">
+                <div className="pt-5 mt-6 border-t border-slate-100 flex items-center justify-between gap-3 relative z-10 font-segoe">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 text-[var(--cj-blue)] font-bold flex items-center justify-center text-[10pt] shadow-xs shrink-0 font-segoe">
                       {t.name?.[0] || 'E'}
                     </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900 leading-tight">{t.name}</h4>
-                      <p className="text-[11px] font-semibold text-slate-500 line-clamp-1 mt-0.5">
+                    <div className="min-w-0">
+                      <h4 className="text-[10pt] font-bold text-slate-900 leading-tight font-segoe truncate">
+                        {t.name}
+                      </h4>
+                      <p className="text-[9.5pt] font-semibold text-slate-500 line-clamp-1 mt-0.5 font-segoe">
                         {t.formation || (t.role ? t.role.replace('Étudiant — ', '') : 'CJ DTC')}
                       </p>
                     </div>
                   </div>
+
+                  {t.sessionDate && (
+                    <span className="text-[9pt] text-slate-400 font-segoe shrink-0 hidden sm:inline-block">
+                      {t.sessionDate}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
@@ -191,7 +225,7 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
         )}
 
         {/* Boutons d'Action & Soumission */}
-        <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 font-segoe">
           <Link
             href={`/${locale}/espace-etudiants/temoignages`}
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--cj-blue)] px-7 py-3.5 text-xs font-bold text-white shadow-md shadow-blue-900/20 hover:bg-blue-900 hover:scale-[1.02] transition"
