@@ -226,10 +226,11 @@ function SessionCard({ session: s }: { session: SessionItem }) {
           <button
             type="button"
             onClick={() => {
+              const confirmUrl = `/espace-etudiants/confirm-inscription?sessionId=${s.id}&formationId=${s.formationId}`
               if (isLoggedIn) {
-                router.push(`/espace-etudiants/confirm-inscription?sessionId=${s.id}&formationId=${s.formationId}`)
+                router.push(confirmUrl)
               } else {
-                router.push(`/espace-etudiants?sessionId=${s.id}&formationId=${s.formationId}`)
+                router.push(`/fr/auth/student-login?next=${encodeURIComponent(confirmUrl)}`)
               }
             }}
             className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-extrabold transition-all shadow-md ${

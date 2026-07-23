@@ -181,9 +181,9 @@ function ConfirmInscriptionContent() {
         }
       }
 
-      if (!formationId) {
+      if (!formationId && !sessionId) {
         if (active) {
-          setError('Formation invalide.')
+          setError('Session ou formation invalide.')
           setLoading(false)
         }
         return
@@ -194,8 +194,8 @@ function ConfirmInscriptionContent() {
           const sessionRes = await fetch(`/api/sessions/${sessionId}`, { cache: 'no-store' })
           if (!sessionRes.ok) throw new Error('Impossible de charger la session.')
           const selectedSession = (await sessionRes.json()) as TrainingSession
-          if (!selectedSession || selectedSession.formationId !== formationId) {
-            throw new Error('Session introuvable pour cette formation.')
+          if (!selectedSession) {
+            throw new Error('Session introuvable.')
           }
           if (active) {
             setSession(selectedSession)

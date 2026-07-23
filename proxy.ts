@@ -92,7 +92,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const isLocalizedStudentSpaceRoute = /^\/(fr|en)\/espace-etudiants(\/|$)/.test(pathname)
+  const isLocalizedStudentSpaceRoute = /^\/(fr|en)\/espace-etudiants(\/|$)/.test(pathname) || pathname.startsWith('/espace-etudiants')
   if (isLocalizedStudentSpaceRoute) {
     const studentToken = request.cookies.get(STUDENT_AUTH_COOKIE)?.value
     const studentPayload = studentToken ? await verifyStudentToken(studentToken) : null

@@ -230,7 +230,7 @@ export default function RecentSessions() {
                       href={
                         isLoggedIn
                           ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formation.id}&sessionId=${session.id}`
-                          : `/${locale}/espace-etudiants?formationId=${session.formation.id}&sessionId=${session.id}`
+                          : `/${locale}/auth/student-login?next=${encodeURIComponent(`/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formation.id}&sessionId=${session.id}`)}`
                       }
                       className="rounded-lg bg-[var(--cj-red)] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#bb111d] transition-colors"
                     >

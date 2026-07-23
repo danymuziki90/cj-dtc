@@ -134,8 +134,17 @@ function StudentRegisterForm() {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-xl items-center justify-center">
 
         <section className="w-full rounded-[28px] border border-white bg-white p-6 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.45)] sm:p-8">
-          <h2 className="text-2xl font-semibold text-slate-950">Creer un compte</h2>
+          <h2 className="text-2xl font-semibold text-slate-950">Créer un compte étudiant</h2>
           <p className="mt-2 text-sm text-slate-600">Renseignez les informations de base de votre compte.</p>
+
+          {nextPath.includes('confirm-inscription') ? (
+            <div className="mt-5 flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50/80 px-4 py-3.5 text-xs font-bold text-[var(--cj-blue)] shadow-sm">
+              <svg className="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Créez votre compte étudiant pour finaliser votre inscription à la session sélectionnée.</span>
+            </div>
+          ) : null}
 
           {globalError ? (
             <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

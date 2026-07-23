@@ -222,10 +222,11 @@ export default function SessionCard({ session: s, locale }: Props) {
             <button
               type="button"
               onClick={() => {
+                const confirmUrl = `/${locale}/espace-etudiants/confirm-inscription?formationId=${s.formationId}&sessionId=${s.id}`
                 if (isLoggedIn) {
-                  router.push(`/${locale}/espace-etudiants/confirm-inscription?formationId=${s.formationId}&sessionId=${s.id}`)
+                  router.push(confirmUrl)
                 } else {
-                  router.push(`/${locale}/espace-etudiants?formationId=${s.formationId}&sessionId=${s.id}`)
+                  router.push(`/${locale}/auth/student-login?next=${encodeURIComponent(confirmUrl)}`)
                 }
               }}
               className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${

@@ -70,6 +70,15 @@ function StudentLoginForm() {
             </div>
           ) : null}
 
+          {nextPath.includes('confirm-inscription') ? (
+            <div className="mt-5 flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50/80 px-4 py-3.5 text-xs font-bold text-[var(--cj-blue)] shadow-sm">
+              <svg className="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Connectez-vous ou créez votre compte étudiant pour poursuivre votre inscription à la session sélectionnée.</span>
+            </div>
+          ) : null}
+
           {error ? (
             <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
