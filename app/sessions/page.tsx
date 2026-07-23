@@ -20,6 +20,8 @@ import {
   CheckCircle2
 } from 'lucide-react'
 import { StudentAuthProvider, useStudentAuth } from '@/lib/auth/StudentAuthContext'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 export interface SessionItem {
   id: number
@@ -444,10 +446,18 @@ function MainSessionsPage() {
   )
 }
 
+export { MainSessionsPage }
+
 export default function NosSessionsPage() {
   return (
     <StudentAuthProvider>
-      <MainSessionsPage />
+      <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+        <Header />
+        <main className="flex-1">
+          <MainSessionsPage />
+        </main>
+        <Footer />
+      </div>
     </StudentAuthProvider>
   )
 }
