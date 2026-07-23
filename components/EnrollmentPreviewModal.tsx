@@ -320,6 +320,7 @@ export default function EnrollmentPreviewModal({
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
   const [feedbackSuccess, setFeedbackSuccess] = useState<string | null>(null)
   const [generatedCredentials, setGeneratedCredentials] = useState<{ username: string; password: string } | null>(null)
+  const [customFormAnswers, setCustomFormAnswers] = useState<Array<{ questionLabel: string; answerText: string }>>([])
 
   useEffect(() => {
     setRecord(enrollment)
@@ -328,6 +329,27 @@ export default function EnrollmentPreviewModal({
     setFeedbackError(null)
     setFeedbackSuccess(null)
     setGeneratedCredentials(null)
+
+    if (enrollment.session?.id && enrollment.id) {
+      fetch(`/api/sessions/${enrollment.session.id}/form-answers?enrollmentId=${enrollment.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data?.answers) && data.answers.length > 0) {
+            const parsedList = data.answers.map((ans: any) => {
+              const label = ans.question?.label || `Question #${ans.questionId}`
+              let val = ans.textValue || ans.jsonValue || (ans.fileUrl ? `${ans.fileName || 'Fichier'}: ${ans.fileUrl}` : '-')
+              if (Array.isArray(val)) val = val.join(', ')
+              return { questionLabel: label, answerText: String(val) }
+            })
+            setCustomFormAnswers(parsedList)
+          } else {
+            setCustomFormAnswers([])
+          }
+        })
+        .catch(() => setCustomFormAnswers([]))
+    } else {
+      setCustomFormAnswers([])
+    }
   }, [enrollment])
 
   const notesInfo = useMemo(() => parseEnrollmentNotes(record.notes), [record.notes])
@@ -525,7 +547,22 @@ export default function EnrollmentPreviewModal({
 
             <AdminPanel className="p-5">
               <h3 className="mb-3 text-lg font-semibold text-slate-900">Donnees du participant</h3>
-              {enrichedSections.length === 0 && additionalAnswers.length === 0 ? (
+              {customFormAnswers.length > 0 && (
+                <div className="mb-4 rounded-[22px] border border-blue-200 bg-blue-50/50 p-4">
+                  <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-blue-900">
+                    Réponses au formulaire personnalisé de la session
+                  </h4>
+                  <div className="grid gap-2 md:grid-cols-2">
+                    {customFormAnswers.map((item, idx) => (
+                      <div key={idx} className="rounded-2xl border border-blue-100 bg-white p-3 shadow-sm">
+                        <p className="text-xs font-semibold text-slate-500">{item.questionLabel}</p>
+                        <p className="mt-1 text-sm font-bold text-slate-900 break-words">{item.answerText}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {enrichedSections.length === 0 && additionalAnswers.length === 0 && customFormAnswers.length === 0 ? (
                 <AdminEmptyState
                   title="Aucune reponse detaillee"
                   description="Cette inscription ne contient pas encore de reponses structurees exploitables."
