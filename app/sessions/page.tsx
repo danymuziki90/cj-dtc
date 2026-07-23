@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -452,11 +452,17 @@ export default function NosSessionsPage() {
   return (
     <StudentAuthProvider>
       <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-        <Header />
+        <Suspense fallback={<div className="h-20 bg-white" />}>
+          <Header />
+        </Suspense>
         <main className="flex-1">
-          <MainSessionsPage />
+          <Suspense fallback={<div className="p-10 text-center text-sm text-slate-500">Chargement des sessions...</div>}>
+            <MainSessionsPage />
+          </Suspense>
         </main>
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
     </StudentAuthProvider>
   )

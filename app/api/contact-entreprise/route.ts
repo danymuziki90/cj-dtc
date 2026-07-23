@@ -26,22 +26,23 @@ export async function POST(req: Request) {
       )
     }
 
-    // Save corporate request in DB
-    await prisma.b2BRequest.create({
+    // 1. Save corporate request in DB
+    const newRequest = await prisma.b2BRequest.create({
       data: {
-        company: body.company,
-        contactName: body.contactName,
-        position: body.position || null,
-        email: body.email,
-        phone: body.phone || null,
-        sector: body.sector || null,
-        employees: body.employees || null,
-        needType: body.needType,
-        message: body.message || null,
-        status: 'pending'
-      }
+        company: body.company.trim(),
+        contactName: body.contactName.trim(),
+        position: body.position?.trim() || null,
+        email: body.email.trim().toLowerCase(),
+        phone: body.phone?.trim() || null,
+        sector: body.sector?.trim() || null,
+        employees: body.employees?.trim() || null,
+        needType: body.needType.trim(),
+        message: body.message?.trim() || null,
+        status: 'pending',
+      },
     })
 
+    // 2. Prepare Email HTML notification for Admin
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;">
         <div style="background:#002D72;padding:28px 32px;border-radius:12px 12px 0 0;">
@@ -83,23 +84,24 @@ export async function POST(req: Request) {
       </div>
     `
 
-    const sent = await sendEmail({
-      to: process.env.CONTACT_EMAIL || process.env.MAIL_USER || 'contact@cjdevelopmenttc.org',
-      replyTo: body.email,
-      subject: `[Entreprise] ${body.company} — ${body.needType}`,
-      html,
-    })
-
-    if (!sent) {
-      return NextResponse.json(
-        { error: 'Erreur lors de l\'envoi. Veuillez réessayer.' },
-        { status: 500 }
-      )
+    // 3. Send email notification (non-blocking for DB storage)
+    try {
+      await sendEmail({
+        to: process.env.CONTACT_EMAIL || process.env.MAIL_USER || 'contact@cjdevelopmenttc.org',
+        replyTo: body.email,
+        subject: `[Entreprise] ${body.company} — ${body.needType}`,
+        html,
+      })
+    } catch (emailErr) {
+      console.error('B2B Email Notification Warning (request saved in DB):', emailErr)
     }
 
-    return NextResponse.json({ message: 'Demande envoyée avec succès.' }, { status: 200 })
+    return NextResponse.json({
+      message: 'Demande entreprise enregistrée avec succès.',
+      id: newRequest.id
+    }, { status: 200 })
   } catch (err) {
     console.error('contact-entreprise error:', err)
-    return NextResponse.json({ error: 'Erreur inattendue.' }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur inattendue lors de l\'enregistrement.' }, { status: 500 })
   }
 }

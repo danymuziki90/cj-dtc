@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/auth-portal/guards'
+
+export const dynamic = 'force-dynamic'
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
+    const auth = await requireAdmin(req)
+    if (auth.error) {
+      return auth.error
     }
 
     const { id } = await params
-    const messageId = parseInt(id)
+    const messageId = parseInt(id, 10)
     if (isNaN(messageId)) {
       return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
     }
@@ -28,7 +29,7 @@ export async function PUT(
 
     const updated = await prisma.contactMessage.update({
       where: { id: messageId },
-      data: updateData
+      data: updateData,
     })
 
     return NextResponse.json(updated)
@@ -43,19 +44,19 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
+    const auth = await requireAdmin(req)
+    if (auth.error) {
+      return auth.error
     }
 
     const { id } = await params
-    const messageId = parseInt(id)
+    const messageId = parseInt(id, 10)
     if (isNaN(messageId)) {
       return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
     }
 
     await prisma.contactMessage.delete({
-      where: { id: messageId }
+      where: { id: messageId },
     })
 
     return NextResponse.json({ message: 'Message supprimé avec succès' })
