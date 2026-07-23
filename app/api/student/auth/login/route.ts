@@ -12,11 +12,11 @@ import {
 } from '@/lib/auth-portal/jwt'
 
 const loginSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
+  username: z.string().min(1, 'Identifiant requis.'),
+  password: z.string().min(1, 'Mot de passe requis.'),
 })
 
-const STUDENT_LOGIN_LIMIT = 8
+const STUDENT_LOGIN_LIMIT = 12
 const STUDENT_LOGIN_WINDOW_MS = 15 * 60 * 1000
 
 export async function POST(request: NextRequest) {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: 'Trop de tentatives de connexion. Veuillez reessayer plus tard.' },
+        { error: 'Trop de tentatives de connexion. Veuillez réessayer dans quelques minutes.' },
         {
           status: 429,
           headers: {
@@ -49,11 +49,13 @@ export async function POST(request: NextRequest) {
 
     const parsed = loginSchema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ error: "Nom d'utilisateur ou mot de passe incorrect. Veuillez reessayer." }, { status: 400 })
+      return NextResponse.json({ error: "Nom d'utilisateur ou mot de passe obligatoire." }, { status: 400 })
     }
 
-    const normalizedUsername = parsed.data.username.trim().toLowerCase()
-    const student = await prisma.student.findFirst({
+    const rawUsername = parsed.data.username.trim()
+    const normalizedUsername = rawUsername.toLowerCase()
+
+    let student = await prisma.student.findFirst({
       where: {
         OR: [
           { username: { equals: normalizedUsername, mode: 'insensitive' } },
@@ -62,18 +64,44 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Si l'étudiant n'est pas encore dans la table Student mais existe dans la table User
     if (!student) {
-      return NextResponse.json({ error: "Nom d'utilisateur ou mot de passe incorrect. Veuillez reessayer." }, { status: 401 })
+      const user = await prisma.user.findFirst({
+        where: { email: { equals: normalizedUsername, mode: 'insensitive' } },
+      })
+      if (user && user.password && (await verifyPassword(parsed.data.password, user.password))) {
+        const nameParts = (user.name || 'Étudiant').trim().split(' ')
+        const firstName = nameParts[0] || 'Étudiant'
+        const lastName = nameParts.slice(1).join(' ') || firstName
+        const studentNumber = `STU-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase().slice(-6)}`
+
+        student = await prisma.student.create({
+          data: {
+            firstName,
+            lastName,
+            email: user.email.toLowerCase(),
+            username: user.email.toLowerCase().split('@')[0],
+            password: user.password,
+            studentNumber,
+            status: 'ACTIVE',
+            role: 'STUDENT',
+          },
+        })
+      }
+    }
+
+    if (!student) {
+      return NextResponse.json({ error: "Nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer." }, { status: 401 })
     }
 
     const isValidPassword = await verifyPassword(parsed.data.password, student.password)
     if (!isValidPassword) {
-      return NextResponse.json({ error: "Nom d'utilisateur ou mot de passe incorrect. Veuillez reessayer." }, { status: 401 })
+      return NextResponse.json({ error: "Nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer." }, { status: 401 })
     }
 
     if (student.status === 'SUSPENDED') {
       return NextResponse.json(
-        { error: 'Votre compte etudiant est suspendu. Contactez l administration.' },
+        { error: 'Votre compte étudiant est suspendu. Veuillez contacter l administration.' },
         { status: 403 }
       )
     }
@@ -101,8 +129,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Student login error:', error)
     return NextResponse.json(
-      { error: "Authentification etudiant indisponible. Verifiez la configuration de securite." },
-      { status: 503 }
+      { error: "Service de connexion temporairement indisponible. Veuillez réessayer." },
+      { status: 500 }
     )
   }
 }

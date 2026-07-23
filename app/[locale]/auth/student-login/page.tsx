@@ -47,8 +47,8 @@ function StudentLoginForm() {
 
       router.push(nextPath)
       router.refresh()
-    } catch {
-      setError("Nom d'utilisateur ou mot de passe incorrect.")
+    } catch (err: any) {
+      setError(err?.message || "Erreur de réseau ou serveur indisponible. Veuillez réessayer.")
     } finally {
       setLoading(false)
     }
