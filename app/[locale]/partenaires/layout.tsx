@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { generatePageMetadata } from '@/components/PageMetadata'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
@@ -12,9 +12,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const t = copy[locale]
 
   return generatePageMetadata({
-    title: t.title,
-    description: t.description,
-    keywords: ['partners', 'collaboration', 'CJ DTC', 'Africa'],
+    title: t.title || 'Nos Partenaires Institutionnels & Entreprises | CJ DTC',
+    description: t.description || 'Découvrez nos partenaires stratégiques académiques et professionnels qui soutiennent le développement des compétences en Afrique.',
+    keywords: ['partenaires', 'collaboration', 'réseau institutionnel', 'CJ DTC', 'Afrique'],
+    path: `/${locale}/partenaires`,
   })
 }
 
