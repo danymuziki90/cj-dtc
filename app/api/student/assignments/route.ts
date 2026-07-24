@@ -265,6 +265,7 @@ export async function POST(request: NextRequest) {
 
     const r2Folder = `travaux/${auth.student.id}`
 
+    try {
     for (const file of files) {
       const extension = extname(file.name).toLowerCase()
       const fileName = `${Date.now()}-${randomUUID()}${extension}`
@@ -284,6 +285,18 @@ export async function POST(request: NextRequest) {
           url: fileUrl,
         },
       })
+    }
+    } catch (uploadError) {
+      // Never leave a submission that points to files which R2 rejected.
+      if (isResubmissionAllowed) {
+        await prisma.submission.update({
+          where: { id: submission.id },
+          data: { status: 'returned' },
+        })
+      } else {
+        await prisma.submission.delete({ where: { id: submission.id } })
+      }
+      throw uploadError
     }
 
     const submissionWithFiles = await prisma.submission.findUnique({
@@ -308,10 +321,17 @@ export async function POST(request: NextRequest) {
     )
   } catch (error: any) {
     console.error('[POST /api/student/assignments] CRITICAL SERVER ERROR:', error)
+    if (error?.code === 'R2_STORAGE_ERROR') {
+      return NextResponse.json({
+        success: false,
+        message: error.message,
+        error: 'R2 storage unavailable',
+      }, { status: 503 })
+    }
     return NextResponse.json({
       success: false,
       message: error?.message || 'Une erreur système est survenue lors de l\'enregistrement du devoir.',
-      error: error?.stack || String(error)
+      error: 'Submission processing failed'
     }, { status: 500 })
   }
 }

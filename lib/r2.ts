@@ -18,6 +18,15 @@ const publicUrl = sanitizeEnv(process.env.CLOUDFLARE_R2_PUBLIC_URL) || sanitizeE
 
 export const isR2Configured = !!(accountId && accessKeyId && secretAccessKey)
 
+export class R2StorageError extends Error {
+  readonly code = 'R2_STORAGE_ERROR'
+
+  constructor(message: string) {
+    super(message)
+    this.name = 'R2StorageError'
+  }
+}
+
 const r2Client = isR2Configured
   ? new S3Client({
       region: 'auto',
@@ -59,6 +68,11 @@ export async function uploadToR2(
 
   console.log(`[R2 Upload] key: ${key}, size: ${buffer.length} bytes, mimeType: ${mimeType}, R2 Configured: ${isR2Configured}`)
 
+  if (!isR2Configured && (process.env.NODE_ENV === 'production' || process.env.VERCEL)) {
+    console.error('[R2 Upload] Configuration R2 absente en production.')
+    throw new R2StorageError("Le stockage des fichiers n'est pas configure. Contactez l'administration.")
+  }
+
   if (isR2Configured && r2Client) {
     console.log(`[R2 Upload] Envoi vers bucket R2: ${bucketName}...`)
     try {
@@ -92,6 +106,11 @@ export async function uploadToR2(
       return fallbackUrl
     } catch (error: any) {
       console.error(`[R2 Upload] Échec PutObjectCommand R2 pour ${key}:`, error)
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+        // /tmp is ephemeral on serverless deployments: do not return a URL
+        // that will later fail with a 404.
+        throw new R2StorageError("Le fichier n'a pas pu etre enregistre dans le stockage securise. Veuillez reessayer.")
+      }
       try {
         const baseDir = getWritableBaseDir(cleanFolder, privateStorage || cleanFolder === 'certificats')
         await mkdir(baseDir, { recursive: true })

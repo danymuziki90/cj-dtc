@@ -112,7 +112,7 @@ export default function StudentAssignmentsPage() {
       formData.append('assignmentId', assignmentId.toString())
       formData.append('fileCount', files.length.toString())
 
-      const response = await fetch('/api/student/assignments/submit', {
+      const response = await fetch('/api/student/assignments', {
         method: 'POST',
         body: formData
       })
@@ -566,4 +566,3 @@ export default function StudentAssignmentsPage() {
     </div>
   )
 }
-
