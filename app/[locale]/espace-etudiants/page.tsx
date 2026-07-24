@@ -532,7 +532,7 @@ function EspaceEtudiantsContent() {
     },
   ];
 
-  const basePath = `/${locale}/espace-etudiants`;
+  const basePath = `${localePrefix}/espace-etudiants`;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-800">
