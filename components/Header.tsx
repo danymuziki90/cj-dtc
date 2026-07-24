@@ -15,14 +15,16 @@ import {
   X,
   ChevronRight,
   Globe,
-  Sparkles,
   ArrowUpRight,
   ShieldCheck,
   Linkedin,
   Facebook,
   Mail,
-  Phone,
-  MessageCircle,
+  Headphones,
+  Image as ImageIcon,
+  Users,
+  LogIn,
+  UserPlus,
 } from 'lucide-react'
 import { resolveSiteLocale, type SiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
@@ -182,15 +184,15 @@ function FullscreenNavItem({
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
       style={{
-        transitionDelay: isOpen ? `${60 + index * 35}ms` : '0ms',
+        transitionDelay: isOpen ? `${40 + index * 25}ms` : '0ms',
       }}
       className={`
         group relative flex items-center justify-between rounded-2xl p-3.5 transition-all duration-300 ease-out active:scale-[0.98]
         ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}
         ${
           isActive
-            ? 'bg-gradient-to-r from-blue-950/80 via-slate-900/90 to-blue-950/40 text-white border-l-4 border-[var(--cj-red)] shadow-lg shadow-blue-950/50'
-            : 'text-slate-300 hover:bg-slate-900/60 hover:text-white'
+            ? 'bg-gradient-to-r from-blue-950/90 via-slate-900 to-blue-950/60 text-white border-l-4 border-[var(--cj-red)] shadow-lg shadow-blue-950/60'
+            : 'text-slate-300 hover:bg-slate-900/80 hover:text-white'
         }
       `}
     >
@@ -200,7 +202,7 @@ function FullscreenNavItem({
             flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110
             ${
               isActive
-                ? 'bg-gradient-to-tr from-[var(--cj-blue)] to-blue-600 text-white shadow-md shadow-blue-900/40'
+                ? 'bg-gradient-to-tr from-[var(--cj-blue)] to-blue-600 text-white shadow-md shadow-blue-900/50'
                 : 'bg-slate-900 text-slate-400 group-hover:bg-slate-800 group-hover:text-white'
             }
           `}
@@ -273,22 +275,15 @@ export default function Header() {
   const navigationCategories = useMemo<NavCategoryConfig[]>(
     () => [
       {
-        id: 'academy',
+        id: 'main',
         categoryNumber: '01',
-        categoryName: locale === 'fr' ? 'ACADÉMIE & FORMATIONS' : 'ACADEMY & COURSES',
+        categoryName: locale === 'fr' ? 'NAVIGATION PRINCIPALE' : 'MAIN NAVIGATION',
         items: [
           {
             href: `/${locale}`,
             label: labels.home,
-            description: locale === 'fr' ? 'Page d\'accueil du centre de formation' : 'Main training center homepage',
+            description: locale === 'fr' ? 'Accueil du centre de formation' : 'Training center homepage',
             icon: Home,
-          },
-          {
-            href: `/sessions`,
-            label: locale === 'fr' ? 'Nos Sessions Ouvertes' : 'Open Training Sessions',
-            description: locale === 'fr' ? 'Consultez les dates et inscrivez-vous' : 'View session dates and register',
-            icon: GraduationCap,
-            badge: locale === 'fr' ? 'Inscriptions' : 'Enrollment',
           },
           {
             href: `/${locale}/about`,
@@ -296,13 +291,13 @@ export default function Header() {
             description: locale === 'fr' ? 'Notre mission, équipe et accréditations' : 'Our mission, team & accreditations',
             icon: Info,
           },
-        ],
-      },
-      {
-        id: 'corporate',
-        categoryNumber: '02',
-        categoryName: locale === 'fr' ? 'SOLUTIONS ENTREPRISES & B2B' : 'CORPORATE & B2B',
-        items: [
+          {
+            href: `/sessions`,
+            label: labels.sessions,
+            description: locale === 'fr' ? 'Consultez les dates et inscrivez-vous' : 'View session dates and register',
+            icon: GraduationCap,
+            badge: locale === 'fr' ? 'Inscriptions' : 'Enrollment',
+          },
           {
             href: `/${locale}/entreprises`,
             label: labels.entreprises,
@@ -312,9 +307,9 @@ export default function Header() {
         ],
       },
       {
-        id: 'portal',
-        categoryNumber: '03',
-        categoryName: locale === 'fr' ? 'PORTAIL ÉTUDIANT & BLOG' : 'STUDENT PORTAL & NEWS',
+        id: 'explore',
+        categoryNumber: '02',
+        categoryName: locale === 'fr' ? 'DÉCOUVRIR & DÉCOUVERTES' : 'EXPLORE & MEDIA',
         items: [
           {
             href: `/${locale}/actualites`,
@@ -323,11 +318,42 @@ export default function Header() {
             icon: Newspaper,
           },
           {
+            href: `/${locale}/galerie`,
+            label: labels.galerie,
+            description: locale === 'fr' ? 'Photos de nos campus et événements' : 'Photos of our campus and events',
+            icon: ImageIcon,
+          },
+          {
+            href: `/${locale}/partenaires`,
+            label: labels.partners,
+            description: locale === 'fr' ? 'Nos entreprises et institutions partenaires' : 'Our partner companies & institutions',
+            icon: Users,
+          },
+        ],
+      },
+      {
+        id: 'portal',
+        categoryNumber: '03',
+        categoryName: locale === 'fr' ? 'PORTAIL ÉTUDIANT & ACCÈS' : 'STUDENT PORTAL & AUTH',
+        items: [
+          {
             href: `/${locale}/espace-etudiants`,
             label: labels.studentSpace,
             description: locale === 'fr' ? 'Accès devoirs, supports et espace élève' : 'Assignments, courseware & student portal',
             icon: UserCheck,
             badge: 'Portail',
+          },
+          {
+            href: `/${locale}/auth/student-login`,
+            label: labels.login,
+            description: locale === 'fr' ? 'Se connecter à votre compte étudiant' : 'Log in to your student account',
+            icon: LogIn,
+          },
+          {
+            href: `/${locale}/auth/student-register`,
+            label: labels.register,
+            description: locale === 'fr' ? 'Créer un nouveau compte étudiant' : 'Register a new student account',
+            icon: UserPlus,
           },
         ],
       },
@@ -340,7 +366,7 @@ export default function Header() {
     () => [
       { href: `/${locale}`, label: labels.home },
       { href: `/${locale}/about`, label: labels.about },
-      { href: `/sessions`, label: locale === 'fr' ? 'Nos Sessions' : 'Our Sessions' },
+      { href: `/sessions`, label: labels.sessions },
       { href: `/${locale}/entreprises`, label: labels.entreprises },
       { href: `/${locale}/actualites`, label: labels.news },
       { href: `/${locale}/espace-etudiants`, label: labels.studentSpace },
@@ -423,7 +449,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* FULLSCREEN MOBILE NAVIGATION OVERLAY */}
+      {/* FULLSCREEN MOBILE NAVIGATION OVERLAY (100vw x 100vh) */}
       <div
         id="fullscreen-navigation-overlay"
         ref={overlayRef}
@@ -432,14 +458,14 @@ export default function Header() {
         aria-label="Menu principal de navigation"
         aria-hidden={!open}
         className={`
-          fixed inset-0 z-50 flex flex-col justify-between md:hidden
-          bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-950/40 via-slate-950 to-slate-950
-          text-slate-100 backdrop-blur-3xl transition-all duration-400 ease-out
+          fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col justify-between md:hidden
+          bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-950/60 via-slate-950 to-slate-950
+          text-slate-100 backdrop-blur-2xl transition-all duration-300 ease-out
           ${open ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-95'}
         `}
       >
         {/* Fullscreen Overlay Top Bar Header */}
-        <div className="flex items-center justify-between border-b border-slate-800/80 px-5 py-4 backdrop-blur-xl bg-slate-950/60">
+        <div className="flex items-center justify-between border-b border-slate-800/80 px-5 py-4 backdrop-blur-xl bg-slate-950/80 shrink-0">
           <Link
             href={`/${locale}`}
             onClick={() => setOpen(false)}
@@ -465,9 +491,9 @@ export default function Header() {
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Fermer le menu plein écran"
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-slate-300 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800 hover:text-white active:scale-95"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/80 bg-slate-900/90 text-slate-200 transition-all duration-200 hover:border-slate-500 hover:bg-slate-800 hover:text-white active:scale-95 shadow-md"
           >
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           </button>
         </div>
 
@@ -509,19 +535,19 @@ export default function Header() {
 
           {/* Action CTAs in Fullscreen Menu */}
           <div className="pt-4 space-y-3">
-            <p className="px-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
-              04. ACCÈS DIRECT & CONTACT
+            <p className="px-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400 border-b border-slate-800/60 pb-1">
+              04. ASSISTANCE & CONTACT DIRECT
             </p>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <Link
-                href={`/${locale}/espace-etudiants`}
+                href={`/${locale}/contact`}
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-between rounded-2xl border border-blue-600/40 bg-gradient-to-r from-[var(--cj-blue)] to-blue-700 p-4 text-sm font-bold text-white shadow-xl shadow-blue-950/60 transition-all duration-200 hover:shadow-blue-900/80 active:scale-[0.98]"
+                className="flex items-center justify-between rounded-2xl border border-blue-500/40 bg-gradient-to-r from-[var(--cj-blue)] to-blue-700 p-4 text-sm font-bold text-white shadow-xl shadow-blue-950/60 transition-all duration-200 hover:shadow-blue-900/80 active:scale-[0.98]"
               >
                 <div className="flex items-center gap-3">
-                  <ShieldCheck className="h-5 w-5 text-blue-200" />
-                  <span>Espace Étudiant</span>
+                  <Headphones className="h-5 w-5 text-blue-200" />
+                  <span>{labels.advisor}</span>
                 </div>
                 <ArrowUpRight className="h-4 w-4 text-blue-200" />
               </Link>
@@ -529,7 +555,7 @@ export default function Header() {
               <Link
                 href={`/${locale}/contact`}
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-between rounded-2xl border border-red-600/40 bg-gradient-to-r from-[var(--cj-red)] to-red-700 p-4 text-sm font-bold text-white shadow-xl shadow-red-950/60 transition-all duration-200 hover:shadow-red-900/80 active:scale-[0.98]"
+                className="flex items-center justify-between rounded-2xl border border-red-500/40 bg-gradient-to-r from-[var(--cj-red)] to-red-700 p-4 text-sm font-bold text-white shadow-xl shadow-red-950/60 transition-all duration-200 hover:shadow-red-900/80 active:scale-[0.98]"
               >
                 <div className="flex items-center gap-3">
                   <Send className="h-5 w-5 text-red-200" />
@@ -542,7 +568,7 @@ export default function Header() {
         </div>
 
         {/* Fullscreen Overlay Footer (Language, Socials & Credits) */}
-        <div className="border-t border-slate-800/80 bg-slate-950/90 px-5 py-4 space-y-3">
+        <div className="border-t border-slate-800/80 bg-slate-950/95 px-5 py-4 space-y-3 shrink-0">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Quick Language Switcher */}
             <div className="flex items-center gap-2">
@@ -595,3 +621,4 @@ export default function Header() {
     </header>
   )
 }
+
