@@ -163,9 +163,18 @@ export default function StudentAssignmentsPage() {
         body: formData,
       });
 
-      const resData = await res.json();
+      let resData: any = {};
+      const contentType = res.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        resData = await res.json().catch(() => ({}));
+      } else {
+        const rawText = await res.text().catch(() => "");
+        console.error("[Assignment Upload Error] Non-JSON server response:", rawText);
+        resData = { error: "Une erreur est survenue lors du dépôt du travail. Veuillez réessayer." };
+      }
+
       if (!res.ok) {
-        throw new Error(resData.error || "Une erreur est survenue.");
+        throw new Error(resData.error || "Le fichier n'a pas pu être envoyé. Veuillez réessayer.");
       }
 
       setSuccessMsg("Votre travail a été déposé avec succès.");
@@ -178,7 +187,7 @@ export default function StudentAssignmentsPage() {
         fetchAssignments();
       }, 2000);
     } catch (err: any) {
-      setErrorMsg(err.message || "Erreur lors du dépôt.");
+      setErrorMsg(err.message || "Une erreur est survenue lors du dépôt du travail.");
     } finally {
       setSubmitting(false);
     }

@@ -95,24 +95,34 @@ export default function StudentAssignmentsPage() {
         body: formData
       })
 
+      let resData: any = {}
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        resData = await response.json().catch(() => ({}))
+      } else {
+        const rawText = await response.text().catch(() => '')
+        console.error('[Assignment Submit Error] Non-JSON server response:', rawText)
+        resData = { error: "Une erreur est survenue lors du dépôt du travail. Veuillez réessayer." }
+      }
+
       if (response.ok) {
-        const result = await response.json()
         // Mettre à jour l'assignment dans la liste
-        setAssignments(prev => prev.map(assignment =>
-          assignment.id === assignmentId
-            ? { ...assignment, submissions: [...assignment.submissions, result.submission] }
-            : assignment
-        ))
+        if (resData.submission) {
+          setAssignments(prev => prev.map(assignment =>
+            assignment.id === assignmentId
+              ? { ...assignment, submissions: [...assignment.submissions, resData.submission] }
+              : assignment
+          ))
+        }
         setSelectedAssignment(null)
         setFiles(null)
-        alert('Travail soumis avec succès!')
+        alert('Travail soumis avec succès !')
       } else {
-        const error = await response.json()
-        throw new Error(error.error || 'Erreur lors de la soumission')
+        throw new Error(resData.error || 'Le fichier n\'a pas pu être envoyé. Veuillez réessayer.')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur lors de la soumission:', error)
-      alert('Une erreur est survenue lors de la soumission. Veuillez réessayer.')
+      alert(error?.message || 'Une erreur est survenue lors de la soumission. Veuillez réessayer.')
     } finally {
       setSubmitting(false)
     }

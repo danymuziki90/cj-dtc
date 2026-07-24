@@ -81,7 +81,16 @@ export async function uploadToR2(
       return fallbackUrl
     } catch (error: any) {
       console.error(`[R2] Échec du PutObjectCommand pour la clé: ${key}. Erreur détaillée:`, error)
-      throw new Error(`Échec du stockage Cloudflare R2 : ${error.message || error} (Code: ${error.Code || error.name || 'Inconnu'})`)
+      try {
+        const baseDir = join(process.cwd(), 'public', 'uploads', cleanFolder)
+        await mkdir(baseDir, { recursive: true })
+        const filePath = join(baseDir, fileName)
+        await writeFile(filePath, buffer)
+        console.log(`[R2 Fallback] Fichier écrit sur disque: ${filePath}`)
+        return `/uploads/${key}`
+      } catch (diskError: any) {
+        throw new Error(`Échec du stockage Cloudflare R2 : ${error?.message || error}`)
+      }
     }
   } else {
     console.log(`[R2] Mode local fallback actif. Stockage local temporaire...`)

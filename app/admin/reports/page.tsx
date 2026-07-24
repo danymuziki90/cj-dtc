@@ -280,18 +280,18 @@ export default function AdminReportsPage() {
       </AdminPanel>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <AdminMetricCard icon={CircleDollarSign} label="Encaisse" value={formatCurrency(data.summary.collectedRevenue)} helper={`${data.summary.collectionRate}% de conversion financiere.`} tone="primary" />
-        <AdminMetricCard icon={Layers3} label="Remplissage" value={`${data.summary.averageFillRate}%`} helper={`${data.reports.fillRate.fullSessions} session(s) deja completes.`} tone="success" />
-        <AdminMetricCard icon={BookOpenCheck} label="Presence" value={`${data.summary.attendanceRate}%`} helper={`${data.reports.attendance.repeatedAbsences.length} dossier(s) avec absences repetees.`} tone="warning" />
-        <AdminMetricCard icon={BadgeCheck} label="Certificats prets" value={`${data.summary.certificatesReady}`} helper={`${data.summary.accountConversionRate}% des inscrits ont deja un compte.`} tone="danger" />
+        <AdminMetricCard icon={CircleDollarSign} label="Encaisse" value={formatCurrency(data.summary?.collectedRevenue || 0)} helper={`${data.summary?.collectionRate || 100}% de conversion financiere.`} tone="primary" />
+        <AdminMetricCard icon={Layers3} label="Remplissage" value={`${data.summary?.averageFillRate || 0}%`} helper={`${data.reports?.fillRate?.fullSessions || 0} session(s) deja completes.`} tone="success" />
+        <AdminMetricCard icon={BookOpenCheck} label="Presence" value={`${data.summary?.attendanceRate || 0}%`} helper={`${data.reports?.attendance?.repeatedAbsences?.length || 0} dossier(s) avec absences repetees.`} tone="warning" />
+        <AdminMetricCard icon={BadgeCheck} label="Certificats prets" value={`${data.summary?.certificatesReady || 0}`} helper={`${data.summary?.accountConversionRate || 0}% des inscrits ont deja un compte.`} tone="danger" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <AdminPanel>
-          <AdminPanelHeader eyebrow="Finance" title="Encaisse vs attendu" description={`Periode active: ${data.periodLabel.toLowerCase()}.`} />
+          <AdminPanelHeader eyebrow="Finance" title="Encaisse vs attendu" description={`Periode active: ${data.periodLabel?.toLowerCase() || ''}.`} />
           <div className="mt-6 h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.reports.revenue.trend} margin={{ left: -16, right: 12, top: 12, bottom: 0 }}>
+              <LineChart data={data.reports?.revenue?.trend || []} margin={{ left: -16, right: 12, top: 12, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="rgba(148,163,184,0.18)" />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                 <YAxis tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
@@ -306,7 +306,7 @@ export default function AdminReportsPage() {
         <AdminPanel>
           <AdminPanelHeader eyebrow="Impayes" title="Anciennete du reste a recouvrer" description="Les buckets d anciennete montrent ou concentrer relances et validations." />
           <div className="mt-5 space-y-3">
-            {data.reports.revenue.agingBuckets.map((bucket) => (
+            {(data.reports?.revenue?.agingBuckets || []).map((bucket) => (
               <div key={bucket.label} className="rounded-[24px] border border-slate-200 bg-slate-50/70 px-4 py-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>

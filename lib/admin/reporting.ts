@@ -89,6 +89,11 @@ export type AdminReportingSnapshot = {
     notificationsRecent: number
   }
   summary: {
+    expectedRevenue?: number
+    collectedRevenue?: number
+    outstandingRevenue?: number
+    collectionRate?: number
+    paymentConversionRate?: number
     averageFillRate: number
     attendanceRate: number
     pendingCorrections: number
@@ -96,6 +101,22 @@ export type AdminReportingSnapshot = {
     accountConversionRate: number
   }
   reports: {
+    revenue?: {
+      expected: number
+      collected: number
+      outstanding: number
+      collectionRate: number
+      agingBuckets: Array<{
+        label: string
+        count: number
+        amount: number
+      }>
+      trend: Array<{
+        label: string
+        expected: number
+        collected: number
+      }>
+    }
     fillRate: {
       averageRate: number
       fullSessions: number
@@ -739,6 +760,11 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
       notificationsRecent: recentNotifications.length,
     },
     summary: {
+      expectedRevenue: 0,
+      collectedRevenue: 0,
+      outstandingRevenue: 0,
+      collectionRate: 100,
+      paymentConversionRate: 100,
       averageFillRate: fillRateAverage,
       attendanceRate,
       pendingCorrections: portalPendingSubmissions.length + legacyPendingSubmissions.length,
@@ -746,6 +772,23 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
       accountConversionRate: percentage(conversionAccounts, recentEnrollments.length),
     },
     reports: {
+      revenue: {
+        expected: 0,
+        collected: 0,
+        outstanding: 0,
+        collectionRate: 100,
+        agingBuckets: [
+          { label: '0-30 jours', count: 0, amount: 0 },
+          { label: '31-60 jours', count: 0, amount: 0 },
+          { label: '61+ jours', count: 0, amount: 0 },
+        ],
+        trend: [
+          { label: 'S1', expected: 0, collected: 0 },
+          { label: 'S2', expected: 0, collected: 0 },
+          { label: 'S3', expected: 0, collected: 0 },
+          { label: 'S4', expected: 0, collected: 0 },
+        ],
+      },
       fillRate: {
         averageRate: fillRateAverage,
         fullSessions,
@@ -775,7 +818,7 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
         accountRate: percentage(conversionAccounts, recentEnrollments.length),
         stages: [
           { stage: 'Inscriptions', value: recentEnrollments.length },
-          { stage: 'Comptes crees', value: conversionAccounts },
+          { stage: 'Comptes créés', value: conversionAccounts },
         ],
         blockedWithoutAccount,
       },

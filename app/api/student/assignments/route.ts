@@ -7,7 +7,7 @@ import { uploadToR2 } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
-const ENROLLMENT_STATUSES_WITH_ACCESS = ['accepted', 'confirmed', 'completed']
+const ENROLLMENT_STATUSES_WITH_ACCESS = ['accepted', 'confirmed', 'completed', 'pending']
 
 function parseAllowedFileTypes(value: string | null | undefined) {
   return (value || '')
@@ -100,14 +100,9 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const assignmentId = Number(formData.get('assignmentId'))
-    const fileCount = Number(formData.get('fileCount'))
 
     if (!Number.isInteger(assignmentId) || assignmentId <= 0) {
       return NextResponse.json({ error: 'ID du travail requis.' }, { status: 400 })
-    }
-
-    if (!Number.isInteger(fileCount) || fileCount <= 0 || fileCount > 10) {
-      return NextResponse.json({ error: 'Ajoutez entre 1 et 10 fichiers.' }, { status: 400 })
     }
 
     const assignment = await prisma.assignment.findUnique({
@@ -130,7 +125,7 @@ export async function POST(request: NextRequest) {
     const isResubmissionAllowed = existingSubmission && existingSubmission.status === 'returned'
 
     if (assignment.deadline < new Date() && !isResubmissionAllowed) {
-      return NextResponse.json({ error: 'La date limite de remise est depassee.' }, { status: 400 })
+      return NextResponse.json({ error: 'La date limite de remise est dépassée.' }, { status: 400 })
     }
 
     const enrollment = await prisma.enrollment.findFirst({
@@ -153,24 +148,23 @@ export async function POST(request: NextRequest) {
     const maxBytes = assignment.maxFileSize * 1024 * 1024
     const files: File[] = []
 
-    for (let index = 0; index < fileCount; index += 1) {
-      const file = formData.get(`file_${index}`)
-      if (!(file instanceof File)) continue
+    for (const [key, value] of formData.entries()) {
+      if (value instanceof File && value.name && value.size > 0) {
+        const extension = normalizeExtension(value.name.split('.').pop() || '')
+        if (allowedTypes.length && !allowedTypes.includes(extension)) {
+          return NextResponse.json({ error: `Format non autorisé: .${extension}. Formats acceptés: ${allowedTypes.join(', ')}` }, { status: 400 })
+        }
 
-      const extension = normalizeExtension(file.name.split('.').pop() || '')
-      if (allowedTypes.length && !allowedTypes.includes(extension)) {
-        return NextResponse.json({ error: `Format non autorise: ${file.name}` }, { status: 400 })
+        if (value.size > maxBytes) {
+          return NextResponse.json({ error: `Le fichier ${value.name} dépasse la taille maximale autorisée de ${assignment.maxFileSize} MB.` }, { status: 400 })
+        }
+
+        files.push(value)
       }
-
-      if (file.size > maxBytes) {
-        return NextResponse.json({ error: `Fichier trop volumineux: ${file.name}` }, { status: 400 })
-      }
-
-      files.push(file)
     }
 
     if (!files.length) {
-      return NextResponse.json({ error: 'Aucun fichier valide fourni.' }, { status: 400 })
+      return NextResponse.json({ error: 'Veuillez choisir au moins un fichier valide à remettre.' }, { status: 400 })
     }
 
     if (existingSubmission && !isResubmissionAllowed) {
