@@ -1,8 +1,5 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-
-import type { Metadata } from 'next'
-import type { ReactNode } from 'react'
 import { buildMetadata } from '@/lib/seo-config'
 
 export const metadata: Metadata = buildMetadata({
