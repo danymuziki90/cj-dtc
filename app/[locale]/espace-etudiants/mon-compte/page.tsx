@@ -29,7 +29,8 @@ interface StudentProfile {
 
 export default function MonComptePage() {
   const params = useParams<{ locale?: string }>()
-  const locale = params?.locale || 'fr'
+  const locale = params?.locale
+  const localePrefix = locale ? `/${locale}` : ''
 
   const [profile, setProfile] = useState<StudentProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -190,7 +191,7 @@ export default function MonComptePage() {
             title="Aucun profil trouve"
             description="Inscrivez-vous a une session ou reconnectez-vous avec le bon compte pour voir apparaitre vos informations personnelles."
             action={
-              <Link href={`/${locale}/formations#sessions`} className={studentPrimaryButtonClassName}>
+              <Link href={`${localePrefix}/formations#sessions`} className={studentPrimaryButtonClassName}>
                 Voir les sessions disponibles
               </Link>
             }
@@ -373,19 +374,19 @@ export default function MonComptePage() {
           icon={BookOpen}
         >
           <div className="grid gap-3">
-            <Link href={`/${locale}/espace-etudiants/mes-formations`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+            <Link href={`${localePrefix}/espace-etudiants/mes-formations`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
               <p className="text-sm font-semibold text-slate-950">Mes formations</p>
               <p className="mt-1 text-sm leading-6 text-slate-500">Consultez vos programmes, vos parcours et vos prochaines sessions.</p>
             </Link>
-            <Link href={`/${locale}/espace-etudiants/mes-certificats`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+            <Link href={`${localePrefix}/espace-etudiants/mes-certificats`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
               <p className="text-sm font-semibold text-slate-950">Mes certificats</p>
               <p className="mt-1 text-sm leading-6 text-slate-500">Retrouvez vos documents valides et les liens de verification associes.</p>
             </Link>
-            <Link href={`/${locale}/espace-etudiants/travaux`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+            <Link href={`${localePrefix}/espace-etudiants/travaux`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
               <p className="text-sm font-semibold text-slate-950">Travaux et projets</p>
               <p className="mt-1 text-sm leading-6 text-slate-500">Deposez vos livrables et suivez vos validations pedagogiques.</p>
             </Link>
-            <Link href={`/${locale}/espace-etudiants/temoignages`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
+            <Link href={`${localePrefix}/espace-etudiants/temoignages`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
               <p className="text-sm font-semibold text-slate-950">Témoignages et avis</p>
               <p className="mt-1 text-sm leading-6 text-slate-500">Partagez votre retour d'expérience et consultez vos avis publiés.</p>
             </Link>
@@ -397,10 +398,10 @@ export default function MonComptePage() {
               Gardez vos coordonnees a jour pour recevoir les confirmations de session, les informations de paiement et les liens de verification de certificat.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href={`/${locale}/espace-etudiants/supports`} className={studentSurfaceButtonClassName}>
+              <Link href={`${localePrefix}/espace-etudiants/supports`} className={studentSurfaceButtonClassName}>
                 Voir les supports
               </Link>
-              <Link href={`/${locale}/espace-etudiants`} className={studentMutedButtonClassName}>
+              <Link href={`${localePrefix}/espace-etudiants`} className={studentMutedButtonClassName}>
                 Revenir au dashboard
               </Link>
             </div>

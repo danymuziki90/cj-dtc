@@ -301,7 +301,13 @@ function EspaceEtudiantsContent() {
       } else {
         const rawText = await response.text().catch(() => "");
         console.error("[Assignment Upload Error] Non-JSON server response:", rawText);
-        resData = { error: "Une erreur est survenue lors du dépôt du travail. Veuillez réessayer." };
+        if (response.status === 413) {
+          resData = { error: "Le fichier sélectionné est trop volumineux (limite réseau atteinte). Veuillez compresser votre fichier ou choisir un document plus léger (moins de 4.5 Mo)." };
+        } else if (response.status === 401 || response.status === 403) {
+          resData = { error: "Votre session a expiré ou vous n'êtes pas inscrit à la formation requise. Veuillez vous reconnecter." };
+        } else {
+          resData = { error: `Une erreur serveur est survenue (Code HTTP ${response.status}). Veuillez réessayer.` };
+        }
       }
 
       if (!response.ok || resData.success === false) {
