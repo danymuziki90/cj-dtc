@@ -49,6 +49,7 @@ model Student {
   enrollments        Enrollment[]
   certificates       Certificate[]
   testimonials       Testimonial[]
+  submissions        Submission[]
 
   @@index([username])
   @@index([adminSessionId])
@@ -256,6 +257,7 @@ model Formation {
   documents        Document[]
   evaluations      Evaluation[]
   testimonials     Testimonial[]
+  assignments      Assignment[]
 }
 
 model Certificate {
@@ -380,6 +382,8 @@ model TrainingSession {
   events            SessionEvent[]
   formQuestions     SessionFormQuestion[]
   testimonials      Testimonial[]
+  assignments       Assignment[]
+  submissions       Submission[]
   @@index([formationId])
   @@index([startDate])
   @@index([status])
@@ -673,3 +677,100 @@ model Testimonial {
   @@index([status])
   @@index([createdAt])
 }
+
+// =============================================
+// MODULE TRAVAUX (ASSIGNMENTS & SUBMISSIONS)
+// =============================================
+
+model Assignment {
+  id               Int              @id @default(autoincrement())
+  title            String
+  description      String
+  objectives       String?
+  instructions     String?
+  type             String           @default("tp") // tp, exam, project, homework
+  difficulty       String?          @default("intermediaire") // debutant, intermediaire, avance
+  status           String           @default("publie") // brouillon, publie, archive
+  published        Boolean          @default(true)
+  publishedAt      DateTime         @default(now())
+  deadline         DateTime
+  maxFileSize      Int              @default(10) // MB
+  maxFiles         Int              @default(5)
+  allowResubmission Boolean         @default(true)
+  allowedFileTypes String           @default("pdf,doc,docx,zip,rar,png,jpg,jpeg,excel,xls,xlsx")
+
+  formationId      Int
+  formation        Formation        @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  sessionId        Int?
+  session          TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  files            AssignmentFile[]
+  submissions      Submission[]
+
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([formationId])
+  @@index([sessionId])
+  @@index([deadline])
+  @@index([published])
+  @@index([status])
+}
+
+model AssignmentFile {
+  id           Int        @id @default(autoincrement())
+  assignmentId Int
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  name         String
+  originalName String
+  size         Int
+  mimeType     String     @default("application/octet-stream")
+  url          String
+  key          String?
+  createdAt    DateTime   @default(now())
+
+  @@index([assignmentId])
+}
+
+model Submission {
+  id           Int              @id @default(autoincrement())
+  assignmentId Int
+  assignment   Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  sessionId    Int?
+  session      TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  status       String           @default("submitted") // submitted, graded, returned
+  grade        Float?
+  feedback     String?
+  submittedAt  DateTime         @default(now())
+  gradedAt     DateTime?
+  gradedBy     String?
+
+  files        SubmissionFile[]
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([assignmentId])
+  @@index([studentId])
+  @@index([sessionId])
+  @@index([status])
+}
+
+model SubmissionFile {
+  id           Int        @id @default(autoincrement())
+  submissionId Int
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  name         String
+  originalName String
+  size         Int
+  mimeType     String     @default("application/octet-stream")
+  url          String
+  key          String?
+  uploadedAt   DateTime   @default(now())
+
+  @@index([submissionId])
+}
+

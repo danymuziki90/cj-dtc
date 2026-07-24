@@ -47,6 +47,7 @@ type NavItem = {
 const navRow1: NavItem[] = [
   { href: '/admin/dashboard', label: 'Dashboard', caption: 'Vue synthétique & KPI', icon: LayoutDashboard },
   { href: '/admin/sessions', label: 'Sessions', caption: 'Planification et cohortes', icon: CalendarDays },
+  { href: '/admin/travaux', label: 'Travaux', caption: 'Devoirs & remises', icon: BookOpenCheck },
   { href: '/admin/students', label: 'Étudiants', caption: 'Comptes et accès', icon: Users },
   { href: '/admin/enrollments', label: 'Inscriptions', caption: 'Suivi et demandes', icon: FileStack },
 ]
