@@ -49,7 +49,6 @@ const navRow1: NavItem[] = [
   { href: '/admin/sessions', label: 'Sessions', caption: 'Planification et cohortes', icon: CalendarDays },
   { href: '/admin/students', label: 'Étudiants', caption: 'Comptes et accès', icon: Users },
   { href: '/admin/enrollments', label: 'Inscriptions', caption: 'Suivi et demandes', icon: FileStack },
-  { href: '/admin/assignments', label: 'Travaux', caption: 'TP et devoirs', icon: ClipboardList },
 ]
 
 const navRow2: NavItem[] = [
@@ -65,7 +64,7 @@ const navItems = [...navRow1, ...navRow2]
 
 const quickActions = [
   { href: '/admin/articles/new', label: 'Article', icon: Newspaper },
-  { href: '/admin/assignments', label: 'Travaux', icon: ClipboardList },
+  { href: '/admin/enrollments', label: 'Inscriptions', icon: FileStack },
 ]
 
 

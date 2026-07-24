@@ -21,11 +21,6 @@ export async function GET(req: NextRequest) {
       studentsActive,
       sessionsOpen,
       sessionsFuture,
-      assignmentsPublished,
-      portalSubmissionsTotal,
-      portalSubmissionsPending,
-      portalSubmissionsNew7d,
-      legacySubmissionsPending,
       newsPublished,
       notificationsTotal,
       recentAuditLogs,
@@ -35,11 +30,6 @@ export async function GET(req: NextRequest) {
       prisma.student.count({ where: { status: 'ACTIVE' } }),
       prisma.trainingSession.count({ where: { status: 'ouverte' } }),
       prisma.trainingSession.count({ where: { startDate: { gte: now } } }),
-      prisma.assignment.count({ where: { status: 'publie' } }),
-      prisma.studentSubmission.count(),
-      prisma.studentSubmission.count({ where: { status: 'pending' } }),
-      prisma.studentSubmission.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
-      prisma.submission.count({ where: { status: { in: ['submitted', 'returned'] } } }),
       prisma.news.count({ where: { published: true } }),
       prisma.adminNotification.count(),
       prisma.adminAuditLog.findMany({
@@ -55,8 +45,8 @@ export async function GET(req: NextRequest) {
 
     // Calculate trends / helper labels
     const studentTrend = studentsTotal > 0 ? `+${Math.round((studentsNew7d / studentsTotal) * 100)}% cette semaine` : '0%'
-    const submissionTrend = portalSubmissionsTotal > 0 ? `+${Math.round((portalSubmissionsNew7d / portalSubmissionsTotal) * 100)}% cette semaine` : '0%'
-    const submissionsPending = portalSubmissionsPending + legacySubmissionsPending
+    const submissionTrend = '0%'
+    const submissionsPending = 0
 
     return NextResponse.json({
       totals: {
@@ -64,8 +54,8 @@ export async function GET(req: NextRequest) {
         studentsActive,
         sessionsOpen,
         sessionsFuture,
-        assignmentsPublished,
-        submissionsPending,
+        assignmentsPublished: 0,
+        submissionsPending: 0,
         newsPublished,
         notificationsTotal,
       },

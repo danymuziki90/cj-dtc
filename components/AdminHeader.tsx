@@ -9,7 +9,6 @@ const navRow1 = [
   { href: '/admin/sessions', label: 'Sessions' },
   { href: '/admin/students', label: 'Étudiants' },
   { href: '/admin/enrollments', label: 'Inscriptions' },
-  { href: '/admin/assignments', label: 'Travaux' },
 ]
 
 const navRow2 = [

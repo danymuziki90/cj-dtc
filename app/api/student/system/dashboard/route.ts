@@ -176,55 +176,7 @@ export async function GET(request: NextRequest) {
     new Set(activeEnrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value)))
   )
 
-  // Fetch active assignments for the student's formations and sessions
-  const assignmentsRaw = await prisma.assignment.findMany({
-    where: {
-      formationId: { in: formationIds },
-      OR: [
-        { sessionId: null },
-        { sessionId: { in: sessionIds } }
-      ],
-      status: 'publie',
-      publishDate: { lte: new Date() }
-    },
-    include: {
-      formation: {
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          categorie: true,
-        }
-      },
-      files: true,
-      submissions: {
-        where: {
-          studentEmail: { equals: studentEmail, mode: 'insensitive' },
-        },
-        include: {
-          files: true,
-        },
-        orderBy: { submittedAt: 'desc' },
-      },
-    },
-    orderBy: { deadline: 'asc' },
-  })
-
-  const mappedAssignments = assignmentsRaw.map((assignment) => ({
-    ...assignment,
-    allowedFileTypes: (assignment.allowedFileTypes || '')
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean),
-    submissions: assignment.submissions.map((submission) => ({
-      ...submission,
-      reviewFeedback: submission.feedback,
-      files: submission.files.map((file) => ({
-        ...file,
-        type: file.mimeType,
-      })),
-    })),
-  }))
+  const mappedAssignments: any[] = []
 
   const adminNotifications = await prisma.adminNotification.findMany({
     where: {

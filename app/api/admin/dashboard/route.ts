@@ -21,15 +21,11 @@ export async function GET(req: NextRequest) {
       totalFormations,
       totalEnrollments,
       pendingEnrollments,
-      totalAssignments,
-      portalPendingSubmissions,
-      legacyPendingSubmissions,
       totalExams,
       scheduledExams,
       totalCertificates,
       recentLogs,
       recentEnrollments,
-      recentSubmissions,
       allEnrollments,
     ] = await Promise.all([
       prisma.student.count(),
@@ -37,10 +33,7 @@ export async function GET(req: NextRequest) {
       prisma.formation.count(),
       prisma.enrollment.count(),
       prisma.enrollment.count({ where: { status: 'pending' } }),
-      prisma.assignment.count(),
-      prisma.studentSubmission.count({ where: { status: 'pending' } }),
-      prisma.submission.count({ where: { status: { in: ['submitted', 'returned'] } } }),
-      prisma.assignment.count({ where: { type: 'exam' } }),
+      prisma.sessionEvent.count({ where: { type: 'exam' } }),
       prisma.sessionEvent.count({ where: { type: 'exam', date: { gte: now } } }),
       prisma.certificate.count(),
       prisma.adminAuditLog.findMany({
@@ -52,11 +45,6 @@ export async function GET(req: NextRequest) {
         take: 5,
         include: { formation: { select: { title: true } } },
       }),
-      prisma.studentSubmission.findMany({
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-        include: { student: { select: { firstName: true, lastName: true } } },
-      }),
       prisma.enrollment.findMany({
         select: { createdAt: true },
         where: {
@@ -67,7 +55,7 @@ export async function GET(req: NextRequest) {
       })
     ])
 
-    const pendingCorrections = portalPendingSubmissions + legacyPendingSubmissions
+    const pendingCorrections = 0
 
     // 2. Compilation de l'activité récente à partir du journal d'audit réel
     const recentActivity = []
@@ -78,8 +66,6 @@ export async function GET(req: NextRequest) {
       
       if (actionLower.includes('inscript') || actionLower.includes('enroll')) {
         activityType = 'inscription'
-      } else if (actionLower.includes('devoir') || actionLower.includes('travail') || actionLower.includes('subm')) {
-        activityType = 'assignment'
       } else if (actionLower.includes('exam') || actionLower.includes('event')) {
         activityType = 'exam'
       } else if (actionLower.includes('certif')) {
@@ -101,36 +87,23 @@ export async function GET(req: NextRequest) {
         recentActivity.push({
           type: 'inscription',
           title: `Nouvelle inscription - ${enc.formation.title}`,
-          student: `${enc.firstName} ${enc.lastName}`,
+          student: 'Étudiant',
           date: formatRelativeTime(enc.createdAt),
           status: enc.status === 'pending' ? 'pending' : 'completed'
-        })
-      }
-      for (const sub of recentSubmissions) {
-        recentActivity.push({
-          type: 'assignment',
-          title: `Travail "${sub.title}" soumis`,
-          student: `${sub.student.firstName} ${sub.student.lastName}`,
-          date: formatRelativeTime(sub.createdAt),
-          status: 'completed'
         })
       }
     }
 
     // 3. Calcul des statistiques mensuelles d'inscriptions sur les 6 derniers mois
-    const monthNames = [
-      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-    ]
-
-    const monthlyStatsMap = new Map<string, { month: string, students: number, inscriptions: number, certificates: number }>()
+    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
+    const monthlyStatsMap = new Map<string, { month: string; students: number; inscriptions: number; certificates: number }>()
 
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
       const label = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
       monthlyStatsMap.set(label, {
         month: label,
-        students: Math.max(0, totalStudents - (i * 12)), // Simulation de courbe d'étudiants croissante
+        students: Math.max(0, totalStudents - (i * 12)),
         inscriptions: 0,
         certificates: Math.max(0, Math.floor(totalCertificates / 6) + (i * 2))
       })
@@ -153,7 +126,7 @@ export async function GET(req: NextRequest) {
       totalFormations,
       totalInscriptions: totalEnrollments,
       pendingInscriptions: pendingEnrollments,
-      totalAssignments,
+      totalAssignments: 0,
       pendingCorrections,
       totalExams,
       scheduledExams,
