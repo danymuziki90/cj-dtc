@@ -13,46 +13,30 @@ interface LayoutProps {
 
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://cjdevelopmenttc.com').replace(/\/$/, '')
 
+import { buildMetadata } from '@/lib/seo-config'
+
 export const metadata: Metadata = {
+  ...buildMetadata({
+    title: 'CJ Development Training Center - Formation Professionnelle Panafricaine',
+    description: 'Centre panafricain d\'excellence en formation professionnelle, RH, leadership et insertion. Formations certifiantes en ligne et présentiel depuis 2018.',
+    keywords: [
+      'formation professionnelle',
+      'leadership',
+      'ressources humaines',
+      'RH',
+      'employabilité',
+      'Afrique',
+      'certification',
+      'insertion professionnelle',
+      'CJ DTC',
+    ],
+    path: '/',
+  }),
   title: {
-    default: 'CJ Development Training Center - Formation professionnelle panafricaine',
+    default: 'CJ Development Training Center - Formation Professionnelle Panafricaine',
     template: '%s | CJ DTC',
   },
-  description:
-    'Centre panafricain de formation professionnelle en RH, leadership et employabilite. Programmes certifiants depuis 2018.',
-  keywords: [
-    'formation professionnelle',
-    'leadership',
-    'RH',
-    'emploi',
-    'Afrique',
-    'certification',
-    'insertion professionnelle',
-    'CJ DTC',
-  ],
-  authors: [{ name: 'CJ Development Training Center' }],
-  openGraph: {
-    title: 'CJ Development Training Center',
-    description: 'Batir des competences. Transformer des destins. Creer des opportunites.',
-    url: APP_URL,
-    siteName: 'CJ DTC',
-    images: [
-      {
-        url: `${APP_URL}/logo.png`,
-        width: 1200,
-        height: 630,
-        alt: 'CJ Development Training Center',
-      },
-    ],
-    locale: 'fr_FR',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'CJ Development Training Center',
-    description: 'Batir des competences. Transformer des destins.',
-    images: [`${APP_URL}/logo.png`],
-  },
+}
   robots: {
     index: true,
     follow: true,
