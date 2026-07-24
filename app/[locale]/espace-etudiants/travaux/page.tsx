@@ -173,8 +173,8 @@ export default function StudentAssignmentsPage() {
         resData = { error: "Une erreur est survenue lors du dépôt du travail. Veuillez réessayer." };
       }
 
-      if (!res.ok) {
-        throw new Error(resData.error || "Le fichier n'a pas pu être envoyé. Veuillez réessayer.");
+      if (!res.ok || resData.success === false) {
+        throw new Error(resData.message || resData.error || resData.detail || `Échec de l'envoi (code HTTP ${res.status}).`);
       }
 
       setSuccessMsg("Votre travail a été déposé avec succès.");

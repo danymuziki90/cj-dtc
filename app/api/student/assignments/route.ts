@@ -98,11 +98,17 @@ export async function POST(request: NextRequest) {
     const auth = await requireStudent(request)
     if (auth.error) return auth.error
 
+    console.log(`[POST /api/student/assignments] Request received from student: ${auth.student.email} (ID: ${auth.student.id})`)
+
     const formData = await request.formData()
     const assignmentId = Number(formData.get('assignmentId'))
 
     if (!Number.isInteger(assignmentId) || assignmentId <= 0) {
-      return NextResponse.json({ error: 'ID du travail requis.' }, { status: 400 })
+      return NextResponse.json({
+        success: false,
+        message: 'L\'identifiant du devoir est invalide ou manquant.',
+        error: 'Invalid assignmentId'
+      }, { status: 400 })
     }
 
     const assignment = await prisma.assignment.findUnique({
@@ -110,7 +116,12 @@ export async function POST(request: NextRequest) {
       include: { formation: true },
     })
     if (!assignment) {
-      return NextResponse.json({ error: 'Travail introuvable.' }, { status: 404 })
+      console.warn(`[POST /api/student/assignments] Assignment #${assignmentId} not found`)
+      return NextResponse.json({
+        success: false,
+        message: 'Le devoir demandé est introuvable.',
+        error: 'Assignment not found'
+      }, { status: 404 })
     }
 
     // Fetch existing submission first to inspect its status
@@ -125,7 +136,12 @@ export async function POST(request: NextRequest) {
     const isResubmissionAllowed = existingSubmission && existingSubmission.status === 'returned'
 
     if (assignment.deadline < new Date() && !isResubmissionAllowed) {
-      return NextResponse.json({ error: 'La date limite de remise est dépassée.' }, { status: 400 })
+      console.warn(`[POST /api/student/assignments] Deadline passed for assignment #${assignmentId}`)
+      return NextResponse.json({
+        success: false,
+        message: 'La date limite de remise pour ce devoir est dépassée.',
+        error: 'Deadline exceeded'
+      }, { status: 400 })
     }
 
     const enrollment = await prisma.enrollment.findFirst({
@@ -141,7 +157,12 @@ export async function POST(request: NextRequest) {
       select: { id: true },
     })
     if (!enrollment) {
-      return NextResponse.json({ error: 'Vous n\'êtes pas inscrit à la session spécifique requise pour ce devoir.' }, { status: 403 })
+      console.warn(`[POST /api/student/assignments] Student ${auth.student.email} is not enrolled in formation #${assignment.formationId}`)
+      return NextResponse.json({
+        success: false,
+        message: 'Vous n\'êtes pas inscrit à la session spécifique requise pour ce devoir.',
+        error: 'Enrollment check failed'
+      }, { status: 403 })
     }
 
     const allowedTypes = parseAllowedFileTypes(assignment.allowedFileTypes).map(normalizeExtension)
@@ -152,11 +173,19 @@ export async function POST(request: NextRequest) {
       if (value instanceof File && value.name && value.size > 0) {
         const extension = normalizeExtension(value.name.split('.').pop() || '')
         if (allowedTypes.length && !allowedTypes.includes(extension)) {
-          return NextResponse.json({ error: `Format non autorisé: .${extension}. Formats acceptés: ${allowedTypes.join(', ')}` }, { status: 400 })
+          return NextResponse.json({
+            success: false,
+            message: `Format non autorisé: .${extension}. Formats acceptés: ${allowedTypes.join(', ')}`,
+            error: `Disallowed extension .${extension}`
+          }, { status: 400 })
         }
 
         if (value.size > maxBytes) {
-          return NextResponse.json({ error: `Le fichier ${value.name} dépasse la taille maximale autorisée de ${assignment.maxFileSize} MB.` }, { status: 400 })
+          return NextResponse.json({
+            success: false,
+            message: `Le fichier "${value.name}" dépasse la taille maximale autorisée de ${assignment.maxFileSize} MB.`,
+            error: `File size ${value.size} > max ${maxBytes}`
+          }, { status: 400 })
         }
 
         files.push(value)
@@ -164,27 +193,29 @@ export async function POST(request: NextRequest) {
     }
 
     if (!files.length) {
-      return NextResponse.json({ error: 'Veuillez choisir au moins un fichier valide à remettre.' }, { status: 400 })
+      return NextResponse.json({
+        success: false,
+        message: 'Veuillez choisir au moins un fichier valide à remettre.',
+        error: 'No valid files in request payload'
+      }, { status: 400 })
     }
 
     if (existingSubmission && !isResubmissionAllowed) {
-      return NextResponse.json(
-        {
-          error: 'Vous avez déjà soumis ce devoir.',
-          detail: `Soumission existante (ID: ${existingSubmission.id}) — statut : ${existingSubmission.status}. Contactez votre formateur pour toute modification.`,
-        },
-        { status: 409 }
-      )
+      return NextResponse.json({
+        success: false,
+        message: 'Vous avez déjà soumis ce devoir. Contactez votre formateur pour tout changement.',
+        error: `Submission #${existingSubmission.id} already exists with status ${existingSubmission.status}`
+      }, { status: 409 })
     }
+
+    console.log(`[POST /api/student/assignments] Processing ${files.length} file(s) for assignment "${assignment.title}"...`)
 
     let submission
     if (isResubmissionAllowed) {
-      // Clear old submission files first
       await prisma.submissionFile.deleteMany({
         where: { submissionId: existingSubmission.id }
       })
 
-      // Reset submission fields
       submission = await prisma.submission.update({
         where: { id: existingSubmission.id },
         data: {
@@ -196,6 +227,7 @@ export async function POST(request: NextRequest) {
           gradedBy: null,
         }
       })
+      console.log(`[POST /api/student/assignments] Updated existing submission #${submission.id}`)
     } else {
       submission = await prisma.submission.create({
         data: {
@@ -205,6 +237,7 @@ export async function POST(request: NextRequest) {
           submittedAt: new Date(),
         },
       })
+      console.log(`[POST /api/student/assignments] Created new submission #${submission.id}`)
     }
 
     try {
@@ -223,12 +256,14 @@ export async function POST(request: NextRequest) {
 
     const r2Folder = `travaux/${auth.student.id}`
 
-    for (const [index, file] of files.entries()) {
+    for (const file of files) {
       const extension = extname(file.name).toLowerCase()
       const fileName = `${Date.now()}-${randomUUID()}${extension}`
       
+      console.log(`[POST /api/student/assignments] Uploading file "${file.name}" to R2 folder "${r2Folder}"...`)
       const buffer = Buffer.from(await file.arrayBuffer())
       const fileUrl = await uploadToR2(buffer, fileName, r2Folder, file.type)
+      console.log(`[POST /api/student/assignments] R2 Upload success, fileUrl: ${fileUrl}`)
 
       await prisma.submissionFile.create({
         data: {
@@ -247,9 +282,12 @@ export async function POST(request: NextRequest) {
       include: { files: true },
     })
 
+    console.log(`[POST /api/student/assignments] Submission #${submission.id} completed successfully for ${auth.student.email}`)
+
     return NextResponse.json(
       {
         success: true,
+        message: 'Votre travail a été déposé avec succès !',
         submission: submissionWithFiles
           ? {
               ...submissionWithFiles,
@@ -259,8 +297,12 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     )
-  } catch (error) {
-    console.error('Student assignment submit error:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  } catch (error: any) {
+    console.error('[POST /api/student/assignments] CRITICAL SERVER ERROR:', error)
+    return NextResponse.json({
+      success: false,
+      message: error?.message || 'Une erreur système est survenue lors de l\'enregistrement du devoir.',
+      error: error?.stack || String(error)
+    }, { status: 500 })
   }
 }

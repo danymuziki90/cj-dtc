@@ -72,12 +72,22 @@ export async function requireAdmin(request: NextRequest) {
 export async function requireStudent(request: NextRequest) {
   const token = request.cookies.get(STUDENT_AUTH_COOKIE)?.value
   if (!token) {
-    return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+    return {
+      error: NextResponse.json(
+        { success: false, message: 'Session expirée ou non connectée. Veuillez vous connecter.', error: 'Unauthorized' },
+        { status: 401 }
+      ),
+    }
   }
 
   const payload = await verifyStudentToken(token)
   if (!payload?.studentId) {
-    return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+    return {
+      error: NextResponse.json(
+        { success: false, message: 'Jeton de connexion invalide.', error: 'Invalid token' },
+        { status: 401 }
+      ),
+    }
   }
 
   const student = await prisma.student.findUnique({
@@ -99,7 +109,12 @@ export async function requireStudent(request: NextRequest) {
   })
 
   if (!student) {
-    return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+    return {
+      error: NextResponse.json(
+        { success: false, message: 'Profil étudiant introuvable.', error: 'Student not found' },
+        { status: 401 }
+      ),
+    }
   }
 
   const normalizedStatus = typeof student.status === 'string' ? student.status.trim().toUpperCase() : ''
@@ -107,7 +122,7 @@ export async function requireStudent(request: NextRequest) {
   if (normalizedStatus !== 'ACTIVE') {
     return {
       error: NextResponse.json(
-        { error: 'Compte etudiant inactif. Veuillez contacter l administration.' },
+        { success: false, message: 'Compte étudiant inactif. Veuillez contacter l\'administration.', error: 'Account inactive' },
         { status: 403 }
       ),
     }

@@ -2,12 +2,19 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } fro
 import { writeFile, mkdir, unlink } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
+import { tmpdir } from 'os'
 
-const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID
-const accessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID
-const secretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY
-const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'cjdtc-bucket'
-const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL || ''
+function sanitizeEnv(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : undefined
+}
+
+const accountId = sanitizeEnv(process.env.CLOUDFLARE_R2_ACCOUNT_ID) || sanitizeEnv(process.env.R2_ACCOUNT_ID)
+const accessKeyId = sanitizeEnv(process.env.CLOUDFLARE_R2_ACCESS_KEY_ID) || sanitizeEnv(process.env.R2_ACCESS_KEY_ID)
+const secretAccessKey = sanitizeEnv(process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY) || sanitizeEnv(process.env.R2_SECRET_ACCESS_KEY)
+const bucketName = sanitizeEnv(process.env.CLOUDFLARE_R2_BUCKET_NAME) || sanitizeEnv(process.env.R2_BUCKET_NAME) || 'cjdevelopmenttc-storage'
+const publicUrl = sanitizeEnv(process.env.CLOUDFLARE_R2_PUBLIC_URL) || sanitizeEnv(process.env.R2_PUBLIC_URL) || ''
 
 export const isR2Configured = !!(accountId && accessKeyId && secretAccessKey)
 
@@ -21,6 +28,16 @@ const r2Client = isR2Configured
       },
     })
   : null
+
+function getWritableBaseDir(cleanFolder: string, isPrivate: boolean): string {
+  const isServerless = !!process.env.VERCEL || process.env.NODE_ENV === 'production'
+  if (isServerless) {
+    return join(tmpdir(), 'uploads', cleanFolder)
+  }
+  return isPrivate
+    ? join(process.cwd(), 'uploads', cleanFolder)
+    : join(process.cwd(), 'public', 'uploads', cleanFolder)
+}
 
 /**
  * Uploads a file to Cloudflare R2 or local filesystem fallback.
@@ -37,14 +54,13 @@ export async function uploadToR2(
   mimeType: string,
   privateStorage = false,
 ): Promise<string> {
-  // Normalize folder prefix to fit the strategy (remove trailing slash)
   const cleanFolder = folder.replace(/\/$/, '')
   const key = `${cleanFolder}/${fileName}`
 
-  console.log(`[R2] Début uploadToR2 - key: ${key}, size: ${buffer.length} bytes, mimeType: ${mimeType}`)
+  console.log(`[R2 Upload] key: ${key}, size: ${buffer.length} bytes, mimeType: ${mimeType}, R2 Configured: ${isR2Configured}`)
 
   if (isR2Configured && r2Client) {
-    console.log(`[R2] Client configuré. Envoi vers le bucket R2: ${bucketName}...`)
+    console.log(`[R2 Upload] Envoi vers bucket R2: ${bucketName}...`)
     try {
       await r2Client.send(
         new PutObjectCommand({
@@ -54,70 +70,66 @@ export async function uploadToR2(
           ContentType: mimeType,
         })
       )
-      console.log(`[R2] Upload réussi pour la clé R2: ${key}`)
+      console.log(`[R2 Upload] Réussi pour la clé R2: ${key}`)
       
-      // Private assets must never receive a public R2 URL. Their key is kept in
-      // the database and the application authorizes every download.
       if (privateStorage) {
         return key
       }
 
-      // For certificates, they should always be downloaded securely via API
       if (cleanFolder === 'certificats') {
         return `/api/certificates/download/file/${fileName}`
       }
 
-      // For other files, return public URL if configured
       if (publicUrl) {
         const normalizedPublicUrl = publicUrl.replace(/\/$/, '')
         const finalUrl = `${normalizedPublicUrl}/${key}`
-        console.log(`[R2] URL publique générée: ${finalUrl}`)
+        console.log(`[R2 Upload] URL publique R2 générée: ${finalUrl}`)
         return finalUrl
       }
       
-      // No public URL: serve via internal proxy route
       const fallbackUrl = `/api/r2/file/${key}`
-      console.log(`[R2] Pas d'URL publique configurée. Utilisation de la route proxy: ${fallbackUrl}`)
+      console.log(`[R2 Upload] Utilisation de la route proxy R2: ${fallbackUrl}`)
       return fallbackUrl
     } catch (error: any) {
-      console.error(`[R2] Échec du PutObjectCommand pour la clé: ${key}. Erreur détaillée:`, error)
+      console.error(`[R2 Upload] Échec PutObjectCommand R2 pour ${key}:`, error)
       try {
-        const baseDir = join(process.cwd(), 'public', 'uploads', cleanFolder)
+        const baseDir = getWritableBaseDir(cleanFolder, privateStorage || cleanFolder === 'certificats')
         await mkdir(baseDir, { recursive: true })
         const filePath = join(baseDir, fileName)
         await writeFile(filePath, buffer)
-        console.log(`[R2 Fallback] Fichier écrit sur disque: ${filePath}`)
-        return `/uploads/${key}`
+        console.log(`[R2 Upload Fallback /tmp] Fichier sauvegardé: ${filePath}`)
+        return `/api/r2/file/${key}`
       } catch (diskError: any) {
-        throw new Error(`Échec du stockage Cloudflare R2 : ${error?.message || error}`)
+        console.error(`[R2 Fallback Error] Disk error:`, diskError)
+        throw new Error(`Stockage Cloudflare R2 échoué: ${error?.message || error}`)
       }
     }
   } else {
-    console.log(`[R2] Mode local fallback actif. Stockage local temporaire...`)
+    console.log(`[R2 Upload] Mode local fallback actif. Écriture disque...`)
     try {
-      // Local filesystem fallback
-      // Private files (e.g., certificates) are stored outside public/ directory
       const isPrivate = privateStorage || cleanFolder === 'certificats'
-      const baseDir = isPrivate
-        ? join(process.cwd(), 'uploads', cleanFolder)
-        : join(process.cwd(), 'public', 'uploads', cleanFolder)
-
+      const baseDir = getWritableBaseDir(cleanFolder, isPrivate)
       await mkdir(baseDir, { recursive: true })
       
-      // Extract subdirectories from fileName if any (e.g., student-id/filename.pdf)
       const filePath = join(baseDir, fileName)
       const fileDir = join(filePath, '..')
       await mkdir(fileDir, { recursive: true })
 
       await writeFile(filePath, buffer)
-      console.log(`[R2 fallback] Fichier écrit sur disque: ${filePath}`)
+      console.log(`[R2 Local Fallback] Écrit sur disque: ${filePath}`)
 
       const finalPath = privateStorage
         ? key
         : isPrivate
         ? `/api/certificates/download/file/${fileName}`
-        : `/uploads/${key}`
-      console.log(`[R2 fallback] URL générée: ${finalPath}`)
+        : `/api/r2/file/${key}`
+      return finalPath
+    } catch (error: any) {
+      console.error(`[R2 Local Fallback Error] Échec écriture:`, error)
+      throw new Error(`Échec du stockage local du fichier : ${error?.message || error}`)
+    }
+  }
+}
       return finalPath
     } catch (error: any) {
       console.error(`[R2 fallback] Échec d'écriture disque:`, error)
