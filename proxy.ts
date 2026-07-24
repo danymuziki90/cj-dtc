@@ -26,7 +26,7 @@ const canonicalAdminRouteMap: Record<string, string> = {
   '/admin/courses-management': '/admin/courses-management',
   '/admin/exams-management': '/admin/exams-management',
   '/admin/certificates': '/admin/certificates',
-  '/admin/reports': '/admin/reports',
+  '/admin/reports': '/admin/dashboard',
   '/admin/settings': '/admin/settings',
   '/admin/assignments': '/admin/assignments',
   '/admin/b2b': '/admin/b2b',

@@ -269,7 +269,7 @@ export default function AdminNotificationsPage() {
             eyebrow="Moteur d alertes"
             title="Alertes automatiques prioritaires"
             description="Paiements incomplets, absences repetees, sessions imminentes et certificats prets sont remontes ici sans saisie manuelle."
-            actions={<Link href="/admin/reports" className="text-sm font-semibold text-[var(--admin-primary)]">Ouvrir le reporting</Link>}
+            actions={<Link href="/admin/dashboard" className="text-sm font-semibold text-[var(--admin-primary)]">Voir le tableau de bord</Link>}
           />
           <div className="mt-5 space-y-3">
             {systemAlerts.length ? systemAlerts.slice(0, 8).map((alert) => (
