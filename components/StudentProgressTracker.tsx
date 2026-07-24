@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { FormattedDate } from './FormattedDate'
@@ -9,8 +9,8 @@ interface Progress {
   email: string
   modulesCompleted: number
   totalModules: number
-  assignmentsSubmitted: number
-  totalAssignments: number
+  assignmentsSubmitted?: number
+  totalAssignments?: number
   attendanceRate: number
   overallProgress: number
   lastActivity?: string
@@ -102,22 +102,7 @@ export default function StudentProgressTracker({ sessionId, progresses }: Studen
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: `${(progress.modulesCompleted / progress.totalModules) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Travaux soumis</span>
-                  <span className="font-medium">
-                    {progress.assignmentsSubmitted}/{progress.totalAssignments}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: `${(progress.assignmentsSubmitted / progress.totalAssignments) * 100}%` }}
+                    style={{ width: `${(progress.modulesCompleted / (progress.totalModules || 1)) * 100}%` }}
                   ></div>
                 </div>
               </div>

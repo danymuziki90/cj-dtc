@@ -30,9 +30,7 @@ export default function StudentLayout({
     } else if (status === 'authenticated') {
       const currentPath = pathname || ''
       let targetPath = `/${locale}/espace-etudiants`
-      if (currentPath.includes('/student/assignments')) {
-        targetPath = `/${locale}/espace-etudiants/travaux`
-      } else if (currentPath.includes('/student/certificates')) {
+      if (currentPath.includes('/student/certificates')) {
         targetPath = `/${locale}/espace-etudiants/mes-certificats`
       } else if (currentPath.includes('/student/elearning')) {
         targetPath = `/${locale}/espace-etudiants/elearning`
@@ -66,7 +64,6 @@ export default function StudentLayout({
     { name: 'Tableau de bord', href: '/student', icon: '🏠' },
     { name: 'Mes inscriptions', href: '/student/inscriptions', icon: '📝' },
     { name: 'Cours e-learning', href: '/student/elearning', icon: '📚' },
-    { name: 'Travaux', href: '/student/assignments', icon: '📋' },
     { name: 'Examens', href: '/student/exams', icon: '📝' },
     { name: 'Certificats', href: '/student/certificates', icon: '🎓' },
     { name: 'Profil', href: '/student/profile', icon: '👤' },
