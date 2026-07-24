@@ -25,6 +25,7 @@ import {
   Users,
   LogIn,
   UserPlus,
+  FileText,
 } from 'lucide-react'
 import { resolveSiteLocale, type SiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
@@ -342,6 +343,13 @@ export default function Header() {
             description: locale === 'fr' ? 'Accès devoirs, supports et espace élève' : 'Assignments, courseware & student portal',
             icon: UserCheck,
             badge: 'Portail',
+          },
+          {
+            href: `/${locale}/espace-etudiants/travaux`,
+            label: locale === 'fr' ? 'Mes Travaux & Devoirs' : 'My Assignments',
+            description: locale === 'fr' ? 'Consulter les sujets et téléverser vos rendus' : 'View tasks and submit your work',
+            icon: FileText,
+            badge: 'Devoirs',
           },
           {
             href: `/${locale}/auth/student-login`,

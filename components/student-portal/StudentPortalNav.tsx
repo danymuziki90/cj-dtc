@@ -10,10 +10,12 @@ import {
   Award,
   UserCircle,
   MessageSquare,
+  FileText,
 } from 'lucide-react'
 
 const items = [
-  { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/espace-etudiants', label: 'Tableau de bord', icon: LayoutDashboard },
+  { href: '/espace-etudiants/travaux', label: 'Mes Travaux', icon: FileText },
   { href: '/student/mes-sessions', label: 'Mes sessions', icon: GraduationCap },
   { href: '/student/ressources', label: 'Ressources', icon: BookOpen },
   { href: '/student/resultats', label: 'Resultats', icon: BookOpen },
