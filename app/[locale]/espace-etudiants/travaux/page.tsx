@@ -77,6 +77,7 @@ export default function StudentAssignmentsPage() {
   const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadStats, setUploadStats] = useState({ sent: 0, total: 0, bytesPerSecond: 0 });
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -139,6 +140,33 @@ export default function StudentAssignmentsPage() {
     ];
   }, [assignments]);
 
+  const uploadAssignment = (formData: FormData): Promise<Response> =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const startedAt = performance.now();
+
+      xhr.upload.onprogress = (event) => {
+        if (!event.lengthComputable) return;
+        const elapsedSeconds = Math.max((performance.now() - startedAt) / 1000, 0.001);
+        setUploadProgress(Math.round((event.loaded / event.total) * 100));
+        setUploadStats({
+          sent: event.loaded,
+          total: event.total,
+          bytesPerSecond: event.loaded / elapsedSeconds,
+        });
+      };
+      xhr.onerror = () => reject(new Error("La connexion a ete interrompue pendant le televersement."));
+      xhr.onabort = () => reject(new Error("Le televersement a ete annule."));
+      xhr.onload = () => {
+        const headers = new Headers();
+        const contentType = xhr.getResponseHeader("content-type");
+        if (contentType) headers.set("content-type", contentType);
+        resolve(new Response(xhr.responseText, { status: xhr.status, statusText: xhr.statusText, headers }));
+      };
+      xhr.open("POST", "/api/student/assignments");
+      xhr.send(formData);
+    });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedAssignment || !uploadFiles || uploadFiles.length === 0) {
@@ -174,7 +202,8 @@ export default function StudentAssignmentsPage() {
     }
 
     setSubmitting(true);
-    setUploadProgress(10);
+    setUploadProgress(0);
+    setUploadStats({ sent: 0, total: 0, bytesPerSecond: 0 });
     setErrorMsg("");
     setSuccessMsg("");
 
@@ -187,18 +216,8 @@ export default function StudentAssignmentsPage() {
         formData.append(`file_${i}`, uploadFiles[i]);
       }
 
-      // Simulate progress interval during upload
-      const progressTimer = setInterval(() => {
-        setUploadProgress((prev: number) => (prev < 90 ? prev + 15 : prev));
-      }, 300);
-
-      const res = await fetch("/api/student/assignments", {
-        method: "POST",
-        body: formData,
-      });
-
-      clearInterval(progressTimer);
-      setUploadProgress(95);
+      const res = await uploadAssignment(formData);
+      setUploadProgress(100);
 
       let resData: any = {};
       const contentType = res.headers.get("content-type") || "";
@@ -568,6 +587,12 @@ export default function StudentAssignmentsPage() {
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
+                  {uploadStats.total > 0 && (
+                    <p className="text-[10px] text-slate-500">
+                      {(uploadStats.sent / 1024 / 1024).toFixed(2)} / {(uploadStats.total / 1024 / 1024).toFixed(2)} MB
+                      {" · "}{(uploadStats.bytesPerSecond / 1024 / 1024).toFixed(2)} MB/s
+                    </p>
+                  )}
                 </div>
               )}
 

@@ -164,6 +164,17 @@ export default function AdminAssignmentsPage() {
     fetchSessions();
   }, []);
 
+  // Keep counts and new submissions visible without a manual refresh. Polling
+  // is reliable on Vercel serverless instances where an in-memory websocket
+  // channel cannot be shared between functions.
+  useEffect(() => {
+    const refreshTimer = window.setInterval(() => {
+      fetchAssignments();
+    }, 5000);
+
+    return () => window.clearInterval(refreshTimer);
+  }, []);
+
   const fetchAssignments = async () => {
     try {
       setLoading(true);

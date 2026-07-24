@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
 import { extname } from 'path'
 import { randomUUID } from 'crypto'
-import { uploadToR2 } from '@/lib/r2'
+import { deleteFromR2, uploadToR2 } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
@@ -111,8 +111,12 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: assignmentId },
+    const assignment = await prisma.assignment.findFirst({
+      where: {
+        id: assignmentId,
+        status: 'publie',
+        publishDate: { lte: new Date() },
+      },
       include: { formation: true },
     })
     if (!assignment) {
@@ -152,6 +156,7 @@ export async function POST(request: NextRequest) {
         ],
         formationId: assignment.formationId,
         status: { in: ENROLLMENT_STATUSES_WITH_ACCESS },
+        ...(assignment.sessionId ? { sessionId: assignment.sessionId } : {}),
       },
       select: { id: true },
     })
@@ -241,7 +246,7 @@ export async function POST(request: NextRequest) {
       submission = await prisma.submission.create({
         data: {
           assignmentId,
-          studentEmail: auth.student.email,
+          studentEmail: auth.student.email.toLowerCase(),
           status: 'submitted',
           submittedAt: new Date(),
         },
@@ -264,6 +269,7 @@ export async function POST(request: NextRequest) {
     }
 
     const r2Folder = `travaux/${auth.student.id}`
+    const uploadedKeys: string[] = []
 
     try {
     for (const file of files) {
@@ -273,6 +279,7 @@ export async function POST(request: NextRequest) {
       console.log(`[POST /api/student/assignments] Uploading file "${file.name}" to R2 folder "${r2Folder}"...`)
       const buffer = Buffer.from(await file.arrayBuffer())
       const fileUrl = await uploadToR2(buffer, fileName, r2Folder, file.type)
+      uploadedKeys.push(`${r2Folder}/${fileName}`)
       console.log(`[POST /api/student/assignments] R2 Upload success, fileUrl: ${fileUrl}`)
 
       await prisma.submissionFile.create({
@@ -288,6 +295,7 @@ export async function POST(request: NextRequest) {
     }
     } catch (uploadError) {
       // Never leave a submission that points to files which R2 rejected.
+      await Promise.allSettled(uploadedKeys.map((key) => deleteFromR2(key)))
       if (isResubmissionAllowed) {
         await prisma.submission.update({
           where: { id: submission.id },
@@ -321,6 +329,13 @@ export async function POST(request: NextRequest) {
     )
   } catch (error: any) {
     console.error('[POST /api/student/assignments] CRITICAL SERVER ERROR:', error)
+    if (error?.code === 'P2002') {
+      return NextResponse.json({
+        success: false,
+        message: 'Vous avez deja soumis ce devoir. Contactez votre formateur pour demander une modification.',
+        error: 'Duplicate submission',
+      }, { status: 409 })
+    }
     if (error?.code === 'R2_STORAGE_ERROR') {
       return NextResponse.json({
         success: false,

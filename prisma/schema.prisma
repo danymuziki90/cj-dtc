@@ -506,6 +506,7 @@ model Submission {
   @@index([assignmentId])
   @@index([studentEmail])
   @@index([status])
+  @@unique([assignmentId, studentEmail])
 }
 
 model SubmissionFile {

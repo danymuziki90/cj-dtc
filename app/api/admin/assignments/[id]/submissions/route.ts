@@ -128,6 +128,13 @@ export async function PUT(
       })
     }
 
+    if (submission && submission.assignmentId !== assignmentId) {
+      return NextResponse.json(
+        { error: 'Cette remise n\'appartient pas au devoir selectionne.' },
+        { status: 409 }
+      )
+    }
+
     let updated
     if (submission) {
       updated = await prisma.submission.update({
