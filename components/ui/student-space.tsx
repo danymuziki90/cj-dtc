@@ -12,7 +12,7 @@ export type StudentMetric = {
 }
 
 type StudentPageShellProps = {
-  locale: string
+  locale?: string
   eyebrow: string
   title: string
   description: string
@@ -154,7 +154,7 @@ export function StudentPageShell({
   backHref,
   backLabel = "Retour a l'espace etudiant",
 }: StudentPageShellProps) {
-  const resolvedBackHref = backHref || `/${locale}/espace-etudiants`
+  const resolvedBackHref = backHref || (locale ? `/${locale}/espace-etudiants` : '/espace-etudiants')
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950">

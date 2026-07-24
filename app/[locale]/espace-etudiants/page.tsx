@@ -112,11 +112,12 @@ function EspaceEtudiantsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useParams<{ locale?: string }>();
-  const locale = params?.locale || "fr";
+  const locale = params?.locale;
+  const localePrefix = locale ? `/${locale}` : '';
   const pendingFormationId = searchParams.get("formationId");
   const pendingSessionId = searchParams.get("sessionId");
   const pendingEnrollmentPath = pendingFormationId
-    ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${encodeURIComponent(
+    ? `${localePrefix}/espace-etudiants/confirm-inscription?formationId=${encodeURIComponent(
         pendingFormationId,
       )}${pendingSessionId ? `&sessionId=${encodeURIComponent(pendingSessionId)}` : ""}`
     : "";
