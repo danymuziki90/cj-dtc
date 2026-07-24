@@ -293,9 +293,18 @@ function EspaceEtudiantsContent() {
         body: formData,
       });
 
-      const resData = await response.json();
+      let resData: any = {};
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        resData = await response.json().catch(() => ({}));
+      } else {
+        const rawText = await response.text().catch(() => "");
+        console.error("[Assignment Upload Error] Non-JSON server response:", rawText);
+        resData = { error: "Une erreur est survenue lors du dépôt du travail. Veuillez réessayer." };
+      }
+
       if (!response.ok) {
-        throw new Error(resData.error || "Une erreur est survenue lors du dépôt.");
+        throw new Error(resData.error || "Le fichier n'a pas pu être envoyé. Veuillez réessayer.");
       }
 
       setUploadSuccessMessage("Votre travail a été déposé avec succès !");
