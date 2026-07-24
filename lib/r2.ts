@@ -127,6 +127,7 @@ export async function uploadToR2(
     } catch (error: any) {
       console.error(`[R2 Local Fallback Error] Échec écriture:`, error)
       throw new Error(`Échec du stockage local du fichier : ${error?.message || error}`)
+    }
   }
 }
 
