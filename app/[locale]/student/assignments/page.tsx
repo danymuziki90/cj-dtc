@@ -77,6 +77,28 @@ export default function StudentAssignmentsPage() {
       return
     }
 
+    if (selectedAssignment) {
+      const maxMB = selectedAssignment.maxFileSize || 10
+      const maxBytes = maxMB * 1024 * 1024
+      const allowedTypes = selectedAssignment.allowedFileTypes?.length
+        ? selectedAssignment.allowedFileTypes.map((t) => t.trim().toLowerCase().replace(/^\./, ''))
+        : ['pdf', 'doc', 'docx', 'zip', 'rar', 'png', 'jpg', 'jpeg']
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        if (file.size > maxBytes) {
+          alert(`Le fichier "${file.name}" (${(file.size / 1024 / 1024).toFixed(1)} MB) dépasse la limite de ${maxMB} MB.`)
+          return
+        }
+
+        const ext = file.name.split('.').pop()?.toLowerCase() || ''
+        if (allowedTypes.length > 0 && !allowedTypes.includes(ext)) {
+          alert(`Format non autorisé pour "${file.name}" (.${ext}). Formats acceptés : ${allowedTypes.join(', ')}.`)
+          return
+        }
+      }
+    }
+
     setSubmitting(true)
     try {
       const formData = new FormData()
@@ -102,10 +124,18 @@ export default function StudentAssignmentsPage() {
       } else {
         const rawText = await response.text().catch(() => '')
         console.error('[Assignment Submit Error] Non-JSON server response:', rawText)
-        resData = { error: "Une erreur est survenue lors du dépôt du travail. Veuillez réessayer." }
+        if (response.status === 413) {
+          resData = { error: 'Le fichier sélectionné est trop volumineux (limite réseau atteinte). Veuillez compresser votre fichier.' }
+        } else if (response.status === 401 || response.status === 403) {
+          resData = { error: 'Votre session a expiré. Veuillez vous reconnecter.' }
+        } else if (response.status === 404) {
+          resData = { error: 'Le devoir demandé n\'existe plus ou a été modifié.' }
+        } else {
+          resData = { error: `Une erreur serveur est survenue (Code HTTP ${response.status}). Veuillez réessayer.` }
+        }
       }
 
-      if (response.ok) {
+      if (response.ok && resData.success !== false) {
         // Mettre à jour l'assignment dans la liste
         if (resData.submission) {
           setAssignments(prev => prev.map(assignment =>
@@ -117,8 +147,9 @@ export default function StudentAssignmentsPage() {
         setSelectedAssignment(null)
         setFiles(null)
         alert('Travail soumis avec succès !')
+        fetchAssignments()
       } else {
-        throw new Error(resData.error || 'Le fichier n\'a pas pu être envoyé. Veuillez réessayer.')
+        throw new Error(resData.message || resData.error || `Le fichier n'a pas pu être envoyé (Code HTTP ${response.status}).`)
       }
     } catch (error: any) {
       console.error('Erreur lors de la soumission:', error)

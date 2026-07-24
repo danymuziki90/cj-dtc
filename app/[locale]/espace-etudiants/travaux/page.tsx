@@ -76,6 +76,7 @@ export default function StudentAssignmentsPage() {
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -145,7 +146,35 @@ export default function StudentAssignmentsPage() {
       return;
     }
 
+    // Client-side Pre-validation
+    const maxMB = selectedAssignment.maxFileSize || 10;
+    const maxBytes = maxMB * 1024 * 1024;
+    const allowedTypes = selectedAssignment.allowedFileTypes?.length
+      ? selectedAssignment.allowedFileTypes.map((t) => t.trim().toLowerCase().replace(/^\./, ""))
+      : ["pdf", "doc", "docx", "zip", "rar", "png", "jpg", "jpeg"];
+
+    for (let i = 0; i < uploadFiles.length; i++) {
+      const file = uploadFiles[i];
+      if (file.size > maxBytes) {
+        setErrorMsg(
+          `Le fichier "${file.name}" (${(file.size / 1024 / 1024).toFixed(
+            1
+          )} MB) dépasse la limite autorisée de ${maxMB} MB.`
+        );
+        return;
+      }
+
+      const ext = file.name.split(".").pop()?.toLowerCase() || "";
+      if (allowedTypes.length > 0 && !allowedTypes.includes(ext)) {
+        setErrorMsg(
+          `Format non autorisé pour "${file.name}" (.${ext}). Formats acceptés : ${allowedTypes.join(", ")}.`
+        );
+        return;
+      }
+    }
+
     setSubmitting(true);
+    setUploadProgress(10);
     setErrorMsg("");
     setSuccessMsg("");
 
@@ -158,10 +187,18 @@ export default function StudentAssignmentsPage() {
         formData.append(`file_${i}`, uploadFiles[i]);
       }
 
+      // Simulate progress interval during upload
+      const progressTimer = setInterval(() => {
+        setUploadProgress((prev: number) => (prev < 90 ? prev + 15 : prev));
+      }, 300);
+
       const res = await fetch("/api/student/assignments", {
         method: "POST",
         body: formData,
       });
+
+      clearInterval(progressTimer);
+      setUploadProgress(95);
 
       let resData: any = {};
       const contentType = res.headers.get("content-type") || "";
@@ -171,29 +208,49 @@ export default function StudentAssignmentsPage() {
         const rawText = await res.text().catch(() => "");
         console.error("[Assignment Upload Error] Non-JSON server response:", rawText);
         if (res.status === 413) {
-          resData = { error: "Le fichier sélectionné est trop volumineux (limite réseau atteinte). Veuillez compresser votre fichier ou choisir un document plus léger (moins de 4.5 Mo)." };
+          resData = {
+            error:
+              "Le fichier sélectionné est trop volumineux (limite réseau atteinte). Veuillez compresser votre fichier ou choisir un document de moins de 4.5 Mo.",
+          };
         } else if (res.status === 401 || res.status === 403) {
-          resData = { error: "Votre session a expiré ou vous n'êtes pas inscrit à la formation requise. Veuillez vous reconnecter." };
+          resData = {
+            error:
+              "Votre session a expiré ou vous n'êtes pas inscrit à la formation requise. Veuillez vous reconnecter.",
+          };
+        } else if (res.status === 404) {
+          resData = {
+            error:
+              "Le devoir sélectionné n'existe plus ou a été modifié. Veuillez rafraîchir la page.",
+          };
         } else {
-          resData = { error: `Une erreur serveur est survenue (Code HTTP ${res.status}). Veuillez réessayer.` };
+          resData = {
+            error: `Une erreur serveur est survenue (Code HTTP ${res.status}). Veuillez réessayer.`,
+          };
         }
       }
 
       if (!res.ok || resData.success === false) {
-        throw new Error(resData.message || resData.error || resData.detail || `Échec de l'envoi (code HTTP ${res.status}).`);
+        throw new Error(
+          resData.message ||
+            resData.error ||
+            resData.detail ||
+            `Échec du téléversement (Code HTTP ${res.status}).`
+        );
       }
 
-      setSuccessMsg("Votre travail a été déposé avec succès.");
+      setUploadProgress(100);
+      setSuccessMsg("Votre travail a été déposé avec succès !");
       setUploadFiles(null);
-      
-      // Actualiser
+
       setTimeout(() => {
         setSelectedAssignment(null);
         setSuccessMsg("");
+        setUploadProgress(0);
         fetchAssignments();
-      }, 2000);
+      }, 1800);
     } catch (err: any) {
       setErrorMsg(err.message || "Une erreur est survenue lors du dépôt du travail.");
+      setUploadProgress(0);
     } finally {
       setSubmitting(false);
     }
@@ -498,6 +555,21 @@ export default function StudentAssignmentsPage() {
                   Formats autorisés : {selectedAssignment.allowedFileTypes?.join(", ") || "pdf, doc, docx, zip"}.
                 </p>
               </div>
+
+              {submitting && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex justify-between text-[11px] font-semibold text-slate-600">
+                    <span>Téléversement en cours...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 border border-slate-200">
+                    <div
+                      className="h-full bg-gradient-to-r from-[var(--cj-blue)] to-blue-500 transition-all duration-300 ease-out"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="flex gap-2 pt-2 justify-end border-t border-slate-100">
                 <button

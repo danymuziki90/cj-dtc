@@ -169,8 +169,18 @@ export async function POST(request: NextRequest) {
     const files: File[] = []
 
     for (const [key, value] of formData.entries()) {
-      if (value instanceof File && value.name && value.size > 0) {
-        const extension = normalizeExtension(value.name.split('.').pop() || '')
+      const isFileLike =
+        value &&
+        typeof value === 'object' &&
+        'size' in value &&
+        'name' in value &&
+        typeof (value as any).size === 'number' &&
+        (value as any).size > 0 &&
+        typeof (value as any).name === 'string'
+
+      if (isFileLike) {
+        const fileObj = value as unknown as File
+        const extension = normalizeExtension(fileObj.name.split('.').pop() || '')
         if (allowedTypes.length && !allowedTypes.includes(extension)) {
           return NextResponse.json({
             success: false,
@@ -179,15 +189,15 @@ export async function POST(request: NextRequest) {
           }, { status: 400 })
         }
 
-        if (value.size > maxBytes) {
+        if (fileObj.size > maxBytes) {
           return NextResponse.json({
             success: false,
-            message: `Le fichier "${value.name}" dépasse la taille maximale autorisée de ${assignment.maxFileSize} MB.`,
-            error: `File size ${value.size} > max ${maxBytes}`
+            message: `Le fichier "${fileObj.name}" dépasse la taille maximale autorisée de ${assignment.maxFileSize} MB.`,
+            error: `File size ${fileObj.size} > max ${maxBytes}`
           }, { status: 400 })
         }
 
-        files.push(value)
+        files.push(fileObj)
       }
     }
 
