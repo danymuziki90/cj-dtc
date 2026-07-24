@@ -524,8 +524,6 @@ export interface DashboardStats {
 export interface StudentDashboard {
   user: User;
   enrollments: Enrollment[];
-  upcomingAssignments: Assignment[];
-  recentSubmissions: Submission[];
   certificates: Certificate[];
   stats: {
     totalCourses: number;
