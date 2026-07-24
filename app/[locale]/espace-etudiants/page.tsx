@@ -752,7 +752,6 @@ function EspaceEtudiantsContent() {
             {[
               { id: "overview", label: "Tableau de bord", icon: BarChart3, count: null },
               { id: "formations", label: "Mes formations", icon: BookOpen, count: totalFormationsCount },
-              { id: "travaux", label: "Mes travaux", icon: FileText, count: pendingAssignmentsCount, activeCount: true },
               { id: "news", label: "Actualités", icon: Newspaper, count: news.length },
               { id: "calendrier", label: "Calendrier", icon: Calendar, count: null },
               { id: "notifications", label: "Notifications", icon: Bell, count: totalNotifications },
@@ -779,9 +778,7 @@ function EspaceEtudiantsContent() {
                         ${
                           isActive
                             ? "bg-white text-[var(--cj-blue)]"
-                            : tab.activeCount
-                              ? "bg-[var(--cj-red)] text-white"
-                              : "bg-slate-200 text-slate-700"
+                            : "bg-slate-200 text-slate-700"
                         }`}
                     >
                       {tab.count}
@@ -1442,172 +1439,6 @@ function EspaceEtudiantsContent() {
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: TRAVAUX (MY ASSIGNMENTS) */}
-          {activeTab === "travaux" && (
-            <div className="space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">Mes travaux</h3>
-                  <p className="text-xs text-slate-500">
-                    Retrouvez les travaux pratiques (TP), examens et projets assignés à vos formations.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {assignments.map((assign: any) => {
-                  const status = getAssignmentStatus(assign);
-                  const isFuture = new Date(assign.deadline).getTime() >= Date.now();
-                  const borderL = 
-                    status.theme === "green" ? "border-l-4 border-l-emerald-500" :
-                    status.theme === "orange" ? "border-l-4 border-l-orange-500" :
-                    "border-l-4 border-l-red-500";
-                  
-                  return (
-                    <div
-                      key={assign.id}
-                      className={`group overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md ${borderL}`}
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
-                        <div className="space-y-1">
-                          <span className={`inline-block rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${status.color}`}>
-                            {assign.type.toUpperCase()}
-                          </span>
-                          <h4 className="text-base font-bold text-slate-900">{assign.title}</h4>
-                          <p className="text-xs text-slate-500">Formation : {assign.formation?.title}</p>
-                        </div>
-                        <div className="text-right">
-                          <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${status.color} shadow-sm`}>
-                            {status.label}
-                          </span>
-                          <p className="text-[10px] text-slate-400 font-semibold mt-1">
-                            Date limite : {formatDate(assign.deadline)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid gap-6 md:grid-cols-2">
-                        <div>
-                          <p className="text-xs font-semibold text-slate-700">Description :</p>
-                          <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                            {assign.description}
-                          </p>
-                          
-                          {/* Instructions attached (Télécharger les consignes) */}
-                          <div className="mt-4">
-                            <p className="text-xs font-semibold text-slate-700 mb-2">Consignes et documents de cours :</p>
-                            {assign.files && assign.files.length > 0 ? (
-                              <div className="space-y-1">
-                                {assign.files.map((file: any) => (
-                                  <a
-                                    key={file.id}
-                                    href={file.url}
-                                    download={file.originalName}
-                                    className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 underline font-medium"
-                                  >
-                                    <Download className="w-3.5 h-3.5" />
-                                    {file.originalName} ({Math.round(file.size / 1024)} KB)
-                                  </a>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-xs text-slate-400 italic font-medium">Aucun fichier de consigne attaché.</p>
-                            )}
-                          </div>
-
-                          {/* Consignes text description */}
-                          {assign.instructions && (
-                            <div className="mt-4 bg-slate-50 rounded-xl p-3 border border-slate-100">
-                              <p className="text-xs font-semibold text-slate-700 mb-1">Consignes / Instructions :</p>
-                              <p className="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">{assign.instructions}</p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Submissions section */}
-                        <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 flex flex-col justify-between">
-                          <div>
-                            <p className="text-xs font-semibold text-slate-700 mb-2">Votre dépôt :</p>
-                            
-                            {assign.submissions && assign.submissions.length > 0 ? (
-                              <div className="space-y-3">
-                                {assign.submissions.map((sub: any) => (
-                                  <div key={sub.id} className="rounded-lg bg-white p-3 border border-slate-150 shadow-sm text-xs">
-                                    <div className="flex justify-between font-semibold">
-                                      <span className="text-slate-800">Soumission déposée</span>
-                                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusClass(sub.status)}`}>
-                                        {sub.status}
-                                      </span>
-                                    </div>
-                                    <p className="text-[10px] text-slate-400 mt-1">Déposé le {formatDateTime(sub.submittedAt)}</p>
-                                    
-                                    {sub.files && sub.files.length > 0 && (
-                                      <div className="mt-2 space-y-1 pt-2 border-t border-slate-100">
-                                        {sub.files.map((file: any) => (
-                                          <a
-                                            key={file.id}
-                                            href={file.url}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="inline-flex items-center gap-1.5 text-[10px] text-blue-600 hover:underline font-medium"
-                                          >
-                                            <FileText className="w-3.5 h-3.5 text-slate-400" />
-                                            {file.name}
-                                          </a>
-                                        ))}
-                                      </div>
-                                    )}
-
-                                    {(sub.feedback || sub.reviewFeedback) && (
-                                      <div className="mt-2 rounded-lg bg-blue-50/70 p-2.5 text-[10px] text-slate-700 border border-blue-100">
-                                        <span className="font-bold text-[var(--cj-blue)]">Feedback Formateur :</span>{" "}
-                                        {sub.feedback || sub.reviewFeedback}
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-xs text-slate-400 italic">Aucun travail déposé pour le moment.</p>
-                            )}
-                          </div>
-
-                          <div className="mt-4 pt-3 border-t border-slate-200">
-                            {isFuture ? (
-                              <button
-                                onClick={() => setSelectedAssignmentForSubmission(assign)}
-                                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-blue-700)] transition shadow-sm"
-                              >
-                                <Upload className="w-3.5 h-3.5" />
-                                Déposer mon travail
-                              </button>
-                            ) : (
-                              <button
-                                disabled
-                                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-200 py-2 text-xs font-semibold text-slate-400 cursor-not-allowed"
-                              >
-                                Dépôt verrouillé (date limite dépassée)
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {assignments.length === 0 && (
-                  <div className="py-12 text-center">
-                    <EmptyState
-                      title="Aucun travail en attente"
-                      description="L'administration n'a publié aucun TP ou examen pour vos formations."
-                    />
-                  </div>
-                )}
               </div>
             </div>
           )}
