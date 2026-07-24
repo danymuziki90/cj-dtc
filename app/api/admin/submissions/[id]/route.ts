@@ -5,12 +5,13 @@ import { supabase } from '@/lib/supabase'
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const auth = await requireAdmin(request)
   if (auth.error) return auth.error
 
-  const submissionId = parseInt(params.id, 10)
+  const submissionId = parseInt(id, 10)
   if (isNaN(submissionId)) {
     return NextResponse.json({ success: false, error: 'ID de remise invalide' }, { status: 400 })
   }

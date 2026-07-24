@@ -6,12 +6,13 @@ import { supabase } from '@/lib/supabase'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const auth = await requireAdmin(request)
   if (auth.error) return auth.error
 
-  const assignmentId = parseInt(params.id, 10)
+  const assignmentId = parseInt(id, 10)
   if (isNaN(assignmentId)) {
     return NextResponse.json({ success: false, error: 'ID invalide' }, { status: 400 })
   }
@@ -67,12 +68,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const auth = await requireAdmin(request)
   if (auth.error) return auth.error
 
-  const assignmentId = parseInt(params.id, 10)
+  const assignmentId = parseInt(id, 10)
   if (isNaN(assignmentId)) {
     return NextResponse.json({ success: false, error: 'ID invalide' }, { status: 400 })
   }
@@ -270,12 +272,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const auth = await requireAdmin(request)
   if (auth.error) return auth.error
 
-  const assignmentId = parseInt(params.id, 10)
+  const assignmentId = parseInt(id, 10)
   if (isNaN(assignmentId)) {
     return NextResponse.json({ success: false, error: 'ID invalide' }, { status: 400 })
   }
