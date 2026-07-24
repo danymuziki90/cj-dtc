@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
         studentTrend,
         studentsNew7d,
         submissionTrend,
-        portalSubmissionsPending,
+        portalSubmissionsPending: 0,
       },
       recentLogs: recentAuditLogs.map(log => ({
         username: log.adminUsername,

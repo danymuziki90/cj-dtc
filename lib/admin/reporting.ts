@@ -326,42 +326,8 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
         },
       },
     }),
-    prisma.submission.findMany({
-      where: { status: { in: ['submitted', 'returned'] } },
-      orderBy: { submittedAt: 'desc' },
-      take: 8,
-      select: {
-        id: true,
-        status: true,
-        submittedAt: true,
-        studentEmail: true,
-        assignment: {
-          select: {
-            title: true,
-          },
-        },
-      },
-    }),
-    prisma.assignment.findMany({
-      where: { deadline: { lt: now } },
-      orderBy: { deadline: 'asc' },
-      select: {
-        id: true,
-        title: true,
-        deadline: true,
-        formationId: true,
-        formation: {
-          select: {
-            title: true,
-          },
-        },
-        submissions: {
-          select: {
-            studentEmail: true,
-          },
-        },
-      },
-    }),
+    Promise.resolve([]),
+    Promise.resolve([]),
     prisma.attendance.findMany({
       where: since ? { date: { gte: since } } : undefined,
       orderBy: { date: 'desc' },
@@ -570,35 +536,12 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     status: submission.status,
     createdAt: submission.createdAt.toISOString(),
   }))
-  const legacyQueue = legacyPendingSubmissions.map((submission) => ({
-    id: `legacy-${submission.id}`,
-    source: 'legacy' as const,
-    title: submission.assignment.title,
-    studentName: submission.studentEmail,
-    email: submission.studentEmail,
-    status: submission.status,
-    createdAt: submission.submittedAt.toISOString(),
-  }))
+  const legacyQueue: any[] = []
   const submissionQueue = [...portalQueue, ...legacyQueue]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 10)
 
-  const overdueAssignmentRows = overdueAssignments
-    .map((assignment) => {
-      const targetEnrollments = Number(activeEnrollmentsByFormationMap.get(assignment.formationId) || 0)
-      const submittedEmails = new Set(assignment.submissions.map((item) => normalizeEmail(item.studentEmail)).filter(Boolean))
-      const missingCount = Math.max(0, targetEnrollments - submittedEmails.size)
-      return {
-        assignmentId: assignment.id,
-        title: assignment.title,
-        formationTitle: assignment.formation.title,
-        deadline: assignment.deadline.toISOString(),
-        missingCount,
-      }
-    })
-    .filter((assignment) => assignment.missingCount > 0)
-    .sort((a, b) => b.missingCount - a.missingCount)
-    .slice(0, 8)
+  const overdueAssignmentRows: any[] = []
 
   const eligibleNotIssued = endedCandidateEnrollments
     .filter((enrollment) => !enrollment.certificateIssued)

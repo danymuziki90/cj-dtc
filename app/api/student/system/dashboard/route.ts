@@ -451,12 +451,7 @@ export async function GET(request: NextRequest) {
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
-  const assignmentSubmissions = mappedAssignments.flatMap((assign) => 
-    assign.submissions.map((sub) => ({
-      ...sub,
-      assignmentTitle: assign.title,
-    }))
-  )
+  const assignmentSubmissions: any[] = []
 
   const notifications = [
     // 1. Inscriptions à des formations
