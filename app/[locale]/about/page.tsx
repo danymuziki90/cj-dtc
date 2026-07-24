@@ -4,7 +4,7 @@ import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
 type AboutPageProps = {
-  params: Promise<{ locale: string }> | { locale: string }
+  params: Promise<{ locale: string }>
 }
 
 const metadataCopy = publicMessages.aboutMetadata
