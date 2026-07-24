@@ -152,7 +152,6 @@ export async function POST(request: NextRequest) {
         ],
         formationId: assignment.formationId,
         status: { in: ENROLLMENT_STATUSES_WITH_ACCESS },
-        ...(assignment.sessionId && { sessionId: assignment.sessionId }),
       },
       select: { id: true },
     })
@@ -160,7 +159,7 @@ export async function POST(request: NextRequest) {
       console.warn(`[POST /api/student/assignments] Student ${auth.student.email} is not enrolled in formation #${assignment.formationId}`)
       return NextResponse.json({
         success: false,
-        message: 'Vous n\'êtes pas inscrit à la session spécifique requise pour ce devoir.',
+        message: 'Vous n\'êtes pas inscrit à la formation requise pour ce devoir.',
         error: 'Enrollment check failed'
       }, { status: 403 })
     }
