@@ -114,8 +114,8 @@ function NavLink({ href, label }: { href: string; label: string }) {
         relative rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200 whitespace-nowrap
         ${
           isActive
-            ? 'text-blue-600 font-bold bg-blue-50/80'
-            : 'text-slate-800 hover:text-blue-600 hover:bg-slate-50'
+            ? 'text-white font-bold bg-white/20 shadow-sm'
+            : 'text-slate-100 hover:text-blue-400 hover:bg-white/10'
         }
       `}
     >
@@ -157,21 +157,21 @@ function DesktopDropdown({
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         className={`
-          flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-800 transition-colors hover:text-blue-600 hover:bg-slate-50 whitespace-nowrap
-          ${isOpen ? 'text-blue-600 bg-slate-50' : ''}
+          flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-100 transition-colors hover:text-blue-400 hover:bg-white/10 whitespace-nowrap
+          ${isOpen ? 'text-blue-400 bg-white/10' : ''}
         `}
       >
         <span>{label}</span>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-blue-600' : ''
+          className={`h-3.5 w-3.5 text-slate-300 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-blue-400' : ''
           }`}
         />
       </button>
 
       <div
         className={`
-          absolute left-1/2 -translate-x-1/2 top-full z-50 mt-2 w-64 rounded-2xl border border-slate-100 bg-white p-2.5 shadow-xl shadow-slate-900/10 backdrop-blur-xl transition-all duration-200 ease-out
+          absolute left-1/2 -translate-x-1/2 top-full z-50 mt-2 w-64 rounded-2xl border border-white/15 bg-slate-900/95 p-2.5 shadow-2xl backdrop-blur-xl transition-all duration-200 ease-out
           ${
             isOpen
               ? 'opacity-100 translate-y-0 pointer-events-auto visible'
@@ -186,17 +186,17 @@ function DesktopDropdown({
               key={item.href}
               href={item.href}
               onClick={() => setIsOpen(false)}
-              className="group/item flex items-start gap-3 rounded-xl p-2 transition-all duration-200 hover:bg-slate-50 hover:translate-x-1"
+              className="group/item flex items-start gap-3 rounded-xl p-2 transition-all duration-200 hover:bg-white/10 hover:translate-x-1"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-blue-600 transition-colors group-hover/item:bg-blue-600 group-hover/item:text-white">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-blue-400 transition-colors group-hover/item:bg-blue-600 group-hover/item:text-white">
                 <Icon className="h-4 w-4" />
               </div>
               <div>
-                <div className="text-xs font-bold text-slate-900 group-hover/item:text-blue-600 transition-colors">
+                <div className="text-xs font-bold text-slate-100 group-hover/item:text-white transition-colors">
                   {item.label}
                 </div>
                 {item.description && (
-                  <div className="text-[11px] text-slate-500 leading-snug">{item.description}</div>
+                  <div className="text-[11px] text-slate-400 leading-snug">{item.description}</div>
                 )}
               </div>
             </Link>
