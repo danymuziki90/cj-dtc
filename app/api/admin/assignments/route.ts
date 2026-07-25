@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get('search')?.trim() || ''
   const publishedOnly = searchParams.get('published') === 'true'
   const page = parseInt(searchParams.get('page') || '1', 10)
-  const limit = parseInt(searchParams.get('limit') || '50', 10)
+  const limit = parseInt(searchParams.get('limit') || '500', 10)
 
   const whereClause: any = {}
 

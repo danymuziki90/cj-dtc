@@ -259,19 +259,29 @@ export default function AdminAssignmentsPage() {
     setError(null)
     try {
       const [assignRes, sessionRes] = await Promise.all([
-        fetch('/api/admin/assignments', { cache: 'no-store' }),
+        fetch('/api/admin/assignments?limit=500', { cache: 'no-store' }),
         fetch('/api/sessions', { cache: 'no-store' }),
       ])
 
       if (!assignRes.ok) throw new Error('Impossible de charger les travaux')
       const assignData = await assignRes.json()
-      setAssignments(assignData.assignments || [])
+      const fetchedAssignments = assignData.assignments || []
+      setAssignments(fetchedAssignments)
 
       if (sessionRes.ok) {
         const sessionData = await sessionRes.json()
-        const rawSessions = Array.isArray(sessionData) ? sessionData : []
-        setSessions(rawSessions)
+        const fetchedSessions = Array.isArray(sessionData)
+          ? sessionData
+          : sessionData.sessions || []
+        setSessions(fetchedSessions)
       }
+
+      // Synchroniser le tiroir de remises s'il est ouvert
+      setViewSubmissionsAssignment((current) => {
+        if (!current) return null
+        const updated = fetchedAssignments.find((item: Assignment) => item.id === current.id)
+        return updated || current
+      })
     } catch (err: any) {
       console.error(err)
       setError(err.message || 'Erreur lors du chargement des données')
@@ -279,6 +289,23 @@ export default function AdminAssignmentsPage() {
       setIsLoading(false)
     }
   }, [])
+
+  // Dynamic fetch when opening student submissions drawer
+  const handleOpenSubmissions = async (assignment: Assignment) => {
+    setViewSubmissionsAssignment(assignment)
+    setSelectedSubmission(null)
+    try {
+      const res = await fetch(`/api/admin/assignments/${assignment.id}`, { cache: 'no-store' })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.assignment) {
+          setViewSubmissionsAssignment(data.assignment)
+        }
+      }
+    } catch (err) {
+      console.error('Erreur lors du chargement des remises :', err)
+    }
+  }
 
   useEffect(() => {
     fetchData()
@@ -549,6 +576,9 @@ export default function AdminAssignmentsPage() {
 
       showToastMsg('Note et correction enregistrées avec succès !')
       setSelectedSubmission(null)
+      if (viewSubmissionsAssignment) {
+        await handleOpenSubmissions(viewSubmissionsAssignment)
+      }
       await fetchData()
     } catch (err: any) {
       showToastMsg(err.message || 'Erreur lors de la notation', 'error')
@@ -871,10 +901,7 @@ export default function AdminAssignmentsPage() {
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
-                              onClick={() => {
-                                setViewSubmissionsAssignment(a)
-                                setSelectedSubmission(null)
-                              }}
+                              onClick={() => handleOpenSubmissions(a)}
                               className="group inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-100 transition"
                             >
                               <FileCheck className="h-4 w-4 text-[var(--admin-primary)]" />
@@ -987,10 +1014,7 @@ export default function AdminAssignmentsPage() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => {
-                          setViewSubmissionsAssignment(a)
-                          setSelectedSubmission(null)
-                        }}
+                        onClick={() => handleOpenSubmissions(a)}
                         className="font-bold text-[var(--admin-primary)] flex items-center gap-1"
                       >
                         <FileCheck className="h-3.5 w-3.5" />

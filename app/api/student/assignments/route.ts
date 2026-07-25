@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
           sessionId: assignment.sessionId,
           OR: [
             { studentId: student.id },
-            { email: student.email },
+            { email: { equals: student.email, mode: 'insensitive' } },
           ],
           status: {
             notIn: REJECTED_STATUSES,
@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
           formationId: assignment.formationId,
           OR: [
             { studentId: student.id },
-            { email: student.email },
+            { email: { equals: student.email, mode: 'insensitive' } },
           ],
           status: {
             notIn: REJECTED_STATUSES,
