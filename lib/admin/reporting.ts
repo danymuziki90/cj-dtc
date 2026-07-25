@@ -308,15 +308,19 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
         createdAt: true,
       },
     }),
-    prisma.studentSubmission.findMany({
+    prisma.submission.findMany({
       where: { status: 'pending' },
       orderBy: { createdAt: 'desc' },
       take: 8,
       select: {
         id: true,
-        title: true,
         status: true,
         createdAt: true,
+        assignment: {
+          select: {
+            title: true,
+          },
+        },
         student: {
           select: {
             firstName: true,
@@ -527,12 +531,12 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
     .filter((item) => item.absentCount >= 2)
     .sort((a, b) => b.absentCount - a.absentCount)
 
-  const portalQueue = portalPendingSubmissions.map((submission) => ({
+  const portalQueue = portalPendingSubmissions.map((submission: any) => ({
     id: submission.id,
     source: 'portal' as const,
-    title: submission.title,
-    studentName: `${submission.student.firstName} ${submission.student.lastName}`.trim(),
-    email: submission.student.email,
+    title: submission.assignment?.title || `Devoir #${submission.assignmentId}`,
+    studentName: `${submission.student?.firstName || ''} ${submission.student?.lastName || ''}`.trim(),
+    email: submission.student?.email || '',
     status: submission.status,
     createdAt: submission.createdAt.toISOString(),
   }))

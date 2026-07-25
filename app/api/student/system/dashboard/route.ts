@@ -76,13 +76,21 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      prisma.studentSubmission.findMany({
+      prisma.submission.findMany({
         where: { studentId: auth.student.id },
         orderBy: { createdAt: 'desc' },
+        include: {
+          assignment: {
+            select: {
+              title: true,
+            },
+          },
+          files: true,
+        },
       }),
-      prisma.studentCertificate.findMany({
+      prisma.certificate.findMany({
         where: { studentId: auth.student.id },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { issuedAt: 'desc' },
       }),
       prisma.certificate.findMany({
         where: {
@@ -424,18 +432,18 @@ export async function GET(request: NextRequest) {
     return acc
   }, {})
 
-  const mappedSubmissions = submissions.map((submission) => {
+  const mappedSubmissions = submissions.map((submission: any) => {
     const feedback = submissionFeedbackMap[submission.id]
     return {
       id: submission.id,
-      title: submission.title,
+      title: submission.assignment?.title || `Devoir #${submission.assignmentId}`,
       status: submission.status,
-      fileUrl: submission.fileUrl,
-      submittedAt: submission.createdAt,
+      fileUrl: submission.files?.[0]?.url || null,
+      submittedAt: submission.createdAt || submission.submittedAt,
       updatedAt: submission.updatedAt,
-      reviewFeedback: feedback?.feedback || null,
-      reviewedAt: feedback?.updatedAt || null,
-      reviewStatus: feedback?.status || null,
+      reviewFeedback: feedback?.feedback || submission.feedback || null,
+      reviewedAt: feedback?.updatedAt || submission.gradedAt || null,
+      reviewStatus: feedback?.status || submission.status || null,
     }
   })
 
@@ -504,12 +512,12 @@ export async function GET(request: NextRequest) {
       message: `Votre certificat officiel de formation pour "${item.formation?.title || 'votre formation'}" a été délivré.`,
       createdAt: new Date(item.issuedAt),
     })),
-    ...portalCertificates.map((item) => ({
+    ...portalCertificates.map((item: any) => ({
       id: `cert-issue-portal-${item.id}`,
       type: 'correction',
       title: 'Certificat disponible',
-      message: `Votre certificat de formation pour "${item.title || 'votre formation'}" est disponible.`,
-      createdAt: new Date(item.createdAt),
+      message: `Votre certificat de formation pour "${item.formation?.title || 'votre formation'}" est disponible.`,
+      createdAt: new Date(item.issuedAt),
     })),
     // 7. Actualités générales
     ...news.map((item) => ({
@@ -618,18 +626,18 @@ export async function GET(request: NextRequest) {
       source: 'certificate',
       fileUrl: certificate.fileUrl,
     })),
-    ...portalCertificates.map((certificate) => ({
+    ...portalCertificates.map((certificate: any) => ({
       id: `portal-${certificate.id}`,
-      code: certificate.id,
-      type: 'portal',
-      holderName: `${auth.student.firstName} ${auth.student.lastName}`.trim(),
-      issuedAt: certificate.createdAt,
-      verified: true,
-      formation: null,
-      session: null,
+      code: String(certificate.code || certificate.id),
+      type: certificate.type || 'portal',
+      holderName: certificate.holderName || `${auth.student.firstName} ${auth.student.lastName}`.trim(),
+      issuedAt: certificate.issuedAt,
+      verified: certificate.verified ?? true,
+      formation: certificate.formation || null,
+      session: certificate.session || null,
       source: 'student_certificate',
       fileUrl: certificate.fileUrl,
-      title: certificate.title,
+      title: certificate.formation?.title || certificate.type,
     })),
   ]
 

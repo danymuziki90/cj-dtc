@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     prisma.enrollment.count({
       where: { email: auth.student.email },
     }),
-    prisma.studentSubmission.count({
+    prisma.submission.count({
       where: { studentId: auth.student.id },
     }),
     prisma.certificate.count({

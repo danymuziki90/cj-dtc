@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.student.count(),
-      prisma.studentSubmission.groupBy({
+      prisma.submission.groupBy({
         by: ['status'],
         _count: {
           status: true,
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     totalAvailableSpots += Math.max(0, (session.maxParticipants || 0) - (session.currentParticipants || 0))
   }
 
-  const submissionsByStatus = submissions.reduce<Record<string, number>>((acc, row) => {
+  const submissionsByStatus = submissions.reduce<Record<string, number>>((acc: Record<string, number>, row: any) => {
     acc[row.status] = row._count.status
     return acc
   }, {})
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       sessions: sessions.length,
       students: studentsCount,
       availableSpots: totalAvailableSpots,
-      submissions: submissions.reduce((sum, row) => sum + row._count.status, 0),
+      submissions: submissions.reduce((sum: number, row: any) => sum + row._count.status, 0),
       submissionsPending: submissionsByStatus.pending || 0,
       submissionsValidated: submissionsByStatus.approved || 0,
       certificates: certificatesCount,

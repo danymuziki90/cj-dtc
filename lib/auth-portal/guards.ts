@@ -104,7 +104,6 @@ export async function requireStudent(request: NextRequest) {
       city: true,
       country: true,
       createdAt: true,
-      adminSessionId: true,
     },
   })
 

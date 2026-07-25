@@ -52,40 +52,32 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       studentNumber: true,
       createdAt: true,
       updatedAt: true,
-      adminSession: {
+      enrollments: {
+        take: 1,
         select: {
-          id: true,
-          title: true,
-          startDate: true,
-          endDate: true,
-        },
-      },
-      portalSubmissions: {
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          title: true,
-          fileUrl: true,
-          status: true,
-          createdAt: true,
-          updatedAt: true,
           session: {
             select: {
               id: true,
-              title: true,
               startDate: true,
               endDate: true,
             },
           },
         },
       },
-      portalCertificates: {
+      submissions: {
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,
-          title: true,
-          fileUrl: true,
-          createdAt: true,
+          status: true,
+          submittedAt: true,
+          updatedAt: true,
+          session: {
+            select: {
+              id: true,
+              startDate: true,
+              endDate: true,
+            },
+          },
         },
       },
     },
@@ -256,8 +248,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       activeEnrollments: enrollments.filter((item) => ['pending', 'accepted', 'confirmed'].includes(item.status)).length,
       settledEnrollments: 0,
       pendingPayments: 0,
-      submissionsCount: student.portalSubmissions.length,
-      certificatesCount: student.portalCertificates.length + issuedCertificates.length,
+      submissionsCount: (student as any).submissions?.length || 0,
+      certificatesCount: issuedCertificates.length,
       notificationsCount: notifications.length,
       attendanceCount: attendance.length,
     },
@@ -275,20 +267,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     })),
     payments,
     attendance,
-    submissions: student.portalSubmissions,
+    submissions: (student as any).submissions || [],
     results,
     notes,
     certificates: [
-      ...student.portalCertificates.map((certificate) => ({
-        id: certificate.id,
-        title: certificate.title,
-        type: 'portal',
-        code: certificate.id,
-        issuedAt: certificate.createdAt,
-        verified: true,
-        fileUrl: certificate.fileUrl,
-        formationTitle: null,
-      })),
       ...issuedCertificates.map((certificate) => ({
         id: String(certificate.id),
         title: certificate.formation?.title || certificate.type,
@@ -296,7 +278,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         code: certificate.code,
         issuedAt: certificate.issuedAt,
         verified: certificate.verified,
-        fileUrl: null,
+        fileUrl: certificate.fileUrl,
         formationTitle: certificate.formation?.title || null,
       })),
     ],
@@ -324,7 +306,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       email: true,
       username: true,
       status: true,
-      adminSessionId: true,
     },
   })
 
@@ -333,9 +314,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const assignedSession = parsed.data.sessionId
-    ? await prisma.adminTrainingSession.findUnique({
-        where: { id: parsed.data.sessionId },
-        select: { id: true, title: true },
+    ? await prisma.trainingSession.findUnique({
+        where: { id: Number(parsed.data.sessionId) },
+        select: { id: true, formation: { select: { title: true } } },
       })
     : null
 
@@ -349,7 +330,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     lastName,
     email: parsed.data.email.trim().toLowerCase(),
     username: parsed.data.username,
-    adminSessionId: assignedSession?.id || null,
   }
 
   if (parsed.data.status) {
@@ -369,7 +349,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     email: string
     username: string | null
     status: string
-    adminSessionId: string | null
     updatedAt: Date
   }
 
@@ -384,7 +363,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         email: true,
         username: true,
         status: true,
-        adminSessionId: true,
         updatedAt: true,
       },
     })
@@ -408,7 +386,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           username: student.username,
           password: generatedPassword,
           appBaseUrl: resolveAppBaseUrl(request.url),
-          sessionTitle: assignedSession?.title || null,
+          sessionTitle: assignedSession?.formation?.title || null,
         })
       )
       credentialsEmailSent = true
@@ -426,8 +404,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     nextUsername: student.username,
     previousStatus: existingStudent.status,
     nextStatus: student.status,
-    previousAdminSessionId: existingStudent.adminSessionId,
-    nextAdminSessionId: student.adminSessionId,
+    sessionId: assignedSession?.id || null,
     credentialsEmailSent,
   }
 
@@ -462,7 +439,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   if (
     student.email !== existingStudent.email ||
     student.username !== existingStudent.username ||
-    student.adminSessionId !== existingStudent.adminSessionId ||
     student.firstName !== existingStudent.firstName ||
     student.lastName !== existingStudent.lastName
   ) {

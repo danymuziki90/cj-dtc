@@ -15,9 +15,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (auth.error) return auth.error
 
   const { id } = await params
-  const session = await prisma.adminTrainingSession.findUnique({
-    where: { id },
-    include: { _count: { select: { students: true, submissions: true } } },
+  const numericId = Number(id)
+  const session = await prisma.trainingSession.findUnique({
+    where: { id: numericId },
+    include: { _count: { select: { enrollments: true, submissions: true } } },
   })
 
   if (!session) {
@@ -32,6 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   if (auth.error) return auth.error
 
   const { id } = await params
+  const numericId = Number(id)
   const parsed = updateSessionSchema.safeParse(await request.json())
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid payload', details: parsed.error.flatten() }, { status: 400 })
@@ -43,10 +45,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'endDate must be greater than startDate' }, { status: 400 })
   }
 
-  const session = await prisma.adminTrainingSession.update({
-    where: { id },
+  const session = await prisma.trainingSession.update({
+    where: { id: numericId },
     data: {
-      title: parsed.data.title,
       description: parsed.data.description,
       startDate,
       endDate,
@@ -61,6 +62,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   if (auth.error) return auth.error
 
   const { id } = await params
-  await prisma.adminTrainingSession.delete({ where: { id } })
+  const numericId = Number(id)
+  await prisma.trainingSession.delete({ where: { id: numericId } })
   return NextResponse.json({ success: true })
 }

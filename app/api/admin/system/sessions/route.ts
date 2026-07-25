@@ -14,12 +14,13 @@ export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request)
   if (auth.error) return auth.error
 
-  const sessions = await prisma.adminTrainingSession.findMany({
+  const sessions = await prisma.trainingSession.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
+      formation: { select: { id: true, title: true } },
       _count: {
         select: {
-          students: true,
+          enrollments: true,
           submissions: true,
         },
       },
@@ -45,12 +46,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'endDate must be greater than startDate' }, { status: 400 })
   }
 
-  const session = await prisma.adminTrainingSession.create({
+  // Ensure default formation exists or fetch first formation
+  const formation = await prisma.formation.findFirst()
+  if (!formation) {
+    return NextResponse.json({ error: 'No formation available to attach session.' }, { status: 400 })
+  }
+
+  const session = await prisma.trainingSession.create({
     data: {
-      title: parsed.data.title,
+      formationId: formation.id,
       description: parsed.data.description,
       startDate,
       endDate,
+      startTime: '09:00',
+      endTime: '17:00',
+      format: 'presentiel',
     },
   })
 
