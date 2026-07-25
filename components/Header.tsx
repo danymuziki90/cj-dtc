@@ -626,9 +626,9 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href={`/${locale}/contact`}
-              className="border-2 border-white/90 text-white bg-white/5 hover:bg-white hover:text-slate-950 hover:border-white rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
+              className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border-2 border-[var(--cj-red)] hover:border-[var(--cj-red-700)] text-white rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-md shadow-red-900/30 hover:shadow-xl hover:shadow-red-900/50 transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
             >
-              <Mail className="h-3.5 w-3.5 text-[var(--cj-red)] transition-colors group-hover:text-slate-950" />
+              <Mail className="h-3.5 w-3.5 text-white transition-colors" />
               <span>{labels.contact}</span>
             </Link>
           </div>
