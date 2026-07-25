@@ -184,12 +184,15 @@ export async function GET(request: NextRequest) {
     new Set(activeEnrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value)))
   )
 
-  const rawAssignments = sessionIds.length > 0
+  const rawAssignments = (sessionIds.length > 0 || formationIds.length > 0)
     ? await prisma.assignment.findMany({
         where: {
-          sessionId: { in: sessionIds },
           published: true,
           status: { in: ['publie', 'published'] },
+          OR: [
+            ...(sessionIds.length ? [{ sessionId: { in: sessionIds } }] : []),
+            ...(formationIds.length ? [{ formationId: { in: formationIds }, sessionId: null }] : []),
+          ],
         },
         include: {
           formation: { select: { title: true } },

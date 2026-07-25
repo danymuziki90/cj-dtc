@@ -16,32 +16,38 @@ export async function GET(request: NextRequest) {
       where: {
         OR: [
           { studentId: student.id },
-          { email: student.email },
+          { email: { equals: student.email, mode: 'insensitive' } },
         ],
         status: {
           in: ['accepted', 'confirmed', 'completed', 'ACCEPTED', 'CONFIRMED', 'COMPLETED', 'ACTIVE', 'active'],
         },
       },
-      select: { sessionId: true },
+      select: { sessionId: true, formationId: true },
     })
 
     const enrolledSessionIds = new Set<number>()
+    const enrolledFormationIds = new Set<number>()
     for (const e of activeEnrollments) {
       if (e.sessionId) enrolledSessionIds.add(e.sessionId)
+      if (e.formationId) enrolledFormationIds.add(e.formationId)
     }
 
     const sessionIdsList = Array.from(enrolledSessionIds)
+    const formationIdsList = Array.from(enrolledFormationIds)
 
-    if (sessionIdsList.length === 0) {
+    if (sessionIdsList.length === 0 && formationIdsList.length === 0) {
       return NextResponse.json([])
     }
 
-    // 2. Fetch published assignments for those sessions only
+    // 2. Fetch published assignments for those sessions or formation-level assignments
     const assignments = await prisma.assignment.findMany({
       where: {
-        sessionId: { in: sessionIdsList },
         published: true,
         status: { in: ['publie', 'published'] },
+        OR: [
+          ...(sessionIdsList.length ? [{ sessionId: { in: sessionIdsList } }] : []),
+          ...(formationIdsList.length ? [{ formationId: { in: formationIdsList }, sessionId: null }] : []),
+        ],
       },
       orderBy: { deadline: 'asc' },
       include: {
