@@ -30,12 +30,6 @@ export async function GET(request: NextRequest) {
       if (e.sessionId) enrolledSessionIds.add(e.sessionId)
     }
 
-    // Also check student.adminSessionId if applicable
-    if (student.adminSessionId) {
-      const parsedAdminId = parseInt(student.adminSessionId, 10)
-      if (!isNaN(parsedAdminId)) enrolledSessionIds.add(parsedAdminId)
-    }
-
     const sessionIdsList = Array.from(enrolledSessionIds)
 
     if (sessionIdsList.length === 0) {
@@ -176,9 +170,7 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      const isDirectAdminSession = student.adminSessionId && parseInt(student.adminSessionId, 10) === assignment.sessionId
-
-      if (!enrollment && !isDirectAdminSession) {
+      if (!enrollment) {
         return NextResponse.json(
           { success: false, error: 'Vous n’êtes pas inscrit ou votre inscription n’a pas encore été acceptée pour cette session.' },
           { status: 403 }

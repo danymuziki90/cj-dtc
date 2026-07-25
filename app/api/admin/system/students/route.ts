@@ -131,7 +131,12 @@ function buildStudentWhere(params: { search: string; status: string; sessionId: 
   }
 
   if (params.sessionId) {
-    where.adminSessionId = params.sessionId
+    const numericSessionId = Number(params.sessionId)
+    if (!isNaN(numericSessionId)) {
+      where.enrollments = {
+        some: { sessionId: numericSessionId },
+      }
+    }
   }
 
   if (params.search) {
@@ -173,12 +178,16 @@ export async function GET(request: NextRequest) {
         username: true,
         status: true,
         createdAt: true,
-        adminSession: {
+        enrollments: {
+          take: 1,
           select: {
-            id: true,
-            title: true,
-            startDate: true,
-            endDate: true,
+            session: {
+              select: {
+                id: true,
+                startDate: true,
+                endDate: true,
+              },
+            },
           },
         },
       },
@@ -275,9 +284,9 @@ export async function POST(request: NextRequest) {
     }
 
     const assignedSession = sessionId
-      ? await prisma.adminTrainingSession.findUnique({
-          where: { id: sessionId },
-          select: { id: true, title: true },
+      ? await prisma.trainingSession.findUnique({
+          where: { id: Number(sessionId) },
+          select: { id: true, formation: { select: { title: true } } },
         })
       : null
 
@@ -299,7 +308,7 @@ export async function POST(request: NextRequest) {
         status: 'blocked',
         metadata: {
           email: normalizedEmail,
-          adminSessionId: assignedSession?.id || null,
+          sessionId: assignedSession?.id || null,
           reason: 'missing_paid_enrollment',
         },
       })
@@ -319,7 +328,7 @@ export async function POST(request: NextRequest) {
         status: 'blocked',
         metadata: {
           email: normalizedEmail,
-          adminSessionId: assignedSession?.id || null,
+          sessionId: assignedSession?.id || null,
           enrollmentId: latestEnrollment.id,
           enrollmentStatus: latestEnrollment.status,
           formationTitle: latestEnrollment.formation.title,
@@ -364,7 +373,6 @@ export async function POST(request: NextRequest) {
         studentNumber: generateStudentNumber(),
         status: 'ACTIVE',
         role: 'STUDENT',
-        adminSessionId: assignedSession?.id || null,
       },
       select: {
         id: true,
@@ -374,7 +382,6 @@ export async function POST(request: NextRequest) {
         username: true,
         status: true,
         createdAt: true,
-        adminSessionId: true,
       },
     })
 
@@ -400,7 +407,7 @@ export async function POST(request: NextRequest) {
           username,
           password: plainPassword,
           appBaseUrl: resolveAppBaseUrl(request.url),
-          sessionTitle: assignedSession?.title || null,
+          sessionTitle: assignedSession?.formation?.title || null,
         })
       )
       credentialsEmailSent = true
@@ -421,7 +428,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         email: student.email,
         username: student.username,
-        adminSessionId: student.adminSessionId,
+        sessionId: assignedSession?.id || null,
         credentialsEmailSent,
         manualCredentials: Boolean(manualUsername || providedPassword),
       },
