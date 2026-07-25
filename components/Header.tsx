@@ -108,7 +108,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
       href={href}
       aria-current={isActive ? 'page' : undefined}
       className={`
-        relative rounded-lg px-3.5 py-2 text-xs font-extrabold uppercase tracking-wider transition-all duration-200
+        relative rounded-lg px-3.5 py-2 text-sm font-semibold tracking-normal transition-all duration-200
         ${isActive
           ? 'text-[var(--cj-red)]'
           : 'text-slate-200 hover:bg-slate-800/80 hover:text-white'
@@ -161,7 +161,7 @@ function DesktopDropdown({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-extrabold uppercase tracking-wider text-slate-200 transition-colors hover:bg-slate-800 hover:text-white"
+        className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold tracking-normal text-slate-200 transition-colors hover:bg-slate-800 hover:text-white"
       >
         <span>{label}</span>
         <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-white' : ''}`} />
@@ -457,6 +457,15 @@ export default function Header() {
                 className="text-slate-400 transition-colors hover:text-blue-500"
               >
                 <Linkedin className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube CJ DTC"
+                className="text-slate-400 transition-colors hover:text-red-500"
+              >
+                <Youtube className="h-3.5 w-3.5" />
               </a>
               <a
                 href="https://wa.me/243810000000"
