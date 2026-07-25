@@ -527,18 +527,16 @@ export default function Header() {
                 },
               ]}
             />
-
-            <NavLink href={`/${locale}/contact`} label={labels.contact} />
           </nav>
 
           {/* Right Action Pill Button (Desktop lg:flex) */}
           <div className="hidden lg:flex items-center gap-3">
             <Link
-              href={`/${locale}/espace-etudiants`}
+              href={`/${locale}/contact`}
               className="group relative inline-flex items-center gap-2 rounded-full border-2 border-white/90 bg-transparent px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg transition-all duration-300 hover:bg-white hover:text-slate-950 hover:border-white hover:shadow-xl hover:shadow-white/20 active:scale-95"
             >
-              <UserCheck className="h-4 w-4 text-[var(--cj-red)] transition-colors group-hover:text-[var(--cj-blue)]" />
-              <span>{labels.studentSpace}</span>
+              <Mail className="h-4 w-4 text-[var(--cj-red)] transition-colors group-hover:text-[var(--cj-blue)]" />
+              <span>{labels.contact}</span>
             </Link>
           </div>
 
