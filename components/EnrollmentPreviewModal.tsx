@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ProgramSessionType } from '@/lib/programmes/session-types'
 import { inferProgramSessionType } from '@/lib/programmes/session-types'
+import { getEnrollmentStatusLabel, getEnrollmentStatusTone } from '@/lib/enrollment/status-helpers'
 import EnrollmentStatusChanger from './EnrollmentStatusChanger'
 import { FormattedDate } from './FormattedDate'
 import {
@@ -290,23 +291,7 @@ function inferTypeFromEnrollment(enrollment: Enrollment): ProgramSessionType {
 
 
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'En attente',
-  accepted: 'Accepté',
-  rejected: 'Refusé',
-  waitlist: 'En liste d\'attente',
-  cancelled: 'Annulé',
-  confirmed: 'Confirmé',
-  completed: 'Terminé'
-}
 
-function enrollmentStatusTone(status: string): 'warning' | 'success' | 'danger' | 'neutral' | 'primary' {
-  if (status === 'accepted') return 'success'
-  if (status === 'confirmed' || status === 'completed') return 'primary'
-  if (status === 'rejected') return 'danger'
-  if (status === 'pending' || status === 'waitlist') return 'warning'
-  return 'neutral'
-}
 
 export default function EnrollmentPreviewModal({
   enrollment,
@@ -490,7 +475,7 @@ export default function EnrollmentPreviewModal({
                 Inscription #{record.id} - {record.firstName} {record.lastName}
               </h2>
               <div className="mt-2.5 flex flex-wrap gap-1.5 sm:gap-2">
-                <AdminBadge tone={enrollmentStatusTone(record.status)}>{record.status}</AdminBadge>
+                <AdminBadge tone={getEnrollmentStatusTone(record.status)}>{getEnrollmentStatusLabel(record.status)}</AdminBadge>
                 {record.account ? <AdminBadge tone={record.account.tone}>{record.account.label}</AdminBadge> : null}
                 <AdminBadge tone="neutral">{record.formation.title}</AdminBadge>
               </div>
@@ -716,8 +701,8 @@ export default function EnrollmentPreviewModal({
                       <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-blue-600" />
                       <div className="space-y-1">
                         <p className="font-extrabold text-slate-800">
-                          Statut : <span className="text-slate-500 font-semibold">{STATUS_LABELS[entry.fromStatus] || entry.fromStatus}</span> →{' '}
-                          <span className="text-blue-600 font-bold">{STATUS_LABELS[entry.toStatus] || entry.toStatus}</span>
+                          Statut : <span className="text-slate-500 font-semibold">{getEnrollmentStatusLabel(entry.fromStatus)}</span> →{' '}
+                          <span className="text-blue-600 font-bold">{getEnrollmentStatusLabel(entry.toStatus)}</span>
                         </p>
                         {entry.reason && (
                           <p className="text-slate-650 bg-slate-50 border border-slate-200 rounded-lg p-2 mt-1">

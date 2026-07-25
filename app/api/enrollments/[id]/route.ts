@@ -76,16 +76,7 @@ export async function PUT(
       })
     }
 
-    // confirmPayment supprimé — refonte 2026
-    if (action === 'confirmPayment') {
-      return NextResponse.json(
-        {
-          error:
-            "L'action confirmPayment a été supprimée. La gestion des paiements n'est plus dans le périmètre admin.",
-        },
-        { status: 410 },
-      )
-    }
+
 
     if (
       status &&

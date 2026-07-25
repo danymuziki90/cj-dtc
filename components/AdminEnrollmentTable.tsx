@@ -48,38 +48,12 @@ export interface EnrollmentRow {
   } | null
 }
 
+import { getEnrollmentStatusLabel, getEnrollmentStatusTone } from '@/lib/enrollment/status-helpers'
+
 interface AdminEnrollmentTableProps {
   enrollments: EnrollmentRow[]
   groupBy: 'formation' | 'date'
   onPreview?: (enrollment: EnrollmentRow) => void
-}
-
-function enrollmentStatusTone(status: string) {
-  const map: Record<string, 'warning' | 'success' | 'danger' | 'neutral' | 'primary'> = {
-    pending: 'warning',
-    accepted: 'success',
-    rejected: 'danger',
-    confirmed: 'primary',
-    completed: 'primary',
-    waitlist: 'warning',
-    cancelled: 'neutral',
-  }
-
-  return map[status] || 'neutral'
-}
-
-function enrollmentStatusLabel(status: string) {
-  const map: Record<string, string> = {
-    pending: 'En attente',
-    accepted: 'Acceptee',
-    rejected: 'Rejetee',
-    confirmed: 'Confirmee',
-    completed: 'Terminee',
-    waitlist: 'Liste attente',
-    cancelled: 'Annulee',
-  }
-
-  return map[status] || status
 }
 
 function buildDateKey(dateValue: string) {
@@ -184,8 +158,8 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                             )}
                           </td>
                           <td className="px-4 py-4">
-                            <AdminBadge tone={enrollmentStatusTone(enrollment.status)}>
-                                {enrollmentStatusLabel(enrollment.status)}
+                            <AdminBadge tone={getEnrollmentStatusTone(enrollment.status)}>
+                                {getEnrollmentStatusLabel(enrollment.status)}
                             </AdminBadge>
                           </td>
                           <td className="px-4 py-4 text-slate-700">
@@ -254,8 +228,8 @@ export default function AdminEnrollmentTable({ enrollments, groupBy, onPreview }
                         <p className="text-base font-semibold text-slate-950">
                           {enrollment.firstName} {enrollment.lastName}
                         </p>
-                        <AdminBadge tone={enrollmentStatusTone(enrollment.status)}>
-                          {enrollmentStatusLabel(enrollment.status)}
+                        <AdminBadge tone={getEnrollmentStatusTone(enrollment.status)}>
+                          {getEnrollmentStatusLabel(enrollment.status)}
                         </AdminBadge>
                         {enrollment.account ? (
                           <AdminBadge tone={enrollment.account.tone}>{enrollment.account.label}</AdminBadge>

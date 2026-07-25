@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { getEnrollmentStatusLabel, getEnrollmentStatusTone } from '@/lib/enrollment/status-helpers'
 import { AdminBadge, adminDangerButtonClassName, adminPrimaryButtonClassName, adminSecondaryButtonClassName, adminTextareaClassName } from '@/components/admin-portal/ui'
 
 interface EnrollmentActionProps {
@@ -9,38 +11,6 @@ interface EnrollmentActionProps {
   email: string
   formationTitle: string
   onStatusChanged?: (newStatus: string) => void
-}
-
-function getStatusTone(status: string): 'warning' | 'success' | 'danger' | 'neutral' | 'primary' {
-  switch (status) {
-    case 'pending':
-      return 'warning'
-    case 'accepted':
-      return 'success'
-    case 'confirmed':
-      return 'primary'
-    case 'rejected':
-      return 'danger'
-    default:
-      return 'neutral'
-  }
-}
-
-function getStatusLabel(status: string) {
-  switch (status) {
-    case 'pending':
-      return 'En attente'
-    case 'accepted':
-      return 'Accepte'
-    case 'confirmed':
-      return 'Confirme'
-    case 'rejected':
-      return 'Rejete'
-    case 'cancelled':
-      return 'Annule'
-    default:
-      return status
-  }
 }
 
 export default function EnrollmentStatusChanger({
@@ -82,10 +52,13 @@ export default function EnrollmentStatusChanger({
       setSuccess(true)
       setTargetStatusToConfirm(null)
       setDecisionReason('')
+      toast.success(`Statut mis à jour : ${getEnrollmentStatusLabel(newStatus)}`)
       onStatusChanged?.(newStatus)
       window.setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inattendue.')
+      const errMsg = err instanceof Error ? err.message : 'Erreur inattendue.'
+      setError(errMsg)
+      toast.error(errMsg)
     } finally {
       setSubmitting(false)
     }
@@ -100,7 +73,7 @@ export default function EnrollmentStatusChanger({
   return (
     <div className="space-y-3 font-sans">
       <div className="flex flex-wrap items-center gap-2">
-        <AdminBadge tone={getStatusTone(status)}>{getStatusLabel(status)}</AdminBadge>
+        <AdminBadge tone={getEnrollmentStatusTone(status)}>{getEnrollmentStatusLabel(status)}</AdminBadge>
         <span className="text-xs text-slate-500 font-bold">Email cible : {email}</span>
       </div>
 
@@ -117,7 +90,7 @@ export default function EnrollmentStatusChanger({
       {targetStatusToConfirm ? (
         <div className="rounded-[24px] border border-blue-100 bg-blue-50/50 p-4 space-y-3">
           <p className="text-xs font-black text-slate-900">
-            Confirmations : Modifier le statut vers « <span className="text-blue-700 font-black">{getStatusLabel(targetStatusToConfirm)}</span> » ?
+            Confirmations : Modifier le statut vers « <span className="text-blue-700 font-black">{getEnrollmentStatusLabel(targetStatusToConfirm)}</span> » ?
           </p>
           <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
             Un e-mail automatique utilisant le modèle de communication personnalisé sera transmis au candidat ({email}).

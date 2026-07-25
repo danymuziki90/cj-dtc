@@ -1098,3 +1098,34 @@ a:hover {
   letter-spacing: -0.02em;
 }
 
+/* Print optimization for Admin tables */
+@media print {
+  header,
+  aside,
+  nav,
+  button:not(.print-keep),
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  main, .admin-panel {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  th, td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+  }
+}
+
+

@@ -176,10 +176,8 @@ export default function EnrollmentsPage() {
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            <AdminBadge tone="primary">{pagination.totalItems} dossier(s)</AdminBadge>
-            <AdminBadge tone="neutral">{viewMode === 'formation' ? 'Vue formation' : 'Vue date'}</AdminBadge>
-            <AdminBadge tone="success">{formations.length} formation(s)</AdminBadge>
-            <AdminBadge tone="primary">{stats.byAccountStatus.active || 0} compte(s) actif(s)</AdminBadge>
+            <AdminBadge tone="neutral">{viewMode === 'formation' ? 'Vue par formation' : 'Vue par date'}</AdminBadge>
+            <AdminBadge tone="success">{stats.byAccountStatus.active || 0} compte(s) actif(s)</AdminBadge>
           </div>
         </div>
 
