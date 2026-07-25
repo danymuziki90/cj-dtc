@@ -1,0 +1,38 @@
+stAméliore complètement le **menu mobile (hamburger)** de mon site en lui donnant un design moderne, fluide et professionnel.
+
+### Design
+
+* Adopter un style premium, moderne et responsive.
+* Respecter l'identité visuelle du site (couleurs, typographie et icônes).
+* Ajouter un arrière-plan élégant avec un léger effet de flou (glassmorphism) ou une couleur adaptée au thème.
+* Espacer correctement les éléments du menu.
+* Ajouter des icônes à côté de chaque lien de navigation.
+* Mettre en évidence la page active.
+
+
+### Animations
+
+* Ajouter une animation fluide lors de l'ouverture et de la fermeture du menu.
+* Faire glisser le menu depuis le côté (slide-in) avec un effet d'accélération/décélération naturel.
+* Ajouter un fondu (fade) sur l'arrière-plan.
+* Animer chaque lien avec un léger décalage (stagger animation) lors de l'ouverture.
+* Ajouter un effet de survol (hover) et de pression (tap/click) sur chaque élément.
+* Transformer l'icône hamburger en icône **X** avec une animation fluide.
+* Fermer automatiquement le menu lorsqu'un lien est sélectionné.
+
+### Expérience utilisateur (UX)
+
+* Empêcher le défilement de la page lorsque le menu est ouvert.
+* Permettre la fermeture du menu en cliquant à l'extérieur ou en appuyant sur la touche **Échap**.
+* Assurer une navigation fluide sur tous les appareils mobiles et tablettes.
+* Garantir une excellente accessibilité (navigation au clavier, attributs ARIA, gestion du focus).
+
+### Performance
+
+* Utiliser des animations optimisées (CSS ou Framer Motion).
+* Éviter les ralentissements et les re-rendus inutiles.
+* Assurer une compatibilité avec tous les navigateurs modernes.
+
+### Résultat attendu
+
+Le menu mobile doit offrir une expérience comparable à celle des sites professionnels modernes (Apple, Stripe, Vercel ou Airbnb), avec une ouverture fluide, des animations élégantes, un design soigné et une excellente ergonomie sur smartphone.
