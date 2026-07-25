@@ -154,15 +154,26 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    if (!assignment || !assignment.published || assignment.status === 'brouillon' || assignment.status === 'archive') {
+    if (!assignment) {
       return NextResponse.json(
-        { success: false, error: 'Le devoir sélectionné est introuvable ou non disponible.' },
+        { success: false, error: 'Le devoir sélectionné est introuvable. Veuillez actualiser la page et réessayer.' },
         { status: 404 }
       )
     }
 
-    // Verify student enrollment in assignment session
+    // A devoir is available if published=true AND status is not draft/archived
+    const BLOCKED_STATUSES = ['brouillon', 'archive', 'draft', 'archived']
+    if (!assignment.published || BLOCKED_STATUSES.includes(assignment.status?.toLowerCase() || '')) {
+      return NextResponse.json(
+        { success: false, error: 'Ce devoir n\'est plus disponible au dépôt (brouillon ou archivé).' },
+        { status: 403 }
+      )
+    }
+
+    // Verify student enrollment in assignment session (if session-scoped)
     if (assignment.sessionId) {
+      // Accept any non-rejected, non-cancelled enrollment status
+      const REJECTED_STATUSES = ['rejected', 'cancelled', 'REJECTED', 'CANCELLED', 'annulee', 'rejete', 'refuse']
       const enrollment = await prisma.enrollment.findFirst({
         where: {
           sessionId: assignment.sessionId,
@@ -171,14 +182,36 @@ export async function POST(request: NextRequest) {
             { email: student.email },
           ],
           status: {
-            in: ['accepted', 'confirmed', 'completed', 'ACCEPTED', 'CONFIRMED', 'COMPLETED', 'ACTIVE', 'active'],
+            notIn: REJECTED_STATUSES,
           },
         },
       })
 
       if (!enrollment) {
         return NextResponse.json(
-          { success: false, error: 'Vous n’êtes pas inscrit ou votre inscription n’a pas encore été acceptée pour cette session.' },
+          { success: false, error: 'Vous n\'êtes pas inscrit à la session associée à ce devoir. Veuillez contacter l\'administration.' },
+          { status: 403 }
+        )
+      }
+    } else if (assignment.formationId) {
+      // Formation-level assignment: check enrollment in any session of this formation
+      const REJECTED_STATUSES = ['rejected', 'cancelled', 'REJECTED', 'CANCELLED', 'annulee', 'rejete', 'refuse']
+      const enrollment = await prisma.enrollment.findFirst({
+        where: {
+          formationId: assignment.formationId,
+          OR: [
+            { studentId: student.id },
+            { email: student.email },
+          ],
+          status: {
+            notIn: REJECTED_STATUSES,
+          },
+        },
+      })
+
+      if (!enrollment) {
+        return NextResponse.json(
+          { success: false, error: 'Vous n\'êtes pas inscrit à la formation associée à ce devoir. Veuillez contacter l\'administration.' },
           { status: 403 }
         )
       }
