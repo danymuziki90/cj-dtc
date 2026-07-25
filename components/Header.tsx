@@ -367,12 +367,6 @@ export default function Header() {
             icon: Newspaper,
           },
           {
-            href: `/${locale}/galerie`,
-            label: labels.galerie,
-            description: locale === 'fr' ? 'Photos de nos campus et événements' : 'Photos of our campus and events',
-            icon: ImageIcon,
-          },
-          {
             href: `/${locale}/partenaires`,
             label: labels.partners,
             description: locale === 'fr' ? 'Nos entreprises et institutions partenaires' : 'Our partner companies & institutions',
@@ -509,7 +503,6 @@ export default function Header() {
             <NavLink href={`/sessions`} label={labels.sessions} />
             <NavLink href={`/${locale}/entreprises`} label={labels.entreprises} />
             <NavLink href={`/${locale}/actualites`} label={labels.news} />
-            <NavLink href={`/${locale}/galerie`} label={labels.galerie} />
 
             {/* Dropdown Menu for Student Space */}
             <DesktopDropdown
