@@ -128,17 +128,37 @@ export async function POST(request: NextRequest) {
   const student = auth.student
 
   try {
-    const formData = await request.formData()
-    const assignmentIdVal = formData.get('assignmentId')
+    let assignmentId: number
+    let preUploadedFiles: Array<{ name: string; originalName: string; size: number; mimeType?: string; url: string; key?: string }> = []
+    let filesToUpload: { file: File; buffer: Buffer }[] = []
 
-    if (!assignmentIdVal) {
-      return NextResponse.json(
-        { success: false, error: 'Identifiant du travail manquant' },
-        { status: 400 }
-      )
+    const contentType = request.headers.get('content-type') || ''
+
+    if (contentType.includes('application/json')) {
+      const body = await request.json()
+      assignmentId = parseInt(String(body.assignmentId), 10)
+      if (Array.isArray(body.files)) {
+        preUploadedFiles = body.files
+      }
+    } else {
+      const formData = await request.formData()
+      const assignmentIdVal = formData.get('assignmentId')
+      assignmentId = parseInt(String(assignmentIdVal), 10)
+
+      const entries = Array.from(formData.entries())
+      for (const [key, value] of entries) {
+        if ((key.startsWith('file_') || key === 'files' || key === 'file') && value instanceof File) {
+          if (value.size > 0) {
+            const arrayBuffer = await value.arrayBuffer()
+            filesToUpload.push({
+              file: value,
+              buffer: Buffer.from(arrayBuffer),
+            })
+          }
+        }
+      }
     }
 
-    const assignmentId = parseInt(String(assignmentIdVal), 10)
     if (isNaN(assignmentId)) {
       return NextResponse.json(
         { success: false, error: 'Identifiant du travail invalide' },
@@ -172,7 +192,6 @@ export async function POST(request: NextRequest) {
 
     // Verify student enrollment in assignment session (if session-scoped)
     if (assignment.sessionId) {
-      // Accept any non-rejected, non-cancelled enrollment status
       const REJECTED_STATUSES = ['rejected', 'cancelled', 'REJECTED', 'CANCELLED', 'annulee', 'rejete', 'refuse']
       const enrollment = await prisma.enrollment.findFirst({
         where: {
@@ -194,7 +213,6 @@ export async function POST(request: NextRequest) {
         )
       }
     } else if (assignment.formationId) {
-      // Formation-level assignment: check enrollment in any session of this formation
       const REJECTED_STATUSES = ['rejected', 'cancelled', 'REJECTED', 'CANCELLED', 'annulee', 'rejete', 'refuse']
       const enrollment = await prisma.enrollment.findFirst({
         where: {
@@ -233,66 +251,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Extract files from formData
-    const filesToUpload: { file: File; buffer: Buffer }[] = []
-    const entries = Array.from(formData.entries())
-
-    for (const [key, value] of entries) {
-      if ((key.startsWith('file_') || key === 'files' || key === 'file') && value instanceof File) {
-        if (value.size > 0) {
-          const arrayBuffer = await value.arrayBuffer()
-          filesToUpload.push({
-            file: value,
-            buffer: Buffer.from(arrayBuffer),
-          })
-        }
-      }
-    }
-
-    if (filesToUpload.length === 0) {
+    const totalFilesCount = preUploadedFiles.length + filesToUpload.length
+    if (totalFilesCount === 0) {
       return NextResponse.json(
-        { success: false, error: 'Veuillez sélectionner au moins un fichier à téléverser.' },
+        { success: false, error: 'Veuillez sélectionner au moins un fichier téléversé à transmettre.' },
         { status: 400 }
       )
     }
 
     const maxAllowedFiles = assignment.maxFiles || 5
-    if (filesToUpload.length > maxAllowedFiles) {
+    if (totalFilesCount > maxAllowedFiles) {
       return NextResponse.json(
-        { success: false, error: `Vous ne pouvez pas téléverser plus de ${maxAllowedFiles} fichier(s).` },
+        { success: false, error: `Vous ne pouvez pas transmettre plus de ${maxAllowedFiles} fichier(s).` },
         { status: 400 }
       )
-    }
-
-    // Client-specified & Assignment max file size check
-    const maxBytes = assignment.maxFileSize * 1024 * 1024
-    const allowedTypesArray = assignment.allowedFileTypes
-      ? assignment.allowedFileTypes.split(',').map((t) => t.trim().toLowerCase().replace(/^\./, ''))
-      : ['pdf', 'doc', 'docx', 'zip', 'rar', 'png', 'jpg', 'jpeg']
-
-    for (const item of filesToUpload) {
-      if (item.file.size > maxBytes) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: `Le fichier "${item.file.name}" (${(item.file.size / 1024 / 1024).toFixed(
-              1
-            )} MB) dépasse la taille maximale autorisée de ${assignment.maxFileSize} MB.`,
-          },
-          { status: 400 }
-        )
-      }
-
-      const ext = item.file.name.split('.').pop()?.toLowerCase() || ''
-      if (allowedTypesArray.length > 0 && !allowedTypesArray.includes(ext)) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: `Le format de fichier .${ext} n'est pas autorisé pour "${item.file.name}". Formats acceptés : ${allowedTypesArray.join(', ')}.`,
-          },
-          { status: 400 }
-        )
-      }
     }
 
     let submissionId: number
@@ -336,7 +308,22 @@ export async function POST(request: NextRequest) {
       submissionId = newSub.id
     }
 
-    // Upload files to Cloudflare R2 and save in SubmissionFile table
+    // Save pre-uploaded files metadata in SubmissionFile table
+    for (const f of preUploadedFiles) {
+      await prisma.submissionFile.create({
+        data: {
+          submissionId,
+          name: f.name || f.originalName,
+          originalName: f.originalName,
+          size: f.size || 0,
+          mimeType: f.mimeType || 'application/octet-stream',
+          url: f.url,
+          key: f.key || null,
+        },
+      })
+    }
+
+    // Process direct FormData uploads (legacy / fallback)
     for (const item of filesToUpload) {
       const timestamp = Date.now()
       const sanitizedFilename = item.file.name.replace(/[^a-zA-Z0-9._-]/g, '_')

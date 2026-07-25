@@ -28,7 +28,7 @@ import {
   studentPrimaryButtonClassName,
   type StudentMetric,
 } from "@/components/ui/student-space";
-import { AssignmentSubmitModal } from "../_components/AssignmentSubmitModal";
+import { AssignmentSubmitModal, type UploadedFileData } from "../_components/AssignmentSubmitModal";
 import { getAssignmentStatus } from "../_components/utils";
 
 interface AssignmentFileItem {
@@ -98,7 +98,6 @@ function TravauxContent() {
 
   // Modal submission state
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
-  const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
   const [isSubmittingWork, setIsSubmittingWork] = useState(false);
   const [uploadErrorMessage, setUploadErrorMessage] = useState("");
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState("");
@@ -130,10 +129,9 @@ function TravauxContent() {
     }
   };
 
-  const handleAssignmentSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!selectedAssignment || !uploadFiles || uploadFiles.length === 0) {
-      setUploadErrorMessage("Veuillez choisir au moins un fichier à remettre.");
+  const handleAssignmentSubmit = async (uploadedFiles: UploadedFileData[]) => {
+    if (!selectedAssignment || !uploadedFiles || uploadedFiles.length === 0) {
+      setUploadErrorMessage("Veuillez téléverser au moins un fichier avant d'envoyer votre travail.");
       return;
     }
 
@@ -142,17 +140,15 @@ function TravauxContent() {
     setUploadSuccessMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append("assignmentId", String(selectedAssignment.id));
-      formData.append("fileCount", String(uploadFiles.length));
-
-      for (let i = 0; i < uploadFiles.length; i++) {
-        formData.append(`file_${i}`, uploadFiles[i]);
-      }
-
       const response = await fetch("/api/student/assignments", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assignmentId: selectedAssignment.id,
+          files: uploadedFiles,
+        }),
       });
 
       let resData: any = {};
@@ -160,20 +156,14 @@ function TravauxContent() {
       if (contentType.includes("application/json")) {
         resData = await response.json().catch(() => ({}));
       } else {
-        const rawText = await response.text().catch(() => "");
-        if (response.status === 413) {
-          resData = { error: "Le fichier sélectionné est trop volumineux." };
-        } else {
-          resData = { error: `Erreur serveur (code HTTP ${response.status}).` };
-        }
+        resData = { error: `Erreur serveur (code HTTP ${response.status}).` };
       }
 
       if (!response.ok || resData.success === false) {
-        throw new Error(resData.message || resData.error || "Échec de l'envoi.");
+        throw new Error(resData.message || resData.error || "Échec de l'envoi du travail.");
       }
 
       setUploadSuccessMessage("Votre travail a été déposé avec succès !");
-      setUploadFiles(null);
       await fetchAssignments();
 
       setTimeout(() => {
@@ -181,7 +171,7 @@ function TravauxContent() {
         setUploadSuccessMessage("");
       }, 1500);
     } catch (err: any) {
-      setUploadErrorMessage(err.message || "Erreur lors du dépôt de fichier.");
+      setUploadErrorMessage(err.message || "Erreur lors de l'enregistrement du dépôt.");
     } finally {
       setIsSubmittingWork(false);
     }
@@ -555,11 +545,14 @@ function TravauxContent() {
       {/* Upload Submission Modal */}
       <AssignmentSubmitModal
         selectedAssignment={selectedAssignment}
-        onClose={() => setSelectedAssignment(null)}
+        onClose={() => {
+          setSelectedAssignment(null);
+          setUploadErrorMessage("");
+          setUploadSuccessMessage("");
+        }}
         onSubmit={handleAssignmentSubmit}
         uploadErrorMessage={uploadErrorMessage}
         uploadSuccessMessage={uploadSuccessMessage}
-        setUploadFiles={setUploadFiles}
         isSubmittingWork={isSubmittingWork}
       />
     </StudentPageShell>
