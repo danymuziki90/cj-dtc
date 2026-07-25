@@ -14,12 +14,16 @@ import {
   Send,
   X,
   ChevronRight,
+  ChevronDown,
   Globe,
   ArrowUpRight,
   ShieldCheck,
   Linkedin,
   Facebook,
+  Youtube,
+  MessageCircle,
   Mail,
+  Phone,
   Headphones,
   Image as ImageIcon,
   Users,
@@ -78,7 +82,7 @@ function LanguageSwitcher({
             href={buildLocaleHref(pathname, search, option)}
             hrefLang={option}
             onClick={onNavigate}
-            className={`rounded-full px-3 py-1.5 text-xs font-bold tracking-[0.16em] transition-all duration-200 ${
+            className={`rounded-full px-3 py-1 text-xs font-bold tracking-[0.16em] transition-all duration-200 ${
               active
                 ? 'bg-[var(--cj-blue)] text-white shadow-md scale-105'
                 : darkVariant
@@ -95,7 +99,7 @@ function LanguageSwitcher({
   )
 }
 
-/** Desktop navigation link with animated active underline */
+/** Desktop navigation link with animated active underline & high-contrast dark theme */
 function NavLink({ href, label }: { href: string; label: string }) {
   const isActive = useActiveLink(href)
 
@@ -104,10 +108,10 @@ function NavLink({ href, label }: { href: string; label: string }) {
       href={href}
       aria-current={isActive ? 'page' : undefined}
       className={`
-        relative rounded-lg px-3.5 py-2 text-sm font-medium transition-colors duration-200
+        relative rounded-lg px-3.5 py-2 text-xs font-extrabold uppercase tracking-wider transition-all duration-200
         ${isActive
-          ? 'text-[var(--cj-red)] font-semibold'
-          : 'text-slate-700 hover:bg-slate-100/80 hover:text-[var(--cj-blue)]'
+          ? 'text-[var(--cj-red)]'
+          : 'text-slate-200 hover:bg-slate-800/80 hover:text-white'
         }
       `}
     >
@@ -125,29 +129,73 @@ function NavLink({ href, label }: { href: string; label: string }) {
   )
 }
 
-/** Desktop navigation contact CTA button */
-function NavLinkContact({ href, label }: { href: string; label: string }) {
-  const isActive = useActiveLink(href)
+/** Desktop navigation dropdown item with arrow and smooth fade-in */
+function DesktopDropdown({
+  label,
+  items,
+}: {
+  label: string
+  items: { href: string; label: string; description?: string; icon: any }[]
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
-    <Link
-      href={href}
-      aria-current={isActive ? 'page' : undefined}
-      className={`
-        inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200
-        ${isActive
-          ? 'bg-[var(--cj-red-700)] ring-2 ring-[var(--cj-red)] ring-offset-2 scale-[0.98]'
-          : 'bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] hover:shadow-md active:scale-95'
-        }
-      `}
+    <div
+      ref={dropdownRef}
+      className="relative"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
     >
-      <Send className="h-4 w-4" />
-      {label}
-    </Link>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-extrabold uppercase tracking-wider text-slate-200 transition-colors hover:bg-slate-800 hover:text-white"
+      >
+        <span>{label}</span>
+        <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-white' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-2xl border border-slate-800 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl animate-fade-in">
+          {items.map((item) => {
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className="group flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-slate-800/80"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-blue-400 transition-colors group-hover:bg-[var(--cj-blue)] group-hover:text-white">
+                  <Icon className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-100 group-hover:text-white">{item.label}</div>
+                  {item.description && (
+                    <div className="text-[11px] text-slate-400 leading-snug">{item.description}</div>
+                  )}
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
 
-/** Types for Fullscreen Navigation Links */
 type NavItemConfig = {
   href: string
   label: string
@@ -163,7 +211,7 @@ type NavCategoryConfig = {
   items: NavItemConfig[]
 }
 
-/** Fullscreen Navigation Link Item Component with Stagger Entrance */
+/** Fullscreen Navigation Link Item Component for Mobile Overlay */
 function FullscreenNavItem({
   item,
   isActive,
@@ -250,7 +298,7 @@ export default function Header() {
   const search = searchParams.toString()
   const labels = navigationLabels[locale]
 
-  // Prevent background scrolling, manage keyboard Escape & Focus Trap when overlay is open
+  // Prevent background scrolling for Mobile menu
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden'
@@ -272,7 +320,7 @@ export default function Header() {
     }
   }, [open])
 
-  // Fullscreen Navigation Structure grouped by non-clickable Category Headers
+  // Fullscreen Navigation Structure for Mobile
   const navigationCategories = useMemo<NavCategoryConfig[]>(
     () => [
       {
@@ -340,16 +388,9 @@ export default function Header() {
           {
             href: `/${locale}/espace-etudiants`,
             label: labels.studentSpace,
-            description: locale === 'fr' ? 'Accès devoirs, supports et espace élève' : 'Assignments, courseware & student portal',
+            description: locale === 'fr' ? 'Accès supports et espace élève' : 'Courseware & student portal',
             icon: UserCheck,
             badge: 'Portail',
-          },
-          {
-            href: `/${locale}/espace-etudiants/travaux`,
-            label: locale === 'fr' ? 'Mes Travaux & Devoirs' : 'My Assignments',
-            description: locale === 'fr' ? 'Consulter les sujets et téléverser vos rendus' : 'View tasks and submit your work',
-            icon: FileText,
-            badge: 'Devoirs',
           },
           {
             href: `/${locale}/auth/student-login`,
@@ -369,95 +410,196 @@ export default function Header() {
     [labels, locale]
   )
 
-  // Flat links array for desktop navigation
-  const desktopLinks = useMemo(
-    () => [
-      { href: `/${locale}`, label: labels.home },
-      { href: `/${locale}/about`, label: labels.about },
-      { href: `/sessions`, label: labels.sessions },
-      { href: `/${locale}/entreprises`, label: labels.entreprises },
-      { href: `/${locale}/actualites`, label: labels.news },
-      { href: `/${locale}/espace-etudiants`, label: labels.studentSpace },
-    ],
-    [labels, locale]
-  )
-
   let globalIndexCounter = 0
 
   return (
-    <header className="header sticky top-0 z-50 border-b border-slate-200/70 bg-white/95 backdrop-blur-md">
-      <div className="container mx-auto flex items-center justify-between px-4 py-3">
-        {/* Brand Logo */}
-        <Link href={`/${locale}`} className="flex items-center gap-3" aria-label="CJ Development Training Center — Accueil">
-          <Image
-            src="/logo.png"
-            alt="CJ DEVELOPMENT TRAINING CENTER"
-            width={80}
-            height={80}
-            className="h-14 w-auto sm:h-16 transition-transform duration-200 hover:scale-[1.02]"
-          />
-        </Link>
-
-        {/* Desktop Navigation Menu */}
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Navigation principale">
-          {desktopLinks.map((link) => (
-            <NavLink key={link.href} href={link.href} label={link.label} />
-          ))}
-          <div className="mx-2">
-            <LanguageSwitcher locale={locale} pathname={pathname} search={search} />
+    <header className="header sticky top-0 z-50">
+      {/* 1. DESKTOP TOP-BAR (VISIBLE DESKTOP ONLY lg:block) */}
+      <div className="hidden lg:block border-b border-slate-800/80 bg-slate-950 text-slate-300 text-xs font-medium py-2 shadow-inner">
+        <div className="container mx-auto flex items-center justify-between px-4">
+          {/* Left: Contact Info */}
+          <div className="flex items-center gap-6">
+            <a
+              href="tel:+243810000000"
+              className="inline-flex items-center gap-2 transition-colors hover:text-white"
+            >
+              <Phone className="h-3.5 w-3.5 text-[var(--cj-blue)]" />
+              <span>+243 810 000 000</span>
+            </a>
+            <a
+              href="mailto:contact@cj-dtc.com"
+              className="inline-flex items-center gap-2 transition-colors hover:text-white"
+            >
+              <Mail className="h-3.5 w-3.5 text-[var(--cj-red)]" />
+              <span>contact@cj-dtc.com</span>
+            </a>
           </div>
-          <NavLinkContact href={`/${locale}/contact`} label={labels.contact} />
-        </nav>
 
-        {/* Mobile Header Quick Actions */}
-        <div className="flex items-center gap-3 md:hidden">
-          <LanguageSwitcher locale={locale} pathname={pathname} search={search} />
+          {/* Center: Institutional Slogan */}
+          <div className="italic text-slate-400 text-xs font-serif tracking-wide hidden xl:block">
+            « Bâtir des compétences. Transformer des destins. »
+          </div>
 
-          {/* Animated Hamburger / X Transformation Toggle Button */}
-          <button
-            type="button"
-            aria-label={open ? labels.closeMenu : labels.openMenu}
-            aria-expanded={open}
-            aria-controls="fullscreen-navigation-overlay"
-            onClick={() => setOpen(!open)}
-            className={`
-              relative flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300
-              focus:outline-none focus:ring-2 focus:ring-[var(--cj-blue)] focus:ring-offset-2
-              ${
-                open
-                  ? 'border-[var(--cj-red-200)] bg-[var(--cj-red-50)] text-[var(--cj-red)] shadow-md scale-105'
-                  : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 hover:border-slate-300'
-              }
-            `}
-          >
-            <div className="relative flex h-5 w-5 flex-col items-center justify-center">
-              <span
-                aria-hidden="true"
-                className={`
-                  absolute h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out
-                  ${open ? 'rotate-45 translate-y-0 bg-[var(--cj-red)]' : '-translate-y-1.5'}
-                `}
-              />
-              <span
-                aria-hidden="true"
-                className={`
-                  absolute h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out
-                  ${open ? 'opacity-0 scale-x-0' : 'opacity-100'}
-                `}
-              />
-              <span
-                aria-hidden="true"
-                className={`
-                  absolute h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out
-                  ${open ? '-rotate-45 translate-y-0 bg-[var(--cj-red)]' : 'translate-y-1.5'}
-                `}
-              />
+          {/* Right: Language & Social Networks */}
+          <div className="flex items-center gap-5">
+            <LanguageSwitcher locale={locale} pathname={pathname} search={search} darkVariant={true} />
+
+            <div className="h-4 w-px bg-slate-800" />
+
+            <div className="flex items-center gap-2.5">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook CJ DTC"
+                className="text-slate-400 transition-colors hover:text-blue-400"
+              >
+                <Facebook className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn CJ DTC"
+                className="text-slate-400 transition-colors hover:text-blue-500"
+              >
+                <Linkedin className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube CJ DTC"
+                className="text-slate-400 transition-colors hover:text-red-500"
+              >
+                <Youtube className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="https://wa.me/243810000000"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp CJ DTC"
+                className="text-slate-400 transition-colors hover:text-emerald-400"
+              >
+                <MessageCircle className="h-3.5 w-3.5" />
+              </a>
             </div>
-          </button>
+          </div>
         </div>
       </div>
 
-      {/* FULLSCREEN MOBILE NAVIGATION OVERLAY (100vw x 100vh) */}
+      {/* 2. DESKTOP & MOBILE MAIN NAVBAR HEADER */}
+      <div className="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur-md shadow-xl text-white">
+        <div className="container mx-auto flex items-center justify-between px-4 py-3">
+          {/* Brand Logo Pinned Left */}
+          <Link href={`/${locale}`} className="flex items-center gap-3" aria-label="CJ Development Training Center — Accueil">
+            <Image
+              src="/logo.png"
+              alt="CJ DEVELOPMENT TRAINING CENTER"
+              width={80}
+              height={80}
+              className="h-14 w-auto sm:h-16 transition-transform duration-200 hover:scale-[1.02] filter brightness-110"
+            />
+          </Link>
+
+          {/* Desktop Navigation Links (hidden on mobile lg:flex) */}
+          <nav className="hidden lg:flex items-center gap-1.5" aria-label="Navigation principale Desktop">
+            <NavLink href={`/${locale}`} label={labels.home} />
+            <NavLink href={`/${locale}/about`} label={labels.about} />
+            <NavLink href={`/sessions`} label={labels.sessions} />
+            <NavLink href={`/${locale}/entreprises`} label={labels.entreprises} />
+            <NavLink href={`/${locale}/actualites`} label={labels.news} />
+            <NavLink href={`/${locale}/galerie`} label={labels.galerie} />
+
+            {/* Dropdown Menu for Student Space */}
+            <DesktopDropdown
+              label={labels.studentSpace}
+              items={[
+                {
+                  href: `/${locale}/espace-etudiants`,
+                  label: labels.studentSpace,
+                  description: locale === 'fr' ? 'Accéder à votre tableau de bord LMS' : 'Access your LMS dashboard',
+                  icon: UserCheck,
+                },
+                {
+                  href: `/${locale}/espace-etudiants/supports`,
+                  label: locale === 'fr' ? 'Supports de cours' : 'Course Materials',
+                  description: locale === 'fr' ? 'Documents et fichiers téléchargeables' : 'Downloadable documents & resources',
+                  icon: FileText,
+                },
+                {
+                  href: `/${locale}/auth/student-login`,
+                  label: labels.login,
+                  description: locale === 'fr' ? 'Se connecter à votre compte' : 'Log in to your account',
+                  icon: LogIn,
+                },
+              ]}
+            />
+
+            <NavLink href={`/${locale}/contact`} label={labels.contact} />
+          </nav>
+
+          {/* Right Action Pill Button (Desktop lg:flex) */}
+          <div className="hidden lg:flex items-center gap-3">
+            <Link
+              href={`/${locale}/espace-etudiants`}
+              className="group relative inline-flex items-center gap-2 rounded-full border-2 border-white/90 bg-transparent px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg transition-all duration-300 hover:bg-white hover:text-slate-950 hover:border-white hover:shadow-xl hover:shadow-white/20 active:scale-95"
+            >
+              <UserCheck className="h-4 w-4 text-[var(--cj-red)] transition-colors group-hover:text-[var(--cj-blue)]" />
+              <span>{labels.studentSpace}</span>
+            </Link>
+          </div>
+
+          {/* Mobile Header Quick Actions (visible on mobile lg:hidden) */}
+          <div className="flex items-center gap-3 lg:hidden">
+            <LanguageSwitcher locale={locale} pathname={pathname} search={search} darkVariant={true} />
+
+            {/* Animated Hamburger / X Transformation Toggle Button */}
+            <button
+              type="button"
+              aria-label={open ? labels.closeMenu : labels.openMenu}
+              aria-expanded={open}
+              aria-controls="fullscreen-navigation-overlay"
+              onClick={() => setOpen(!open)}
+              className={`
+                relative flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300
+                focus:outline-none focus:ring-2 focus:ring-[var(--cj-blue)] focus:ring-offset-2
+                ${
+                  open
+                    ? 'border-[var(--cj-red-200)] bg-[var(--cj-red-50)] text-[var(--cj-red)] shadow-md scale-105'
+                    : 'border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700 hover:border-slate-600'
+                }
+              `}
+            >
+              <div className="relative flex h-5 w-5 flex-col items-center justify-center">
+                <span
+                  aria-hidden="true"
+                  className={`
+                    absolute h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out
+                    ${open ? 'rotate-45 translate-y-0 bg-[var(--cj-red)]' : '-translate-y-1.5'}
+                  `}
+                />
+                <span
+                  aria-hidden="true"
+                  className={`
+                    absolute h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out
+                    ${open ? 'opacity-0 scale-x-0' : 'opacity-100'}
+                  `}
+                />
+                <span
+                  aria-hidden="true"
+                  className={`
+                    absolute h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out
+                    ${open ? '-rotate-45 translate-y-0 bg-[var(--cj-red)]' : 'translate-y-1.5'}
+                  `}
+                />
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* FULLSCREEN MOBILE NAVIGATION OVERLAY (UNTOUCHED MOBILE CODE FOR < lg) */}
       <div
         id="fullscreen-navigation-overlay"
         ref={overlayRef}
@@ -466,7 +608,7 @@ export default function Header() {
         aria-label="Menu principal de navigation"
         aria-hidden={!open}
         className={`
-          fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col justify-between md:hidden
+          fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col justify-between lg:hidden
           bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-950/60 via-slate-950 to-slate-950
           text-slate-100 backdrop-blur-2xl transition-all duration-300 ease-out
           ${open ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-95'}
@@ -629,4 +771,5 @@ export default function Header() {
     </header>
   )
 }
+
 
