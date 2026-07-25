@@ -1,7 +1,17 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import Link from 'next/link'
 import AdminShell from '@/components/admin-portal/AdminShell'
+import PaginationControls from '@/components/admin-portal/PaginationControls'
+import {
+  AdminBadge,
+  AdminPanel,
+  adminInputClassName,
+  adminPrimaryButtonClassName,
+  adminSecondaryButtonClassName,
+  adminSelectClassName,
+} from '@/components/admin-portal/ui'
 import {
   Plus,
   Search,
@@ -21,26 +31,30 @@ import {
   FileCheck,
   Award,
   RefreshCw,
-  Filter,
-  Layers,
-  ChevronLeft,
+  SlidersHorizontal,
   ChevronRight,
-  TrendingUp,
-  Percent,
   Send,
   FileSpreadsheet,
   FileArchive,
   FileImage,
   FileCode,
   Sparkles,
+  Layers3,
+  UserCheck,
+  XCircle,
+  ExternalLink,
+  BookOpen,
+  RotateCcw,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 interface SessionOption {
   id: number
-  title?: string
   startDate: string
   endDate: string
+  location?: string | null
   format: string
   status: string
   formation?: {
@@ -95,8 +109,8 @@ interface Assignment {
   description: string
   objectives: string | null
   instructions: string | null
-  type: 'tp' | 'exam' | 'project' | 'homework'
-  difficulty: 'debutant' | 'intermediaire' | 'avance'
+  type: 'tp' | 'exam' | 'project' | 'homework' | string
+  difficulty: 'debutant' | 'intermediaire' | 'avance' | string
   status: 'brouillon' | 'publie' | 'archive' | string
   published: boolean
   publishedAt: string
@@ -128,6 +142,59 @@ interface Assignment {
   }
 }
 
+// ─── Composant KPI Card ────────────────────────────────────────────────────────
+
+function KpiCard({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  accent,
+  onClick,
+  active,
+}: {
+  icon: React.ElementType
+  label: string
+  value: string | number
+  sub?: string
+  accent: string
+  onClick?: () => void
+  active?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative flex flex-col gap-3 rounded-[28px] border p-5 text-left shadow-sm transition-all duration-200 ${
+        active
+          ? `${accent} border-transparent shadow-md scale-[1.02]`
+          : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'
+      }`}
+    >
+      <div
+        className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
+          active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+        }`}
+      >
+        <Icon className="h-5 w-5" />
+      </div>
+      <div>
+        <p className={`text-3xl font-bold tracking-tight ${active ? 'text-white' : 'text-slate-900'}`}>
+          {value}
+        </p>
+        <p className={`mt-1 text-xs font-semibold uppercase tracking-wider ${active ? 'text-white/80' : 'text-slate-500'}`}>
+          {label}
+        </p>
+        {sub && (
+          <p className={`mt-1 text-[11px] ${active ? 'text-white/70' : 'text-slate-400'}`}>{sub}</p>
+        )}
+      </div>
+    </button>
+  )
+}
+
+// ─── Main Page Component ───────────────────────────────────────────────────────
+
 export default function AdminAssignmentsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [sessions, setSessions] = useState<SessionOption[]>([])
@@ -142,9 +209,9 @@ export default function AdminAssignmentsPage() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 8
+  const [pageSize, setPageSize] = useState(10)
 
-  // Modals & Drawers
+  // Modals & Drawers State
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [viewDetailAssignment, setViewDetailAssignment] = useState<Assignment | null>(null)
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null)
@@ -152,8 +219,9 @@ export default function AdminAssignmentsPage() {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<Assignment | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [togglingPublishId, setTogglingPublishId] = useState<number | null>(null)
 
-  // Form State
+  // Form State for Creation / Editing
   const [formLoading, setFormLoading] = useState(false)
   const [consigneFiles, setConsigneFiles] = useState<File[]>([])
   const [formData, setFormData] = useState({
@@ -185,14 +253,14 @@ export default function AdminAssignmentsPage() {
     setTimeout(() => setToast(null), 3500)
   }
 
-  // Load Data
+  // Load Data from API
   const fetchData = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
       const [assignRes, sessionRes] = await Promise.all([
-        fetch('/api/admin/assignments'),
-        fetch('/api/sessions'),
+        fetch('/api/admin/assignments', { cache: 'no-store' }),
+        fetch('/api/sessions', { cache: 'no-store' }),
       ])
 
       if (!assignRes.ok) throw new Error('Impossible de charger les travaux')
@@ -216,19 +284,23 @@ export default function AdminAssignmentsPage() {
     fetchData()
   }, [fetchData])
 
-  // Realtime Supabase Broadcast Channel Setup
+  // Realtime Supabase Broadcast Channels Setup (Submissions + Assignments)
   useEffect(() => {
     if (!supabase) return
 
-    const channel = supabase
-      .channel('admin_travaux_sync')
-      .on('broadcast', { event: 'submission_created' }, (payload) => {
+    const subChannel = supabase
+      .channel('submissions_channel')
+      .on('broadcast', { event: 'submission_created' }, () => {
         showToastMsg('🔔 Une nouvelle remise a été déposée par un étudiant !')
         fetchData()
       })
       .on('broadcast', { event: 'submission_graded' }, () => {
         fetchData()
       })
+      .subscribe()
+
+    const assignChannel = supabase
+      .channel('assignments_channel')
       .on('broadcast', { event: 'assignment_created' }, () => {
         fetchData()
       })
@@ -241,49 +313,41 @@ export default function AdminAssignmentsPage() {
       .subscribe()
 
     return () => {
-      supabase?.removeChannel(channel)
+      supabase?.removeChannel(subChannel)
+      supabase?.removeChannel(assignChannel)
     }
   }, [fetchData])
 
-  // Advanced Dashboard KPIs
+  // KPIs calculation
   const kpis = useMemo(() => {
     const totalAssignments = assignments.length
     const publishedCount = assignments.filter((a) => a.published || a.status === 'publie').length
     const draftCount = assignments.filter((a) => !a.published || a.status === 'brouillon').length
     const archivedCount = assignments.filter((a) => a.status === 'archive').length
-    
-    const totalSubmissions = assignments.reduce((acc, a) => acc + (a.submissions?.length || 0), 0)
-    const gradedSubmissions = assignments.reduce(
-      (acc, a) => acc + (a.submissions?.filter((s) => s.status === 'graded').length || 0),
-      0
-    )
-    const pendingGrading = assignments.reduce(
-      (acc, a) => acc + (a.submissions?.filter((s) => s.status === 'submitted').length || 0),
-      0
-    )
 
-    // Taux de remise (Estimé par travaux publiés x remises)
-    const submissionRate = publishedCount > 0 ? Math.min(Math.round((totalSubmissions / (publishedCount * 15)) * 100), 100) : 0
-    // Taux de correction
-    const correctionRate = totalSubmissions > 0 ? Math.round((gradedSubmissions / totalSubmissions) * 100) : 100
+    const pendingGradingCount = assignments.reduce((acc, a) => {
+      const pendingInAssign = (a.submissions || []).filter((s) => s.status === 'submitted').length
+      return acc + pendingInAssign
+    }, 0)
+
+    const assignmentsNeedingGrading = assignments.filter((a) =>
+      (a.submissions || []).some((s) => s.status === 'submitted')
+    ).length
 
     return {
       totalAssignments,
       publishedCount,
       draftCount,
       archivedCount,
-      totalSubmissions,
-      gradedSubmissions,
-      pendingGrading,
-      submissionRate,
-      correctionRate,
+      pendingGradingCount,
+      assignmentsNeedingGrading,
     }
   }, [assignments])
 
-  // Filtered List
+  // Filtered Assignments List
   const filteredAssignments = useMemo(() => {
     return assignments.filter((a) => {
-      const q = search.toLowerCase()
+      const q = search.toLowerCase().trim()
       const matchSearch =
         !q ||
         a.title.toLowerCase().includes(q) ||
@@ -297,31 +361,55 @@ export default function AdminAssignmentsPage() {
       if (statusFilter === 'draft') matchStatus = !a.published || a.status === 'brouillon'
       if (statusFilter === 'archived') matchStatus = a.status === 'archive'
       if (statusFilter === 'pending_grading') {
-        matchStatus = a.submissions.some((s) => s.status === 'submitted')
+        matchStatus = (a.submissions || []).some((s) => s.status === 'submitted')
       }
 
       return matchSearch && matchSession && matchStatus
     })
   }, [assignments, search, sessionFilter, statusFilter])
 
-  // Paginated List
-  const totalPages = Math.ceil(filteredAssignments.length / itemsPerPage) || 1
+  // Pagination calculation
+  const totalPages = Math.max(1, Math.ceil(filteredAssignments.length / pageSize))
   const paginatedAssignments = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage
-    return filteredAssignments.slice(start, start + itemsPerPage)
-  }, [filteredAssignments, currentPage, itemsPerPage])
+    const start = (currentPage - 1) * pageSize
+    return filteredAssignments.slice(start, start + pageSize)
+  }, [filteredAssignments, currentPage, pageSize])
 
-  // Reset pagination on filter change
   useEffect(() => {
     setCurrentPage(1)
   }, [search, sessionFilter, statusFilter])
 
-  // Open Create Form
+  // Quick Toggle Publish status
+  const handleTogglePublish = async (assignment: Assignment) => {
+    setTogglingPublishId(assignment.id)
+    try {
+      const nextPublished = !assignment.published
+      const nextStatus = nextPublished ? 'publie' : 'brouillon'
+      const res = await fetch(`/api/admin/assignments/${assignment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: nextPublished, status: nextStatus }),
+      })
+      if (!res.ok) throw new Error('Échec du changement de statut')
+      showToastMsg(
+        nextPublished
+          ? `✅ Travail "${assignment.title}" publié avec succès !`
+          : `⏸️ Travail "${assignment.title}" repassé en brouillon.`
+      )
+      await fetchData()
+    } catch (err: any) {
+      showToastMsg(err.message || 'Erreur lors du changement de statut', 'error')
+    } finally {
+      setTogglingPublishId(null)
+    }
+  }
+
+  // Open Form for Creation
   const handleOpenCreate = () => {
     setEditingAssignment(null)
     const nowISO = new Date().toISOString().slice(0, 16)
     const defaultDeadline = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString().slice(0, 16)
-    
+
     setFormData({
       title: '',
       description: '',
@@ -343,7 +431,7 @@ export default function AdminAssignmentsPage() {
     setShowCreateModal(true)
   }
 
-  // Open Edit Form
+  // Open Form for Editing
   const handleOpenEdit = (assignment: Assignment) => {
     setEditingAssignment(assignment)
     setFormData({
@@ -351,8 +439,8 @@ export default function AdminAssignmentsPage() {
       description: assignment.description,
       objectives: assignment.objectives || '',
       instructions: assignment.instructions || '',
-      type: assignment.type,
-      difficulty: assignment.difficulty || 'intermediaire',
+      type: (assignment.type as any) || 'tp',
+      difficulty: (assignment.difficulty as any) || 'intermediaire',
       status: (assignment.status as any) || (assignment.published ? 'publie' : 'brouillon'),
       sessionId: String(assignment.sessionId),
       publishedAt: assignment.publishedAt ? new Date(assignment.publishedAt).toISOString().slice(0, 16) : '',
@@ -367,7 +455,7 @@ export default function AdminAssignmentsPage() {
     setShowCreateModal(true)
   }
 
-  // Submit Assignment (Create / Edit)
+  // Handle Form Submit
   const handleSubmitAssignment = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.title || !formData.description || !formData.sessionId || !formData.deadline) {
@@ -405,68 +493,40 @@ export default function AdminAssignmentsPage() {
         body: payloadData,
       })
 
-      const resData = await res.json()
-      if (!res.ok || resData.success === false) {
-        throw new Error(resData.error || 'Erreur lors de la sauvegarde du travail')
+      if (!res.ok) {
+        const errJson = await res.json()
+        throw new Error(errJson.error || 'Erreur lors de l’enregistrement')
       }
 
-      showToastMsg(editingAssignment ? 'Travail mis à jour avec succès !' : 'Nouveau travail créé et synchronisé !')
+      showToastMsg(editingAssignment ? 'Modifications enregistrées !' : 'Travail créé et publié !')
       setShowCreateModal(false)
       fetchData()
     } catch (err: any) {
-      console.error(err)
-      showToastMsg(err.message || 'Une erreur est survenue', 'error')
+      showToastMsg(err.message || 'Erreur lors de la soumission', 'error')
     } finally {
       setFormLoading(false)
     }
   }
 
-  // Toggle Publish
-  const handleTogglePublish = async (assignment: Assignment) => {
-    try {
-      const nextPublished = !assignment.published
-      const nextStatus = nextPublished ? 'publie' : 'brouillon'
-      const res = await fetch(`/api/admin/assignments/${assignment.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ published: nextPublished, status: nextStatus }),
-      })
-      if (!res.ok) throw new Error('Échec du changement de statut')
-      showToastMsg(nextPublished ? 'Travail publié aux étudiants !' : 'Travail dépublié (Brouillon)')
-      fetchData()
-    } catch (err: any) {
-      showToastMsg(err.message, 'error')
-    }
-  }
-
-  // Delete Assignment
-  const handleDeleteAssignment = async (assignment: Assignment) => {
+  // Handle Delete
+  const handleDeleteAssignment = async () => {
+    if (!confirmDelete) return
     setIsDeleting(true)
     try {
-      const res = await fetch(`/api/admin/assignments/${assignment.id}`, {
-        method: 'DELETE',
-      })
+      const res = await fetch(`/api/admin/assignments/${confirmDelete.id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Échec de la suppression')
-      showToastMsg('Travail et fichiers R2 associés supprimés avec succès')
+      showToastMsg('Travail supprimé avec succès.')
       setConfirmDelete(null)
       fetchData()
     } catch (err: any) {
-      showToastMsg(err.message, 'error')
+      showToastMsg(err.message || 'Erreur de suppression', 'error')
     } finally {
       setIsDeleting(false)
     }
   }
 
-  // Select Submission for Grading
-  const handleSelectSubmissionForGrading = (sub: Submission) => {
-    setSelectedSubmission(sub)
-    setGradeValue(sub.grade !== null && sub.grade !== undefined ? String(sub.grade) : '')
-    setFeedbackValue(sub.feedback || '')
-    setSubmissionStatusValue(sub.status === 'returned' ? 'returned' : 'graded')
-  }
-
-  // Save Grade and Feedback
-  const handleSaveGrade = async (e: React.FormEvent) => {
+  // Handle Submission Grading
+  const handleGradeSubmission = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedSubmission) return
 
@@ -476,649 +536,1110 @@ export default function AdminAssignmentsPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          grade: gradeValue !== '' ? parseFloat(gradeValue) : null,
+          grade: gradeValue,
           feedback: feedbackValue,
           status: submissionStatusValue,
         }),
       })
 
-      const resData = await res.json()
-      if (!res.ok || resData.success === false) {
-        throw new Error(resData.error || 'Erreur lors de l’enregistrement de la note')
+      if (!res.ok) {
+        const errJson = await res.json()
+        throw new Error(errJson.error || 'Impossible d’enregistrer la note')
       }
 
-      showToastMsg('Correction enregistrée et étudiant notifié !')
-
-      // Update local state in viewSubmissionsAssignment
-      if (viewSubmissionsAssignment) {
-        const updatedSubs = viewSubmissionsAssignment.submissions.map((s) =>
-          s.id === selectedSubmission.id ? resData.submission : s
-        )
-        setViewSubmissionsAssignment({
-          ...viewSubmissionsAssignment,
-          submissions: updatedSubs,
-        })
-      }
-
+      showToastMsg('Note et correction enregistrées avec succès !')
       setSelectedSubmission(null)
-      fetchData()
+      await fetchData()
     } catch (err: any) {
-      showToastMsg(err.message, 'error')
+      showToastMsg(err.message || 'Erreur lors de la notation', 'error')
     } finally {
       setGradingLoading(false)
     }
   }
 
-  const getFileIcon = (mimeType: string, fileName: string) => {
-    const ext = fileName.split('.').pop()?.toLowerCase() || ''
-    if (mimeType.includes('pdf') || ext === 'pdf') return <FileText className="w-4 h-4 text-red-500" />
-    if (ext === 'doc' || ext === 'docx') return <FileText className="w-4 h-4 text-blue-600" />
-    if (ext === 'xls' || ext === 'xlsx' || ext === 'csv') return <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-    if (ext === 'zip' || ext === 'rar' || ext === '7z') return <FileArchive className="w-4 h-4 text-amber-600" />
-    if (mimeType.includes('image') || ['png', 'jpg', 'jpeg', 'webp'].includes(ext)) return <FileImage className="w-4 h-4 text-purple-600" />
-    return <FileCode className="w-4 h-4 text-slate-500" />
-  }
+  const activeFilterCount = (search ? 1 : 0) + (sessionFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0)
 
   return (
-    <AdminShell title="Gestion des Travaux & Devoirs">
-      {/* Toast Notification */}
-      {toast && (
-        <div
-          className={`fixed right-6 top-20 z-50 flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-bold shadow-2xl animate-fade-in-up ${
-            toast.type === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-              : 'border-red-200 bg-red-50 text-red-800'
-          }`}
-        >
-          {toast.type === 'success' ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-          ) : (
-            <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
-          )}
-          <span>{toast.msg}</span>
-        </div>
-      )}
+    <AdminShell title="Travaux & Évaluations">
+      <div className="space-y-6">
 
-      {/* Header Bar */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Administration · Module Travaux & Évaluations
-          </p>
-          <h1 className="text-2xl font-black text-slate-900 leading-tight">
-            Centre de Gestion des Travaux
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Créez, filtrez, publiez et corrigez les sujets d'évaluations synchronisés avec Cloudflare R2 et Supabase.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={handleOpenCreate}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] hover:bg-[var(--admin-primary-700)] text-white text-xs font-black rounded-xl shadow-lg transition shrink-0 hover:scale-105 active:scale-95"
-        >
-          <Plus className="h-4 w-4" />
-          Nouveau Travail
-        </button>
-      </div>
+        {/* ── Toast Notification ────────────────────────────────────────────── */}
+        {toast && (
+          <div
+            className={`fixed bottom-5 right-5 z-[999] flex items-center gap-3 rounded-2xl px-5 py-3 text-sm font-semibold shadow-xl backdrop-blur-md transition-all ${
+              toast.type === 'error'
+                ? 'border border-rose-200 bg-rose-900/90 text-white'
+                : 'border border-emerald-200 bg-emerald-900/90 text-white'
+            }`}
+          >
+            <span>{toast.msg}</span>
+            <button type="button" onClick={() => setToast(null)} className="opacity-80 hover:opacity-100">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
 
-      {/* KPI & Analytics Dashboard Section */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
-        {[
-          { label: 'Total Travaux', value: kpis.totalAssignments, icon: FileText, color: 'text-slate-800', bg: 'bg-slate-50' },
-          { label: 'Publiés', value: kpis.publishedCount, icon: CheckCircle2, color: 'text-emerald-700', bg: 'bg-emerald-50/60' },
-          { label: 'Brouillons', value: kpis.draftCount, icon: Clock, color: 'text-amber-700', bg: 'bg-amber-50/60' },
-          { label: 'Total Remises', value: kpis.totalSubmissions, icon: Layers, color: 'text-blue-700', bg: 'bg-blue-50/60' },
-          { label: 'À Corriger', value: kpis.pendingGrading, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50/60' },
-          { label: 'Corrigés', value: kpis.gradedSubmissions, icon: Award, color: 'text-violet-700', bg: 'bg-violet-50/60' },
-        ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className={`rounded-2xl border border-slate-200/70 p-4 shadow-sm ${bg}`}>
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
-              <Icon className={`h-4 w-4 ${color}`} />
-            </div>
-            <p className={`text-2xl font-black ${color}`}>{value}</p>
+        {/* ── En-tête ──────────────────────────────────────────────────────── */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Travaux & Évaluations</h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Créez des devoirs, TP et projets rattachés aux sessions, consultez les remises et notez les étudiants.
+            </p>
           </div>
-        ))}
-      </div>
-
-      {/* Progress Metric Rates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="bg-white rounded-2xl border border-slate-200/70 p-4 shadow-sm space-y-2">
-          <div className="flex justify-between items-center text-xs font-bold">
-            <span className="text-slate-700 flex items-center gap-1.5">
-              <TrendingUp className="w-4 h-4 text-blue-600" /> Taux Global de Remise des Étudiants
-            </span>
-            <span className="text-blue-700 font-black">{kpis.submissionRate}%</span>
-          </div>
-          <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500"
-              style={{ width: `${kpis.submissionRate}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-slate-200/70 p-4 shadow-sm space-y-2">
-          <div className="flex justify-between items-center text-xs font-bold">
-            <span className="text-slate-700 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-emerald-600" /> Taux de Correction par l'Administration
-            </span>
-            <span className="text-emerald-700 font-black">{kpis.correctionRate}%</span>
-          </div>
-          <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-            <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 transition-all duration-500"
-              style={{ width: `${kpis.correctionRate}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Search & Filter Toolbar */}
-      <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-4 mb-6">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center">
-          {/* Search Bar */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Rechercher par titre, description ou formation..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-xs border border-slate-200 bg-slate-50/50 rounded-xl focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:outline-none font-semibold text-slate-800"
-            />
-          </div>
-
           <div className="flex flex-wrap items-center gap-2">
-            {/* Session filter */}
-            <select
-              value={sessionFilter}
-              onChange={(e) => setSessionFilter(e.target.value)}
-              className="px-3 py-2 text-xs border border-slate-200 bg-white rounded-xl focus:outline-none font-bold text-slate-700"
-            >
-              <option value="all">Toutes les sessions</option>
-              {sessions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.formation?.title ? `${s.formation.title} (Session #${s.id})` : `Session #${s.id}`}
-                </option>
-              ))}
-            </select>
-
-            {/* Status filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-xs border border-slate-200 bg-white rounded-xl focus:outline-none font-bold text-slate-700"
-            >
-              <option value="all">Tous les statuts</option>
-              <option value="published">Publiés uniquement</option>
-              <option value="draft">Brouillons uniquement</option>
-              <option value="archived">Archivés uniquement</option>
-              <option value="pending_grading">Remises à corriger</option>
-            </select>
-
             <button
               type="button"
               onClick={fetchData}
-              className="inline-flex items-center gap-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition"
+              className={adminSecondaryButtonClassName}
+              title="Actualiser les données"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               Actualiser
+            </button>
+            <button
+              type="button"
+              onClick={handleOpenCreate}
+              className={adminPrimaryButtonClassName}
+            >
+              <Plus className="h-4 w-4" />
+              Nouveau travail
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Main Table / List Section */}
-      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden mb-6">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-3 text-slate-400">
-            <Loader2 className="h-8 w-8 animate-spin text-[var(--admin-primary)]" />
-            <span className="text-xs font-semibold uppercase tracking-wider">Chargement des travaux...</span>
-          </div>
-        ) : filteredAssignments.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-300 mb-4 border border-slate-200/50">
-              <FileText className="h-8 w-8" />
+        {/* ── KPIs Cliquables ──────────────────────────────────────────────── */}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <KpiCard
+            icon={Layers3}
+            label="Total Devoirs"
+            value={kpis.totalAssignments}
+            sub="Tous devoirs & examens"
+            accent="bg-gradient-to-br from-slate-700 to-slate-900"
+            onClick={() => setStatusFilter('all')}
+            active={statusFilter === 'all'}
+          />
+          <KpiCard
+            icon={CheckCircle2}
+            label="Publiés"
+            value={kpis.publishedCount}
+            sub="Visibles sur l'Espace Étudiant"
+            accent="bg-gradient-to-br from-emerald-500 to-teal-600"
+            onClick={() => setStatusFilter('published')}
+            active={statusFilter === 'published'}
+          />
+          <KpiCard
+            icon={Clock}
+            label="À corriger"
+            value={kpis.pendingGradingCount}
+            sub={`${kpis.assignmentsNeedingGrading} devoir(s) en attente de note`}
+            accent="bg-gradient-to-br from-amber-500 to-orange-600"
+            onClick={() => setStatusFilter('pending_grading')}
+            active={statusFilter === 'pending_grading'}
+          />
+          <KpiCard
+            icon={FileText}
+            label="Brouillons"
+            value={kpis.draftCount}
+            sub="Devoirs non encore publiés"
+            accent="bg-gradient-to-br from-slate-600 to-slate-800"
+            onClick={() => setStatusFilter('draft')}
+            active={statusFilter === 'draft'}
+          />
+        </div>
+
+        {/* ── Zone de filtres et de recherche ─────────────────────────────────── */}
+        <AdminPanel>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+            {/* Recherche */}
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                id="search-assignments"
+                type="text"
+                placeholder="Rechercher par titre, description ou formation..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className={`pl-11 ${adminInputClassName}`}
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
-            <p className="text-sm font-bold text-slate-900">Aucun travail trouvé</p>
-            <p className="text-xs text-slate-500 mt-1 mb-6">
-              {assignments.length === 0
-                ? 'Créez votre premier travail pour le diffuser auprès des étudiants.'
-                : 'Ajustez vos filtres de recherche.'}
-            </p>
-            {assignments.length === 0 && (
+
+            {/* Filtre par Session */}
+            <div className="w-full lg:w-72">
+              <label htmlFor="filter-session" className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Session
+              </label>
+              <select
+                id="filter-session"
+                value={sessionFilter}
+                onChange={(e) => setSessionFilter(e.target.value)}
+                className={adminSelectClassName}
+              >
+                <option value="all">Toutes les sessions</option>
+                {sessions.map((s) => {
+                  const formationTitle = s.formation?.title || 'Formation'
+                  const startDateFormatted = s.startDate
+                    ? new Date(s.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                    : ''
+                  return (
+                    <option key={s.id} value={String(s.id)}>
+                      {formationTitle} — {startDateFormatted} ({s.format})
+                    </option>
+                  )
+                })}
+              </select>
+            </div>
+
+            {/* Bouton Réinitialiser */}
+            {activeFilterCount > 0 && (
               <button
                 type="button"
-                onClick={handleOpenCreate}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--admin-primary)] text-white text-xs font-black rounded-xl shadow-sm"
+                onClick={() => {
+                  setSearch('')
+                  setSessionFilter('all')
+                  setStatusFilter('all')
+                }}
+                className={adminSecondaryButtonClassName}
               >
-                <Plus className="h-4 w-4" />
-                Créer un travail
+                <RotateCcw className="h-4 w-4" />
+                Réinitialiser
               </button>
             )}
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200/70 text-[11px] font-black text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Titre du Travail</th>
-                  <th className="py-3.5 px-4">Session Concernée</th>
-                  <th className="py-3.5 px-4">Date Limite</th>
-                  <th className="py-3.5 px-4 text-center">Remises</th>
-                  <th className="py-3.5 px-4">Statut</th>
-                  <th className="py-3.5 px-4">Date de Création</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {paginatedAssignments.map((assignment) => {
-                  const pendingCount = assignment.submissions?.filter((s) => s.status === 'submitted').length || 0
-                  const statusLabel = assignment.status === 'archive'
-                    ? 'Archivé'
-                    : assignment.published || assignment.status === 'publie'
-                    ? 'Publié'
-                    : 'Brouillon'
 
-                  return (
-                    <tr key={assignment.id} className="hover:bg-slate-50/50 transition">
-                      {/* Titre & Type */}
-                      <td className="py-4 px-4">
-                        <div className="space-y-1 max-w-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black uppercase text-[var(--cj-blue)] bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                              {assignment.type === 'tp'
-                                ? 'TP'
-                                : assignment.type === 'exam'
-                                ? 'Examen'
-                                : assignment.type === 'project'
-                                ? 'Projet'
-                                : 'Devoir'}
+          {/* Filtres rapides par pilules de statut */}
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+            <span className="self-center text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              Statut :
+            </span>
+            {[
+              { label: 'Tous', value: 'all' },
+              { label: 'Publiés', value: 'published' },
+              { label: 'À corriger', value: 'pending_grading' },
+              { label: 'Brouillons', value: 'draft' },
+              { label: 'Archivés', value: 'archived' },
+            ].map((st) => {
+              const isActive = statusFilter === st.value
+              return (
+                <button
+                  key={st.value}
+                  type="button"
+                  onClick={() => setStatusFilter(st.value)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+                    isActive
+                      ? 'border-[var(--admin-primary)] bg-[var(--admin-primary)] text-white shadow-sm'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-[var(--admin-primary-200)] hover:bg-[var(--admin-primary-50)]'
+                  }`}
+                >
+                  {st.label}
+                </button>
+              )
+            })}
+          </div>
+        </AdminPanel>
+
+        {/* ── Liste des Travaux (Desktop Table / Mobile Cards) ──────────────── */}
+        {isLoading ? (
+          <AdminPanel>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Loader2 className="h-10 w-10 animate-spin text-[var(--admin-primary)]" />
+              <p className="mt-4 text-sm font-medium text-slate-500">Chargement des travaux...</p>
+            </div>
+          </AdminPanel>
+        ) : error ? (
+          <AdminPanel>
+            <div className="flex flex-col items-center justify-center py-12 text-center text-rose-600">
+              <AlertTriangle className="h-10 w-10 mb-2" />
+              <p className="text-sm font-semibold">{error}</p>
+              <button type="button" onClick={fetchData} className={`mt-4 ${adminSecondaryButtonClassName}`}>
+                Réessayer
+              </button>
+            </div>
+          </AdminPanel>
+        ) : paginatedAssignments.length === 0 ? (
+          <AdminPanel>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <FileText className="h-7 w-7" />
+              </div>
+              <h3 className="mt-4 text-base font-bold text-slate-900">Aucun travail trouvé</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {activeFilterCount > 0
+                  ? 'Aucun devoir ne correspond à vos critères de recherche.'
+                  : 'Commencez par ajouter votre premier devoir pour cette session.'}
+              </p>
+              <button type="button" onClick={handleOpenCreate} className={`mt-6 ${adminPrimaryButtonClassName}`}>
+                <Plus className="h-4 w-4" />
+                Créer un travail
+              </button>
+            </div>
+          </AdminPanel>
+        ) : (
+          <div className="space-y-4">
+
+            {/* Vue Desktop / Tablet (Tableau épuré) */}
+            <div className="hidden md:block overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
+              <table className="w-full text-left text-sm text-slate-600">
+                <thead className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th scope="col" className="px-5 py-3.5">Travail & Type</th>
+                    <th scope="col" className="px-5 py-3.5">Formation / Session</th>
+                    <th scope="col" className="px-5 py-3.5">Date limite</th>
+                    <th scope="col" className="px-5 py-3.5">Remises & Correction</th>
+                    <th scope="col" className="px-5 py-3.5">Statut</th>
+                    <th scope="col" className="px-5 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {paginatedAssignments.map((a) => {
+                    const submissionsList = a.submissions || []
+                    const pendingCount = submissionsList.filter((s) => s.status === 'submitted').length
+                    const gradedCount = submissionsList.filter((s) => s.status === 'graded').length
+                    const isOverdue = new Date(a.deadline).getTime() < Date.now()
+
+                    return (
+                      <tr key={a.id} className="transition-colors hover:bg-slate-50/70">
+                        {/* Titre & Type */}
+                        <td className="px-5 py-4">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900 text-sm line-clamp-1">{a.title}</span>
+                              <AdminBadge
+                                tone={
+                                  a.type === 'exam'
+                                    ? 'danger'
+                                    : a.type === 'project'
+                                    ? 'primary'
+                                    : 'neutral'
+                                }
+                              >
+                                {a.type?.toUpperCase() || 'TP'}
+                              </AdminBadge>
+                            </div>
+                            <p className="text-xs text-slate-500 line-clamp-1">{a.description}</p>
+                            {a.files && a.files.length > 0 && (
+                              <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+                                <FileArchive className="h-3.5 w-3.5 text-slate-400" />
+                                {a.files.length} document(s) joint(s)
+                              </div>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Formation / Session */}
+                        <td className="px-5 py-4">
+                          <div className="flex flex-col text-xs">
+                            <span className="font-semibold text-slate-800 line-clamp-1">
+                              {a.formation?.title || 'Formation'}
                             </span>
-                            <span className="text-[10px] font-semibold text-slate-400">
-                              Max : {assignment.maxFileSize} MB
+                            <span className="text-slate-500">
+                              Session #{a.sessionId}{' '}
+                              {a.session?.startDate
+                                ? `(${new Date(a.session.startDate).toLocaleDateString('fr-FR')})`
+                                : ''}
                             </span>
                           </div>
-                          <p className="font-bold text-slate-900 text-xs truncate" title={assignment.title}>
-                            {assignment.title}
-                          </p>
-                          <p className="text-[11px] text-slate-500 line-clamp-1">{assignment.description}</p>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Session */}
-                      <td className="py-4 px-4 font-semibold text-slate-700">
-                        <div>
-                          <p className="font-bold text-slate-800">
-                            {assignment.formation?.title || (assignment.formationId ? `Formation #${assignment.formationId}` : `Session #${assignment.sessionId}`)}
-                          </p>
-                          <p className="text-[11px] text-slate-400">Session #{assignment.sessionId}</p>
-                        </div>
-                      </td>
-
-                      {/* Date limite */}
-                      <td className="py-4 px-4">
-                        <span className="inline-flex items-center gap-1 font-semibold text-slate-700 whitespace-nowrap">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          {new Date(assignment.deadline).toLocaleString('fr-FR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </td>
-
-                      {/* Remises */}
-                      <td className="py-4 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => setViewSubmissionsAssignment(assignment)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50 text-[var(--cj-blue)] hover:bg-blue-100 font-bold transition shadow-sm"
-                        >
-                          <FileCheck className="w-3.5 h-3.5" />
-                          <span>{assignment.submissions?.length || 0}</span>
-                          {pendingCount > 0 && (
-                            <span className="ml-1 bg-amber-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full animate-pulse">
-                              {pendingCount}
+                        {/* Date limite */}
+                        <td className="px-5 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5 text-xs">
+                            <Clock className={`h-4 w-4 ${isOverdue ? 'text-rose-500' : 'text-slate-400'}`} />
+                            <span className={isOverdue ? 'font-bold text-rose-600' : 'text-slate-700'}>
+                              {new Date(a.deadline).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
                             </span>
-                          )}
-                        </button>
-                      </td>
+                          </div>
+                        </td>
 
-                      {/* Statut */}
-                      <td className="py-4 px-4">
-                        {statusLabel === 'Publié' ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                            <CheckCircle2 className="w-3 h-3" /> Publié
-                          </span>
-                        ) : statusLabel === 'Archivé' ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
-                            <FileArchive className="w-3 h-3" /> Archivé
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                            <Clock className="w-3 h-3" /> Brouillon
-                          </span>
-                        )}
-                      </td>
+                        {/* Remises & Correction */}
+                        <td className="px-5 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setViewSubmissionsAssignment(a)
+                                setSelectedSubmission(null)
+                              }}
+                              className="group inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-100 transition"
+                            >
+                              <FileCheck className="h-4 w-4 text-[var(--admin-primary)]" />
+                              <span>{submissionsList.length} remise(s)</span>
+                              {pendingCount > 0 && (
+                                <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                  {pendingCount} à corriger
+                                </span>
+                              )}
+                            </button>
+                          </div>
+                        </td>
 
-                      {/* Date de création */}
-                      <td className="py-4 px-4 text-slate-500 font-medium whitespace-nowrap">
-                        {new Date(assignment.createdAt).toLocaleDateString('fr-FR')}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-4 px-4 text-right whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1">
+                        {/* Switch Statut Publié/Brouillon */}
+                        <td className="px-5 py-4 whitespace-nowrap">
                           <button
                             type="button"
-                            onClick={() => setViewDetailAssignment(assignment)}
-                            title="Aperçu rapide"
-                            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition"
+                            onClick={() => handleTogglePublish(a)}
+                            disabled={togglingPublishId === a.id}
+                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                              a.published || a.status === 'publie'
+                                ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                            title="Cliquer pour basculer le statut de publication"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            {togglingPublishId === a.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : a.published || a.status === 'publie' ? (
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                            ) : (
+                              <XCircle className="h-3.5 w-3.5 text-slate-400" />
+                            )}
+                            {a.published || a.status === 'publie' ? 'Publié' : 'Brouillon'}
                           </button>
+                        </td>
 
-                          <button
-                            type="button"
-                            onClick={() => handleTogglePublish(assignment)}
-                            title={assignment.published ? 'Dépublier' : 'Publier'}
-                            className={`px-2 py-1 rounded-lg border transition text-[11px] font-bold ${
-                              assignment.published
-                                ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
-                                : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
+                        {/* Actions */}
+                        <td className="px-5 py-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setViewDetailAssignment(a)}
+                              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                              title="Voir les détails"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEdit(a)}
+                              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                              title="Modifier"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDelete(a)}
+                              className="rounded-lg p-2 text-rose-500 hover:bg-rose-50 hover:text-rose-700"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Vue Mobile (Cartes interactives adaptées) */}
+            <div className="grid gap-4 md:hidden">
+              {paginatedAssignments.map((a) => {
+                const submissionsList = a.submissions || []
+                const pendingCount = submissionsList.filter((s) => s.status === 'submitted').length
+                const isOverdue = new Date(a.deadline).getTime() < Date.now()
+
+                return (
+                  <div key={a.id} className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                          {a.type?.toUpperCase() || 'TP'}
+                        </span>
+                        <h3 className="mt-1 text-base font-bold text-slate-900">{a.title}</h3>
+                        <p className="text-xs text-slate-500">{a.formation?.title || 'Formation'}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePublish(a)}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
+                          a.published || a.status === 'publie'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {a.published || a.status === 'publie' ? 'Publié' : 'Brouillon'}
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-slate-600 line-clamp-2">{a.description}</p>
+
+                    <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                      <span className={`font-semibold flex items-center gap-1 ${isOverdue ? 'text-rose-600' : 'text-slate-500'}`}>
+                        <Clock className="h-3.5 w-3.5" />
+                        {new Date(a.deadline).toLocaleDateString('fr-FR')}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setViewSubmissionsAssignment(a)
+                          setSelectedSubmission(null)
+                        }}
+                        className="font-bold text-[var(--admin-primary)] flex items-center gap-1"
+                      >
+                        <FileCheck className="h-3.5 w-3.5" />
+                        {submissionsList.length} remise(s)
+                        {pendingCount > 0 && <span className="text-amber-600">({pendingCount} à corriger)</span>}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => setViewDetailAssignment(a)}
+                        className={adminSecondaryButtonClassName}
+                      >
+                        <Eye className="h-3.5 w-3.5" /> Détails
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(a)}
+                        className={adminSecondaryButtonClassName}
+                      >
+                        <Edit className="h-3.5 w-3.5" /> Modifier
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDelete(a)}
+                        className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-100"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Pagination Controls */}
+            <PaginationControls
+              pagination={{
+                page: currentPage,
+                pageSize,
+                totalItems: filteredAssignments.length,
+                totalPages,
+                hasNextPage: currentPage < totalPages,
+                hasPreviousPage: currentPage > 1,
+              }}
+              onPageChange={(p) => setCurrentPage(p)}
+              onPageSizeChange={(sz) => {
+                setPageSize(sz)
+                setCurrentPage(1)
+              }}
+            />
+          </div>
+        )}
+
+        {/* ── Modal Créer / Modifier Devoir ─────────────────────────────────── */}
+        {showCreateModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm overflow-y-auto">
+            <div className="w-full max-w-2xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl space-y-5 my-8">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--admin-primary-50)] text-[var(--admin-primary)]">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">
+                      {editingAssignment ? 'Modifier le travail' : 'Créer un nouveau travail'}
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      Définissez les consignes, la session associée et la date limite.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmitAssignment} className="space-y-4">
+                {/* Titre */}
+                <div>
+                  <label htmlFor="form-title" className="mb-1 block text-xs font-semibold text-slate-700">
+                    Titre du travail <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    id="form-title"
+                    type="text"
+                    required
+                    placeholder="Ex: TP1 — Conception de base de données PostgreSQL"
+                    value={formData.title}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                    className={adminInputClassName}
+                  />
+                </div>
+
+                {/* Session */}
+                <div>
+                  <label htmlFor="form-session" className="mb-1 block text-xs font-semibold text-slate-700">
+                    Session associée <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    id="form-session"
+                    required
+                    value={formData.sessionId}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, sessionId: e.target.value }))}
+                    className={adminSelectClassName}
+                  >
+                    <option value="">Sélectionnez une session</option>
+                    {sessions.map((s) => (
+                      <option key={s.id} value={String(s.id)}>
+                        {s.formation?.title || 'Formation'} — Session du{' '}
+                        {new Date(s.startDate).toLocaleDateString('fr-FR')} ({s.format})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Grid Type & Difficulty */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="form-type" className="mb-1 block text-xs font-semibold text-slate-700">
+                      Type d'évaluation
+                    </label>
+                    <select
+                      id="form-type"
+                      value={formData.type}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, type: e.target.value as any }))}
+                      className={adminSelectClassName}
+                    >
+                      <option value="tp">Travaux Pratiques (TP)</option>
+                      <option value="exam">Examen / Contrôle</option>
+                      <option value="project">Projet de fin de module</option>
+                      <option value="homework">Devoir à la maison</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="form-difficulty" className="mb-1 block text-xs font-semibold text-slate-700">
+                      Niveau de difficulté
+                    </label>
+                    <select
+                      id="form-difficulty"
+                      value={formData.difficulty}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, difficulty: e.target.value as any }))}
+                      className={adminSelectClassName}
+                    >
+                      <option value="debutant">Débutant</option>
+                      <option value="intermediaire">Intermédiaire</option>
+                      <option value="avance">Avancé</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label htmlFor="form-description" className="mb-1 block text-xs font-semibold text-slate-700">
+                    Description & Consignes générales <span className="text-rose-500">*</span>
+                  </label>
+                  <textarea
+                    id="form-description"
+                    required
+                    rows={3}
+                    placeholder="Présentation générale des attentes pour ce devoir..."
+                    value={formData.description}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                    className={adminInputClassName}
+                  />
+                </div>
+
+                {/* Objectifs & Instructions */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="form-objectives" className="mb-1 block text-xs font-semibold text-slate-700">
+                      Objectifs pédagogiques
+                    </label>
+                    <textarea
+                      id="form-objectives"
+                      rows={2}
+                      placeholder="Quelles compétences seront évaluées ?"
+                      value={formData.objectives}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, objectives: e.target.value }))}
+                      className={adminInputClassName}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="form-instructions" className="mb-1 block text-xs font-semibold text-slate-700">
+                      Instructions de rendu
+                    </label>
+                    <textarea
+                      id="form-instructions"
+                      rows={2}
+                      placeholder="Format du fichier attendu, structure..."
+                      value={formData.instructions}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, instructions: e.target.value }))}
+                      className={adminInputClassName}
+                    />
+                  </div>
+                </div>
+
+                {/* Date limite & Statut */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="form-deadline" className="mb-1 block text-xs font-semibold text-slate-700">
+                      Date et heure limite <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      id="form-deadline"
+                      type="datetime-local"
+                      required
+                      value={formData.deadline}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, deadline: e.target.value }))}
+                      className={adminInputClassName}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="form-status" className="mb-1 block text-xs font-semibold text-slate-700">
+                      Statut de publication
+                    </label>
+                    <select
+                      id="form-status"
+                      value={formData.status}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          status: e.target.value as any,
+                          published: e.target.value === 'publie',
+                        }))
+                      }
+                      className={adminSelectClassName}
+                    >
+                      <option value="publie">Publié (visible par les étudiants)</option>
+                      <option value="brouillon">Brouillon (non visible)</option>
+                      <option value="archive">Archivé</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Paramètres avancés du rendu */}
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    Paramètres de rendu des étudiants
+                  </span>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <label htmlFor="form-maxFileSize" className="mb-1 block text-[11px] font-semibold text-slate-600">
+                        Taille max par fichier (Mo)
+                      </label>
+                      <input
+                        id="form-maxFileSize"
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={formData.maxFileSize}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, maxFileSize: Number(e.target.value) || 10 }))}
+                        className={adminInputClassName}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="form-maxFiles" className="mb-1 block text-[11px] font-semibold text-slate-600">
+                        Nombre max de fichiers
+                      </label>
+                      <input
+                        id="form-maxFiles"
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={formData.maxFiles}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, maxFiles: Number(e.target.value) || 5 }))}
+                        className={adminInputClassName}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="form-allowedFileTypes" className="mb-1 block text-[11px] font-semibold text-slate-600">
+                        Extensions autorisées
+                      </label>
+                      <input
+                        id="form-allowedFileTypes"
+                        type="text"
+                        placeholder="pdf,doc,docx,zip..."
+                        value={formData.allowedFileTypes}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, allowedFileTypes: e.target.value }))}
+                        className={adminInputClassName}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      id="form-allowResubmission"
+                      type="checkbox"
+                      checked={formData.allowResubmission}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, allowResubmission: e.target.checked }))}
+                      className="h-4 w-4 rounded border-slate-300 text-[var(--admin-primary)] focus:ring-[var(--admin-primary-200)]"
+                    />
+                    <label htmlFor="form-allowResubmission" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                      Autoriser les étudiants à remplacer/re-déposer leur travail avant ou après correction
+                    </label>
+                  </div>
+                </div>
+
+                {/* Consignes Fichiers R2 */}
+                <div>
+                  <label htmlFor="consigne-files-input" className="mb-1.5 block text-xs font-semibold text-slate-700">
+                    Joindre des documents de consigne (PDF, ZIP, DOCX...)
+                  </label>
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-4 text-center">
+                    <Upload className="mx-auto h-6 w-6 text-slate-400" />
+                    <p className="mt-1 text-xs text-slate-600">
+                      Glissez des fichiers ou{' '}
+                      <label htmlFor="consigne-files-input" className="cursor-pointer font-bold text-[var(--admin-primary)] hover:underline">
+                        parcourez votre ordinateur
+                      </label>
+                    </p>
+                    <input
+                      id="consigne-files-input"
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setConsigneFiles(Array.from(e.target.files))
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    {consigneFiles.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2 justify-center">
+                        {consigneFiles.map((f, i) => (
+                          <span key={i} className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs text-slate-700 shadow-sm">
+                            <FileText className="h-3.5 w-3.5 text-blue-500" />
+                            {f.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className={adminSecondaryButtonClassName}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={formLoading}
+                    className={adminPrimaryButtonClassName}
+                  >
+                    {formLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Enregistrement...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4" />
+                        {editingAssignment ? 'Enregistrer les modifications' : 'Créer le travail'}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ── Modal / Drawer Remises & Correction ───────────────────────────── */}
+        {viewSubmissionsAssignment && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm overflow-y-auto">
+            <div className="w-full max-w-4xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl space-y-6 my-8 max-h-[90vh] flex flex-col">
+              {/* Drawer Header */}
+              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--admin-primary)] bg-[var(--admin-primary-50)] px-2 py-0.5 rounded">
+                    Remises des Étudiants
+                  </span>
+                  <h2 className="mt-1 text-xl font-bold text-slate-900">{viewSubmissionsAssignment.title}</h2>
+                  <p className="text-xs text-slate-500">
+                    Session #{viewSubmissionsAssignment.sessionId} · Date limite :{' '}
+                    {new Date(viewSubmissionsAssignment.deadline).toLocaleDateString('fr-FR')}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setViewSubmissionsAssignment(null)
+                    setSelectedSubmission(null)
+                  }}
+                  className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Submissions List & Grading Pane */}
+              <div className="grid gap-6 md:grid-cols-12 flex-1 overflow-y-auto pr-1">
+                {/* Left: List of Submissions */}
+                <div className={`${selectedSubmission ? 'md:col-span-6' : 'md:col-span-12'} space-y-3`}>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Liste des remises ({viewSubmissionsAssignment.submissions?.length || 0})
+                  </h3>
+
+                  {(!viewSubmissionsAssignment.submissions || viewSubmissionsAssignment.submissions.length === 0) ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center text-xs text-slate-500">
+                      <FileCheck className="mx-auto h-8 w-8 text-slate-400 mb-2" />
+                      Aucune remise n'a encore été effectuée par les étudiants pour ce travail.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {viewSubmissionsAssignment.submissions.map((sub) => {
+                        const isSelected = selectedSubmission?.id === sub.id
+                        const studentName = sub.student
+                          ? `${sub.student.firstName} ${sub.student.lastName}`
+                          : 'Étudiant anonyme'
+
+                        return (
+                          <div
+                            key={sub.id}
+                            onClick={() => {
+                              setSelectedSubmission(sub)
+                              setGradeValue(sub.grade !== null && sub.grade !== undefined ? String(sub.grade) : '')
+                              setFeedbackValue(sub.feedback || '')
+                              setSubmissionStatusValue(sub.status === 'returned' ? 'returned' : 'graded')
+                            }}
+                            className={`cursor-pointer rounded-2xl border p-4 transition-all ${
+                              isSelected
+                                ? 'border-[var(--admin-primary)] bg-[var(--admin-primary-50)]/50 shadow-sm'
+                                : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
                             }`}
                           >
-                            {assignment.published ? 'Dépublier' : 'Publier'}
-                          </button>
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <h4 className="text-sm font-bold text-slate-900">{studentName}</h4>
+                                <p className="text-xs text-slate-500">
+                                  {sub.student?.email || ''} · Mat. #{sub.student?.studentNumber || sub.studentId}
+                                </p>
+                              </div>
+                              <AdminBadge
+                                tone={
+                                  sub.status === 'graded'
+                                    ? 'success'
+                                    : sub.status === 'returned'
+                                    ? 'warning'
+                                    : 'primary'
+                                }
+                              >
+                                {sub.status === 'graded'
+                                  ? `Noté : ${sub.grade}/20`
+                                  : sub.status === 'returned'
+                                  ? 'A réviser'
+                                  : 'En attente'}
+                              </AdminBadge>
+                            </div>
 
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEdit(assignment)}
-                            title="Modifier"
-                            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
+                            <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-xs text-slate-500">
+                              <span>Déposé le {new Date(sub.submittedAt).toLocaleDateString('fr-FR')}</span>
+                              <span className="font-semibold text-slate-700">
+                                {sub.files?.length || 0} fichier(s) joint(s)
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
 
-                          <button
-                            type="button"
-                            onClick={() => setConfirmDelete(assignment)}
-                            title="Supprimer"
-                            className="p-1.5 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                {/* Right: Grading Pane */}
+                {selectedSubmission && (
+                  <div className="md:col-span-6 rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-4 shadow-inner">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900">
+                          Correction : {selectedSubmission.student?.firstName} {selectedSubmission.student?.lastName}
+                        </h4>
+                        <p className="text-xs text-slate-500">Formulaire d'évaluation & feedback</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSubmission(null)}
+                        className="text-slate-400 hover:text-slate-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* Fichiers remis par l'étudiant */}
+                    <div>
+                      <span className="text-xs font-semibold text-slate-700 block mb-1.5">
+                        Fichiers déposés sur Cloudflare R2 :
+                      </span>
+                      {selectedSubmission.files && selectedSubmission.files.length > 0 ? (
+                        <div className="space-y-1.5">
+                          {selectedSubmission.files.map((sf) => (
+                            <a
+                              key={sf.id}
+                              href={sf.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 hover:border-blue-300 hover:text-blue-600 transition"
+                            >
+                              <span className="truncate max-w-[200px]">{sf.originalName || sf.name}</span>
+                              <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                            </a>
+                          ))}
                         </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                      ) : (
+                        <p className="text-xs text-slate-500 italic">Aucun fichier joint.</p>
+                      )}
+                    </div>
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50/50">
-            <p className="text-xs font-semibold text-slate-500">
-              Page <strong className="text-slate-900">{currentPage}</strong> sur{' '}
-              <strong className="text-slate-900">{totalPages}</strong> ({filteredAssignments.length} travaux)
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 disabled:opacity-40 hover:bg-slate-50"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 disabled:opacity-40 hover:bg-slate-50"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+                    {/* Formulaire de notation */}
+                    <form onSubmit={handleGradeSubmission} className="space-y-3 pt-2">
+                      <div>
+                        <label htmlFor="submission-grade" className="block text-xs font-semibold text-slate-700 mb-1">
+                          Note attribuée (/20)
+                        </label>
+                        <input
+                          id="submission-grade"
+                          type="number"
+                          step="0.5"
+                          min="0"
+                          max="20"
+                          placeholder="Ex: 16.5"
+                          value={gradeValue}
+                          onChange={(e) => setGradeValue(e.target.value)}
+                          className={adminInputClassName}
+                        />
+                      </div>
 
-      {/* Modal Création / Édition Travail */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 animate-fade-in-up">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 sticky top-0 z-10 backdrop-blur-md">
-              <div>
-                <h2 className="text-lg font-black text-slate-900">
-                  {editingAssignment ? 'Modifier le Travail' : 'Créer un nouveau Travail'}
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Configurez le sujet, les consignes et la session de destination.
-                </p>
+                      <div>
+                        <label htmlFor="submission-feedback" className="block text-xs font-semibold text-slate-700 mb-1">
+                          Commentaire & Feedback pédagogique
+                        </label>
+                        <textarea
+                          id="submission-feedback"
+                          rows={3}
+                          placeholder="Remarques sur le travail, points forts et axes d'amélioration..."
+                          value={feedbackValue}
+                          onChange={(e) => setFeedbackValue(e.target.value)}
+                          className={adminInputClassName}
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="submission-status" className="block text-xs font-semibold text-slate-700 mb-1">
+                          Action après correction
+                        </label>
+                        <select
+                          id="submission-status"
+                          value={submissionStatusValue}
+                          onChange={(e) => setSubmissionStatusValue(e.target.value as any)}
+                          className={adminSelectClassName}
+                        >
+                          <option value="graded">Valider la note & Notifier l'étudiant</option>
+                          <option value="returned">Demander une révision / nouvelle remise</option>
+                        </select>
+                      </div>
+
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          type="submit"
+                          disabled={gradingLoading}
+                          className={adminPrimaryButtonClassName}
+                        >
+                          {gradingLoading ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" /> Enregistrement...
+                            </>
+                          ) : (
+                            <>
+                              <Check className="h-4 w-4" /> Enregistrer l'évaluation
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
               </div>
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
+          </div>
+        )}
 
-            <form onSubmit={handleSubmitAssignment} className="p-6 space-y-4">
-              {/* Session Concernée */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Session de Formation Concernée *
-                </label>
-                <select
-                  value={formData.sessionId}
-                  onChange={(e) => setFormData({ ...formData, sessionId: e.target.value })}
-                  required
-                  className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[var(--admin-primary)] outline-none text-slate-900"
+        {/* ── Modal Détails d'un Travail ────────────────────────────────────── */}
+        {viewDetailAssignment && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
+              <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--admin-primary)] bg-[var(--admin-primary-50)] px-2 py-0.5 rounded">
+                    Détails du travail
+                  </span>
+                  <h3 className="mt-1 text-lg font-bold text-slate-900">{viewDetailAssignment.title}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setViewDetailAssignment(null)}
+                  className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100"
                 >
-                  <option value="">Sélectionnez une session active</option>
-                  {sessions.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.formation?.title ? `${s.formation.title} (Session #${s.id})` : `Session #${s.id}`} (
-                      {s.format})
-                    </option>
-                  ))}
-                </select>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
-              {/* Titre */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Titre du Travail *</label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="ex: TP n°1 - Audit Sécurité et Architecture Cloud"
-                  required
-                  className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[var(--admin-primary)] outline-none text-slate-900"
-                />
-              </div>
+              <div className="space-y-3 text-xs text-slate-700">
+                <div>
+                  <span className="font-bold text-slate-900 block mb-1">Description :</span>
+                  <p className="bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed whitespace-pre-wrap">
+                    {viewDetailAssignment.description}
+                  </p>
+                </div>
 
-              {/* Type, Niveau & Statut */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Type de Travail</label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                    className="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none"
-                  >
-                    <option value="tp">Travail Pratique (TP)</option>
-                    <option value="project">Projet de fin de module</option>
-                    <option value="exam">Examen / Évaluation</option>
-                    <option value="homework">Devoir à la maison</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Difficulté</label>
-                  <select
-                    value={formData.difficulty}
-                    onChange={(e) => setFormData({ ...formData, difficulty: e.target.value as any })}
-                    className="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none"
-                  >
-                    <option value="debutant">Débutant</option>
-                    <option value="intermediaire">Intermédiaire</option>
-                    <option value="avance">Avancé</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Statut Initial</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none"
-                  >
-                    <option value="publie">Publié (Immédiat)</option>
-                    <option value="brouillon">Brouillon</option>
-                    <option value="archive">Archivé</option>
-                  </select>
-                </div>
-              </div>
+                {viewDetailAssignment.objectives && (
+                  <div>
+                    <span className="font-bold text-slate-900 block mb-1">Objectifs pédagogiques :</span>
+                    <p className="bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
+                      {viewDetailAssignment.objectives}
+                    </p>
+                  </div>
+                )}
 
-              {/* Description */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Description Générale *</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
-                  placeholder="Présentation générale du sujet..."
-                  required
-                  className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[var(--admin-primary)] outline-none text-slate-900"
-                />
-              </div>
+                {viewDetailAssignment.instructions && (
+                  <div>
+                    <span className="font-bold text-slate-900 block mb-1">Instructions de rendu :</span>
+                    <p className="bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
+                      {viewDetailAssignment.instructions}
+                    </p>
+                  </div>
+                )}
 
-              {/* Objectifs & Instructions */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Objectifs Pédagogiques</label>
-                  <textarea
-                    value={formData.objectives}
-                    onChange={(e) => setFormData({ ...formData, objectives: e.target.value })}
-                    rows={2}
-                    placeholder="Compétences visées..."
-                    className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white outline-none text-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Instructions de Remise</label>
-                  <textarea
-                    value={formData.instructions}
-                    onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-                    rows={2}
-                    placeholder="Format de nommage du fichier, consignes de rendu..."
-                    className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white outline-none text-slate-900"
-                  />
-                </div>
-              </div>
-
-              {/* Dates & Paramètres Fichiers */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Date Limite de Remise *</label>
-                  <input
-                    type="datetime-local"
-                    value={formData.deadline}
-                    onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                    required
-                    className="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Taille Max Fichier (MB)</label>
-                  <input
-                    type="number"
-                    value={formData.maxFileSize}
-                    onChange={(e) => setFormData({ ...formData, maxFileSize: parseInt(e.target.value, 10) || 10 })}
-                    min={1}
-                    max={100}
-                    className="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Max Fichiers Remis</label>
-                  <input
-                    type="number"
-                    value={formData.maxFiles}
-                    onChange={(e) => setFormData({ ...formData, maxFiles: parseInt(e.target.value, 10) || 5 })}
-                    min={1}
-                    max={10}
-                    className="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Formats autorisés */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Formats de fichiers autorisés</label>
-                <input
-                  type="text"
-                  value={formData.allowedFileTypes}
-                  onChange={(e) => setFormData({ ...formData, allowedFileTypes: e.target.value })}
-                  placeholder="pdf,doc,docx,zip,rar,png,jpg,jpeg,excel,xls,xlsx"
-                  className="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none text-slate-900"
-                />
-              </div>
-
-              {/* Checkbox Remplacement */}
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="allowResubmission_cb"
-                  checked={formData.allowResubmission}
-                  onChange={(e) => setFormData({ ...formData, allowResubmission: e.target.checked })}
-                  className="w-4 h-4 rounded text-[var(--cj-blue)] border-slate-300"
-                />
-                <label htmlFor="allowResubmission_cb" className="text-xs font-bold text-slate-800">
-                  Autoriser l'étudiant à remplacer son dépôt avant la date limite
-                </label>
-              </div>
-
-              {/* Fichiers Consignes (Cloudflare R2 Upload) */}
-              <div className="border border-slate-200 rounded-2xl p-4 bg-slate-50/50 space-y-2">
-                <label className="block text-xs font-bold text-slate-800">
-                  📄 Téléverser le Sujet / Consignes (Cloudflare R2)
-                </label>
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e) => {
-                    if (e.target.files) {
-                      setConsigneFiles(Array.from(e.target.files))
-                    }
-                  }}
-                  className="w-full text-xs text-slate-700 bg-white rounded-xl border border-slate-200 p-2"
-                />
-                {editingAssignment && editingAssignment.files.length > 0 && (
-                  <div className="pt-2">
-                    <p className="text-[11px] font-bold text-slate-500 mb-1.5">Consignes déjà enregistrées :</p>
-                    <div className="flex flex-wrap gap-2">
-                      {editingAssignment.files.map((f) => (
+                {viewDetailAssignment.files && viewDetailAssignment.files.length > 0 && (
+                  <div>
+                    <span className="font-bold text-slate-900 block mb-1">Documents de consigne rattachés (Cloudflare R2) :</span>
+                    <div className="space-y-1.5">
+                      {viewDetailAssignment.files.map((f) => (
                         <a
                           key={f.id}
                           href={f.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-[11px] font-bold text-[var(--cj-blue)] hover:bg-blue-50"
+                          className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 hover:bg-slate-100 transition text-blue-600 font-semibold"
                         >
-                          {getFileIcon(f.mimeType, f.originalName)}
-                          <span>{f.originalName}</span>
-                          <Download className="w-3 h-3 ml-1 text-slate-400" />
+                          <span className="truncate">{f.originalName || f.name}</span>
+                          <ExternalLink className="h-3.5 w-3.5" />
                         </a>
                       ))}
                     </div>
@@ -1126,338 +1647,55 @@ export default function AdminAssignmentsPage() {
                 )}
               </div>
 
-              {/* Submit Buttons */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <div className="flex justify-end border-t border-slate-100 pt-3">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  onClick={() => setViewDetailAssignment(null)}
+                  className={adminSecondaryButtonClassName}
                 >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={formLoading}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] text-white text-xs font-bold rounded-xl hover:bg-[var(--admin-primary-700)] disabled:opacity-50 shadow-md"
-                >
-                  {formLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                  <span>{editingAssignment ? 'Enregistrer les modifications' : 'Créer et Enregistrer'}</span>
+                  Fermer
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Aperçu Rapide */}
-      {viewDetailAssignment && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200 animate-fade-in-up">
-            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
-              <div>
-                <span className="text-[10px] font-black uppercase text-[var(--cj-blue)] bg-blue-50 px-2 py-0.5 rounded">
-                  Session #{viewDetailAssignment.sessionId}
-                </span>
-                <h3 className="text-base font-black text-slate-900 mt-1">{viewDetailAssignment.title}</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setViewDetailAssignment(null)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
+          </div>
+        )}
 
-            <p className="text-xs text-slate-600 leading-relaxed">{viewDetailAssignment.description}</p>
-
-            {viewDetailAssignment.objectives && (
-              <div className="bg-blue-50/50 p-3 rounded-xl text-xs text-slate-700">
-                <strong className="text-[var(--cj-blue)] font-bold">Objectifs :</strong> {viewDetailAssignment.objectives}
-              </div>
-            )}
-
-            {viewDetailAssignment.files.length > 0 && (
-              <div className="space-y-1.5 pt-1">
-                <p className="text-xs font-bold text-slate-800">Sujet & consignes :</p>
-                <div className="flex flex-wrap gap-2">
-                  {viewDetailAssignment.files.map((f) => (
-                    <a
-                      key={f.id}
-                      href={f.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--cj-blue)]"
-                    >
-                      <Download className="w-3.5 h-3.5" /> {f.originalName}
-                    </a>
-                  ))}
+        {/* ── Modal Confirmation Supression ─────────────────────────────────── */}
+        {confirmDelete && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
+              <div className="flex items-center gap-3 text-rose-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50">
+                  <AlertTriangle className="h-5 w-5" />
                 </div>
+                <h3 className="text-base font-bold text-slate-900">Confirmer la suppression</h3>
               </div>
-            )}
-
-            <div className="flex justify-end pt-2">
-              <button
-                type="button"
-                onClick={() => setViewDetailAssignment(null)}
-                className="px-4 py-2 bg-slate-100 text-xs font-bold text-slate-700 rounded-xl"
-              >
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Drawer / Modal Liste des Remises d'un Travail */}
-      {viewSubmissionsAssignment && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 animate-fade-in-up">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 sticky top-0 z-10 backdrop-blur-md">
-              <div>
-                <span className="text-[10px] font-black uppercase text-[var(--cj-blue)] bg-blue-50 px-2 py-0.5 rounded">
-                  Session #{viewSubmissionsAssignment.sessionId}
-                </span>
-                <h2 className="text-lg font-black text-slate-900 mt-1">
-                  Remises : {viewSubmissionsAssignment.title}
-                </h2>
-                <p className="text-xs text-slate-500">
-                  {viewSubmissionsAssignment.submissions.length} travail(aux) remis au total.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setViewSubmissionsAssignment(null)
-                  setSelectedSubmission(null)
-                }}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {viewSubmissionsAssignment.submissions.length === 0 ? (
-                <div className="py-12 text-center text-slate-500 text-xs rounded-2xl bg-slate-50 border border-slate-200">
-                  Aucun étudiant n'a déposé de travail pour le moment.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {viewSubmissionsAssignment.submissions.map((sub) => (
-                    <div
-                      key={sub.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3 shadow-sm hover:border-blue-200 transition"
-                    >
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
-                        <div>
-                          <p className="text-sm font-bold text-slate-900">
-                            👤 {sub.student.firstName} {sub.student.lastName}
-                          </p>
-                          <p className="text-xs text-slate-500 font-medium">
-                            Matricule : {sub.student.studentNumber} | Email : {sub.student.email}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
-                              sub.status === 'graded'
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                : sub.status === 'returned'
-                                ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                : 'bg-blue-50 text-blue-800 border-blue-200'
-                            }`}
-                          >
-                            {sub.status === 'graded'
-                              ? `Corrigé (${sub.grade}/20)`
-                              : sub.status === 'returned'
-                              ? 'À refaire'
-                              : 'Déposé (À corriger)'}
-                          </span>
-
-                          <button
-                            type="button"
-                            onClick={() => handleSelectSubmissionForGrading(sub)}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-[var(--admin-primary)] text-white text-xs font-bold rounded-xl hover:bg-[var(--admin-primary-700)] transition shadow-sm"
-                          >
-                            <Award className="w-3.5 h-3.5" />
-                            <span>Corriger / Noter</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Submitted Files */}
-                      {sub.files.length > 0 && (
-                        <div className="space-y-1.5">
-                          <p className="text-xs font-bold text-slate-700">Fichiers remis par l'étudiant :</p>
-                          <div className="flex flex-wrap gap-2">
-                            {sub.files.map((f) => (
-                              <a
-                                key={f.id}
-                                href={f.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 hover:bg-blue-50 hover:text-[var(--cj-blue)] hover:border-blue-300 transition"
-                              >
-                                {getFileIcon(f.mimeType, f.originalName)}
-                                <span>{f.originalName} ({(f.size / 1024).toFixed(1)} KB)</span>
-                                <Download className="w-3.5 h-3.5 text-slate-400" />
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Feedback & Grade Display */}
-                      {sub.grade !== null && (
-                        <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3 text-xs">
-                          <p className="font-bold text-emerald-900">
-                            Note attribuée : {sub.grade}/20
-                          </p>
-                          {sub.feedback && (
-                            <p className="text-emerald-800 mt-1 italic">
-                              Commentaire : "{sub.feedback}"
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      <p className="text-[11px] text-slate-400 font-medium pt-1">
-                        Déposé le {new Date(sub.submittedAt).toLocaleString('fr-FR')}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Formulaire de Correction / Notation */}
-      {selectedSubmission && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full border border-slate-200 animate-fade-in-up">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="text-base font-black text-slate-900">
-                  Correction de la remise
-                </h3>
-                <p className="text-xs text-slate-500">
-                  {selectedSubmission.student.firstName} {selectedSubmission.student.lastName} (
-                  {selectedSubmission.student.studentNumber})
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedSubmission(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveGrade} className="p-6 space-y-4">
-              {/* Note sur 20 */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Note attribuée (sur 20) *
-                </label>
-                <input
-                  type="number"
-                  step="0.25"
-                  min="0"
-                  max="20"
-                  value={gradeValue}
-                  onChange={(e) => setGradeValue(e.target.value)}
-                  placeholder="ex: 17.5"
-                  required
-                  className="w-full text-sm font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[var(--admin-primary)] outline-none text-slate-900"
-                />
-              </div>
-
-              {/* Statut de correction */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Décision / Statut</label>
-                <select
-                  value={submissionStatusValue}
-                  onChange={(e) => setSubmissionStatusValue(e.target.value as any)}
-                  className="w-full text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white outline-none"
-                >
-                  <option value="graded">Valider & Marquer comme Corrigé</option>
-                  <option value="returned">Demande de modification (À refaire)</option>
-                </select>
-              </div>
-
-              {/* Commentaire / Feedback */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Commentaire & Feedback Pédagogique
-                </label>
-                <textarea
-                  value={feedbackValue}
-                  onChange={(e) => setFeedbackValue(e.target.value)}
-                  rows={4}
-                  placeholder="Rédigez vos conseils, remarques et points d'amélioration pour l'étudiant..."
-                  className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[var(--admin-primary)] outline-none text-slate-900"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setSelectedSubmission(null)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={gradingLoading}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] text-white text-xs font-bold rounded-xl hover:bg-[var(--admin-primary-700)] disabled:opacity-50 shadow-md"
-                >
-                  {gradingLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  <span>Enregistrer & Notifier</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Confirmation Suppression */}
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 text-center border border-slate-200 animate-fade-in-up">
-            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
-              <Trash2 className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-slate-900">Supprimer ce travail ?</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Cette action supprimera également les consignes et les fichiers remis associés sur Cloudflare R2.
+              <p className="text-xs leading-relaxed text-slate-600">
+                Êtes-vous sûr de vouloir supprimer le travail <span className="font-bold">"{confirmDelete.title}"</span> ? Cette action supprimera définitivement le devoir, ses fichiers consignes sur Cloudflare R2 ainsi que toutes les remises des étudiants.
               </p>
-            </div>
-            <div className="flex justify-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 rounded-xl border border-slate-200 hover:bg-slate-50"
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={() => handleDeleteAssignment(confirmDelete)}
-                className="px-4 py-2 text-xs font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 disabled:opacity-50"
-              >
-                {isDeleting ? 'Suppression...' : 'Confirmer la suppression'}
-              </button>
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(null)}
+                  className={adminSecondaryButtonClassName}
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteAssignment}
+                  disabled={isDeleting}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-rose-700 transition"
+                >
+                  {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  Supprimer définitivement
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
     </AdminShell>
   )
 }

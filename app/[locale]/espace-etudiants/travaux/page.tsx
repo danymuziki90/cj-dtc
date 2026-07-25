@@ -116,12 +116,18 @@ function TravauxContent() {
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/student/system/dashboard", { cache: "no-store" });
-      if (!response.ok) {
-        throw new Error("Erreur lors du chargement des travaux");
+      const response = await fetch("/api/student/assignments", { cache: "no-store" });
+      if (response.ok) {
+        const data = await response.json();
+        const list = Array.isArray(data) ? data : data.assignments || [];
+        setAssignments(list);
+      } else {
+        const dashRes = await fetch("/api/student/system/dashboard", { cache: "no-store" });
+        if (dashRes.ok) {
+          const dashData = await dashRes.json();
+          setAssignments(dashData.dashboard?.assignments || []);
+        }
       }
-      const data = await response.json();
-      setAssignments(data.dashboard?.assignments || []);
     } catch (error) {
       console.error("Erreur lors du chargement des travaux:", error);
     } finally {
