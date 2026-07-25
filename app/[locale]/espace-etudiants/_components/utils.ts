@@ -63,6 +63,28 @@ export function getGradientForCategory(category: string | null) {
 }
 
 export function getAssignmentStatus(assign: any) {
+  const submission = assign.submissions?.[0];
+  const isGraded = submission?.status === "graded" || submission?.grade != null;
+  const isReturned = submission?.status === "returned";
+
+  if (isGraded) {
+    return { 
+      label: "Corrigé", 
+      color: "border-blue-200 bg-blue-50 text-blue-800",
+      theme: "blue",
+      icon: CheckCircle2
+    };
+  }
+
+  if (isReturned) {
+    return { 
+      label: "À réviser", 
+      color: "border-amber-200 bg-amber-50 text-amber-800",
+      theme: "amber",
+      icon: Clock
+    };
+  }
+
   const hasSub = assign.submissions && assign.submissions.length > 0;
   if (hasSub) {
     return { 

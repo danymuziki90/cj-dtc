@@ -192,12 +192,21 @@ function TravauxContent() {
   }, [assignments]);
 
   const submittedCount = useMemo(() => {
-    return assignments.filter((item) => item.submissions && item.submissions.length > 0).length;
+    return assignments.filter((item) => {
+      const hasSub = item.submissions && item.submissions.length > 0;
+      if (!hasSub) return false;
+      const isEvaluated = item.submissions?.some(
+        (sub) => sub.status === "graded" || sub.status === "returned" || sub.grade != null
+      );
+      return !isEvaluated;
+    }).length;
   }, [assignments]);
 
   const evaluatedCount = useMemo(() => {
     return assignments.filter((item) =>
-      item.submissions?.some((sub) => sub.status === "graded" || sub.grade != null)
+      item.submissions?.some(
+        (sub) => sub.status === "graded" || sub.status === "returned" || sub.grade != null
+      )
     ).length;
   }, [assignments]);
 
@@ -205,11 +214,14 @@ function TravauxContent() {
     return assignments.filter((item) => {
       const hasSub = item.submissions && item.submissions.length > 0;
       const isEvaluated = item.submissions?.some(
-        (sub) => sub.status === "graded" || sub.grade != null
+        (sub) => sub.status === "graded" || sub.status === "returned" || sub.grade != null
       );
 
-      if (filter === "pending" && (hasSub || new Date(item.deadline).getTime() < Date.now())) return false;
-      if (filter === "submitted" && !hasSub) return false;
+      if (filter === "pending") {
+        const isFuture = new Date(item.deadline).getTime() >= Date.now();
+        if (hasSub || !isFuture) return false;
+      }
+      if (filter === "submitted" && (!hasSub || isEvaluated)) return false;
       if (filter === "evaluated" && !isEvaluated) return false;
 
       if (searchQuery.trim()) {
@@ -472,16 +484,28 @@ function TravauxContent() {
                     )}
 
                     {/* Feedback / Grade card if evaluated */}
-                    {isGraded && submission && (
-                      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3.5 space-y-1 text-xs">
-                        <div className="flex items-center justify-between font-bold text-emerald-900">
+                    {(isGraded || submission?.status === "returned") && submission && (
+                      <div className={`rounded-2xl border p-3.5 space-y-1 text-xs ${
+                        submission?.status === "returned"
+                          ? "border-amber-200 bg-amber-50/60"
+                          : "border-emerald-200 bg-emerald-50/60"
+                      }`}>
+                        <div className={`flex items-center justify-between font-bold ${
+                          submission?.status === "returned" ? "text-amber-900" : "text-emerald-900"
+                        }`}>
                           <span>Note attribuée :</span>
-                          <span className="text-sm font-extrabold bg-emerald-600 text-white px-2.5 py-0.5 rounded-lg">
-                            {submission.grade} / 20
+                          <span className={`text-sm font-extrabold px-2.5 py-0.5 rounded-lg text-white ${
+                            submission?.status === "returned" ? "bg-amber-600" : "bg-emerald-600"
+                          }`}>
+                            {submission.grade !== null && submission.grade !== undefined ? `${submission.grade} / 20` : "-- / 20"}
                           </span>
                         </div>
                         {submission.feedback && (
-                          <p className="text-emerald-800 text-[11px] leading-relaxed pt-1 border-t border-emerald-200/60">
+                          <p className={`text-[11px] leading-relaxed pt-1 border-t ${
+                            submission?.status === "returned"
+                              ? "text-amber-800 border-amber-200/60"
+                              : "text-emerald-800 border-emerald-200/60"
+                          }`}>
                             <strong>Commentaire du formateur :</strong> {submission.feedback}
                           </p>
                         )}
@@ -531,7 +555,7 @@ function TravauxContent() {
                       </span>
                     </div>
 
-                    {(!submission || assign.allowResubmission !== false) && (
+                    {(!submission || (assign.allowResubmission !== false && !isGraded) || submission.status === "returned") && (
                       <button
                         onClick={() => setSelectedAssignment(assign)}
                         className={submission ? studentMutedButtonClassName : studentPrimaryButtonClassName}

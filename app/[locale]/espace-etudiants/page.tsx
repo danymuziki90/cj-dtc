@@ -140,9 +140,14 @@ function EspaceEtudiantsContent() {
   }, [assignments]);
 
   const submittedAssignmentsCount = useMemo(() => {
-    return assignments.filter(
-      (assign: any) => assign.submissions && assign.submissions.length > 0
-    ).length;
+    return assignments.filter((assign: any) => {
+      const hasSub = assign.submissions && assign.submissions.length > 0;
+      if (!hasSub) return false;
+      const isEvaluated = assign.submissions?.some(
+        (sub: any) => sub.status === "graded" || sub.status === "returned" || sub.grade != null
+      );
+      return !isEvaluated;
+    }).length;
   }, [assignments]);
 
   const totalFormationsCount = sessionsHistory.length;
