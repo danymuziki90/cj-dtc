@@ -195,24 +195,67 @@ export async function GET(request: NextRequest) {
           ],
         },
         include: {
-          formation: { select: { title: true } },
+          formation: { select: { id: true, title: true, slug: true } },
+          session: { select: { id: true, startDate: true, endDate: true, location: true, format: true } },
           files: true,
+          submissions: {
+            where: { studentId: auth.student.id },
+            orderBy: { submittedAt: 'desc' },
+            include: { files: true },
+          },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { deadline: 'asc' },
       })
     : []
 
-  const mappedAssignments = rawAssignments.map((a) => ({
-    id: a.id,
-    title: a.title,
-    description: a.description,
-    type: a.type,
-    deadline: a.deadline,
-    createdAt: a.createdAt,
-    publishDate: a.publishedAt || a.createdAt,
-    formation: { title: a.formation.title },
-    filesCount: a.files.length,
-  }))
+  const mappedAssignments = rawAssignments.map((a) => {
+    const allowedTypesArray = a.allowedFileTypes
+      ? a.allowedFileTypes.split(',').map((t) => t.trim())
+      : ['pdf', 'doc', 'docx', 'zip', 'rar', 'png', 'jpg', 'jpeg']
+
+    return {
+      id: a.id,
+      title: a.title,
+      description: a.description,
+      objectives: a.objectives,
+      instructions: a.instructions,
+      type: a.type,
+      difficulty: a.difficulty,
+      publishedAt: a.publishedAt ? a.publishedAt.toISOString() : a.createdAt.toISOString(),
+      createdAt: a.createdAt.toISOString(),
+      deadline: a.deadline.toISOString(),
+      maxFileSize: a.maxFileSize,
+      maxFiles: a.maxFiles || 5,
+      allowResubmission: a.allowResubmission !== false,
+      allowedFileTypes: allowedTypesArray,
+      formation: a.formation,
+      session: a.session,
+      files: a.files.map((f) => ({
+        id: f.id,
+        name: f.name,
+        originalName: f.originalName,
+        size: f.size,
+        mimeType: f.mimeType,
+        url: f.url,
+      })),
+      submissions: a.submissions.map((s) => ({
+        id: s.id,
+        status: s.status,
+        grade: s.grade,
+        feedback: s.feedback,
+        submittedAt: s.submittedAt.toISOString(),
+        gradedAt: s.gradedAt ? s.gradedAt.toISOString() : null,
+        files: s.files.map((sf) => ({
+          id: sf.id,
+          name: sf.name,
+          originalName: sf.originalName,
+          size: sf.size,
+          mimeType: sf.mimeType,
+          url: sf.url,
+        })),
+      })),
+    }
+  })
 
   const adminNotifications = await prisma.adminNotification.findMany({
     where: {

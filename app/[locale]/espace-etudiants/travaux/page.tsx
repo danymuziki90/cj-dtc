@@ -117,12 +117,12 @@ function TravauxContent() {
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/student/assignments", { cache: "no-store" });
+      const response = await fetch("/api/student/system/dashboard", { cache: "no-store" });
       if (!response.ok) {
         throw new Error("Erreur lors du chargement des travaux");
       }
       const data = await response.json();
-      setAssignments(Array.isArray(data) ? data : []);
+      setAssignments(data.dashboard?.assignments || []);
     } catch (error) {
       console.error("Erreur lors du chargement des travaux:", error);
     } finally {
