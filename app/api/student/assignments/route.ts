@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const student = auth.student
 
   try {
-    // 1. Get all active and accepted enrollments for this student
+    // 1. Get all active enrollments for this student (not rejected or cancelled)
     const activeEnrollments = await prisma.enrollment.findMany({
       where: {
         OR: [
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
           { email: { equals: student.email, mode: 'insensitive' } },
         ],
         status: {
-          in: ['accepted', 'confirmed', 'completed', 'ACCEPTED', 'CONFIRMED', 'COMPLETED', 'ACTIVE', 'active'],
+          notIn: ['rejected', 'cancelled', 'REJECTED', 'CANCELLED', 'annulee', 'rejete'],
         },
       },
       select: { sessionId: true, formationId: true },
@@ -43,10 +43,10 @@ export async function GET(request: NextRequest) {
     const assignments = await prisma.assignment.findMany({
       where: {
         published: true,
-        status: { in: ['publie', 'published'] },
+        status: { notIn: ['brouillon', 'archive', 'draft'] },
         OR: [
           ...(sessionIdsList.length ? [{ sessionId: { in: sessionIdsList } }] : []),
-          ...(formationIdsList.length ? [{ formationId: { in: formationIdsList }, sessionId: null }] : []),
+          ...(formationIdsList.length ? [{ formationId: { in: formationIdsList } }] : []),
         ],
       },
       orderBy: { deadline: 'asc' },

@@ -188,10 +188,10 @@ export async function GET(request: NextRequest) {
     ? await prisma.assignment.findMany({
         where: {
           published: true,
-          status: { in: ['publie', 'published'] },
+          status: { notIn: ['brouillon', 'archive', 'draft'] },
           OR: [
             ...(sessionIds.length ? [{ sessionId: { in: sessionIds } }] : []),
-            ...(formationIds.length ? [{ formationId: { in: formationIds }, sessionId: null }] : []),
+            ...(formationIds.length ? [{ formationId: { in: formationIds } }] : []),
           ],
         },
         include: {
