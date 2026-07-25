@@ -31,28 +31,23 @@ model Student {
   studentNumber String        @unique
   status        String        @default("ACTIVE")
   role          String        @default("STUDENT")
-  adminSessionId String?
-  adminSession  AdminTrainingSession? @relation(fields: [adminSessionId], references: [id], onDelete: SetNull)
   
   // Additional fields from registration form
   dateOfBirth   DateTime?
   address       String?
   city          String?
-  country      String?
+  country       String?
 
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   
   passwordResetTokens PasswordResetToken[]
-  portalSubmissions  StudentSubmission[]
-  portalCertificates StudentCertificate[]
   enrollments        Enrollment[]
   certificates       Certificate[]
   testimonials       Testimonial[]
   submissions        Submission[]
 
   @@index([username])
-  @@index([adminSessionId])
 }
 
 model User {
@@ -168,19 +163,6 @@ model AdminAuditLog {
   @@index([createdAt])
 }
 
-model AdminTrainingSession {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  startDate   DateTime
-  endDate     DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  students    Student[]
-  submissions StudentSubmission[]
-}
-
 model News {
   id        String   @id @default(cuid())
   title     String
@@ -197,34 +179,6 @@ model News {
   @@index([published])
   @@index([publicationDate])
   @@index([category])
-}
-
-model StudentSubmission {
-  id        String   @id @default(cuid())
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  sessionId String?
-  session   AdminTrainingSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
-  title     String
-  fileUrl   String
-  status    String   @default("pending") // pending / approved / rejected
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([studentId])
-  @@index([sessionId])
-  @@index([status])
-}
-
-model StudentCertificate {
-  id        String   @id @default(cuid())
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  title     String   @default("Certificate")
-  fileUrl   String
-  createdAt DateTime @default(now())
-
-  @@index([studentId])
 }
 
 model Formation {
