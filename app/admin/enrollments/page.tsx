@@ -16,7 +16,6 @@ import {
   RotateCcw,
   ChevronDown,
   ChevronUp,
-  Eye,
   X,
 } from 'lucide-react'
 import AdminEnrollmentTable, { type EnrollmentRow } from '@/components/AdminEnrollmentTable'
@@ -38,6 +37,24 @@ import type { EnrollmentStatsSummary } from '@/components/EnrollmentStats'
 
 type Formation = { id: number; title: string }
 
+type SessionItem = {
+  id: number
+  startDate: string
+  endDate: string
+  location?: string | null
+  format: string
+  status: string
+  formationId: number
+  formation?: {
+    id: number
+    title: string
+  } | null
+  adminMeta?: {
+    customTitle?: string | null
+  } | null
+  customTitle?: string | null
+}
+
 type PaginationState = {
   page: number
   pageSize: number
@@ -50,6 +67,7 @@ type PaginationState = {
 type FilterState = {
   status: string
   formationId: string
+  sessionId: string
   accountStatus: string
   startDateFrom: string
   startDateTo: string
@@ -61,6 +79,7 @@ type FilterState = {
 const INITIAL_FILTERS: FilterState = {
   status: '',
   formationId: '',
+  sessionId: '',
   accountStatus: '',
   startDateFrom: '',
   startDateTo: '',
@@ -150,6 +169,7 @@ function KpiCard({
 export default function EnrollmentsPage() {
   const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([])
   const [formations, setFormations] = useState<Formation[]>([])
+  const [sessions, setSessions] = useState<SessionItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS)
   const [pagination, setPagination] = useState<PaginationState>(INITIAL_PAGINATION)
@@ -160,16 +180,93 @@ export default function EnrollmentsPage() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [showBulkEmail, setShowBulkEmail] = useState(false)
 
-  // ─── Chargement formations ─────────────────────────────────────────────────
+  // ─── Chargement formations et sessions depuis l'API back-office ─────────────
 
   useEffect(() => {
-    fetch('/api/formations', { cache: 'no-store' })
-      .then((res) => res.json())
-      .then((data) => setFormations(Array.isArray(data) ? data : []))
-      .catch(() => setFormations([]))
+    Promise.all([
+      fetch('/api/formations', { cache: 'no-store' }).then((res) => res.json()).catch(() => []),
+      fetch('/api/sessions', { cache: 'no-store' }).then((res) => res.json()).catch(() => []),
+    ]).then(([formationsData, sessionsData]) => {
+      setFormations(Array.isArray(formationsData) ? formationsData : [])
+      setSessions(Array.isArray(sessionsData) ? sessionsData : [])
+    })
   }, [])
 
-  // ─── Chargement inscriptions ───────────────────────────────────────────────
+  // ─── Initialisation des filtres depuis l'URL au chargement de la page ─────────
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search) {
+      const params = new URLSearchParams(window.location.search)
+      const urlFormationId = params.get('formationId') || ''
+      const urlSessionId = params.get('sessionId') || ''
+      const urlStatus = params.get('status') || ''
+      const urlSearch = params.get('search') || ''
+      const urlAccountStatus = params.get('accountStatus') || ''
+      const urlStartDateFrom = params.get('startDateFrom') || ''
+      const urlStartDateTo = params.get('startDateTo') || ''
+
+      if (
+        urlFormationId ||
+        urlSessionId ||
+        urlStatus ||
+        urlSearch ||
+        urlAccountStatus ||
+        urlStartDateFrom ||
+        urlStartDateTo
+      ) {
+        setFilters((prev) => ({
+          ...prev,
+          formationId: urlFormationId,
+          sessionId: urlSessionId,
+          status: urlStatus,
+          search: urlSearch,
+          accountStatus: urlAccountStatus,
+          startDateFrom: urlStartDateFrom,
+          startDateTo: urlStartDateTo,
+        }))
+      }
+    }
+  }, [])
+
+  // ─── Synchronisation de l'URL avec l'état des filtres ──────────────────────
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      let changed = false
+
+      const filterKeys: Array<keyof FilterState> = [
+        'status',
+        'formationId',
+        'sessionId',
+        'accountStatus',
+        'startDateFrom',
+        'startDateTo',
+        'search',
+      ]
+
+      filterKeys.forEach((key) => {
+        const val = filters[key]
+        if (val) {
+          if (url.searchParams.get(key) !== val) {
+            url.searchParams.set(key, val)
+            changed = true
+          }
+        } else {
+          if (url.searchParams.has(key)) {
+            url.searchParams.delete(key)
+            changed = true
+          }
+        }
+      })
+
+      if (changed) {
+        window.history.replaceState(null, '', url.pathname + url.search)
+      }
+    }
+  }, [filters])
+
+  // ─── Chargement des inscriptions (DB -> API -> UI) ──────────────────────────
 
   const fetchEnrollments = useCallback(
     async (overrides?: Partial<PaginationState & FilterState>) => {
@@ -182,6 +279,7 @@ export default function EnrollmentsPage() {
         const params = new URLSearchParams()
         if (merged.status) params.append('status', merged.status)
         if (merged.formationId) params.append('formationId', merged.formationId)
+        if (merged.sessionId) params.append('sessionId', merged.sessionId)
         if (merged.accountStatus) params.append('accountStatus', merged.accountStatus)
         if (merged.startDateFrom) params.append('startDateFrom', merged.startDateFrom)
         if (merged.startDateTo) params.append('startDateTo', merged.startDateTo)
@@ -212,6 +310,18 @@ export default function EnrollmentsPage() {
     fetchEnrollments()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, pagination.page, pagination.pageSize])
+
+  // ─── Filtered Active Sessions (sans doublons et sans sessions annulées/archivées) ──
+
+  const activeSessions = useMemo(() => {
+    const seen = new Set<number>()
+    return sessions.filter((s) => {
+      if (!s || !s.id || seen.has(s.id)) return false
+      seen.add(s.id)
+      const status = (s.status || '').toLowerCase()
+      return !['annulee', 'cancelled', 'deleted', 'archived', 'archive'].includes(status)
+    })
+  }, [sessions])
 
   // ─── Export ────────────────────────────────────────────────────────────────
 
@@ -359,7 +469,7 @@ export default function EnrollmentsPage() {
 
         {/* ── Zone de filtres ───────────────────────────────────────────────── */}
         <AdminPanel>
-          {/* Ligne 1 : recherche + statut pill + boutons */}
+          {/* Ligne 1 : recherche + filtre dynamique formation/session + compte + boutons */}
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
             {/* Barre de recherche */}
             <div className="relative flex-1">
@@ -386,28 +496,76 @@ export default function EnrollmentsPage() {
               )}
             </div>
 
-            {/* Formation */}
-            <div className="w-full lg:w-56">
+            {/* Filtre dynamique : Formations ET Sessions publiées back-office */}
+            <div className="w-full lg:w-72">
+              <label htmlFor="enrollment-formation-session-filter" className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Formation ou Session
+              </label>
               <select
-                id="enrollment-formation-filter"
-                value={filters.formationId}
+                id="enrollment-formation-session-filter"
+                value={
+                  filters.sessionId
+                    ? `session-${filters.sessionId}`
+                    : filters.formationId
+                    ? `formation-${filters.formationId}`
+                    : ''
+                }
                 onChange={(e) => {
-                  setFilters((prev) => ({ ...prev, formationId: e.target.value }))
+                  const val = e.target.value
+                  if (val.startsWith('session-')) {
+                    const sId = val.replace('session-', '')
+                    setFilters((prev) => ({ ...prev, sessionId: sId, formationId: '' }))
+                  } else if (val.startsWith('formation-')) {
+                    const fId = val.replace('formation-', '')
+                    setFilters((prev) => ({ ...prev, formationId: fId, sessionId: '' }))
+                  } else {
+                    setFilters((prev) => ({ ...prev, formationId: '', sessionId: '' }))
+                  }
                   setPagination((prev) => ({ ...prev, page: 1 }))
                 }}
                 className={adminSelectClassName}
               >
-                <option value="">Toutes les formations</option>
-                {formations.map((f) => (
-                  <option key={f.id} value={String(f.id)}>
-                    {f.title}
-                  </option>
-                ))}
+                <option value="">Toutes les formations & sessions</option>
+
+                {formations.length > 0 && (
+                  <optgroup label="── Formations (Toutes sessions) ──">
+                    {formations.map((f) => (
+                      <option key={`f-${f.id}`} value={`formation-${f.id}`}>
+                        📚 {f.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+
+                {activeSessions.length > 0 && (
+                  <optgroup label="── Sessions publiées (Filtre par session) ──">
+                    {activeSessions.map((s) => {
+                      const formationTitle = s.formation?.title || 'Formation'
+                      const startDateFormatted = s.startDate
+                        ? new Date(s.startDate).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })
+                        : ''
+                      const locationText = s.location || (s.format === 'distanciel' ? 'En ligne' : 'Présentiel')
+                      const label = `🗓️ ${formationTitle} — Session du ${startDateFormatted} (${locationText})`
+                      return (
+                        <option key={`s-${s.id}`} value={`session-${s.id}`}>
+                          {label}
+                        </option>
+                      )
+                    })}
+                  </optgroup>
+                )}
               </select>
             </div>
 
             {/* Compte étudiant */}
             <div className="w-full lg:w-48">
+              <label htmlFor="enrollment-account-filter" className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Compte étudiant
+              </label>
               <select
                 id="enrollment-account-filter"
                 value={filters.accountStatus}
@@ -523,7 +681,18 @@ export default function EnrollmentsPage() {
               {filters.search && (
                 <AdminBadge tone="neutral">Recherche : {filters.search}</AdminBadge>
               )}
-              {filters.formationId && (
+              {filters.sessionId && (
+                <AdminBadge tone="primary">
+                  Session : {
+                    activeSessions.find((s) => String(s.id) === filters.sessionId)?.formation?.title || 'Session #' + filters.sessionId
+                  } ({
+                    activeSessions.find((s) => String(s.id) === filters.sessionId)?.startDate
+                      ? new Date(activeSessions.find((s) => String(s.id) === filters.sessionId)!.startDate).toLocaleDateString('fr-FR')
+                      : ''
+                  })
+                </AdminBadge>
+              )}
+              {filters.formationId && !filters.sessionId && (
                 <AdminBadge tone="primary">
                   Formation : {formations.find((f) => String(f.id) === filters.formationId)?.title || filters.formationId}
                 </AdminBadge>
