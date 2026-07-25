@@ -184,7 +184,32 @@ export async function GET(request: NextRequest) {
     new Set(activeEnrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value)))
   )
 
-  const mappedAssignments: any[] = []
+  const rawAssignments = sessionIds.length > 0
+    ? await prisma.assignment.findMany({
+        where: {
+          sessionId: { in: sessionIds },
+          published: true,
+          status: { in: ['publie', 'published'] },
+        },
+        include: {
+          formation: { select: { title: true } },
+          files: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+    : []
+
+  const mappedAssignments = rawAssignments.map((a) => ({
+    id: a.id,
+    title: a.title,
+    description: a.description,
+    type: a.type,
+    deadline: a.deadline,
+    createdAt: a.createdAt,
+    publishDate: a.publishedAt || a.createdAt,
+    formation: { title: a.formation.title },
+    filesCount: a.files.length,
+  }))
 
   const adminNotifications = await prisma.adminNotification.findMany({
     where: {
@@ -459,7 +484,15 @@ export async function GET(request: NextRequest) {
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
-  const assignmentSubmissions: any[] = []
+  const assignmentSubmissions = submissions.map((s: any) => ({
+    id: s.id,
+    assignmentTitle: s.assignment?.title || `Devoir #${s.assignmentId}`,
+    status: s.status,
+    grade: s.grade,
+    feedback: s.feedback,
+    submittedAt: s.submittedAt || s.createdAt,
+    gradedAt: s.gradedAt,
+  }))
 
   const notifications = [
     // 1. Inscriptions à des formations

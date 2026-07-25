@@ -7,12 +7,14 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Download,
   FileCheck2,
   FileCode2,
   FileText,
   Filter,
   FolderOpen,
   GraduationCap,
+  Info,
   Loader2,
   Search,
   UploadCloud,
@@ -29,32 +31,58 @@ import {
 import { AssignmentSubmitModal } from "../_components/AssignmentSubmitModal";
 import { getAssignmentStatus } from "../_components/utils";
 
+interface AssignmentFileItem {
+  id: number;
+  name?: string;
+  originalName?: string;
+  fileName?: string;
+  size?: number;
+  mimeType?: string;
+  url?: string;
+  fileUrl?: string;
+}
+
+interface AssignmentSubmissionItem {
+  id: number;
+  status: string;
+  submittedAt?: string;
+  createdAt?: string;
+  gradedAt?: string | null;
+  grade?: number | null;
+  feedback?: string | null;
+  files?: AssignmentFileItem[];
+}
+
 interface Assignment {
   id: number;
   title: string;
   type: string;
   description: string;
+  objectives?: string | null;
+  instructions?: string | null;
+  difficulty?: string | null;
   deadline: string;
   createdAt?: string;
+  publishedAt?: string;
+  maxFileSize?: number;
+  maxFiles?: number;
+  allowResubmission?: boolean;
+  allowedFileTypes?: string[];
   formationId?: number;
   formation?: {
     id: number;
     title: string;
     slug?: string;
   };
-  submissions?: Array<{
+  session?: {
     id: number;
-    status: string;
-    submittedAt?: string;
-    createdAt?: string;
-    grade?: number | null;
-    feedback?: string | null;
-    files?: Array<{
-      id: number;
-      fileName: string;
-      fileUrl: string;
-    }>;
-  }>;
+    startDate: string;
+    endDate: string;
+    location?: string | null;
+    format?: string;
+  };
+  files?: AssignmentFileItem[];
+  submissions?: AssignmentSubmissionItem[];
 }
 
 function TravauxContent() {
@@ -89,12 +117,12 @@ function TravauxContent() {
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/student/system/dashboard", { cache: "no-store" });
+      const response = await fetch("/api/student/assignments", { cache: "no-store" });
       if (!response.ok) {
         throw new Error("Erreur lors du chargement des travaux");
       }
       const data = await response.json();
-      setAssignments(data.dashboard?.assignments || []);
+      setAssignments(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erreur lors du chargement des travaux:", error);
     } finally {
@@ -134,7 +162,7 @@ function TravauxContent() {
       } else {
         const rawText = await response.text().catch(() => "");
         if (response.status === 413) {
-          resData = { error: "Le fichier sélectionné est trop volumineux (max 4.5 Mo)." };
+          resData = { error: "Le fichier sélectionné est trop volumineux." };
         } else {
           resData = { error: `Erreur serveur (code HTTP ${response.status}).` };
         }
@@ -151,7 +179,7 @@ function TravauxContent() {
       setTimeout(() => {
         setSelectedAssignment(null);
         setUploadSuccessMessage("");
-      }, 2000);
+      }, 1500);
     } catch (err: any) {
       setUploadErrorMessage(err.message || "Erreur lors du dépôt de fichier.");
     } finally {
@@ -172,13 +200,17 @@ function TravauxContent() {
   }, [assignments]);
 
   const evaluatedCount = useMemo(() => {
-    return assignments.filter((item) => item.submissions?.some((sub) => sub.status === "graded" || sub.grade != null)).length;
+    return assignments.filter((item) =>
+      item.submissions?.some((sub) => sub.status === "graded" || sub.grade != null)
+    ).length;
   }, [assignments]);
 
   const filteredAssignments = useMemo(() => {
     return assignments.filter((item) => {
       const hasSub = item.submissions && item.submissions.length > 0;
-      const isEvaluated = item.submissions?.some((sub) => sub.status === "graded" || sub.grade != null);
+      const isEvaluated = item.submissions?.some(
+        (sub) => sub.status === "graded" || sub.grade != null
+      );
 
       if (filter === "pending" && (hasSub || new Date(item.deadline).getTime() < Date.now())) return false;
       if (filter === "submitted" && !hasSub) return false;
@@ -336,10 +368,10 @@ function TravauxContent() {
             description={
               filter !== "all" || searchQuery
                 ? "Aucun devoir ne correspond à vos critères de recherche ou de filtre actuels."
-                : "Vous n'avez actuellement aucun devoir attribué. Vos prochains travaux apparaîtront automatiquement ici dès leur publication."
+                : "Vous n'avez actuellement aucun devoir attribué dans vos sessions actives. Vos futurs travaux apparaîtront automatiquement ici dès leur publication depuis l'administration."
             }
             action={
-              (filter !== "all" || searchQuery) ? (
+              filter !== "all" || searchQuery ? (
                 <button
                   onClick={() => {
                     setFilter("all");
@@ -359,6 +391,7 @@ function TravauxContent() {
               const StatusIcon = statusInfo.icon;
               const submission = assign.submissions?.[0];
               const isGraded = submission?.status === "graded" || submission?.grade != null;
+              const isPastDeadline = new Date(assign.deadline).getTime() < Date.now();
 
               return (
                 <div
@@ -368,14 +401,26 @@ function TravauxContent() {
                   <div className="space-y-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
-                        <span className="inline-block rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[var(--cj-blue)]">
-                          {assign.type?.toUpperCase() || "TP"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[var(--cj-blue)]">
+                            {assign.type?.toUpperCase() || "TP"}
+                          </span>
+                          {assign.difficulty && (
+                            <span className="inline-block rounded-lg border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold capitalize text-slate-600">
+                              {assign.difficulty}
+                            </span>
+                          )}
+                        </div>
                         <h3 className="text-base font-bold text-slate-900 leading-snug group-hover:text-[var(--cj-blue)] transition">
                           {assign.title}
                         </h3>
                         <p className="text-xs font-semibold text-slate-500">
                           {assign.formation?.title || "Formation CJ DTC"}
+                          {assign.session && (
+                            <span className="text-slate-400 font-normal">
+                              {" "}• Session du <FormattedDate date={assign.session.startDate} />
+                            </span>
+                          )}
                         </p>
                       </div>
                       <span
@@ -386,12 +431,52 @@ function TravauxContent() {
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       {assign.description}
                     </p>
 
+                    {/* Consignes / Instructions Admin */}
+                    {assign.instructions && (
+                      <div className="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-3 text-xs space-y-1">
+                        <div className="flex items-center gap-1.5 font-bold text-amber-900 text-[11px]">
+                          <Info className="h-3.5 w-3.5 text-amber-600" />
+                          <span>Consignes de l'enseignant :</span>
+                        </div>
+                        <p className="text-amber-800 text-[11px] leading-relaxed">
+                          {assign.instructions}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Fichiers sujets transmis par l'administrateur */}
+                    {assign.files && assign.files.length > 0 && (
+                      <div className="space-y-1.5 pt-1 border-t border-slate-100">
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                          Sujet & Documents de cours ({assign.files.length}) :
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {assign.files.map((file) => {
+                            const fileUrl = file.url || file.fileUrl || "#";
+                            const fileName = file.originalName || file.name || file.fileName || "Document_cours";
+                            return (
+                              <a
+                                key={file.id}
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/60 px-2.5 py-1 text-[11px] font-semibold text-[var(--cj-blue)] hover:bg-blue-100 transition shadow-xs"
+                              >
+                                <Download className="h-3.5 w-3.5 text-blue-600" />
+                                <span className="truncate max-w-[180px]">{fileName}</span>
+                              </a>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Feedback / Grade card if evaluated */}
-                    {isGraded && (
+                    {isGraded && submission && (
                       <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3.5 space-y-1 text-xs">
                         <div className="flex items-center justify-between font-bold text-emerald-900">
                           <span>Note attribuée :</span>
@@ -401,31 +486,42 @@ function TravauxContent() {
                         </div>
                         {submission.feedback && (
                           <p className="text-emerald-800 text-[11px] leading-relaxed pt-1 border-t border-emerald-200/60">
-                            <strong>Commentaire de l'enseignant :</strong> {submission.feedback}
+                            <strong>Commentaire du formateur :</strong> {submission.feedback}
                           </p>
                         )}
                       </div>
                     )}
 
-                    {/* Files rendered */}
+                    {/* Fichiers remis par l'étudiant */}
                     {submission?.files && submission.files.length > 0 && (
-                      <div className="space-y-1.5 pt-1">
-                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                          Fichiers transmis ({submission.files.length}) :
-                        </p>
+                      <div className="space-y-1.5 pt-1 border-t border-slate-100">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                            Votre remise ({submission.files.length}) :
+                          </p>
+                          {submission.submittedAt && (
+                            <span className="text-[10px] text-slate-400">
+                              Déposé le <FormattedDate date={submission.submittedAt} />
+                            </span>
+                          )}
+                        </div>
                         <div className="flex flex-wrap gap-2">
-                          {submission.files.map((file) => (
-                            <a
-                              key={file.id}
-                              href={file.fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100 hover:text-blue-700 transition"
-                            >
-                              <FileCode2 className="h-3.5 w-3.5 text-blue-600" />
-                              <span className="truncate max-w-[160px]">{file.fileName}</span>
-                            </a>
-                          ))}
+                          {submission.files.map((file) => {
+                            const fileUrl = file.url || file.fileUrl || "#";
+                            const fileName = file.originalName || file.name || file.fileName || "Rendu_etudiant";
+                            return (
+                              <a
+                                key={file.id}
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100 hover:text-blue-700 transition"
+                              >
+                                <FileCode2 className="h-3.5 w-3.5 text-blue-600" />
+                                <span className="truncate max-w-[160px]">{fileName}</span>
+                              </a>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -439,13 +535,15 @@ function TravauxContent() {
                       </span>
                     </div>
 
-                    <button
-                      onClick={() => setSelectedAssignment(assign)}
-                      className={submission ? studentMutedButtonClassName : studentPrimaryButtonClassName}
-                    >
-                      <UploadCloud className="h-4 w-4" />
-                      <span>{submission ? "Modifier mon dépôt" : "Déposer mon travail"}</span>
-                    </button>
+                    {(!submission || assign.allowResubmission !== false) && (
+                      <button
+                        onClick={() => setSelectedAssignment(assign)}
+                        className={submission ? studentMutedButtonClassName : studentPrimaryButtonClassName}
+                      >
+                        <UploadCloud className="h-4 w-4" />
+                        <span>{submission ? "Modifier mon dépôt" : "Déposer mon travail"}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               );
