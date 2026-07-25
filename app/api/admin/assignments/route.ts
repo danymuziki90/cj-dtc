@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { uploadToR2 } from '@/lib/r2'
 import { supabase } from '@/lib/supabase'
+import { revalidatePath } from 'next/cache'
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request)
@@ -299,6 +300,9 @@ export async function POST(request: NextRequest) {
     } catch (realtimeErr) {
       console.warn('[Realtime Notification Warning]:', realtimeErr)
     }
+
+    // Invalidate cache to update student space and admin dashboard immediately
+    revalidatePath('/', 'layout')
 
     return NextResponse.json({ success: true, assignment: result }, { status: 201 })
   } catch (error: any) {

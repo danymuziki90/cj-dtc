@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { supabase } from '@/lib/supabase'
+import { revalidatePath } from 'next/cache'
 
 export async function PUT(
   request: NextRequest,
@@ -133,6 +134,8 @@ export async function PUT(
     } catch (rErr) {
       console.warn('[Realtime Notification Warning]:', rErr)
     }
+
+    revalidatePath('/', 'layout')
 
     return NextResponse.json({ success: true, submission: updatedSubmission })
   } catch (error: any) {

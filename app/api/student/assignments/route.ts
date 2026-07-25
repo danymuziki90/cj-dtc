@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
 import { uploadToR2 } from '@/lib/r2'
 import { supabase } from '@/lib/supabase'
+import { revalidatePath } from 'next/cache'
 
 export async function GET(request: NextRequest) {
   const auth = await requireStudent(request)
@@ -389,6 +390,8 @@ export async function POST(request: NextRequest) {
     } catch (rErr) {
       console.warn('[Realtime Notification Warning]:', rErr)
     }
+
+    revalidatePath('/', 'layout')
 
     return NextResponse.json({
       success: true,

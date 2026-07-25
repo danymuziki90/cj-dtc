@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { uploadToR2, deleteFromR2 } from '@/lib/r2'
 import { supabase } from '@/lib/supabase'
+import { revalidatePath } from 'next/cache'
 
 export async function GET(
   request: NextRequest,
@@ -260,6 +261,8 @@ export async function PUT(
       console.warn('[Realtime Notification Warning]:', rErr)
     }
 
+    revalidatePath('/', 'layout')
+
     return NextResponse.json({ success: true, assignment: updated })
   } catch (error: any) {
     console.error('[Admin Assignment PUT Error]:', error)
@@ -333,6 +336,8 @@ export async function DELETE(
     } catch (rErr) {
       console.warn('[Realtime Notification Warning]:', rErr)
     }
+
+    revalidatePath('/', 'layout')
 
     return NextResponse.json({ success: true, message: 'Travail supprimé avec succès' })
   } catch (error: any) {
