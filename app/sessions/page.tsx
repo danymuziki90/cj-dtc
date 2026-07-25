@@ -265,8 +265,11 @@ function MainSessionsPage() {
       .then((data: any) => {
         if (!alive) return
         const list: SessionItem[] = Array.isArray(data) ? data : (data?.sessions || [])
-        // Exclude draft, archived, cancelled
-        const valid = list.filter(s => !['brouillon', 'archive', 'annulee', 'cancelled', 'draft'].includes((s.status || '').toLowerCase().trim()))
+        // Conserver uniquement les sessions ouvertes ou complètes (liste d'attente)
+        const valid = list.filter(s => {
+          const st = (s.status || '').toLowerCase().trim()
+          return st === 'ouverte' || st === 'open' || st === 'complete'
+        })
         setSessions(valid)
       })
       .catch(() => { if (alive) setError('Impossible de charger les sessions. Veuillez réessayer.') })

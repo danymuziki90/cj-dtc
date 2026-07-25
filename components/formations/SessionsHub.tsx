@@ -13,7 +13,7 @@ type Props = {
 
 function isOpen(status: string) {
   const s = (status || '').toLowerCase().trim()
-  return !['brouillon', 'archive', 'annulee', 'cancelled', 'draft'].includes(s)
+  return s === 'ouverte' || s === 'open' || s === 'complete'
 }
 
 export default function SessionsHub({ locale }: Props) {

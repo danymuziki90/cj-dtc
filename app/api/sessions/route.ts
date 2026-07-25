@@ -21,39 +21,40 @@ export async function GET(request: NextRequest) {
         const adminAccess = await requireAdmin(request)
         const isAdmin = !adminAccess.error
         const now = new Date()
-        const sessions = isAdmin ? await prisma.trainingSession.findMany({
-            include: {
-                formation: {
-                    select: {
-                        id: true,
-                        title: true,
-                        slug: true,
-                        categorie: true,
-                        description: true,
-                    }
-                },
-                enrollments: {
-                    where: {
-                        status: {
-                            notIn: ['waitlist', 'rejected', 'cancelled']
-                        }
+        const sessions = isAdmin
+            ? await prisma.trainingSession.findMany({
+                include: {
+                    formation: {
+                        select: {
+                            id: true,
+                            title: true,
+                            slug: true,
+                            categorie: true,
+                            description: true,
+                        },
                     },
-                    select: {
-                        id: true
-                    }
-                }
-            },
-            orderBy: { startDate: 'desc' }
-        }) : await getPublishedSessions(now)
+                    enrollments: {
+                        where: {
+                            status: {
+                                notIn: ['waitlist', 'rejected', 'cancelled'],
+                            },
+                        },
+                        select: { id: true },
+                    },
+                },
+                orderBy: { startDate: 'desc' },
+            })
+            : await getPublishedSessions(now)
 
-        // Ajouter le nombre de participants actuels à chaque session
-        const sessionsWithCount = sessions.map((session) => {
+        const sessionsWithCount = sessions.map((session: any) => {
+            if (!isAdmin) return session
+
             const parsedMetadata = parseSessionMetadata(session.prerequisites)
             const resolvedImageUrl = parsedMetadata.metadata.imageUrl || session.imageUrl || null
             return {
                 ...session,
                 imageUrl: resolvedImageUrl,
-                currentParticipants: Array.isArray((session as any).enrollments) ? (session as any).enrollments.length : ((session as any).currentParticipants || 0),
+                currentParticipants: Array.isArray(session.enrollments) ? session.enrollments.length : (session.currentParticipants || 0),
                 prerequisitesText: parsedMetadata.prerequisitesText,
                 adminMeta: {
                     customTitle: parsedMetadata.metadata.customTitle || null,
