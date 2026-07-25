@@ -67,7 +67,7 @@ export function getAssignmentStatus(assign: any) {
   if (hasSub) {
     return { 
       label: "Déposé", 
-      color: "border-emerald-250 bg-emerald-50 text-emerald-800",
+      color: "border-emerald-200 bg-emerald-50 text-emerald-800",
       theme: "green",
       icon: CheckCircle2
     };
@@ -78,7 +78,7 @@ export function getAssignmentStatus(assign: any) {
   if (isPast) {
     return { 
       label: "En retard", 
-      color: "border-red-250 bg-red-50 text-red-800",
+      color: "border-red-200 bg-red-50 text-red-800",
       theme: "red",
       icon: AlertCircle
     };
@@ -88,7 +88,7 @@ export function getAssignmentStatus(assign: any) {
   if (isClose) {
     return { 
       label: "À remettre", 
-      color: "border-red-250 bg-red-50 text-red-800",
+      color: "border-red-200 bg-red-50 text-red-800",
       theme: "red",
       icon: Clock
     };

@@ -311,7 +311,7 @@ export async function GET(request: NextRequest) {
   const enrollmentsWithSession = enrollments.filter((item) => item.session)
 
   const currentEnrollment = enrollmentsWithSession
-    .filter((item) => ['pending', 'accepted', 'confirmed', 'waitlist'].includes(item.status))
+    .filter((item) => ['accepted', 'confirmed'].includes(item.status))
     .sort((a, b) => {
       const aDate = a.session?.startDate ? new Date(a.session.startDate).getTime() : Number.MAX_SAFE_INTEGER
       const bDate = b.session?.startDate ? new Date(b.session.startDate).getTime() : Number.MAX_SAFE_INTEGER
@@ -396,6 +396,7 @@ export async function GET(request: NextRequest) {
     const sessionMeta = parseSessionMetadata(session.prerequisites)
     return {
       enrollmentId: item.id,
+      formationId: item.formationId,
       formationTitle: item.formation.title,
       formationCategory: item.formation.categorie,
       formationImageUrl: session.imageUrl || item.formation.imageUrl || null,
@@ -585,7 +586,7 @@ export async function GET(request: NextRequest) {
       message: `Le document "${item.title}" (${item.category}) a été ajouté à votre espace de formation.`,
       createdAt: new Date(item.createdAt),
     })),
-    // 6. Certificats délivrés
+    // 6. Certificats délivrés — déduplication : issuedCertificates en priorité, portalCertificates seulement si non déjà présent
     ...issuedCertificates.map((item) => ({
       id: `cert-issue-core-${item.id}`,
       type: 'correction',
@@ -593,22 +594,16 @@ export async function GET(request: NextRequest) {
       message: `Votre certificat officiel de formation pour "${item.formation?.title || 'votre formation'}" a été délivré.`,
       createdAt: new Date(item.issuedAt),
     })),
-    ...portalCertificates.map((item: any) => ({
-      id: `cert-issue-portal-${item.id}`,
-      type: 'correction',
-      title: 'Certificat disponible',
-      message: `Votre certificat de formation pour "${item.formation?.title || 'votre formation'}" est disponible.`,
-      createdAt: new Date(item.issuedAt),
-    })),
-    // 7. Actualités générales
-    ...news.map((item) => ({
-      id: `news-${item.id}`,
-      type: 'info',
-      title: item.title,
-      message: item.content,
-      createdAt: item.createdAt,
-    })),
-    // 8. Notifications importantes ciblées ou globales
+    ...portalCertificates
+      .filter((pc: any) => !issuedCertificates.some((ic) => ic.id === pc.id))
+      .map((item: any) => ({
+        id: `cert-issue-portal-${item.id}`,
+        type: 'correction',
+        title: 'Certificat disponible',
+        message: `Votre certificat de formation pour "${item.formation?.title || 'votre formation'}" est disponible.`,
+        createdAt: new Date(item.issuedAt),
+      })),
+    // 7. Notifications importantes ciblées ou globales (les actualités ont leur propre onglet — pas injectées ici)
     ...adminNotifications.map((item) => ({
       id: `admin-notification-${item.id}`,
       type: item.type,
@@ -616,7 +611,7 @@ export async function GET(request: NextRequest) {
       message: item.message,
       createdAt: item.createdAt,
     })),
-    // 9. Dépôt de fichiers généraux
+    // 8. Dépôt de fichiers généraux
     ...mappedSubmissions.map((item) => ({
       id: `submission-dep-${item.id}`,
       type: 'info',
@@ -624,7 +619,7 @@ export async function GET(request: NextRequest) {
       message: `Vous avez mis en ligne le document "${item.title}".`,
       createdAt: new Date(item.submittedAt),
     })),
-    // 10. Corrections de fichiers généraux
+    // 9. Corrections de fichiers généraux
     ...mappedSubmissions
       .filter((item) => item.status !== 'pending' && item.reviewStatus !== 'pending')
       .map((item) => ({
@@ -634,7 +629,7 @@ export async function GET(request: NextRequest) {
         message: `Votre document "${item.title}" a été vérifié par l'administration (Statut: ${item.status}${item.reviewFeedback ? ` | Retour: ${item.reviewFeedback}` : ''}).`,
         createdAt: item.reviewedAt ? new Date(item.reviewedAt) : new Date(item.updatedAt),
       })),
-    // 11. Rappels automatiques de début de session
+    // 10. Rappels automatiques de début de session
     ...(currentEnrollment?.session &&
     new Date(currentEnrollment.session.startDate).getTime() > now.getTime()
       ? [
@@ -649,7 +644,7 @@ export async function GET(request: NextRequest) {
           },
         ]
       : []),
-    // 12. Réponses aux questions de l'étudiant
+    // 11. Réponses aux questions de l'étudiant
     ...questions
       .filter((item) => item.adminReply)
       .map((item) => ({
@@ -659,7 +654,7 @@ export async function GET(request: NextRequest) {
         message: item.adminReply as string,
         createdAt: item.adminReplyAt ? new Date(item.adminReplyAt) : new Date(item.createdAt),
       })),
-    // 13. Témoignages (validation, refus ou réponse)
+    // 12. Témoignages (validation, refus ou réponse)
     ...testimonials.map((t) => {
       let title = 'Témoignage en cours d\'examen'
       let type = 'info'
