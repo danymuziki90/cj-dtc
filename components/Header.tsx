@@ -32,6 +32,7 @@ import {
   FileText,
   BookOpen,
   Search,
+  Briefcase,
 } from 'lucide-react'
 import { resolveSiteLocale, type SiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
@@ -101,7 +102,7 @@ function LanguageSwitcher({
   )
 }
 
-/** Desktop navigation link with animated active underline & high-contrast dark theme */
+/** Desktop navigation link for ARSP-style capsule navbar */
 function NavLink({ href, label }: { href: string; label: string }) {
   const isActive = useActiveLink(href)
 
@@ -110,28 +111,20 @@ function NavLink({ href, label }: { href: string; label: string }) {
       href={href}
       aria-current={isActive ? 'page' : undefined}
       className={`
-        relative rounded-lg px-3.5 py-2 text-sm font-semibold tracking-normal transition-all duration-200
-        ${isActive
-          ? 'text-[var(--cj-red)]'
-          : 'text-slate-200 hover:bg-slate-800/80 hover:text-white'
+        relative rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200 whitespace-nowrap
+        ${
+          isActive
+            ? 'text-blue-600 font-bold bg-blue-50/80'
+            : 'text-slate-800 hover:text-blue-600 hover:bg-slate-50'
         }
       `}
     >
       {label}
-
-      <span
-        aria-hidden="true"
-        className={`
-          absolute bottom-0 left-3.5 right-3.5 h-0.5 rounded-full bg-[var(--cj-red)]
-          origin-left transition-all duration-300 ease-out
-          ${isActive ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'}
-        `}
-      />
     </Link>
   )
 }
 
-/** Desktop navigation dropdown item with arrow and smooth fade-in */
+/** Desktop navigation dropdown component (ARSP style with fade & slide transition) */
 function DesktopDropdown({
   label,
   items,
@@ -155,7 +148,7 @@ function DesktopDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="relative"
+      className="relative group/dropdown"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -163,37 +156,53 @@ function DesktopDropdown({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold tracking-normal text-slate-200 transition-colors hover:bg-slate-800 hover:text-white"
+        className={`
+          flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-800 transition-colors hover:text-blue-600 hover:bg-slate-50 whitespace-nowrap
+          ${isOpen ? 'text-blue-600 bg-slate-50' : ''}
+        `}
       >
         <span>{label}</span>
-        <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-white' : ''}`} />
+        <ChevronDown
+          className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-blue-600' : ''
+          }`}
+        />
       </button>
 
-      {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-2xl border border-slate-800 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl animate-fade-in">
-          {items.map((item) => {
-            const Icon = item.icon
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className="group flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-slate-800/80"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-blue-400 transition-colors group-hover:bg-[var(--cj-blue)] group-hover:text-white">
-                  <Icon className="h-4.5 w-4.5" />
+      <div
+        className={`
+          absolute left-1/2 -translate-x-1/2 top-full z-50 mt-2 w-64 rounded-2xl border border-slate-100 bg-white p-2.5 shadow-xl shadow-slate-900/10 backdrop-blur-xl transition-all duration-200 ease-out
+          ${
+            isOpen
+              ? 'opacity-100 translate-y-0 pointer-events-auto visible'
+              : 'opacity-0 translate-y-2 pointer-events-none invisible'
+          }
+        `}
+      >
+        {items.map((item) => {
+          const Icon = item.icon
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setIsOpen(false)}
+              className="group/item flex items-start gap-3 rounded-xl p-2 transition-all duration-200 hover:bg-slate-50 hover:translate-x-1"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-blue-600 transition-colors group-hover/item:bg-blue-600 group-hover/item:text-white">
+                <Icon className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-900 group-hover/item:text-blue-600 transition-colors">
+                  {item.label}
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-100 group-hover:text-white">{item.label}</div>
-                  {item.description && (
-                    <div className="text-[11px] text-slate-400 leading-snug">{item.description}</div>
-                  )}
-                </div>
-              </Link>
-            )
-          })}
-        </div>
-      )}
+                {item.description && (
+                  <div className="text-[11px] text-slate-500 leading-snug">{item.description}</div>
+                )}
+              </div>
+            </Link>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -294,11 +303,22 @@ export default function Header() {
   const searchParams = useSearchParams()
   const locale = resolveSiteLocale(params?.locale)
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
 
   const search = searchParams.toString()
   const labels = navigationLabels[locale]
+
+  // Detect scroll state for sticky header animation
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    handleScroll()
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Prevent background scrolling for Mobile menu
   useEffect(() => {
@@ -418,7 +438,7 @@ export default function Header() {
     <header className="header sticky top-0 z-50">
       {/* 1. DESKTOP TOP-BAR (VISIBLE DESKTOP ONLY lg:block) */}
       <div className="hidden lg:block border-b border-slate-800/80 bg-slate-950 text-slate-300 text-xs font-medium py-2 shadow-inner">
-        <div className="container mx-auto flex items-center justify-between px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
           {/* Left: Email Info */}
           <div className="flex items-center gap-6">
             <a
@@ -435,7 +455,7 @@ export default function Header() {
             « Bâtir des compétences. Transformer des destins. »
           </div>
 
-          {/* Right: Language & Social Networks (Facebook, LinkedIn, WhatsApp) */}
+          {/* Right: Language & Social Networks */}
           <div className="flex items-center gap-5">
             <LanguageSwitcher locale={locale} pathname={pathname} search={search} darkVariant={true} />
 
@@ -483,22 +503,31 @@ export default function Header() {
         </div>
       </div>
 
-      {/* 2. DESKTOP & MOBILE MAIN NAVBAR HEADER */}
-      <div className="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur-md shadow-xl text-white">
-        <div className="container mx-auto flex items-center justify-between px-4 py-3">
-          {/* Brand Logo Pinned Left */}
-          <Link href={`/${locale}`} className="flex items-center gap-3" aria-label="CJ Development Training Center — Accueil">
+      {/* 2. MAIN HEADER (PURE WHITE BACKGROUND WITH ARSP 3-ISLAND LAYOUT) */}
+      <div
+        className={`w-full bg-white transition-all duration-300 ${
+          scrolled
+            ? 'border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-md py-2'
+            : 'border-b border-slate-100 bg-white py-3 shadow-sm'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
+          {/* ÎLOT 1 (GAUCHE) : LOGO CJ DTC */}
+          <Link href={`/${locale}`} className="flex items-center gap-3 shrink-0" aria-label="CJ Development Training Center — Accueil">
             <Image
               src="/logo.png"
               alt="CJ DEVELOPMENT TRAINING CENTER"
               width={80}
               height={80}
-              className="h-14 w-auto sm:h-16 transition-transform duration-200 hover:scale-[1.02] filter brightness-110"
+              className="h-10 w-auto sm:h-12 transition-transform duration-200 hover:scale-[1.02]"
             />
           </Link>
 
-          {/* Desktop Navigation Links (hidden on mobile lg:flex) */}
-          <nav className="hidden lg:flex items-center gap-1.5" aria-label="Navigation principale Desktop">
+          {/* ÎLOT 2 (CENTRE) : CAPSULE ARSP ENCADRÉE DE NAVIGATION DESKTOP */}
+          <nav
+            className="hidden lg:flex items-center gap-1 rounded-full border border-slate-200 bg-white px-6 py-2 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-md"
+            aria-label="Navigation principale Desktop"
+          >
             <NavLink href={`/${locale}`} label={labels.home} />
             <NavLink href={`/${locale}/about`} label={labels.about} />
 
@@ -546,7 +575,25 @@ export default function Header() {
               ]}
             />
 
-            <NavLink href={`/${locale}/actualites`} label={labels.news} />
+            {/* Dropdown Menu for Actualités + Offres d'emploi */}
+            <DesktopDropdown
+              label={labels.news}
+              items={[
+                {
+                  href: `/${locale}/actualites`,
+                  label: locale === 'fr' ? 'Articles & Annonces' : 'Articles & News',
+                  description: locale === 'fr' ? 'Actualités et annonces officielles' : 'Official news and updates',
+                  icon: Newspaper,
+                },
+                {
+                  href: `/${locale}/actualites?categorie=emplois`,
+                  label: locale === 'fr' ? 'Offres d\'emploi' : 'Job Openings',
+                  description: locale === 'fr' ? 'Opportunités de carrière et stages' : 'Career opportunities & internships',
+                  icon: Briefcase,
+                },
+              ]}
+            />
+
             <NavLink href={`/${locale}/galerie`} label={labels.galerie} />
 
             {/* Dropdown Menu for Student Space */}
@@ -575,13 +622,13 @@ export default function Header() {
             />
           </nav>
 
-          {/* Right Action Pill Button (Desktop lg:flex) */}
+          {/* ÎLOT 3 (DROIT) : BOUTON CTA CONTACT CAPSULE ARSP */}
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href={`/${locale}/contact`}
-              className="group relative inline-flex items-center gap-2 rounded-full border-2 border-white/90 bg-transparent px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg transition-all duration-300 hover:bg-white hover:text-slate-950 hover:border-white hover:shadow-xl hover:shadow-white/20 active:scale-95"
+              className="border-2 border-slate-900 text-slate-900 hover:bg-blue-600 hover:border-blue-600 hover:text-white rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
             >
-              <Mail className="h-4 w-4 text-[var(--cj-red)] transition-colors group-hover:text-[var(--cj-blue)]" />
+              <Mail className="h-3.5 w-3.5" />
               <span>{labels.contact}</span>
             </Link>
           </div>
