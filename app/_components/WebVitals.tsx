@@ -22,6 +22,5 @@ export default function WebVitals() {
       }
     })
   }, [])
-
   return null
 }
