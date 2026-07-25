@@ -503,12 +503,12 @@ export default function Header() {
         </div>
       </div>
 
-      {/* 2. MAIN HEADER (PURE WHITE BACKGROUND WITH ARSP 3-ISLAND LAYOUT) */}
+      {/* 2. MAIN HEADER (HERO GLASSMORPHISM OVERLAY WITH ARSP 3-ISLAND LAYOUT) */}
       <div
-        className={`w-full bg-white transition-all duration-300 ${
+        className={`w-full transition-all duration-300 ${
           scrolled
-            ? 'border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-md py-2'
-            : 'border-b border-slate-100 bg-white py-3 shadow-sm'
+            ? 'border-b border-slate-800/90 bg-slate-950/90 backdrop-blur-md shadow-2xl py-2'
+            : 'border-b border-white/10 bg-slate-900/60 backdrop-blur-md py-3.5 shadow-md'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -519,13 +519,13 @@ export default function Header() {
               alt="CJ DEVELOPMENT TRAINING CENTER"
               width={80}
               height={80}
-              className="h-10 w-auto sm:h-12 transition-transform duration-200 hover:scale-[1.02]"
+              className="h-10 w-auto sm:h-12 transition-transform duration-200 hover:scale-[1.02] filter brightness-110"
             />
           </Link>
 
-          {/* ÎLOT 2 (CENTRE) : CAPSULE ARSP ENCADRÉE DE NAVIGATION DESKTOP */}
+          {/* ÎLOT 2 (CENTRE) : CAPSULE ARSP GLASSMORPHISM ENCADRÉE DE NAVIGATION DESKTOP */}
           <nav
-            className="hidden lg:flex items-center gap-1 rounded-full border border-slate-200 bg-white px-6 py-2 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-md"
+            className="hidden lg:flex items-center gap-1 rounded-full border border-white/20 bg-slate-900/60 px-6 py-2 shadow-lg backdrop-blur-lg transition-all duration-300 hover:border-white/40 hover:bg-slate-900/75 hover:shadow-xl"
             aria-label="Navigation principale Desktop"
           >
             <NavLink href={`/${locale}`} label={labels.home} />
@@ -626,9 +626,9 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href={`/${locale}/contact`}
-              className="border-2 border-slate-900 text-slate-900 hover:bg-blue-600 hover:border-blue-600 hover:text-white rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
+              className="border-2 border-white/90 text-white bg-white/5 hover:bg-white hover:text-slate-950 hover:border-white rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
             >
-              <Mail className="h-3.5 w-3.5" />
+              <Mail className="h-3.5 w-3.5 text-[var(--cj-red)] transition-colors group-hover:text-slate-950" />
               <span>{labels.contact}</span>
             </Link>
           </div>
