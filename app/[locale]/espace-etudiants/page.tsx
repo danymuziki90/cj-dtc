@@ -23,7 +23,7 @@ import { NewsTab } from "./_components/NewsTab";
 import { CalendarTab } from "./_components/CalendarTab";
 import { NotificationsTab } from "./_components/NotificationsTab";
 import { SupportTab } from "./_components/SupportTab";
-import { AssignmentSubmitModal } from "./_components/AssignmentSubmitModal";
+import { AssignmentSubmitModal, type UploadedFileData } from "./_components/AssignmentSubmitModal";
 import { NewsModal } from "./_components/NewsModal";
 import { DashboardPayload } from "./_components/types";
 import { formatDate } from "./_components/utils";
@@ -43,7 +43,7 @@ function EspaceEtudiantsContent() {
       )}${pendingSessionId ? `&sessionId=${encodeURIComponent(pendingSessionId)}` : ""}`
     : "";
 
-  // Core Data States
+  // Auth & General State
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState("");
@@ -62,7 +62,6 @@ function EspaceEtudiantsContent() {
   // Assignment submission states
   const [selectedAssignmentForSubmission, setSelectedAssignmentForSubmission] =
     useState<any | null>(null);
-  const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
   const [isSubmittingWork, setIsSubmittingWork] = useState(false);
   const [uploadErrorMessage, setUploadErrorMessage] = useState("");
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState("");
@@ -190,14 +189,13 @@ function EspaceEtudiantsContent() {
     }
   }
 
-  async function handleAssignmentSubmit(event: FormEvent) {
-    event.preventDefault();
+  async function handleAssignmentSubmit(uploadedFiles: UploadedFileData[]) {
     if (
       !selectedAssignmentForSubmission ||
-      !uploadFiles ||
-      uploadFiles.length === 0
+      !uploadedFiles ||
+      uploadedFiles.length === 0
     ) {
-      setUploadErrorMessage("Veuillez choisir au moins un fichier à remettre.");
+      setUploadErrorMessage("Veuillez téléverser au moins un fichier avant de valider.");
       return;
     }
 
@@ -206,20 +204,13 @@ function EspaceEtudiantsContent() {
     setUploadSuccessMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append(
-        "assignmentId",
-        String(selectedAssignmentForSubmission.id)
-      );
-      formData.append("fileCount", String(uploadFiles.length));
-
-      for (let i = 0; i < uploadFiles.length; i++) {
-        formData.append(`file_${i}`, uploadFiles[i]);
-      }
-
       const response = await fetch("/api/student/assignments", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assignmentId: selectedAssignmentForSubmission.id,
+          files: uploadedFiles,
+        }),
       });
 
       let resData: any = {};
@@ -227,26 +218,9 @@ function EspaceEtudiantsContent() {
       if (contentType.includes("application/json")) {
         resData = await response.json().catch(() => ({}));
       } else {
-        const rawText = await response.text().catch(() => "");
-        console.error(
-          "[Assignment Upload Error] Non-JSON server response:",
-          rawText
-        );
-        if (response.status === 413) {
-          resData = {
-            error:
-              "Le fichier sélectionné est trop volumineux (limite réseau atteinte). Veuillez compresser votre fichier ou choisir un document plus léger (moins de 4.5 Mo).",
-          };
-        } else if (response.status === 401 || response.status === 403) {
-          resData = {
-            error:
-              "Votre session a expiré ou vous n'êtes pas inscrit à la formation requise. Veuillez vous reconnecter.",
-          };
-        } else {
-          resData = {
-            error: `Une erreur serveur est survenue (Code HTTP ${response.status}). Veuillez réessayer.`,
-          };
-        }
+        resData = {
+          error: `Une erreur serveur est survenue (Code HTTP ${response.status}). Veuillez réessayer.`,
+        };
       }
 
       if (!response.ok || resData.success === false) {
@@ -259,7 +233,6 @@ function EspaceEtudiantsContent() {
       }
 
       setUploadSuccessMessage("Votre travail a été déposé avec succès !");
-      setUploadFiles(null);
       await loadDashboard();
 
       setTimeout(() => {
@@ -267,7 +240,9 @@ function EspaceEtudiantsContent() {
         setUploadSuccessMessage("");
       }, 2000);
     } catch (err: any) {
-      setUploadErrorMessage(err.message || "Erreur lors du dépôt de fichier.");
+      setUploadErrorMessage(
+        err.message || "Erreur lors de l'enregistrement de votre travail."
+      );
     } finally {
       setIsSubmittingWork(false);
     }
@@ -562,11 +537,14 @@ function EspaceEtudiantsContent() {
       {/* MODALS */}
       <AssignmentSubmitModal
         selectedAssignment={selectedAssignmentForSubmission}
-        onClose={() => setSelectedAssignmentForSubmission(null)}
+        onClose={() => {
+          setSelectedAssignmentForSubmission(null);
+          setUploadErrorMessage("");
+          setUploadSuccessMessage("");
+        }}
         onSubmit={handleAssignmentSubmit}
         uploadErrorMessage={uploadErrorMessage}
         uploadSuccessMessage={uploadSuccessMessage}
-        setUploadFiles={setUploadFiles}
         isSubmittingWork={isSubmittingWork}
       />
 
