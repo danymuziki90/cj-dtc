@@ -134,6 +134,35 @@ function DesktopDropdown({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setIsOpen(true)
+  }
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false)
+    }, 250)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsOpen(false)
+    } else if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+      if (!isOpen) {
+        setIsOpen(true)
+        e.preventDefault()
+      }
+    }
+  }
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -142,66 +171,79 @@ function DesktopDropdown({
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
   }, [])
 
   return (
     <div
       ref={dropdownRef}
-      className="relative group/dropdown"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      className="relative group/dropdown py-1"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onKeyDown={handleKeyDown}
     >
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen((prev) => !prev)}
+        onFocus={handleMouseEnter}
         aria-expanded={isOpen}
+        aria-haspopup="true"
         className={`
-          flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-100 transition-colors hover:text-blue-400 hover:bg-white/10 whitespace-nowrap
+          flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-100 transition-colors hover:text-blue-400 hover:bg-white/10 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-400/50
           ${isOpen ? 'text-blue-400 bg-white/10' : ''}
+          group-hover/dropdown:text-blue-400 group-hover/dropdown:bg-white/10
         `}
       >
         <span>{label}</span>
         <ChevronDown
           className={`h-3.5 w-3.5 text-slate-300 transition-transform duration-200 ${
             isOpen ? 'rotate-180 text-blue-400' : ''
-          }`}
+          } group-hover/dropdown:rotate-180 group-hover/dropdown:text-blue-400`}
         />
       </button>
 
       <div
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={`
-          absolute left-1/2 -translate-x-1/2 top-full z-50 mt-2 w-64 rounded-2xl border border-white/15 bg-slate-900/95 p-2.5 shadow-2xl backdrop-blur-xl transition-all duration-200 ease-out
+          absolute left-1/2 -translate-x-1/2 top-full z-50 pt-2 w-64 transition-all duration-200 ease-out
+          before:absolute before:-top-5 before:-left-6 before:-right-6 before:h-8 before:content-['']
+          group-hover/dropdown:opacity-100 group-hover/dropdown:translate-y-0 group-hover/dropdown:pointer-events-auto group-hover/dropdown:visible
           ${
             isOpen
               ? 'opacity-100 translate-y-0 pointer-events-auto visible'
-              : 'opacity-0 translate-y-2 pointer-events-none invisible'
+              : 'opacity-0 translate-y-1 pointer-events-none invisible'
           }
         `}
       >
-        {items.map((item) => {
-          const Icon = item.icon
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsOpen(false)}
-              className="group/item flex items-start gap-3 rounded-xl p-2 transition-all duration-200 hover:bg-white/10 hover:translate-x-1"
-            >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-blue-400 transition-colors group-hover/item:bg-blue-600 group-hover/item:text-white">
-                <Icon className="h-4 w-4" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-slate-100 group-hover/item:text-white transition-colors">
-                  {item.label}
+        <div className="rounded-2xl border border-white/15 bg-slate-900/95 p-2.5 shadow-2xl backdrop-blur-xl space-y-1">
+          {items.map((item) => {
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className="group/item flex items-start gap-3 rounded-xl p-2 transition-all duration-200 hover:bg-white/10 hover:translate-x-1 focus:bg-white/10 focus:outline-none"
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-blue-400 transition-colors group-hover/item:bg-blue-600 group-hover/item:text-white">
+                  <Icon className="h-4 w-4" />
                 </div>
-                {item.description && (
-                  <div className="text-[11px] text-slate-400 leading-snug">{item.description}</div>
-                )}
-              </div>
-            </Link>
-          )
-        })}
+                <div>
+                  <div className="text-xs font-bold text-slate-100 group-hover/item:text-white transition-colors">
+                    {item.label}
+                  </div>
+                  {item.description && (
+                    <div className="text-[11px] text-slate-400 leading-snug">{item.description}</div>
+                  )}
+                </div>
+              </Link>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
