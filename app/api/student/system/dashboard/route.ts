@@ -490,6 +490,7 @@ export async function GET(request: NextRequest) {
     status: s.status,
     grade: s.grade,
     feedback: s.feedback,
+    reviewFeedback: s.feedback || null,
     submittedAt: s.submittedAt || s.createdAt,
     gradedAt: s.gradedAt,
   }))
