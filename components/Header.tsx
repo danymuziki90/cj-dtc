@@ -111,7 +111,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
       href={href}
       aria-current={isActive ? 'page' : undefined}
       className={`
-        relative rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200 whitespace-nowrap
+        relative rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide transition-all duration-200 whitespace-nowrap
         ${
           isActive
             ? 'text-white font-bold bg-white/20 shadow-sm'
@@ -192,7 +192,7 @@ function DesktopDropdown({
         aria-expanded={isOpen}
         aria-haspopup="true"
         className={`
-          flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-100 transition-colors hover:text-blue-400 hover:bg-white/10 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-400/50
+          flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide text-slate-100 transition-colors hover:text-blue-400 hover:bg-white/10 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-400/50
           ${isOpen ? 'text-blue-400 bg-white/10' : ''}
           group-hover/dropdown:text-blue-400 group-hover/dropdown:bg-white/10
         `}
@@ -573,13 +573,13 @@ export default function Header() {
               items={[
                 {
                   href: '/sessions',
-                  label: locale === 'fr' ? 'Sessions Ouvertes' : 'Open Sessions',
+                  label: locale === 'fr' ? 'Sessions ouvertes' : 'Open Sessions',
                   description: locale === 'fr' ? 'Dates et inscriptions en cours' : 'Upcoming session dates & enrollment',
                   icon: GraduationCap,
                 },
                 {
                   href: `/${locale}/formations`,
-                  label: locale === 'fr' ? 'Toutes les Formations' : 'All Programs',
+                  label: locale === 'fr' ? 'Toutes les formations' : 'All Programs',
                   description: locale === 'fr' ? 'Catalogue complet des programmes' : 'Browse full training catalog',
                   icon: BookOpen,
                 },
@@ -592,19 +592,19 @@ export default function Header() {
               items={[
                 {
                   href: `/${locale}/entreprises`,
-                  label: locale === 'fr' ? 'Formations Sur-Mesure' : 'Custom Corporate Training',
+                  label: locale === 'fr' ? 'Formations sur-mesure' : 'Custom Corporate Training',
                   description: locale === 'fr' ? 'Programmes adaptés aux équipes' : 'Tailored team training programs',
                   icon: Building2,
                 },
                 {
                   href: `/${locale}/entreprises#audit-rh`,
-                  label: locale === 'fr' ? 'Audit & Diagnostic RH' : 'HR Audit & Diagnostics',
+                  label: locale === 'fr' ? 'Audit & diagnostic RH' : 'HR Audit & Diagnostics',
                   description: locale === 'fr' ? 'Évaluation des compétences et besoins' : 'Skills & performance assessment',
                   icon: Search,
                 },
                 {
                   href: `/${locale}/entreprises#recrutement`,
-                  label: locale === 'fr' ? 'Recrutement & Placement' : 'Recruitment & Placement',
+                  label: locale === 'fr' ? 'Recrutement & placement' : 'Recruitment & Placement',
                   description: locale === 'fr' ? 'Bassin de diplômés qualifiés' : 'Connect with certified alumni',
                   icon: Users,
                 },
@@ -617,7 +617,7 @@ export default function Header() {
               items={[
                 {
                   href: `/${locale}/actualites`,
-                  label: locale === 'fr' ? 'Articles & Annonces' : 'Articles & News',
+                  label: locale === 'fr' ? 'Articles & annonces' : 'Articles & News',
                   description: locale === 'fr' ? 'Actualités et annonces officielles' : 'Official news and updates',
                   icon: Newspaper,
                 },
@@ -660,7 +660,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href={`/${locale}/contact`}
-              className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border-2 border-[var(--cj-red)] hover:border-[var(--cj-red-700)] text-white rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-md shadow-red-900/30 hover:shadow-xl hover:shadow-red-900/50 transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
+              className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border-2 border-[var(--cj-red)] hover:border-[var(--cj-red-700)] text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-md shadow-red-900/30 hover:shadow-xl hover:shadow-red-900/50 transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
             >
               <Mail className="h-3.5 w-3.5 text-white transition-colors" />
               <span>{labels.contact}</span>
