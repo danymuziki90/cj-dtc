@@ -1,4 +1,4 @@
-﻿import { test, expect, devices, type Page } from '@playwright/test'
+import { test, expect, devices, type Page } from '@playwright/test'
 
 const adminUsername = process.env.E2E_ADMIN_USERNAME || 'admincjtc'
 const adminPassword = process.env.E2E_ADMIN_PASSWORD || 'admin@123'
@@ -7,6 +7,7 @@ const pages = [
   { name: 'dashboard', path: '/admin/dashboard' },
   { name: 'students', path: '/admin/students' },
   { name: 'sessions', path: '/admin/sessions' },
+  { name: 'travaux', path: '/admin/travaux' },
   { name: 'payments', path: '/admin/payments' },
   { name: 'enrollments', path: '/admin/enrollments' },
   { name: 'documents', path: '/admin/documents' },

@@ -28,7 +28,8 @@ const canonicalAdminRouteMap: Record<string, string> = {
   '/admin/certificates': '/admin/certificates',
   '/admin/reports': '/admin/dashboard',
   '/admin/settings': '/admin/settings',
-  '/admin/assignments': '/admin/dashboard',
+  '/admin/assignments': '/admin/travaux',
+  '/admin/travaux': '/admin/travaux',
   '/admin/b2b': '/admin/b2b',
   '/admin/contacts': '/admin/contacts',
   '/admin/faq': '/admin/faq',
@@ -60,11 +61,6 @@ function resolveInscriptionRedirect(pathname: string, search: string) {
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl
-
-  if (pathname.includes('/espace-etudiants/travaux') || pathname.includes('/student/assignments')) {
-    const locale = pathname.startsWith('/en') ? 'en' : 'fr'
-    return NextResponse.redirect(new URL(`/${locale}/espace-etudiants`, request.url))
-  }
 
   const localeRedirect = localeMiddleware(request)
   if (localeRedirect) return localeRedirect

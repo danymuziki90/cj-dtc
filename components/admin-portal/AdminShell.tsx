@@ -143,6 +143,11 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
     description:
       'Créez et gérez les travaux pratiques, examens et projets. Publiez-les pour les étudiants inscrits aux sessions concernées et suivez les remises.',
   },
+  'Gestion des Travaux & Devoirs': {
+    eyebrow: 'TP, examens & projets',
+    description:
+      'Créez et gérez les travaux pratiques, examens et projets. Publiez-les pour les étudiants inscrits aux sessions concernées et suivez les remises.',
+  },
 }
 
 const DEFAULT_ENTRY = {

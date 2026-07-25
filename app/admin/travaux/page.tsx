@@ -241,7 +241,7 @@ export default function AdminAssignmentsPage() {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      supabase?.removeChannel(channel)
     }
   }, [fetchData])
 
