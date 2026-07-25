@@ -222,6 +222,7 @@ export async function GET(request: NextRequest) {
       type: a.type,
       difficulty: a.difficulty,
       publishedAt: a.publishedAt ? a.publishedAt.toISOString() : a.createdAt.toISOString(),
+      publishDate: a.publishedAt ? a.publishedAt.toISOString() : a.createdAt.toISOString(),
       createdAt: a.createdAt.toISOString(),
       deadline: a.deadline.toISOString(),
       maxFileSize: a.maxFileSize,
