@@ -202,14 +202,23 @@ export default function AdminAssignmentsPage() {
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
 
-  // Search & Filters
+  // Active Tab
+  const [activeTab, setActiveTab] = useState<'assignments' | 'submissions'>('assignments')
+
+  // Search & Filters for Assignments
   const [search, setSearch] = useState('')
   const [sessionFilter, setSessionFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all') // all, published, draft, archived, pending_grading
-
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+
+  // Search & Filters for Submissions
+  const [subSearch, setSubSearch] = useState('')
+  const [subSessionFilter, setSubSessionFilter] = useState('all')
+  const [subAssignmentFilter, setSubAssignmentFilter] = useState('all')
+  const [subStatusFilter, setSubStatusFilter] = useState('all') // all, submitted, graded, returned, overdue
+  const [subCurrentPage, setSubCurrentPage] = useState(1)
+  const [subPageSize, setSubPageSize] = useState(10)
 
   // Modals & Drawers State
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -402,9 +411,72 @@ export default function AdminAssignmentsPage() {
     return filteredAssignments.slice(start, start + pageSize)
   }, [filteredAssignments, currentPage, pageSize])
 
+  // Aggregate all submissions from all assignments
+  const allSubmissions = useMemo(() => {
+    const list: any[] = []
+    assignments.forEach((a) => {
+      if (a.submissions) {
+        a.submissions.forEach((s) => {
+          list.push({
+            ...s,
+            assignment: a,
+          })
+        })
+      }
+    })
+    return list.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+  }, [assignments])
+
+  // Filtered Submissions List
+  const filteredSubmissions = useMemo(() => {
+    return allSubmissions.filter((sub) => {
+      const q = subSearch.toLowerCase().trim()
+      const studentName = sub.student ? `${sub.student.firstName} ${sub.student.lastName}` : ''
+      const matchSearch =
+        !q ||
+        studentName.toLowerCase().includes(q) ||
+        (sub.student?.email || '').toLowerCase().includes(q) ||
+        (sub.student?.studentNumber || '').toLowerCase().includes(q) ||
+        sub.assignment.title.toLowerCase().includes(q)
+
+      const matchSession =
+        subSessionFilter === 'all' ||
+        String(sub.assignment.sessionId) === subSessionFilter
+
+      const matchAssignment =
+        subAssignmentFilter === 'all' ||
+        String(sub.assignmentId) === subAssignmentFilter
+
+      let matchStatus = true
+      if (subStatusFilter === 'submitted') {
+        matchStatus = sub.status === 'submitted'
+      } else if (subStatusFilter === 'graded') {
+        matchStatus = sub.status === 'graded'
+      } else if (subStatusFilter === 'returned') {
+        matchStatus = sub.status === 'returned'
+      } else if (subStatusFilter === 'overdue') {
+        const isSubmittedLate = new Date(sub.submittedAt).getTime() > new Date(sub.assignment.deadline).getTime()
+        matchStatus = isSubmittedLate
+      }
+
+      return matchSearch && matchSession && matchAssignment && matchStatus
+    })
+  }, [allSubmissions, subSearch, subSessionFilter, subAssignmentFilter, subStatusFilter])
+
+  // Pagination for submissions
+  const subTotalPages = Math.max(1, Math.ceil(filteredSubmissions.length / subPageSize))
+  const paginatedSubmissions = useMemo(() => {
+    const start = (subCurrentPage - 1) * subPageSize
+    return filteredSubmissions.slice(start, start + subPageSize)
+  }, [filteredSubmissions, subCurrentPage, subPageSize])
+
   useEffect(() => {
     setCurrentPage(1)
   }, [search, sessionFilter, statusFilter])
+
+  useEffect(() => {
+    setSubCurrentPage(1)
+  }, [subSearch, subSessionFilter, subAssignmentFilter, subStatusFilter])
 
   // Quick Toggle Publish status
   const handleTogglePublish = async (assignment: Assignment) => {
@@ -678,396 +750,802 @@ export default function AdminAssignmentsPage() {
           />
         </div>
 
-        {/* ── Zone de filtres et de recherche ─────────────────────────────────── */}
-        <AdminPanel>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
-            {/* Recherche */}
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                id="search-assignments"
-                type="text"
-                placeholder="Rechercher par titre, description ou formation..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className={`pl-11 ${adminInputClassName}`}
-              />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
+        {/* ── Navigation par Onglets ────────────────────────────────────────── */}
+        <div className="flex border-b border-slate-200 gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('assignments')}
+            className={`pb-4 px-6 text-sm font-bold border-b-2 transition-all duration-200 ${
+              activeTab === 'assignments'
+                ? 'border-[var(--admin-primary)] text-[var(--admin-primary)]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            Liste des travaux
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('submissions')}
+            className={`pb-4 px-6 text-sm font-bold border-b-2 transition-all duration-200 ${
+              activeTab === 'submissions'
+                ? 'border-[var(--admin-primary)] text-[var(--admin-primary)]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            Remises des étudiants
+          </button>
+        </div>
 
-            {/* Filtre par Session */}
-            <div className="w-full lg:w-72">
-              <label htmlFor="filter-session" className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Session
-              </label>
-              <select
-                id="filter-session"
-                value={sessionFilter}
-                onChange={(e) => setSessionFilter(e.target.value)}
-                className={adminSelectClassName}
-              >
-                <option value="all">Toutes les sessions</option>
-                {sessions.map((s) => {
-                  const formationTitle = s.formation?.title || 'Formation'
-                  const startDateFormatted = s.startDate
-                    ? new Date(s.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-                    : ''
+        {activeTab === 'assignments' ? (
+          <>
+            {/* ── Zone de filtres et de recherche (Travaux) ────────────────── */}
+            <AdminPanel>
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+                {/* Recherche */}
+                <div className="relative flex-1">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    id="search-assignments"
+                    type="text"
+                    placeholder="Rechercher par titre, description ou formation..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className={`pl-11 ${adminInputClassName}`}
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch('')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Filtre par Session */}
+                <div className="w-full lg:w-72">
+                  <label htmlFor="filter-session" className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Session
+                  </label>
+                  <select
+                    id="filter-session"
+                    value={sessionFilter}
+                    onChange={(e) => setSessionFilter(e.target.value)}
+                    className={adminSelectClassName}
+                  >
+                    <option value="all">Toutes les sessions</option>
+                    {sessions.map((s) => {
+                      const formationTitle = s.formation?.title || 'Formation'
+                      const startDateFormatted = s.startDate
+                        ? new Date(s.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                        : ''
+                      return (
+                        <option key={s.id} value={String(s.id)}>
+                          {formationTitle} — {startDateFormatted} ({s.format})
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
+
+                {/* Bouton Réinitialiser */}
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearch('')
+                      setSessionFilter('all')
+                      setStatusFilter('all')
+                    }}
+                    className={adminSecondaryButtonClassName}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Réinitialiser
+                  </button>
+                )}
+              </div>
+
+              {/* Filtres rapides par pilules de statut */}
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+                <span className="self-center text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Statut :
+                </span>
+                {[
+                  { label: 'Tous', value: 'all' },
+                  { label: 'Publiés', value: 'published' },
+                  { label: 'À corriger', value: 'pending_grading' },
+                  { label: 'Brouillons', value: 'draft' },
+                  { label: 'Archivés', value: 'archived' },
+                ].map((st) => {
+                  const isActive = statusFilter === st.value
                   return (
-                    <option key={s.id} value={String(s.id)}>
-                      {formationTitle} — {startDateFormatted} ({s.format})
-                    </option>
+                    <button
+                      key={st.value}
+                      type="button"
+                      onClick={() => setStatusFilter(st.value)}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+                        isActive
+                          ? 'border-[var(--admin-primary)] bg-[var(--admin-primary)] text-white shadow-sm'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-[var(--admin-primary-200)] hover:bg-[var(--admin-primary-50)]'
+                      }`}
+                    >
+                      {st.label}
+                    </button>
                   )
                 })}
-              </select>
-            </div>
-
-            {/* Bouton Réinitialiser */}
-            {activeFilterCount > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearch('')
-                  setSessionFilter('all')
-                  setStatusFilter('all')
-                }}
-                className={adminSecondaryButtonClassName}
-              >
-                <RotateCcw className="h-4 w-4" />
-                Réinitialiser
-              </button>
-            )}
-          </div>
-
-          {/* Filtres rapides par pilules de statut */}
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-            <span className="self-center text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-              Statut :
-            </span>
-            {[
-              { label: 'Tous', value: 'all' },
-              { label: 'Publiés', value: 'published' },
-              { label: 'À corriger', value: 'pending_grading' },
-              { label: 'Brouillons', value: 'draft' },
-              { label: 'Archivés', value: 'archived' },
-            ].map((st) => {
-              const isActive = statusFilter === st.value
-              return (
-                <button
-                  key={st.value}
-                  type="button"
-                  onClick={() => setStatusFilter(st.value)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
-                    isActive
-                      ? 'border-[var(--admin-primary)] bg-[var(--admin-primary)] text-white shadow-sm'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-[var(--admin-primary-200)] hover:bg-[var(--admin-primary-50)]'
-                  }`}
-                >
-                  {st.label}
-                </button>
-              )
-            })}
-          </div>
-        </AdminPanel>
-
-        {/* ── Liste des Travaux (Desktop Table / Mobile Cards) ──────────────── */}
-        {isLoading ? (
-          <AdminPanel>
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Loader2 className="h-10 w-10 animate-spin text-[var(--admin-primary)]" />
-              <p className="mt-4 text-sm font-medium text-slate-500">Chargement des travaux...</p>
-            </div>
-          </AdminPanel>
-        ) : error ? (
-          <AdminPanel>
-            <div className="flex flex-col items-center justify-center py-12 text-center text-rose-600">
-              <AlertTriangle className="h-10 w-10 mb-2" />
-              <p className="text-sm font-semibold">{error}</p>
-              <button type="button" onClick={fetchData} className={`mt-4 ${adminSecondaryButtonClassName}`}>
-                Réessayer
-              </button>
-            </div>
-          </AdminPanel>
-        ) : paginatedAssignments.length === 0 ? (
-          <AdminPanel>
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                <FileText className="h-7 w-7" />
               </div>
-              <h3 className="mt-4 text-base font-bold text-slate-900">Aucun travail trouvé</h3>
-              <p className="mt-1 text-sm text-slate-500">
-                {activeFilterCount > 0
-                  ? 'Aucun devoir ne correspond à vos critères de recherche.'
-                  : 'Commencez par ajouter votre premier devoir pour cette session.'}
-              </p>
-              <button type="button" onClick={handleOpenCreate} className={`mt-6 ${adminPrimaryButtonClassName}`}>
-                <Plus className="h-4 w-4" />
-                Créer un travail
-              </button>
-            </div>
-          </AdminPanel>
-        ) : (
-          <div className="space-y-4">
+            </AdminPanel>
 
-            {/* Vue Desktop / Tablet (Tableau épuré) */}
-            <div className="hidden md:block overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th scope="col" className="px-5 py-3.5">Travail & Type</th>
-                    <th scope="col" className="px-5 py-3.5">Formation / Session</th>
-                    <th scope="col" className="px-5 py-3.5">Date limite</th>
-                    <th scope="col" className="px-5 py-3.5">Remises & Correction</th>
-                    <th scope="col" className="px-5 py-3.5">Statut</th>
-                    <th scope="col" className="px-5 py-3.5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
+            {/* ── Liste des Travaux (Desktop Table / Mobile Cards) ─────────── */}
+            {isLoading ? (
+              <AdminPanel>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <Loader2 className="h-10 w-10 animate-spin text-[var(--admin-primary)]" />
+                  <p className="mt-4 text-sm font-medium text-slate-500">Chargement des travaux...</p>
+                </div>
+              </AdminPanel>
+            ) : error ? (
+              <AdminPanel>
+                <div className="flex flex-col items-center justify-center py-12 text-center text-rose-600">
+                  <AlertTriangle className="h-10 w-10 mb-2" />
+                  <p className="text-sm font-semibold">{error}</p>
+                  <button type="button" onClick={fetchData} className={`mt-4 ${adminSecondaryButtonClassName}`}>
+                    Réessayer
+                  </button>
+                </div>
+              </AdminPanel>
+            ) : paginatedAssignments.length === 0 ? (
+              <AdminPanel>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                    <FileText className="h-7 w-7" />
+                  </div>
+                  <h3 className="mt-4 text-base font-bold text-slate-900">Aucun travail trouvé</h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {activeFilterCount > 0
+                      ? 'Aucun devoir ne correspond à vos critères de recherche.'
+                      : 'Commencez par ajouter votre premier devoir pour cette session.'}
+                  </p>
+                  <button type="button" onClick={handleOpenCreate} className={`mt-6 ${adminPrimaryButtonClassName}`}>
+                    <Plus className="h-4 w-4" />
+                    Créer un travail
+                  </button>
+                </div>
+              </AdminPanel>
+            ) : (
+              <div className="space-y-4">
+                {/* Vue Desktop / Tablet (Tableau épuré) */}
+                <div className="hidden md:block overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
+                  <table className="w-full text-left text-sm text-slate-600">
+                    <thead className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      <tr>
+                        <th scope="col" className="px-5 py-3.5">Travail & Type</th>
+                        <th scope="col" className="px-5 py-3.5">Formation / Session</th>
+                        <th scope="col" className="px-5 py-3.5">Date limite</th>
+                        <th scope="col" className="px-5 py-3.5">Remises & Correction</th>
+                        <th scope="col" className="px-5 py-3.5">Statut</th>
+                        <th scope="col" className="px-5 py-3.5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {paginatedAssignments.map((a) => {
+                        const submissionsList = a.submissions || []
+                        const pendingCount = submissionsList.filter((s) => s.status === 'submitted').length
+                        const isOverdue = new Date(a.deadline).getTime() < Date.now()
+
+                        return (
+                          <tr key={a.id} className="transition-colors hover:bg-slate-50/70">
+                            <td className="px-5 py-4">
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-slate-900 text-sm line-clamp-1">{a.title}</span>
+                                  <AdminBadge
+                                    tone={
+                                      a.type === 'exam'
+                                        ? 'danger'
+                                        : a.type === 'project'
+                                        ? 'primary'
+                                        : 'neutral'
+                                    }
+                                  >
+                                    {a.type?.toUpperCase() || 'TP'}
+                                  </AdminBadge>
+                                </div>
+                                <p className="text-xs text-slate-500 line-clamp-1">{a.description}</p>
+                                {a.files && a.files.length > 0 && (
+                                  <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+                                    <FileArchive className="h-3.5 w-3.5 text-slate-400" />
+                                    {a.files.length} document(s) joint(s)
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-5 py-4">
+                              <div className="flex flex-col text-xs">
+                                <span className="font-semibold text-slate-800 line-clamp-1">
+                                  {a.formation?.title || 'Formation'}
+                                </span>
+                                <span className="text-slate-500">
+                                  Session #{a.sessionId}{' '}
+                                  {a.session?.startDate
+                                    ? `(${new Date(a.session.startDate).toLocaleDateString('fr-FR')})`
+                                    : ''}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-1.5 text-xs">
+                                <Clock className={`h-4 w-4 ${isOverdue ? 'text-rose-500' : 'text-slate-400'}`} />
+                                <span className={isOverdue ? 'font-bold text-rose-600' : 'text-slate-700'}>
+                                  {new Date(a.deadline).toLocaleDateString('fr-FR', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenSubmissions(a)}
+                                  className="group inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-100 transition"
+                                >
+                                  <FileCheck className="h-4 w-4 text-[var(--admin-primary)]" />
+                                  <span>{submissionsList.length} remise(s)</span>
+                                  {pendingCount > 0 && (
+                                    <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                      {pendingCount} à corriger
+                                    </span>
+                                  )}
+                                </button>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 whitespace-nowrap">
+                              <button
+                                type="button"
+                                onClick={() => handleTogglePublish(a)}
+                                disabled={togglingPublishId === a.id}
+                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                                  a.published || a.status === 'publie'
+                                    ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                }`}
+                                title="Cliquer pour basculer le statut de publication"
+                              >
+                                {togglingPublishId === a.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : a.published || a.status === 'publie' ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <XCircle className="h-3.5 w-3.5 text-slate-400" />
+                                )}
+                                {a.published || a.status === 'publie' ? 'Publié' : 'Brouillon'}
+                              </button>
+                            </td>
+                            <td className="px-5 py-4 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setViewDetailAssignment(a)}
+                                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                                  title="Voir les détails"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEdit(a)}
+                                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                                  title="Modifier"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmDelete(a)}
+                                  className="rounded-lg p-2 text-rose-500 hover:bg-rose-50 hover:text-rose-700"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Vue Mobile (Cartes interactives adaptées) */}
+                <div className="grid gap-4 md:hidden">
                   {paginatedAssignments.map((a) => {
                     const submissionsList = a.submissions || []
                     const pendingCount = submissionsList.filter((s) => s.status === 'submitted').length
-                    const gradedCount = submissionsList.filter((s) => s.status === 'graded').length
                     const isOverdue = new Date(a.deadline).getTime() < Date.now()
 
                     return (
-                      <tr key={a.id} className="transition-colors hover:bg-slate-50/70">
-                        {/* Titre & Type */}
-                        <td className="px-5 py-4">
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-900 text-sm line-clamp-1">{a.title}</span>
-                              <AdminBadge
-                                tone={
-                                  a.type === 'exam'
-                                    ? 'danger'
-                                    : a.type === 'project'
-                                    ? 'primary'
-                                    : 'neutral'
-                                }
-                              >
-                                {a.type?.toUpperCase() || 'TP'}
-                              </AdminBadge>
-                            </div>
-                            <p className="text-xs text-slate-500 line-clamp-1">{a.description}</p>
-                            {a.files && a.files.length > 0 && (
-                              <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-                                <FileArchive className="h-3.5 w-3.5 text-slate-400" />
-                                {a.files.length} document(s) joint(s)
-                              </div>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Formation / Session */}
-                        <td className="px-5 py-4">
-                          <div className="flex flex-col text-xs">
-                            <span className="font-semibold text-slate-800 line-clamp-1">
-                              {a.formation?.title || 'Formation'}
+                      <div key={a.id} className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                              {a.type?.toUpperCase() || 'TP'}
                             </span>
-                            <span className="text-slate-500">
-                              Session #{a.sessionId}{' '}
-                              {a.session?.startDate
-                                ? `(${new Date(a.session.startDate).toLocaleDateString('fr-FR')})`
-                                : ''}
-                            </span>
+                            <h3 className="mt-1 text-base font-bold text-slate-900">{a.title}</h3>
+                            <p className="text-xs text-slate-500">{a.formation?.title || 'Formation'}</p>
                           </div>
-                        </td>
-
-                        {/* Date limite */}
-                        <td className="px-5 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5 text-xs">
-                            <Clock className={`h-4 w-4 ${isOverdue ? 'text-rose-500' : 'text-slate-400'}`} />
-                            <span className={isOverdue ? 'font-bold text-rose-600' : 'text-slate-700'}>
-                              {new Date(a.deadline).toLocaleDateString('fr-FR', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Remises & Correction */}
-                        <td className="px-5 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenSubmissions(a)}
-                              className="group inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-100 transition"
-                            >
-                              <FileCheck className="h-4 w-4 text-[var(--admin-primary)]" />
-                              <span>{submissionsList.length} remise(s)</span>
-                              {pendingCount > 0 && (
-                                <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                                  {pendingCount} à corriger
-                                </span>
-                              )}
-                            </button>
-                          </div>
-                        </td>
-
-                        {/* Switch Statut Publié/Brouillon */}
-                        <td className="px-5 py-4 whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => handleTogglePublish(a)}
-                            disabled={togglingPublishId === a.id}
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
                               a.published || a.status === 'publie'
-                                ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-slate-100 text-slate-600'
                             }`}
-                            title="Cliquer pour basculer le statut de publication"
                           >
-                            {togglingPublishId === a.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : a.published || a.status === 'publie' ? (
-                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                            ) : (
-                              <XCircle className="h-3.5 w-3.5 text-slate-400" />
-                            )}
                             {a.published || a.status === 'publie' ? 'Publié' : 'Brouillon'}
                           </button>
-                        </td>
+                        </div>
 
-                        {/* Actions */}
-                        <td className="px-5 py-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              type="button"
-                              onClick={() => setViewDetailAssignment(a)}
-                              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
-                              title="Voir les détails"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEdit(a)}
-                              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
-                              title="Modifier"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setConfirmDelete(a)}
-                              className="rounded-lg p-2 text-rose-500 hover:bg-rose-50 hover:text-rose-700"
-                              title="Supprimer"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                        <p className="text-xs text-slate-600 line-clamp-2">{a.description}</p>
+
+                        <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                          <span className={`font-semibold flex items-center gap-1 ${isOverdue ? 'text-rose-600' : 'text-slate-500'}`}>
+                            <Clock className="h-3.5 w-3.5" />
+                            {new Date(a.deadline).toLocaleDateString('fr-FR')}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenSubmissions(a)}
+                            className="font-bold text-[var(--admin-primary)] flex items-center gap-1"
+                          >
+                            <FileCheck className="h-3.5 w-3.5" />
+                            {submissionsList.length} remise(s)
+                            {pendingCount > 0 && <span className="text-amber-600">({pendingCount} à corriger)</span>}
+                          </button>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                          <button
+                            type="button"
+                            onClick={() => setViewDetailAssignment(a)}
+                            className={adminSecondaryButtonClassName}
+                          >
+                            <Eye className="h-3.5 w-3.5" /> Détails
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(a)}
+                            className={adminSecondaryButtonClassName}
+                          >
+                            <Edit className="h-3.5 w-3.5" /> Modifier
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDelete(a)}
+                            className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-100"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
                     )
                   })}
-                </tbody>
-              </table>
-            </div>
+                </div>
 
-            {/* Vue Mobile (Cartes interactives adaptées) */}
-            <div className="grid gap-4 md:hidden">
-              {paginatedAssignments.map((a) => {
-                const submissionsList = a.submissions || []
-                const pendingCount = submissionsList.filter((s) => s.status === 'submitted').length
-                const isOverdue = new Date(a.deadline).getTime() < Date.now()
-
-                return (
-                  <div key={a.id} className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                          {a.type?.toUpperCase() || 'TP'}
-                        </span>
-                        <h3 className="mt-1 text-base font-bold text-slate-900">{a.title}</h3>
-                        <p className="text-xs text-slate-500">{a.formation?.title || 'Formation'}</p>
-                      </div>
+                {/* Pagination Controls */}
+                <PaginationControls
+                  pagination={{
+                    page: currentPage,
+                    pageSize,
+                    totalItems: filteredAssignments.length,
+                    totalPages,
+                    hasNextPage: currentPage < totalPages,
+                    hasPreviousPage: currentPage > 1,
+                  }}
+                  onPageChange={(p) => setCurrentPage(p)}
+                  onPageSizeChange={(sz) => {
+                    setPageSize(sz)
+                    setCurrentPage(1)
+                  }}
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* ── Zone de filtres et de recherche (Remises) ────────────────── */}
+            <AdminPanel>
+              <div className="grid gap-4 md:grid-cols-12 items-end">
+                {/* Recherche Étudiant */}
+                <div className="relative md:col-span-4">
+                  <label htmlFor="search-sub" className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Rechercher
+                  </label>
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="search-sub"
+                      type="text"
+                      placeholder="Étudiant, email, devoir..."
+                      value={subSearch}
+                      onChange={(e) => setSubSearch(e.target.value)}
+                      className={`pl-11 ${adminInputClassName}`}
+                    />
+                    {subSearch && (
                       <button
                         type="button"
-                        onClick={() => handleTogglePublish(a)}
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
-                          a.published || a.status === 'publie'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-slate-100 text-slate-600'
+                        onClick={() => setSubSearch('')}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Filtre Session */}
+                <div className="md:col-span-4">
+                  <label htmlFor="filter-sub-session" className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Session
+                  </label>
+                  <select
+                    id="filter-sub-session"
+                    value={subSessionFilter}
+                    onChange={(e) => setSubSessionFilter(e.target.value)}
+                    className={adminSelectClassName}
+                  >
+                    <option value="all">Toutes les sessions</option>
+                    {sessions.map((s) => {
+                      const formationTitle = s.formation?.title || 'Formation'
+                      const startDateFormatted = s.startDate
+                        ? new Date(s.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                        : ''
+                      return (
+                        <option key={s.id} value={String(s.id)}>
+                          {formationTitle} — {startDateFormatted} ({s.format})
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
+
+                {/* Filtre Devoir */}
+                <div className="md:col-span-4">
+                  <label htmlFor="filter-sub-assignment" className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Travail / Évaluation
+                  </label>
+                  <select
+                    id="filter-sub-assignment"
+                    value={subAssignmentFilter}
+                    onChange={(e) => setSubAssignmentFilter(e.target.value)}
+                    className={adminSelectClassName}
+                  >
+                    <option value="all">Tous les devoirs</option>
+                    {assignments.map((a) => (
+                      <option key={a.id} value={String(a.id)}>
+                        {a.title} ({a.type?.toUpperCase()})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Filtres rapides par pilules de statut de remises */}
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4 items-center justify-between">
+                <div className="flex flex-wrap gap-2 items-center">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">
+                    Statut remise :
+                  </span>
+                  {[
+                    { label: 'Toutes', value: 'all' },
+                    { label: 'À corriger', value: 'submitted' },
+                    { label: 'Corrigées', value: 'graded' },
+                    { label: 'À réviser', value: 'returned' },
+                    { label: 'Remises en retard', value: 'overdue' },
+                  ].map((st) => {
+                    const isActive = subStatusFilter === st.value
+                    return (
+                      <button
+                        key={st.value}
+                        type="button"
+                        onClick={() => setSubStatusFilter(st.value)}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+                          isActive
+                            ? 'border-[var(--admin-primary)] bg-[var(--admin-primary)] text-white shadow-sm'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-[var(--admin-primary-200)] hover:bg-[var(--admin-primary-50)]'
                         }`}
                       >
-                        {a.published || a.status === 'publie' ? 'Publié' : 'Brouillon'}
+                        {st.label}
                       </button>
-                    </div>
+                    )
+                  })}
+                </div>
 
-                    <p className="text-xs text-slate-600 line-clamp-2">{a.description}</p>
+                {/* Bouton Réinitialiser */}
+                {(subSearch || subSessionFilter !== 'all' || subAssignmentFilter !== 'all' || subStatusFilter !== 'all') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubSearch('')
+                      setSubSessionFilter('all')
+                      setSubAssignmentFilter('all')
+                      setSubStatusFilter('all')
+                    }}
+                    className={adminSecondaryButtonClassName}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Réinitialiser
+                  </button>
+                )}
+              </div>
+            </AdminPanel>
 
-                    <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
-                      <span className={`font-semibold flex items-center gap-1 ${isOverdue ? 'text-rose-600' : 'text-slate-500'}`}>
-                        <Clock className="h-3.5 w-3.5" />
-                        {new Date(a.deadline).toLocaleDateString('fr-FR')}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenSubmissions(a)}
-                        className="font-bold text-[var(--admin-primary)] flex items-center gap-1"
-                      >
-                        <FileCheck className="h-3.5 w-3.5" />
-                        {submissionsList.length} remise(s)
-                        {pendingCount > 0 && <span className="text-amber-600">({pendingCount} à corriger)</span>}
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                      <button
-                        type="button"
-                        onClick={() => setViewDetailAssignment(a)}
-                        className={adminSecondaryButtonClassName}
-                      >
-                        <Eye className="h-3.5 w-3.5" /> Détails
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit(a)}
-                        className={adminSecondaryButtonClassName}
-                      >
-                        <Edit className="h-3.5 w-3.5" /> Modifier
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setConfirmDelete(a)}
-                        className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-100"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+            {/* ── Liste des Remises Globale ─────────────────────────────────── */}
+            {isLoading ? (
+              <AdminPanel>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <Loader2 className="h-10 w-10 animate-spin text-[var(--admin-primary)]" />
+                  <p className="mt-4 text-sm font-medium text-slate-500">Chargement des remises...</p>
+                </div>
+              </AdminPanel>
+            ) : error ? (
+              <AdminPanel>
+                <div className="flex flex-col items-center justify-center py-12 text-center text-rose-600">
+                  <AlertTriangle className="h-10 w-10 mb-2" />
+                  <p className="text-sm font-semibold">{error}</p>
+                  <button type="button" onClick={fetchData} className={`mt-4 ${adminSecondaryButtonClassName}`}>
+                    Réessayer
+                  </button>
+                </div>
+              </AdminPanel>
+            ) : paginatedSubmissions.length === 0 ? (
+              <AdminPanel>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                    <FileCheck className="h-7 w-7" />
                   </div>
-                )
-              })}
-            </div>
+                  <h3 className="mt-4 text-base font-bold text-slate-900">Aucune remise trouvée</h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Aucun rendu d'étudiant ne correspond aux critères sélectionnés.
+                  </p>
+                </div>
+              </AdminPanel>
+            ) : (
+              <div className="space-y-4">
+                {/* Vue Table Desktop */}
+                <div className="hidden md:block overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm">
+                  <table className="w-full text-left text-sm text-slate-600">
+                    <thead className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      <tr>
+                        <th scope="col" className="px-5 py-3.5">Étudiant & Matricule</th>
+                        <th scope="col" className="px-5 py-3.5">Travail & Session</th>
+                        <th scope="col" className="px-5 py-3.5">Date limite / Rendu</th>
+                        <th scope="col" className="px-5 py-3.5">Fichier remis</th>
+                        <th scope="col" className="px-5 py-3.5">Statut / Note</th>
+                        <th scope="col" className="px-5 py-3.5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {paginatedSubmissions.map((sub) => {
+                        const studentName = sub.student
+                          ? `${sub.student.firstName} ${sub.student.lastName}`
+                          : 'Étudiant anonyme'
+                        const initials = sub.student
+                          ? `${sub.student.firstName.charAt(0)}${sub.student.lastName.charAt(0)}`.toUpperCase()
+                          : 'ET'
+                        const isLate = new Date(sub.submittedAt).getTime() > new Date(sub.assignment.deadline).getTime()
+                        const primaryFile = sub.files && sub.files.length > 0 ? sub.files[0] : null
+                        const fileSizeFormatted = primaryFile ? (primaryFile.size < 1024 * 1024
+                          ? `${(primaryFile.size / 1024).toFixed(1)} Ko`
+                          : `${(primaryFile.size / (1024 * 1024)).toFixed(1)} Mo`) : ''
 
-            {/* Pagination Controls */}
-            <PaginationControls
-              pagination={{
-                page: currentPage,
-                pageSize,
-                totalItems: filteredAssignments.length,
-                totalPages,
-                hasNextPage: currentPage < totalPages,
-                hasPreviousPage: currentPage > 1,
-              }}
-              onPageChange={(p) => setCurrentPage(p)}
-              onPageSizeChange={(sz) => {
-                setPageSize(sz)
-                setCurrentPage(1)
-              }}
-            />
-          </div>
+                        return (
+                          <tr key={sub.id} className="transition-colors hover:bg-slate-50/70">
+                            {/* Étudiant */}
+                            <td className="px-5 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs font-bold shadow-sm">
+                                  {initials}
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-slate-900 text-sm">{studentName}</span>
+                                  <span className="text-[11px] text-slate-400">{sub.student?.email || ''}</span>
+                                  <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Mat. #{sub.student?.studentNumber || sub.studentId}</span>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Travail & Session */}
+                            <td className="px-5 py-4">
+                              <div className="flex flex-col gap-1 text-xs">
+                                <span className="font-bold text-slate-800 line-clamp-1">{sub.assignment.title}</span>
+                                <span className="text-[10px] text-slate-500 font-medium">
+                                  {sub.assignment.formation?.title || 'Formation'} · Session #{sub.assignment.sessionId}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Dates */}
+                            <td className="px-5 py-4 whitespace-nowrap text-xs">
+                              <div className="flex flex-col gap-1">
+                                <span className="text-slate-500 flex items-center gap-1">
+                                  <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                                  Déposé le : {new Date(sub.submittedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                <span className="text-[11px] text-slate-400">
+                                  Limite : {new Date(sub.assignment.deadline).toLocaleDateString('fr-FR')}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Fichier joint */}
+                            <td className="px-5 py-4 whitespace-nowrap">
+                              {primaryFile ? (
+                                <a
+                                  href={primaryFile.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-blue-300 hover:text-blue-600 transition"
+                                >
+                                  <Download className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                  <span className="truncate max-w-[150px]">{primaryFile.originalName || primaryFile.name}</span>
+                                  <span className="text-[10px] font-normal text-slate-400">({fileSizeFormatted})</span>
+                                </a>
+                              ) : (
+                                <span className="text-xs text-slate-400 italic">Aucun fichier</span>
+                              )}
+                            </td>
+
+                            {/* Statut / Note */}
+                            <td className="px-5 py-4 whitespace-nowrap">
+                              <div className="flex flex-col gap-1.5">
+                                <div className="flex items-center gap-1.5">
+                                  <AdminBadge
+                                    tone={
+                                      sub.status === 'graded'
+                                        ? 'success'
+                                        : sub.status === 'returned'
+                                        ? 'warning'
+                                        : 'primary'
+                                    }
+                                  >
+                                    {sub.status === 'graded'
+                                      ? 'Corrigé'
+                                      : sub.status === 'returned'
+                                      ? 'À réviser'
+                                      : 'À corriger'}
+                                  </AdminBadge>
+                                  {isLate && (
+                                    <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200">
+                                      En retard
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-xs font-bold text-slate-800">
+                                  {sub.grade !== null && sub.grade !== undefined ? `Note: ${sub.grade}/20` : 'Non noté'}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Action Noter / Corriger */}
+                            <td className="px-5 py-4 text-right whitespace-nowrap">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setViewSubmissionsAssignment(sub.assignment)
+                                  setSelectedSubmission(sub)
+                                  setGradeValue(sub.grade !== null && sub.grade !== undefined ? String(sub.grade) : '')
+                                  setFeedbackValue(sub.feedback || '')
+                                  setSubmissionStatusValue(sub.status === 'returned' ? 'returned' : 'graded')
+                                }}
+                                className="inline-flex items-center gap-1 rounded-xl bg-[var(--admin-primary-50)] px-3 py-1.5 text-xs font-bold text-[var(--admin-primary)] hover:bg-[var(--admin-primary-100)] transition"
+                              >
+                                <Award className="h-3.5 w-3.5" />
+                                Corriger
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Vue Mobile Submissions */}
+                <div className="grid gap-4 md:hidden">
+                  {paginatedSubmissions.map((sub) => {
+                    const studentName = sub.student ? `${sub.student.firstName} ${sub.student.lastName}` : 'Étudiant'
+                    const isLate = new Date(sub.submittedAt).getTime() > new Date(sub.assignment.deadline).getTime()
+                    const primaryFile = sub.files && sub.files.length > 0 ? sub.files[0] : null
+
+                    return (
+                      <div key={sub.id} className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+                        <div className="flex items-start justify-between border-b border-slate-100 pb-2">
+                          <div>
+                            <h4 className="text-sm font-bold text-slate-900">{studentName}</h4>
+                            <p className="text-[10px] text-slate-500">Mat. #{sub.student?.studentNumber || sub.studentId}</p>
+                          </div>
+                          <AdminBadge
+                            tone={
+                              sub.status === 'graded'
+                                ? 'success'
+                                : sub.status === 'returned'
+                                ? 'warning'
+                                : 'primary'
+                            }
+                          >
+                            {sub.status === 'graded' ? 'Corrigé' : sub.status === 'returned' ? 'À réviser' : 'En attente'}
+                          </AdminBadge>
+                        </div>
+
+                        <div className="text-xs space-y-1">
+                          <p className="font-semibold text-slate-800 line-clamp-1">{sub.assignment.title}</p>
+                          <p className="text-slate-500">Session #{sub.assignment.sessionId} · {sub.assignment.formation?.title}</p>
+                          <p className="text-[11px] text-slate-400">Rendu le : {new Date(sub.submittedAt).toLocaleDateString('fr-FR')}</p>
+                        </div>
+
+                        {primaryFile && (
+                          <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Fichier :</span>
+                            <a
+                              href={primaryFile.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 font-bold hover:underline truncate max-w-[180px]"
+                            >
+                              {primaryFile.originalName}
+                            </a>
+                          </div>
+                        )}
+
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-700">
+                            {sub.grade !== null && sub.grade !== undefined ? `Note: ${sub.grade}/20` : 'Non noté'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setViewSubmissionsAssignment(sub.assignment)
+                              setSelectedSubmission(sub)
+                              setGradeValue(sub.grade !== null && sub.grade !== undefined ? String(sub.grade) : '')
+                              setFeedbackValue(sub.feedback || '')
+                              setSubmissionStatusValue(sub.status === 'returned' ? 'returned' : 'graded')
+                            }}
+                            className="inline-flex items-center gap-1 rounded-lg bg-[var(--admin-primary-50)] px-2.5 py-1 text-xs font-bold text-[var(--admin-primary)]"
+                          >
+                            <Award className="h-3.5 w-3.5" /> Noter
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Pagination Submissions */}
+                <PaginationControls
+                  pagination={{
+                    page: subCurrentPage,
+                    pageSize: subPageSize,
+                    totalItems: filteredSubmissions.length,
+                    totalPages: subTotalPages,
+                    hasNextPage: subCurrentPage < subTotalPages,
+                    hasPreviousPage: subCurrentPage > 1,
+                  }}
+                  onPageChange={(p) => setSubCurrentPage(p)}
+                  onPageSizeChange={(sz) => {
+                    setSubPageSize(sz)
+                    setSubCurrentPage(1)
+                  }}
+                />
+              </div>
+            )}
+          </>
         )}
 
         {/* ── Modal Créer / Modifier Devoir ─────────────────────────────────── */}
