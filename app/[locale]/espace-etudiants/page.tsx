@@ -573,13 +573,6 @@ function EspaceEtudiantsContent() {
 
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              href={`/${locale}/espace-etudiants/temoignages`}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20 transition"
-            >
-              <MessageSquare className="h-3.5 w-3.5 text-amber-300" />
-              Témoignages
-            </Link>
-            <Link
               href={`${basePath}/mon-compte`}
               className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/90 hover:bg-white/10 transition"
             >
@@ -645,25 +638,11 @@ function EspaceEtudiantsContent() {
 
               <div className="flex flex-wrap gap-2 pt-1">
                 <Link
-                  href={`${basePath}/travaux`}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--cj-blue)] to-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-lg transition hover:brightness-110"
-                >
-                  <FileText className="h-3.5 w-3.5" />
-                  <span>Mes Travaux & Devoirs</span>
-                </Link>
-                <Link
                   href={`${basePath}/supports`}
                   className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/25 transition"
                 >
                   <BookOpen className="h-3.5 w-3.5" />
                   <span className="text-white">Supports de cours</span>
-                </Link>
-                <Link
-                  href={`/${locale}/espace-etudiants/temoignages`}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--cj-red)] to-red-600 px-4 py-2.5 text-xs font-semibold text-white shadow-lg transition hover:brightness-110"
-                >
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  <span>Donner mon témoignage</span>
                 </Link>
                 {firstCertificate && firstCertificate.fileUrl && (
                   <a
@@ -759,7 +738,6 @@ function EspaceEtudiantsContent() {
             {[
               { id: "overview", label: "Tableau de bord", icon: BarChart3, count: null },
               { id: "formations", label: "Mes formations", icon: BookOpen, count: totalFormationsCount },
-              { id: "travaux", label: "Mes Travaux", icon: FileText, count: assignments.length },
               { id: "news", label: "Actualités", icon: Newspaper, count: news.length },
               { id: "calendrier", label: "Calendrier", icon: Calendar, count: null },
               { id: "notifications", label: "Notifications", icon: Bell, count: totalNotifications },
