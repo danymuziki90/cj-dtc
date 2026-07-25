@@ -1,7 +1,7 @@
 import AboutModernPage from '@/components/about/AboutModernPage'
 
 type AboutPublicPageProps = {
-  params: Promise<{ locale: string }> | { locale: string }
+  params: Promise<{ locale: string }>
 }
 
 export default async function AboutPublicPage({ params }: AboutPublicPageProps) {

@@ -6,7 +6,7 @@ import { publicMessages } from '@/lib/i18n/public-messages'
 
 const copy = publicMessages.partnersMetadata
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> | { locale: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const resolvedParams = await Promise.resolve(params)
   const locale = resolveSiteLocale(resolvedParams.locale)
   const t = copy[locale]

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import EntreprisesClientPage from './EntreprisesClientPage'
 
-type Props = { params: Promise<{ locale: string }> | { locale: string } }
+type Props = { params: Promise<{ locale: string }> }
 
 import { buildMetadata } from '@/lib/seo-config'
 

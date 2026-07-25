@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 // Toute visite de /[locale]/programmes est redirigée vers /[locale]/formations#sessions.
 
 interface Props {
-  params: Promise<{ locale: string }> | { locale: string }
+  params: Promise<{ locale: string }>
 }
 
 export default async function ProgrammesRedirectPage({ params }: Props) {

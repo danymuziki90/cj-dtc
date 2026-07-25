@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ArrowLeft, CalendarDays, Tag } from 'lucide-react'
@@ -9,7 +9,7 @@ import { getIntlLocale, resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
 interface PageProps {
-  params: Promise<{ locale: string; slug: string }> | { locale: string; slug: string }
+  params: Promise<{ locale: string; slug: string }>
 }
 
 const copy = publicMessages.newsDetail
