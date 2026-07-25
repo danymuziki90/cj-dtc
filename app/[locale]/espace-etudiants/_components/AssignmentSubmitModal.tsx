@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -50,11 +50,27 @@ export function AssignmentSubmitModal({
 }: AssignmentSubmitModalProps) {
   const [fileItems, setFileItems] = useState<UploadFileStateItem[]>([]);
   const [validationError, setValidationError] = useState<string>("");
+  const xhrMapRef = useRef<Map<string, XMLHttpRequest>>(new Map());
+
+  // Abort all active XHR uploads when unmounting or when selectedAssignment changes
+  const abortAllUploads = () => {
+    xhrMapRef.current.forEach((xhr) => {
+      try {
+        xhr.abort();
+      } catch {}
+    });
+    xhrMapRef.current.clear();
+  };
 
   useEffect(() => {
-    // Reset file list when modal opens or selected assignment changes
+    // Reset file list and abort old requests when modal opens or assignment changes
+    abortAllUploads();
     setFileItems([]);
     setValidationError("");
+
+    return () => {
+      abortAllUploads();
+    };
   }, [selectedAssignment]);
 
   if (!selectedAssignment) return null;
@@ -74,7 +90,20 @@ export function AssignmentSubmitModal({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const handleCloseModal = () => {
+    abortAllUploads();
+    onClose();
+  };
+
   const uploadFileToServer = (item: UploadFileStateItem) => {
+    // Cancel previous XHR if retrying
+    if (xhrMapRef.current.has(item.id)) {
+      try {
+        xhrMapRef.current.get(item.id)?.abort();
+      } catch {}
+      xhrMapRef.current.delete(item.id);
+    }
+
     setFileItems((prev) =>
       prev.map((f) =>
         f.id === item.id ? { ...f, status: "uploading", progress: 0, errorMessage: undefined } : f
@@ -82,6 +111,9 @@ export function AssignmentSubmitModal({
     );
 
     const xhr = new XMLHttpRequest();
+    xhrMapRef.current.set(item.id, xhr);
+    xhr.timeout = 60000; // 60 seconds timeout
+
     const formData = new FormData();
     formData.append("file", item.file);
     formData.append("assignmentId", String(selectedAssignment.id));
@@ -97,10 +129,12 @@ export function AssignmentSubmitModal({
     });
 
     xhr.addEventListener("load", () => {
+      xhrMapRef.current.delete(item.id);
+
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const res = JSON.parse(xhr.responseText);
-          if (res.success && res.file) {
+          if (res.success && res.file && res.file.url) {
             setFileItems((prev) =>
               prev.map((f) =>
                 f.id === item.id
@@ -115,7 +149,7 @@ export function AssignmentSubmitModal({
                   ? {
                       ...f,
                       status: "error",
-                      errorMessage: res.error || "Erreur de téléversement",
+                      errorMessage: res.error || "Erreur de téléversement : URL non générée",
                     }
                   : f
               )
@@ -125,7 +159,7 @@ export function AssignmentSubmitModal({
           setFileItems((prev) =>
             prev.map((f) =>
               f.id === item.id
-                ? { ...f, status: "error", errorMessage: "Format de réponse invalide" }
+                ? { ...f, status: "error", errorMessage: "Format de réponse du serveur invalide" }
                 : f
             )
           );
@@ -145,6 +179,7 @@ export function AssignmentSubmitModal({
     });
 
     xhr.addEventListener("error", () => {
+      xhrMapRef.current.delete(item.id);
       setFileItems((prev) =>
         prev.map((f) =>
           f.id === item.id
@@ -156,6 +191,25 @@ export function AssignmentSubmitModal({
             : f
         )
       );
+    });
+
+    xhr.addEventListener("timeout", () => {
+      xhrMapRef.current.delete(item.id);
+      setFileItems((prev) =>
+        prev.map((f) =>
+          f.id === item.id
+            ? {
+                ...f,
+                status: "error",
+                errorMessage: "Le téléversement a expiré (délai de 60s dépassé). Veuillez réessayer.",
+              }
+            : f
+        )
+      );
+    });
+
+    xhr.addEventListener("abort", () => {
+      xhrMapRef.current.delete(item.id);
     });
 
     xhr.open("POST", "/api/student/upload");
@@ -194,7 +248,7 @@ export function AssignmentSubmitModal({
           file,
           progress: 0,
           status: "error",
-          errorMessage: `Format .${ext} non autorisé (Acceptés : ${allowedTypesArray.join(", ")})`,
+          errorMessage: `Format .${ext} non autorisé (Formats acceptés : ${allowedTypesArray.join(", ")})`,
         });
       } else {
         const item: UploadFileStateItem = {
@@ -209,7 +263,7 @@ export function AssignmentSubmitModal({
 
     setFileItems((prev) => [...prev, ...itemsToAdd]);
 
-    // Immediately trigger upload for valid pending files
+    // Immediately trigger upload ONLY for valid pending files
     itemsToAdd.forEach((item) => {
       if (item.status === "pending") {
         uploadFileToServer(item);
@@ -218,6 +272,12 @@ export function AssignmentSubmitModal({
   };
 
   const handleRemoveFile = (id: string) => {
+    if (xhrMapRef.current.has(id)) {
+      try {
+        xhrMapRef.current.get(id)?.abort();
+      } catch {}
+      xhrMapRef.current.delete(id);
+    }
     setFileItems((prev) => prev.filter((f) => f.id !== id));
   };
 
@@ -225,10 +285,10 @@ export function AssignmentSubmitModal({
     uploadFileToServer(item);
   };
 
-  const isUploading = fileItems.some((f) => f.status === "uploading");
+  const isUploading = fileItems.some((f) => f.status === "uploading" || f.status === "pending");
   const hasErrors = fileItems.some((f) => f.status === "error");
   const completedFiles = fileItems
-    .filter((f) => f.status === "completed" && f.data)
+    .filter((f) => f.status === "completed" && f.data && Boolean(f.data.url))
     .map((f) => f.data!);
 
   const canSubmit =
@@ -242,6 +302,15 @@ export function AssignmentSubmitModal({
     e.preventDefault();
     if (!canSubmit) return;
     onSubmit(completedFiles);
+  };
+
+  const getSubmitButtonLabel = () => {
+    if (isSubmittingWork) return "Envoi de votre travail en cours...";
+    if (isUploading) return "Téléversement des fichiers en cours...";
+    if (hasErrors) return "Veuillez corriger ou supprimer les fichiers en erreur";
+    if (fileItems.length === 0) return "Sélectionnez au moins un fichier";
+    if (completedFiles.length < fileItems.length) return "Téléversement incomplet";
+    return "Déposer mon travail";
   };
 
   return (
@@ -259,7 +328,7 @@ export function AssignmentSubmitModal({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleCloseModal}
             className="rounded-lg p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition"
           >
             <X className="w-5 h-5" />
@@ -340,7 +409,7 @@ export function AssignmentSubmitModal({
                             <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                           ) : item.status === "error" ? (
                             <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-                          ) : item.status === "uploading" ? (
+                          ) : item.status === "uploading" || item.status === "pending" ? (
                             <Loader2 className="w-4 h-4 text-blue-600 animate-spin shrink-0" />
                           ) : (
                             <FileText className="w-4 h-4 text-slate-400 shrink-0" />
@@ -361,7 +430,7 @@ export function AssignmentSubmitModal({
                               type="button"
                               onClick={() => handleRetryUpload(item)}
                               title="Réessayer le téléversement"
-                              className="p-1 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition"
+                              className="p-1 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition"
                             >
                               <RefreshCw className="w-3.5 h-3.5" />
                             </button>
@@ -378,7 +447,7 @@ export function AssignmentSubmitModal({
                       </div>
 
                       {/* Progress Bar */}
-                      {item.status === "uploading" && (
+                      {(item.status === "uploading" || item.status === "pending") && (
                         <div className="space-y-1">
                           <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                             <div
@@ -417,7 +486,7 @@ export function AssignmentSubmitModal({
           <div className="flex gap-2 pt-3 justify-end border-t border-slate-100">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCloseModal}
               className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
             >
               Annuler
@@ -427,16 +496,12 @@ export function AssignmentSubmitModal({
               disabled={!canSubmit}
               className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cj-blue)] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--cj-blue-700)] disabled:opacity-50 disabled:cursor-not-allowed shadow"
             >
-              {isSubmittingWork ? (
+              {isSubmittingWork || isUploading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <Upload className="w-3.5 h-3.5" />
               )}
-              {isUploading
-                ? "Téléversement en cours..."
-                : isSubmittingWork
-                ? "Envoi en cours..."
-                : "Déposer mon travail"}
+              {getSubmitButtonLabel()}
             </button>
           </div>
         </form>

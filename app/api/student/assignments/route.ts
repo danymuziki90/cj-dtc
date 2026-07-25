@@ -259,6 +259,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate that each pre-uploaded file has a valid URL
+    for (const f of preUploadedFiles) {
+      if (!f.url || typeof f.url !== 'string' || f.url.trim() === '') {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Le fichier "${f.originalName || f.name || 'sélectionné'}" n'a pas d'URL de stockage valide. Veuillez le téléverser à nouveau.`,
+          },
+          { status: 400 }
+        )
+      }
+    }
+
     const maxAllowedFiles = assignment.maxFiles || 5
     if (totalFilesCount > maxAllowedFiles) {
       return NextResponse.json(

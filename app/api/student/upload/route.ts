@@ -47,6 +47,13 @@ export async function POST(request: NextRequest) {
 
     const fileUrl = await uploadToR2(buffer, storageKeyName, r2Folder, mimeType)
 
+    if (!fileUrl) {
+      return NextResponse.json(
+        { success: false, error: 'Échec de la génération de l\'URL d\'accès au fichier téléversé.' },
+        { status: 500 }
+      )
+    }
+
     return NextResponse.json({
       success: true,
       file: {
