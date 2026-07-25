@@ -417,21 +417,14 @@ export default function Header() {
       {/* 1. DESKTOP TOP-BAR (VISIBLE DESKTOP ONLY lg:block) */}
       <div className="hidden lg:block border-b border-slate-800/80 bg-slate-950 text-slate-300 text-xs font-medium py-2 shadow-inner">
         <div className="container mx-auto flex items-center justify-between px-4">
-          {/* Left: Contact Info */}
+          {/* Left: Email Info */}
           <div className="flex items-center gap-6">
             <a
-              href="tel:+243810000000"
-              className="inline-flex items-center gap-2 transition-colors hover:text-white"
-            >
-              <Phone className="h-3.5 w-3.5 text-[var(--cj-blue)]" />
-              <span>+243 810 000 000</span>
-            </a>
-            <a
-              href="mailto:contact@cj-dtc.com"
+              href="mailto:contact@cjdevelopmenttc.org"
               className="inline-flex items-center gap-2 transition-colors hover:text-white"
             >
               <Mail className="h-3.5 w-3.5 text-[var(--cj-red)]" />
-              <span>contact@cj-dtc.com</span>
+              <span className="font-semibold text-slate-200">contact@cjdevelopmenttc.org</span>
             </a>
           </div>
 
@@ -440,13 +433,13 @@ export default function Header() {
             « Bâtir des compétences. Transformer des destins. »
           </div>
 
-          {/* Right: Language & Social Networks */}
+          {/* Right: Language & Social Networks (Facebook, LinkedIn, WhatsApp) */}
           <div className="flex items-center gap-5">
             <LanguageSwitcher locale={locale} pathname={pathname} search={search} darkVariant={true} />
 
             <div className="h-4 w-px bg-slate-800" />
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-3">
               <a
                 href="https://facebook.com"
                 target="_blank"
@@ -464,15 +457,6 @@ export default function Header() {
                 className="text-slate-400 transition-colors hover:text-blue-500"
               >
                 <Linkedin className="h-3.5 w-3.5" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube CJ DTC"
-                className="text-slate-400 transition-colors hover:text-red-500"
-              >
-                <Youtube className="h-3.5 w-3.5" />
               </a>
               <a
                 href="https://wa.me/243810000000"
@@ -509,7 +493,6 @@ export default function Header() {
             <NavLink href={`/sessions`} label={labels.sessions} />
             <NavLink href={`/${locale}/entreprises`} label={labels.entreprises} />
             <NavLink href={`/${locale}/actualites`} label={labels.news} />
-            <NavLink href={`/${locale}/galerie`} label={labels.galerie} />
 
             {/* Dropdown Menu for Student Space */}
             <DesktopDropdown
