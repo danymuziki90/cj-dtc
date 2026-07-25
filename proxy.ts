@@ -150,3 +150,5 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: ['/', '/admin/:path*', '/api/admin/:path*', '/student/:path*', '/api/student/system/:path*', '/espace-etudiants/:path*', '/fr/admin/:path*', '/en/admin/:path*', '/fr/student/:path*', '/fr/espace-etudiants/:path*', '/auth/:path*', '/(fr|en)/:path*'],
 }
+
+export default proxy

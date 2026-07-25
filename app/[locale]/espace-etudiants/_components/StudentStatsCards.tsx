@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Activity,
   CheckCircle2,
@@ -14,6 +15,7 @@ interface StudentStatsCardsProps {
   pendingAssignmentsCount: number;
   submittedAssignmentsCount: number;
   newsCount: number;
+  locale?: string;
 }
 
 export function StudentStatsCards({
@@ -22,11 +24,17 @@ export function StudentStatsCards({
   pendingAssignmentsCount,
   submittedAssignmentsCount,
   newsCount,
+  locale = "fr",
 }: StudentStatsCardsProps) {
+  const prefix = locale ? `/${locale}` : "";
+
   return (
     <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
       {/* Card 1: Sessions (Bleu) */}
-      <div className="group relative overflow-hidden rounded-[26px] border border-blue-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 hover:bg-blue-50/20">
+      <Link
+        href={`${prefix}/espace-etudiants/mes-formations`}
+        className="group relative overflow-hidden rounded-[26px] border border-blue-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer"
+      >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-[var(--cj-blue)]" />
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Sessions</span>
@@ -36,10 +44,13 @@ export function StudentStatsCards({
         </div>
         <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{totalFormationsCount}</p>
         <p className="text-[10px] text-slate-500 mt-1 font-medium">Inscriptions enregistrées</p>
-      </div>
+      </Link>
 
       {/* Card 2: En cours (Orange) */}
-      <div className="group relative overflow-hidden rounded-[26px] border border-orange-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-orange-200 hover:bg-orange-50/20">
+      <Link
+        href={`${prefix}/espace-etudiants/mes-formations`}
+        className="group relative overflow-hidden rounded-[26px] border border-orange-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-orange-200 hover:bg-orange-50/30 cursor-pointer"
+      >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">En cours</span>
@@ -49,10 +60,13 @@ export function StudentStatsCards({
         </div>
         <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{activeSessionsCount}</p>
         <p className="text-[10px] text-slate-500 mt-1 font-medium">Sessions actives</p>
-      </div>
+      </Link>
 
-      {/* Card 3: À remettre (Rouge) */}
-      <div className="group relative overflow-hidden rounded-[26px] border border-red-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-200 hover:bg-red-50/20">
+      {/* Card 3: À remettre / Devoirs en attente (Rouge -> /espace-etudiants/travaux?filter=pending) */}
+      <Link
+        href={`${prefix}/espace-etudiants/travaux?filter=pending`}
+        className="group relative overflow-hidden rounded-[26px] border border-red-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-200 hover:bg-red-50/30 cursor-pointer"
+      >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 to-[var(--cj-red)]" />
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">À remettre</span>
@@ -61,11 +75,14 @@ export function StudentStatsCards({
           </div>
         </div>
         <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{pendingAssignmentsCount}</p>
-        <p className="text-[10px] text-slate-500 mt-1 font-medium">Travaux restants</p>
-      </div>
+        <p className="text-[10px] text-slate-500 mt-1 font-medium">Devoirs en attente (cliquer)</p>
+      </Link>
 
-      {/* Card 4: Déposés (Vert) */}
-      <div className="group relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 hover:bg-emerald-50/20">
+      {/* Card 4: Déposés / Devoirs rendus (Vert -> /espace-etudiants/travaux?filter=submitted) */}
+      <Link
+        href={`${prefix}/espace-etudiants/travaux?filter=submitted`}
+        className="group relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 hover:bg-emerald-50/30 cursor-pointer"
+      >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-500" />
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Déposés</span>
@@ -74,8 +91,8 @@ export function StudentStatsCards({
           </div>
         </div>
         <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{submittedAssignmentsCount}</p>
-        <p className="text-[10px] text-slate-500 mt-1 font-medium">Travaux soumis</p>
-      </div>
+        <p className="text-[10px] text-slate-500 mt-1 font-medium">Devoirs rendus (cliquer)</p>
+      </Link>
 
       {/* Card 5: Actualités (Violet/Indigo) */}
       <div className="group relative overflow-hidden rounded-[26px] border border-indigo-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200 hover:bg-indigo-50/20">

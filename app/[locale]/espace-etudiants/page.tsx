@@ -491,6 +491,7 @@ function EspaceEtudiantsContent() {
           pendingAssignmentsCount={pendingAssignmentsCount}
           submittedAssignmentsCount={submittedAssignmentsCount}
           newsCount={news.length}
+          locale={locale}
         />
 
         {/* DYNAMIC CONTENT CONTAINER BASED ON TAB */}

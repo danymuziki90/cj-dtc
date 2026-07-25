@@ -6,6 +6,7 @@ import {
   Bell,
   BookOpen,
   Calendar,
+  FileText,
   HelpCircle,
   MessageSquare,
   Newspaper,
@@ -29,12 +30,13 @@ export function StudentNavTabs({
   locale,
 }: StudentNavTabsProps) {
   const tabs = [
-    { id: "overview", label: "Tableau de bord", icon: BarChart3, count: null },
-    { id: "formations", label: "Mes formations", icon: BookOpen, count: totalFormationsCount },
-    { id: "news", label: "Actualités", icon: Newspaper, count: newsCount },
-    { id: "calendrier", label: "Calendrier", icon: Calendar, count: null },
-    { id: "notifications", label: "Notifications", icon: Bell, count: totalNotifications },
-    { id: "support", label: "Support & Questions", icon: HelpCircle, count: null },
+    { id: "overview", label: "Tableau de bord", icon: BarChart3, count: null, href: null },
+    { id: "formations", label: "Mes formations", icon: BookOpen, count: totalFormationsCount, href: null },
+    { id: "travaux", label: "Mes Travaux", icon: FileText, count: null, href: `/${locale}/espace-etudiants/travaux` },
+    { id: "news", label: "Actualités", icon: Newspaper, count: newsCount, href: null },
+    { id: "calendrier", label: "Calendrier", icon: Calendar, count: null, href: null },
+    { id: "notifications", label: "Notifications", icon: Bell, count: totalNotifications, href: null },
+    { id: "support", label: "Support & Questions", icon: HelpCircle, count: null, href: null },
   ];
 
   return (
@@ -43,6 +45,28 @@ export function StudentNavTabs({
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
+
+          if (tab.href) {
+            return (
+              <Link
+                key={tab.id}
+                href={tab.href}
+                className={`group flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all duration-200 focus:outline-none ${
+                  isActive
+                    ? "bg-[var(--cj-blue)] text-white shadow-md shadow-blue-900/10 scale-[1.02]"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <Icon
+                  className={`h-4 w-4 transition-transform duration-200 ${
+                    isActive ? "text-white scale-110" : "text-slate-400 group-hover:scale-110"
+                  }`}
+                />
+                <span>{tab.label}</span>
+              </Link>
+            );
+          }
+
           return (
             <button
               key={tab.id}
