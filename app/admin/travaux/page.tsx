@@ -212,6 +212,12 @@ export default function AdminAssignmentsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
+  // Dedicated Submissions State (fetched from /api/admin/submissions)
+  const [allSubmissions, setAllSubmissions] = useState<any[]>([])
+  const [submissionsLoading, setSubmissionsLoading] = useState(false)
+  const [submissionsTotal, setSubmissionsTotal] = useState(0)
+  const [subTotalPagesFromApi, setSubTotalPagesFromApi] = useState(1)
+
   // Search & Filters for Submissions
   const [subSearch, setSubSearch] = useState('')
   const [subSessionFilter, setSubSessionFilter] = useState('all')
@@ -262,7 +268,7 @@ export default function AdminAssignmentsPage() {
     setTimeout(() => setToast(null), 3500)
   }
 
-  // Load Data from API
+  // Load Assignments & Sessions from API
   const fetchData = useCallback(async () => {
     setIsLoading(true)
     setError(null)
@@ -299,6 +305,50 @@ export default function AdminAssignmentsPage() {
     }
   }, [])
 
+  // Fetch submissions directly from dedicated API endpoint
+  const fetchSubmissions = useCallback(async () => {
+    setSubmissionsLoading(true)
+    try {
+      const params = new URLSearchParams()
+      // For 'overdue' filter, fetch all and filter client-side (deadline comparison)
+      if (subStatusFilter !== 'all' && subStatusFilter !== 'overdue') {
+        params.set('status', subStatusFilter)
+      }
+      if (subSessionFilter !== 'all') params.set('sessionId', subSessionFilter)
+      if (subAssignmentFilter !== 'all') params.set('assignmentId', subAssignmentFilter)
+      if (subSearch.trim()) params.set('search', subSearch.trim())
+      // Fetch all on current page (server-side pagination)
+      params.set('page', String(subCurrentPage))
+      params.set('limit', String(subPageSize))
+
+      const res = await fetch(`/api/admin/submissions?${params.toString()}`, { cache: 'no-store' })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Erreur chargement des remises')
+      }
+      const data = await res.json()
+      let subs = data.submissions || []
+
+      // Client-side overdue filter (requires deadline from nested assignment)
+      if (subStatusFilter === 'overdue') {
+        subs = subs.filter((s: any) => {
+          const deadline = s.assignment?.deadline
+          if (!deadline) return false
+          return new Date(s.submittedAt).getTime() > new Date(deadline).getTime()
+        })
+      }
+
+      setAllSubmissions(subs)
+      setSubmissionsTotal(data.pagination?.total ?? subs.length)
+      setSubTotalPagesFromApi(data.pagination?.totalPages ?? 1)
+    } catch (err: any) {
+      console.error('[fetchSubmissions]', err)
+      showToastMsg(err.message || 'Impossible de charger les remises', 'error')
+    } finally {
+      setSubmissionsLoading(false)
+    }
+  }, [subStatusFilter, subSessionFilter, subAssignmentFilter, subSearch, subCurrentPage, subPageSize])
+
   // Dynamic fetch when opening student submissions drawer
   const handleOpenSubmissions = async (assignment: Assignment) => {
     setViewSubmissionsAssignment(assignment)
@@ -320,6 +370,13 @@ export default function AdminAssignmentsPage() {
     fetchData()
   }, [fetchData])
 
+  // Fetch submissions when tab is active or filters change
+  useEffect(() => {
+    if (activeTab === 'submissions') {
+      fetchSubmissions()
+    }
+  }, [activeTab, fetchSubmissions])
+
   // Realtime Supabase Broadcast Channels Setup (Submissions + Assignments)
   useEffect(() => {
     if (!supabase) return
@@ -329,9 +386,11 @@ export default function AdminAssignmentsPage() {
       .on('broadcast', { event: 'submission_created' }, () => {
         showToastMsg('🔔 Une nouvelle remise a été déposée par un étudiant !')
         fetchData()
+        fetchSubmissions()
       })
       .on('broadcast', { event: 'submission_graded' }, () => {
         fetchData()
+        fetchSubmissions()
       })
       .subscribe()
 
@@ -361,10 +420,12 @@ export default function AdminAssignmentsPage() {
     const draftCount = assignments.filter((a) => !a.published || a.status === 'brouillon').length
     const archivedCount = assignments.filter((a) => a.status === 'archive').length
 
-    const pendingGradingCount = assignments.reduce((acc, a) => {
-      const pendingInAssign = (a.submissions || []).filter((s) => s.status === 'submitted').length
-      return acc + pendingInAssign
-    }, 0)
+    // Use allSubmissions from dedicated API if loaded, else fallback to nested
+    const pendingGradingCount = allSubmissions.length > 0
+      ? allSubmissions.filter((s: any) => s.status === 'submitted').length
+      : assignments.reduce((acc, a) => {
+          return acc + (a.submissions || []).filter((s) => s.status === 'submitted').length
+        }, 0)
 
     const assignmentsNeedingGrading = assignments.filter((a) =>
       (a.submissions || []).some((s) => s.status === 'submitted')
@@ -378,7 +439,7 @@ export default function AdminAssignmentsPage() {
       pendingGradingCount,
       assignmentsNeedingGrading,
     }
-  }, [assignments])
+  }, [assignments, allSubmissions])
 
   // Filtered Assignments List
   const filteredAssignments = useMemo(() => {
@@ -411,64 +472,11 @@ export default function AdminAssignmentsPage() {
     return filteredAssignments.slice(start, start + pageSize)
   }, [filteredAssignments, currentPage, pageSize])
 
-  // Aggregate all submissions from all assignments
-  const allSubmissions = useMemo(() => {
-    const list: any[] = []
-    assignments.forEach((a) => {
-      if (a.submissions) {
-        a.submissions.forEach((s) => {
-          list.push({
-            ...s,
-            assignment: a,
-          })
-        })
-      }
-    })
-    return list.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
-  }, [assignments])
-
-  // Filtered Submissions List
-  const filteredSubmissions = useMemo(() => {
-    return allSubmissions.filter((sub) => {
-      const q = subSearch.toLowerCase().trim()
-      const studentName = sub.student ? `${sub.student.firstName} ${sub.student.lastName}` : ''
-      const matchSearch =
-        !q ||
-        studentName.toLowerCase().includes(q) ||
-        (sub.student?.email || '').toLowerCase().includes(q) ||
-        (sub.student?.studentNumber || '').toLowerCase().includes(q) ||
-        sub.assignment.title.toLowerCase().includes(q)
-
-      const matchSession =
-        subSessionFilter === 'all' ||
-        String(sub.assignment.sessionId) === subSessionFilter
-
-      const matchAssignment =
-        subAssignmentFilter === 'all' ||
-        String(sub.assignmentId) === subAssignmentFilter
-
-      let matchStatus = true
-      if (subStatusFilter === 'submitted') {
-        matchStatus = sub.status === 'submitted'
-      } else if (subStatusFilter === 'graded') {
-        matchStatus = sub.status === 'graded'
-      } else if (subStatusFilter === 'returned') {
-        matchStatus = sub.status === 'returned'
-      } else if (subStatusFilter === 'overdue') {
-        const isSubmittedLate = new Date(sub.submittedAt).getTime() > new Date(sub.assignment.deadline).getTime()
-        matchStatus = isSubmittedLate
-      }
-
-      return matchSearch && matchSession && matchAssignment && matchStatus
-    })
-  }, [allSubmissions, subSearch, subSessionFilter, subAssignmentFilter, subStatusFilter])
-
-  // Pagination for submissions
-  const subTotalPages = Math.max(1, Math.ceil(filteredSubmissions.length / subPageSize))
-  const paginatedSubmissions = useMemo(() => {
-    const start = (subCurrentPage - 1) * subPageSize
-    return filteredSubmissions.slice(start, start + subPageSize)
-  }, [filteredSubmissions, subCurrentPage, subPageSize])
+  // Submissions come directly from API (allSubmissions state), already filtered server-side
+  // Client-side: only overdue needs post-filter (deadline comparison done in fetchSubmissions)
+  const filteredSubmissions = allSubmissions
+  const paginatedSubmissions = allSubmissions
+  const subTotalPages = subTotalPagesFromApi
 
   useEffect(() => {
     setCurrentPage(1)
@@ -773,6 +781,11 @@ export default function AdminAssignmentsPage() {
             }`}
           >
             Remises des étudiants
+            {submissionsTotal > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                {submissionsTotal}
+              </span>
+            )}
           </button>
         </div>
 
@@ -1287,7 +1300,7 @@ export default function AdminAssignmentsPage() {
             </AdminPanel>
 
             {/* ── Liste des Remises Globale ─────────────────────────────────── */}
-            {isLoading ? (
+            {submissionsLoading ? (
               <AdminPanel>
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <Loader2 className="h-10 w-10 animate-spin text-[var(--admin-primary)]" />
@@ -1532,7 +1545,7 @@ export default function AdminAssignmentsPage() {
                   pagination={{
                     page: subCurrentPage,
                     pageSize: subPageSize,
-                    totalItems: filteredSubmissions.length,
+                    totalItems: submissionsTotal,
                     totalPages: subTotalPages,
                     hasNextPage: subCurrentPage < subTotalPages,
                     hasPreviousPage: subCurrentPage > 1,
