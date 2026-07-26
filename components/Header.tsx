@@ -550,12 +550,14 @@ export default function Header() {
       </div>
 
       {/* 2. MAIN HEADER (HERO GLASSMORPHISM OVERLAY WITH ARSP 3-ISLAND LAYOUT) */}
-      {/* Desktop: transparent on Hero, opaque on scroll. Mobile: always opaque dark. */}
+      {/* Desktop: transparent glassmorphism on Hero, fully opaque on scroll. Mobile: always opaque dark. */}
       <div
         className={`w-full transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'border-b border-slate-800/90 lg:bg-slate-950/95 lg:backdrop-blur-xl lg:shadow-2xl py-2 bg-slate-950/90 backdrop-blur-md shadow-2xl'
-            : 'border-b lg:border-transparent lg:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:py-4 border-white/10 bg-slate-900/60 backdrop-blur-md py-3.5 shadow-md'
+            ? // Scrolled: fully opaque on desktop + mobile
+              'border-b border-slate-800/90 bg-slate-950/95 backdrop-blur-xl shadow-2xl shadow-black/20 py-2'
+            : // Not scrolled: fully transparent on desktop (overlays Hero), dark on mobile
+              'border-b border-transparent lg:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:py-5 bg-slate-900/80 backdrop-blur-md py-3.5 shadow-md'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -566,13 +568,17 @@ export default function Header() {
               alt="CJ DEVELOPMENT TRAINING CENTER"
               width={80}
               height={80}
-              className="h-10 w-auto sm:h-12 transition-transform duration-200 hover:scale-[1.02] filter brightness-110"
+              className={`h-10 w-auto sm:h-12 transition-all duration-300 hover:scale-[1.02] filter ${scrolled ? 'brightness-110' : 'brightness-125 drop-shadow-lg'}`}
             />
           </Link>
 
           {/* ÎLOT 2 (CENTRE) : CAPSULE ARSP GLASSMORPHISM ENCADRÉE DE NAVIGATION DESKTOP */}
           <nav
-            className="hidden lg:flex items-center gap-1 rounded-full border border-white/20 bg-slate-900/60 px-6 py-2 shadow-lg backdrop-blur-lg transition-all duration-300 hover:border-white/40 hover:bg-slate-900/75 hover:shadow-xl"
+            className={`hidden lg:flex items-center gap-1 rounded-full px-6 py-2 transition-all duration-500 ${
+              scrolled
+                ? 'border border-white/20 bg-slate-900/60 shadow-lg backdrop-blur-lg hover:border-white/40 hover:bg-slate-900/75 hover:shadow-xl'
+                : 'border border-white/10 bg-white/5 shadow-none backdrop-blur-sm hover:border-white/25 hover:bg-white/10'
+            }`}
             aria-label="Navigation principale Desktop"
           >
             <NavLink href={`/${locale}`} label={labels.home} />
