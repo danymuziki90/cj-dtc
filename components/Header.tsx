@@ -471,9 +471,19 @@ export default function Header() {
   let globalIndexCounter = 0
 
   return (
-    <header className="header sticky top-0 z-50">
+    <header className="header
+      lg:fixed lg:top-0 lg:left-0 lg:right-0 lg:z-50
+      sticky top-0 z-50
+    ">
       {/* 1. DESKTOP TOP-BAR (VISIBLE DESKTOP ONLY lg:block) */}
-      <div className="hidden lg:block border-b border-slate-800/80 bg-slate-950 text-slate-300 text-xs font-medium py-2 shadow-inner">
+      {/* On desktop this top bar is hidden when transparent (not scrolled) and revealed when scrolled */}
+      <div
+        className={`hidden lg:block border-b text-slate-300 text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
+          scrolled
+            ? 'border-slate-800/80 bg-slate-950/95 shadow-inner opacity-100 translate-y-0'
+            : 'border-transparent bg-transparent opacity-0 -translate-y-full pointer-events-none'
+        }`}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
           {/* Left: Email Info */}
           <div className="flex items-center gap-6">
@@ -540,11 +550,12 @@ export default function Header() {
       </div>
 
       {/* 2. MAIN HEADER (HERO GLASSMORPHISM OVERLAY WITH ARSP 3-ISLAND LAYOUT) */}
+      {/* Desktop: transparent on Hero, opaque on scroll. Mobile: always opaque dark. */}
       <div
-        className={`w-full transition-all duration-300 ${
+        className={`w-full transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'border-b border-slate-800/90 bg-slate-950/90 backdrop-blur-md shadow-2xl py-2'
-            : 'border-b border-white/10 bg-slate-900/60 backdrop-blur-md py-3.5 shadow-md'
+            ? 'border-b border-slate-800/90 lg:bg-slate-950/95 lg:backdrop-blur-xl lg:shadow-2xl py-2 bg-slate-950/90 backdrop-blur-md shadow-2xl'
+            : 'border-b lg:border-transparent lg:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:py-4 border-white/10 bg-slate-900/60 backdrop-blur-md py-3.5 shadow-md'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
