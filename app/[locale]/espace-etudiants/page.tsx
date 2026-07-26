@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import {
   Award,
   CalendarDays,
@@ -66,10 +67,10 @@ function EspaceEtudiantsContent() {
   const [uploadErrorMessage, setUploadErrorMessage] = useState("");
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState("");
 
-  async function loadDashboard() {
-    setLoading(true);
+  async function loadDashboard(showSpinner = true) {
+    if (showSpinner) setLoading(true);
     try {
-      const response = await fetch("/api/student/system/dashboard", {
+      const response = await fetch(`/api/student/system/dashboard?t=${Date.now()}`, {
         cache: "no-store",
       });
       const payload = await response.json().catch(() => ({}));
@@ -79,13 +80,13 @@ function EspaceEtudiantsContent() {
           payload.error ||
             "Vous devez vous connecter pour accéder à l'espace étudiant."
         );
-        setLoading(false);
+        if (showSpinner) setLoading(false);
         return;
       }
 
       if (!response.ok) {
         setAuthError(payload.error || "Impossible de charger le dashboard.");
-        setLoading(false);
+        if (showSpinner) setLoading(false);
         return;
       }
 
@@ -94,12 +95,40 @@ function EspaceEtudiantsContent() {
       console.error("Dashboard loading error:", error);
       setAuthError("Une erreur est survenue lors de la récupération des données.");
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   }
 
   useEffect(() => {
     loadDashboard();
+
+    if (!supabase) return;
+
+    const assignmentsChannel = supabase.channel("assignments_channel")
+      .on("broadcast", { event: "assignment_created" }, () => {
+        loadDashboard(false);
+      })
+      .on("broadcast", { event: "assignment_updated" }, () => {
+        loadDashboard(false);
+      })
+      .on("broadcast", { event: "assignment_deleted" }, () => {
+        loadDashboard(false);
+      });
+
+    const submissionsChannel = supabase.channel("submissions_channel")
+      .on("broadcast", { event: "submission_created" }, () => {
+        loadDashboard(false);
+      })
+      .on("broadcast", { event: "submission_graded" }, () => {
+        loadDashboard(false);
+      });
+
+    assignmentsChannel.subscribe();
+    submissionsChannel.subscribe();
+    return () => {
+      supabase?.removeChannel(assignmentsChannel);
+      supabase?.removeChannel(submissionsChannel);
+    };
   }, []);
 
   // Global variables extracted from data payload

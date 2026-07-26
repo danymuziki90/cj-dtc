@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import {
   ArrowRight,
   CheckCircle2,
@@ -104,6 +105,35 @@ function TravauxContent() {
 
   useEffect(() => {
     fetchAssignments();
+
+    if (!supabase) return;
+
+    const assignmentsChannel = supabase.channel("assignments_channel")
+      .on("broadcast", { event: "assignment_created" }, () => {
+        fetchAssignments(false);
+      })
+      .on("broadcast", { event: "assignment_updated" }, () => {
+        fetchAssignments(false);
+      })
+      .on("broadcast", { event: "assignment_deleted" }, () => {
+        fetchAssignments(false);
+      });
+
+    const submissionsChannel = supabase.channel("submissions_channel")
+      .on("broadcast", { event: "submission_created" }, () => {
+        fetchAssignments(false);
+      })
+      .on("broadcast", { event: "submission_graded" }, () => {
+        fetchAssignments(false);
+      });
+
+    assignmentsChannel.subscribe();
+    submissionsChannel.subscribe();
+
+    return () => {
+      supabase?.removeChannel(assignmentsChannel);
+      supabase?.removeChannel(submissionsChannel);
+    };
   }, []);
 
   useEffect(() => {
@@ -113,16 +143,16 @@ function TravauxContent() {
     }
   }, [searchParams]);
 
-  const fetchAssignments = async () => {
-    setLoading(true);
+  const fetchAssignments = async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     try {
-      const response = await fetch("/api/student/assignments", { cache: "no-store" });
+      const response = await fetch(`/api/student/assignments?t=${Date.now()}`, { cache: "no-store" });
       if (response.ok) {
         const data = await response.json();
         const list = Array.isArray(data) ? data : data.assignments || [];
         setAssignments(list);
       } else {
-        const dashRes = await fetch("/api/student/system/dashboard", { cache: "no-store" });
+        const dashRes = await fetch(`/api/student/system/dashboard?t=${Date.now()}`, { cache: "no-store" });
         if (dashRes.ok) {
           const dashData = await dashRes.json();
           setAssignments(dashData.dashboard?.assignments || []);
@@ -131,7 +161,7 @@ function TravauxContent() {
     } catch (error) {
       console.error("Erreur lors du chargement des travaux:", error);
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   };
 
