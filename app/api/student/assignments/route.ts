@@ -7,6 +7,8 @@ import { uploadToR2 } from '@/lib/r2'
 import { supabase } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 
+import { fetchStudentAssignmentsData } from '@/lib/student/assignments'
+
 export async function GET(request: NextRequest) {
   const auth = await requireStudent(request)
   if (auth.error) return auth.error
@@ -14,106 +16,7 @@ export async function GET(request: NextRequest) {
   const student = auth.student
 
   try {
-    // 1. Get all active enrollments for this student (not rejected or cancelled)
-    const activeEnrollments = await prisma.enrollment.findMany({
-      where: {
-        OR: [
-          { studentId: student.id },
-          { email: { equals: student.email, mode: 'insensitive' } },
-        ],
-        status: {
-          notIn: ['rejected', 'cancelled', 'REJECTED', 'CANCELLED', 'annulee', 'rejete'],
-        },
-      },
-      select: { sessionId: true, formationId: true },
-    })
-
-    const enrolledSessionIds = new Set<number>()
-    const enrolledFormationIds = new Set<number>()
-    for (const e of activeEnrollments) {
-      if (e.sessionId) enrolledSessionIds.add(e.sessionId)
-      if (e.formationId) enrolledFormationIds.add(e.formationId)
-    }
-
-    const sessionIdsList = Array.from(enrolledSessionIds)
-    const formationIdsList = Array.from(enrolledFormationIds)
-
-    if (sessionIdsList.length === 0 && formationIdsList.length === 0) {
-      return NextResponse.json([])
-    }
-
-    // 2. Fetch published assignments for those sessions or formation-level assignments
-    const assignments = await prisma.assignment.findMany({
-      where: {
-        published: true,
-        status: { notIn: ['brouillon', 'archive', 'draft'] },
-        OR: [
-          ...(sessionIdsList.length ? [{ sessionId: { in: sessionIdsList } }] : []),
-          ...(formationIdsList.length ? [{ formationId: { in: formationIdsList }, sessionId: null }] : []),
-        ],
-      },
-      orderBy: { deadline: 'asc' },
-      include: {
-        formation: { select: { title: true, slug: true } },
-        session: { select: { id: true, startDate: true, endDate: true, location: true, format: true } },
-        files: true,
-        submissions: {
-          where: { studentId: student.id },
-          orderBy: { submittedAt: 'desc' },
-          include: { files: true },
-        },
-      },
-    })
-
-    const formatted = assignments.map((a) => {
-      const allowedTypesArray = a.allowedFileTypes
-        ? a.allowedFileTypes.split(',').map((t) => t.trim())
-        : ['pdf', 'doc', 'docx', 'zip', 'rar', 'png', 'jpg', 'jpeg']
-
-      return {
-        id: a.id,
-        title: a.title,
-        description: a.description,
-        objectives: a.objectives,
-        instructions: a.instructions,
-        type: a.type,
-        difficulty: a.difficulty,
-        publishedAt: a.publishedAt ? a.publishedAt.toISOString() : a.createdAt.toISOString(),
-        createdAt: a.createdAt.toISOString(),
-        deadline: a.deadline.toISOString(),
-        maxFileSize: a.maxFileSize,
-        maxFiles: a.maxFiles || 5,
-        allowResubmission: a.allowResubmission !== false,
-        allowedFileTypes: allowedTypesArray,
-        formation: a.formation,
-        session: a.session,
-        files: a.files.map((f) => ({
-          id: f.id,
-          name: f.name,
-          originalName: f.originalName,
-          size: f.size,
-          mimeType: f.mimeType,
-          url: f.url,
-        })),
-        submissions: a.submissions.map((s) => ({
-          id: s.id,
-          status: s.status,
-          grade: s.grade,
-          feedback: s.feedback,
-          submittedAt: s.submittedAt.toISOString(),
-          gradedAt: s.gradedAt ? s.gradedAt.toISOString() : null,
-          files: s.files.map((sf) => ({
-            id: sf.id,
-            name: sf.name,
-            originalName: sf.originalName,
-            size: sf.size,
-            mimeType: sf.mimeType,
-            url: sf.url,
-          })),
-        })),
-      }
-    })
-
+    const formatted = await fetchStudentAssignmentsData(student.id, student.email)
     return NextResponse.json(formatted)
   } catch (error: any) {
     console.error('[Student Assignments GET Error]:', error)
