@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, UserIcon } from "lucide-react";
+import { FileText, LogOut, UserIcon } from "lucide-react";
 
 interface StudentHeaderProps {
   student: any;
   studentInitial: string;
   basePath: string;
+  pendingAssignmentsCount?: number;
   onLogout: () => void;
 }
 
@@ -14,6 +15,7 @@ export function StudentHeader({
   student,
   studentInitial,
   basePath,
+  pendingAssignmentsCount = 0,
   onLogout,
 }: StudentHeaderProps) {
   return (
@@ -42,6 +44,18 @@ export function StudentHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`${basePath}/travaux`}
+            className="relative inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/90 hover:bg-white/10 transition"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            Mes Travaux
+            {pendingAssignmentsCount > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--cj-red)] px-1 text-[10px] font-bold text-white shadow">
+                {pendingAssignmentsCount}
+              </span>
+            )}
+          </Link>
           <Link
             href={`${basePath}/mon-compte`}
             className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/90 hover:bg-white/10 transition"

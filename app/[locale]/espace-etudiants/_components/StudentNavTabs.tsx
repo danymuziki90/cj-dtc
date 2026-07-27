@@ -16,6 +16,7 @@ interface StudentNavTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   totalFormationsCount: number;
+  pendingAssignmentsCount: number;
   newsCount: number;
   totalNotifications: number;
   locale: string;
@@ -25,6 +26,7 @@ export function StudentNavTabs({
   activeTab,
   setActiveTab,
   totalFormationsCount,
+  pendingAssignmentsCount,
   newsCount,
   totalNotifications,
   locale,
@@ -32,6 +34,7 @@ export function StudentNavTabs({
   const tabs = [
     { id: "overview", label: "Tableau de bord", icon: BarChart3, count: null, href: null },
     { id: "formations", label: "Mes formations", icon: BookOpen, count: totalFormationsCount, href: null },
+    { id: "travaux", label: "Mes Travaux", icon: FileText, count: pendingAssignmentsCount, href: `/${locale}/espace-etudiants/travaux` },
     { id: "news", label: "Actualités", icon: Newspaper, count: newsCount, href: null },
     { id: "calendrier", label: "Calendrier", icon: Calendar, count: null, href: null },
     { id: "notifications", label: "Notifications", icon: Bell, count: totalNotifications, href: null },

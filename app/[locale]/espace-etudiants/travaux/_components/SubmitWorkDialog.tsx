@@ -61,15 +61,15 @@ export function SubmitWorkDialog({
 
       const uploadData = await uploadRes.json();
 
-      if (!uploadRes.ok || !uploadData.url) {
+      if (!uploadRes.ok || !uploadData.success || !uploadData.file?.url) {
         throw new Error(uploadData.error || "Erreur lors de l'upload du fichier.");
       }
 
       const uploadedFile: UploadedFileData = {
-        url: uploadData.url,
-        name: selectedFile.name,
-        size: selectedFile.size,
-        type: selectedFile.type || "application/octet-stream",
+        url: uploadData.file.url,
+        name: uploadData.file.name || selectedFile.name,
+        size: uploadData.file.size ?? selectedFile.size,
+        type: uploadData.file.mimeType || selectedFile.type || "application/octet-stream",
       };
 
       await onSubmit([uploadedFile]);

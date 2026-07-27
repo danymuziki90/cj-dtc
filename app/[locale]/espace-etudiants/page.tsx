@@ -468,6 +468,7 @@ function EspaceEtudiantsContent() {
         student={student}
         studentInitial={studentInitial}
         basePath={basePath}
+        pendingAssignmentsCount={pendingAssignmentsCount}
         onLogout={logout}
       />
 
@@ -488,6 +489,7 @@ function EspaceEtudiantsContent() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           totalFormationsCount={totalFormationsCount}
+          pendingAssignmentsCount={pendingAssignmentsCount}
           newsCount={news.length}
           totalNotifications={totalNotifications}
           locale={locale}

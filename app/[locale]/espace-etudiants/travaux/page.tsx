@@ -20,7 +20,8 @@ import { StudentPageShell, StudentSectionCard, studentMutedButtonClassName, stud
 import { AssignmentCard } from "./_components/AssignmentCard";
 import { AssignmentEmptyState } from "./_components/AssignmentEmptyState";
 import { AssignmentSkeleton } from "./_components/AssignmentSkeleton";
-import { SubmitWorkDialog, UploadedFileData } from "./_components/SubmitWorkDialog";
+import { AssignmentSubmitModal, type UploadedFileData } from "../_components/AssignmentSubmitModal";
+import StudentPortalNav from "@/components/student-portal/StudentPortalNav";
 
 // Same interface shape from the API
 interface Assignment {
@@ -57,6 +58,7 @@ export default function TravauxPage() {
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [isSubmittingWork, setIsSubmittingWork] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
 
   const fetchAssignments = async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
@@ -98,9 +100,13 @@ export default function TravauxPage() {
   }, []);
 
   const handleAssignmentSubmit = async (uploadedFiles: UploadedFileData[]) => {
-    if (!selectedAssignment || uploadedFiles.length === 0) return;
+    if (!selectedAssignment || uploadedFiles.length === 0) {
+      setSubmitError("Veuillez téléverser au moins un fichier avant de valider.");
+      return;
+    }
     setIsSubmittingWork(true);
     setSubmitError("");
+    setSubmitSuccess("");
 
     try {
       const response = await fetch("/api/student/assignments", {
@@ -117,8 +123,13 @@ export default function TravauxPage() {
         throw new Error(resData.message || resData.error || "Échec de l'envoi.");
       }
 
+      setSubmitSuccess("Votre travail a été déposé avec succès !");
       await fetchAssignments(false);
-      setSelectedAssignment(null);
+
+      setTimeout(() => {
+        setSelectedAssignment(null);
+        setSubmitSuccess("");
+      }, 2000);
     } catch (err: any) {
       setSubmitError(err.message || "Erreur lors de l'enregistrement du dépôt.");
     } finally {
@@ -204,10 +215,14 @@ export default function TravauxPage() {
         </Link>
       }
     >
+      <div className="mb-6">
+        <StudentPortalNav />
+      </div>
+
       <StudentSectionCard
         eyebrow="Portail Devoirs"
         title="Liste de vos travaux"
-        description="Filtrez, triez et consultez vos devoirs actuels ou passés."
+        description="Filtrez, triez et consultez vos devoirs actuels ou passés. Mise à jour automatique dès qu'un travail est publié ou corrigé par l'administration."
         icon={FolderOpen}
       >
         <div className="space-y-4 border-b border-slate-200 pb-6 mb-8">
@@ -311,16 +326,17 @@ export default function TravauxPage() {
         )}
       </StudentSectionCard>
 
-      <SubmitWorkDialog
-        isOpen={!!selectedAssignment}
+      <AssignmentSubmitModal
+        selectedAssignment={selectedAssignment}
         onClose={() => {
           setSelectedAssignment(null);
           setSubmitError("");
+          setSubmitSuccess("");
         }}
         onSubmit={handleAssignmentSubmit}
-        assignmentTitle={selectedAssignment?.title || ""}
-        isSubmitting={isSubmittingWork}
-        errorMessage={submitError}
+        uploadErrorMessage={submitError}
+        uploadSuccessMessage={submitSuccess}
+        isSubmittingWork={isSubmittingWork}
       />
     </StudentPageShell>
   );
