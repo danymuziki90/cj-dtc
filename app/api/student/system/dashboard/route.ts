@@ -6,7 +6,6 @@ import { requireStudent } from '@/lib/auth-portal/guards'
 import { parseSessionMetadata } from '@/lib/sessions/metadata'
 import { getPublishedSessions } from '@/lib/sessions/published'
 import { getStudentQuestions, parseEnrollmentNotes } from '@/lib/student/enrollment-notes'
-import { fetchStudentAssignmentsData } from '@/lib/student/assignments'
 
 function getSessionHours(session: { startDate: Date; endDate: Date; prerequisites?: string | null }) {
   const parsed = parseSessionMetadata(session.prerequisites)
@@ -42,7 +41,7 @@ export async function GET(request: NextRequest) {
   const studentEmail = auth.student.email
 
   try {
-  const [enrollmentsRaw, submissions, portalCertificates, issuedCertificates, news, evaluations, userProfile, testimonials] =
+  const [enrollmentsRaw, portalCertificates, issuedCertificates, news, evaluations] =
     await Promise.all([
       prisma.enrollment.findMany({
         where: {
@@ -77,18 +76,6 @@ export async function GET(request: NextRequest) {
               imageUrl: true,
             },
           },
-        },
-      }),
-      prisma.submission.findMany({
-        where: { studentId: auth.student.id },
-        orderBy: { createdAt: 'desc' },
-        include: {
-          assignment: {
-            select: {
-              title: true,
-            },
-          },
-          files: true,
         },
       }),
       prisma.certificate.findMany({
