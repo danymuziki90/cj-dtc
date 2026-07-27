@@ -215,9 +215,11 @@ function TravauxContent() {
 
   const pendingCount = useMemo(() => {
     return assignments.filter((item) => {
+      const sub = item.submissions?.[0];
+      const isReturned = sub?.status === "returned";
       const hasSub = item.submissions && item.submissions.length > 0;
       const isFuture = new Date(item.deadline).getTime() >= Date.now();
-      return !hasSub && isFuture;
+      return (!hasSub && isFuture) || isReturned;
     }).length;
   }, [assignments]);
 
@@ -242,6 +244,8 @@ function TravauxContent() {
 
   const filteredAssignments = useMemo(() => {
     return assignments.filter((item) => {
+      const sub = item.submissions?.[0];
+      const isReturned = sub?.status === "returned";
       const hasSub = item.submissions && item.submissions.length > 0;
       const isEvaluated = item.submissions?.some(
         (sub) => sub.status === "graded" || sub.status === "returned" || sub.grade != null
@@ -249,7 +253,7 @@ function TravauxContent() {
 
       if (filter === "pending") {
         const isFuture = new Date(item.deadline).getTime() >= Date.now();
-        if (hasSub || !isFuture) return false;
+        if ((hasSub && !isReturned) || (!isReturned && !isFuture)) return false;
       }
       if (filter === "submitted" && (!hasSub || isEvaluated)) return false;
       if (filter === "evaluated" && !isEvaluated) return false;

@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         status: { notIn: ['brouillon', 'archive', 'draft'] },
         OR: [
           ...(sessionIdsList.length ? [{ sessionId: { in: sessionIdsList } }] : []),
-          ...(formationIdsList.length ? [{ formationId: { in: formationIdsList } }] : []),
+          ...(formationIdsList.length ? [{ formationId: { in: formationIdsList }, sessionId: null }] : []),
         ],
       },
       orderBy: { deadline: 'asc' },
