@@ -473,15 +473,15 @@ export default function Header() {
   return (
     <header className="header
       lg:fixed lg:top-0 lg:left-0 lg:right-0 lg:z-50
-      sticky top-0 z-50
+      sticky top-0 z-50 transition-all duration-300
     ">
       {/* 1. DESKTOP TOP-BAR (VISIBLE DESKTOP ONLY lg:block) */}
-      {/* On desktop this top bar is hidden when transparent (not scrolled) and revealed when scrolled */}
+      {/* On desktop, transparent over Hero when at top, opaque when scrolled */}
       <div
-        className={`hidden lg:block border-b text-slate-300 text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
+        className={`hidden lg:block border-b text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'border-slate-800/80 bg-slate-950/95 shadow-inner opacity-100 translate-y-0'
-            : 'border-transparent bg-transparent opacity-0 -translate-y-full pointer-events-none'
+            ? 'border-slate-800/80 bg-slate-950/95 text-slate-300 shadow-inner'
+            : 'border-white/10 bg-slate-950/40 backdrop-blur-md text-slate-200'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -497,7 +497,7 @@ export default function Header() {
           </div>
 
           {/* Center: Institutional Slogan */}
-          <div className="italic text-slate-400 text-xs font-serif tracking-wide hidden xl:block">
+          <div className="italic text-slate-300 text-xs font-serif tracking-wide hidden xl:block">
             « Bâtir des compétences. Transformer des destins. »
           </div>
 
@@ -513,7 +513,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook CJ DTC"
-                className="text-slate-400 transition-colors hover:text-blue-400"
+                className="text-slate-300 transition-colors hover:text-blue-400"
               >
                 <Facebook className="h-3.5 w-3.5" />
               </a>
@@ -522,7 +522,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn CJ DTC"
-                className="text-slate-400 transition-colors hover:text-blue-500"
+                className="text-slate-300 transition-colors hover:text-blue-500"
               >
                 <Linkedin className="h-3.5 w-3.5" />
               </a>
@@ -531,7 +531,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube CJ DTC"
-                className="text-slate-400 transition-colors hover:text-red-500"
+                className="text-slate-300 transition-colors hover:text-red-500"
               >
                 <Youtube className="h-3.5 w-3.5" />
               </a>
@@ -540,7 +540,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp CJ DTC"
-                className="text-slate-400 transition-colors hover:text-emerald-400"
+                className="text-slate-300 transition-colors hover:text-emerald-400"
               >
                 <MessageCircle className="h-3.5 w-3.5" />
               </a>
@@ -554,10 +554,10 @@ export default function Header() {
       <div
         className={`w-full transition-all duration-500 ease-in-out ${
           scrolled
-            ? // Scrolled: fully opaque on desktop + mobile
-              'border-b border-slate-800/90 bg-slate-950/95 backdrop-blur-xl shadow-2xl shadow-black/20 py-2'
-            : // Not scrolled: fully transparent on desktop (overlays Hero), dark on mobile
-              'border-b border-transparent lg:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:py-5 bg-slate-900/80 backdrop-blur-md py-3.5 shadow-md'
+            ? // Scrolled: fully opaque dark backdrop on desktop + mobile
+              'border-b border-slate-800/90 bg-slate-950/95 backdrop-blur-xl shadow-2xl shadow-black/40 py-2.5'
+            : // Not scrolled: transparent glassmorphism on desktop (superimposed over Hero), dark on mobile
+              'border-b border-white/10 lg:bg-gradient-to-b lg:from-slate-950/60 lg:via-slate-950/30 lg:to-transparent lg:backdrop-blur-md lg:shadow-none lg:py-3.5 bg-slate-900/90 backdrop-blur-md py-3.5 shadow-md'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -568,7 +568,7 @@ export default function Header() {
               alt="CJ DEVELOPMENT TRAINING CENTER"
               width={80}
               height={80}
-              className={`h-10 w-auto sm:h-12 transition-all duration-300 hover:scale-[1.02] filter ${scrolled ? 'brightness-110' : 'brightness-125 drop-shadow-lg'}`}
+              className={`h-10 w-auto sm:h-12 transition-all duration-300 hover:scale-[1.02] filter ${scrolled ? 'brightness-110' : 'brightness-125 drop-shadow-xl'}`}
             />
           </Link>
 
@@ -576,8 +576,8 @@ export default function Header() {
           <nav
             className={`hidden lg:flex items-center gap-1 rounded-full px-6 py-2 transition-all duration-500 ${
               scrolled
-                ? 'border border-white/20 bg-slate-900/60 shadow-lg backdrop-blur-lg hover:border-white/40 hover:bg-slate-900/75 hover:shadow-xl'
-                : 'border border-white/10 bg-white/5 shadow-none backdrop-blur-sm hover:border-white/25 hover:bg-white/10'
+                ? 'border border-white/20 bg-slate-900/80 shadow-md backdrop-blur-lg hover:border-white/40 hover:bg-slate-900/90 hover:shadow-xl'
+                : 'border border-white/20 bg-slate-950/50 shadow-lg backdrop-blur-md hover:border-white/35 hover:bg-slate-900/75'
             }`}
             aria-label="Navigation principale Desktop"
           >
@@ -677,7 +677,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href={`/${locale}/contact`}
-              className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border-2 border-[var(--cj-red)] hover:border-[var(--cj-red-700)] text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-md shadow-red-900/30 hover:shadow-xl hover:shadow-red-900/50 transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
+              className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border-2 border-[var(--cj-red)] hover:border-[var(--cj-red-700)] text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-md shadow-red-900/40 hover:shadow-xl hover:shadow-red-900/60 transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
             >
               <Mail className="h-3.5 w-3.5 text-white transition-colors" />
               <span>{labels.contact}</span>

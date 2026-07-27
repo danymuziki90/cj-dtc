@@ -21,8 +21,8 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
     <>
       {!isAdmin && <Header />}
       {/* Homepage: no top padding — Hero sits under the transparent fixed navbar.
-          Other pages: lg:pt-[72px] compensates for the fixed header height. */}
-      <main className={isHome ? '' : 'lg:pt-[72px]'}>{children}</main>
+          Other pages: lg:pt-[105px] compensates for the fixed header height. */}
+      <main className={isHome ? '' : 'lg:pt-[105px]'}>{children}</main>
       {!isAdmin && <Footer />}
     </>
   )
