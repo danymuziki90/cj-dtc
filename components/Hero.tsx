@@ -181,10 +181,10 @@ export default function Hero() {
             />
           </div>
         ))}
-        {/* Dark Gradient Overlay for maximum readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/60 z-20" />
-        {/* Top gradient for desktop navbar readability (fades from dark at top to transparent) */}
-        <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-20 hidden lg:block pointer-events-none" />
+        {/* Light & Crisp Gradient Overlay for maximum image visibility while preserving text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-black/15 z-20" />
+        {/* Subtle top vignette gradient for desktop navbar header transparency */}
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/45 via-black/15 to-transparent z-20 hidden lg:block pointer-events-none" />
       </div>
 
       {/* Nav Arrows */}

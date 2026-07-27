@@ -111,11 +111,11 @@ function NavLink({ href, label }: { href: string; label: string }) {
       href={href}
       aria-current={isActive ? 'page' : undefined}
       className={`
-        relative rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide transition-all duration-200 whitespace-nowrap
+        relative rounded-full px-3.5 py-1.5 text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap
         ${
           isActive
-            ? 'text-white font-bold bg-white/20 shadow-sm'
-            : 'text-slate-100 hover:text-blue-400 hover:bg-white/10'
+            ? 'text-white bg-gradient-to-r from-[var(--cj-blue)] to-blue-600 shadow-md shadow-blue-950/50 border border-blue-400/40'
+            : 'text-slate-100 hover:text-white hover:bg-white/10 active:scale-95'
         }
       `}
     >
@@ -192,16 +192,16 @@ function DesktopDropdown({
         aria-expanded={isOpen}
         aria-haspopup="true"
         className={`
-          flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide text-slate-100 transition-colors hover:text-blue-400 hover:bg-white/10 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-400/50
-          ${isOpen ? 'text-blue-400 bg-white/10' : ''}
-          group-hover/dropdown:text-blue-400 group-hover/dropdown:bg-white/10
+          flex items-center gap-1 rounded-full px-3.5 py-1.5 text-xs font-bold tracking-wide text-slate-100 transition-all duration-200 hover:text-white hover:bg-white/10 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-400/50
+          ${isOpen ? 'text-blue-300 bg-white/15 shadow-sm' : ''}
+          group-hover/dropdown:text-blue-300 group-hover/dropdown:bg-white/15
         `}
       >
         <span>{label}</span>
         <ChevronDown
           className={`h-3.5 w-3.5 text-slate-300 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-blue-400' : ''
-          } group-hover/dropdown:rotate-180 group-hover/dropdown:text-blue-400`}
+            isOpen ? 'rotate-180 text-blue-300' : ''
+          } group-hover/dropdown:rotate-180 group-hover/dropdown:text-blue-300`}
         />
       </button>
 
@@ -209,7 +209,7 @@ function DesktopDropdown({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={`
-          absolute left-1/2 -translate-x-1/2 top-full z-50 pt-2 w-64 transition-all duration-200 ease-out
+          absolute left-1/2 -translate-x-1/2 top-full z-50 pt-2 w-68 transition-all duration-200 ease-out
           before:absolute before:-top-5 before:-left-6 before:-right-6 before:h-8 before:content-['']
           group-hover/dropdown:opacity-100 group-hover/dropdown:translate-y-0 group-hover/dropdown:pointer-events-auto group-hover/dropdown:visible
           ${
@@ -219,7 +219,7 @@ function DesktopDropdown({
           }
         `}
       >
-        <div className="rounded-2xl border border-white/15 bg-slate-900/95 p-2.5 shadow-2xl backdrop-blur-xl space-y-1">
+        <div className="rounded-2xl border border-white/20 bg-slate-950/95 p-3 shadow-2xl shadow-black/80 backdrop-blur-2xl space-y-1.5">
           {items.map((item) => {
             const Icon = item.icon
             return (
@@ -227,9 +227,9 @@ function DesktopDropdown({
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="group/item flex items-start gap-3 rounded-xl p-2 transition-all duration-200 hover:bg-white/10 hover:translate-x-1 focus:bg-white/10 focus:outline-none"
+                className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-all duration-200 hover:bg-white/10 hover:translate-x-1 focus:bg-white/10 focus:outline-none"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-blue-400 transition-colors group-hover/item:bg-blue-600 group-hover/item:text-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800/90 text-blue-400 border border-white/10 transition-colors group-hover/item:bg-[var(--cj-blue)] group-hover/item:text-white group-hover/item:border-blue-400/50 shadow-sm">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>
@@ -237,7 +237,7 @@ function DesktopDropdown({
                     {item.label}
                   </div>
                   {item.description && (
-                    <div className="text-[11px] text-slate-400 leading-snug">{item.description}</div>
+                    <div className="text-[11px] text-slate-400 group-hover/item:text-slate-300 leading-snug">{item.description}</div>
                   )}
                 </div>
               </Link>
@@ -476,12 +476,12 @@ export default function Header() {
       sticky top-0 z-50 transition-all duration-300
     ">
       {/* 1. DESKTOP TOP-BAR (VISIBLE DESKTOP ONLY lg:block) */}
-      {/* On desktop, transparent over Hero when at top, opaque when scrolled */}
+      {/* On desktop, transparent glassmorphic over Hero when at top, opaque dark when scrolled */}
       <div
         className={`hidden lg:block border-b text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
           scrolled
             ? 'border-slate-800/80 bg-slate-950/95 text-slate-300 shadow-inner'
-            : 'border-white/10 bg-slate-950/40 backdrop-blur-md text-slate-200'
+            : 'border-white/10 bg-slate-950/30 text-slate-100 backdrop-blur-md'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -497,7 +497,7 @@ export default function Header() {
           </div>
 
           {/* Center: Institutional Slogan */}
-          <div className="italic text-slate-300 text-xs font-serif tracking-wide hidden xl:block">
+          <div className="italic text-slate-200 text-xs font-serif tracking-wide hidden xl:block drop-shadow-sm">
             « Bâtir des compétences. Transformer des destins. »
           </div>
 
@@ -505,7 +505,7 @@ export default function Header() {
           <div className="flex items-center gap-5">
             <LanguageSwitcher locale={locale} pathname={pathname} search={search} darkVariant={true} />
 
-            <div className="h-4 w-px bg-slate-800" />
+            <div className="h-4 w-px bg-white/20" />
 
             <div className="flex items-center gap-3">
               <a
@@ -513,7 +513,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook CJ DTC"
-                className="text-slate-300 transition-colors hover:text-blue-400"
+                className="text-slate-200 transition-colors hover:text-blue-400"
               >
                 <Facebook className="h-3.5 w-3.5" />
               </a>
@@ -522,7 +522,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn CJ DTC"
-                className="text-slate-300 transition-colors hover:text-blue-500"
+                className="text-slate-200 transition-colors hover:text-blue-500"
               >
                 <Linkedin className="h-3.5 w-3.5" />
               </a>
@@ -531,7 +531,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube CJ DTC"
-                className="text-slate-300 transition-colors hover:text-red-500"
+                className="text-slate-200 transition-colors hover:text-red-500"
               >
                 <Youtube className="h-3.5 w-3.5" />
               </a>
@@ -540,7 +540,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp CJ DTC"
-                className="text-slate-300 transition-colors hover:text-emerald-400"
+                className="text-slate-200 transition-colors hover:text-emerald-400"
               >
                 <MessageCircle className="h-3.5 w-3.5" />
               </a>
@@ -550,14 +550,14 @@ export default function Header() {
       </div>
 
       {/* 2. MAIN HEADER (HERO GLASSMORPHISM OVERLAY WITH ARSP 3-ISLAND LAYOUT) */}
-      {/* Desktop: transparent glassmorphism on Hero, fully opaque on scroll. Mobile: always opaque dark. */}
+      {/* Desktop: glassmorphism backdrop on Hero, fully opaque dark on scroll. Mobile: always opaque dark. */}
       <div
         className={`w-full transition-all duration-500 ease-in-out ${
           scrolled
             ? // Scrolled: fully opaque dark backdrop on desktop + mobile
-              'border-b border-slate-800/90 bg-slate-950/95 backdrop-blur-xl shadow-2xl shadow-black/40 py-2.5'
-            : // Not scrolled: transparent glassmorphism on desktop (superimposed over Hero), dark on mobile
-              'border-b border-white/10 lg:bg-gradient-to-b lg:from-slate-950/60 lg:via-slate-950/30 lg:to-transparent lg:backdrop-blur-md lg:shadow-none lg:py-3.5 bg-slate-900/90 backdrop-blur-md py-3.5 shadow-md'
+              'border-b border-slate-800/90 bg-slate-950/95 backdrop-blur-2xl shadow-2xl shadow-slate-950/60 py-2.5'
+            : // Not scrolled: modern glassmorphic background on desktop, dark on mobile
+              'border-b border-white/10 lg:bg-slate-950/20 lg:backdrop-blur-md lg:shadow-lg lg:shadow-black/10 lg:py-3.5 bg-slate-900/90 backdrop-blur-md py-3.5 shadow-md'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -576,8 +576,8 @@ export default function Header() {
           <nav
             className={`hidden lg:flex items-center gap-1 rounded-full px-6 py-2 transition-all duration-500 ${
               scrolled
-                ? 'border border-white/20 bg-slate-900/80 shadow-md backdrop-blur-lg hover:border-white/40 hover:bg-slate-900/90 hover:shadow-xl'
-                : 'border border-white/20 bg-slate-950/50 shadow-lg backdrop-blur-md hover:border-white/35 hover:bg-slate-900/75'
+                ? 'border border-white/20 bg-slate-900/80 shadow-md backdrop-blur-xl hover:border-white/40 hover:bg-slate-900/95 hover:shadow-xl'
+                : 'border border-white/20 bg-slate-900/40 shadow-xl backdrop-blur-xl hover:border-white/35 hover:bg-slate-900/60'
             }`}
             aria-label="Navigation principale Desktop"
           >
@@ -677,7 +677,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href={`/${locale}/contact`}
-              className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border-2 border-[var(--cj-red)] hover:border-[var(--cj-red-700)] text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-md shadow-red-900/40 hover:shadow-xl hover:shadow-red-900/60 transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
+              className="group bg-gradient-to-r from-[var(--cj-red)] to-red-600 hover:from-[var(--cj-red-700)] hover:to-red-700 border border-red-500/40 text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-md shadow-red-950/50 hover:shadow-xl hover:shadow-red-900/60 transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
             >
               <Mail className="h-3.5 w-3.5 text-white transition-colors" />
               <span>{labels.contact}</span>
