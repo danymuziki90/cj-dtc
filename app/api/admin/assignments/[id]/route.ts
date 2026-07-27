@@ -307,16 +307,18 @@ export async function DELETE(
 
     // Delete consigne files from R2
     for (const f of assignment.files) {
-      if (f.key) {
-        await deleteFromR2(f.key)
+      const fileKey = f.key || f.url
+      if (fileKey) {
+        await deleteFromR2(fileKey)
       }
     }
 
     // Delete student submission files from R2
     for (const sub of assignment.submissions) {
       for (const sf of sub.files) {
-        if (sf.key) {
-          await deleteFromR2(sf.key)
+        const fileKey = sf.key || sf.url
+        if (fileKey) {
+          await deleteFromR2(fileKey)
         }
       }
     }
