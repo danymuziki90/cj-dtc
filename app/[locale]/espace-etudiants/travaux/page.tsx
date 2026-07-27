@@ -4,11 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { motion } from "framer-motion";
 import {
   Search,
   FolderOpen,
-  FileText,
   Clock,
   CheckCircle2,
   FileCheck2,
@@ -209,6 +207,11 @@ export default function TravauxPage() {
   return (
     <StudentPageShell
       locale={locale}
+      eyebrow="Espace étudiant"
+      title="Mes Travaux"
+      description="Filtrez, triez et consultez vos devoirs actuels ou passés. Mise à jour automatique dès qu'un travail est publié ou corrigé par l'administration."
+      icon={FolderOpen}
+      metrics={metrics}
       actions={
         <Link href={`/${locale}/espace-etudiants`} className={studentMutedButtonClassName}>
           Retour au tableau de bord
@@ -222,7 +225,7 @@ export default function TravauxPage() {
       <StudentSectionCard
         eyebrow="Portail Devoirs"
         title="Liste de vos travaux"
-        description="Filtrez, triez et consultez vos devoirs actuels ou passés. Mise à jour automatique dès qu'un travail est publié ou corrigé par l'administration."
+        description="Consultez les consignes, téléchargez les supports et déposez vos rendus."
         icon={FolderOpen}
       >
         <div className="space-y-4 border-b border-slate-200 pb-6 mb-8">

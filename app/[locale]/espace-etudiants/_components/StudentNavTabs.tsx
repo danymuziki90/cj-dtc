@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Bell,
@@ -31,6 +32,8 @@ export function StudentNavTabs({
   totalNotifications,
   locale,
 }: StudentNavTabsProps) {
+  const pathname = usePathname();
+
   const tabs = [
     { id: "overview", label: "Tableau de bord", icon: BarChart3, count: null, href: null },
     { id: "formations", label: "Mes formations", icon: BookOpen, count: totalFormationsCount, href: null },
@@ -46,7 +49,9 @@ export function StudentNavTabs({
       <nav className="flex flex-wrap gap-1.5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+          const isActive = tab.href
+            ? pathname === tab.href || pathname.startsWith(`${tab.href}/`)
+            : activeTab === tab.id;
 
           if (tab.href) {
             return (
@@ -65,6 +70,17 @@ export function StudentNavTabs({
                   }`}
                 />
                 <span>{tab.label}</span>
+                {tab.count !== null && tab.count > 0 && (
+                  <span
+                    className={`ml-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+                      isActive
+                        ? "bg-white text-[var(--cj-blue)]"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
               </Link>
             );
           }
