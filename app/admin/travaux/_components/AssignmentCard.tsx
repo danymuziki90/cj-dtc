@@ -18,9 +18,9 @@ import { AdminBadge } from '@/components/admin-portal/ui'
 import type { Assignment } from './types'
 
 function statusBadge(a: Assignment) {
-  if (a.status === 'archive') return <AdminBadge variant="default">Archivé</AdminBadge>
-  if (!a.published || a.status === 'brouillon') return <AdminBadge variant="warning">Brouillon</AdminBadge>
-  return <AdminBadge variant="success">Publié</AdminBadge>
+  if (a.status === 'archive') return <AdminBadge tone="neutral">Archivé</AdminBadge>
+  if (!a.published || a.status === 'brouillon') return <AdminBadge tone="warning">Brouillon</AdminBadge>
+  return <AdminBadge tone="success">Publié</AdminBadge>
 }
 
 function typePill(type: string) {

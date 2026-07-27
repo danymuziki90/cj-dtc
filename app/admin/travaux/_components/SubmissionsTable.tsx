@@ -7,12 +7,12 @@ import PaginationControls from '@/components/admin-portal/PaginationControls'
 import type { SessionOption, Submission, SubmissionStatusFilter } from './types'
 
 function statusBadge(status: string, deadline?: string) {
-  if (status === 'graded') return <AdminBadge variant="success">Corrigé</AdminBadge>
-  if (status === 'returned') return <AdminBadge variant="warning">À reprendre</AdminBadge>
+  if (status === 'graded') return <AdminBadge tone="success">Corrigé</AdminBadge>
+  if (status === 'returned') return <AdminBadge tone="warning">À reprendre</AdminBadge>
   if (deadline && new Date(deadline) < new Date()) {
     return <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200"><AlertTriangle className="h-3 w-3" />En retard</span>
   }
-  return <AdminBadge variant="info">Rendu</AdminBadge>
+  return <AdminBadge tone="primary">Rendu</AdminBadge>
 }
 
 interface SubmissionsTableProps {
@@ -226,9 +226,14 @@ export function SubmissionsTable({
       {/* Pagination */}
       {totalPages > 1 && (
         <PaginationControls
-          currentPage={page}
-          totalPages={totalPages}
-          pageSize={pageSize}
+          pagination={{
+            page,
+            pageSize,
+            totalItems: total,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPreviousPage: page > 1,
+          }}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
         />
