@@ -198,11 +198,6 @@ export default function TravauxPage() {
   return (
     <StudentPageShell
       locale={locale}
-      eyebrow="Espace étudiant"
-      title="Mes Travaux Pratiques"
-      description="Gérez vos devoirs, déposez vos rendus et suivez vos évaluations en temps réel."
-      icon={FileText}
-      metrics={metrics}
       actions={
         <Link href={`/${locale}/espace-etudiants`} className={studentMutedButtonClassName}>
           Retour au tableau de bord

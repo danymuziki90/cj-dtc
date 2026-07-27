@@ -29,7 +29,7 @@ export function StudentStatsCards({
   const prefix = locale ? `/${locale}` : "";
 
   return (
-    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {/* Card 1: Sessions (Bleu) */}
       <Link
         href={`${prefix}/espace-etudiants/mes-formations`}
@@ -62,37 +62,6 @@ export function StudentStatsCards({
         <p className="text-[10px] text-slate-500 mt-1 font-medium">Sessions actives</p>
       </Link>
 
-      {/* Card 3: À remettre / Devoirs en attente (Rouge -> /espace-etudiants/travaux?filter=pending) */}
-      <Link
-        href={`${prefix}/espace-etudiants/travaux?filter=pending`}
-        className="group relative overflow-hidden rounded-[26px] border border-red-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-200 hover:bg-red-50/30 cursor-pointer"
-      >
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 to-[var(--cj-red)]" />
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">À remettre</span>
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition-transform duration-300 group-hover:scale-110 shadow-sm border border-red-100">
-            <Clock className="h-4 w-4" />
-          </div>
-        </div>
-        <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{pendingAssignmentsCount}</p>
-        <p className="text-[10px] text-slate-500 mt-1 font-medium">Devoirs en attente (cliquer)</p>
-      </Link>
-
-      {/* Card 4: Déposés / Devoirs rendus (Vert -> /espace-etudiants/travaux?filter=submitted) */}
-      <Link
-        href={`${prefix}/espace-etudiants/travaux?filter=submitted`}
-        className="group relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 hover:bg-emerald-50/30 cursor-pointer"
-      >
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-500" />
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Déposés</span>
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform duration-300 group-hover:scale-110 shadow-sm border border-emerald-100">
-            <CheckCircle2 className="h-4 w-4" />
-          </div>
-        </div>
-        <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{submittedAssignmentsCount}</p>
-        <p className="text-[10px] text-slate-500 mt-1 font-medium">Devoirs rendus (cliquer)</p>
-      </Link>
 
       {/* Card 5: Actualités (Violet/Indigo) */}
       <div className="group relative overflow-hidden rounded-[26px] border border-indigo-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200 hover:bg-indigo-50/20">

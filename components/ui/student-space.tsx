@@ -13,10 +13,10 @@ export type StudentMetric = {
 
 type StudentPageShellProps = {
   locale?: string
-  eyebrow: string
-  title: string
-  description: string
-  icon: LucideIcon
+  eyebrow?: string
+  title?: string
+  description?: string
+  icon?: LucideIcon
   metrics?: StudentMetric[]
   actions?: ReactNode
   children: ReactNode
@@ -175,37 +175,44 @@ export function StudentPageShell({
           {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
         </div>
 
-        <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,#02142f_0%,#002d72_42%,#0c4da2_100%)] p-5 text-white shadow-[0_38px_110px_-45px_rgba(0,0,0,0.75)] sm:p-6">
-          <div className="pointer-events-none absolute -left-10 top-20 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-10 top-0 h-52 w-52 rounded-full bg-[rgba(227,6,19,0.20)] blur-3xl" />
-          <div className="relative space-y-5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="max-w-3xl">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
-                  <Sparkle className="h-3.5 w-3.5" />
-                  {eyebrow}
-                </div>
-                <div className="mt-3 flex items-start gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white shadow-lg shadow-black/20 backdrop-blur">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-semibold tracking-tight leading-tight sm:text-3xl">{title}</h1>
-                    <p className="mt-2 max-w-3xl text-sm leading-6 text-white/80">{description}</p>
+        {/* Conditionally render the header section if any header props are provided */}
+        {(eyebrow || title || description || Icon || metrics.length > 0) && (
+          <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,#02142f_0%,#002d72_42%,#0c4da2_100%)] p-5 text-white shadow-[0_38px_110px_-45px_rgba(0,0,0,0.75)] sm:p-6">
+            <div className="pointer-events-none absolute -left-10 top-20 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
+            <div className="pointer-events-none absolute -right-10 top-0 h-52 w-52 rounded-full bg-[rgba(227,6,19,0.20)] blur-3xl" />
+            <div className="relative space-y-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="max-w-3xl">
+                  {eyebrow && (
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
+                      <Sparkle className="h-3.5 w-3.5" />
+                      {eyebrow}
+                    </div>
+                  )}
+                  <div className="mt-3 flex items-start gap-3">
+                    {Icon && (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white shadow-lg shadow-black/20 backdrop-blur">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div>
+                      {title && <h1 className="text-2xl font-semibold tracking-tight leading-tight sm:text-3xl">{title}</h1>}
+                      {description && <p className="mt-2 max-w-3xl text-sm leading-6 text-white/80">{description}</p>}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {metrics.length ? (
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                {metrics.map((metric) => (
-                  <StudentMetricCard key={metric.label} {...metric} />
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </section>
+              {metrics.length > 0 && (
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  {metrics.map((metric) => (
+                    <StudentMetricCard key={metric.label} {...metric} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         <div className="space-y-6">{children}</div>
       </main>

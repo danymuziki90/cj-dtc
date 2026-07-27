@@ -536,10 +536,6 @@ function EspaceEtudiantsContent() {
             />
           )}
 
-          {activeTab === "travaux" && (
-            <AssignmentsTab assignments={assignments} basePath={basePath} />
-          )}
-
           {activeTab === "news" && (
             <NewsTab
               news={news}
