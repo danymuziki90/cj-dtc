@@ -119,27 +119,29 @@ export async function GET(req: NextRequest) {
     ]
 
     const rows = exportRows.map((enrollment) => [
-      enrollment.id.toString(),
-      enrollment.firstName,
-      enrollment.lastName,
-      enrollment.email,
+      enrollment.id ? String(enrollment.id) : '',
+      enrollment.firstName || '',
+      enrollment.lastName || '',
+      enrollment.email || '',
       enrollment.phone || '',
       enrollment.address || '',
-      enrollment.formation.title,
-      new Date(enrollment.startDate).toLocaleDateString('fr-FR'),
-      enrollment.status,
-      enrollment.paymentStatus,
-      enrollment.account.label,
-      enrollment.account.username || '',
-      enrollment.totalAmount.toString(),
-      enrollment.paidAmount.toString(),
-      new Date(enrollment.createdAt).toLocaleDateString('fr-FR'),
+      enrollment.formation?.title || 'Formation',
+      enrollment.startDate ? new Date(enrollment.startDate).toLocaleDateString('fr-FR') : '',
+      enrollment.status || '',
+      enrollment.paymentStatus || '',
+      enrollment.account?.label || '',
+      enrollment.account?.username || '',
+      enrollment.totalAmount != null ? String(enrollment.totalAmount) : '0',
+      enrollment.paidAmount != null ? String(enrollment.paidAmount) : '0',
+      enrollment.createdAt ? new Date(enrollment.createdAt).toLocaleDateString('fr-FR') : '',
     ])
 
+    const BOM = '\uFEFF'
+
     if (format === 'csv') {
-      const csvContent = [
-        headers.join(','),
-        ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
+      const csvContent = BOM + [
+        headers.join(';'),
+        ...rows.map((row) => row.map((cell) => `"${String(cell || '').replace(/"/g, '""')}"`).join(';')),
       ].join('\n')
 
       return new NextResponse(csvContent, {
@@ -150,16 +152,16 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    const tsvContent = [headers.join('\t'), ...rows.map((row) => row.join('\t'))].join('\n')
+    const tsvContent = BOM + [headers.join('\t'), ...rows.map((row) => row.map((cell) => String(cell || '').replace(/[\t\r\n]/g, ' ')).join('\t'))].join('\n')
 
     return new NextResponse(tsvContent, {
       headers: {
-        'Content-Type': 'application/vnd.ms-excel',
+        'Content-Type': 'application/vnd.ms-excel; charset=utf-8',
         'Content-Disposition': `attachment; filename="inscriptions_${new Date().toISOString().split('T')[0]}.xls"`,
       },
     })
   } catch (error: any) {
-    console.error("Erreur lors de l'export:", error)
+    console.error("Erreur lors de l'export des inscriptions:", error)
     return NextResponse.json({ error: "Erreur lors de l'export" }, { status: 500 })
   }
 }

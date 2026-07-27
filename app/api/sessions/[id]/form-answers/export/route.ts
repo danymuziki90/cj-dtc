@@ -62,21 +62,22 @@ export async function GET(
     const rows: string[][] = []
     for (const [, { enrollment, answers: ansMap }] of byEnrollment) {
       rows.push([
-        String(enrollment.id),
-        enrollment.firstName,
-        enrollment.lastName,
-        enrollment.email,
-        enrollment.phone || '',
-        new Date(enrollment.createdAt).toLocaleDateString('fr-FR'),
+        enrollment?.id ? String(enrollment.id) : '',
+        enrollment?.firstName || '',
+        enrollment?.lastName || '',
+        enrollment?.email || '',
+        enrollment?.phone || '',
+        enrollment?.createdAt ? new Date(enrollment.createdAt).toLocaleDateString('fr-FR') : '',
         ...questions.map((q) => ansMap.get(q.id) || ''),
       ])
     }
 
+    const BOM = '\uFEFF'
     const csvLines = [
-      headers.map(escape).join(','),
-      ...rows.map((row) => row.map(escape).join(',')),
+      headers.map(escape).join(';'),
+      ...rows.map((row) => row.map(escape).join(';')),
     ]
-    const csv = csvLines.join('\r\n')
+    const csv = BOM + csvLines.join('\r\n')
 
     return new Response(csv, {
       headers: {

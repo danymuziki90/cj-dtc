@@ -151,53 +151,125 @@ export async function uploadToR2(
 }
 
 /**
+ * Cleans and normalizes R2 keys, stripping hostnames, leading slashes, and route prefixes.
+ */
+export function sanitizeR2Key(rawKey: string): string {
+  if (!rawKey) return ''
+  let cleanKey = rawKey.trim()
+  if (cleanKey.startsWith('http://') || cleanKey.startsWith('https://')) {
+    try {
+      const urlObj = new URL(cleanKey)
+      cleanKey = decodeURIComponent(urlObj.pathname)
+    } catch (e) {}
+  }
+  cleanKey = cleanKey.replace(/^\/api\/r2\/file\//, '')
+  cleanKey = cleanKey.replace(/^\/api\/certificates\/download\/file\//, 'certificats/')
+  cleanKey = cleanKey.replace(/^\/uploads\//, '')
+  cleanKey = cleanKey.replace(/^\//, '')
+  return cleanKey
+}
+
+/**
+ * Resolves exact MIME types for all supported file formats.
+ */
+export function getMimeTypeFromKey(key: string): string {
+  const ext = key.split('.').pop()?.toLowerCase() || ''
+  const mimeMap: Record<string, string> = {
+    // Spreadsheets & Documents
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    xls: 'application/vnd.ms-excel',
+    csv: 'text/csv; charset=utf-8',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    doc: 'application/msword',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    ppt: 'application/vnd.ms-powerpoint',
+    pdf: 'application/pdf',
+    txt: 'text/plain; charset=utf-8',
+    json: 'application/json',
+    xml: 'application/xml',
+    html: 'text/html',
+    css: 'text/css',
+    js: 'text/javascript',
+
+    // Archives
+    zip: 'application/zip',
+    rar: 'application/vnd.rar',
+    '7z': 'application/x-7z-compressed',
+    gz: 'application/gzip',
+    tar: 'application/x-tar',
+
+    // Images
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+    gif: 'image/gif',
+    svg: 'image/svg+xml',
+    ico: 'image/x-icon',
+
+    // Audio / Video
+    mp3: 'audio/mpeg',
+    mp4: 'video/mp4',
+    wav: 'audio/wav',
+    webm: 'video/webm',
+  }
+  return mimeMap[ext] || 'application/octet-stream'
+}
+
+/**
  * Downloads a file from Cloudflare R2 or local filesystem fallback.
- * @param key The R2 key (e.g., 'certificats/filename.pdf')
+ * @param key The R2 key (e.g., 'certificats/filename.pdf' or '/api/r2/file/...')
  * @returns The file buffer
  */
 export async function downloadFromR2(key: string): Promise<Buffer> {
-  console.log(`[R2] Début downloadFromR2 - key: ${key}`)
+  const cleanKey = sanitizeR2Key(key)
+  console.log(`[R2] Début downloadFromR2 - rawKey: ${key}, cleanKey: ${cleanKey}`)
+
   if (isR2Configured && r2Client) {
     try {
-      console.log(`[R2] Récupération depuis le bucket: ${bucketName}...`)
+      console.log(`[R2] Récupération depuis le bucket: ${bucketName} pour la clé: ${cleanKey}...`)
       const response = await r2Client.send(
         new GetObjectCommand({
           Bucket: bucketName,
-          Key: key,
+          Key: cleanKey,
         })
       )
       if (!response.Body) {
-        throw new Error(`Aucun contenu renvoyé pour la clé ${key} sur R2`)
+        throw new Error(`Aucun contenu renvoyé pour la clé ${cleanKey} sur R2`)
       }
       const bytes = await response.Body.transformToByteArray()
       return Buffer.from(bytes)
     } catch (error: any) {
-      console.error(`[R2] Échec du téléchargement pour la clé: ${key}. Erreur:`, error)
-      throw new Error(`Échec du téléchargement Cloudflare R2 : ${error.message || error}`)
+      console.warn(`[R2] Échec du téléchargement S3 pour la clé: ${cleanKey}. Tentative fallback local. Erreur:`, error?.message || error)
     }
-  } else {
-    // Local fallback
-    console.log(`[R2] Mode local fallback actif. Récupération sur le disque local...`)
-    try {
-      const parts = key.split('/')
-      const folder = parts[0]
-      const fileName = parts.slice(1).join('/')
-      
-      const isPrivate = folder === 'certificats'
-      const baseDir = isPrivate
-        ? join(process.cwd(), 'uploads', folder)
-        : join(process.cwd(), 'public', 'uploads', folder)
-      const filePath = join(baseDir, fileName)
+  }
 
-      if (!existsSync(filePath)) {
-        throw new Error(`Fichier introuvable localement : ${filePath}`)
+  // Local fallback
+  console.log(`[R2] Recherche sur le disque local pour la clé: ${cleanKey}...`)
+  try {
+    const parts = cleanKey.split('/')
+    const folder = parts[0]
+    const fileName = parts.slice(1).join('/')
+
+    const isPrivate = folder === 'certificats'
+    const baseDir = isPrivate
+      ? join(process.cwd(), 'uploads', folder)
+      : join(process.cwd(), 'public', 'uploads', folder)
+    const filePath = join(baseDir, fileName)
+
+    if (!existsSync(filePath)) {
+      const tmpPath = join(tmpdir(), 'uploads', folder, fileName)
+      if (existsSync(tmpPath)) {
+        const { readFile } = await import('fs/promises')
+        return await readFile(tmpPath)
       }
-      const { readFile } = await import('fs/promises')
-      return await readFile(filePath)
-    } catch (error: any) {
-      console.error(`[R2 fallback] Échec de la lecture locale du fichier:`, error)
-      throw error
+      throw new Error(`Fichier introuvable sur R2 ni localement (${filePath})`)
     }
+    const { readFile } = await import('fs/promises')
+    return await readFile(filePath)
+  } catch (error: any) {
+    console.error(`[R2 downloadFromR2] Échec de la lecture du fichier:`, error)
+    throw new Error(`Échec du téléchargement du fichier : ${error.message || error}`)
   }
 }
 
@@ -206,25 +278,25 @@ export async function downloadFromR2(key: string): Promise<Buffer> {
  * @param key The R2 key (e.g., 'formations/filename.jpg')
  */
 export async function deleteFromR2(key: string): Promise<void> {
-  console.log(`[R2] Début deleteFromR2 - key: ${key}`)
+  const cleanKey = sanitizeR2Key(key)
+  console.log(`[R2] Début deleteFromR2 - rawKey: ${key}, cleanKey: ${cleanKey}`)
   if (isR2Configured && r2Client) {
     try {
       console.log(`[R2] Suppression dans le bucket: ${bucketName}...`)
       await r2Client.send(
         new DeleteObjectCommand({
           Bucket: bucketName,
-          Key: key,
+          Key: cleanKey,
         })
       )
-      console.log(`[R2] Fichier supprimé avec succès: ${key}`)
+      console.log(`[R2] Fichier supprimé avec succès: ${cleanKey}`)
     } catch (error: any) {
-      console.error(`[R2] Échec de la suppression pour la clé ${key}. Erreur:`, error)
-      // On ne lève pas d'exception pour ne pas bloquer les suppressions cascade, mais on logue.
+      console.error(`[R2] Échec de la suppression pour la clé ${cleanKey}. Erreur:`, error)
     }
   } else {
     // Local fallback
     console.log(`[R2] Mode local fallback actif. Suppression sur le disque local...`)
-    const parts = key.split('/')
+    const parts = cleanKey.split('/')
     const folder = parts[0]
     const fileName = parts.slice(1).join('/')
     

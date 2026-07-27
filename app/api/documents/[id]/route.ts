@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin, requireStudent } from '@/lib/auth-portal/guards'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
-import { deleteFromR2, downloadFromR2 } from '@/lib/r2'
+import { deleteFromR2, downloadFromR2, getMimeTypeFromKey, sanitizeR2Key } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
@@ -28,12 +28,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   try {
-    const key = document.filePath.replace(/^\//, '')
+    const key = sanitizeR2Key(document.filePath)
     const bytes = await downloadFromR2(key)
     const disposition = request.nextUrl.searchParams.get('disposition') === 'inline' ? 'inline' : 'attachment'
     const safeName = document.fileName.replace(/["\\]/g, '_')
+    const contentType = getMimeTypeFromKey(safeName) || document.mimeType || 'application/octet-stream'
+
     return new NextResponse(new Uint8Array(bytes), { headers: {
-      'Content-Type': document.mimeType || 'application/octet-stream',
+      'Content-Type': contentType,
       'Content-Length': String(bytes.length),
       'Content-Disposition': `${disposition}; filename="${safeName}"`,
       'Cache-Control': 'private, no-store',

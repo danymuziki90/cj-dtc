@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { downloadFromR2 } from '@/lib/r2'
+import { downloadFromR2, getMimeTypeFromKey, sanitizeR2Key } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
@@ -10,34 +10,41 @@ export async function GET(
   try {
     const { key } = await context.params
     if (!key || key.length === 0) {
-      return NextResponse.json({ error: 'Clé requise' }, { status: 400 })
+      return NextResponse.json({ error: 'Clé de fichier requise' }, { status: 400 })
     }
-    
-    const r2Key = key.join('/')
-    // Pedagogical resources are intentionally served only through
-    // /api/documents/:id, which checks the student's enrollment first.
-    if (r2Key.startsWith('supports/')) {
-      return NextResponse.json({ error: 'Utilisez le point d’accès sécurisé du document.' }, { status: 403 })
+
+    const rawKey = key.join('/')
+    const r2Key = sanitizeR2Key(rawKey)
+    if (!r2Key) {
+      return NextResponse.json({ error: 'Clé de fichier invalide' }, { status: 400 })
     }
+
     const fileBuffer = await downloadFromR2(r2Key)
-    
-    const ext = r2Key.split('.').pop()?.toLowerCase()
-    let contentType = 'application/octet-stream'
-    if (ext === 'jpg' || ext === 'jpeg') contentType = 'image/jpeg'
-    else if (ext === 'png') contentType = 'image/png'
-    else if (ext === 'webp') contentType = 'image/webp'
-    else if (ext === 'gif') contentType = 'image/gif'
-    else if (ext === 'pdf') contentType = 'application/pdf'
-    
+    const contentType = getMimeTypeFromKey(r2Key)
+    const originalFileName = r2Key.split('/').pop() || 'document'
+    const safeFileName = originalFileName.replace(/["\\]/g, '_')
+
+    // Determine inline vs attachment disposition
+    const isInlineType =
+      contentType.startsWith('image/') ||
+      contentType === 'application/pdf' ||
+      contentType.startsWith('video/')
+    const reqDisposition = request.nextUrl.searchParams.get('disposition')
+    const dispositionType = reqDisposition === 'inline' || (isInlineType && reqDisposition !== 'attachment')
+      ? 'inline'
+      : 'attachment'
+
     return new NextResponse(new Uint8Array(fileBuffer), {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable'
-      }
+        'Content-Length': String(fileBuffer.length),
+        'Content-Disposition': `${dispositionType}; filename="${safeFileName}"`,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
     })
-  } catch (error) {
-    console.error('Erreur de service du fichier R2:', error)
-    return NextResponse.json({ error: 'Fichier non trouvé' }, { status: 404 })
+  } catch (error: any) {
+    console.error('[R2 File Service Error]:', error)
+    return NextResponse.json({ error: 'Fichier introuvable ou indisponible' }, { status: 404 })
   }
 }
