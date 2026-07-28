@@ -6,7 +6,7 @@ export const runtime = "nodejs"
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session: any = await getServerSession(authOptions)
     
     if (!session || (session.user?.role !== 'STUDENT' && session.user?.role !== 'ADMIN')) {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })

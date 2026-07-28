@@ -5,7 +5,7 @@ import { prisma } from '../../../../lib/prisma'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session: any = await getServerSession(authOptions)
     
     if (!session || session.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
@@ -169,7 +169,7 @@ Comprendre les fondamentaux du marketing digital et ses applications.
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session: any = await getServerSession(authOptions)
     
     if (!session || session.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
