@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server'
-import { prisma } from '../../../../lib/prisma'
-import { verifyJWT } from '../../../../lib/auth-token'
+import { prisma } from '@/lib/prisma'
+import { verifyStudentToken } from '@/lib/auth-portal/jwt'
 import { cookies } from 'next/headers'
 
 export const runtime = "nodejs"
@@ -9,19 +9,19 @@ export const runtime = "nodejs"
 export async function GET(req: Request) {
     try {
         const cookieStore = await cookies()
-        const token = cookieStore.get('student-token')?.value
+        const token = cookieStore.get('student-token')?.value || cookieStore.get('student_token')?.value
 
         if (!token) {
             return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
         }
 
-        const payload = await verifyJWT(token)
-        if (!payload || !payload.email) {
+        const payload = await verifyStudentToken(token)
+        if (!payload || !payload.username) {
             return NextResponse.json({ error: 'Session invalide' }, { status: 401 })
         }
 
         const student = await prisma.student.findUnique({
-            where: { email: payload.email as string },
+            where: { email: payload.username },
             select: {
                 id: true,
                 firstName: true,

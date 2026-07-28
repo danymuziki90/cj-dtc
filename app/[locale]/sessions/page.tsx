@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { MainSessionsPage } from '@/app/sessions/page'
+import RecentSessions from '@/components/RecentSessions'
 import { StudentAuthProvider } from '@/lib/auth/StudentAuthContext'
 
 import type { Metadata } from 'next'
@@ -19,7 +19,7 @@ export default function LocalizedSessionsPage() {
   return (
     <StudentAuthProvider>
       <Suspense fallback={<div className="p-10 text-center text-sm text-slate-500">Chargement des sessions...</div>}>
-        <MainSessionsPage />
+        <RecentSessions />
       </Suspense>
     </StudentAuthProvider>
   )

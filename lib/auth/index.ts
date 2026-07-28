@@ -480,3 +480,9 @@ export function verifyEmailVerificationToken(token: string): string | null {
 export function consumeEmailVerificationToken(token: string): void {
   emailVerificationStore.delete(token)
 }
+
+// NextAuth configuration options export
+export const authOptions: any = {
+  providers: [],
+  secret: process.env.NEXTAUTH_SECRET || 'cj-dtc-secret-key',
+}
