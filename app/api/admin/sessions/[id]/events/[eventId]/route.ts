@@ -62,7 +62,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; eventId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const session: any = await getServerSession(authOptions)
     if (!session || session.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
@@ -89,7 +89,7 @@ export async function DELETE(
     // Write audit log
     await writeAdminAuditLog({
       request,
-      adminUsername: session.user.email || 'Admin',
+      adminUsername: session?.user?.email || 'Admin',
       action: 'DELETE_SESSION_EVENT',
       targetType: 'SessionEvent',
       targetId: String(evId),

@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session: any = await getServerSession(authOptions)
     
     if (!session || session.user?.role !== 'student') {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     const submission = {
       id: Date.now(),
       examId,
-      studentEmail: session.user.email,
+      studentEmail: session?.user?.email,
       answers,
       maxScore: 30,
       status: 'submitted',
