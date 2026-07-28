@@ -146,23 +146,6 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      prisma.user.findUnique({
-        where: { email: studentEmail },
-        select: {
-          image: true,
-        },
-      }),
-      prisma.testimonial.findMany({
-        where: {
-          OR: [
-            { studentId: auth.student.id },
-            { student: { email: { equals: studentEmail, mode: 'insensitive' } } },
-          ],
-        },
-        include: {
-          formation: { select: { id: true, title: true } },
-        },
-      }),
     ])
 
   const enrollments = enrollmentsRaw as any[]
@@ -173,8 +156,6 @@ export async function GET(request: NextRequest) {
   const sessionIds = Array.from(
     new Set(activeEnrollments.map((item) => item.sessionId).filter((value): value is number => Boolean(value)))
   )
-
-  const mappedAssignments = await fetchStudentAssignmentsData(auth.student.id, studentEmail)
 
   const adminNotifications = await prisma.adminNotification.findMany({
     where: {
@@ -403,41 +384,6 @@ export async function GET(request: NextRequest) {
     isAnonymous: evaluation.isAnonymous,
   }))
 
-  const submissionFeedbackMap = enrollments.reduce<
-    Record<string, { feedback?: string | null; status?: string | null; updatedAt?: string }>
-  >((acc, enrollment) => {
-    const notes = parseEnrollmentNotes(enrollment.notes)
-    const entry = notes.submissionFeedback
-    if (entry && typeof entry === 'object') {
-      Object.entries(entry).forEach(([key, value]) => {
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          const cast = value as Record<string, unknown>
-          acc[key] = {
-            feedback: typeof cast.feedback === 'string' ? cast.feedback : null,
-            status: typeof cast.status === 'string' ? cast.status : null,
-            updatedAt: typeof cast.updatedAt === 'string' ? cast.updatedAt : undefined,
-          }
-        }
-      })
-    }
-    return acc
-  }, {})
-
-  const mappedSubmissions = submissions.map((submission: any) => {
-    const feedback = submissionFeedbackMap[submission.id]
-    return {
-      id: submission.id,
-      title: submission.assignment?.title || `Devoir #${submission.assignmentId}`,
-      status: submission.status,
-      fileUrl: submission.files?.[0]?.url || null,
-      submittedAt: submission.createdAt || submission.submittedAt,
-      updatedAt: submission.updatedAt,
-      reviewFeedback: feedback?.feedback || submission.feedback || null,
-      reviewedAt: feedback?.updatedAt || submission.gradedAt || null,
-      reviewStatus: feedback?.status || submission.status || null,
-    }
-  })
-
   const questions = enrollments
     .flatMap((enrollment) => {
       const notes = parseEnrollmentNotes(enrollment.notes)
@@ -450,17 +396,6 @@ export async function GET(request: NextRequest) {
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
-  const assignmentSubmissions = submissions.map((s: any) => ({
-    id: s.id,
-    assignmentTitle: s.assignment?.title || `Devoir #${s.assignmentId}`,
-    status: s.status,
-    grade: s.grade,
-    feedback: s.feedback,
-    reviewFeedback: s.feedback || null,
-    submittedAt: s.submittedAt || s.createdAt,
-    gradedAt: s.gradedAt,
-  }))
-
   const notifications = [
     // 1. Inscriptions à des formations
     ...enrollments.map((item) => ({
@@ -470,33 +405,7 @@ export async function GET(request: NextRequest) {
       message: `Votre inscription à la formation "${item.formation.title}" a été enregistrée (Statut : ${item.status}).`,
       createdAt: new Date(item.createdAt),
     })),
-    // 2. Nouveaux devoirs publiés
-    ...mappedAssignments.map((item) => ({
-      id: `assignment-pub-${item.id}`,
-      type: 'reminder',
-      title: 'Nouveau travail publié',
-      message: `Le devoir "${item.title}" a été mis en ligne pour la formation "${item.formation.title}". Rendu limite : ${new Date(item.deadline).toLocaleDateString('fr-FR')}.`,
-      createdAt: new Date(item.publishDate || item.createdAt),
-    })),
-    // 3. Soumission initiale de devoirs
-    ...assignmentSubmissions.map((item) => ({
-      id: `assignment-sub-${item.id}`,
-      type: 'info',
-      title: 'Travail rendu',
-      message: `Vous avez déposé votre travail pour le devoir "${item.assignmentTitle}".`,
-      createdAt: new Date(item.submittedAt),
-    })),
-    // 4. Corrections de devoirs officiels
-    ...assignmentSubmissions
-      .filter((item) => item.status === 'graded' || item.status === 'returned')
-      .map((item) => ({
-        id: `assignment-corr-${item.id}`,
-        type: 'correction',
-        title: 'Note ou retour publié',
-        message: `Votre travail pour "${item.assignmentTitle}" a été corrigé par l'administration (Statut: ${item.status}${item.grade !== null && item.grade !== undefined ? ` | Note: ${item.grade}/20` : ''}${item.reviewFeedback ? ` | Retour: ${item.reviewFeedback}` : ''}).`,
-        createdAt: item.gradedAt ? new Date(item.gradedAt) : new Date(item.submittedAt),
-      })),
-    // 5. Nouvelles ressources pédagogiques
+    // 2. Nouvelles ressources pédagogiques
     ...resources.map((item) => ({
       id: `resource-${item.id}`,
       type: 'info',
@@ -504,7 +413,7 @@ export async function GET(request: NextRequest) {
       message: `Le document "${item.title}" (${item.category}) a été ajouté à votre espace de formation.`,
       createdAt: new Date(item.createdAt),
     })),
-    // 6. Certificats délivrés — déduplication : issuedCertificates en priorité, portalCertificates seulement si non déjà présent
+    // 3. Certificats délivrés
     ...issuedCertificates.map((item) => ({
       id: `cert-issue-core-${item.id}`,
       type: 'correction',
@@ -521,7 +430,7 @@ export async function GET(request: NextRequest) {
         message: `Votre certificat de formation pour "${item.formation?.title || 'votre formation'}" est disponible.`,
         createdAt: new Date(item.issuedAt),
       })),
-    // 7. Notifications importantes ciblées ou globales (les actualités ont leur propre onglet — pas injectées ici)
+    // 4. Notifications admin ciblées ou globales
     ...adminNotifications.map((item) => ({
       id: `admin-notification-${item.id}`,
       type: item.type,
@@ -529,25 +438,7 @@ export async function GET(request: NextRequest) {
       message: item.message,
       createdAt: item.createdAt,
     })),
-    // 8. Dépôt de fichiers généraux
-    ...mappedSubmissions.map((item) => ({
-      id: `submission-dep-${item.id}`,
-      type: 'info',
-      title: 'Fichier déposé',
-      message: `Vous avez mis en ligne le document "${item.title}".`,
-      createdAt: new Date(item.submittedAt),
-    })),
-    // 9. Corrections de fichiers généraux
-    ...mappedSubmissions
-      .filter((item) => item.status !== 'pending' && item.reviewStatus !== 'pending')
-      .map((item) => ({
-        id: `submission-corr-${item.id}`,
-        type: 'correction',
-        title: 'Fichier vérifié',
-        message: `Votre document "${item.title}" a été vérifié par l'administration (Statut: ${item.status}${item.reviewFeedback ? ` | Retour: ${item.reviewFeedback}` : ''}).`,
-        createdAt: item.reviewedAt ? new Date(item.reviewedAt) : new Date(item.updatedAt),
-      })),
-    // 10. Rappels automatiques de début de session
+    // 5. Rappels automatiques de début de session
     ...(currentEnrollment?.session &&
     new Date(currentEnrollment.session.startDate).getTime() > now.getTime()
       ? [
@@ -571,37 +462,6 @@ export async function GET(request: NextRequest) {
         title: 'Réponse à votre question',
         message: item.adminReply as string,
         createdAt: item.adminReplyAt ? new Date(item.adminReplyAt) : new Date(item.createdAt),
-      })),
-    // 12. Témoignages (validation, refus ou réponse)
-    ...testimonials.map((t) => {
-      let title = 'Témoignage en cours d\'examen'
-      let type = 'info'
-      let message = `Votre témoignage pour la formation "${t.formation?.title || 'formation'}" est en attente de modération.`
-      if (t.status === 'approved') {
-        title = 'Témoignage approuvé'
-        type = 'info'
-        message = `Votre témoignage pour la formation "${t.formation?.title || 'formation'}" a été approuvé et publié.`
-      } else if (t.status === 'rejected') {
-        title = 'Témoignage refusé'
-        type = 'warning'
-        message = `Votre témoignage pour la formation "${t.formation?.title || 'formation'}" a été refusé.`
-      }
-      return {
-        id: `testimonial-status-${t.id}-${t.status}`,
-        type,
-        title,
-        message,
-        createdAt: t.updatedAt || t.createdAt,
-      }
-    }),
-    ...testimonials
-      .filter((t) => t.adminReply)
-      .map((t) => ({
-        id: `testimonial-reply-${t.id}`,
-        type: 'info',
-        title: 'Réponse à votre témoignage',
-        message: `L'administration a répondu à votre témoignage : "${t.adminReply}"`,
-        createdAt: t.updatedAt || t.createdAt,
       })),
   ]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -635,11 +495,9 @@ export async function GET(request: NextRequest) {
     })),
   ]
 
-  const currentEnrollmentProjectValidated = mappedSubmissions.some(
-    (item) => item.status === 'approved' || item.reviewStatus === 'approved'
-  )
+  const currentEnrollmentProjectValidated = false
   const certificateEligibility = {
-    projectValidated: currentEnrollmentProjectValidated,
+    projectValidated: false,
     attendanceTracked: attendanceRecordedCount > 0,
     attendanceRate,
     attendanceValidated,
@@ -660,7 +518,7 @@ export async function GET(request: NextRequest) {
       city: auth.student.city,
       country: auth.student.country,
       createdAt: auth.student.createdAt,
-      photoUrl: userProfile?.image || null,
+      photoUrl: null,
     },
     dashboard: {
       enrollments: enrollmentsRaw,
@@ -704,8 +562,6 @@ export async function GET(request: NextRequest) {
       sessionsHistory,
       availableSessions,
       resources,
-      submissions: mappedSubmissions,
-      assignments: mappedAssignments,
       certificates,
       certificateEligibility,
       questions,
@@ -716,9 +572,9 @@ export async function GET(request: NextRequest) {
       progress: {
         hoursCompleted,
         hoursRemaining,
-        exercisesCompleted: mappedSubmissions.filter((item) => item.status === 'approved').length,
-        exercisesInProgress: mappedSubmissions.filter((item) => item.status === 'pending').length,
-        projectsCompleted: mappedSubmissions.filter((item) => item.status === 'approved').length,
+        exercisesCompleted: 0,
+        exercisesInProgress: 0,
+        projectsCompleted: 0,
         evaluationsCompleted: evaluations.length,
       },
       metrics: {
