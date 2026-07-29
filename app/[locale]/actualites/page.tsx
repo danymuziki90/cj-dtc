@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import Breadcrumbs from '../../../components/Breadcrumbs'
 import { getIntlLocale, resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
@@ -53,8 +53,9 @@ function stripHtml(value: string) {
   return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
-export default function ActualitesPage() {
+function ActualitesContent() {
   const params = useParams<{ locale: string }>()
+  const searchParams = useSearchParams()
   const locale = resolveSiteLocale(params?.locale)
   const t = copy[locale]
 
@@ -65,7 +66,8 @@ export default function ActualitesPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [category, setCategory] = useState('all')
+  const initialCategory = searchParams?.get('categorie') || 'all'
+  const [category, setCategory] = useState(initialCategory)
   const [date, setDate] = useState('')
   const [pagination, setPagination] = useState({
     page: 1,
@@ -320,5 +322,13 @@ export default function ActualitesPage() {
         ) : null}
       </div>
     </div>
+  )
+}
+
+export default function ActualitesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center p-10"><span className="animate-pulse font-semibold text-slate-500">Chargement...</span></div>}>
+      <ActualitesContent />
+    </Suspense>
   )
 }

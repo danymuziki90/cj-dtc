@@ -105,6 +105,14 @@ export async function GET(request: NextRequest) {
         equals: category,
         mode: 'insensitive',
       }
+    } else {
+      // Exclude recruitment (Emplois) from general news feed
+      where.category = {
+        not: {
+          equals: 'Emplois',
+          mode: 'insensitive',
+        },
+      }
     }
 
     if (date && DATE_INPUT_REGEX.test(date)) {
