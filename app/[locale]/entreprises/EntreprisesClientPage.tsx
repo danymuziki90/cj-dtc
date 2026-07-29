@@ -8,6 +8,7 @@ import {
   Rocket, ShieldIcon, TargetIcon, TrendingUp, Users, ZapIcon,
 } from 'lucide-react'
 import EntrepriseContactForm from '@/components/entreprises/EntrepriseContactForm'
+import { PageHero } from '@/components/ui/PageHero'
 
 type Locale = 'fr' | 'en'
 
@@ -259,42 +260,24 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
         {/* Hero Section floating card */}
-        <section className="cj-hero-card mb-6">
-          <div className="relative z-10">
-            <div className="max-w-4xl">
-              <span className="cj-eyebrow-dark">
-                <HeartHandshake className="h-3.5 w-3.5 text-[var(--cj-red)] animate-pulse" />
-                {t.heroBadge}
-              </span>
-              <h1 className="cj-hero-title mb-3 leading-tight">
-                {t.heroTitle}
-              </h1>
-              <p className="mb-5 max-w-2xl text-sm leading-7 text-white sm:text-base">{t.heroSub}</p>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <a href="#contact" className="cj-btn-primary">
-                  <MessageCircleIcon className="h-4 w-4" />
-                  {t.heroCta1}
-                </a>
-                <a href="#solutions" className="cj-btn-secondary-dark">
-                  {t.heroCta2}
-                  <ArrowRight className="h-4 w-4" />
-                </a>
+        <PageHero
+          eyebrow={t.heroBadge}
+          title={t.heroTitle}
+          description={t.heroSub}
+          image="/img/ceo.jpeg"
+          primaryCta={{ label: t.heroCta1, href: '#contact' }}
+          secondaryCta={{ label: t.heroCta2, href: '#solutions' }}
+        >
+          {/* Stats bar inside card */}
+          <dl className="grid grid-cols-2 gap-y-6 gap-x-4 divide-x divide-white/10 sm:grid-cols-4">
+            {TRUST_STATS.map((s, idx) => (
+              <div key={s.value} className={`text-center ${idx === 0 ? '' : 'sm:pl-4'}`}>
+                <dt className="text-3xl font-black text-white sm:text-4xl font-montserrat">{s.value}</dt>
+                <dd className="mt-1 text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">{isFr ? s.fr : s.en}</dd>
               </div>
-            </div>
-
-            {/* Stats bar inside card */}
-            <div className="mt-10 border-t border-white/10 pt-8">
-              <dl className="grid grid-cols-2 gap-y-6 gap-x-4 divide-x divide-white/10 sm:grid-cols-4">
-                {TRUST_STATS.map((s, idx) => (
-                  <div key={s.value} className={`text-center ${idx === 0 ? '' : 'sm:pl-4'}`}>
-                    <dt className="text-3xl font-black text-white sm:text-4xl font-montserrat">{s.value}</dt>
-                    <dd className="mt-1 text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">{isFr ? s.fr : s.en}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </div>
-        </section>
+            ))}
+          </dl>
+        </PageHero>
 
       {/* ════════════════════════════════════════
           2. POURQUOI CJ DEVELOPMENT

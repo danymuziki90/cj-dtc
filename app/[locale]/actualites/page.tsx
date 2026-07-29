@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import Breadcrumbs from '../../../components/Breadcrumbs'
 import { getIntlLocale, resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
+import { PageHero } from '@/components/ui/PageHero'
 
 type NewsItem = {
   id: string
@@ -138,19 +139,17 @@ function ActualitesContent() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
 
-        <section className="cj-hero-card mb-6">
-          <div className="relative z-10">
-            <span className="cj-eyebrow-dark">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
-              {t.heroEyebrow}
-            </span>
-            <h1 className="cj-hero-title mb-3 font-montserrat">{t.heroTitle}</h1>
-            <p className="text-sm text-white leading-relaxed font-opensans max-w-2xl sm:text-base">{t.heroDescription}</p>
-            <div className="mt-4 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/80">
-              {loading ? t.loading : `${pagination.total} ${t.totalSuffix}`}
-            </div>
+        <PageHero
+          eyebrow={t.heroEyebrow}
+          title={t.heroTitle}
+          description={t.heroDescription}
+          image="/img/actu.jpeg"
+          compact
+        >
+          <div className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/80">
+            {loading ? t.loading : `${pagination.total} ${t.totalSuffix}`}
           </div>
-        </section>
+        </PageHero>
 
         <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="grid gap-3 md:grid-cols-4">

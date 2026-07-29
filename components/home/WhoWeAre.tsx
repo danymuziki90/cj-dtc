@@ -94,15 +94,16 @@ export default function WhoWeAre({ locale }: WhoWeAreProps) {
 
         </div>
 
-        {/* Stats Grid */}
-        <div className="mt-20 border-t border-slate-100 pt-16">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+        {/* Stats Grid - "Notre Impact" */}
+        <div className="mt-20 overflow-hidden rounded-3xl bg-[var(--cj-blue)] px-8 py-12 text-white shadow-xl relative">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(227,6,19,0.15),transparent_50%)] pointer-events-none" />
+          <div className="relative z-10 grid grid-cols-2 gap-8 md:grid-cols-4">
             {stats.map((stat, i) => (
               <div key={i} className="text-center group">
-                <p className="text-4xl font-black text-slate-900 font-montserrat transition-colors group-hover:text-[var(--cj-red)]">
+                <p className="text-4xl font-black text-white font-montserrat transition-colors group-hover:text-blue-300">
                   {stat.value}
                 </p>
-                <p className="mt-2 text-sm font-semibold uppercase tracking-wider text-slate-500 font-opensans">
+                <p className="mt-2 text-xs font-bold uppercase tracking-wider text-blue-200 font-opensans">
                   {stat.label}
                 </p>
               </div>

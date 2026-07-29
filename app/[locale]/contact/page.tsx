@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
+import { PageHero } from '@/components/ui/PageHero'
 
 const copy = publicMessages.contact
 
@@ -130,62 +131,44 @@ export default function ContactPage() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
         {/* ── SECTION 1 — HERO ──────────────────────────────────────────────── */}
-        <section className="cj-hero-card mb-6">
-          <div className="relative z-10 grid gap-8 lg:grid-cols-2 lg:items-center">
-            {/* Left: text + CTAs */}
-            <div>
-              <span className="cj-eyebrow-dark mb-3">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-                {t.heroBadge}
-              </span>
-              <h1 className="cj-hero-title mb-3 font-montserrat">
-                {t.heroTitle}
-              </h1>
-              <p className="max-w-xl text-sm leading-7 text-white sm:text-base font-opensans">
-                {t.heroSubtitle}
-              </p>
-              <div className="mt-5 flex flex-col sm:flex-row gap-3">
-                <a href="#contact-form" className="cj-btn-primary">
-                  {t.heroCta1}
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-                <Link href={`/${locale}/formations`} className="cj-btn-secondary-dark">
-                  {t.heroCta2}
-                </Link>
+        {/* ── SECTION 1 — HERO ──────────────────────────────────────────────── */}
+        <PageHero
+          eyebrow={t.heroBadge}
+          title={t.heroTitle}
+          description={t.heroSubtitle}
+          image="/img/team.jpeg"
+          primaryCta={{ label: t.heroCta1, href: '#contact-form' }}
+          secondaryCta={{ label: t.heroCta2, href: `/${locale}/formations` }}
+        >
+          <div className="flex justify-start">
+            <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md shadow-2xl">
+              <div className="mb-6 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-green-450 animate-pulse" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-blue-200">
+                  {t.heroBadge}
+                </span>
               </div>
-            </div>
-
-            {/* Right: trust card */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md shadow-2xl">
-                <div className="mb-6 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-green-450 animate-pulse" />
-                  <span className="text-xs font-semibold uppercase tracking-wider text-blue-200">
-                    {t.heroBadge}
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { value: '15+', label: locale === 'fr' ? 'Années' : 'Years' },
-                    { value: '10+', label: locale === 'fr' ? 'Pays' : 'Countries' },
-                    { value: '8 500+', label: locale === 'fr' ? 'Étudiants' : 'Students' },
-                  ].map((stat) => (
-                    <div key={stat.label} className="text-center font-opensans">
-                      <div className="text-2xl font-black text-white font-montserrat">{stat.value}</div>
-                      <div className="mt-1 text-[10px] uppercase font-bold tracking-wider text-blue-200">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-center">
-                  <CheckCircle2 className="mx-auto mb-1 h-5 w-5 text-emerald-400" />
-                  <p className="text-xs font-bold text-white leading-relaxed">
-                    {locale === 'fr' ? 'Réponse garantie sous 24h' : 'Guaranteed reply within 24h'}
-                  </p>
-                </div>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { value: '15+', label: locale === 'fr' ? 'Années' : 'Years' },
+                  { value: '10+', label: locale === 'fr' ? 'Pays' : 'Countries' },
+                  { value: '8 500+', label: locale === 'fr' ? 'Étudiants' : 'Students' },
+                ].map((stat) => (
+                  <div key={stat.label} className="text-center font-opensans">
+                    <div className="text-2xl font-black text-white font-montserrat">{stat.value}</div>
+                    <div className="mt-1 text-[10px] uppercase font-bold tracking-wider text-blue-200">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-center">
+                <CheckCircle2 className="mx-auto mb-1 h-5 w-5 text-emerald-400" />
+                <p className="text-xs font-bold text-white leading-relaxed">
+                  {locale === 'fr' ? 'Réponse garantie sous 24h' : 'Guaranteed reply within 24h'}
+                </p>
               </div>
             </div>
           </div>
-        </section>
+        </PageHero>
 
       {/* ── SECTION 2 — CONTACT CHANNELS ─────────────────────────────────── */}
       <section id="contact-channels" className="py-20">

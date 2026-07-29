@@ -97,11 +97,13 @@ function selectSessions(data: SessionItem[], limit: number) {
   return limit > 0 ? openSessions.slice(0, limit) : openSessions
 }
 
-export default function RecentSessions({ limit = 6 }: { limit?: number }) {
+export default function RecentSessions({ limit = 6, hideHeader = false }: { limit?: number; hideHeader?: boolean }) {
   const params = useParams<{ locale: string }>()
   const locale = resolveSiteLocale(params?.locale)
   const t = copy[locale]
   const [sessions, setSessions] = useState<SessionItem[]>([])
+  const [filteredSessions, setFilteredSessions] = useState<SessionItem[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
@@ -110,8 +112,9 @@ export default function RecentSessions({ limit = 6 }: { limit?: number }) {
       try {
         const response = await fetch('/api/sessions', { cache: 'no-store' })
         if (!response.ok) throw new Error('Failed to fetch sessions')
-        const data = (await response.json()) as SessionItem[]
-        setSessions(selectSessions(data, limit))
+        const selected = selectSessions(data, limit)
+        setSessions(selected)
+        setFilteredSessions(selected)
       } catch (error) {
         console.error('Error fetching sessions:', error)
       } finally {
@@ -125,8 +128,20 @@ export default function RecentSessions({ limit = 6 }: { limit?: number }) {
       .then((res) => {
         if (res.ok) setIsLoggedIn(true)
       })
-      .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredSessions(sessions)
+      return
+    }
+    const lowerQuery = searchQuery.toLowerCase()
+    setFilteredSessions(sessions.filter(s => {
+      const title = (s.adminMeta?.customTitle || s.formation.title || '').toLowerCase()
+      const desc = (s.description || s.formation.description || '').toLowerCase()
+      return title.includes(lowerQuery) || desc.includes(lowerQuery)
+    }))
+  }, [searchQuery, sessions])
 
   if (loading) {
     return (
@@ -157,30 +172,48 @@ export default function RecentSessions({ limit = 6 }: { limit?: number }) {
   if (sessions.length === 0) return null
 
   return (
-    <section className="bg-gradient-to-b from-white to-gray-50 py-16">
-      <div className="container mx-auto px-4">
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-bold text-cjblue">
-            {locale === 'fr' ? 'Sessions ouvertes' : 'Open Sessions'}
-          </h2>
-          <p className="mx-auto max-w-2xl text-lg text-gray-600">
-            {locale === 'fr' 
-              ? 'Découvrez nos sessions de formation actuellement ouvertes aux inscriptions.' 
-              : 'Discover our training sessions currently open for registration.'}
-          </p>
-        </div>
+    <section className={hideHeader ? '' : 'bg-gradient-to-b from-white to-gray-50 py-16'}>
+      <div className={hideHeader ? '' : 'container mx-auto px-4'}>
+        {!hideHeader && (
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-4xl font-bold text-cjblue font-montserrat">
+              {locale === 'fr' ? 'Sessions ouvertes' : 'Open Sessions'}
+            </h2>
+            <p className="mx-auto max-w-2xl text-lg text-gray-600 font-opensans">
+              {locale === 'fr' 
+                ? 'Découvrez nos sessions de formation actuellement ouvertes aux inscriptions.' 
+                : 'Discover our training sessions currently open for registration.'}
+            </p>
+          </div>
+        )}
 
-        <div className="grid gap-8 md:grid-cols-3">
-          {sessions.map((session) => {
+        {/* Barre de recherche uniquement sur la page complète (limit === 0) */}
+        {limit === 0 && (
+          <div className="mb-10 max-w-md mx-auto relative">
+            <input
+              type="text"
+              placeholder={locale === 'fr' ? 'Rechercher une session...' : 'Search for a session...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-2xl border-slate-200 bg-white py-3 pl-4 pr-10 text-sm shadow-sm focus:border-[var(--cj-blue)] focus:ring-[var(--cj-blue)]"
+            />
+            <svg className="absolute right-3 top-3.5 h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        )}
+
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {filteredSessions.map((session) => {
             const availableSpots = Math.max(0, (session.maxParticipants || 0) - (session.currentParticipants || 0))
             const title = session.adminMeta?.customTitle || session.formation.title
             const headerImage = session.adminMeta?.imageUrl || session.imageUrl || session.formation.imageUrl || '/logo.png'
 
             return (
-              <div key={session.id} className="group flex flex-col justify-between overflow-hidden rounded-xl border border-blue-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+              <div key={session.id} className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[var(--cj-blue)]/20">
                 <div>
                   <Link href={`/${locale}/formations/${session.formation.slug}`}>
-                    <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-cjblue to-blue-700">
+                    <div className="relative h-56 w-full overflow-hidden bg-slate-100">
                       <img
                         src={headerImage}
                         alt={title}
@@ -206,12 +239,12 @@ export default function RecentSessions({ limit = 6 }: { limit?: number }) {
                           {session.formation.title}
                         </p>
                       )}
-                      <h3 className="mb-3 line-clamp-2 text-xl font-bold text-cjblue transition-colors hover:text-[var(--cj-red)]">
+                      <h3 className="mb-3 line-clamp-2 text-xl font-bold text-slate-900 transition-colors hover:text-[var(--cj-blue)] font-montserrat">
                         {title}
                       </h3>
                     </Link>
 
-                    <div className="space-y-2 text-sm text-gray-600 mb-4">
+                    <div className="space-y-2 text-sm text-slate-600 mb-4 font-opensans">
                       <p className="font-semibold">{session.location || (locale === 'fr' ? 'À définir' : 'TBD')}</p>
                       <p>{formatLabel(session.format, locale)} · {session.startTime} - {session.endTime}</p>
                       <p className="text-emerald-700 font-medium">

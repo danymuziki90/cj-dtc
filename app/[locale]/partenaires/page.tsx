@@ -3,6 +3,7 @@ import { ArrowRight, Globe2, HeartHandshake, Landmark, UsersRound } from 'lucide
 import Breadcrumbs from '../../../components/Breadcrumbs'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
+import { PageHero } from '@/components/ui/PageHero'
 
 type PageProps = {
   params: Promise<{ locale: string }>
@@ -23,28 +24,23 @@ export default async function PartenairesPage({ params }: PageProps) {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
 
-        {/* Hero Section floating card */}
-        <section className="cj-hero-card mb-6">
-          <div className="relative z-10 grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-            <div>
-              <span className="cj-eyebrow-dark mb-3">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
-                {t.heroBadge}
-              </span>
-              <h1 className="cj-hero-title mb-3 font-montserrat">{t.heroTitle}</h1>
-              <p className="max-w-3xl text-sm leading-7 text-white sm:text-base font-opensans">{t.heroDescription}</p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-              {t.stats.map((label, index) => (
-                <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur shadow-lg">
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-blue-200">{label}</p>
-                  <p className="mt-2 text-2xl font-black text-white font-montserrat">{t.statValues[index]}</p>
-                </div>
-              ))}
-            </div>
+        {/* Hero Section */}
+        <PageHero
+          eyebrow={t.heroBadge}
+          title={t.heroTitle}
+          description={t.heroDescription}
+          image="/img/certificat 1.jpeg"
+          compact
+        >
+          <div className="grid gap-3 sm:grid-cols-3">
+            {t.stats.map((label: string, index: number) => (
+              <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur shadow-lg">
+                <p className="text-[10px] uppercase font-bold tracking-wider text-blue-200">{label}</p>
+                <p className="mt-2 text-2xl font-black text-white font-montserrat">{t.statValues[index]}</p>
+              </div>
+            ))}
           </div>
-        </section>
+        </PageHero>
 
         {/* Section Cards */}
         <section className="mt-10">
