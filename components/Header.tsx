@@ -30,8 +30,6 @@ import {
   LogIn,
   UserPlus,
   FileText,
-  BookOpen,
-  Search,
   Briefcase,
 } from 'lucide-react'
 import { resolveSiteLocale, type SiteLocale } from '@/lib/i18n/locale'
@@ -579,49 +577,11 @@ export default function Header() {
             <NavLink href={`/${locale}`} label={labels.home} />
             <NavLink href={`/${locale}/about`} label={labels.about} />
 
-            {/* Dropdown Menu for Sessions */}
-            <DesktopDropdown
-              label={labels.sessions}
-              items={[
-                {
-                  href: '/sessions',
-                  label: locale === 'fr' ? 'Sessions ouvertes' : 'Open Sessions',
-                  description: locale === 'fr' ? 'Dates et inscriptions en cours' : 'Upcoming session dates & enrollment',
-                  icon: GraduationCap,
-                },
-                {
-                  href: `/${locale}/formations`,
-                  label: locale === 'fr' ? 'Toutes les formations' : 'All Programs',
-                  description: locale === 'fr' ? 'Catalogue complet des programmes' : 'Browse full training catalog',
-                  icon: BookOpen,
-                },
-              ]}
-            />
+            {/* Lien simple pour Sessions */}
+            <NavLink href="/sessions" label={labels.sessions} />
 
-            {/* Dropdown Menu for Entreprises */}
-            <DesktopDropdown
-              label={labels.entreprises}
-              items={[
-                {
-                  href: `/${locale}/entreprises`,
-                  label: locale === 'fr' ? 'Formations sur-mesure' : 'Custom Corporate Training',
-                  description: locale === 'fr' ? 'Programmes adaptés aux équipes' : 'Tailored team training programs',
-                  icon: Building2,
-                },
-                {
-                  href: `/${locale}/entreprises#audit-rh`,
-                  label: locale === 'fr' ? 'Audit & diagnostic RH' : 'HR Audit & Diagnostics',
-                  description: locale === 'fr' ? 'Évaluation des compétences et besoins' : 'Skills & performance assessment',
-                  icon: Search,
-                },
-                {
-                  href: `/${locale}/entreprises#recrutement`,
-                  label: locale === 'fr' ? 'Recrutement & placement' : 'Recruitment & Placement',
-                  description: locale === 'fr' ? 'Bassin de diplômés qualifiés' : 'Connect with certified alumni',
-                  icon: Users,
-                },
-              ]}
-            />
+            {/* Lien simple pour Entreprises */}
+            <NavLink href={`/${locale}/entreprises`} label={labels.entreprises} />
 
             {/* Dropdown Menu for Actualités + Offres d'emploi */}
             <DesktopDropdown

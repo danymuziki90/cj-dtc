@@ -308,28 +308,7 @@ export async function buildAdminReportingSnapshot(period: ReportingPeriod = '30d
         createdAt: true,
       },
     }),
-    prisma.submission.findMany({
-      where: { status: 'pending' },
-      orderBy: { createdAt: 'desc' },
-      take: 8,
-      select: {
-        id: true,
-        status: true,
-        createdAt: true,
-        assignment: {
-          select: {
-            title: true,
-          },
-        },
-        student: {
-          select: {
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-      },
-    }),
+    Promise.resolve([]),
     Promise.resolve([]),
     Promise.resolve([]),
     prisma.attendance.findMany({
