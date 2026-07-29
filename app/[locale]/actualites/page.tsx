@@ -18,6 +18,13 @@ type NewsItem = {
   tags: string[]
   imageDataUrl: string | null
   publicationDate: string
+  metadata?: {
+    contractType?: string
+    location?: string
+    deadline?: string
+    contactEmail?: string
+    domain?: string
+  }
 }
 
 type NewsResponse = {
@@ -235,18 +242,36 @@ export default function ActualitesPage() {
                 </div>
 
                 <div className="p-5">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
-                      {item.category || t.defaultCategory}
-                    </span>
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex gap-2">
+                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                        {item.category || t.defaultCategory}
+                      </span>
+                      {item.category?.toLowerCase() === 'emplois' && item.metadata?.contractType ? (
+                        <span className="inline-flex rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+                          {item.metadata.contractType}
+                        </span>
+                      ) : null}
+                    </div>
                     <time className="text-xs text-slate-500 font-medium font-opensans">{formatDate(item.publicationDate, locale)}</time>
                   </div>
 
                   <h2 className="text-lg font-black leading-tight text-[var(--cj-blue)] font-montserrat">{item.title}</h2>
+                  
+                  {item.category?.toLowerCase() === 'emplois' && item.metadata?.location ? (
+                    <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                      </svg>
+                      {item.metadata.location}
+                    </div>
+                  ) : null}
+
                   <p className="mt-2 text-xs leading-relaxed text-slate-600 font-opensans">{item.excerpt || stripHtml(item.content).slice(0, 150)}...</p>
 
                   <div className="mt-4 text-xs font-bold text-[var(--cj-red)] uppercase tracking-wider flex items-center gap-1">
-                    <span>{t.readMore}</span>
+                    <span>{item.category?.toLowerCase() === 'emplois' ? "Voir l'offre" : t.readMore}</span>
                     <span>→</span>
                   </div>
                 </div>

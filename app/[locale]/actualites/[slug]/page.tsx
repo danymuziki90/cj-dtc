@@ -107,6 +107,29 @@ export default async function NewsDetailPage({ params }: PageProps) {
 
             <h1 className="mt-5 text-3xl font-bold leading-tight text-cjblue sm:text-4xl lg:text-5xl">{news.title}</h1>
 
+            {news.category?.toLowerCase() === 'emplois' && news.metadata ? (
+              <div className="mt-6 flex flex-wrap gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                {(news.metadata as any).contractType ? (
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold uppercase text-slate-500">Contrat</span>
+                    <span className="text-sm font-medium text-slate-900">{(news.metadata as any).contractType}</span>
+                  </div>
+                ) : null}
+                {(news.metadata as any).location ? (
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold uppercase text-slate-500">Lieu</span>
+                    <span className="text-sm font-medium text-slate-900">{(news.metadata as any).location}</span>
+                  </div>
+                ) : null}
+                {(news.metadata as any).deadline ? (
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold uppercase text-slate-500">Date limite</span>
+                    <span className="text-sm font-medium text-slate-900">{new Date((news.metadata as any).deadline).toLocaleDateString(getIntlLocale(locale))}</span>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             {tags.length > 0 ? (
               <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
@@ -143,11 +166,19 @@ export default async function NewsDetailPage({ params }: PageProps) {
                 {t.moreNews}
               </Link>
               <Link
-                href={`/${locale}/contact`}
+                href={`/${locale}/actualites`}
                 className="inline-flex items-center rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-cjblue"
               >
                 {t.contact}
               </Link>
+              {news.category?.toLowerCase() === 'emplois' && (news.metadata as any)?.contactEmail ? (
+                <a
+                  href={`mailto:${(news.metadata as any).contactEmail}?subject=Candidature : ${news.title}`}
+                  className="ml-auto inline-flex items-center gap-2 rounded-xl bg-green-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+                >
+                  Postuler maintenant
+                </a>
+              ) : null}
             </div>
           </div>
         </article>
