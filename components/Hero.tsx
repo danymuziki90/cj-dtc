@@ -118,12 +118,7 @@ export const HERO_SLIDES: HeroSlideItem[] = [
   }
 ]
 
-const institutionalProofs = [
-  { value: '2018',   labelFr: 'Année de création', labelEn: 'Founded' },
-  { value: '8 500+', labelFr: 'Impacts réels',     labelEn: 'Real impacts' },
-  { value: '10+',    labelFr: 'Pays couverts',     labelEn: 'Countries reached' },
-  { value: '50+',    labelFr: 'Promotions actives', labelEn: 'Active sessions' },
-]
+
 
 export default function Hero() {
   const params = useParams<{ locale?: string }>()
@@ -156,7 +151,7 @@ export default function Hero() {
 
   return (
     <section
-      className="hero-bg-unified relative min-h-[85vh] pt-0 lg:pt-36 pb-16 overflow-hidden flex flex-col justify-center"
+      className="hero-bg-unified relative min-h-[75vh] pt-0 lg:pt-28 pb-12 overflow-hidden flex flex-col justify-center"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -253,14 +248,14 @@ export default function Hero() {
                 href={`/${locale}/formations`}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--cj-red)] px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-900/30 transition duration-300 hover:bg-[var(--cj-red-700)] hover:scale-[1.02] hover:shadow-red-900/40 group"
               >
-                {isFr ? 'Voir nos formations' : 'View courses'}
+                {isFr ? 'Découvrir nos formations' : 'Discover our courses'}
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
               <Link
-                href={`/${locale}/contact`}
+                href={`/${locale}/inscription`}
                 className="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-8 py-4 text-base font-semibold text-white backdrop-blur-md transition duration-300 hover:bg-white/20 hover:scale-[1.02]"
               >
-                {isFr ? 'Demander un conseil' : 'Contact advisor'}
+                {isFr ? "S'inscrire maintenant" : 'Register now'}
               </Link>
             </div>
           </div>
@@ -298,20 +293,6 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Bande de preuves chiffrées en grille sous le Hero */}
-        <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {institutionalProofs.map((proof) => (
-            <div
-              key={proof.value}
-              className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur-md transition duration-300 hover:bg-white/8 hover:border-white/20 shadow-md"
-            >
-              <p className="text-3xl font-black text-white sm:text-4xl font-montserrat">{proof.value}</p>
-              <p className="mt-1.5 text-xs font-semibold uppercase tracking-wider text-blue-200/95 font-opensans">
-                {isFr ? proof.labelFr : proof.labelEn}
-              </p>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   )
