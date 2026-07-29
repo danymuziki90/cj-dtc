@@ -403,7 +403,7 @@ export default function Header() {
             icon: Info,
           },
           {
-            href: `/sessions`,
+            href: `/${locale}/sessions`,
             label: labels.sessions,
             description: locale === 'fr' ? 'Consultez les dates et inscrivez-vous' : 'View session dates and register',
             icon: GraduationCap,
@@ -578,7 +578,7 @@ export default function Header() {
             <NavLink href={`/${locale}/about`} label={labels.about} />
 
             {/* Lien simple pour Sessions */}
-            <NavLink href="/sessions" label={labels.sessions} />
+            <NavLink href={`/${locale}/sessions`} label={labels.sessions} />
 
             {/* Lien simple pour Entreprises */}
             <NavLink href={`/${locale}/entreprises`} label={labels.entreprises} />

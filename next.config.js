@@ -39,6 +39,7 @@ const nextConfig = {
   async redirects() {
     return [
       // Un-localized /student redirects
+      { source: '/sessions', destination: '/fr/sessions', permanent: true },
       { source: '/student', destination: '/fr/espace-etudiants', permanent: true },
       { source: '/student/dashboard', destination: '/fr/espace-etudiants', permanent: true },
       { source: '/student/inscriptions', destination: '/fr/espace-etudiants/mes-formations', permanent: true },
