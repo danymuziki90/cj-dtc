@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     }
     const cert = await prisma.certificate.findUnique({
       where: { code },
-      include: { formation: true, user: true }
+      include: { formation: true, User: true }
     })
     if (!cert) {
       return NextResponse.json({ valid: false })

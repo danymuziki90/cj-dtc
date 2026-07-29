@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const assignmentId = parseInt(params.id, 10)
+    const assignmentId = parseInt((await params).id, 10)
     if (isNaN(assignmentId)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
     const submissions = await prisma.submission.findMany({
@@ -14,7 +14,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         Student: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           }
         },

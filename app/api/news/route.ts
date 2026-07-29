@@ -111,10 +111,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Exclude recruitment (Emplois) from general news feed
       where.category = {
-        not: {
-          equals: 'Emplois',
-          mode: 'insensitive',
-        },
+        not: 'Emplois',
       }
     }
 

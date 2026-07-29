@@ -24,25 +24,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Travail introuvable' }, { status: 404 })
     }
 
-    // Upsert submission
-    const submission = await prisma.submission.upsert({
+    // Find or create submission
+    let submission = await prisma.submission.findFirst({
       where: {
-        assignmentId_studentId: {
-          assignmentId: assignment.id,
-          studentId: auth.student.id
-        }
-      },
-      update: {
-        status: 'submitted',
-        submittedAt: new Date()
-      },
-      create: {
         assignmentId: assignment.id,
-        studentId: auth.student.id,
-        status: 'submitted',
-        submittedAt: new Date()
+        studentId: auth.student.id
       }
     })
+
+    if (submission) {
+      submission = await prisma.submission.update({
+        where: { id: submission.id },
+        data: {
+          status: 'submitted',
+          submittedAt: new Date(),
+        }
+      })
+    } else {
+      submission = await prisma.submission.create({
+        data: {
+          assignmentId: assignment.id,
+          studentId: auth.student.id,
+          status: 'submitted',
+          submittedAt: new Date(),
+        }
+      })
+    }
 
     // Create file records
     for (const file of files) {
@@ -50,9 +57,10 @@ export async function POST(req: NextRequest) {
         data: {
           submissionId: submission.id,
           name: file.name,
+          originalName: file.name,
           url: file.url,
           size: file.size,
-          type: file.type || 'application/octet-stream'
+          mimeType: file.type || 'application/octet-stream'
         }
       })
     }

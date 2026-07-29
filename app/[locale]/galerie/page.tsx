@@ -3,8 +3,8 @@ import { Image as ImageIcon, ArrowLeft, GraduationCap, Award, Users, Calendar } 
 import { PageHero } from '@/components/ui/PageHero'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
-export default function GaleriePage({ params }: { params: { locale?: string } }) {
-  const locale = params.locale === 'en' ? 'en' : 'fr'
+export default async function GaleriePage({ params }: { params: Promise<{ locale?: string }> }) {
+  const locale = (await params).locale === 'en' ? 'en' : 'fr'
   const isFr = locale === 'fr'
   const tHome = publicMessages.header[locale].home
   const tTitle = isFr ? "Galerie Photos & Moments Forts" : "Photo Gallery & Highlights"

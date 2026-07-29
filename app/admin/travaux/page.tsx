@@ -12,7 +12,7 @@ type AssignmentItem = {
   status: string
   published: boolean
   Formation?: { title: string }
-  TrainingSession?: { title: string }
+  TrainingSession?: { id: number, startDate: string }
   createdAt: string
 }
 
@@ -65,7 +65,7 @@ export default function AdminTravauxPage() {
   }
 
   return (
-    <AdminShell>
+    <AdminShell title="Travaux">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Gestion des Travaux</h1>
@@ -134,7 +134,7 @@ export default function AdminTravauxPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-slate-900">{assignment.Formation?.title || '-'}</div>
-                      <div className="text-slate-400 text-xs mt-0.5">{assignment.TrainingSession?.title || '-'}</div>
+                      <div className="text-slate-400 text-xs mt-0.5">{assignment.TrainingSession ? `Session du ${new Date(assignment.TrainingSession.startDate).toLocaleDateString('fr-FR')}` : '-'}</div>
                     </td>
                     <td className="px-6 py-4">
                       {new Date(assignment.deadline).toLocaleDateString('fr-FR')}

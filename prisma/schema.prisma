@@ -549,7 +549,7 @@ model Assignment {
   allowedFileTypes  String           @default("pdf,doc,docx,zip,rar,png,jpg,jpeg,excel,xls,xlsx")
   instructions      String?
   createdAt         DateTime         @default(now())
-  updatedAt         DateTime
+  updatedAt         DateTime         @updatedAt
   sessionId         Int?
   difficulty        String?          @default("intermediaire")
   objectives        String?
@@ -591,11 +591,11 @@ model LMSConfig {
   apiUrl    String?
   apiKey    String?
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
 }
 
 model Session {
-  id           String   @id
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -614,7 +614,7 @@ model Submission {
   createdAt       DateTime         @default(now())
   sessionId       Int?
   studentId       String
-  updatedAt       DateTime
+  updatedAt       DateTime @updatedAt
   Assignment      Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   TrainingSession TrainingSession? @relation(fields: [sessionId], references: [id])
   Student         Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -651,7 +651,7 @@ model Testimonial {
   status          String           @default("pending")
   studentId       String
   title           String?
-  updatedAt       DateTime
+  updatedAt       DateTime @updatedAt
   adminNote       String?
   content         String
   Formation       Formation?       @relation(fields: [formationId], references: [id])
@@ -666,7 +666,7 @@ model Testimonial {
 }
 
 model User {
-  id            String        @id
+  id            String        @id @default(cuid())
   name          String?
   email         String        @unique
   emailVerified DateTime?
@@ -688,7 +688,7 @@ model VerificationToken {
 }
 
 model Account {
-  id                 String  @id
+  id                 String  @id @default(cuid())
   userId             String
   type               String
   provider           String

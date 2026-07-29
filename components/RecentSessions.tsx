@@ -112,6 +112,7 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
       try {
         const response = await fetch('/api/sessions', { cache: 'no-store' })
         if (!response.ok) throw new Error('Failed to fetch sessions')
+        const data = await response.json()
         const selected = selectSessions(data, limit)
         setSessions(selected)
         setFilteredSessions(selected)

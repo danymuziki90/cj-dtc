@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: 'desc' },
         include: {
           Formation: { select: { title: true } },
-          TrainingSession: { select: { title: true } }
+          TrainingSession: { select: { id: true, startDate: true } }
         }
       }),
       prisma.assignment.count({ where }),
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
       select: { id: true, title: true }
     })
     const sessions = await prisma.trainingSession.findMany({
-      select: { id: true, title: true, formationId: true }
+      select: { id: true, startDate: true, formationId: true }
     })
 
     return NextResponse.json({

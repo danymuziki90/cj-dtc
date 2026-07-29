@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import AdminShell from '@/components/admin-portal/AdminShell'
 
@@ -25,7 +25,8 @@ type Submission = {
   SubmissionFile: { id: number, name: string, url: string }[]
 }
 
-export default function AdminGererTravailPage({ params }: { params: { id: string } }) {
+export default function AdminGererTravailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
   const router = useRouter()
   const [assignment, setAssignment] = useState<Assignment | null>(null)
   const [submissions, setSubmissions] = useState<Submission[]>([])
@@ -40,8 +41,8 @@ export default function AdminGererTravailPage({ params }: { params: { id: string
     async function loadData() {
       try {
         const [res1, res2] = await Promise.all([
-          fetch(`/api/admin/travaux/${params.id}`),
-          fetch(`/api/admin/travaux/${params.id}/submissions`)
+          fetch(`/api/admin/travaux/${resolvedParams.id}`),
+          fetch(`/api/admin/travaux/${resolvedParams.id}/submissions`)
         ])
         
         if (!res1.ok || !res2.ok) throw new Error('Erreur de chargement des données')
@@ -55,7 +56,7 @@ export default function AdminGererTravailPage({ params }: { params: { id: string
       }
     }
     loadData()
-  }, [params.id])
+  }, [resolvedParams.id])
 
   async function submitGrade(e: FormEvent) {
     e.preventDefault()
@@ -63,7 +64,7 @@ export default function AdminGererTravailPage({ params }: { params: { id: string
     setSavingGrade(true)
     
     try {
-      const res = await fetch(`/api/admin/travaux/${params.id}/submissions/${gradingSubId}`, {
+      const res = await fetch(`/api/admin/travaux/${resolvedParams.id}/submissions/${gradingSubId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -85,11 +86,11 @@ export default function AdminGererTravailPage({ params }: { params: { id: string
     }
   }
 
-  if (loading) return <AdminShell><div className="p-8 text-center text-slate-500">Chargement...</div></AdminShell>
-  if (error || !assignment) return <AdminShell><div className="p-8 text-center text-red-500">{error || 'Travail introuvable'}</div></AdminShell>
+  if (loading) return <AdminShell title="Travaux"><div className="p-8 text-center text-slate-500">Chargement...</div></AdminShell>
+  if (error || !assignment) return <AdminShell title="Travaux"><div className="p-8 text-center text-red-500">{error || 'Travail introuvable'}</div></AdminShell>
 
   return (
-    <AdminShell>
+    <AdminShell title="Travaux">
       <div className="flex items-center justify-between mb-6">
         <div>
           <button 

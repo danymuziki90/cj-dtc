@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const numericId = Number(id)
   const session = await prisma.trainingSession.findUnique({
     where: { id: numericId },
-    include: { _count: { select: { enrollments: true, submissions: true } } },
+    include: { _count: { select: { enrollments: true, Submission: true } } },
   })
 
   if (!session) {

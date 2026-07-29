@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       _count: {
         select: {
           enrollments: true,
-          submissions: true,
+          Submission: true,
         },
       },
     },

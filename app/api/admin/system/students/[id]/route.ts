@@ -64,14 +64,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           },
         },
       },
-      submissions: {
+      Submission: {
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,
           status: true,
           submittedAt: true,
           updatedAt: true,
-          session: {
+          TrainingSession: {
             select: {
               id: true,
               startDate: true,
@@ -267,7 +267,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     })),
     payments,
     attendance,
-    submissions: (student as any).submissions || [],
+    submissions: (student as any).Submission || [],
     results,
     notes,
     certificates: [

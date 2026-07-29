@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string, subId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string, subId: string }> }) {
   try {
-    const submissionId = parseInt(params.subId, 10)
+    const submissionId = parseInt((await params).subId, 10)
     if (isNaN(submissionId)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
     const payload = await req.json()

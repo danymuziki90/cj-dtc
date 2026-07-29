@@ -178,8 +178,8 @@ export async function GET(request: NextRequest) {
         },
         include: {
           Formation: { select: { title: true } },
-          TrainingSession: { select: { title: true } },
-          submissions: {
+          TrainingSession: { select: { id: true } },
+          Submission: {
             where: { studentId: auth.student.id },
             include: { SubmissionFile: true }
           }

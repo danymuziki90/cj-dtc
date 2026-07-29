@@ -76,7 +76,7 @@ export default function AdminNouveauTravailPage() {
   }
 
   return (
-    <AdminShell>
+    <AdminShell title="Travaux">
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900">Nouveau Travail</h1>

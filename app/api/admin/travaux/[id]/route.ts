@@ -3,16 +3,16 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = parseInt(params.id, 10)
+    const id = parseInt((await params).id, 10)
     if (isNaN(id)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
     const assignment = await prisma.assignment.findUnique({
       where: { id },
       include: {
         Formation: { select: { title: true } },
-        TrainingSession: { select: { title: true } },
+        TrainingSession: { select: { id: true, startDate: true } },
         AssignmentFile: true,
       },
     })
@@ -28,9 +28,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = parseInt(params.id, 10)
+    const id = parseInt((await params).id, 10)
     if (isNaN(id)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
     const payload = await req.json()
@@ -79,9 +79,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = parseInt(params.id, 10)
+    const id = parseInt((await params).id, 10)
     if (isNaN(id)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
     await prisma.assignment.delete({
