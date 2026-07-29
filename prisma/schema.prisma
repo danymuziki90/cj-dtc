@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 // Enums convertis en String pour SQLite
 // enum Role {
 //   ADMIN
@@ -21,29 +20,31 @@ datasource db {
 // }
 
 model Student {
-  id            String        @id @default(cuid())
+  id            String  @id @default(cuid())
   firstName     String
   lastName      String
-  email         String        @unique
-  username      String?       @unique
+  email         String  @unique
+  username      String? @unique
   password      String
   phone         String?
-  studentNumber String        @unique
-  status        String        @default("ACTIVE")
-  role          String        @default("STUDENT")
-  
-  // Additional fields from registration form
-  dateOfBirth   DateTime?
-  address       String?
-  city          String?
-  country       String?
+  studentNumber String  @unique
+  status        String  @default("ACTIVE")
+  role          String  @default("STUDENT")
 
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  
+  // Additional fields from registration form
+  dateOfBirth DateTime?
+  address     String?
+  city        String?
+  country     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   passwordResetTokens PasswordResetToken[]
-  enrollments        Enrollment[]
-  certificates       Certificate[]
+  enrollments         Enrollment[]
+  certificates        Certificate[]
+  Submission          Submission[]
+  Testimonial         Testimonial[]
 
   @@index([username])
 }
@@ -110,18 +111,18 @@ model AdminAuditLog {
 }
 
 model News {
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-  published Boolean  @default(false)
-  author    String   @default("Admin")
-  category  String   @default("General")
-  tags      String   @default("")
-  imageData String?
+  id              String   @id @default(cuid())
+  title           String
+  content         String
+  published       Boolean  @default(false)
+  author          String   @default("Admin")
+  category        String   @default("General")
+  tags            String   @default("")
+  imageData       String?
   publicationDate DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  metadata  Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  metadata        Json?
 
   @@index([published])
   @@index([publicationDate])
@@ -129,10 +130,10 @@ model News {
 }
 
 model Formation {
-  id               Int      @id @default(autoincrement())
+  id               Int               @id @default(autoincrement())
   name             String?
   title            String
-  slug             String   @unique
+  slug             String            @unique
   description      String
   shortDescription String?
   objectifs        String?
@@ -141,7 +142,7 @@ model Formation {
   methodes         String?
   certification    String?
   categorie        String?
-  statut           String   @default("brouillon") // brouillon, publie, archive
+  statut           String            @default("brouillon") // brouillon, publie, archive
   imageUrl         String?
   gallery          Json?
   skillsAcquired   Json?
@@ -150,33 +151,37 @@ model Formation {
   level            String?
   format           String?
   languages        Json?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   certificates     Certificate[]
   enrollments      Enrollment[]
   sessions         TrainingSession[]
   documents        Document[]
   evaluations      Evaluation[]
+  Assignment       Assignment[]
+  Testimonial      Testimonial[]
 }
 
 model Certificate {
-  id         Int      @id @default(autoincrement())
-  code       String   @unique
-  type       String   @default("completion") // completion, attendance, excellence
-  holderName String
-  formation   Formation? @relation(fields: [formationId], references: [id])
-  formationId Int?
-  sessionId  Int?
-  session    TrainingSession? @relation(fields: [sessionId], references: [id])
-  enrollmentId Int?   @unique
-  enrollment Enrollment? @relation(fields: [enrollmentId], references: [id])
-  issuedAt   DateTime @default(now())
-  verified   Boolean  @default(false)
-  issuedBy   String?
-  fileUrl    String?
-  status     String   @default("actif") // actif, archive, revoque
-  studentId  String?
-  student    Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  id           Int              @id @default(autoincrement())
+  code         String           @unique
+  type         String           @default("completion") // completion, attendance, excellence
+  holderName   String
+  formation    Formation?       @relation(fields: [formationId], references: [id])
+  formationId  Int?
+  sessionId    Int?
+  session      TrainingSession? @relation(fields: [sessionId], references: [id])
+  enrollmentId Int?             @unique
+  enrollment   Enrollment?      @relation(fields: [enrollmentId], references: [id])
+  issuedAt     DateTime         @default(now())
+  verified     Boolean          @default(false)
+  issuedBy     String?
+  fileUrl      String?
+  status       String           @default("actif") // actif, archive, revoque
+  studentId    String?
+  student      Student?         @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  User         User?            @relation(fields: [userId], references: [id])
+  userId       String?
 
   @@index([formationId])
   @@index([sessionId])
@@ -186,51 +191,51 @@ model Certificate {
 }
 
 model Enrollment {
-  id                  Int      @id @default(autoincrement())
-  studentId           String?
-  student             Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
-  firstName           String
-  lastName            String
-  email               String
-  phone               String?
-  address             String?
-  matricule           String?  @unique
-  formationId         Int
-  formation           Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
-  sessionId           Int?
-  session             TrainingSession? @relation(fields: [sessionId], references: [id])
-  startDate           DateTime
-  status              String   @default("pending") // pending, accepted, confirmed, rejected, cancelled, completed
-  motivationLetter    String?
-  notes               String?
+  id               Int              @id @default(autoincrement())
+  studentId        String?
+  student          Student?         @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  firstName        String
+  lastName         String
+  email            String
+  phone            String?
+  address          String?
+  matricule        String?          @unique
+  formationId      Int
+  formation        Formation        @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  sessionId        Int?
+  session          TrainingSession? @relation(fields: [sessionId], references: [id])
+  startDate        DateTime
+  status           String           @default("pending") // pending, accepted, confirmed, rejected, cancelled, completed
+  motivationLetter String?
+  notes            String?
 
-  waitlist            Waitlist[]
-  attendances         Attendance[]
-  formAnswers         SessionFormAnswer[]
+  waitlist    Waitlist[]
+  attendances Attendance[]
+  formAnswers SessionFormAnswer[]
 
   // Certificats
-  certificateIssued   Boolean  @default(false)
-  certificateId       Int?     @unique
-  certificate         Certificate?
+  certificateIssued Boolean      @default(false)
+  certificateId     Int?         @unique
+  certificate       Certificate?
 
   // Évaluations
-  evaluation          Evaluation?
+  evaluation Evaluation?
 
   // Relances automatiques
-  lastReminderSent    DateTime?
-  reminderCount       Int      @default(0)
-  nextReminderDate    DateTime?
+  lastReminderSent DateTime?
+  reminderCount    Int       @default(0)
+  nextReminderDate DateTime?
 
   // Analytics et suivi
-  source              String?  // website, social_media, referral, search_engine, advertisement, other
-  sourceDetails       String?  // détails supplémentaires sur l'origine
-  employmentStatus    String?  // employed, unemployed, student, self_employed, other
-  insertionResult     String?  // placed, not_placed, pending (pour le suivi d'insertion professionnelle)
-  insertionDate       DateTime?
-  insertionNotes      String?
+  source           String? // website, social_media, referral, search_engine, advertisement, other
+  sourceDetails    String? // détails supplémentaires sur l'origine
+  employmentStatus String? // employed, unemployed, student, self_employed, other
+  insertionResult  String? // placed, not_placed, pending (pour le suivi d'insertion professionnelle)
+  insertionDate    DateTime?
+  insertionNotes   String?
 
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([formationId])
   @@index([studentId])
@@ -242,65 +247,69 @@ model Enrollment {
 }
 
 model TrainingSession {
-  id                Int         @id @default(autoincrement())
-  formationId       Int
-  formation         Formation   @relation(fields: [formationId], references: [id], onDelete: Cascade)
-  startDate         DateTime
-  endDate           DateTime
-  startTime         String
-  endTime           String
-  location          String?     @map("locationDetails")
-  format            String      @map("mode") // presentiel, distanciel, hybride
-  maxParticipants   Int         @default(25)
-  currentParticipants Int       @default(0)
-  status            String      @default("ouverte") // ouverte, fermee, complete, annulee, terminee
-  description       String?
-  prerequisites     String?
-  objectives        String?
-  imageUrl          String?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  enrollments       Enrollment[]
-  instructors       SessionInstructor[]
-  documents         Document[]
-  evaluations       Evaluation[]
-  certificates      Certificate[]
-  waitlist          Waitlist[]
-  attendances       Attendance[]
-  events            SessionEvent[]
-  formQuestions     SessionFormQuestion[]
+  id                  Int                   @id @default(autoincrement())
+  formationId         Int
+  formation           Formation             @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  startDate           DateTime
+  endDate             DateTime
+  startTime           String
+  endTime             String
+  location            String?               @map("locationDetails")
+  format              String                @map("mode") // presentiel, distanciel, hybride
+  maxParticipants     Int                   @default(25)
+  currentParticipants Int                   @default(0)
+  status              String                @default("ouverte") // ouverte, fermee, complete, annulee, terminee
+  description         String?
+  prerequisites       String?
+  objectives          String?
+  imageUrl            String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  enrollments         Enrollment[]
+  instructors         SessionInstructor[]
+  documents           Document[]
+  evaluations         Evaluation[]
+  certificates        Certificate[]
+  waitlist            Waitlist[]
+  attendances         Attendance[]
+  events              SessionEvent[]
+  formQuestions       SessionFormQuestion[]
+  Assignment          Assignment[]
+  Submission          Submission[]
+  Testimonial         Testimonial[]
+
   @@index([formationId])
   @@index([startDate])
   @@index([status])
 }
 
 model Instructor {
-  id          Int      @id @default(autoincrement())
-  firstName   String
-  lastName    String
-  email       String   @unique
-  phone       String?
-  bio         String?
-  expertise   String?  // domaines d'expertise
-  experience  String?  // années d'expérience
-  photoUrl    String?
-  status      String   @default("active") // active, inactive
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  sessions    SessionInstructor[]
+  id         Int                 @id @default(autoincrement())
+  firstName  String
+  lastName   String
+  email      String              @unique
+  phone      String?
+  bio        String?
+  expertise  String? // domaines d'expertise
+  experience String? // années d'expérience
+  photoUrl   String?
+  status     String              @default("active") // active, inactive
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  sessions   SessionInstructor[]
 
   @@index([email])
   @@index([status])
 }
 
 model SessionInstructor {
-  id           Int            @id @default(autoincrement())
+  id           Int             @id @default(autoincrement())
   sessionId    Int
   session      TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   instructorId Int
-  instructor   Instructor     @relation(fields: [instructorId], references: [id], onDelete: Cascade)
-  role         String         @default("formateur") // formateur, assistant, examinateur
-  createdAt    DateTime       @default(now())
+  instructor   Instructor      @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  role         String          @default("formateur") // formateur, assistant, examinateur
+  createdAt    DateTime        @default(now())
 
   @@unique([sessionId, instructorId])
   @@index([sessionId])
@@ -308,7 +317,7 @@ model SessionInstructor {
 }
 
 model Document {
-  id          Int      @id @default(autoincrement())
+  id          Int              @id @default(autoincrement())
   title       String
   description String?
   fileName    String
@@ -316,14 +325,14 @@ model Document {
   fileSize    Int
   mimeType    String
   formationId Int?
-  formation   Formation? @relation(fields: [formationId], references: [id])
+  formation   Formation?       @relation(fields: [formationId], references: [id])
   sessionId   Int?
   session     TrainingSession? @relation(fields: [sessionId], references: [id])
-  category    String   // syllabus, presentation, exercise, resource, certificate_template
-  isPublic    Boolean  @default(false)
-  uploadedBy  String?  // user ID
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  category    String // syllabus, presentation, exercise, resource, certificate_template
+  isPublic    Boolean          @default(false)
+  uploadedBy  String? // user ID
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@index([formationId])
   @@index([sessionId])
@@ -332,24 +341,24 @@ model Document {
 }
 
 model Evaluation {
-  id            Int      @id @default(autoincrement())
-  enrollmentId  Int
-  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  sessionId     Int?
-  session       TrainingSession? @relation(fields: [sessionId], references: [id])
-  formationId   Int
-  formation     Formation @relation(fields: [formationId], references: [id])
+  id           Int              @id @default(autoincrement())
+  enrollmentId Int
+  enrollment   Enrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  sessionId    Int?
+  session      TrainingSession? @relation(fields: [sessionId], references: [id])
+  formationId  Int
+  formation    Formation        @relation(fields: [formationId], references: [id])
 
   // Évaluation globale
-  overallRating Int      // 1-5 étoiles
+  overallRating  Int // 1-5 étoiles
   overallComment String?
 
   // Évaluation détaillée
-  contentRating     Int?     // qualité du contenu
-  instructorRating  Int?     // qualité du formateur
-  materialRating    Int?     // qualité des supports
-  organizationRating Int?    // organisation
-  facilityRating    Int?     // locaux/équipements
+  contentRating      Int? // qualité du contenu
+  instructorRating   Int? // qualité du formateur
+  materialRating     Int? // qualité des supports
+  organizationRating Int? // organisation
+  facilityRating     Int? // locaux/équipements
 
   // Questions ouvertes
   strengths       String?
@@ -357,8 +366,8 @@ model Evaluation {
   recommendations String?
 
   // Métadonnées
-  submittedAt     DateTime @default(now())
-  isAnonymous     Boolean  @default(false)
+  submittedAt DateTime @default(now())
+  isAnonymous Boolean  @default(false)
 
   @@unique([enrollmentId])
   @@index([formationId])
@@ -366,16 +375,15 @@ model Evaluation {
   @@index([overallRating])
 }
 
-
 model Waitlist {
-  id          Int      @id @default(autoincrement())
-  sessionId   Int
-  session     TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  id           Int             @id @default(autoincrement())
+  sessionId    Int
+  session      TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   enrollmentId Int
-  enrollment  Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  position    Int
-  addedAt     DateTime @default(now())
-  notifiedAt DateTime?
+  enrollment   Enrollment      @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  position     Int
+  addedAt      DateTime        @default(now())
+  notifiedAt   DateTime?
 
   @@unique([sessionId, enrollmentId])
   @@index([sessionId])
@@ -384,16 +392,16 @@ model Waitlist {
 }
 
 model Attendance {
-  id          Int      @id @default(autoincrement())
-  sessionId   Int
-  session     TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  id           Int             @id @default(autoincrement())
+  sessionId    Int
+  session      TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   enrollmentId Int
-  enrollment  Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  date        DateTime
-  status      String   // present, absent, late, excused
-  notes       String?
-  recordedAt  DateTime @default(now())
-  recordedBy  String?  // user ID
+  enrollment   Enrollment      @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  date         DateTime
+  status       String // present, absent, late, excused
+  notes        String?
+  recordedAt   DateTime        @default(now())
+  recordedBy   String? // user ID
 
   @@unique([sessionId, enrollmentId, date])
   @@index([sessionId])
@@ -403,20 +411,20 @@ model Attendance {
 }
 
 model B2BRequest {
-  id             Int      @id @default(autoincrement())
-  company        String
-  contactName    String
-  position       String?
-  email          String
-  phone          String?
-  sector         String?
-  employees      String?
-  needType       String
-  message        String?
-  status         String   @default("pending") // pending, contacted, qualified, archived
-  notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  company     String
+  contactName String
+  position    String?
+  email       String
+  phone       String?
+  sector      String?
+  employees   String?
+  needType    String
+  message     String?
+  status      String   @default("pending") // pending, contacted, qualified, archived
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([status])
   @@index([createdAt])
@@ -455,10 +463,10 @@ model SessionEvent {
   title       String
   description String?
   date        DateTime
-  startTime   String          // ex. "09:00"
-  endTime     String          // ex. "12:00"
-  type        String          // "class", "exam", "meeting", "other"
-  location    String?         // zoom link, room number
+  startTime   String // ex. "09:00"
+  endTime     String // ex. "12:00"
+  type        String // "class", "exam", "meeting", "other"
+  location    String? // zoom link, room number
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
@@ -471,32 +479,32 @@ model SessionEvent {
 // =============================================
 
 model SessionFormTemplate {
-  id          Int      @id @default(autoincrement())
+  id          Int                   @id @default(autoincrement())
   name        String
   description String?
   questions   SessionFormQuestion[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
 }
 
 model SessionFormQuestion {
-  id          Int      @id @default(autoincrement())
-  sessionId   Int
-  session     TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  templateId  Int?
-  template    SessionFormTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  id         Int                  @id @default(autoincrement())
+  sessionId  Int
+  session    TrainingSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  templateId Int?
+  template   SessionFormTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
 
-  label       String
-  type        String   // text_short | text_long | number | date | select | radio | checkbox | yes_no | file_upload
-  helpText    String?
-  required    Boolean  @default(false)
-  order       Int      @default(0)
-  options     String?  // JSON array ["Option A", "Option B"] pour select/radio/checkbox
-  fileTypes   String?  // JSON array ["pdf","docx"] pour file_upload
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  label     String
+  type      String // text_short | text_long | number | date | select | radio | checkbox | yes_no | file_upload
+  helpText  String?
+  required  Boolean  @default(false)
+  order     Int      @default(0)
+  options   String? // JSON array ["Option A", "Option B"] pour select/radio/checkbox
+  fileTypes String? // JSON array ["pdf","docx"] pour file_upload
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  answers     SessionFormAnswer[]
+  answers SessionFormAnswer[]
 
   @@index([sessionId])
   @@index([order])
@@ -504,19 +512,19 @@ model SessionFormQuestion {
 }
 
 model SessionFormAnswer {
-  id           Int      @id @default(autoincrement())
+  id           Int                 @id @default(autoincrement())
   questionId   Int
   question     SessionFormQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   enrollmentId Int
-  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  enrollment   Enrollment          @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
 
-  textValue    String?  // text_short, text_long, date, yes_no, number
-  jsonValue    String?  // JSON array pour checkbox
-  fileUrl      String?  // file_upload stockage URL
-  fileName     String?  // nom original du fichier
+  textValue String? // text_short, text_long, date, yes_no, number
+  jsonValue String? // JSON array pour checkbox
+  fileUrl   String? // file_upload stockage URL
+  fileName  String? // nom original du fichier
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([questionId, enrollmentId])
   @@index([questionId])
@@ -530,3 +538,171 @@ model EmailTemplate {
   updatedAt DateTime @updatedAt
 }
 
+model Assignment {
+  id                Int              @id @default(autoincrement())
+  title             String
+  description       String
+  type              String           @default("tp")
+  formationId       Int
+  deadline          DateTime
+  maxFileSize       Int              @default(10)
+  allowedFileTypes  String           @default("pdf,doc,docx,zip,rar,png,jpg,jpeg,excel,xls,xlsx")
+  instructions      String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime
+  sessionId         Int?
+  difficulty        String?          @default("intermediaire")
+  objectives        String?
+  published         Boolean          @default(true)
+  publishedAt       DateTime         @default(now())
+  allowResubmission Boolean          @default(true)
+  maxFiles          Int              @default(5)
+  status            String           @default("publie")
+  Formation         Formation        @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  TrainingSession   TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  AssignmentFile    AssignmentFile[]
+  Submission        Submission[]
+
+  @@index([deadline])
+  @@index([formationId])
+  @@index([published])
+  @@index([sessionId])
+  @@index([status])
+}
+
+model AssignmentFile {
+  id           Int        @id @default(autoincrement())
+  assignmentId Int
+  name         String
+  originalName String
+  size         Int
+  url          String
+  createdAt    DateTime   @default(now())
+  key          String?
+  mimeType     String     @default("application/octet-stream")
+  Assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@index([assignmentId])
+}
+
+model LMSConfig {
+  id        Int      @id @default(autoincrement())
+  provider  String
+  apiUrl    String?
+  apiKey    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Submission {
+  id              Int              @id @default(autoincrement())
+  assignmentId    Int
+  status          String           @default("submitted")
+  grade           Float?
+  feedback        String?
+  submittedAt     DateTime         @default(now())
+  gradedAt        DateTime?
+  gradedBy        String?
+  createdAt       DateTime         @default(now())
+  sessionId       Int?
+  studentId       String
+  updatedAt       DateTime
+  Assignment      Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  TrainingSession TrainingSession? @relation(fields: [sessionId], references: [id])
+  Student         Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  SubmissionFile  SubmissionFile[]
+
+  @@index([assignmentId])
+  @@index([sessionId])
+  @@index([status])
+  @@index([studentId])
+}
+
+model SubmissionFile {
+  id           Int        @id @default(autoincrement())
+  submissionId Int
+  name         String
+  originalName String
+  size         Int
+  mimeType     String     @default("application/octet-stream")
+  url          String
+  uploadedAt   DateTime   @default(now())
+  key          String?
+  Submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+}
+
+model Testimonial {
+  id              Int              @id @default(autoincrement())
+  createdAt       DateTime         @default(now())
+  adminReply      String?
+  formationId     Int?
+  rating          Int
+  sessionId       Int?
+  status          String           @default("pending")
+  studentId       String
+  title           String?
+  updatedAt       DateTime
+  adminNote       String?
+  content         String
+  Formation       Formation?       @relation(fields: [formationId], references: [id])
+  TrainingSession TrainingSession? @relation(fields: [sessionId], references: [id])
+  Student         Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([formationId])
+  @@index([sessionId])
+  @@index([status])
+  @@index([studentId])
+}
+
+model User {
+  id            String        @id
+  name          String?
+  email         String        @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String        @default("STUDENT")
+  createdAt     DateTime      @default(now())
+  Account       Account[]
+  Certificate   Certificate[]
+  Session       Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Account {
+  id                 String  @id
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  oauth_token_secret String?
+  oauth_token        String?
+  User               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}

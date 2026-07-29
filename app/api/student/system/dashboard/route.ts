@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
   const studentEmail = auth.student.email
 
   try {
-  const [enrollmentsRaw, portalCertificates, issuedCertificates, news, evaluations] =
+  const [enrollmentsRaw, portalCertificates, issuedCertificates, news, evaluations, assignments] =
     await Promise.all([
       prisma.enrollment.findMany({
         where: {
@@ -146,6 +146,46 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
+      // Fetch assignments based on enrollments
+      prisma.assignment.findMany({
+        where: {
+          published: true,
+          OR: [
+            // Student is enrolled in the formation (global assignments)
+            {
+              Formation: {
+                enrollments: {
+                  some: {
+                    studentId: auth.student.id,
+                    status: { in: ['accepted', 'confirmed', 'completed'] }
+                  }
+                }
+              },
+              sessionId: null
+            },
+            // Student is enrolled in the specific session
+            {
+              TrainingSession: {
+                enrollments: {
+                  some: {
+                    studentId: auth.student.id,
+                    status: { in: ['accepted', 'confirmed', 'completed'] }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        include: {
+          Formation: { select: { title: true } },
+          TrainingSession: { select: { title: true } },
+          submissions: {
+            where: { studentId: auth.student.id },
+            include: { SubmissionFile: true }
+          }
+        },
+        orderBy: { deadline: 'asc' }
+      })
     ])
 
   const enrollments = enrollmentsRaw as any[]
@@ -569,6 +609,7 @@ export async function GET(request: NextRequest) {
       news,
       attendance,
       results,
+      assignments,
       progress: {
         hoursCompleted,
         hoursRemaining,

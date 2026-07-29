@@ -266,7 +266,7 @@ export default function AdminDashboardPage() {
     return [
       { title: 'Formations', count: statsData?.totalFormations || '-', helper: 'Catalogue de formations actives', href: '/admin/formations', icon: GraduationCap },
       { title: 'Étudiants', count: statsData?.totalStudents || '-', helper: "Comptes et profils d'élèves", href: '/admin/students', icon: Users },
-      { title: 'Travaux', count: statsData?.totalAssignments || '-', helper: 'TP, devoirs et corrections', href: '/admin/assignments', icon: FolderKanban },
+      { title: 'Travaux', count: statsData?.totalAssignments || '-', helper: 'TP, devoirs et corrections', href: '/admin/travaux', icon: FolderKanban },
       { title: 'Actualités', count: kpiData?.totals?.newsPublished || '-', helper: 'Articles de blog et annonces', href: '/admin/articles', icon: Newspaper },
       { title: 'Entreprises', count: kpiData?.totals?.notificationsTotal || '-', helper: 'Suivi demandes B2B & CRM', href: '/admin/b2b', icon: Building2 },
       { title: 'Paramètres', count: 'Config', helper: 'Sécurité, JWT & configuration', href: '/admin/settings', icon: Settings2 },
@@ -393,7 +393,7 @@ export default function AdminDashboardPage() {
               value={kpiData.totals?.assignmentsPublished || 0}
               helper="Sujets de travaux mis en ligne"
               tone="neutral"
-              href="/admin/assignments"
+              href="/admin/travaux"
             />
             <DashboardKpiCard
               icon={FolderKanban}
@@ -403,7 +403,7 @@ export default function AdminDashboardPage() {
               trend={kpiData.trends?.submissionTrend || '0%'}
               trendDirection="up"
               tone="success"
-              href="/admin/assignments"
+              href="/admin/travaux"
             />
             <DashboardKpiCard
               icon={Newspaper}
@@ -528,7 +528,7 @@ export default function AdminDashboardPage() {
                 {reportingData.actionsNow?.submissionsPendingReview?.slice(0, 5).map((item) => (
                   <Link
                     key={item.id}
-                    href="/admin/assignments"
+                    href="/admin/travaux"
                     className="block rounded-2xl border border-slate-200/60 bg-slate-50/70 p-3.5 transition hover:border-[var(--admin-primary-200)] hover:bg-white dark:hover:bg-slate-800"
                   >
                     <div className="flex justify-between items-start gap-3">
