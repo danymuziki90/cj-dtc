@@ -80,7 +80,7 @@ function statusClasses(value: string) {
   return 'bg-blue-50 text-blue-700 ring-blue-100'
 }
 
-function selectSessions(data: SessionItem[]) {
+function selectSessions(data: SessionItem[], limit: number) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -94,10 +94,10 @@ function selectSessions(data: SessionItem[]) {
       return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     })
 
-  return openSessions.slice(0, 6)
+  return limit > 0 ? openSessions.slice(0, limit) : openSessions
 }
 
-export default function RecentSessions() {
+export default function RecentSessions({ limit = 6 }: { limit?: number }) {
   const params = useParams<{ locale: string }>()
   const locale = resolveSiteLocale(params?.locale)
   const t = copy[locale]
@@ -111,7 +111,7 @@ export default function RecentSessions() {
         const response = await fetch('/api/sessions', { cache: 'no-store' })
         if (!response.ok) throw new Error('Failed to fetch sessions')
         const data = (await response.json()) as SessionItem[]
-        setSessions(selectSessions(data))
+        setSessions(selectSessions(data, limit))
       } catch (error) {
         console.error('Error fetching sessions:', error)
       } finally {
@@ -201,6 +201,11 @@ export default function RecentSessions() {
                     </p>
 
                     <Link href={`/${locale}/formations/${session.formation.slug}`}>
+                      {session.adminMeta?.customTitle && session.adminMeta.customTitle !== session.formation.title && (
+                        <p className="mb-1 text-sm font-semibold text-[var(--cj-red)]">
+                          {session.formation.title}
+                        </p>
+                      )}
                       <h3 className="mb-3 line-clamp-2 text-xl font-bold text-cjblue transition-colors hover:text-[var(--cj-red)]">
                         {title}
                       </h3>
@@ -243,14 +248,16 @@ export default function RecentSessions() {
           })}
         </div>
 
-        <div className="mt-12 text-center">
-          <Link
-            href={`/${locale}/formations`}
-            className="inline-block rounded-lg bg-[var(--cj-blue)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--cj-red)]"
-          >
-            {locale === 'fr' ? 'Voir toutes les sessions' : 'View all sessions'}
-          </Link>
-        </div>
+        {limit > 0 && (
+          <div className="mt-12 text-center">
+            <Link
+              href={`/${locale}/formations`}
+              className="inline-block rounded-lg bg-[var(--cj-blue)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--cj-red)]"
+            >
+              {locale === 'fr' ? 'Voir toutes les sessions' : 'View all sessions'}
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   )

@@ -267,8 +267,12 @@ function SupportsContent() {
                   onClick={() => setOpenSessions((current) => ({ ...current, [group.session.id]: !current[group.session.id] }))}
                   className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-white"
                 >
-                  <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--cj-red)]">{group.formation?.title || 'Formation'}</p><h3 className="mt-1 font-semibold text-slate-950">Session du {new Date(group.session.startDate).toLocaleDateString('fr-FR')}</h3><p className="mt-1 text-sm text-slate-500">{group.documents.length} support{group.documents.length > 1 ? 's' : ''}{group.session.location ? ` · ${group.session.location}` : ''}</p></div>
-                  <ChevronDown className={`h-5 w-5 text-slate-500 transition ${openSessions[group.session.id] ? 'rotate-180' : ''}`} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-[var(--cj-red)]" title={group.formation?.title || 'Formation'}>{group.formation?.title || 'Formation'}</p>
+                    <h3 className="mt-1 truncate font-semibold text-slate-950">Session du {new Date(group.session.startDate).toLocaleDateString('fr-FR')}</h3>
+                    <p className="mt-1 truncate text-sm text-slate-500">{group.documents.length} support{group.documents.length > 1 ? 's' : ''}{group.session.location ? ` · ${group.session.location}` : ''}</p>
+                  </div>
+                  <ChevronDown className={`shrink-0 h-5 w-5 text-slate-500 transition ${openSessions[group.session.id] ? 'rotate-180' : ''}`} />
                 </button>
                 {openSessions[group.session.id] ? <div className="grid gap-4 border-t border-slate-200 bg-white p-4 md:grid-cols-2 xl:grid-cols-3">
             {group.documents.map((document) => {
@@ -289,7 +293,7 @@ function SupportsContent() {
                     </span>
                   </div>
 
-                  <h3 className="mt-5 text-lg font-semibold text-slate-950">{document.title}</h3>
+                  <h3 className="mt-5 break-words text-lg font-semibold text-slate-950">{document.title}</h3>
                   {document.description ? (
                     <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{document.description}</p>
                   ) : null}
@@ -301,9 +305,9 @@ function SupportsContent() {
                     <p>Ajoute le {new Date(document.createdAt).toLocaleDateString('fr-FR')}</p>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4">
-                    <span className="text-xs uppercase tracking-[0.18em] text-slate-400">{document.fileName}</span>
-                    <div className="flex gap-2">
+                  <div className="mt-5 flex flex-col gap-4 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="truncate text-xs uppercase tracking-[0.18em] text-slate-400" title={document.fileName}>{document.fileName}</span>
+                    <div className="flex flex-wrap gap-2 sm:shrink-0">
                     <a href={`/api/documents/${document.id}`} download={document.fileName} className={studentPrimaryButtonClassName}>
                       <Download className="h-4 w-4" />
                       Telecharger

@@ -19,7 +19,7 @@ export default function LocalizedSessionsPage() {
   return (
     <StudentAuthProvider>
       <Suspense fallback={<div className="p-10 text-center text-sm text-slate-500">Chargement des sessions...</div>}>
-        <RecentSessions />
+        <RecentSessions limit={0} />
       </Suspense>
     </StudentAuthProvider>
   )
