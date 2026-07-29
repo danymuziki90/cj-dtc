@@ -109,11 +109,11 @@ function NavLink({ href, label }: { href: string; label: string }) {
       href={href}
       aria-current={isActive ? 'page' : undefined}
       className={`
-        relative rounded-full px-3.5 py-1.5 text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap
+        relative rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap
         ${
           isActive
-            ? 'text-white bg-gradient-to-r from-[var(--cj-blue)] to-blue-600 shadow-md shadow-blue-950/50 border border-blue-400/40'
-            : 'text-slate-100 hover:text-white hover:bg-white/10 active:scale-95'
+            ? 'text-white bg-gradient-to-r from-[var(--cj-blue)] to-[#0a2e54] shadow-md shadow-[var(--cj-blue)]/20 border border-[var(--cj-blue)]/50'
+            : 'text-slate-700 hover:text-[var(--cj-blue)] hover:bg-slate-100/80 active:scale-95'
         }
       `}
     >
@@ -190,16 +190,16 @@ function DesktopDropdown({
         aria-expanded={isOpen}
         aria-haspopup="true"
         className={`
-          flex items-center gap-1 rounded-full px-3.5 py-1.5 text-xs font-bold tracking-wide text-slate-100 transition-all duration-200 hover:text-white hover:bg-white/10 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-400/50
-          ${isOpen ? 'text-blue-300 bg-white/15 shadow-sm' : ''}
-          group-hover/dropdown:text-blue-300 group-hover/dropdown:bg-white/15
+          flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[var(--cj-blue)]/30
+          ${isOpen ? 'text-[var(--cj-blue)] bg-slate-100/80 shadow-sm' : 'text-slate-700 hover:text-[var(--cj-blue)] hover:bg-slate-100/80'}
+          group-hover/dropdown:text-[var(--cj-blue)] group-hover/dropdown:bg-slate-100/80
         `}
       >
         <span>{label}</span>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-slate-300 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-blue-300' : ''
-          } group-hover/dropdown:rotate-180 group-hover/dropdown:text-blue-300`}
+          className={`h-3.5 w-3.5 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-[var(--cj-blue)]' : 'text-slate-400 group-hover/dropdown:text-[var(--cj-blue)]'
+          } group-hover/dropdown:rotate-180`}
         />
       </button>
 
@@ -217,7 +217,7 @@ function DesktopDropdown({
           }
         `}
       >
-        <div className="rounded-2xl border border-white/20 bg-slate-950/95 p-3 shadow-2xl shadow-black/80 backdrop-blur-2xl space-y-1.5">
+        <div className="rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl shadow-slate-200/50 backdrop-blur-xl space-y-1">
           {items.map((item) => {
             const Icon = item.icon
             return (
@@ -225,17 +225,17 @@ function DesktopDropdown({
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-all duration-200 hover:bg-white/10 hover:translate-x-1 focus:bg-white/10 focus:outline-none"
+                className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-all duration-200 hover:bg-slate-50 hover:translate-x-1 focus:bg-slate-50 focus:outline-none"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800/90 text-blue-400 border border-white/10 transition-colors group-hover/item:bg-[var(--cj-blue)] group-hover/item:text-white group-hover/item:border-blue-400/50 shadow-sm">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--cj-blue)]/5 text-[var(--cj-blue)] border border-[var(--cj-blue)]/10 transition-colors group-hover/item:bg-[var(--cj-blue)] group-hover/item:text-white group-hover/item:border-[var(--cj-blue)]/30 shadow-sm">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-100 group-hover/item:text-white transition-colors">
+                  <div className="text-xs font-bold text-slate-800 group-hover/item:text-[var(--cj-blue)] transition-colors">
                     {item.label}
                   </div>
                   {item.description && (
-                    <div className="text-[11px] text-slate-400 group-hover/item:text-slate-300 leading-snug">{item.description}</div>
+                    <div className="text-[11px] text-slate-500 group-hover/item:text-slate-600 leading-snug mt-0.5">{item.description}</div>
                   )}
                 </div>
               </Link>
@@ -565,12 +565,12 @@ export default function Header() {
             />
           </Link>
 
-          {/* ÎLOT 2 (CENTRE) : CAPSULE ARSP GLASSMORPHISM ENCADRÉE DE NAVIGATION DESKTOP */}
+          {/* ÎLOT 2 (CENTRE) : CAPSULE NAVIGATION DESKTOP */}
           <nav
-            className={`hidden lg:flex items-center gap-1 rounded-full px-6 py-2 transition-all duration-500 ${
+            className={`hidden lg:flex items-center gap-0.5 rounded-full px-3 py-1.5 transition-all duration-500 ${
               scrolled
-                ? 'border border-white/20 bg-slate-900/80 shadow-md backdrop-blur-xl hover:border-white/40 hover:bg-slate-900/95 hover:shadow-xl'
-                : 'border border-white/25 bg-slate-900/60 shadow-2xl backdrop-blur-xl hover:border-white/40 hover:bg-slate-900/80 shadow-black/40'
+                ? 'border border-slate-200/80 bg-white/95 shadow-lg shadow-slate-200/50 backdrop-blur-xl hover:border-slate-300 hover:bg-white hover:shadow-xl'
+                : 'border border-slate-200/60 bg-white/90 shadow-xl shadow-black/5 backdrop-blur-md hover:border-slate-300 hover:bg-white/95'
             }`}
             aria-label="Navigation principale Desktop"
           >
