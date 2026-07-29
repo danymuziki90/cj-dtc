@@ -501,7 +501,7 @@ export default function AdminDashboardPage() {
                   <ActivityTimelineItem
                     key={index}
                     title={activity.title}
-                    description={\`Par \${activity.student}\`}
+                    description={`Par ${activity.student}`}
                     time={activity.date}
                     type={activity.type}
                   />
@@ -563,7 +563,7 @@ export default function AdminDashboardPage() {
                 {reportingData.actionsNow?.studentsBlockedWithoutAccount?.slice(0, 5).map((item) => (
                   <Link
                     key={item.enrollmentId}
-                    href={\`/admin/enrollments\`}
+                    href={`/admin/enrollments`}
                     className="block rounded-2xl border border-slate-200/60 bg-slate-50/70 p-3.5 transition hover:border-[var(--admin-primary-200)] hover:bg-white dark:hover:bg-slate-800"
                   >
                     <div className="flex justify-between items-start gap-3">
