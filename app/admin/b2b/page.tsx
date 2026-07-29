@@ -94,7 +94,7 @@ export default function AdminB2BPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [statusFilter, debouncedSearch, page, error]);
+  }, [statusFilter, debouncedSearch, page]); // Removing error from deps to avoid triggering unnecessary fetches
 
   // Initial and parameter change fetch
   useEffect(() => {

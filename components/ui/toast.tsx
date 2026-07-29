@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { createContext, useContext, useState, useCallback } from 'react'
 
@@ -152,21 +152,21 @@ const ToastContainer: React.FC = () => {
 export const useToastNotification = () => {
   const { addToast } = useToast()
 
-  const success = (title: string, message?: string) => {
+  const success = useCallback((title: string, message?: string) => {
     addToast({ type: 'success', title, message })
-  }
+  }, [addToast])
 
-  const error = (title: string, message?: string) => {
+  const error = useCallback((title: string, message?: string) => {
     addToast({ type: 'error', title, message })
-  }
+  }, [addToast])
 
-  const warning = (title: string, message?: string) => {
+  const warning = useCallback((title: string, message?: string) => {
     addToast({ type: 'warning', title, message })
-  }
+  }, [addToast])
 
-  const info = (title: string, message?: string) => {
+  const info = useCallback((title: string, message?: string) => {
     addToast({ type: 'info', title, message })
-  }
+  }, [addToast])
 
   return { success, error, warning, info }
 }
