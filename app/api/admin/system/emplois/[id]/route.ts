@@ -180,7 +180,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   if (auth.error) return auth.error
 
   const { id } = await params
-  const existing = await (prisma as any).news.findUnique({ where: { id } })
+  const existing = await prisma.news.findUnique({ where: { id } })
   if (!existing) {
     return NextResponse.json({ error: 'Actualité introuvable.' }, { status: 404 })
   }
@@ -228,7 +228,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const finalCategory = parsed.data.category?.trim() || DEFAULT_CATEGORY
 
-    const article = await (prisma as any).news.update({
+    const article = await prisma.news.update({
       where: { id },
       data: {
         title: parsed.data.title,
@@ -260,7 +260,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   const { id } = await params
 
   try {
-    const existing = await (prisma as any).news.findUnique({ where: { id } })
+    const existing = await prisma.news.findUnique({ where: { id } })
     if (!existing) {
       return NextResponse.json({ error: 'Actualité introuvable.' }, { status: 404 })
     }
@@ -270,7 +270,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       await tryDeleteImage(existing.imageData)
     }
 
-    await (prisma as any).news.delete({ where: { id } })
+    await prisma.news.delete({ where: { id } })
     return NextResponse.json({ success: true })
   } catch (error: any) {
     if (error?.code === 'P2025') {

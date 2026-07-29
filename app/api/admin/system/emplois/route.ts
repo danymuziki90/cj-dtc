@@ -214,10 +214,9 @@ export async function GET(request: NextRequest) {
     where.publicationDate = { gte: start, lt: end }
   }
 
-  const newsDelegate = (prisma as any).news
-  const total = await newsDelegate.count({ where })
+  const total = await prisma.news.count({ where })
 
-  const news = await newsDelegate.findMany({
+  const news = await prisma.news.findMany({
     where: { ...where, category: 'Emplois' },
     orderBy: [{ publicationDate: 'desc' }, { createdAt: 'desc' }],
     ...(shouldPaginate
@@ -228,7 +227,7 @@ export async function GET(request: NextRequest) {
       : {}),
   })
 
-  const categoriesRows = await newsDelegate.findMany({
+  const categoriesRows = await prisma.news.findMany({
     where: {
       category: 'Emplois',
     },
@@ -295,7 +294,7 @@ export async function POST(request: NextRequest) {
   const tags = normalizeTags(parsed.data.tags).join(',')
   const finalCategory = parsed.data.category?.trim() || DEFAULT_CATEGORY
 
-  const article = await (prisma as any).news.create({
+  const article = await prisma.news.create({
     data: {
       title: parsed.data.title,
       content: sanitizedContent,

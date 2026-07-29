@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
 
 export const dynamic = 'force-dynamic'

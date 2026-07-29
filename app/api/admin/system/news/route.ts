@@ -206,10 +206,9 @@ export async function GET(request: NextRequest) {
     where.publicationDate = { gte: start, lt: end }
   }
 
-  const newsDelegate = (prisma as any).news
-  const total = await newsDelegate.count({ where })
+  const total = await prisma.news.count({ where })
 
-  const news = await newsDelegate.findMany({
+  const news = await prisma.news.findMany({
     where,
     orderBy: [{ publicationDate: 'desc' }, { createdAt: 'desc' }],
     ...(shouldPaginate
@@ -220,7 +219,7 @@ export async function GET(request: NextRequest) {
       : {}),
   })
 
-  const categoriesRows = await newsDelegate.findMany({
+  const categoriesRows = await prisma.news.findMany({
     where: {
       category: {
         not: '',
@@ -288,8 +287,15 @@ export async function POST(request: NextRequest) {
 
   const tags = normalizeTags(parsed.data.tags).join(',')
   const finalCategory = parsed.data.category?.trim() || DEFAULT_CATEGORY
+  
+  if (finalCategory.toLowerCase() === 'emplois') {
+    return NextResponse.json(
+      { error: 'Pour créer une offre d\'emploi, veuillez utiliser le module Emplois dédié.' },
+      { status: 400 }
+    )
+  }
 
-  const article = await (prisma as any).news.create({
+  const article = await prisma.news.create({
     data: {
       title: parsed.data.title,
       content: sanitizedContent,

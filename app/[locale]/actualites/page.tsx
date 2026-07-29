@@ -102,7 +102,17 @@ function ActualitesContent() {
     }
 
     setNews(payload.news || [])
-    setCategories(payload.categories || [])
+    const fetchedCategories = payload.categories || []
+    setCategories(fetchedCategories)
+    
+    // Normalize category case if there's a match
+    if (category !== 'all') {
+      const exactMatch = fetchedCategories.find(c => c.toLowerCase() === category.toLowerCase())
+      if (exactMatch && exactMatch !== category) {
+        setCategory(exactMatch)
+      }
+    }
+    
     setPagination(payload.pagination || { page: 1, pageSize: PAGE_SIZE, total: 0, pageCount: 1 })
   }
 

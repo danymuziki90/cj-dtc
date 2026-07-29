@@ -20,11 +20,13 @@ function parseTags(value?: string | null) {
     .filter(Boolean)
 }
 
-function toPlainText(value: string) {
+function toPlainText(value?: string | null) {
+  if (!value) return ''
   return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
-function createNewsSlug(id: string, title: string) {
+function createNewsSlug(id: string, title?: string | null) {
+  if (!title) return id
   const safeTitle = title
     .normalize('NFKD')
     .toLowerCase()
@@ -36,10 +38,10 @@ function createNewsSlug(id: string, title: string) {
 }
 
 function mapNewsItem(item: any) {
-  const excerpt = toPlainText(item.content || '')
+  const excerpt = toPlainText(item.content)
   return {
     id: item.id,
-    slug: createNewsSlug(item.id, item.title || ''),
+    slug: createNewsSlug(item.id, item.title),
     title: item.title,
     content: item.content,
     excerpt: excerpt.length > 170 ? `${excerpt.slice(0, 170).trimEnd()}...` : excerpt,
@@ -51,6 +53,7 @@ function mapNewsItem(item: any) {
     publicationDate: item.publicationDate || item.createdAt,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
+    metadata: item.metadata || {},
   }
 }
 
@@ -122,10 +125,9 @@ export async function GET(request: NextRequest) {
       where.publicationDate = { gte: start, lt: end }
     }
 
-    const newsDelegate = (prisma as any).news
-    const total = await newsDelegate.count({ where })
+    const total = await prisma.news.count({ where })
 
-    const news = await newsDelegate.findMany({
+    const news = await prisma.news.findMany({
       where,
       orderBy: [{ publicationDate: 'desc' }, { createdAt: 'desc' }],
       ...(shouldUseLimit
@@ -138,7 +140,7 @@ export async function GET(request: NextRequest) {
           }),
     })
 
-    const categoriesRows = await newsDelegate.findMany({
+    const categoriesRows = await prisma.news.findMany({
       where: {
         ...(publishedOnly ? { published: true } : {}),
         category: {
