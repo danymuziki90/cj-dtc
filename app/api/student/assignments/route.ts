@@ -4,6 +4,55 @@ import { requireStudent } from '@/lib/auth-portal/guards'
 
 export const dynamic = 'force-dynamic'
 
+export async function GET(req: NextRequest) {
+  const auth = await requireStudent(req)
+  if (auth.error) return auth.error
+
+  try {
+    const enrollments = await prisma.enrollment.findMany({
+      where: {
+        studentId: auth.student.id,
+        status: { in: ['accepted', 'confirmed', 'completed'] }
+      }
+    })
+
+    const formationIds = enrollments.map(e => e.formationId)
+    const sessionIds = enrollments.map(e => e.sessionId).filter(Boolean) as number[]
+
+    const assignments = await prisma.assignment.findMany({
+      where: {
+        published: true,
+        OR: [
+          { sessionId: { in: sessionIds } },
+          { formationId: { in: formationIds }, sessionId: null }
+        ]
+      },
+      include: {
+        Formation: { select: { title: true } },
+        TrainingSession: { select: { id: true, startDate: true } },
+        Submission: {
+          where: { studentId: auth.student.id },
+          include: { SubmissionFile: true }
+        },
+        AssignmentFile: true
+      }
+    })
+
+    const formattedAssignments = assignments.map(a => ({
+      ...a,
+      formation: a.Formation,
+      session: a.TrainingSession,
+      submissions: a.Submission,
+      files: a.AssignmentFile
+    }))
+
+    return NextResponse.json({ assignments: formattedAssignments }, { status: 200 })
+  } catch (error) {
+    console.error('[API] Error fetching assignments:', error)
+    return NextResponse.json({ error: 'Failed to fetch assignments' }, { status: 500 })
+  }
+}
+
 export async function POST(req: NextRequest) {
   const auth = await requireStudent(req)
   if (auth.error) return auth.error
