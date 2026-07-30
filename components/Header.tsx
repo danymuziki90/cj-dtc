@@ -475,8 +475,8 @@ export default function Header() {
       <div
         className={`hidden lg:block text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'border-b border-slate-800/80 bg-slate-950/95 text-slate-300 shadow-inner'
-            : 'border-b border-white/10 bg-gradient-to-b from-black/70 via-slate-950/30 to-transparent text-slate-100 backdrop-blur-md'
+            ? 'border-b border-[#0a2e54]/50 bg-[#061b36]/95 text-blue-100 shadow-inner backdrop-blur-md'
+            : 'border-b border-white/10 bg-gradient-to-b from-[#061b36]/90 via-[#061b36]/40 to-transparent text-slate-100 backdrop-blur-md'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -549,8 +549,8 @@ export default function Header() {
       <div
         className={`w-full transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'border-b border-slate-800/90 bg-slate-950/95 backdrop-blur-2xl shadow-2xl shadow-slate-950/60 py-2.5'
-            : 'border-b border-white/10 bg-slate-950/30 backdrop-blur-md shadow-lg shadow-black/10 py-3.5'
+            ? 'border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
+            : 'border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
