@@ -10,70 +10,56 @@ const contactSchema = z.object({
   message: z.string().trim().min(10, 'Le message doit contenir au moins 10 caractères.'),
 })
 
-export async function POST(req: Request) {
-  try {
-    const parsed = contactSchema.safeParse(await req.json())
-    if (!parsed.success) {
-      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-      return NextResponse.json({ error: errorMsg }, { status: 400 })
+import { NextRequest } from 'next/server'
+import { apiHandler, ApiError } from '@/lib/api-error'
+
+export const POST = apiHandler(async (req: NextRequest) => {
+  const { name, email, subject, message } = contactSchema.parse(await req.json())
+
+  // Save contact message in DB
+  await prisma.contactMessage.create({
+    data: {
+      name,
+      email,
+      subject,
+      message,
+      status: 'unread'
     }
+  })
 
-    const { name, email, subject, message } = parsed.data
-
-    // Save contact message in DB
-    await prisma.contactMessage.create({
-      data: {
-        name,
-        email,
-        subject,
-        message,
-        status: 'unread'
-      }
-    })
-
-    // Send email using existing email service
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #002D72;">Nouveau message de contact</h2>
-        <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <p><strong>Nom :</strong> ${name}</p>
-          <p><strong>Email :</strong> ${email}</p>
-          <p><strong>Sujet :</strong> ${subject}</p>
-        </div>
-        <div style="background-color: white; padding: 20px; border-left: 4px solid #E30613; margin: 20px 0;">
-          <p style="white-space: pre-wrap;">${message}</p>
-        </div>
-        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-        <p style="font-size: 12px; color: #666;">
-          Centre Panafricain de Formation Professionnelle<br>
-          CJ DEVELOPMENT TRAINING CENTER
-        </p>
+  // Send email using existing email service
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #002D72;">Nouveau message de contact</h2>
+      <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <p><strong>Nom :</strong> ${name}</p>
+        <p><strong>Email :</strong> ${email}</p>
+        <p><strong>Sujet :</strong> ${subject}</p>
       </div>
-    `
+      <div style="background-color: white; padding: 20px; border-left: 4px solid #E30613; margin: 20px 0;">
+        <p style="white-space: pre-wrap;">${message}</p>
+      </div>
+      <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+      <p style="font-size: 12px; color: #666;">
+        Centre Panafricain de Formation Professionnelle<br>
+        CJ DEVELOPMENT TRAINING CENTER
+      </p>
+    </div>
+  `
 
-    const emailSent = await sendEmail({
-      to: process.env.CONTACT_EMAIL || process.env.MAIL_USER || 'contact@cjdevelopmenttc.org',
-      replyTo: email,
-      subject: `Contact: ${subject}`,
-      html: emailHtml
-    })
+  const emailSent = await sendEmail({
+    to: process.env.CONTACT_EMAIL || process.env.MAIL_USER || 'contact@cjdevelopmenttc.org',
+    replyTo: email,
+    subject: `Contact: ${subject}`,
+    html: emailHtml
+  })
 
-    if (!emailSent) {
-      return NextResponse.json(
-        { error: 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer plus tard.' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json(
-      { message: 'Message envoyé avec succès' },
-      { status: 200 }
-    )
-  } catch (error) {
-    console.error('Contact form error:', error)
-    return NextResponse.json(
-      { error: 'Erreur lors de l\'envoi du message' },
-      { status: 500 }
-    )
+  if (!emailSent) {
+    throw new ApiError(500, 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer plus tard.')
   }
-}
+
+  return NextResponse.json(
+    { message: 'Message envoyé avec succès' },
+    { status: 200 }
+  )
+})

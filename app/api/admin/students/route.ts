@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '../../../../lib/prisma'
+import { apiHandler, ApiError } from '@/lib/api-error'
 
-export async function GET(req: NextRequest) {
-  try {
-    const session: any = await getServerSession(authOptions)
-    
-    if (!session || session.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+export const GET = apiHandler(async (req: NextRequest) => {
+  const session: any = await getServerSession(authOptions)
+  
+  if (!session || session.user?.role !== 'admin') {
+    throw new ApiError(403, 'Accès non autorisé')
+  }
 
     // Récupérer toutes les inscriptions avec les informations des utilisateurs
     const enrollments = await prisma.enrollment.findMany({
@@ -52,9 +52,5 @@ export async function GET(req: NextRequest) {
 
     const students = Array.from(studentMap.values())
 
-    return NextResponse.json(students)
-  } catch (error) {
-    console.error('Erreur lors du chargement des étudiants:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
-  }
-}
+  return NextResponse.json(students)
+})

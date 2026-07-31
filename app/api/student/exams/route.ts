@@ -3,19 +3,19 @@ import { getServerSession } from 'next-auth/next'
 import { z } from 'zod'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '../../../../lib/prisma'
+import { apiHandler, ApiError } from '@/lib/api-error'
 
 const examSubmissionSchema = z.object({
   examId: z.union([z.number(), z.string()]).transform(val => Number(val)),
   answers: z.record(z.any()),
 })
 
-export async function GET(req: NextRequest) {
-  try {
-    const session: any = await getServerSession(authOptions)
-    
-    if (!session || session.user?.role !== 'student') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+export const GET = apiHandler(async (req: NextRequest) => {
+  const session: any = await getServerSession(authOptions)
+  
+  if (!session || session.user?.role !== 'student') {
+    throw new ApiError(403, 'Accès non autorisé')
+  }
 
     // Simuler les examens (en réalité, viendraient de la base de données)
     const exams = [
@@ -120,28 +120,17 @@ export async function GET(req: NextRequest) {
       }
     ]
 
-    return NextResponse.json(exams)
-  } catch (error) {
-    console.error('Erreur lors du chargement des examens:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  return NextResponse.json(exams)
+})
+
+export const POST = apiHandler(async (req: NextRequest) => {
+  const session: any = await getServerSession(authOptions)
+  
+  if (!session || session.user?.role !== 'student') {
+    throw new ApiError(403, 'Accès non autorisé')
   }
-}
 
-export async function POST(req: NextRequest) {
-  try {
-    const session: any = await getServerSession(authOptions)
-    
-    if (!session || session.user?.role !== 'student') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
-
-    const parsed = examSubmissionSchema.safeParse(await req.json())
-    if (!parsed.success) {
-      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-      return NextResponse.json({ error: errorMsg }, { status: 400 })
-    }
-
-    const { examId, answers } = parsed.data
+  const { examId, answers } = examSubmissionSchema.parse(await req.json())
 
     // Simuler la soumission (en réalité, viendra de la base de données)
     const submission = {
@@ -178,13 +167,8 @@ export async function POST(req: NextRequest) {
       score
     }
 
-    return NextResponse.json({
-      success: true,
-      submission: submissionWithScore
-    }, { status: 201 })
-
-  } catch (error) {
-    console.error('Erreur lors de la soumission:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
-  }
-}
+  return NextResponse.json({
+    success: true,
+    submission: submissionWithScore
+  }, { status: 201 })
+})

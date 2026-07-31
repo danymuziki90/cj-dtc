@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { apiHandler, ApiError } from '@/lib/api-error'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
@@ -43,9 +44,8 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 // GET /api/sessions - Récupérer toutes les sessions
-export async function GET(request: NextRequest) {
-    try {
-        const adminAccess = await requireAdmin(request)
+export const GET = apiHandler(async (request: NextRequest) => {
+    const adminAccess = await requireAdmin(request)
         const isAdmin = !adminAccess.error
         const now = new Date()
         const sessions = isAdmin
@@ -96,52 +96,39 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        return NextResponse.json(sessionsWithCount, { headers: { 'Cache-Control': 'no-store, max-age=0, must-revalidate' } })
-    } catch (error) {
-        console.error('Erreur lors de la récupération des sessions:', error)
-        return NextResponse.json(
-            { error: 'Erreur lors de la récupération des sessions' },
-            { status: 500 }
-        )
-    }
-}
+    return NextResponse.json(sessionsWithCount, { headers: { 'Cache-Control': 'no-store, max-age=0, must-revalidate' } })
+})
 
 // POST /api/sessions - Créer une nouvelle session
-export async function POST(request: NextRequest) {
+export const POST = apiHandler(async (request: NextRequest) => {
     const auth = await requireAdmin(request)
-    if (auth.error) return auth.error
-    try {
-        const parsed = sessionSchema.safeParse(await request.json())
-        if (!parsed.success) {
-            const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-            return NextResponse.json({ error: errorMsg }, { status: 400 })
-        }
+    if (auth.error) throw new ApiError(403, "Accès non autorisé")
 
-        const {
-            formationId,
-            formationType,
-            startDate,
-            endDate,
-            startTime,
-            endTime,
-            location,
-            format,
-            maxParticipants,
-            price,
-            description,
-            prerequisites,
-            objectives,
-            imageUrl,
-            sessionType,
-            durationLabel,
-            paymentInfo,
-            customTitle,
-            participationType,
-            prerequisitesText,
-            registrationDeadline,
-            duplicateFromSessionId,
-            status,
-        } = parsed.data
+    const {
+        formationId,
+        formationType,
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        location,
+        format,
+        maxParticipants,
+        price,
+        description,
+        prerequisites,
+        objectives,
+        imageUrl,
+        sessionType,
+        durationLabel,
+        paymentInfo,
+        customTitle,
+        participationType,
+        prerequisitesText,
+        registrationDeadline,
+        duplicateFromSessionId,
+        status,
+    } = sessionSchema.parse(await request.json())
 
         let resolvedFormationId = formationId ? parseInt(String(formationId)) : NaN
 
@@ -227,12 +214,5 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        return NextResponse.json(session, { status: 201 })
-    } catch (error) {
-        console.error('Erreur lors de la création de la session:', error)
-        return NextResponse.json(
-            { error: 'Erreur lors de la création de la session' },
-            { status: 500 }
-        )
-    }
-}
+    return NextResponse.json(session, { status: 201 })
+})

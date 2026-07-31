@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { z } from 'zod'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '../../../../lib/prisma'
+import { apiHandler, ApiError } from '@/lib/api-error'
 
 const courseSchema = z.object({
   title: z.string().trim().min(1, 'Titre requis'),
@@ -15,13 +16,12 @@ const courseSchema = z.object({
   videoUrl: z.string().url('URL vidéo invalide').optional().nullable(),
 })
 
-export async function GET(req: NextRequest) {
-  try {
-    const session: any = await getServerSession(authOptions)
-    
-    if (!session || session.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
+export const GET = apiHandler(async (req: NextRequest) => {
+  const session: any = await getServerSession(authOptions)
+  
+  if (!session || session.user?.role !== 'admin') {
+    throw new ApiError(403, 'Accès non autorisé')
+  }
 
     // Simuler les cours (en réalité, viendraient de la base de données)
     const courses = [
@@ -172,28 +172,17 @@ Comprendre les fondamentaux du marketing digital et ses applications.
       }
     ]
 
-    return NextResponse.json(courses)
-  } catch (error) {
-    console.error('Erreur lors du chargement des cours:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  return NextResponse.json(courses)
+})
+
+export const POST = apiHandler(async (req: NextRequest) => {
+  const session: any = await getServerSession(authOptions)
+  
+  if (!session || session.user?.role !== 'admin') {
+    throw new ApiError(403, 'Accès non autorisé')
   }
-}
 
-export async function POST(req: NextRequest) {
-  try {
-    const session: any = await getServerSession(authOptions)
-    
-    if (!session || session.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
-    }
-
-    const parsed = courseSchema.safeParse(await req.json())
-    if (!parsed.success) {
-      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-      return NextResponse.json({ error: errorMsg }, { status: 400 })
-    }
-
-    const { title, description, content, type, formationId, order, duration, videoUrl } = parsed.data
+  const { title, description, content, type, formationId, order, duration, videoUrl } = courseSchema.parse(await req.json())
 
     // Créer un nouveau cours (simulation)
     const newCourse = {
@@ -212,9 +201,5 @@ export async function POST(req: NextRequest) {
       _count: { progress: 0 }
     }
 
-    return NextResponse.json(newCourse, { status: 201 })
-  } catch (error) {
-    console.error('Erreur lors de la création du cours:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
-  }
-}
+  return NextResponse.json(newCourse, { status: 201 })
+})

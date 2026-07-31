@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '../../../lib/prisma'
+import { apiHandler, ApiError } from '@/lib/api-error'
 
 const evaluationSchema = z.object({
   enrollmentId: z.union([z.number(), z.string()]).transform(val => Number(val)),
@@ -20,9 +21,8 @@ const evaluationSchema = z.object({
 })
 
 // GET /api/evaluations - Récupérer toutes les évaluations
-export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = request.nextUrl
+export const GET = apiHandler(async (request: NextRequest) => {
+    const { searchParams } = request.nextUrl
         const formationId = searchParams.get('formationId')
         const sessionId = searchParams.get('sessionId')
 
@@ -50,41 +50,27 @@ export async function GET(request: NextRequest) {
             orderBy: { submittedAt: 'desc' }
         })
 
-        return NextResponse.json(evaluations)
-    } catch (error) {
-        console.error('Erreur lors de la récupération des évaluations:', error)
-        return NextResponse.json(
-            { error: 'Erreur lors de la récupération des évaluations' },
-            { status: 500 }
-        )
-    }
-}
+    return NextResponse.json(evaluations)
+})
 
 // POST /api/evaluations - Créer une nouvelle évaluation
-export async function POST(request: NextRequest) {
-    try {
-        const parsed = evaluationSchema.safeParse(await request.json())
-        if (!parsed.success) {
-            const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-            return NextResponse.json({ error: errorMsg }, { status: 400 })
-        }
-
-        const {
-            enrollmentId,
-            sessionId,
-            formationId,
-            overallRating,
-            overallComment,
-            contentRating,
-            instructorRating,
-            materialRating,
-            organizationRating,
-            facilityRating,
-            strengths,
-            improvements,
-            recommendations,
-            isAnonymous
-        } = parsed.data
+export const POST = apiHandler(async (request: NextRequest) => {
+    const {
+        enrollmentId,
+        sessionId,
+        formationId,
+        overallRating,
+        overallComment,
+        contentRating,
+        instructorRating,
+        materialRating,
+        organizationRating,
+        facilityRating,
+        strengths,
+        improvements,
+        recommendations,
+        isAnonymous
+    } = evaluationSchema.parse(await request.json())
 
         // Vérifier que l'inscription existe et est terminée
         const enrollment = await prisma.enrollment.findUnique({
@@ -92,19 +78,13 @@ export async function POST(request: NextRequest) {
             include: { formation: true }
         })
 
-        if (!enrollment) {
-            return NextResponse.json(
-                { error: 'Inscription non trouvée' },
-                { status: 404 }
-            )
-        }
+    if (!enrollment) {
+        throw new ApiError(404, 'Inscription non trouvée')
+    }
 
-        if (enrollment.status !== 'completed') {
-            return NextResponse.json(
-                { error: 'L\'évaluation ne peut être soumise que pour une formation terminée' },
-                { status: 400 }
-            )
-        }
+    if (enrollment.status !== 'completed') {
+        throw new ApiError(400, "L'évaluation ne peut être soumise que pour une formation terminée")
+    }
 
         // Créer l'évaluation
         const evaluation = await prisma.evaluation.create({
@@ -126,12 +106,5 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        return NextResponse.json(evaluation, { status: 201 })
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'évaluation:', error)
-        return NextResponse.json(
-            { error: 'Erreur lors de la création de l\'évaluation' },
-            { status: 500 }
-        )
-    }
-}
+    return NextResponse.json(evaluation, { status: 201 })
+})

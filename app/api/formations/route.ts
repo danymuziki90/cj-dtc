@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { apiHandler, ApiError } from '@/lib/api-error'
 import { z } from 'zod'
 import { prisma } from '../../../lib/prisma'
 import { parseSessionMetadata } from '@/lib/sessions/metadata'
@@ -40,11 +41,10 @@ function isPublicRegistration(session: { status: string; startDate: Date; endDat
   return !deadline || new Date(deadline).getTime() >= Date.now()
 }
 
-export async function GET(req: Request) {
-  try {
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ formations: [] })
-    }
+export const GET = apiHandler(async (req: NextRequest) => {
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ formations: [] })
+  }
 
     const { searchParams } = new URL(req.url)
     const includeStats = searchParams.get('stats') === 'true'
@@ -179,24 +179,13 @@ export async function GET(req: Request) {
       return NextResponse.json({ formations: enrichedFormations, stats })
     }
 
-    return NextResponse.json({ formations: enrichedFormations })
-  } catch (error) {
-    console.error('Error fetching formations:', error)
-    return NextResponse.json({ error: 'Erreur lors de la récupération des formations' }, { status: 500 })
-  }
-}
+  return NextResponse.json({ formations: enrichedFormations })
+})
 
-export async function POST(req: Request) {
-  try {
-    const parsed = formationSchema.safeParse(await req.json())
-    if (!parsed.success) {
-      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-      return NextResponse.json({ error: errorMsg }, { status: 400 })
-    }
-
-    const { 
-      title, 
-      description, 
+export const POST = apiHandler(async (req: NextRequest) => {
+  const { 
+    title, 
+    description, 
       categorie, 
       duree, 
       modules, 
@@ -214,7 +203,7 @@ export async function POST(req: Request) {
       level,
       format,
       languages
-    } = parsed.data
+    } = formationSchema.parse(await req.json())
 
     // Générer un slug à partir du titre
     const generateSlug = (text: string) => {
@@ -261,13 +250,6 @@ export async function POST(req: Request) {
         format: format || undefined,
         languages: languages || undefined
       }
-    })
-    return NextResponse.json(created, { status: 201 })
-  } catch (error: any) {
-    console.error('Formation creation error:', error)
-    return NextResponse.json({ 
-      error: 'Erreur lors de la création', 
-      details: error.message 
-    }, { status: 500 })
-  }
-}
+  })
+  return NextResponse.json(created, { status: 201 })
+})

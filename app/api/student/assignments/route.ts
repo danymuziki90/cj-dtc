@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
 import { supabase } from '@/lib/supabase'
+import { apiHandler, ApiError } from '@/lib/api-error'
 
 const submissionSchema = z.object({
   assignmentId: z.union([z.number(), z.string()]).transform(val => Number(val)),
@@ -11,11 +12,9 @@ const submissionSchema = z.object({
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
+export const GET = apiHandler(async (req: NextRequest) => {
   const auth = await requireStudent(req)
-  if (auth.error) return auth.error
-
-  try {
+  if (auth.error) throw new ApiError(401, "Non authentifié")
     const enrollments = await prisma.enrollment.findMany({
       where: {
         studentId: auth.student.id,
@@ -54,24 +53,13 @@ export async function GET(req: NextRequest) {
     }))
 
     return NextResponse.json({ assignments: formattedAssignments }, { status: 200 })
-  } catch (error) {
-    console.error('[API] Error fetching assignments:', error)
-    return NextResponse.json({ error: 'Failed to fetch assignments' }, { status: 500 })
-  }
-}
+})
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   const auth = await requireStudent(req)
-  if (auth.error) return auth.error
+  if (auth.error) throw new ApiError(401, "Non authentifié")
 
-  try {
-    const parsed = submissionSchema.safeParse(await req.json())
-    if (!parsed.success) {
-      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-      return NextResponse.json({ error: errorMsg }, { status: 400 })
-    }
-
-    const { assignmentId, files } = parsed.data
+  const { assignmentId, files } = submissionSchema.parse(await req.json())
 
     const assignment = await prisma.assignment.findUnique({
       where: { id: assignmentId }
@@ -136,8 +124,4 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(submission, { status: 201 })
-  } catch (error) {
-    console.error('[API] Error submitting assignment:', error)
-    return NextResponse.json({ error: 'Failed to submit assignment' }, { status: 500 })
-  }
-}
+})

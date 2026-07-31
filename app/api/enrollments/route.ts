@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { apiHandler, ApiError } from '@/lib/api-error'
 import { z } from 'zod'
 import { prisma } from '../../../lib/prisma'
 import { deriveEnrollmentAccountState, provisionStudentAccountFromEnrollment } from '../../../lib/student/account-provisioning'
@@ -174,10 +175,9 @@ const enrollmentInclude = {
   },
 }
 
-export async function GET(req: NextRequest) {
-  try {
-    const auth = await requireAdmin(req)
-    if (auth.error) return auth.error
+export const GET = apiHandler(async (req: NextRequest) => {
+  const auth = await requireAdmin(req)
+  if (auth.error) throw new ApiError(403, "Accès non autorisé")
 
     const url = new URL(req.url, 'http://localhost')
     const where = buildEnrollmentWhere(url)
@@ -258,33 +258,19 @@ export async function GET(req: NextRequest) {
       },
       stats,
     })
-  } catch (error) {
-    console.error('Enrollment GET error:', error)
-    return NextResponse.json(
-      { error: 'Erreur lors de la recuperation des inscriptions' },
-      { status: 500 },
-    )
-  }
-}
+})
 
-export async function POST(req: Request) {
-  try {
-    const parsed = publicEnrollmentSchema.safeParse(await req.json())
-    if (!parsed.success) {
-      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-      return NextResponse.json({ error: errorMsg }, { status: 400 })
-    }
-
-    const {
-      firstName,
-      lastName,
-      email,
-      phone,
-      address,
-      motivationLetter,
-      formationId,
-      sessionId,
-    } = parsed.data
+export const POST = apiHandler(async (req: NextRequest) => {
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    address,
+    motivationLetter,
+    formationId,
+    sessionId,
+  } = publicEnrollmentSchema.parse(await req.json())
 
     const formation = await prisma.formation.findUnique({
       where: { id: formationId },
@@ -403,34 +389,14 @@ export async function POST(req: Request) {
       }
     }
 
-    return response
-  } catch (error: any) {
-    console.error('Enrollment POST error:', error)
-    if (error.code === 'P2002') {
-      return NextResponse.json(
-        { error: 'Une inscription avec cet email existe deja pour cette formation' },
-        { status: 409 }
-      )
-    }
-    return NextResponse.json(
-      { error: "Erreur lors de la creation de l'inscription" },
-      { status: 500 }
-    )
-  }
-}
+  return response
+})
 
-export async function PATCH(req: NextRequest) {
-  try {
-    const auth = await requireAdmin(req)
-    if (auth.error) return auth.error
+export const PATCH = apiHandler(async (req: NextRequest) => {
+  const auth = await requireAdmin(req)
+  if (auth.error) throw new ApiError(403, "Accès non autorisé")
 
-    const parsed = adminEnrollmentUpdateSchema.safeParse(await req.json())
-    if (!parsed.success) {
-      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-      return NextResponse.json({ error: errorMsg }, { status: 400 })
-    }
-    
-    const { enrollmentId, status, notes } = parsed.data
+  const { enrollmentId, status, notes } = adminEnrollmentUpdateSchema.parse(await req.json())
 
     const oldEnrollment = await prisma.enrollment.findUnique({
       where: { id: enrollmentId },
@@ -550,12 +516,5 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
-    return NextResponse.json(enrollment)
-  } catch (error) {
-    console.error('Update enrollment error:', error)
-    return NextResponse.json(
-      { error: "Erreur lors de la mise a jour de l'inscription" },
-      { status: 500 }
-    )
-  }
-}
+  return NextResponse.json(enrollment)
+})
