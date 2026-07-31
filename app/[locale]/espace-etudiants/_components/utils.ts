@@ -69,8 +69,10 @@ export function getAssignmentStatus(assign: any) {
 
   if (isGraded) {
     return { 
+      status: "graded",
       label: "Corrigé", 
       color: "border-blue-200 bg-blue-50 text-blue-800",
+      className: "border-blue-200 bg-blue-50 text-blue-800",
       theme: "blue",
       icon: CheckCircle2
     };
@@ -78,8 +80,10 @@ export function getAssignmentStatus(assign: any) {
 
   if (isReturned) {
     return { 
+      status: "returned",
       label: "À réviser", 
       color: "border-amber-200 bg-amber-50 text-amber-800",
+      className: "border-amber-200 bg-amber-50 text-amber-800",
       theme: "amber",
       icon: Clock
     };
@@ -88,8 +92,10 @@ export function getAssignmentStatus(assign: any) {
   const hasSub = assign.submissions && assign.submissions.length > 0;
   if (hasSub) {
     return { 
+      status: "submitted",
       label: "Déposé", 
       color: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      className: "border-emerald-200 bg-emerald-50 text-emerald-800",
       theme: "green",
       icon: CheckCircle2
     };
@@ -99,8 +105,10 @@ export function getAssignmentStatus(assign: any) {
   const isPast = deadlineTime < Date.now();
   if (isPast) {
     return { 
+      status: "late",
       label: "En retard", 
       color: "border-red-200 bg-red-50 text-red-800",
+      className: "border-red-200 bg-red-50 text-red-800",
       theme: "red",
       icon: AlertCircle
     };
@@ -109,16 +117,20 @@ export function getAssignmentStatus(assign: any) {
   const isClose = (deadlineTime - Date.now()) < 3 * 24 * 60 * 60 * 1000;
   if (isClose) {
     return { 
+      status: "pending",
       label: "À remettre", 
       color: "border-red-200 bg-red-50 text-red-800",
+      className: "border-red-200 bg-red-50 text-red-800",
       theme: "red",
       icon: Clock
     };
   }
 
   return { 
+    status: "pending",
     label: "En cours", 
     color: "border-orange-200 bg-orange-50 text-orange-800",
+    className: "border-orange-200 bg-orange-50 text-orange-800",
     theme: "orange",
     icon: Activity
   };
