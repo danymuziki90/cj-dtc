@@ -475,8 +475,8 @@ export default function Header() {
       <div
         className={`hidden lg:block text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'border-b border-white/[0.06] bg-[#001a3f]/98 text-blue-100 shadow-inner backdrop-blur-2xl'
-            : 'border-b border-white/[0.08] bg-gradient-to-r from-[#001a3f]/85 via-[#002D72]/60 to-[#001a3f]/85 text-slate-100 backdrop-blur-xl'
+            ? 'border-b border-white/10 bg-gradient-to-r from-[#001a3f]/95 to-[var(--cj-blue)]/95 text-slate-100 shadow-sm backdrop-blur-3xl'
+            : 'border-b border-white/15 bg-gradient-to-r from-[#001a3f]/70 via-[var(--cj-blue)]/50 to-[#001a3f]/70 text-white backdrop-blur-2xl'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -549,8 +549,8 @@ export default function Header() {
       <div
         className={`w-full transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'lg:border-b lg:border-white/[0.06] lg:bg-gradient-to-r lg:from-[#001233]/98 lg:via-[#001a3f]/98 lg:to-[#001233]/98 lg:backdrop-blur-2xl lg:shadow-[0_4px_30px_rgba(0,18,51,0.5)] border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
-            : 'lg:border-b lg:border-white/[0.08] lg:bg-gradient-to-r lg:from-[#001233]/70 lg:via-[#002D72]/50 lg:to-[#001233]/70 lg:backdrop-blur-xl lg:shadow-[0_8px_32px_rgba(0,45,114,0.15)] border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
+            ? 'lg:border-b lg:border-white/10 lg:bg-gradient-to-r lg:from-[#001a3f]/95 lg:to-[var(--cj-blue)]/95 lg:backdrop-blur-3xl lg:shadow-[0_10px_40px_-10px_rgba(0,45,114,0.5)] border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
+            : 'lg:border-b lg:border-white/15 lg:bg-gradient-to-r lg:from-[#001a3f]/60 lg:via-[var(--cj-blue)]/40 lg:to-[#001a3f]/60 lg:backdrop-blur-2xl lg:shadow-[0_8px_32px_rgba(0,0,0,0.15)] border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
