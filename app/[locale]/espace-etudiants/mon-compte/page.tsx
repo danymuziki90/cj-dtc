@@ -382,10 +382,7 @@ export default function MonComptePage() {
               <p className="text-sm font-semibold text-slate-950">Mes certificats</p>
               <p className="mt-1 text-sm leading-6 text-slate-500">Retrouvez vos documents valides et les liens de verification associes.</p>
             </Link>
-            <Link href={`${localePrefix}/espace-etudiants/travaux`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
-              <p className="text-sm font-semibold text-slate-950">Travaux et projets</p>
-              <p className="mt-1 text-sm leading-6 text-slate-500">Deposez vos livrables et suivez vos validations pedagogiques.</p>
-            </Link>
+
             <Link href={`${localePrefix}/espace-etudiants/temoignages`} className="group rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-[0_16px_40px_-30px_rgba(0,45,114,0.35)]">
               <p className="text-sm font-semibold text-slate-950">Témoignages et avis</p>
               <p className="mt-1 text-sm leading-6 text-slate-500">Partagez votre retour d'expérience et consultez vos avis publiés.</p>

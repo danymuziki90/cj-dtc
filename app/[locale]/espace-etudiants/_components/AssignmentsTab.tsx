@@ -6,10 +6,10 @@ import { getAssignmentStatus } from "./utils";
 
 interface AssignmentsTabProps {
   assignments: any[];
-  basePath: string;
+  setSelectedAssignmentForSubmission: (assignment: any) => void;
 }
 
-export function AssignmentsTab({ assignments, basePath }: AssignmentsTabProps) {
+export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission }: AssignmentsTabProps) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -21,15 +21,7 @@ export function AssignmentsTab({ assignments, basePath }: AssignmentsTabProps) {
             Consultez vos TP, projets, examens et remettez vos devoirs en ligne.
           </p>
         </div>
-        <Link
-          href={`${basePath}/travaux`}
-          className="inline-flex items-center gap-2 rounded-xl bg-[var(--cj-blue)] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[var(--cj-blue-700)] transition"
-        >
-          <FileText className="w-4 h-4" />
-          Ouvrir l'espace travaux complet
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      </div>
+        </div>
 
       {assignments.length === 0 ? (
         <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center text-xs text-slate-500 space-y-3">
@@ -85,13 +77,13 @@ export function AssignmentsTab({ assignments, basePath }: AssignmentsTabProps) {
                     {new Date(assign.deadline).toLocaleDateString("fr-FR")}
                   </span>
 
-                  <Link
-                    href={`${basePath}/travaux`}
+                  <button
+                    onClick={() => setSelectedAssignmentForSubmission(assign)}
                     className="inline-flex items-center gap-1 text-xs font-bold text-[var(--cj-blue)] hover:underline"
                   >
                     {submission ? "Voir mon rendu" : "Téléverser mon travail"}
                     <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                  </button>
                 </div>
               </div>
             );

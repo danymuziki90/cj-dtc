@@ -1,39 +1,19 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
-async function main() {
-  try {
-    const sessions = await prisma.trainingSession.findMany({
-      include: {
-        formation: {
-          select: { id: true, title: true }
-        }
-      }
-    })
-    console.log('--- Sessions ---')
-    console.log(sessions.map(s => ({
-      id: s.id,
-      formationId: s.formationId,
-      formationTitle: s.formation?.title,
-      startDate: s.startDate,
-      endDate: s.endDate,
-      format: s.format,
-      status: s.status
-    })))
+async function check() {
+  console.log("=== ENROLLMENTS ===")
+  const enrollments = await prisma.enrollment.findMany({
+    include: {
+      student: { select: { email: true, firstName: true, lastName: true, status: true } },
+      formation: { select: { title: true } }
+    }
+  })
+  console.log(JSON.stringify(enrollments, null, 2))
 
-    const assignments = await prisma.assignment.findMany({
-      include: {
-        files: true,
-        session: true
-      }
-    })
-    console.log('--- Assignments ---')
-    console.log(assignments)
-  } catch (e) {
-    console.error(e)
-  } finally {
-    await prisma.$disconnect()
-  }
+  console.log("\n=== ASSIGNMENTS ===")
+  const assignments = await prisma.assignment.findMany()
+  console.log(JSON.stringify(assignments, null, 2))
 }
 
-main()
+check().catch(console.error).finally(() => prisma.$disconnect())

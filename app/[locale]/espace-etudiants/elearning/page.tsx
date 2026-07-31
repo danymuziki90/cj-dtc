@@ -140,9 +140,7 @@ export default function ElearningPage() {
                   <Link href={`/${locale}/espace-etudiants/supports`} className={studentPrimaryButtonClassName}>
                     Voir les supports
                   </Link>
-                  <Link href={`/${locale}/espace-etudiants/travaux`} className={studentMutedButtonClassName}>
-                    Soumettre un travail
-                  </Link>
+
                 </div>
               }
             />
@@ -157,7 +155,7 @@ export default function ElearningPage() {
             <div className="space-y-3">
               {[
                 'Consulter vos supports pedagogiques.',
-                'Soumettre vos travaux et projets.',
+
                 'Consulter vos resultats et certificats.',
                 'Suivre vos formations depuis le dashboard.',
               ].map((item) => (

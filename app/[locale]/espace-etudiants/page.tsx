@@ -538,6 +538,13 @@ function EspaceEtudiantsContent() {
             />
           )}
 
+          {activeTab === "travaux" && (
+            <AssignmentsTab
+              assignments={assignments}
+              setSelectedAssignmentForSubmission={setSelectedAssignmentForSubmission}
+            />
+          )}
+
           {activeTab === "news" && (
             <NewsTab
               news={news}

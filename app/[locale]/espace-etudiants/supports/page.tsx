@@ -225,9 +225,7 @@ function SupportsContent() {
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.35)]">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--cj-red)]">Raccourcis utiles</p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href={`/${locale}/espace-etudiants/travaux`} className={studentMutedButtonClassName}>
-                Aller aux travaux
-              </Link>
+
               <Link href={`/${locale}/espace-etudiants`} className={studentMutedButtonClassName}>
                 Retour au dashboard
               </Link>

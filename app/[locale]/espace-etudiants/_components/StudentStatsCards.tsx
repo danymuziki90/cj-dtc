@@ -64,9 +64,8 @@ export function StudentStatsCards({
 
 
       {/* Card 3: À remettre (Rouge) */}
-      <Link
-        href={`${prefix}/espace-etudiants/travaux?filter=pending`}
-        className="group relative overflow-hidden rounded-[26px] border border-red-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-200 hover:bg-red-50/30 cursor-pointer"
+      <div
+        className="group relative overflow-hidden rounded-[26px] border border-red-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-200 hover:bg-red-50/30"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 to-[var(--cj-red)]" />
         <div className="flex items-center justify-between">
@@ -77,12 +76,11 @@ export function StudentStatsCards({
         </div>
         <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{pendingAssignmentsCount}</p>
         <p className="text-[10px] text-slate-500 mt-1 font-medium">Devoirs en attente de dépôt</p>
-      </Link>
+      </div>
 
       {/* Card 4: Rendus (Vert) */}
-      <Link
-        href={`${prefix}/espace-etudiants/travaux?filter=submitted`}
-        className="group relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 hover:bg-emerald-50/30 cursor-pointer"
+      <div
+        className="group relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 hover:bg-emerald-50/30"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
         <div className="flex items-center justify-between">
@@ -93,7 +91,7 @@ export function StudentStatsCards({
         </div>
         <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{submittedAssignmentsCount}</p>
         <p className="text-[10px] text-slate-500 mt-1 font-medium">En attente de correction</p>
-      </Link>
+      </div>
 
       {/* Card 5: Actualités (Violet/Indigo) */}
       <div className="group relative overflow-hidden rounded-[26px] border border-indigo-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200 hover:bg-indigo-50/20">

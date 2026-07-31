@@ -90,13 +90,13 @@ export function OverviewTab({
               <FileText className="w-4 h-4 text-[var(--cj-blue)]" />
               Mes travaux récents
             </h3>
-            <Link
-              href={`/${locale}/espace-etudiants/travaux`}
+            <button
+              onClick={() => setActiveTab("travaux")}
               className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cj-blue)] px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[var(--cj-blue-700)] transition"
             >
               <Upload className="w-3.5 h-3.5" />
               Ouvrir Mes Travaux
-            </Link>
+            </button>
           </div>
 
           {assignments.length === 0 ? (
@@ -143,13 +143,13 @@ export function OverviewTab({
                         {submission ? "Modifier" : "Déposer"}
                       </button>
                     ) : (
-                      <Link
-                        href={`/${locale}/espace-etudiants/travaux`}
+                      <button
+                        onClick={() => setActiveTab("travaux")}
                         className="inline-flex items-center gap-1 text-xs font-bold text-[var(--cj-blue)] hover:underline"
                       >
                         Voir le détail
                         <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
+                      </button>
                     )}
                   </div>
                 );

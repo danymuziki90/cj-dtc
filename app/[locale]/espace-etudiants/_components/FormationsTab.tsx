@@ -202,14 +202,7 @@ export function FormationsTab({
                         <BookOpen className="w-4 h-4 mb-1 text-slate-400" />
                         Supports
                       </Link>
-                      <button
-                        onClick={() => setActiveTab("travaux")}
-                        className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
-                        title="Consulter vos devoirs et travaux"
-                      >
-                        <FileText className="w-4 h-4 mb-1 text-slate-400" />
-                        Travaux
-                      </button>
+
                     </div>
                   </>
                 ) : (
