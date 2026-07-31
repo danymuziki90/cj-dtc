@@ -18,8 +18,8 @@ const loginSchema = z.object({
 
 const DEFAULT_ADMIN_USERNAME = process.env.ADMIN_DEFAULT_USERNAME || 'admincjtc'
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_DEFAULT_PASSWORD || 'admin@123'
-const ADMIN_LOGIN_LIMIT = 5
-const ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000
+const ADMIN_LOGIN_LIMIT = 3
+const ADMIN_LOGIN_WINDOW_MS = 60 * 60 * 1000 // 1 hour
 
 function isPortalSecretError(error: unknown) {
   return error instanceof Error && (

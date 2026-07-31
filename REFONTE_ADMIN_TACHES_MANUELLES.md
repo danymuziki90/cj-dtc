@@ -205,11 +205,11 @@ Certains fichiers ont systématiquement rejeté les modifications automatiques. 
 - [ ] Tester une nouvelle inscription depuis l'espace étudiant → doit être `confirmed` + compte actif immédiat
 
 ### Nettoyage manuel UI (ordre recommandé)
-1. [ ] `components/EnrollmentPreviewModal.tsx` : supprimer blocs paiement (impact : modal dossier étudiant)
-2. [ ] `app/admin/students/page.tsx` : supprimer colonne + bloc 360 paiement (impact : liste étudiants)
-3. [ ] `app/admin/enrollments/page.tsx` : nettoyer `initialFilters` (impact : minime, filtre UI déjà retiré)
-4. [ ] `lib/admin/reporting.ts` : supprimer calculs paiement (impact : perfs dashboard)
-5. [ ] `app/admin/dashboard/page.tsx` : nettoyer type `DashboardPayload` (impact : types TS)
+1. [x] `components/EnrollmentPreviewModal.tsx` : supprimer blocs paiement (impact : modal dossier étudiant)
+2. [x] `app/admin/students/page.tsx` : supprimer colonne + bloc 360 paiement (impact : liste étudiants)
+3. [x] `app/admin/enrollments/page.tsx` : nettoyer `initialFilters` (impact : minime, filtre UI déjà retiré)
+4. [x] `lib/admin/reporting.ts` : supprimer calculs paiement (impact : perfs dashboard)
+5. [x] `app/admin/dashboard/page.tsx` : nettoyer type `DashboardPayload` (impact : types TS)
 
 ### Tests de régression
 - [ ] Inscription étudiant → compte actif sans validation admin
@@ -227,9 +227,9 @@ Certains fichiers ont systématiquement rejeté les modifications automatiques. 
 | Inscription étudiant | ✅ Auto-confirmation + provisioning | ✅ |
 | API confirmPayment | ✅ HTTP 410 | ✅ |
 | Dashboard KPI paiement (UI) | ✅ Masqués | ✅ |
-| Dashboard KPI paiement (backend) | ❌ Calcul inutile | ❌ À supprimer |
-| EnrollmentPreviewModal | ❌ Blocs paiement affichés | ❌ À supprimer |
-| Students page (tableau) | ❌ Colonne paiement | ❌ À supprimer |
+| Dashboard KPI paiement (backend) | ✅ Supprimé | ✅ |
+| EnrollmentPreviewModal | ✅ Nettoyé | ✅ |
+| Students page (tableau) | ✅ Nettoyé | ✅ |
 | Students page (KPI) | ✅ Nettoyés | ✅ |
 | Enrollments filters | ✅ Filtre paiement retiré | ✅ |
 | Enrollments stats | ✅ KPI paiement retirés | ✅ |

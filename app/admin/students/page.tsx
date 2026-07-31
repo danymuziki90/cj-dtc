@@ -1346,20 +1346,19 @@ export default function AdminStudentsPage() {
                   <th className="px-5 py-3.5 text-left">Identifiants</th>
                   <th className="px-5 py-3.5 text-left">Statut</th>
                   <th className="px-5 py-3.5 text-left">Session Rattachée</th>
-                  <th className="px-5 py-3.5 text-left">Paiement Dernier Cours</th>
                   <th className="px-5 py-3.5 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
                 {loadingList ? (
                   <tr>
-                    <td colSpan={6} className="px-5 py-8 text-center text-slate-500 font-semibold">
+                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500 font-semibold">
                       Chargement de la liste des étudiants...
                     </td>
                   </tr>
                 ) : students.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-5 py-8 text-center text-slate-500 font-semibold">
+                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500 font-semibold">
                       Aucun étudiant ne correspond aux filtres de recherche.
                     </td>
                   </tr>
@@ -1395,15 +1394,6 @@ export default function AdminStudentsPage() {
                         </td>
                         <td className="px-5 py-3.5 text-slate-700">
                           {student.adminSession?.title || 'Non affectée'}
-                        </td>
-                        <td className="px-5 py-3.5 text-slate-700">
-                          {student.latestEnrollment ? (
-                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${paymentBadgeClass(student.latestEnrollment.paymentStatus)}`}>
-                              {formatCurrency(student.latestEnrollment.paidAmount)} / {formatCurrency(student.latestEnrollment.totalAmount)}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400">Aucun</span>
-                          )}
                         </td>
                         <td className="px-5 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                           <button

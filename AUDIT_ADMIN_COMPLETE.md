@@ -835,10 +835,10 @@ DÉCONNEXION :
 
 | **ID** | **Correction** | **Effort** | **Bénéfice** | **Fichiers** |
 |---|---|---|---|---|
-| **SEC-1** | Implémenter HTTPOnly cookie pour JWT Student | 2h | Prévenir XSS token theft | `lib/auth-portal/jwt.ts`, `lib/auth-portal/guards.ts` |
-| **SEC-2** | Renforcer rate limiting login admin (2-3 tentatives / 1h) | 1.5h | Prévenir brute force | `app/api/admin/auth/login/route.ts` |
-| **SEC-3** | Middleware `requireAdmin()` obligatoire sur ALL `/admin/api/**` | 1h | Prévenir unauthorized access | `lib/auth-portal/guards.ts`, audit all admin routes |
-| **AUD-1** | Implémenter audit log (CREATE, UPDATE, DELETE admin actions) | 4h | Compliance, traçabilité | Create `AuditLog` table, middleware logging |
+| **~~SEC-1~~** | ✅ Implémenter HTTPOnly cookie pour JWT Student | Fait | Prévenir XSS token theft | `lib/auth-portal/jwt.ts` |
+| **~~SEC-2~~** | ✅ Renforcer rate limiting login admin (3 tentatives / 1h) | Fait | Prévenir brute force | `app/api/admin/auth/login/route.ts` |
+| **~~SEC-3~~** | ✅ Middleware obligatoire sur ALL `/api/admin/**` | Fait | Prévenir unauthorized access | `middleware.ts` |
+| **~~AUD-1~~** | ✅ Implémenter audit log (CREATE, UPDATE, DELETE admin) | Fait | Compliance, traçabilité | `AdminAuditLog` + `writeAdminAuditLog` partout |
 
 ### 🟠 **ÉLEVÉE (Faire cette semaine)**
 
