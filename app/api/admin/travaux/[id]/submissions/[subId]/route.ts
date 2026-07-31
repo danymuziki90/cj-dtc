@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { supabase } from '@/lib/supabase'
+import { sendAssignmentGradedEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +22,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         gradedAt: new Date(),
         // gradedBy: session.user.id
       },
+      include: {
+        Student: true,
+        Assignment: true
+      }
     })
 
     if (supabase) {
@@ -32,9 +37,20 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       })
     }
 
+    // Send email asynchronously so it doesn't block the API response
+    if (submission.Student?.email && submission.Assignment?.title) {
+      sendAssignmentGradedEmail(
+        submission.Student.email,
+        submission.Assignment.title,
+        submission.grade || 0,
+        submission.feedback
+      ).catch(err => console.error('[Email Error] Failed to send graded email:', err))
+    }
+
     return NextResponse.json(submission)
   } catch (error) {
     console.error('[API] Error updating submission:', error)
     return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
   }
 }
+

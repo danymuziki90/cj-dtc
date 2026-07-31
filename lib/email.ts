@@ -624,3 +624,56 @@ export async function sendRejectionEmail(email: string, formationTitle: string, 
     }),
   })
 }
+
+export async function sendAssignmentGradedEmail(email: string, assignmentTitle: string, grade: number, feedback?: string | null) {
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const safeAssignmentTitle = escapeHtml(assignmentTitle)
+  const safeFeedback = feedback ? escapeHtml(feedback) : null
+  const subject = `Votre travail "${assignmentTitle}" a ete note`
+  const text = toPlainTextEmail([
+    'Note disponible',
+    '',
+    `Votre travail pour "${assignmentTitle}" a ete corrige.`,
+    `Note : ${grade}/100`,
+    feedback ? `Commentaire : ${feedback}` : null,
+    `Vous pouvez consulter les details sur votre espace etudiant.`,
+    `Lien: ${appBaseUrl}/fr/espace-etudiants/travaux`,
+  ])
+
+  return sendEmail({
+    to: email,
+    subject,
+    text,
+    html: renderBrandedEmailLayout({
+      eyebrow: 'Evaluation',
+      title: 'Votre travail a ete note',
+      introHtml: `Votre depot pour le travail <strong style="color: #002d72;">${safeAssignmentTitle}</strong> a ete corrige par l'equipe pedagogique.`,
+      badgeHtml:
+        '<div style="display: inline-block; border-radius: 999px; background: #ecfdf3; color: #047857; border: 1px solid #a7f3d0; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Correction terminee</div>',
+      bodyHtml: `
+        <div style="border: 1px solid #d7e3ff; border-radius: 22px; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); padding: 20px;">
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #64748b; font-weight: 700; margin-bottom: 8px;">
+            Note obtenue
+          </div>
+          <div style="font-size: 32px; line-height: 1.2; color: #003b9d; font-weight: 800;">${grade} <span style="font-size: 18px; color: #64748b;">/ 100</span></div>
+        </div>
+        ${
+          safeFeedback
+            ? \`<div style="margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 22px; background: #f8fafc; padding: 20px;">
+                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #475569; font-weight: 700; margin-bottom: 8px;">
+                  Commentaire du correcteur
+                </div>
+                <div style="font-size: 14px; line-height: 1.8; color: #334155; font-style: italic;">"\${safeFeedback}"</div>
+              </div>\`
+            : ''
+        }
+      `,
+      action: {
+        label: 'Voir dans mon Espace Etudiant',
+        href: \`\${appBaseUrl}/fr/espace-etudiants/travaux\`,
+      },
+      actionHintHtml:
+        'Connectez-vous pour consulter le detail de vos devoirs et votre progression globale.',
+    }),
+  })
+}
