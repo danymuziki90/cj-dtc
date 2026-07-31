@@ -847,7 +847,7 @@ DÉCONNEXION :
 | **~~AUTH-1~~** | ✅ Email confirmation flow pour register étudiant | Fait | Prévenir spam accounts | `app/api/auth/verify/route.ts` |
 | **ERR-1** | Unifiy error handling (standard response format) | 3h | Better debugging, consistent UX | Create middleware `errorHandler`, audit all routes |
 | **VAL-1** | Complète Zod validation schemas pour toutes POST/PUT | 2h | Prévenir invalid data | Audit all route handlers, add Zod schemas |
-| **XSS-1** | DOMPurify sanitization pour News rich text | 2h | Prévenir XSS | `app/api/admin/system/news/route.ts`, update sanitizeRichText() |
+| **~~XSS-1~~** | ✅ DOMPurify sanitization pour News rich text | Fait | Prévenir XSS | `app/api/admin/system/news/route.ts` via `isomorphic-dompurify` |
 
 ### 🟡 **MOYEN (Faire ce mois-ci)**
 

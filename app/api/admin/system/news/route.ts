@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { uploadToR2 } from '@/lib/r2'
 import { randomUUID } from 'crypto'
+import DOMPurify from 'isomorphic-dompurify'
 
 const DEFAULT_CATEGORY = 'General'
 const DEFAULT_PAGE_SIZE = 8
@@ -37,12 +38,10 @@ const newsSchema = z.object({
 })
 
 function sanitizeRichText(value: string) {
-  return value
-    .replace(/<\s*(script|style|iframe|object|embed|meta|link)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '')
-    .replace(/<\s*(script|style|iframe|object|embed|meta|link)[^>]*\/?>/gi, '')
-    .replace(/\son[a-z]+\s*=\s*(['"]).*?\1/gi, '')
-    .replace(/\s(href|src)\s*=\s*(['"])\s*javascript:[\s\S]*?\2/gi, ' $1="#"')
-    .trim()
+  return DOMPurify.sanitize(value, {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div', 'blockquote', 'img'],
+    ALLOWED_ATTR: ['href', 'title', 'target', 'src', 'alt', 'class', 'style'],
+  }).trim()
 }
 
 function normalizeTags(tags?: string[]) {
