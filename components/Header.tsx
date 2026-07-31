@@ -112,8 +112,8 @@ function NavLink({ href, label }: { href: string; label: string }) {
         relative rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap
         ${
           isActive
-            ? 'text-white bg-gradient-to-r from-[var(--cj-blue)] to-[#0a2e54] shadow-md shadow-[var(--cj-blue)]/20 border border-[var(--cj-blue)]/50'
-            : 'text-slate-700 hover:text-[var(--cj-blue)] hover:bg-slate-100/80 active:scale-95'
+            ? 'text-white bg-gradient-to-r from-[var(--cj-blue)] to-[#0a2e54] shadow-md shadow-[var(--cj-blue)]/30 border border-white/20'
+            : 'text-white/80 hover:text-white hover:bg-white/[0.1] active:scale-95'
         }
       `}
     >
@@ -190,15 +190,15 @@ function DesktopDropdown({
         aria-expanded={isOpen}
         aria-haspopup="true"
         className={`
-          flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[var(--cj-blue)]/30
-          ${isOpen ? 'text-[var(--cj-blue)] bg-slate-100/80 shadow-sm' : 'text-slate-700 hover:text-[var(--cj-blue)] hover:bg-slate-100/80'}
-          group-hover/dropdown:text-[var(--cj-blue)] group-hover/dropdown:bg-slate-100/80
+          flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-white/30
+          ${isOpen ? 'text-white bg-white/[0.12] shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/[0.1]'}
+          group-hover/dropdown:text-white group-hover/dropdown:bg-white/[0.1]
         `}
       >
         <span>{label}</span>
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-[var(--cj-blue)]' : 'text-slate-400 group-hover/dropdown:text-[var(--cj-blue)]'
+            isOpen ? 'rotate-180 text-white' : 'text-white/50 group-hover/dropdown:text-white'
           } group-hover/dropdown:rotate-180`}
         />
       </button>
@@ -475,8 +475,8 @@ export default function Header() {
       <div
         className={`hidden lg:block text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'border-b border-[#0a2e54]/50 bg-[#061b36]/95 text-blue-100 shadow-inner backdrop-blur-md'
-            : 'border-b border-white/10 bg-gradient-to-b from-[#061b36]/90 via-[#061b36]/40 to-transparent text-slate-100 backdrop-blur-md'
+            ? 'border-b border-white/[0.06] bg-[#001a3f]/98 text-blue-100 shadow-inner backdrop-blur-2xl'
+            : 'border-b border-white/[0.08] bg-gradient-to-r from-[#001a3f]/85 via-[#002D72]/60 to-[#001a3f]/85 text-slate-100 backdrop-blur-xl'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -549,8 +549,8 @@ export default function Header() {
       <div
         className={`w-full transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
-            : 'border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
+            ? 'lg:border-b lg:border-white/[0.06] lg:bg-gradient-to-r lg:from-[#001233]/98 lg:via-[#001a3f]/98 lg:to-[#001233]/98 lg:backdrop-blur-2xl lg:shadow-[0_4px_30px_rgba(0,18,51,0.5)] border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
+            : 'lg:border-b lg:border-white/[0.08] lg:bg-gradient-to-r lg:from-[#001233]/70 lg:via-[#002D72]/50 lg:to-[#001233]/70 lg:backdrop-blur-xl lg:shadow-[0_8px_32px_rgba(0,45,114,0.15)] border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -569,8 +569,8 @@ export default function Header() {
           <nav
             className={`hidden lg:flex items-center gap-0.5 rounded-full px-3 py-1.5 transition-all duration-500 ${
               scrolled
-                ? 'border border-slate-200/80 bg-white/95 shadow-lg shadow-slate-200/50 backdrop-blur-xl hover:border-slate-300 hover:bg-white hover:shadow-xl'
-                : 'border border-slate-200/60 bg-white/90 shadow-xl shadow-black/5 backdrop-blur-md hover:border-slate-300 hover:bg-white/95'
+                ? 'border border-white/[0.12] bg-white/[0.07] shadow-lg shadow-black/10 backdrop-blur-2xl hover:border-white/[0.18] hover:bg-white/[0.10] hover:shadow-xl'
+                : 'border border-white/[0.15] bg-white/[0.08] shadow-xl shadow-black/5 backdrop-blur-xl hover:border-white/[0.22] hover:bg-white/[0.12]'
             }`}
             aria-label="Navigation principale Desktop"
           >
@@ -632,7 +632,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href={`/${locale}/contact`}
-              className="group bg-gradient-to-r from-[var(--cj-red)] to-red-600 hover:from-[var(--cj-red-700)] hover:to-red-700 border border-red-500/40 text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-md shadow-red-950/50 hover:shadow-xl hover:shadow-red-900/60 transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
+              className="group bg-gradient-to-r from-[var(--cj-red)] to-red-600 hover:from-[var(--cj-red-700)] hover:to-red-700 border border-red-400/30 text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-[0_0_20px_rgba(200,16,46,0.25)] hover:shadow-[0_0_30px_rgba(200,16,46,0.4)] transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
             >
               <Mail className="h-3.5 w-3.5 text-white transition-colors" />
               <span>{labels.contact}</span>
