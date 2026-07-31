@@ -14,6 +14,7 @@ type Assignment = {
   status: string
   Formation?: { title: string }
   TrainingSession?: { title: string }
+  AssignmentFile?: { id: number, name: string, url: string }[]
 }
 
 type Submission = {
@@ -150,6 +151,24 @@ export default function AdminGererTravailPage({ params }: { params: Promise<{ id
                 <div>
                   <span className="text-slate-500 block mb-0.5">Consignes</span>
                   <p className="text-slate-700 whitespace-pre-wrap">{assignment.instructions}</p>
+                </div>
+              )}
+              {assignment.AssignmentFile && assignment.AssignmentFile.length > 0 && (
+                <div className="pt-2 border-t border-slate-100">
+                  <span className="text-slate-500 block mb-2">Fichiers joints (Admin)</span>
+                  <div className="flex flex-col gap-2">
+                    {assignment.AssignmentFile.map(f => (
+                      <a 
+                        key={f.id} 
+                        href={f.url} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="inline-flex items-center p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-[#2A52BE] hover:bg-slate-100 transition-colors w-fit"
+                      >
+                        📄 {f.name}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

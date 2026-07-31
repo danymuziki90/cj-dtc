@@ -659,18 +659,18 @@ export async function sendAssignmentGradedEmail(email: string, assignmentTitle: 
         </div>
         ${
           safeFeedback
-            ? \`<div style="margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 22px; background: #f8fafc; padding: 20px;">
+            ? `<div style="margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 22px; background: #f8fafc; padding: 20px;">
                 <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #475569; font-weight: 700; margin-bottom: 8px;">
                   Commentaire du correcteur
                 </div>
-                <div style="font-size: 14px; line-height: 1.8; color: #334155; font-style: italic;">"\${safeFeedback}"</div>
-              </div>\`
+                <div style="font-size: 14px; line-height: 1.8; color: #334155; font-style: italic;">"${safeFeedback}"</div>
+              </div>`
             : ''
         }
       `,
       action: {
         label: 'Voir dans mon Espace Etudiant',
-        href: \`\${appBaseUrl}/fr/espace-etudiants/travaux\`,
+        href: `${appBaseUrl}/fr/espace-etudiants/travaux`,
       },
       actionHintHtml:
         'Connectez-vous pour consulter le detail de vos devoirs et votre progression globale.',

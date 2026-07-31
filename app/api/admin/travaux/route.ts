@@ -79,7 +79,8 @@ export async function POST(req: NextRequest) {
       objectives,
       published,
       allowResubmission,
-      maxFiles
+      maxFiles,
+      files
     } = payload
     
     if (!title || !description || !formationId || !deadline) {
@@ -102,7 +103,17 @@ export async function POST(req: NextRequest) {
         published: published !== undefined ? published : true,
         allowResubmission: allowResubmission !== undefined ? allowResubmission : true,
         maxFiles: maxFiles ? parseInt(maxFiles, 10) : 5,
-        status: published ? 'publie' : 'brouillon'
+        status: published ? 'publie' : 'brouillon',
+        AssignmentFile: files && Array.isArray(files) ? {
+          create: files.map((f: any) => ({
+            name: f.name,
+            originalName: f.originalName,
+            size: f.size,
+            mimeType: f.mimeType,
+            url: f.url,
+            key: f.key
+          }))
+        } : undefined
       },
     })
 
@@ -112,3 +123,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create assignment' }, { status: 500 })
   }
 }
+
