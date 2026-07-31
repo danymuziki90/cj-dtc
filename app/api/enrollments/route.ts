@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '../../../lib/prisma'
 import { deriveEnrollmentAccountState, provisionStudentAccountFromEnrollment } from '../../../lib/student/account-provisioning'
 import { resolveAppBaseUrl, sendEmail } from '../../../lib/email'
 import { signStudentToken, STUDENT_AUTH_COOKIE, STUDENT_TOKEN_MAX_AGE, getAuthCookieOptions } from '../../../lib/auth-portal/jwt'
 import { requireAdmin } from '@/lib/auth-portal/guards'
+
+const publicEnrollmentSchema = z.object({
+  firstName: z.string().trim().min(2, 'Le prénom est requis.'),
+  lastName: z.string().trim().min(2, 'Le nom est requis.'),
+  email: z.string().trim().email('Format d\'email invalide.'),
+  phone: z.string().trim().optional().nullable(),
+  address: z.string().trim().optional().nullable(),
+  motivationLetter: z.string().trim().optional().nullable(),
+  formationId: z.union([z.number(), z.string()]).transform(val => Number(val)),
+  sessionId: z.union([z.number(), z.string()]).transform(val => val ? Number(val) : null).optional().nullable(),
+})
+
+const adminEnrollmentUpdateSchema = z.object({
+  enrollmentId: z.union([z.number(), z.string()]).transform(val => Number(val)),
+  status: z.string().trim().min(2, 'Le statut est requis.'),
+  notes: z.string().trim().optional().nullable(),
+})
 
 export const runtime = 'nodejs'
 
@@ -251,7 +269,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    const parsed = publicEnrollmentSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
+    }
+
     const {
       firstName,
       lastName,
@@ -261,17 +284,10 @@ export async function POST(req: Request) {
       motivationLetter,
       formationId,
       sessionId,
-    } = body
-
-    if (!firstName || !lastName || !email || !formationId) {
-      return NextResponse.json(
-        { error: 'Donnees manquantes (prenom, nom, email, formation)' },
-        { status: 400 }
-      )
-    }
+    } = parsed.data
 
     const formation = await prisma.formation.findUnique({
-      where: { id: parseInt(formationId) },
+      where: { id: formationId },
     })
 
     if (!formation) {
@@ -287,7 +303,7 @@ export async function POST(req: Request) {
 
     if (sessionId) {
       const session = await prisma.trainingSession.findUnique({
-        where: { id: parseInt(sessionId) },
+        where: { id: sessionId },
         include: {
           enrollments: {
             where: { status: { not: 'rejected' } },
@@ -323,8 +339,8 @@ export async function POST(req: Request) {
         phone: phone || null,
         address: address || null,
         motivationLetter: motivationLetter || null,
-        formationId: parseInt(formationId),
-        sessionId: sessionId ? parseInt(sessionId) : null,
+        formationId,
+        sessionId,
         startDate: registrationDate,
         status,
       },
@@ -408,18 +424,16 @@ export async function PATCH(req: NextRequest) {
     const auth = await requireAdmin(req)
     if (auth.error) return auth.error
 
-    const body = await req.json()
-    const { enrollmentId, status, notes } = body
-
-    if (!enrollmentId || !status) {
-      return NextResponse.json(
-        { error: "ID de l'inscription et statut requis" },
-        { status: 400 }
-      )
+    const parsed = adminEnrollmentUpdateSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
+    
+    const { enrollmentId, status, notes } = parsed.data
 
     const oldEnrollment = await prisma.enrollment.findUnique({
-      where: { id: parseInt(enrollmentId) },
+      where: { id: enrollmentId },
       include: {
         formation: true,
         session: true,
@@ -434,7 +448,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const enrollment = await prisma.enrollment.update({
-      where: { id: parseInt(enrollmentId) },
+      where: { id: enrollmentId },
       data: {
         status,
         ...(notes && { notes }),

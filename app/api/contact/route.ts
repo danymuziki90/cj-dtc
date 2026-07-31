@@ -1,34 +1,32 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { sendEmail } from '../../../lib/email'
 import { prisma } from '@/lib/prisma'
 
+const contactSchema = z.object({
+  name: z.string().trim().min(2, 'Le nom doit contenir au moins 2 caractères.'),
+  email: z.string().trim().email('Format d\'email invalide.'),
+  subject: z.string().trim().min(5, 'Le sujet doit contenir au moins 5 caractères.'),
+  message: z.string().trim().min(10, 'Le message doit contenir au moins 10 caractères.'),
+})
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-
-    if (!body.name || !body.email || !body.subject || !body.message) {
-      return NextResponse.json(
-        { error: 'Tous les champs sont requis' },
-        { status: 400 }
-      )
+    const parsed = contactSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(body.email)) {
-      return NextResponse.json(
-        { error: 'Format d\'email invalide' },
-        { status: 400 }
-      )
-    }
+    const { name, email, subject, message } = parsed.data
 
     // Save contact message in DB
     await prisma.contactMessage.create({
       data: {
-        name: body.name,
-        email: body.email,
-        subject: body.subject,
-        message: body.message,
+        name,
+        email,
+        subject,
+        message,
         status: 'unread'
       }
     })
@@ -38,12 +36,12 @@ export async function POST(req: Request) {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #002D72;">Nouveau message de contact</h2>
         <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <p><strong>Nom :</strong> ${body.name}</p>
-          <p><strong>Email :</strong> ${body.email}</p>
-          <p><strong>Sujet :</strong> ${body.subject}</p>
+          <p><strong>Nom :</strong> ${name}</p>
+          <p><strong>Email :</strong> ${email}</p>
+          <p><strong>Sujet :</strong> ${subject}</p>
         </div>
         <div style="background-color: white; padding: 20px; border-left: 4px solid #E30613; margin: 20px 0;">
-          <p style="white-space: pre-wrap;">${body.message}</p>
+          <p style="white-space: pre-wrap;">${message}</p>
         </div>
         <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
         <p style="font-size: 12px; color: #666;">
@@ -55,8 +53,8 @@ export async function POST(req: Request) {
 
     const emailSent = await sendEmail({
       to: process.env.CONTACT_EMAIL || process.env.MAIL_USER || 'contact@cjdevelopmenttc.org',
-      replyTo: body.email,
-      subject: `Contact: ${body.subject}`,
+      replyTo: email,
+      subject: `Contact: ${subject}`,
       html: emailHtml
     })
 
