@@ -61,12 +61,31 @@ export default function TravauxPage() {
   const fetchAssignments = async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
     try {
+      // Try the direct assignments endpoint first
       const response = await fetch(`/api/student/assignments?t=${Date.now()}`, { cache: "no-store" });
       if (response.ok) {
         const data = await response.json();
-        setAssignments(Array.isArray(data) ? data : data.assignments || []);
-      } else {
-        alert("Erreur API : " + response.status + " " + response.statusText + "\nAssurez-vous que Vercel a bien déployé la dernière version !");
+        const list = Array.isArray(data) ? data : data.assignments || [];
+        if (list.length > 0 || response.status === 200) {
+          setAssignments(list);
+          return;
+        }
+      }
+      
+      // Fallback: use the dashboard endpoint which is known to work
+      const dashResponse = await fetch(`/api/student/system/dashboard?t=${Date.now()}`, { cache: "no-store" });
+      if (dashResponse.ok) {
+        const dashData = await dashResponse.json();
+        const dashAssignments = dashData?.dashboard?.assignments || [];
+        // Map dashboard format to match expected format
+        const mapped = dashAssignments.map((a: any) => ({
+          ...a,
+          formation: a.Formation || a.formation,
+          session: a.TrainingSession || a.session,
+          submissions: a.Submission || a.submissions || [],
+          files: a.AssignmentFile || a.files || [],
+        }));
+        setAssignments(mapped);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des travaux:", error);
