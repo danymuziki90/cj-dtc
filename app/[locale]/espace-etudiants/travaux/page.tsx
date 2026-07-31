@@ -65,6 +65,8 @@ export default function TravauxPage() {
       if (response.ok) {
         const data = await response.json();
         setAssignments(Array.isArray(data) ? data : data.assignments || []);
+      } else {
+        alert("Erreur API : " + response.status + " " + response.statusText + "\nAssurez-vous que Vercel a bien déployé la dernière version !");
       }
     } catch (error) {
       console.error("Erreur lors du chargement des travaux:", error);
