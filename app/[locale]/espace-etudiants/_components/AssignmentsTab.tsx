@@ -74,11 +74,19 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
                 </p>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs">
-                  <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    Limite :{" "}
-                    {new Date(assign.deadline).toLocaleDateString("fr-FR")}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      Limite :{" "}
+                      {new Date(assign.deadline).toLocaleDateString("fr-FR")}
+                    </span>
+                    {assign.AssignmentFile && assign.AssignmentFile.length > 0 && (
+                      <span className="text-[11px] font-semibold text-[var(--cj-blue)] flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                        <FileText className="w-3 h-3" />
+                        {assign.AssignmentFile.length} fichier(s)
+                      </span>
+                    )}
+                  </div>
 
                   <button
                     onClick={() => setSelectedAssignmentForSubmission(assign)}

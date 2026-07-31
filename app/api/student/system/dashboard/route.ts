@@ -179,6 +179,7 @@ export async function GET(request: NextRequest) {
         include: {
           Formation: { select: { title: true } },
           TrainingSession: { select: { id: true } },
+          AssignmentFile: true,
           Submission: {
             where: { studentId: auth.student.id },
             include: { SubmissionFile: true }
