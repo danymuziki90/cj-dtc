@@ -18,14 +18,25 @@ function StudentLoginForm() {
   const params = useParams<{ locale?: string }>()
   const locale = params?.locale || 'fr'
   const nextPath = safeRedirect(searchParams.get('next') || searchParams.get('callbackUrl'), locale)
-  const successMessage = searchParams.get('registered')
-    ? 'Compte cree avec succes. Vous pouvez maintenant vous connecter.'
-    : ''
+  let successMessage = ''
+  if (searchParams.get('verified')) {
+    successMessage = 'Votre adresse e-mail a été vérifiée avec succès. Vous êtes maintenant connecté(e).'
+  } else if (searchParams.get('registered')) {
+    successMessage = 'Un e-mail de confirmation vous a été envoyé. Veuillez vérifier votre boîte de réception.'
+  }
+  
+  const tokenError = searchParams.get('error')
+  let tokenErrorMessage = ''
+  if (tokenError === 'InvalidToken') tokenErrorMessage = 'Le lien de vérification est invalide.'
+  if (tokenError === 'ExpiredToken') tokenErrorMessage = 'Le lien de vérification a expiré.'
+  if (tokenError === 'UserNotFound') tokenErrorMessage = "L'utilisateur associé à ce lien n'existe plus."
+  if (tokenError === 'MissingToken') tokenErrorMessage = 'Aucun jeton de vérification fourni.'
+  if (tokenError === 'ServerError') tokenErrorMessage = 'Erreur lors de la vérification de votre compte.'
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(tokenErrorMessage)
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault()

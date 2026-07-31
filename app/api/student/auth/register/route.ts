@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { hashPassword } from '@/lib/auth-portal/password'
-import {
-  STUDENT_AUTH_COOKIE,
-  STUDENT_TOKEN_MAX_AGE,
-  getAuthCookieOptions,
-  signStudentToken,
-} from '@/lib/auth-portal/jwt'
+import { sendVerificationEmail } from '@/lib/email'
+import crypto from 'crypto'
 
 export const runtime = 'nodejs'
 
@@ -82,7 +78,7 @@ export async function POST(request: NextRequest) {
     const studentNumber = `STU-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase().slice(-6)}`
 
     // Créer le compte Student et le User correspondant
-    const student = await prisma.$transaction(async (tx) => {
+    const { student, token } = await prisma.$transaction(async (tx) => {
       const createdStudent = await tx.student.create({
         data: {
           firstName,
@@ -91,7 +87,7 @@ export async function POST(request: NextRequest) {
           username: normalizedUsername,
           password: hashedPassword,
           studentNumber,
-          status: 'ACTIVE',
+          status: 'PENDING',
           role: 'STUDENT',
         },
       })
@@ -107,19 +103,32 @@ export async function POST(request: NextRequest) {
         },
       }).catch(() => null)
 
-      return createdStudent
+      // Création du token de vérification
+      const token = crypto.randomBytes(32).toString('hex')
+      const expires = new Date()
+      expires.setHours(expires.getHours() + 24) // Expire dans 24h
+
+      await tx.verificationToken.create({
+        data: {
+          identifier: normalizedEmail,
+          token,
+          expires,
+        },
+      })
+
+      return { student: createdStudent, token }
     })
 
-    // Générer le jeton JWT étudiant
-    const token = await signStudentToken({
-      sub: student.id,
-      studentId: student.id,
-      username: student.username || student.email,
+    // Envoi de l'e-mail de vérification (hors transaction)
+    await sendVerificationEmail(student.email, token).catch(error => {
+      console.error('Failed to send verification email:', error)
+      // On ne bloque pas la réponse si l'email échoue, 
+      // mais on devrait potentiellement l'indiquer à l'utilisateur
     })
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
-      token,
+      message: 'Un lien de confirmation a été envoyé à votre adresse e-mail.',
       student: {
         id: student.id,
         name: `${student.firstName} ${student.lastName}`.trim(),
@@ -128,9 +137,6 @@ export async function POST(request: NextRequest) {
         role: student.role,
       },
     }, { status: 201 })
-
-    response.cookies.set(STUDENT_AUTH_COOKIE, token, getAuthCookieOptions(STUDENT_TOKEN_MAX_AGE))
-    return response
   } catch (error) {
     console.error('Student registration error:', error)
     return NextResponse.json(

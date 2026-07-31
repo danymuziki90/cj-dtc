@@ -106,6 +106,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (student.status === 'PENDING') {
+      return NextResponse.json(
+        { error: 'Votre adresse e-mail n\'a pas encore été vérifiée. Veuillez consulter votre boîte de réception.' },
+        { status: 403 }
+      )
+    }
+
     const token = await signStudentToken({
       sub: student.id,
       studentId: student.id,
