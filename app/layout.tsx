@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import GoogleAnalytics from '../components/GoogleAnalytics'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], fallback: ['system-ui', 'Arial', 'sans-serif'] })
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://cjdevelopmenttc.com'),
