@@ -8,13 +8,15 @@ import {
   verifyStudentToken,
 } from '@/lib/auth-portal/jwt'
 import { isEmergencyAdminLoginAllowed } from '@/lib/auth-portal/security'
+import createIntlMiddleware from 'next-intl/middleware'
 
 const publicRoutes = ['/', '/auth/login', '/auth/register', '/auth/forgot-password', '/api/auth/login', '/api/auth/register', '/api/auth/verify']
 
-const localeMiddleware = (request: NextRequest) => {
-  if (request.nextUrl.pathname === '/') return NextResponse.redirect(new URL('/fr', request.url))
-  return null
-}
+const handleI18nRouting = createIntlMiddleware({
+  locales: ['fr', 'en'],
+  defaultLocale: 'fr',
+  localePrefix: 'always'
+});
 
 const canonicalAdminRouteMap: Record<string, string> = {
   '/admin': '/admin/dashboard',
@@ -61,9 +63,6 @@ function resolveInscriptionRedirect(pathname: string, search: string) {
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl
-
-  const localeRedirect = localeMiddleware(request)
-  if (localeRedirect) return localeRedirect
 
   const inscriptionRedirect = resolveInscriptionRedirect(pathname, search)
   if (inscriptionRedirect) {
@@ -113,6 +112,10 @@ export async function proxy(request: NextRequest) {
       loginUrl.searchParams.set('callbackUrl', pathname)
       return NextResponse.redirect(loginUrl)
     }
+    const isI18nRoute = !pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.startsWith('/admin') && !pathname.includes('.');
+    if (isI18nRoute) {
+      return handleI18nRouting(request);
+    }
     return NextResponse.next()
   }
 
@@ -130,10 +133,22 @@ export async function proxy(request: NextRequest) {
 
   const isLegacyAdminRoute = /^\/(fr|en)\/admin(\/|$)/.test(pathname)
   const isLegacyStudentRoute = /^\/(fr|en)\/student(\/|$)/.test(pathname) || (pathname.includes('/dashboard') && !pathname.startsWith('/admin') && !pathname.startsWith('/student') && !isLocalizedStudentSpaceRoute)
-  if (!isLegacyAdminRoute && !isLegacyStudentRoute) return NextResponse.next()
+  if (!isLegacyAdminRoute && !isLegacyStudentRoute) {
+    const isI18nRoute = !pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.startsWith('/admin') && !pathname.includes('.');
+    if (isI18nRoute) {
+      return handleI18nRouting(request);
+    }
+    return NextResponse.next();
+  }
 
   const isPublic = publicRoutes.some((route) => pathname.startsWith(route) || pathname === `/fr${route}`)
-  if (isPublic) return NextResponse.next()
+  if (isPublic) {
+    const isI18nRoute = !pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.startsWith('/admin') && !pathname.includes('.');
+    if (isI18nRoute) {
+      return handleI18nRouting(request);
+    }
+    return NextResponse.next();
+  }
 
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
   if (!token) {
@@ -144,6 +159,11 @@ export async function proxy(request: NextRequest) {
   const userRole = token.role as string
   if (isLegacyAdminRoute && userRole !== 'ADMIN') return NextResponse.redirect(new URL('/403', request.url))
   if (isLegacyStudentRoute && userRole !== 'STUDENT' && userRole !== 'ADMIN') return NextResponse.redirect(new URL('/fr/auth/login', request.url))
+  
+  const isI18nRoute = !pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.startsWith('/admin') && !pathname.includes('.');
+  if (isI18nRoute) {
+    return handleI18nRouting(request);
+  }
   return NextResponse.next()
 }
 
