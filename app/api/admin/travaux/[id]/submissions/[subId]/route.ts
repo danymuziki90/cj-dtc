@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { supabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +22,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         // gradedBy: session.user.id
       },
     })
+
+    if (supabase) {
+      const channel = supabase.channel('submissions_travaux_channel')
+      channel.send({
+        type: 'broadcast',
+        event: 'submission_graded',
+        payload: { submissionId: submission.id, assignmentId: submission.assignmentId, studentId: submission.studentId }
+      })
+    }
 
     return NextResponse.json(submission)
   } catch (error) {

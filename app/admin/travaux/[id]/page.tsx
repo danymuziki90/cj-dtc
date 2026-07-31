@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import AdminShell from '@/components/admin-portal/AdminShell'
+import { supabase } from '@/lib/supabase'
 
 type Assignment = {
   id: number
@@ -17,7 +18,7 @@ type Assignment = {
 
 type Submission = {
   id: number
-  Student: { id: string, name: string, email: string }
+  Student: { id: string, firstName: string, lastName: string, email: string }
   status: string
   grade: number | null
   feedback: string | null
@@ -56,6 +57,28 @@ export default function AdminGererTravailPage({ params }: { params: Promise<{ id
       }
     }
     loadData()
+  }, [resolvedParams.id])
+
+  useEffect(() => {
+    if (!supabase) return
+
+    const channel = supabase.channel('submissions_travaux_channel')
+    
+    channel.on('broadcast', { event: 'submission_created' }, (payload) => {
+      // Refresh submissions if it belongs to this assignment
+      if (payload.payload?.assignmentId === Number(resolvedParams.id)) {
+        fetch(`/api/admin/travaux/${resolvedParams.id}/submissions`)
+          .then(res => res.ok ? res.json() : Promise.reject())
+          .then(data => setSubmissions(data))
+          .catch(err => console.error('Error refreshing submissions:', err))
+      }
+    })
+
+    channel.subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [resolvedParams.id])
 
   async function submitGrade(e: FormEvent) {
@@ -147,7 +170,11 @@ export default function AdminGererTravailPage({ params }: { params: Promise<{ id
                   <div key={sub.id} className="border border-slate-200 rounded-lg p-4 hover:border-slate-300 transition-colors">
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <h3 className="font-medium text-slate-900">{sub.Student?.name || 'Étudiant inconnu'}</h3>
+                        <h3 className="font-medium text-slate-900">
+                          {sub.Student?.firstName || sub.Student?.lastName 
+                            ? `${sub.Student.firstName || ''} ${sub.Student.lastName || ''}`.trim() 
+                            : 'Étudiant inconnu'}
+                        </h3>
                         <p className="text-xs text-slate-500">{sub.Student?.email}</p>
                         <p className="text-xs text-slate-400 mt-1">Déposé le {new Date(sub.submittedAt).toLocaleString('fr-FR')}</p>
                       </div>

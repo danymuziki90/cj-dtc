@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
+import { supabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,6 +90,10 @@ export async function POST(req: NextRequest) {
           submittedAt: new Date(),
         }
       })
+      // Delete old files for a clean slate
+      await prisma.submissionFile.deleteMany({
+        where: { submissionId: submission.id }
+      })
     } else {
       submission = await prisma.submission.create({
         data: {
@@ -111,6 +116,15 @@ export async function POST(req: NextRequest) {
           size: file.size,
           mimeType: file.type || 'application/octet-stream'
         }
+      })
+    }
+
+    if (supabase) {
+      const channel = supabase.channel('submissions_travaux_channel')
+      channel.send({
+        type: 'broadcast',
+        event: 'submission_created',
+        payload: { submissionId: submission.id, assignmentId: assignment.id, studentId: auth.student.id }
       })
     }
 
