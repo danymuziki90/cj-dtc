@@ -1,24 +1,23 @@
 import { prisma } from '../../../../lib/prisma'
 import { sendEmail } from '../../../../lib/email'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
+
+const bulkEmailSchema = z.object({
+    recipientIds: z.array(z.union([z.number(), z.string()]).transform(val => Number(val))).min(1, 'Destinataires requis'),
+    subject: z.string().trim().min(1, 'Sujet requis'),
+    message: z.string().trim().min(1, 'Message requis'),
+})
 
 export async function POST(req: Request) {
     try {
-        const { recipientIds, subject, message } = await req.json()
-
-        if (!recipientIds || !Array.isArray(recipientIds) || recipientIds.length === 0) {
-            return NextResponse.json(
-                { error: 'Invalid recipient IDs' },
-                { status: 400 }
-            )
+        const parsed = bulkEmailSchema.safeParse(await req.json())
+        if (!parsed.success) {
+            const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+            return NextResponse.json({ error: errorMsg }, { status: 400 })
         }
 
-        if (!subject || !message) {
-            return NextResponse.json(
-                { error: 'Subject and message are required' },
-                { status: 400 }
-            )
-        }
+        const { recipientIds, subject, message } = parsed.data
 
         const enrollments = await prisma.enrollment.findMany({
             where: {

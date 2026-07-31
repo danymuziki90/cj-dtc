@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '../../../../lib/prisma'
+
+const instructorUpdateSchema = z.object({
+    firstName: z.string().trim().nullish().transform(v => v ?? undefined),
+    lastName: z.string().trim().nullish().transform(v => v ?? undefined),
+    email: z.string().trim().email('Format d\'email invalide').nullish().transform(v => v ?? undefined),
+    phone: z.string().trim().nullish().transform(v => v ?? undefined),
+    bio: z.string().trim().nullish().transform(v => v ?? undefined),
+    expertise: z.string().trim().nullish().transform(v => v ?? undefined),
+    experience: z.string().trim().nullish().transform(v => v ?? undefined),
+    photoUrl: z.string().trim().nullish().transform(v => v ?? undefined),
+    status: z.string().trim().nullish().transform(v => v ?? undefined),
+})
 
 // GET /api/instructors/[id] - Récupérer un instructeur
 export async function GET(
@@ -50,8 +63,13 @@ export async function PUT(
     try {
         const resolvedParams = await params
         const instructorId = parseInt(resolvedParams.id)
-        const body = await request.json()
-        const { firstName, lastName, email, phone, bio, expertise, experience, photoUrl, status } = body
+        const parsed = instructorUpdateSchema.safeParse(await request.json())
+        if (!parsed.success) {
+            const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+            return NextResponse.json({ error: errorMsg }, { status: 400 })
+        }
+
+        const { firstName, lastName, email, phone, bio, expertise, experience, photoUrl, status } = parsed.data
 
         const instructor = await prisma.instructor.update({
             where: { id: instructorId },

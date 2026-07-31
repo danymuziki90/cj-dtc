@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
+
+const emailTemplateSchema = z.object({
+    id: z.string().trim().min(1, 'ID requis'),
+    subject: z.string().trim().min(1, 'Sujet requis'),
+    body: z.string().trim().min(1, 'Contenu requis'),
+})
 
 const DEFAULT_TEMPLATES = [
   {
@@ -114,12 +121,13 @@ export async function PUT(req: NextRequest) {
   if (auth.error) return auth.error
 
   try {
-    const body = await req.json()
-    const { id, subject, body: templateBody } = body
-
-    if (!id || !subject || !templateBody) {
-      return NextResponse.json({ error: 'Champs obligatoires manquants (id, subject, body)' }, { status: 400 })
+    const parsed = emailTemplateSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
+
+    const { id, subject, body: templateBody } = parsed.data
 
     const updated = await prisma.emailTemplate.upsert({
       where: { id },

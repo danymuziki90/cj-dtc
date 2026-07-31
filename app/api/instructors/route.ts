@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '../../../lib/prisma'
+
+const instructorSchema = z.object({
+    firstName: z.string().trim().min(2, 'Le prénom est requis'),
+    lastName: z.string().trim().min(2, 'Le nom est requis'),
+    email: z.string().trim().email('Format d\'email invalide'),
+    phone: z.string().trim().nullish().transform(v => v ?? undefined),
+    bio: z.string().trim().nullish().transform(v => v ?? undefined),
+    expertise: z.string().trim().nullish().transform(v => v ?? undefined),
+    experience: z.string().trim().nullish().transform(v => v ?? undefined),
+    photoUrl: z.string().trim().nullish().transform(v => v ?? undefined),
+})
 
 export const runtime = "nodejs"
 
@@ -38,15 +50,13 @@ export async function GET(request: NextRequest) {
 // POST /api/instructors - Créer un nouvel instructeur
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json()
-        const { firstName, lastName, email, phone, bio, expertise, experience, photoUrl } = body
-
-        if (!firstName || !lastName || !email) {
-            return NextResponse.json(
-                { error: 'Le prénom, nom et email sont requis' },
-                { status: 400 }
-            )
+        const parsed = instructorSchema.safeParse(await request.json())
+        if (!parsed.success) {
+            const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+            return NextResponse.json({ error: errorMsg }, { status: 400 })
         }
+
+        const { firstName, lastName, email, phone, bio, expertise, experience, photoUrl } = parsed.data
 
         const instructor = await prisma.instructor.create({
             data: {

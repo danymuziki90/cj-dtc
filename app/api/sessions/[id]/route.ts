@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import {
@@ -9,6 +10,30 @@ import {
   type ManagedSessionType,
   type ParticipationType,
 } from '@/lib/sessions/metadata'
+
+const sessionUpdateSchema = z.object({
+  formationId: z.union([z.number(), z.string()]).transform(val => Number(val)).nullish().transform(v => v ?? undefined),
+  startDate: z.string().trim().nullish().transform(v => v ?? undefined),
+  endDate: z.string().trim().nullish().transform(v => v ?? undefined),
+  startTime: z.string().trim().nullish().transform(v => v ?? undefined),
+  endTime: z.string().trim().nullish().transform(v => v ?? undefined),
+  location: z.string().trim().nullish().transform(v => v ?? undefined),
+  format: z.string().trim().nullish().transform(v => v ?? undefined),
+  maxParticipants: z.union([z.number(), z.string()]).transform(val => Number(val)).nullish().transform(v => v ?? undefined),
+  price: z.union([z.number(), z.string()]).transform(val => Number(val)).nullish().transform(v => v ?? undefined),
+  status: z.string().trim().nullish().transform(v => v ?? undefined),
+  description: z.string().trim().nullish().transform(v => v ?? undefined),
+  prerequisites: z.string().trim().nullish().transform(v => v ?? undefined),
+  objectives: z.string().trim().nullish().transform(v => v ?? undefined),
+  imageUrl: z.string().trim().nullish().transform(v => v ?? undefined),
+  sessionType: z.string().trim().nullish().transform(v => v ?? undefined),
+  durationLabel: z.string().trim().nullish().transform(v => v ?? undefined),
+  paymentInfo: z.string().trim().nullish().transform(v => v ?? undefined),
+  customTitle: z.string().trim().nullish().transform(v => v ?? undefined),
+  participationType: z.string().trim().nullish().transform(v => v ?? undefined),
+  prerequisitesText: z.string().trim().nullish().transform(v => v ?? undefined),
+  registrationDeadline: z.string().trim().nullish().transform(v => v ?? undefined),
+})
 
 // GET /api/sessions/[id] - Recuperer une session specifique
 export async function GET(
@@ -94,7 +119,12 @@ export async function PUT(
       return NextResponse.json({ error: 'ID de session invalide' }, { status: 400 })
     }
 
-    const body = await request.json()
+    const parsed = sessionUpdateSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
+    }
+
     const {
       formationId,
       startDate,
@@ -117,7 +147,7 @@ export async function PUT(
       participationType,
       prerequisitesText,
       registrationDeadline,
-    } = body
+    } = parsed.data
 
     const existingSession = await prisma.trainingSession.findUnique({
       where: { id: sessionId },
@@ -162,7 +192,7 @@ export async function PUT(
     const updatedSession = await prisma.trainingSession.update({
       where: { id: sessionId },
       data: {
-        ...(formationId && { formationId: parseInt(formationId) }),
+        ...(formationId && { formationId }),
         ...(startDate && { startDate: new Date(startDate) }),
         ...(endDate && { endDate: new Date(endDate) }),
         ...(startTime && { startTime }),
@@ -173,8 +203,8 @@ export async function PUT(
             ? mapParticipationTypeToFormat(participationType as ParticipationType)
             : format,
         }),
-        ...(maxParticipants && { maxParticipants: parseInt(maxParticipants) }),
-        ...(price !== undefined && { price: parseFloat(price) }),
+        ...(maxParticipants && { maxParticipants }),
+        ...(price !== undefined && price !== null && { price }),
         ...(status && { status }),
         ...(description !== undefined && { description }),
         ...((prerequisites !== undefined ||

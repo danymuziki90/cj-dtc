@@ -1,6 +1,29 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '../../../lib/prisma'
 import { parseSessionMetadata } from '@/lib/sessions/metadata'
+
+const formationSchema = z.object({
+  title: z.string().trim().min(2, 'Titre requis'),
+  description: z.string().trim().nullish().transform(val => val ?? ''),
+  categorie: z.string().trim().nullish().transform(val => val ?? ''),
+  duree: z.string().trim().nullish().transform(val => val ?? ''),
+  modules: z.string().trim().nullish().transform(val => val ?? ''),
+  methodes: z.string().trim().nullish().transform(val => val ?? ''),
+  certification: z.string().trim().nullish().transform(val => val ?? ''),
+  statut: z.string().trim().default('brouillon'),
+  imageUrl: z.string().trim().nullish().transform(val => val ?? undefined),
+  objectifs: z.string().trim().nullish().transform(val => val ?? ''),
+  name: z.string().trim().nullish().transform(val => val ?? undefined),
+  shortDescription: z.string().trim().nullish().transform(val => val ?? undefined),
+  gallery: z.string().trim().nullish().transform(val => val ?? undefined),
+  skillsAcquired: z.string().trim().nullish().transform(val => val ?? undefined),
+  prerequisites: z.string().trim().nullish().transform(val => val ?? undefined),
+  publicTargets: z.string().trim().nullish().transform(val => val ?? undefined),
+  level: z.string().trim().nullish().transform(val => val ?? undefined),
+  format: z.string().trim().nullish().transform(val => val ?? undefined),
+  languages: z.string().trim().nullish().transform(val => val ?? undefined),
+})
 
 export const runtime = "nodejs"
 export const dynamic = 'force-dynamic'
@@ -165,7 +188,12 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    const parsed = formationSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
+    }
+
     const { 
       title, 
       description, 
@@ -174,7 +202,7 @@ export async function POST(req: Request) {
       modules, 
       methodes, 
       certification, 
-      statut = 'brouillon',
+      statut,
       imageUrl,
       objectifs,
       name,
@@ -186,11 +214,7 @@ export async function POST(req: Request) {
       level,
       format,
       languages
-    } = body
-
-    if (!title) {
-      return NextResponse.json({ error: 'Titre requis' }, { status: 400 })
-    }
+    } = parsed.data
 
     // Générer un slug à partir du titre
     const generateSlug = (text: string) => {
@@ -227,15 +251,15 @@ export async function POST(req: Request) {
         certification: certification || '',
         statut,
         imageUrl: imageUrl || null,
-        name: name || null,
-        shortDescription: shortDescription || null,
-        gallery: gallery || null,
-        skillsAcquired: skillsAcquired || null,
-        prerequisites: prerequisites || null,
-        publicTargets: publicTargets || null,
-        level: level || null,
-        format: format || null,
-        languages: languages || null
+        name: name || undefined,
+        shortDescription: shortDescription || undefined,
+        gallery: gallery || undefined,
+        skillsAcquired: skillsAcquired || undefined,
+        prerequisites: prerequisites || undefined,
+        publicTargets: publicTargets || undefined,
+        level: level || undefined,
+        format: format || undefined,
+        languages: languages || undefined
       }
     })
     return NextResponse.json(created, { status: 201 })

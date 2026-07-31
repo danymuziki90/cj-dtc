@@ -7,6 +7,7 @@ interface StudentHeaderProps {
   student: any;
   studentInitial: string;
   basePath: string;
+  pendingAssignmentsCount: number;
   onLogout: () => void;
 }
 
@@ -14,6 +15,7 @@ export function StudentHeader({
   student,
   studentInitial,
   basePath,
+  pendingAssignmentsCount,
   onLogout,
 }: StudentHeaderProps) {
   return (

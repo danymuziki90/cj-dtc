@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '../../../../lib/prisma'
 import { sendEmail } from '../../../../lib/email'
 
@@ -14,17 +15,20 @@ export const runtime = 'nodejs'
 //   - "accepted"         → supprimé, plus de validation admin
 //   - "rejected"         → supprimé, plus de validation admin
 //   - "payment_reminder" → supprimé, pas de flux paiement dans l'admin
+const notifySchema = z.object({
+  enrollmentId: z.union([z.number(), z.string()]).transform(val => Number(val)),
+  notificationType: z.string().trim().min(1, 'Type de notification requis'),
+})
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { enrollmentId, notificationType } = body
-
-    if (!enrollmentId || !notificationType) {
-      return NextResponse.json(
-        { error: 'enrollmentId et notificationType requis' },
-        { status: 400 }
-      )
+    const parsed = notifySchema.safeParse(await request.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
+
+    const { enrollmentId, notificationType } = parsed.data
 
     // Bloquer explicitement les types supprimés pour éviter tout appel résiduel
     const removedTypes = ['accepted', 'rejected', 'payment_reminder']
@@ -38,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     const enrollment = await prisma.enrollment.findUnique({
-      where: { id: parseInt(enrollmentId) },
+      where: { id: enrollmentId },
       include: { formation: true, session: true },
     })
 

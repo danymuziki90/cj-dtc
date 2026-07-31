@@ -29,6 +29,7 @@ export async function POST(req: Request) {
 
     // 1. Save corporate request in DB
     const newRequest = await prisma.b2BRequest.create({
+      data: {
         company,
         contactName,
         position: position || null,
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
         needType,
         message: message || null,
         status: 'pending',
-      },
+      }
     })
 
     // 2. Prepare Email HTML notification for Admin

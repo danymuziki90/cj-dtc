@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
+import { z } from 'zod'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '../../../../lib/prisma'
+
+const courseSchema = z.object({
+  title: z.string().trim().min(1, 'Titre requis'),
+  description: z.string().trim().min(1, 'Description requise'),
+  content: z.string().trim().min(1, 'Contenu requis'),
+  type: z.string().trim().min(1, 'Type requis'),
+  formationId: z.number().int().positive('ID Formation invalide'),
+  order: z.number().int().optional().nullable(),
+  duration: z.number().int().optional().nullable(),
+  videoUrl: z.string().url('URL vidéo invalide').optional().nullable(),
+})
 
 export async function GET(req: NextRequest) {
   try {
@@ -175,7 +187,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
-    const { title, description, content, type, formationId, order, duration, videoUrl } = await req.json()
+    const parsed = courseSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
+    }
+
+    const { title, description, content, type, formationId, order, duration, videoUrl } = parsed.data
 
     // Créer un nouveau cours (simulation)
     const newCourse = {

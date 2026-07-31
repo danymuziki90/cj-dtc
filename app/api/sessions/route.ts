@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { getPublishedSessions } from '@/lib/sessions/published'
@@ -10,6 +11,32 @@ import {
     type ManagedSessionType,
     type ParticipationType,
 } from '@/lib/sessions/metadata'
+
+const sessionSchema = z.object({
+  formationId: z.union([z.number(), z.string()]).transform(val => Number(val)).nullish().transform(v => v ?? undefined),
+  formationType: z.string().trim().nullish().transform(v => v ?? undefined),
+  startDate: z.string().trim().min(1, 'Date de début requise'),
+  endDate: z.string().trim().min(1, 'Date de fin requise'),
+  startTime: z.string().trim().nullish().transform(v => v ?? undefined),
+  endTime: z.string().trim().nullish().transform(v => v ?? undefined),
+  location: z.string().trim().min(1, 'Lieu requis'),
+  format: z.string().trim().min(1, 'Format requis'),
+  maxParticipants: z.union([z.number(), z.string()]).transform(val => Number(val)).nullish().transform(v => v ?? undefined),
+  price: z.union([z.number(), z.string()]).transform(val => Number(val)).nullish().transform(v => v ?? undefined),
+  description: z.string().trim().nullish().transform(v => v ?? undefined),
+  prerequisites: z.string().trim().nullish().transform(v => v ?? undefined),
+  objectives: z.string().trim().nullish().transform(v => v ?? undefined),
+  imageUrl: z.string().trim().nullish().transform(v => v ?? undefined),
+  sessionType: z.string().trim().nullish().transform(v => v ?? undefined),
+  durationLabel: z.string().trim().nullish().transform(v => v ?? undefined),
+  paymentInfo: z.string().trim().nullish().transform(v => v ?? undefined),
+  customTitle: z.string().trim().nullish().transform(v => v ?? undefined),
+  participationType: z.string().trim().nullish().transform(v => v ?? undefined),
+  prerequisitesText: z.string().trim().nullish().transform(v => v ?? undefined),
+  registrationDeadline: z.string().trim().nullish().transform(v => v ?? undefined),
+  duplicateFromSessionId: z.union([z.number(), z.string()]).transform(val => Number(val)).nullish().transform(v => v ?? undefined),
+  status: z.string().trim().nullish().transform(v => v ?? undefined),
+})
 
 export const runtime = "nodejs"
 export const dynamic = 'force-dynamic'
@@ -84,7 +111,12 @@ export async function POST(request: NextRequest) {
     const auth = await requireAdmin(request)
     if (auth.error) return auth.error
     try {
-        const body = await request.json()
+        const parsed = sessionSchema.safeParse(await request.json())
+        if (!parsed.success) {
+            const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+            return NextResponse.json({ error: errorMsg }, { status: 400 })
+        }
+
         const {
             formationId,
             formationType,
@@ -109,15 +141,7 @@ export async function POST(request: NextRequest) {
             registrationDeadline,
             duplicateFromSessionId,
             status,
-        } = body
-
-        // Validation des données
-        if (!startDate || !endDate || !location || !format) {
-            return NextResponse.json(
-                { error: 'Données manquantes (dates, lieu, format)' },
-                { status: 400 }
-            )
-        }
+        } = parsed.data
 
         let resolvedFormationId = formationId ? parseInt(String(formationId)) : NaN
 
@@ -154,34 +178,33 @@ export async function POST(request: NextRequest) {
                     (participationType
                         ? mapParticipationTypeToFormat(participationType as ParticipationType)
                         : format) || 'presentiel',
-                maxParticipants: parseInt(maxParticipants) || 25,
+                maxParticipants: maxParticipants || 25,
                 description,
                 prerequisites: serializeSessionMetadata(
                     {
-                        customTitle: customTitle || null,
+                        customTitle: customTitle || undefined,
                         sessionType: ((formationType || sessionType) as ManagedSessionType) || undefined,
-                        durationLabel: durationLabel || null,
-                        paymentInfo: paymentInfo || null,
+                        durationLabel: durationLabel || undefined,
+                        paymentInfo: paymentInfo || undefined,
                         participationType:
                             ((participationType as ParticipationType) || normalizeParticipationType(format)) ??
                             'presentiel',
-                        imageUrl: imageUrl || null,
-                        registrationDeadline: registrationDeadline || null,
+                        imageUrl: imageUrl || undefined,
+                        registrationDeadline: registrationDeadline || undefined,
                     },
                     prerequisitesText ?? prerequisites
                 ),
                 objectives,
                 imageUrl,
-                status: ['ouverte', 'fermee', 'complete', 'annulee', 'terminee'].includes(status) ? status : 'ouverte'
+                status: status && ['ouverte', 'fermee', 'complete', 'annulee', 'terminee'].includes(status) ? status : 'ouverte'
             },
             include: {
                 formation: true
             }
         })
 
-        // Duplication des questions si demandé
-        if (duplicateFromSessionId) {
-            const parsedDupId = parseInt(duplicateFromSessionId)
+        if (duplicateFromSessionId && !isNaN(duplicateFromSessionId)) {
+            const parsedDupId = duplicateFromSessionId
             if (!isNaN(parsedDupId)) {
                 const originalQuestions = await prisma.sessionFormQuestion.findMany({
                     where: { sessionId: parsedDupId },

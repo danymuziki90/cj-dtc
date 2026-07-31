@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
 import { supabase } from '@/lib/supabase'
+
+const submissionSchema = z.object({
+  assignmentId: z.union([z.number(), z.string()]).transform(val => Number(val)),
+  files: z.array(z.any()).min(1, 'Fichiers manquants')
+})
 
 export const dynamic = 'force-dynamic'
 
@@ -59,15 +65,16 @@ export async function POST(req: NextRequest) {
   if (auth.error) return auth.error
 
   try {
-    const payload = await req.json()
-    const { assignmentId, files } = payload
-    
-    if (!assignmentId || !files || files.length === 0) {
-      return NextResponse.json({ error: 'Fichiers manquants' }, { status: 400 })
+    const parsed = submissionSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
 
+    const { assignmentId, files } = parsed.data
+
     const assignment = await prisma.assignment.findUnique({
-      where: { id: parseInt(assignmentId, 10) }
+      where: { id: assignmentId }
     })
     
     if (!assignment) {

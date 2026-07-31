@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
+import { z } from 'zod'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '../../../../lib/prisma'
+
+const examSubmissionSchema = z.object({
+  examId: z.union([z.number(), z.string()]).transform(val => Number(val)),
+  answers: z.record(z.any()),
+})
 
 export async function GET(req: NextRequest) {
   try {
@@ -129,11 +135,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
-    const { examId, answers } = await req.json()
-
-    if (!examId || !answers) {
-      return NextResponse.json({ error: 'Données incomplètes' }, { status: 400 })
+    const parsed = examSubmissionSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
+
+    const { examId, answers } = parsed.data
 
     // Simuler la soumission (en réalité, viendra de la base de données)
     const submission = {

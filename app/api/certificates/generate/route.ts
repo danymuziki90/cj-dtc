@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { PrismaClient } from '@prisma/client'
+
+const generateCertificateSchema = z.object({
+  enrollmentId: z.union([z.number(), z.string()]).transform(val => Number(val)),
+  type: z.string().optional().default('completion'),
+  issuedBy: z.string().optional().nullable()
+})
 
 const prisma = new PrismaClient()
 
@@ -14,23 +21,21 @@ function generateCertificateCode(type: string, formationId: number, enrollmentId
 // POST /api/certificates/generate - Générer un nouveau certificat
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json()
+        const parsed = generateCertificateSchema.safeParse(await request.json())
+        if (!parsed.success) {
+            const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+            return NextResponse.json({ error: errorMsg }, { status: 400 })
+        }
+
         const {
             enrollmentId,
-            type = 'completion',
+            type,
             issuedBy
-        } = body
-
-        if (!enrollmentId) {
-            return NextResponse.json(
-                { error: 'L\'ID d\'inscription est requis' },
-                { status: 400 }
-            )
-        }
+        } = parsed.data
 
         // Récupérer les informations de l'inscription
         const enrollment = await prisma.enrollment.findUnique({
-            where: { id: parseInt(enrollmentId) },
+            where: { id: enrollmentId },
             include: {
                 formation: true,
                 session: true
@@ -55,7 +60,7 @@ export async function POST(request: NextRequest) {
         // Vérifier qu'un certificat n'existe pas déjà pour cette inscription et ce type
         const existingCertificate = await prisma.certificate.findFirst({
             where: {
-                enrollmentId: parseInt(enrollmentId),
+                enrollmentId: enrollmentId,
                 type
             }
         })

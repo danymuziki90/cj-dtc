@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+
+const formTemplateSchema = z.object({
+  name: z.string().trim().min(1, 'Le nom du modèle est requis'),
+  description: z.string().trim().optional().nullable(),
+  sessionId: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : null)
+})
 
 // ── GET /api/sessions/form-templates ──────────────────────────────────────
 // Liste tous les modèles de formulaire
@@ -34,12 +41,13 @@ export async function GET() {
 // body: { name, description, sessionId }
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-    const { name, description, sessionId } = body
-
-    if (!name?.trim()) {
-      return NextResponse.json({ error: 'Le nom du modèle est requis' }, { status: 400 })
+    const parsed = formTemplateSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
+
+    const { name, description, sessionId } = parsed.data
 
     // Crée d'abord le template vide
     const template = await prisma.sessionFormTemplate.create({
@@ -49,14 +57,14 @@ export async function POST(req: Request) {
     // Si un sessionId est fourni, copie les questions de la session vers le template
     if (sessionId) {
       const sourceQuestions = await prisma.sessionFormQuestion.findMany({
-        where: { sessionId: parseInt(sessionId) },
+        where: { sessionId: sessionId },
         orderBy: { order: 'asc' },
       })
 
       if (sourceQuestions.length > 0) {
         await prisma.sessionFormQuestion.createMany({
           data: sourceQuestions.map((q, i) => ({
-            sessionId: parseInt(sessionId), // liée à la session source (sera réutilisée via apply)
+            sessionId: sessionId, // liée à la session source (sera réutilisée via apply)
             templateId: template.id,
             label: q.label,
             type: q.type,

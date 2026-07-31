@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
+
+const adminCertificateSchema = z.object({
+  code: z.string().trim().optional().nullable(),
+  studentId: z.string().trim().min(1, 'L\'étudiant est requis'),
+  formationId: z.union([z.number(), z.string()]).transform(val => Number(val)),
+  sessionId: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : null),
+  holderName: z.string().trim().optional().nullable(),
+  status: z.string().trim().optional().default('actif'),
+  fileUrl: z.string().url('URL de fichier invalide').optional().nullable(),
+  type: z.string().trim().optional().default('completion'),
+  issuedAt: z.string().optional().nullable()
+})
 
 export const runtime = "nodejs"
 
@@ -92,22 +105,23 @@ export async function POST(request: NextRequest) {
         const auth = await requireAdmin(request)
         if (auth.error) return auth.error
 
-        const body = await request.json()
+        const parsed = adminCertificateSchema.safeParse(await request.json())
+        if (!parsed.success) {
+            const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+            return NextResponse.json({ error: errorMsg }, { status: 400 })
+        }
+
         let {
             code,
             studentId,
             formationId,
             sessionId,
             holderName,
-            status = 'actif',
+            status,
             fileUrl,
-            type = 'completion',
+            type,
             issuedAt
-        } = body
-
-        if (!studentId || !formationId) {
-            return NextResponse.json({ error: 'L\'étudiant et la formation sont requis' }, { status: 400 })
-        }
+        } = parsed.data
 
         // Valider l'étudiant
         const student = await prisma.student.findUnique({
@@ -149,8 +163,8 @@ export async function POST(request: NextRequest) {
                 code,
                 type,
                 holderName,
-                formationId: parseInt(formationId),
-                sessionId: sessionId ? parseInt(sessionId) : null,
+                formationId: formationId,
+                sessionId: sessionId,
                 studentId,
                 status,
                 fileUrl,

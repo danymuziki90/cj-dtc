@@ -1,6 +1,29 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '../../../../lib/prisma'
 import { parseSessionMetadata } from '@/lib/sessions/metadata'
+
+const formationUpdateSchema = z.object({
+  title: z.string().trim().min(2, 'Titre trop court').nullish().transform(val => val ?? undefined),
+  description: z.string().trim().nullish().transform(val => val ?? undefined),
+  categorie: z.string().trim().nullish().transform(val => val ?? undefined),
+  duree: z.string().trim().nullish().transform(val => val ?? undefined),
+  modules: z.string().trim().nullish().transform(val => val ?? undefined),
+  methodes: z.string().trim().nullish().transform(val => val ?? undefined),
+  certification: z.string().trim().nullish().transform(val => val ?? undefined),
+  statut: z.string().trim().nullish().transform(val => val ?? undefined),
+  imageUrl: z.string().trim().nullish().transform(val => val ?? undefined),
+  objectifs: z.string().trim().nullish().transform(val => val ?? undefined),
+  name: z.string().trim().nullish().transform(val => val ?? undefined),
+  shortDescription: z.string().trim().nullish().transform(val => val ?? undefined),
+  gallery: z.string().trim().nullish().transform(val => val ?? undefined),
+  skillsAcquired: z.string().trim().nullish().transform(val => val ?? undefined),
+  prerequisites: z.string().trim().nullish().transform(val => val ?? undefined),
+  publicTargets: z.string().trim().nullish().transform(val => val ?? undefined),
+  level: z.string().trim().nullish().transform(val => val ?? undefined),
+  format: z.string().trim().nullish().transform(val => val ?? undefined),
+  languages: z.string().trim().nullish().transform(val => val ?? undefined),
+})
 
 export const runtime = "nodejs"
 
@@ -184,7 +207,12 @@ export async function PUT(
       return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
     }
 
-    const body = await req.json()
+    const parsed = formationUpdateSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
+    }
+
     const { 
       title, 
       description,
@@ -205,7 +233,7 @@ export async function PUT(
       level,
       format,
       languages
-    } = body
+    } = parsed.data
 
     // Vérifier que la formation existe
     const existingFormation = await prisma.formation.findUnique({

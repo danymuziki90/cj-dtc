@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
+
+const activateStudentSchema = z.object({
+  email: z.string().trim().email('Email invalide')
+})
 
 export const runtime = 'nodejs'
 
@@ -9,10 +14,13 @@ export async function POST(req: NextRequest) {
   if (auth.error) return auth.error
 
   try {
-    const { email } = await req.json()
-    if (!email) {
-      return NextResponse.json({ error: 'Email requis' }, { status: 400 })
+    const parsed = activateStudentSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
+
+    const { email } = parsed.data
 
     const student = await prisma.student.update({
       where: { email },

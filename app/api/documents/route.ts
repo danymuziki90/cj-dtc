@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin, requireStudent } from '@/lib/auth-portal/guards'
 import { ADMIN_AUTH_COOKIE, STUDENT_AUTH_COOKIE } from '@/lib/auth-portal/jwt'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
 import { uploadToR2 } from '@/lib/r2'
+
+const documentSchema = z.object({
+  title: z.string().trim().min(1, 'Le titre est obligatoire'),
+  description: z.string().trim().optional().nullable(),
+  category: z.string().trim().min(1, 'La catégorie est obligatoire'),
+  formationId: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : null),
+  sessionId: z.union([z.number(), z.string()]).transform(val => Number(val)),
+  isPublic: z.union([z.boolean(), z.string()]).transform(val => val === 'true' || val === true)
+})
 
 export const runtime = 'nodejs'
 
@@ -155,17 +165,34 @@ export async function POST(request: NextRequest) {
     console.log('[API Documents] Requête POST reçue')
     const formData = await request.formData()
     const file = formData.get('file') as File | null
-    const title = String(formData.get('title') || '').trim()
-    const description = String(formData.get('description') || '').trim() || null
-    const category = String(formData.get('category') || '').trim()
-    const formationId = parseOptionalNumber(String(formData.get('formationId') || '').trim() || null)
-    const sessionId = parseOptionalNumber(String(formData.get('sessionId') || '').trim() || null)
-    const isPublic = String(formData.get('isPublic') || 'false') === 'true'
-
-    if (!file || !title || !category || !sessionId) {
-      console.warn('[API Documents] Données requises manquantes')
-      return NextResponse.json({ error: 'Le fichier, le titre, la categorie et la session sont obligatoires.' }, { status: 400 })
+    if (!file) {
+      console.warn('[API Documents] Fichier manquant')
+      return NextResponse.json({ error: 'Le fichier est obligatoire.' }, { status: 400 })
     }
+
+    const parsed = documentSchema.safeParse({
+      title: formData.get('title'),
+      description: formData.get('description'),
+      category: formData.get('category'),
+      formationId: formData.get('formationId'),
+      sessionId: formData.get('sessionId'),
+      isPublic: formData.get('isPublic')
+    })
+
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      console.warn('[API Documents] Données requises manquantes ou invalides')
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
+    }
+
+    const {
+      title,
+      description,
+      category,
+      formationId,
+      sessionId,
+      isPublic
+    } = parsed.data
 
     const session = await prisma.trainingSession.findUnique({
       where: { id: sessionId },

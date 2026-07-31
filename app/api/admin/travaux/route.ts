@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
+
+const assignmentSchema = z.object({
+  title: z.string().trim().min(1, 'Titre requis'),
+  description: z.string().trim().min(1, 'Description requise'),
+  type: z.string().optional().nullable(),
+  formationId: z.union([z.number(), z.string()]).transform(val => Number(val)),
+  sessionId: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : undefined),
+  deadline: z.string().min(1, 'Date limite requise'),
+  instructions: z.string().optional().nullable(),
+  maxFileSize: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : undefined),
+  allowedFileTypes: z.string().optional().nullable(),
+  difficulty: z.string().optional().nullable(),
+  objectives: z.string().optional().nullable(),
+  published: z.boolean().optional().nullable(),
+  allowResubmission: z.boolean().optional().nullable(),
+  maxFiles: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : undefined),
+  files: z.array(z.any()).optional().nullable(),
+})
 
 export const dynamic = 'force-dynamic'
 
@@ -63,8 +82,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json()
-    
+    const parsed = assignmentSchema.safeParse(await req.json())
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
+    }
+
     const {
       title,
       description,
@@ -81,28 +104,24 @@ export async function POST(req: NextRequest) {
       allowResubmission,
       maxFiles,
       files
-    } = payload
-    
-    if (!title || !description || !formationId || !deadline) {
-      return NextResponse.json({ error: 'Champs obligatoires manquants' }, { status: 400 })
-    }
+    } = parsed.data
 
     const assignment = await prisma.assignment.create({
       data: {
         title,
         description,
         type: type || 'tp',
-        formationId: parseInt(formationId, 10),
-        sessionId: sessionId ? parseInt(sessionId, 10) : null,
+        formationId: formationId,
+        sessionId: sessionId || null,
         deadline: new Date(deadline),
         instructions: instructions || '',
-        maxFileSize: maxFileSize ? parseInt(maxFileSize, 10) : 10,
+        maxFileSize: maxFileSize || 10,
         allowedFileTypes: allowedFileTypes || 'pdf,doc,docx,zip,rar,png,jpg,jpeg,excel,xls,xlsx',
         difficulty: difficulty || 'intermediaire',
         objectives: objectives || '',
-        published: published !== undefined ? published : true,
-        allowResubmission: allowResubmission !== undefined ? allowResubmission : true,
-        maxFiles: maxFiles ? parseInt(maxFiles, 10) : 5,
+        published: published !== undefined && published !== null ? published : true,
+        allowResubmission: allowResubmission !== undefined && allowResubmission !== null ? allowResubmission : true,
+        maxFiles: maxFiles || 5,
         status: published ? 'publie' : 'brouillon',
         AssignmentFile: files && Array.isArray(files) ? {
           create: files.map((f: any) => ({

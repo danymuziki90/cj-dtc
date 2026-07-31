@@ -78,7 +78,7 @@ export default function AdminGererTravailPage({ params }: { params: Promise<{ id
     channel.subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      supabase?.removeChannel(channel)
     }
   }, [resolvedParams.id])
 
