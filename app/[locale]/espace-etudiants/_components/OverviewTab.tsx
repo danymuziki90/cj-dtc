@@ -13,6 +13,7 @@ import {
   Send,
   Upload,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { formatDateShort, formatDateTime, getAssignmentStatus } from "./utils";
 
 interface OverviewTabProps {
@@ -46,6 +47,10 @@ export function OverviewTab({
   questionLoading,
   locale,
 }: OverviewTabProps) {
+  const t = useTranslations('student');
+  const toverview = useTranslations('student.overview');
+  const tassign = useTranslations('student.assignments');
+
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       {/* Left Column - Formations & Deadlines previews */}
@@ -56,7 +61,7 @@ export function OverviewTab({
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Session active
+                  {toverview('next_course')}
                 </span>
                 <h3 className="mt-1 text-lg font-bold text-slate-900">
                   {currentSession.formationTitle}
@@ -76,7 +81,7 @@ export function OverviewTab({
                 onClick={() => setActiveTab("formations")}
                 className="inline-flex items-center gap-1 text-xs font-bold text-[var(--cj-blue)] hover:underline"
               >
-                Suivre le cours
+                {t('formations.continue')}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -88,20 +93,20 @@ export function OverviewTab({
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3 mb-4">
             <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
               <FileText className="w-4 h-4 text-[var(--cj-blue)]" />
-              Mes travaux récents
+              {toverview('recent_activities')}
             </h3>
             <button
               onClick={() => setActiveTab("travaux")}
               className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cj-blue)] px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[var(--cj-blue-700)] transition"
             >
               <Upload className="w-3.5 h-3.5" />
-              Ouvrir Mes Travaux
+              {tassign('title')}
             </button>
           </div>
 
           {assignments.length === 0 ? (
             <p className="text-xs text-slate-500 text-center py-6">
-              Aucun devoir publié pour le moment. Les nouveaux travaux apparaîtront ici automatiquement.
+              {tassign('no_assignments')}
             </p>
           ) : (
             <div className="space-y-3">
@@ -140,7 +145,7 @@ export function OverviewTab({
                         className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--cj-blue)] bg-blue-50 px-3 py-2 text-xs font-bold text-[var(--cj-blue)] hover:bg-blue-100 transition"
                       >
                         <Upload className="w-3.5 h-3.5" />
-                        {submission ? "Modifier" : "Déposer"}
+                        {tassign('submit_work')}
                       </button>
                     ) : (
                       <button

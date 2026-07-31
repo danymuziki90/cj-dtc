@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Clock, FileText } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { getAssignmentStatus } from "./utils";
 
 interface AssignmentsTabProps {
@@ -10,15 +11,17 @@ interface AssignmentsTabProps {
 }
 
 export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission }: AssignmentsTabProps) {
+  const t = useTranslations('student.assignments');
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-bold text-slate-900">
-            Mes Travaux & Évaluations
+            {t('title')}
           </h3>
           <p className="text-xs text-slate-500">
-            Consultez vos TP, projets, examens et remettez vos devoirs en ligne.
+            {t('subtitle')}
           </p>
         </div>
         </div>
@@ -29,7 +32,7 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
             <FileText className="w-6 h-6" />
           </div>
           <p className="font-bold text-slate-800 text-sm">
-            Aucun devoir à réaliser pour le moment
+            {t('no_assignments')}
           </p>
           <p className="text-slate-500">
             Vos prochains travaux apparaîtront automatiquement dès leur publication.

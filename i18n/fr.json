@@ -1,9 +1,59 @@
 {
   "home_title": "CJ DEVELOPMENT TRAINING CENTER",
-  "home_tagline": "B\u00e2tir des comp\u00e9tences. Transformer des destins. Cr\u00e9er des opportunit\u00e9s.",
-  "discover_trainings": "D\u00e9couvrir nos formations",
-  "about_title": "\u00c0 propos du CJ DEVELOPMENT TRAINING CENTER",
-  "about_text": "Centre panafricain de formation professionnelle, leadership et insertion.",
+  "home_tagline": "Bâtir des compétences. Transformer des destins. Créer des opportunités.",
+  "discover_trainings": "Découvrir nos formations",
+  "about_title": "À propos de CJ DEVELOPMENT TRAINING CENTER",
+  "about_text": "Centre panafricain d'excellence en formation professionnelle, leadership et insertion.",
   "formations_title": "Nos formations",
-  "formations_text": "D\u00e9couvrez les programmes IOP, MRH, Leadership et plus."
+  "formations_text": "Explorez nos programmes OIP, GRH, Leadership et bien plus.",
+  "student": {
+    "dashboard": "Tableau de bord",
+    "my_formations": "Mes formations",
+    "my_assignments": "Mes Travaux",
+    "news": "Actualités",
+    "calendar": "Calendrier",
+    "notifications": "Notifications",
+    "support": "Support & Questions",
+    "overview": {
+      "welcome": "Heureux de vous revoir",
+      "completion_rate": "Taux d'achèvement",
+      "average_grade": "Moyenne Générale",
+      "certifications": "Certifications",
+      "next_course": "Prochain Cours",
+      "no_course": "Aucun cours programmé",
+      "recent_activities": "Activités récentes",
+      "no_activities": "Aucune activité récente",
+      "my_progress": "Ma progression",
+      "total_hours": "heures totales"
+    },
+    "assignments": {
+      "title": "Travaux et Évaluations",
+      "subtitle": "Gérez vos devoirs, TP et examens à remettre.",
+      "to_do": "À remettre",
+      "submitted": "Remis",
+      "graded": "Corrigé",
+      "deadline": "Date limite",
+      "no_assignments": "Aucun travail trouvé.",
+      "submit_work": "Remettre le travail",
+      "view_feedback": "Voir la correction",
+      "grade": "Note",
+      "download_instructions": "Télécharger les consignes",
+      "upload_files": "Téléverser des fichiers",
+      "status": {
+        "pending": "En attente",
+        "submitted": "Soumis",
+        "graded": "Corrigé"
+      }
+    },
+    "formations": {
+      "title": "Mes Formations",
+      "subtitle": "Suivez votre progression et accédez à vos cours.",
+      "continue": "Continuer",
+      "completed": "Terminée",
+      "in_progress": "En cours",
+      "modules": "modules",
+      "start": "Commencer",
+      "no_formations": "Vous n'êtes inscrit à aucune formation."
+    }
+  }
 }

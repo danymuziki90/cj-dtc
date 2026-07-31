@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Newspaper,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface StudentNavTabsProps {
   activeTab: string;
@@ -33,15 +34,16 @@ export function StudentNavTabs({
   locale,
 }: StudentNavTabsProps) {
   const pathname = usePathname();
+  const t = useTranslations('student');
 
   const tabs = [
-    { id: "overview", label: "Tableau de bord", icon: BarChart3, count: null, href: null },
-    { id: "formations", label: "Mes formations", icon: BookOpen, count: totalFormationsCount, href: null },
-    { id: "travaux", label: "Mes Travaux", icon: FileText, count: pendingAssignmentsCount, href: null },
-    { id: "news", label: "Actualités", icon: Newspaper, count: newsCount, href: null },
-    { id: "calendrier", label: "Calendrier", icon: Calendar, count: null, href: null },
-    { id: "notifications", label: "Notifications", icon: Bell, count: totalNotifications, href: null },
-    { id: "support", label: "Support & Questions", icon: HelpCircle, count: null, href: null },
+    { id: "overview", label: t('dashboard'), icon: BarChart3, count: null, href: null },
+    { id: "formations", label: t('my_formations'), icon: BookOpen, count: totalFormationsCount, href: null },
+    { id: "travaux", label: t('my_assignments'), icon: FileText, count: pendingAssignmentsCount, href: null },
+    { id: "news", label: t('news'), icon: Newspaper, count: newsCount, href: null },
+    { id: "calendrier", label: t('calendar'), icon: Calendar, count: null, href: null },
+    { id: "notifications", label: t('notifications'), icon: Bell, count: totalNotifications, href: null },
+    { id: "support", label: t('support'), icon: HelpCircle, count: null, href: null },
   ];
 
   return (

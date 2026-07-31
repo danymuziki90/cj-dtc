@@ -46,11 +46,13 @@ export const metadata: Metadata = {
   },
 }
 
+import { getMessages } from 'next-intl/server'
+
 export default async function LocaleLayout({ children, params }: LayoutProps) {
   const resolvedParams = await Promise.resolve(params)
   const locale = resolvedParams.locale || 'fr'
 
-  const messages = {}
+  const messages = await getMessages()
 
   return (
     <I18nProvider messages={messages} locale={locale}>
