@@ -1,312 +1,108 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
-import { uploadToR2 } from '@/lib/r2'
-import { randomUUID } from 'crypto'
+import {
+  EMPLOIS_CATEGORY, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, DATE_INPUT_REGEX,
+  emploiWriteSchema, sanitizeHtml, normalizeTags, resolvePublicationDate,
+  parsePositiveInt, handleImageUpload, mapEmploi, generateSlug,
+} from '@/lib/emplois/shared'
 
-const DEFAULT_CATEGORY = 'General'
-const DEFAULT_PAGE_SIZE = 8
-const MAX_PAGE_SIZE = 30
-const MAX_IMAGE_BYTES = 2 * 1024 * 1024
+export const runtime = 'nodejs'
 
-const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'])
-const DATE_INPUT_REGEX = /^\d{4}-\d{2}-\d{2}$/
-const MIME_MAP: Record<string, string> = {
-  'image/jpeg': 'jpg',
-  'image/jpg': 'jpg',
-  'image/png': 'png',
-  'image/webp': 'webp',
-  'image/gif': 'gif',
-}
-
-const emploisSchema = z.object({
-  title: z.string({
-    required_error: "Le titre est obligatoire",
-    invalid_type_error: "Le titre doit être une chaîne de caractères"
-  }).trim().min(3, "Le titre doit contenir au moins 3 caractères").max(180, "Le titre ne doit pas dépasser 180 caractères"),
-  content: z.string({
-    required_error: "Le contenu est obligatoire",
-    invalid_type_error: "Le contenu doit être une chaîne de caractères"
-  }).trim().min(10, "Le contenu doit contenir au moins 10 caractères"),
-  category: z.string().trim().max(80, "La catégorie ne doit pas dépasser 80 caractères").optional().nullable().or(z.literal('')),
-  tags: z.array(z.string().trim().min(1, "Un tag ne peut pas être vide").max(40, "Un tag ne doit pas dépasser 40 caractères")).max(15, "Vous ne pouvez pas ajouter plus de 15 tags").optional(),
-  publicationDate: z.string().optional().nullable().or(z.literal('')),
-  imageDataUrl: z.string().trim().optional().nullable(),
-  published: z.boolean().optional(),
-  metadata: z.object({
-    contractType: z.string().optional(),
-    location: z.string().optional(),
-    deadline: z.string().optional(),
-    contactEmail: z.string().optional(),
-    domain: z.string().optional(),
-  }).optional(),
-})
-
-function sanitizeRichText(value: string) {
-  return value
-    .replace(/<\s*(script|style|iframe|object|embed|meta|link)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '')
-    .replace(/<\s*(script|style|iframe|object|embed|meta|link)[^>]*\/?>/gi, '')
-    .replace(/\son[a-z]+\s*=\s*(['"]).*?\1/gi, '')
-    .replace(/\s(href|src)\s*=\s*(['"])\s*javascript:[\s\S]*?\2/gi, ' $1="#"')
-    .trim()
-}
-
-function normalizeTags(tags?: string[]) {
-  if (!tags?.length) return []
-
-  const seen = new Set<string>()
-  const result: string[] = []
-
-  for (const tag of tags) {
-    const cleaned = tag.trim()
-    if (!cleaned) continue
-    const key = cleaned.toLowerCase()
-    if (seen.has(key)) continue
-    seen.add(key)
-    result.push(cleaned)
-  }
-
-  return result
-}
-
-function parseTags(value?: string | null) {
-  if (!value) return []
-  return value
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter(Boolean)
-}
-
-function resolvePublicationDate(rawDate?: string | null) {
-  if (!rawDate) {
-    return new Date()
-  }
-  const dateStr = rawDate.trim()
-  if (!dateStr) {
-    return new Date()
-  }
-  if (DATE_INPUT_REGEX.test(dateStr)) {
-    return new Date(`${dateStr}T00:00:00.000Z`)
-  }
-  const parsed = new Date(dateStr)
-  if (Number.isNaN(parsed.getTime())) {
-    return new Date()
-  }
-  return parsed
-}
-
-function parsePositiveInteger(value: string | null, fallback: number) {
-  const parsed = Number.parseInt(value || '', 10)
-  if (Number.isNaN(parsed) || parsed < 1) return fallback
-  return parsed
-}
-
-function estimateBase64Size(base64: string) {
-  const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0
-  return Math.floor((base64.length * 3) / 4) - padding
-}
-
-async function handleImageUpload(imageDataUrl?: string | null): Promise<string | null> {
-  const value = imageDataUrl?.trim()
-  if (!value) return null
-
-  // If it's already an uploaded URL, keep it
-  if (
-    value.startsWith('http://') ||
-    value.startsWith('https://') ||
-    value.startsWith('/uploads/') ||
-    value.startsWith('/api/r2/file/')
-  ) {
-    return value
-  }
-
-  // If it's a data URL, upload to R2
-  const match = value.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$/)
-  if (!match) {
-    throw new Error("Le format de l'image est invalide.")
-  }
-
-  const mimeType = match[1].toLowerCase()
-  if (!ACCEPTED_IMAGE_TYPES.has(mimeType)) {
-    throw new Error("Le type de l'image n'est pas autorisé (JPEG, PNG, WEBP, GIF uniquement).")
-  }
-
-  const base64 = match[2].replace(/\s/g, '')
-  const bytes = estimateBase64Size(base64)
-  if (bytes > MAX_IMAGE_BYTES) {
-    throw new Error("L'image est trop volumineuse (maximum 2 Mo).")
-  }
-
-  const buffer = Buffer.from(base64, 'base64')
-  const ext = MIME_MAP[mimeType] || 'jpg'
-  const fileName = `${randomUUID()}.${ext}`
-
-  try {
-    const url = await uploadToR2(buffer, fileName, 'actualites', mimeType)
-    return url
-  } catch (error: any) {
-    console.error('[R2 Image Upload Error]:', error)
-    throw new Error(`Échec de l'envoi de l'image vers Cloudflare R2: ${error.message || error}`)
-  }
-}
-
-function mapNewsItem(item: any) {
-  return {
-    ...item,
-    author: item.author || 'Admin',
-    category: item.category || DEFAULT_CATEGORY,
-    tags: parseTags(item.tags),
-    publicationDate: item.publicationDate || item.createdAt,
-    imageDataUrl: item.imageData || null,
-    metadata: item.metadata || {},
-  }
-}
-
+// ─── GET /api/admin/system/emplois ────────────────────────────────────────────
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request)
   if (auth.error) return auth.error
 
   const url = new URL(request.url)
-  const page = parsePositiveInteger(url.searchParams.get('page'), 1)
-  const pageSize = Math.min(parsePositiveInteger(url.searchParams.get('pageSize'), DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE)
-  const search = (url.searchParams.get('search') || '').trim()
-  const category = (url.searchParams.get('category') || '').trim()
-  const date = (url.searchParams.get('date') || '').trim()
+  const page     = parsePositiveInt(url.searchParams.get('page'), 1)
+  const pageSize = Math.min(parsePositiveInt(url.searchParams.get('pageSize'), DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE)
+  const search   = url.searchParams.get('search')?.trim() || ''
+  const status   = url.searchParams.get('status')?.trim() || ''  // published|draft|archived
+  const date     = url.searchParams.get('date')?.trim() || ''
+  const sortBy   = url.searchParams.get('sortBy') || 'date'      // date|title|deadline
 
-  const shouldPaginate =
-    url.searchParams.has('page') ||
-    url.searchParams.has('pageSize') ||
-    Boolean(search) ||
-    Boolean(category) ||
-    Boolean(date)
-
-  const where: any = {}
+  const where: any = { category: EMPLOIS_CATEGORY }
 
   if (search) {
     where.OR = [
-      {
-        title: {
-          contains: search,
-          mode: 'insensitive',
-        },
-      },
-      {
-        content: {
-          contains: search,
-          mode: 'insensitive',
-        },
-      },
+      { title:   { contains: search, mode: 'insensitive' } },
+      { content: { contains: search, mode: 'insensitive' } },
     ]
   }
 
-  if (category && category !== 'all') {
-    where.category = {
-      equals: category,
-      mode: 'insensitive',
-    }
-  }
+  if (status === 'published') where.published = true
+  if (status === 'draft')     where.published = false
 
   if (date && DATE_INPUT_REGEX.test(date)) {
     const start = new Date(`${date}T00:00:00.000Z`)
-    const end = new Date(start)
+    const end   = new Date(start)
     end.setUTCDate(end.getUTCDate() + 1)
     where.publicationDate = { gte: start, lt: end }
   }
 
-  const total = await prisma.news.count({ where })
+  const orderBy = sortBy === 'title'
+    ? [{ title: 'asc' as const }]
+    : [{ publicationDate: 'desc' as const }, { createdAt: 'desc' as const }]
 
-  const news = await prisma.news.findMany({
-    where: { ...where, category: 'Emplois' },
-    orderBy: [{ publicationDate: 'desc' }, { createdAt: 'desc' }],
-    ...(shouldPaginate
-      ? {
-          skip: (page - 1) * pageSize,
-          take: pageSize,
-        }
-      : {}),
-  })
-
-  const categoriesRows = await prisma.news.findMany({
-    where: {
-      category: 'Emplois',
-    },
-    select: { category: true },
-    distinct: ['category'],
-    orderBy: { category: 'asc' },
-  })
-
-  const effectivePageSize = shouldPaginate ? pageSize : Math.max(total, 1)
+  const [total, rows] = await Promise.all([
+    prisma.news.count({ where }),
+    prisma.news.findMany({
+      where,
+      orderBy,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+  ])
 
   return NextResponse.json({
-    news: news.map(mapNewsItem),
-    categories: categoriesRows
-      .map((row: { category: string }) => row.category)
-      .filter(Boolean),
+    emplois: rows.map(mapEmploi),
     pagination: {
       page,
-      pageSize: effectivePageSize,
+      pageSize,
       total,
-      pageCount: shouldPaginate ? Math.max(Math.ceil(total / pageSize), 1) : 1,
+      pageCount: Math.max(Math.ceil(total / pageSize), 1),
     },
   })
 }
 
+// ─── POST /api/admin/system/emplois ───────────────────────────────────────────
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin(request)
   if (auth.error) return auth.error
 
-  const parsed = emploisSchema.safeParse(await request.json())
+  const body   = await request.json()
+  const parsed = emploiWriteSchema.safeParse(body)
   if (!parsed.success) {
-    const errorDetails = parsed.error.flatten().fieldErrors
-    const formattedErrors = Object.entries(errorDetails)
-      .map(([field, msgs]) => {
-        const fieldName = field === 'title' ? 'Titre' :
-                          field === 'content' ? 'Contenu' :
-                          field === 'category' ? 'Catégorie' :
-                          field === 'publicationDate' ? 'Date de publication' :
-                          field === 'imageDataUrl' ? 'Image' :
-                          field === 'published' ? 'Statut de publication' : field
-        return `${fieldName} : ${msgs?.join(', ')}`
-      })
-      .join(' ; ')
-    return NextResponse.json({
-      error: `Champs invalides - ${formattedErrors}`,
-      details: errorDetails
-    }, { status: 400 })
+    return NextResponse.json({ error: 'Données invalides.', details: parsed.error.flatten().fieldErrors }, { status: 400 })
   }
 
-  const sanitizedContent = sanitizeRichText(parsed.data.content)
-  if (sanitizedContent.length < 10) {
-    return NextResponse.json({ error: 'Le contenu est trop court après nettoyage.' }, { status: 400 })
-  }
+  const { title, content, tags, publicationDate, imageDataUrl, published, metadata } = parsed.data
+
+  const sanitized = sanitizeHtml(content)
+  if (sanitized.length < 10)
+    return NextResponse.json({ error: 'Contenu trop court.' }, { status: 400 })
 
   let imageData: string | null = null
-  try {
-    imageData = await handleImageUpload(parsed.data.imageDataUrl)
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Image invalide.' },
-      { status: 400 }
-    )
-  }
+  try { imageData = await handleImageUpload(imageDataUrl) }
+  catch (e: any) { return NextResponse.json({ error: e.message }, { status: 400 }) }
 
-  const tags = normalizeTags(parsed.data.tags).join(',')
-  const finalCategory = parsed.data.category?.trim() || DEFAULT_CATEGORY
+  // Determine published flag from metadata.status or explicit field
+  const isPublished = metadata?.status === 'published' ? true : (published ?? false)
 
-  const article = await prisma.news.create({
+  const row = await prisma.news.create({
     data: {
-      title: parsed.data.title,
-      content: sanitizedContent,
-      published: parsed.data.published ?? false,
-      author: auth.admin.username || 'Admin',
-      category: 'Emplois',
-      tags,
+      title,
+      content: sanitized,
+      published: isPublished,
+      author: (auth.admin as any).username || 'Admin',
+      category: EMPLOIS_CATEGORY,
+      tags: normalizeTags(tags),
       imageData,
-      publicationDate: resolvePublicationDate(parsed.data.publicationDate),
-      metadata: parsed.data.metadata || {},
+      publicationDate: resolvePublicationDate(publicationDate),
+      metadata: { ...metadata, status: isPublished ? 'published' : (metadata?.status ?? 'draft') },
     },
   })
 
-  return NextResponse.json({ article: mapNewsItem(article) }, { status: 201 })
+  return NextResponse.json({ emploi: mapEmploi(row) }, { status: 201 })
 }

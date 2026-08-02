@@ -1,717 +1,463 @@
 'use client'
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import AdminShell from '@/components/admin-portal/AdminShell'
+import {
+  Plus, Pencil, Trash2, Eye, EyeOff, Archive, Copy,
+  Search, Filter, ChevronLeft, ChevronRight, Loader2,
+  CheckCircle2, AlertCircle, X, MapPin, Briefcase, Calendar,
+  Building2, Globe, GraduationCap, Clock, DollarSign, Mail, Link as LinkIcon,
+} from 'lucide-react'
 
-type NewsItem = {
-  id: string
-  title: string
-  content: string
-  published: boolean
-  createdAt: string
-  updatedAt: string
-  author: string
-  category: string
-  tags: string[]
-  publicationDate: string
-  imageDataUrl?: string | null
-  metadata?: {
-    contractType?: string
-    location?: string
-    deadline?: string
-    contactEmail?: string
-    domain?: string
-  }
+// ─── Types ────────────────────────────────────────────────────────────────────
+type EmploiMeta = {
+  company: string; contractType: string; location: string; remote: string
+  domain: string; educationLevel: string; experience: string; salary: string
+  positions: number; deadline: string; applyUrl: string; contactEmail: string
+  missions: string; profile: string; skills: string; status: string; excerpt: string
+}
+type Emploi = {
+  id: string; title: string; content: string; published: boolean
+  publicationDate: string; createdAt: string; imageDataUrl: string | null
+  tags: string[]; metadata: EmploiMeta
+}
+type Pagination = { page: number; pageSize: number; total: number; pageCount: number }
+
+// ─── Form state ───────────────────────────────────────────────────────────────
+type FormState = {
+  title: string; content: string; tagsInput: string
+  publicationDate: string; imageDataUrl: string | null; published: boolean
+  company: string; contractType: string; location: string; remote: string
+  domain: string; educationLevel: string; experience: string; salary: string
+  positions: string; deadline: string; applyUrl: string; contactEmail: string
+  missions: string; profile: string; skills: string; excerpt: string
 }
 
-type NewsResponse = {
-  news: NewsItem[]
-  categories: string[]
-  pagination: {
-    page: number
-    pageSize: number
-    total: number
-    pageCount: number
-  }
+const CONTRACT_TYPES = ['CDI', 'CDD', 'Stage', 'Freelance', 'Intérim', 'Alternance', 'Bénévolat', 'Autre']
+const REMOTE_OPTIONS = [{ value: 'non', label: 'Présentiel' }, { value: 'oui', label: 'Télétravail' }, { value: 'hybride', label: 'Hybride' }]
+const EDUCATION_LEVELS = ['Bac', 'Bac+2', 'Bac+3 / Licence', 'Bac+5 / Master', 'Doctorat', 'Sans diplôme requis']
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  published: { label: 'Publié',   color: 'bg-emerald-100 text-emerald-700' },
+  draft:     { label: 'Brouillon', color: 'bg-amber-100 text-amber-700' },
+  archived:  { label: 'Archivé',  color: 'bg-slate-100 text-slate-600' },
 }
 
-type EmploiFormState = {
-  title: string
-  content: string
-  tagsInput: string
-  publicationDate: string
-  imageDataUrl: string | null
-  published: boolean
-  contractType: string
-  location: string
-  deadline: string
-  contactEmail: string
-  domain: string
-}
-
-const PAGE_SIZE = 8
-const MAX_IMAGE_BYTES = 2 * 1024 * 1024
-
-function todayAsInputDate() {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function emptyFormState(): EmploiFormState {
+function emptyForm(): FormState {
   return {
-    title: '',
-    content: '',
-    tagsInput: '',
-    publicationDate: todayAsInputDate(),
+    title: '', content: '', tagsInput: '', published: false,
+    publicationDate: new Date().toISOString().slice(0, 10),
     imageDataUrl: null,
-    published: true,
-    contractType: '',
-    location: '',
-    deadline: '',
-    contactEmail: '',
-    domain: '',
+    company: '', contractType: '', location: '', remote: 'non',
+    domain: '', educationLevel: '', experience: '', salary: '',
+    positions: '1', deadline: '', applyUrl: '', contactEmail: '',
+    missions: '', profile: '', skills: '', excerpt: '',
   }
 }
 
-function parseTagInput(value: string) {
-  const seen = new Set<string>()
-  return value
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .filter((item) => {
-      const key = item.toLowerCase()
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
-}
-
-function plainTextExcerpt(html: string, maxLength = 120) {
-  const cleaned = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-  if (cleaned.length <= maxLength) return cleaned
-  return `${cleaned.slice(0, maxLength)}...`
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('fr-FR', {
-    dateStyle: 'medium',
-  }).format(new Date(value))
-}
-
-function RichTextEditor({
-  value,
-  onChange,
-}: {
-  value: string
-  onChange: (next: string) => void
-}) {
-  const editorRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    if (!editorRef.current) return
-    if (editorRef.current.innerHTML === value) return
-    editorRef.current.innerHTML = value || ''
-  }, [value])
-
-  function runCommand(command: string) {
-    editorRef.current?.focus()
-    document.execCommand(command, false)
-    onChange(editorRef.current?.innerHTML || '')
+function formToPayload(f: FormState, status: string) {
+  return {
+    title: f.title.trim(),
+    content: f.content.trim() || '<p>Description du poste.</p>',
+    tags: f.tagsInput.split(',').map(t => t.trim()).filter(Boolean),
+    publicationDate: f.publicationDate,
+    imageDataUrl: f.imageDataUrl,
+    published: status === 'published',
+    metadata: {
+      company: f.company, contractType: f.contractType, location: f.location,
+      remote: f.remote, domain: f.domain, educationLevel: f.educationLevel,
+      experience: f.experience, salary: f.salary,
+      positions: parseInt(f.positions) || 1,
+      deadline: f.deadline, applyUrl: f.applyUrl, contactEmail: f.contactEmail,
+      missions: f.missions, profile: f.profile, skills: f.skills,
+      excerpt: f.excerpt, status,
+    },
   }
-
-  function createLink() {
-    const url = window.prompt('URL du lien (https://...)')
-    if (!url) return
-    editorRef.current?.focus()
-    document.execCommand('createLink', false, url.trim())
-    onChange(editorRef.current?.innerHTML || '')
-  }
-
-  return (
-    <div className="rounded-xl border border-slate-300 bg-white">
-      <div className="flex flex-wrap gap-1 border-b border-slate-200 p-2">
-        <button
-          type="button"
-          onClick={() => runCommand('bold')}
-          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-        >
-          Gras
-        </button>
-        <button
-          type="button"
-          onClick={() => runCommand('italic')}
-          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-        >
-          Italique
-        </button>
-        <button
-          type="button"
-          onClick={() => runCommand('underline')}
-          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-        >
-          Souligne
-        </button>
-        <button
-          type="button"
-          onClick={() => runCommand('insertUnorderedList')}
-          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-        >
-          Liste
-        </button>
-        <button
-          type="button"
-          onClick={createLink}
-          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-        >
-          Lien
-        </button>
-        <button
-          type="button"
-          onClick={() => runCommand('removeFormat')}
-          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-        >
-          Nettoyer
-        </button>
-      </div>
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={(event) => onChange(event.currentTarget.innerHTML)}
-        className="min-h-44 w-full p-3 text-sm text-slate-900 outline-none"
-      />
-    </div>
-  )
 }
 
+const MAX_IMG = 2 * 1024 * 1024
+
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function AdminEmploisPage() {
-  const [news, setNews] = useState<NewsItem[]>([])
-  const [form, setForm] = useState<EmploiFormState>(emptyFormState)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const [filters, setFilters] = useState({
-    search: '',
-  })
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [page, setPage] = useState(1)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: PAGE_SIZE,
-    total: 0,
-    pageCount: 1,
-  })
+  const [emplois, setEmplois]       = useState<Emploi[]>([])
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 9, total: 0, pageCount: 1 })
+  const [loading, setLoading]       = useState(true)
+  const [saving, setSaving]         = useState(false)
+  const [error, setError]           = useState<string | null>(null)
+  const [success, setSuccess]       = useState<string | null>(null)
+  const [showForm, setShowForm]     = useState(false)
+  const [editingId, setEditingId]   = useState<string | null>(null)
+  const [form, setForm]             = useState<FormState>(emptyForm())
+  const [formStatus, setFormStatus] = useState<string>('draft')
+  const [search, setSearch]         = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [page, setPage]             = useState(1)
+  const [deleteId, setDeleteId]     = useState<string | null>(null)
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setDebouncedSearch(filters.search.trim())
-      setPage(1)
-    }, 250)
+  const f = (k: keyof FormState) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    setForm(prev => ({ ...prev, [k]: e.target.value }))
 
-    return () => window.clearTimeout(timer)
-  }, [filters.search])
-
-  async function loadEmplois(targetPage = page) {
-    const params = new URLSearchParams()
-    params.set('page', String(targetPage))
-    params.set('pageSize', String(PAGE_SIZE))
-
-    if (debouncedSearch) params.set('search', debouncedSearch)
-    
-    // We fetch from the emplois route which forces category='Emplois'
-    const response = await fetch(`/api/admin/system/emplois?${params.toString()}`, {
-      cache: 'no-store',
-    })
-
-    if (!response.ok) {
-      const payload = await response.json().catch(() => ({}))
-      throw new Error(payload?.error || 'Impossible de charger les offres d emploi.')
-    }
-
-    const payload = (await response.json()) as NewsResponse
-    setNews(payload.news || [])
-    setPagination(payload.pagination || { page: 1, pageSize: PAGE_SIZE, total: 0, pageCount: 1 })
-    return payload
-  }
-
-  useEffect(() => {
+  // ── Load list ──────────────────────────────────────────────────────────────
+  const load = useCallback(async (p = page) => {
     setLoading(true)
-    setError(null)
+    const qs = new URLSearchParams({ page: String(p), pageSize: '9' })
+    if (search) qs.set('search', search)
+    if (statusFilter) qs.set('status', statusFilter)
+    try {
+      const res = await fetch(`/api/admin/system/emplois?${qs}`, { cache: 'no-store' })
+      if (!res.ok) throw new Error('Chargement impossible.')
+      const data = await res.json()
+      setEmplois(data.emplois || [])
+      setPagination(data.pagination)
+    } catch (e: any) { setError(e.message) }
+    finally { setLoading(false) }
+  }, [page, search, statusFilter])
 
-    loadEmplois()
-      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur inattendue.'))
-      .finally(() => setLoading(false))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, debouncedSearch])
+  useEffect(() => { load(page) }, [page, search, statusFilter])
 
-  const pageNumbers = useMemo(() => {
-    if (pagination.pageCount <= 1) return []
-    const start = Math.max(1, pagination.page - 2)
-    const end = Math.min(pagination.pageCount, start + 4)
-    const numbers: number[] = []
-
-    for (let i = start; i <= end; i += 1) numbers.push(i)
-    return numbers
-  }, [pagination.page, pagination.pageCount])
-
-  function resetForm() {
-    setEditingId(null)
-    setForm(emptyFormState())
-    setError(null)
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function toast(msg: string, isError = false) {
+    if (isError) setError(msg); else setSuccess(msg)
+    setTimeout(() => { setError(null); setSuccess(null) }, 5000)
   }
 
-  function startEdit(item: NewsItem) {
-    setEditingId(item.id)
-    setError(null)
-    setSuccessMessage(null)
-    setForm({
-      title: item.title,
-      content: item.content,
-      tagsInput: item.tags.join(', '),
-      publicationDate: item.publicationDate.slice(0, 10),
-      imageDataUrl: item.imageDataUrl || null,
-      published: item.published,
-      contractType: item.metadata?.contractType || '',
-      location: item.metadata?.location || '',
-      deadline: item.metadata?.deadline || '',
-      contactEmail: item.metadata?.contactEmail || '',
-      domain: item.metadata?.domain || '',
-    })
+  function openCreate() {
+    setEditingId(null); setForm(emptyForm()); setFormStatus('draft'); setShowForm(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  async function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      setError('Selectionnez uniquement un fichier image.')
-      return
-    }
-
-    if (file.size > MAX_IMAGE_BYTES) {
-      setError('Image trop volumineuse. Taille max: 2 MB.')
-      return
-    }
-
-    const encoded = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(String(reader.result || ''))
-      reader.onerror = () => reject(new Error('Impossible de lire l image.'))
-      reader.readAsDataURL(file)
+  function openEdit(e: Emploi) {
+    setEditingId(e.id)
+    setFormStatus(e.metadata.status || (e.published ? 'published' : 'draft'))
+    setForm({
+      title: e.title, content: e.content,
+      tagsInput: e.tags.join(', '),
+      publicationDate: e.publicationDate.slice(0, 10),
+      imageDataUrl: e.imageDataUrl || null,
+      published: e.published,
+      company: e.metadata.company || '', contractType: e.metadata.contractType || '',
+      location: e.metadata.location || '', remote: e.metadata.remote || 'non',
+      domain: e.metadata.domain || '', educationLevel: e.metadata.educationLevel || '',
+      experience: e.metadata.experience || '', salary: e.metadata.salary || '',
+      positions: String(e.metadata.positions || 1), deadline: e.metadata.deadline || '',
+      applyUrl: e.metadata.applyUrl || '', contactEmail: e.metadata.contactEmail || '',
+      missions: e.metadata.missions || '', profile: e.metadata.profile || '',
+      skills: e.metadata.skills || '', excerpt: e.metadata.excerpt || '',
     })
-
-    setError(null)
-    setForm((prev) => ({ ...prev, imageDataUrl: encoded }))
+    setShowForm(true); window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault()
-    setSaving(true)
-    setError(null)
-    setSuccessMessage(null)
+  function closeForm() { setShowForm(false); setEditingId(null); setForm(emptyForm()) }
 
-    const payload = {
-      title: form.title.trim(),
-      content: form.content.trim(),
-      category: 'Emplois', // forced
-      tags: parseTagInput(form.tagsInput),
-      publicationDate: form.publicationDate || todayAsInputDate(),
-      imageDataUrl: form.imageDataUrl,
-      published: form.published,
-      metadata: {
-        contractType: form.contractType,
-        location: form.location,
-        deadline: form.deadline,
-        contactEmail: form.contactEmail,
-        domain: form.domain,
-      }
-    }
-
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault(); setSaving(true); setError(null)
+    const payload = formToPayload(form, formStatus)
     try {
       const method = editingId ? 'PUT' : 'POST'
-      const url = editingId ? `/api/admin/system/emplois/${editingId}` : '/api/admin/system/emplois'
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}))
-        throw new Error(body?.error || 'Enregistrement impossible.')
-      }
-
-      const isEditing = Boolean(editingId)
-      resetForm()
-      setSuccessMessage(isEditing ? 'Offre mise à jour avec succès !' : 'Offre enregistrée avec succès !')
-      setTimeout(() => setSuccessMessage(null), 5000)
-
-      const refreshed = await loadEmplois(page)
-      if (refreshed.pagination.pageCount > 0 && page > refreshed.pagination.pageCount) {
-        setPage(refreshed.pagination.pageCount)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inattendue.')
-    } finally {
-      setSaving(false)
-    }
+      const url    = editingId ? `/api/admin/system/emplois/${editingId}` : '/api/admin/system/emplois'
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Enregistrement impossible.') }
+      toast(editingId ? 'Offre mise à jour !' : 'Offre créée !'); closeForm(); load(page)
+    } catch (err: any) { setError(err.message) }
+    finally { setSaving(false) }
   }
 
-  async function removeNews(item: NewsItem) {
-    const confirmed = window.confirm(`Supprimer "${item.title}" ? Cette action est irreversible.`)
-    if (!confirmed) return
-
-    setError(null)
-    const response = await fetch(`/api/admin/system/emplois/${item.id}`, { method: 'DELETE' })
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}))
-      setError(body?.error || 'Suppression impossible.')
-      return
-    }
-
-    const nextPage = news.length === 1 && page > 1 ? page - 1 : page
-    if (nextPage !== page) {
-      setPage(nextPage)
-    } else {
-      await loadEmplois(nextPage)
-    }
+  // ── Actions ────────────────────────────────────────────────────────────────
+  async function patch(id: string, action: string) {
+    const res = await fetch(`/api/admin/system/emplois/${id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }),
+    })
+    if (!res.ok) { const d = await res.json(); toast(d.error || 'Action impossible.', true); return }
+    const label = action === 'publish' ? 'Offre publiée.' : action === 'unpublish' ? 'Offre dépubliée.' : action === 'archive' ? 'Offre archivée.' : 'Offre dupliquée.'
+    toast(label); load(page)
   }
+
+  async function remove(id: string) {
+    if (!window.confirm('Supprimer cette offre ? Action irréversible.')) return
+    const res = await fetch(`/api/admin/system/emplois/${id}`, { method: 'DELETE' })
+    if (!res.ok) { const d = await res.json(); toast(d.error || 'Suppression impossible.', true); return }
+    toast('Offre supprimée.'); load(page)
+  }
+
+  // ── Image ──────────────────────────────────────────────────────────────────
+  async function onImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; if (!file) return
+    if (!file.type.startsWith('image/')) return toast('Fichier image requis.', true)
+    if (file.size > MAX_IMG) return toast('Image trop volumineuse (max 2 Mo).', true)
+    const reader = new FileReader()
+    reader.onload = () => setForm(p => ({ ...p, imageDataUrl: reader.result as string }))
+    reader.readAsDataURL(file)
+  }
+
+  // ─── Input helpers ─────────────────────────────────────────────────────────
+  function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+    return (
+      <div>
+        <label className="mb-1 block text-xs font-semibold text-slate-600 uppercase tracking-wide">
+          {label}{required && <span className="ml-0.5 text-red-500">*</span>}
+        </label>
+        {children}
+      </div>
+    )
+  }
+
+  const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[var(--cj-blue)] focus:ring-1 focus:ring-[var(--cj-blue)]'
+  const selectCls = inputCls
+  const textareaCls = `${inputCls} resize-y min-h-[90px]`
 
   return (
-    <AdminShell title="Recrutement / Emplois">
-      <div className="space-y-6">
-        <form onSubmit={onSubmit} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
-          <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900">
-                {editingId ? 'Modifier une offre d emploi' : 'Publier une offre d emploi'}
-              </h2>
-              <p className="text-sm text-slate-500">Titre, lieu, contrat, description et conditions.</p>
-            </div>
-            {editingId ? (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              >
-                Annuler l edition
+    <AdminShell title="Offres d'emploi">
+      {/* Toast messages */}
+      {success && (
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />{success}
+        </div>
+      )}
+      {error && (
+        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          <AlertCircle className="h-4 w-4 shrink-0" />{error}
+          <button onClick={() => setError(null)} className="ml-auto"><X className="h-4 w-4" /></button>
+        </div>
+      )}
+
+      {/* ── Form ──────────────────────────────────────────────────────────── */}
+      {showForm && (
+        <form onSubmit={onSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-slate-800">{editingId ? 'Modifier l\'offre' : 'Nouvelle offre d\'emploi'}</h2>
+            <button type="button" onClick={closeForm} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X className="h-5 w-5" /></button>
+          </div>
+
+          {/* Statut */}
+          <div className="flex flex-wrap gap-2">
+            {(['draft', 'published', 'archived'] as const).map(s => (
+              <button key={s} type="button" onClick={() => setFormStatus(s)}
+                className={`rounded-full px-4 py-1.5 text-xs font-bold border transition ${formStatus === s ? STATUS_LABELS[s].color + ' border-current' : 'border-slate-200 text-slate-500 hover:border-slate-400'}`}>
+                {STATUS_LABELS[s].label}
               </button>
-            ) : null}
+            ))}
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="title" className="mb-1 block text-sm font-medium text-slate-700">
-                  Titre de l'offre
-                </label>
-                <input
-                  id="title"
-                  value={form.title}
-                  onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-                  required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="domain" className="mb-1 block text-sm font-medium text-slate-700">
-                    Domaine / Département
-                  </label>
-                  <input
-                    id="domain"
-                    value={form.domain}
-                    onChange={(event) => setForm((prev) => ({ ...prev, domain: event.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
-                    placeholder="Ex: Marketing, IT, RH..."
-                  />
-                </div>
-                <div>
-                  <label htmlFor="contractType" className="mb-1 block text-sm font-medium text-slate-700">
-                    Type de contrat
-                  </label>
-                  <select
-                    id="contractType"
-                    value={form.contractType}
-                    onChange={(event) => setForm((prev) => ({ ...prev, contractType: event.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
-                  >
-                    <option value="">Sélectionner</option>
-                    <option value="CDI">CDI</option>
-                    <option value="CDD">CDD</option>
-                    <option value="Freelance">Freelance</option>
-                    <option value="Stage">Stage</option>
-                    <option value="Alternance">Alternance</option>
-                    <option value="Bénévole">Bénévole</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="location" className="mb-1 block text-sm font-medium text-slate-700">
-                    Lieu
-                  </label>
-                  <input
-                    id="location"
-                    value={form.location}
-                    onChange={(event) => setForm((prev) => ({ ...prev, location: event.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
-                    placeholder="Ex: Paris, Distanciel..."
-                  />
-                </div>
-                <div>
-                  <label htmlFor="deadline" className="mb-1 block text-sm font-medium text-slate-700">
-                    Date limite de candidature
-                  </label>
-                  <input
-                    id="deadline"
-                    type="date"
-                    value={form.deadline}
-                    onChange={(event) => setForm((prev) => ({ ...prev, deadline: event.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="contactEmail" className="mb-1 block text-sm font-medium text-slate-700">
-                    Email de candidature
-                  </label>
-                  <input
-                    id="contactEmail"
-                    type="email"
-                    value={form.contactEmail}
-                    onChange={(event) => setForm((prev) => ({ ...prev, contactEmail: event.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
-                    placeholder="recrutement@exemple.com"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="publicationDate" className="mb-1 block text-sm font-medium text-slate-700">
-                    Date de publication
-                  </label>
-                  <input
-                    id="publicationDate"
-                    type="date"
-                    value={form.publicationDate}
-                    onChange={(event) => setForm((prev) => ({ ...prev, publicationDate: event.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Image de couverture</label>
-                <div className="flex flex-wrap items-center gap-3">
-                  <label
-                    htmlFor="imageInput"
-                    className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Choisir un fichier
-                  </label>
-                  <input
-                    id="imageInput"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
-                  {form.imageDataUrl ? (
-                    <div className="flex items-center gap-2">
-                      <img src={form.imageDataUrl} alt="Preview" className="h-10 w-10 rounded-md object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setForm((prev) => ({ ...prev, imageDataUrl: null }))}
-                        className="text-xs font-semibold text-red-600 hover:underline"
-                      >
-                        Retirer
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-slate-500">Aucune image sélectionnée</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex h-full flex-col">
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Description de l'offre (Missions, Profil, Conditions...)
-                </label>
-                <div className="flex-1">
-                  <RichTextEditor
-                    value={form.content}
-                    onChange={(next) => setForm((prev) => ({ ...prev, content: next }))}
-                  />
-                </div>
-              </div>
+          {/* Section 1 : Informations générales */}
+          <div className="space-y-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Informations générales</p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Titre du poste" required>
+                <input className={inputCls} value={form.title} onChange={f('title')} required placeholder="Ex : Développeur Full Stack" />
+              </Field>
+              <Field label="Entreprise">
+                <input className={inputCls} value={form.company} onChange={f('company')} placeholder="Nom de l'entreprise" />
+              </Field>
+              <Field label="Secteur d'activité">
+                <input className={inputCls} value={form.domain} onChange={f('domain')} placeholder="Ex : Finance, IT, RH…" />
+              </Field>
+              <Field label="Localisation">
+                <input className={inputCls} value={form.location} onChange={f('location')} placeholder="Ville, Pays" />
+              </Field>
+              <Field label="Type de contrat">
+                <select className={selectCls} value={form.contractType} onChange={f('contractType')}>
+                  <option value="">-- Sélectionner --</option>
+                  {CONTRACT_TYPES.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </Field>
+              <Field label="Télétravail">
+                <select className={selectCls} value={form.remote} onChange={f('remote')}>
+                  {REMOTE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </Field>
+              <Field label="Niveau d'études">
+                <select className={selectCls} value={form.educationLevel} onChange={f('educationLevel')}>
+                  <option value="">-- Sélectionner --</option>
+                  {EDUCATION_LEVELS.map(l => <option key={l}>{l}</option>)}
+                </select>
+              </Field>
+              <Field label="Expérience requise">
+                <input className={inputCls} value={form.experience} onChange={f('experience')} placeholder="Ex : 2 ans minimum" />
+              </Field>
+              <Field label="Salaire (optionnel)">
+                <input className={inputCls} value={form.salary} onChange={f('salary')} placeholder="Ex : 800 000 XAF / mois" />
+              </Field>
+              <Field label="Nombre de postes">
+                <input className={inputCls} type="number" min="1" value={form.positions} onChange={f('positions')} />
+              </Field>
+              <Field label="Date limite de candidature">
+                <input className={inputCls} type="date" value={form.deadline} onChange={f('deadline')} />
+              </Field>
+              <Field label="Date de publication">
+                <input className={inputCls} type="date" value={form.publicationDate} onChange={f('publicationDate')} />
+              </Field>
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-4">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={form.published}
-                onChange={(event) => setForm((prev) => ({ ...prev, published: event.target.checked }))}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
-              />
-              <span className="text-sm font-medium text-slate-700">Publier l'offre en ligne</span>
-            </label>
+          {/* Section 2 : Description */}
+          <div className="space-y-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Description du poste</p>
+            <Field label="Résumé / Accroche (max 400 car.)">
+              <textarea className={textareaCls} value={form.excerpt} onChange={f('excerpt')} maxLength={400} rows={2} placeholder="Courte description affichée dans les cartes" />
+            </Field>
+            <Field label="Description complète" required>
+              <textarea className={textareaCls} value={form.content} onChange={f('content')} rows={5} required placeholder="Description complète du poste…" />
+            </Field>
+            <Field label="Missions principales">
+              <textarea className={textareaCls} value={form.missions} onChange={f('missions')} rows={4} placeholder="• Mission 1&#10;• Mission 2…" />
+            </Field>
+            <Field label="Profil recherché">
+              <textarea className={textareaCls} value={form.profile} onChange={f('profile')} rows={4} placeholder="Décrivez le profil idéal…" />
+            </Field>
+            <Field label="Compétences requises">
+              <textarea className={textareaCls} value={form.skills} onChange={f('skills')} rows={3} placeholder="• Compétence 1&#10;• Compétence 2…" />
+            </Field>
+          </div>
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
-            >
-              {saving ? 'Enregistrement...' : editingId ? 'Mettre a jour' : 'Enregistrer'}
+          {/* Section 3 : Candidature */}
+          <div className="space-y-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Candidature</p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Lien de candidature (URL)">
+                <input className={inputCls} type="url" value={form.applyUrl} onChange={f('applyUrl')} placeholder="https://…" />
+              </Field>
+              <Field label="Email de contact">
+                <input className={inputCls} type="email" value={form.contactEmail} onChange={f('contactEmail')} placeholder="recrutement@example.com" />
+              </Field>
+            </div>
+          </div>
+
+          {/* Section 4 : Médias */}
+          <div className="space-y-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Image & Tags</p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Image / Logo (optionnel)">
+                <input type="file" accept="image/*" onChange={onImageChange} className="w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--cj-blue)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-blue-800" />
+                {form.imageDataUrl && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <img src={form.imageDataUrl} alt="preview" className="h-16 w-24 rounded-lg object-cover border border-slate-200" />
+                    <button type="button" onClick={() => setForm(p => ({ ...p, imageDataUrl: null }))} className="text-xs text-red-500 hover:underline">Supprimer</button>
+                  </div>
+                )}
+              </Field>
+              <Field label="Tags (séparés par virgule)">
+                <input className={inputCls} value={form.tagsInput} onChange={f('tagsInput')} placeholder="RH, Finance, Kinshasa…" />
+              </Field>
+            </div>
+          </div>
+
+          {/* Form actions */}
+          <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
+            <button type="submit" disabled={saving}
+              className="inline-flex items-center gap-2 rounded-xl bg-[var(--cj-blue)] px-6 py-2.5 text-sm font-bold text-white shadow hover:bg-blue-900 disabled:opacity-60">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {saving ? 'Enregistrement…' : editingId ? 'Mettre à jour' : 'Créer l\'offre'}
+            </button>
+            <button type="button" onClick={closeForm} className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+              Annuler
             </button>
           </div>
-
-          {error ? <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600">{error}</div> : null}
-          {successMessage ? (
-            <div className="mt-4 rounded-lg bg-green-50 p-3 text-sm font-medium text-green-700">{successMessage}</div>
-          ) : null}
         </form>
+      )}
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 sm:max-w-xs">
-              <input
-                type="search"
-                placeholder="Rechercher une offre..."
-                value={filters.search}
-                onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none ring-blue-500 focus:ring"
-              />
-              <svg
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
+      {/* ── Toolbar ───────────────────────────────────────────────────────── */}
+      {!showForm && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-wrap gap-2 flex-1">
+            <div className="relative flex-1 min-w-[180px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
+                placeholder="Rechercher une offre…"
+                className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm outline-none focus:border-[var(--cj-blue)] focus:ring-1 focus:ring-[var(--cj-blue)]" />
             </div>
+            <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[var(--cj-blue)]">
+              <option value="">Tous les statuts</option>
+              <option value="published">Publiés</option>
+              <option value="draft">Brouillons</option>
+            </select>
           </div>
+          <button onClick={openCreate}
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--cj-blue)] px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-blue-900">
+            <Plus className="h-4 w-4" /> Nouvelle offre
+          </button>
+        </div>
+      )}
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="w-full min-w-[700px] text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Offre</th>
-                  <th className="px-4 py-3 font-semibold">Statut</th>
-                  <th className="px-4 py-3 font-semibold">Contrat</th>
-                  <th className="px-4 py-3 font-semibold">Date</th>
-                  <th className="px-4 py-3 text-right font-semibold">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {loading ? (
-                  <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-500">
-                      <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600"></div>
-                    </td>
-                  </tr>
-                ) : news.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-500">
-                      Aucune offre trouvée.
-                    </td>
-                  </tr>
-                ) : (
-                  news.map((item) => (
-                    <tr key={item.id} className="transition hover:bg-slate-50/80">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          {item.imageDataUrl ? (
-                            <img src={item.imageDataUrl} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
-                          ) : (
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
-                              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                              </svg>
-                            </div>
-                          )}
-                          <div>
-                            <div className="font-semibold text-slate-900 line-clamp-1">{item.title}</div>
-                            <div className="text-xs text-slate-500">{item.metadata?.domain || 'Général'}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        {item.published ? (
-                          <span className="inline-flex rounded-full bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700">Publié</span>
-                        ) : (
-                          <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">Brouillon</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-slate-500">
-                        {item.metadata?.contractType || '-'}
-                      </td>
-                      <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
-                        {formatDate(item.publicationDate)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => startEdit(item)}
-                            className="p-1 text-slate-400 hover:text-blue-600"
-                            title="Modifier"
-                          >
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => removeNews(item)}
-                            className="p-1 text-slate-400 hover:text-red-600"
-                            title="Supprimer"
-                          >
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+      {/* ── Stats bar ─────────────────────────────────────────────────────── */}
+      {!showForm && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: 'Total', value: pagination.total, color: 'text-[var(--cj-blue)]' },
+            { label: 'Publiées', value: emplois.filter(e => e.published).length, color: 'text-emerald-600' },
+            { label: 'Brouillons', value: emplois.filter(e => !e.published && e.metadata.status !== 'archived').length, color: 'text-amber-600' },
+            { label: 'Archivées', value: emplois.filter(e => e.metadata.status === 'archived').length, color: 'text-slate-500' },
+          ].map(s => (
+            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm text-center">
+              <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── List ──────────────────────────────────────────────────────────── */}
+      {!showForm && (
+        <div className="space-y-3">
+          {loading ? (
+            <div className="flex items-center justify-center py-16 text-slate-400 gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" /> Chargement…
+            </div>
+          ) : emplois.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+              <Briefcase className="mx-auto h-10 w-10 text-slate-300 mb-3" />
+              <p className="font-bold text-slate-700">Aucune offre trouvée</p>
+              <p className="text-sm text-slate-500 mt-1">Créez votre première offre d'emploi.</p>
+              <button onClick={openCreate} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--cj-blue)] px-5 py-2.5 text-sm font-bold text-white">
+                <Plus className="h-4 w-4" /> Créer une offre
+              </button>
+            </div>
+          ) : emplois.map(e => (
+            <div key={e.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-wrap items-start gap-3">
+                {e.imageDataUrl && (
+                  <img src={e.imageDataUrl} alt={e.title} className="h-14 w-20 rounded-xl object-cover border border-slate-200 shrink-0" />
                 )}
-              </tbody>
-            </table>
-          </div>
-
-          {pagination.pageCount > 1 ? (
-            <div className="mt-4 flex items-center justify-between">
-              <span className="text-sm text-slate-500">
-                {pagination.total} offre{pagination.total > 1 ? 's' : ''}
-              </span>
-              <div className="flex items-center gap-1">
-                {pageNumbers.map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`h-8 min-w-[32px] rounded-lg px-2 text-sm font-medium transition ${
-                      p === page ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${STATUS_LABELS[e.metadata.status]?.color || 'bg-slate-100 text-slate-600'}`}>
+                      {STATUS_LABELS[e.metadata.status]?.label || e.metadata.status}
+                    </span>
+                    {e.metadata.contractType && <span className="inline-block rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700">{e.metadata.contractType}</span>}
+                    {e.metadata.remote !== 'non' && <span className="inline-block rounded-full bg-purple-50 px-2.5 py-0.5 text-[11px] font-semibold text-purple-700">{e.metadata.remote === 'oui' ? 'Télétravail' : 'Hybride'}</span>}
+                  </div>
+                  <h3 className="font-bold text-slate-900 truncate">{e.title}</h3>
+                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-slate-500">
+                    {e.metadata.company && <span className="flex items-center gap-1"><Building2 className="h-3 w-3" />{e.metadata.company}</span>}
+                    {e.metadata.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{e.metadata.location}</span>}
+                    {e.metadata.deadline && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />Limite : {e.metadata.deadline}</span>}
+                  </div>
+                </div>
+                {/* Actions */}
+                <div className="flex flex-wrap gap-1.5 shrink-0">
+                  <button onClick={() => openEdit(e)} title="Modifier" className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50"><Pencil className="h-4 w-4" /></button>
+                  {e.metadata.status !== 'published' && <button onClick={() => patch(e.id, 'publish')} title="Publier" className="rounded-lg border border-emerald-200 p-2 text-emerald-600 hover:bg-emerald-50"><Eye className="h-4 w-4" /></button>}
+                  {e.metadata.status === 'published' && <button onClick={() => patch(e.id, 'unpublish')} title="Dépublier" className="rounded-lg border border-amber-200 p-2 text-amber-600 hover:bg-amber-50"><EyeOff className="h-4 w-4" /></button>}
+                  <button onClick={() => patch(e.id, 'archive')} title="Archiver" className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"><Archive className="h-4 w-4" /></button>
+                  <button onClick={() => patch(e.id, 'duplicate')} title="Dupliquer" className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"><Copy className="h-4 w-4" /></button>
+                  <button onClick={() => remove(e.id)} title="Supprimer" className="rounded-lg border border-red-200 p-2 text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4" /></button>
+                </div>
               </div>
             </div>
-          ) : null}
+          ))}
         </div>
-      </div>
+      )}
+
+      {/* ── Pagination ────────────────────────────────────────────────────── */}
+      {!showForm && pagination.pageCount > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50 disabled:opacity-40"><ChevronLeft className="h-4 w-4" /></button>
+          {Array.from({ length: pagination.pageCount }, (_, i) => i + 1).map(n => (
+            <button key={n} onClick={() => setPage(n)} className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition ${n === page ? 'border-[var(--cj-blue)] bg-[var(--cj-blue)] text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>{n}</button>
+          ))}
+          <button disabled={page >= pagination.pageCount} onClick={() => setPage(p => p + 1)} className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50 disabled:opacity-40"><ChevronRight className="h-4 w-4" /></button>
+        </div>
+      )}
     </AdminShell>
   )
 }

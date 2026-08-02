@@ -128,8 +128,12 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
     description:
       "Consultez les évaluations des formations, identifiez les signaux de satisfaction et repérez les axes d'amélioration.",
   },
+  "Offres d'emploi": {
+    eyebrow: 'Recrutement & carrières',
+    description:
+      "Publiez, gérez et archivez les offres d'emploi. Les offres publiées sont immédiatement visibles sur le site public.",
+  },
   Formateurs: {
-    eyebrow: 'Intervenants & expertises',
     description:
       'Gérez les profils des formateurs, leurs expertises déclarées et leurs affectations aux sessions.',
   },

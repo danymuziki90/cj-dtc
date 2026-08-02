@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Breadcrumbs from '../../../components/Breadcrumbs'
 import { getIntlLocale, resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
@@ -57,8 +57,17 @@ function stripHtml(value: string) {
 function ActualitesContent() {
   const params = useParams<{ locale: string }>()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const locale = resolveSiteLocale(params?.locale)
   const t = copy[locale]
+
+  // Redirect /actualites?categorie=emplois → /emplois
+  useEffect(() => {
+    const cat = searchParams?.get('categorie') || ''
+    if (cat.toLowerCase() === 'emplois') {
+      router.replace(`/${locale}/emplois`)
+    }
+  }, [searchParams, locale, router])
 
   const [news, setNews] = useState<NewsItem[]>([])
   const [categories, setCategories] = useState<string[]>([])
