@@ -64,6 +64,11 @@ function resolveInscriptionRedirect(pathname: string, search: string) {
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
+  // Root locale paths (/fr or /en) — let Next.js serve app/[locale]/page.tsx directly
+  if (pathname === '/fr' || pathname === '/en') {
+    return NextResponse.next()
+  }
+
   const inscriptionRedirect = resolveInscriptionRedirect(pathname, search)
   if (inscriptionRedirect) {
     return NextResponse.redirect(new URL(inscriptionRedirect, request.url))
