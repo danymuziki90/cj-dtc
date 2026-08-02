@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/auth-portal/guards'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const auth = await requireAdmin(req)
+    if (auth.error) return auth.error
+
     const assignmentId = parseInt((await params).id, 10)
     if (isNaN(assignmentId)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
@@ -17,11 +21,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
             firstName: true,
             lastName: true,
             email: true,
-          }
+          },
         },
         SubmissionFile: true,
       },
-      orderBy: { submittedAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     })
 
     return NextResponse.json(submissions)

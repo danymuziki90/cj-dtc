@@ -43,14 +43,19 @@ export default function AdminGererTravailPage({ params }: { params: Promise<{ id
     async function loadData() {
       try {
         const [res1, res2] = await Promise.all([
-          fetch(`/api/admin/travaux/${resolvedParams.id}`),
-          fetch(`/api/admin/travaux/${resolvedParams.id}/submissions`)
+          fetch(`/api/admin/travaux/${resolvedParams.id}`, { cache: 'no-store' }),
+          fetch(`/api/admin/travaux/${resolvedParams.id}/submissions`, { cache: 'no-store' })
         ])
-        
-        if (!res1.ok || !res2.ok) throw new Error('Erreur de chargement des données')
-        
+
+        if (!res1.ok || !res2.ok) {
+          const errBody = !res2.ok ? await res2.json().catch(() => ({})) : {}
+          throw new Error(errBody.error || 'Erreur de chargement des données')
+        }
+
         setAssignment(await res1.json())
-        setSubmissions(await res2.json())
+        const subsData = await res2.json()
+        // API may return array directly or wrapped in { submissions: [...] }
+        setSubmissions(Array.isArray(subsData) ? subsData : (subsData.submissions ?? []))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erreur')
       } finally {
@@ -68,9 +73,9 @@ export default function AdminGererTravailPage({ params }: { params: Promise<{ id
     channel.on('broadcast', { event: 'submission_created' }, (payload) => {
       // Refresh submissions if it belongs to this assignment
       if (payload.payload?.assignmentId === Number(resolvedParams.id)) {
-        fetch(`/api/admin/travaux/${resolvedParams.id}/submissions`)
+        fetch(`/api/admin/travaux/${resolvedParams.id}/submissions`, { cache: 'no-store' })
           .then(res => res.ok ? res.json() : Promise.reject())
-          .then(data => setSubmissions(data))
+          .then(data => setSubmissions(Array.isArray(data) ? data : (data.submissions ?? [])))
           .catch(err => console.error('Error refreshing submissions:', err))
       }
     })
