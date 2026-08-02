@@ -5,6 +5,89 @@ import { requireAdmin } from '@/lib/auth-portal/guards'
 export const dynamic = 'force-dynamic'
 
 /**
+ * POST /api/admin/travaux/submissions
+ * Création manuelle d'une soumission par un administrateur.
+ * Utile quand un étudiant ne peut pas soumettre via l'espace étudiant.
+ */
+export async function POST(req: NextRequest) {
+  const auth = await requireAdmin(req)
+  if (auth.error) return auth.error
+
+  try {
+    const body = await req.json()
+    const { assignmentId, studentId, fileUrl, fileName, fileSize, note } = body
+
+    if (!assignmentId || !studentId) {
+      return NextResponse.json({ error: 'assignmentId et studentId sont requis.' }, { status: 400 })
+    }
+
+    const [assignment, student] = await Promise.all([
+      prisma.assignment.findUnique({ where: { id: Number(assignmentId) } }),
+      prisma.student.findUnique({ where: { id: String(studentId) }, select: { id: true, firstName: true, lastName: true, email: true } }),
+    ])
+
+    if (!assignment) return NextResponse.json({ error: 'Travail introuvable.' }, { status: 404 })
+    if (!student)     return NextResponse.json({ error: 'Étudiant introuvable.' }, { status: 404 })
+
+    // Upsert submission
+    let submission = await prisma.submission.findFirst({
+      where: { assignmentId: assignment.id, studentId: student.id }
+    })
+
+    if (submission) {
+      submission = await prisma.submission.update({
+        where: { id: submission.id },
+        data: {
+          status: 'submitted',
+          correctionStatus: note ? 'graded' : 'pending',
+          submittedAt: new Date(),
+          sessionId: assignment.sessionId ?? null,
+          maxGrade: assignment.maxGrade,
+          grade: note ? Number(note) : null,
+          percentage: note ? Math.round((Number(note) / assignment.maxGrade) * 100) : null,
+        }
+      })
+      await prisma.submissionFile.deleteMany({ where: { submissionId: submission.id } })
+    } else {
+      submission = await prisma.submission.create({
+        data: {
+          assignmentId: assignment.id,
+          studentId: student.id,
+          sessionId: assignment.sessionId ?? null,
+          maxGrade: assignment.maxGrade,
+          status: 'submitted',
+          correctionStatus: note ? 'graded' : 'pending',
+          submittedAt: new Date(),
+          grade: note ? Number(note) : null,
+          percentage: note ? Math.round((Number(note) / assignment.maxGrade) * 100) : null,
+        }
+      })
+    }
+
+    // Attach file if provided
+    if (fileUrl && fileName) {
+      await prisma.submissionFile.create({
+        data: {
+          submissionId: submission.id,
+          name: fileName,
+          originalName: fileName,
+          url: fileUrl,
+          size: fileSize ? Number(fileSize) : 0,
+          mimeType: 'application/octet-stream',
+        }
+      })
+    }
+
+    console.log(`[admin POST submissions] Created/updated submission id=${submission.id} for student=${student.id} assignment=${assignment.id}`)
+
+    return NextResponse.json({ success: true, submission, student }, { status: 201 })
+  } catch (error) {
+    console.error('[admin POST submissions] Error:', error)
+    return NextResponse.json({ error: 'Erreur serveur', details: String(error) }, { status: 500 })
+  }
+}
+
+/**
  * GET /api/admin/travaux/submissions
  * Liste globale de toutes les remises avec filtres.
  * Ajouter ?debug=true pour obtenir un diagnostic.

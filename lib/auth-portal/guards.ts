@@ -72,6 +72,7 @@ export async function requireAdmin(request: NextRequest) {
 export async function requireStudent(request: NextRequest) {
   const token = request.cookies.get(STUDENT_AUTH_COOKIE)?.value
   if (!token) {
+    console.warn(`[requireStudent] No '${STUDENT_AUTH_COOKIE}' cookie found. URL: ${request.nextUrl?.pathname}`)
     return {
       error: NextResponse.json(
         { success: false, message: 'Session expirée ou non connectée. Veuillez vous connecter.', error: 'Unauthorized' },
@@ -82,6 +83,7 @@ export async function requireStudent(request: NextRequest) {
 
   const payload = await verifyStudentToken(token)
   if (!payload?.studentId) {
+    console.warn(`[requireStudent] Token verification failed — token present but invalid/expired. URL: ${request.nextUrl?.pathname}`)
     return {
       error: NextResponse.json(
         { success: false, message: 'Jeton de connexion invalide.', error: 'Invalid token' },

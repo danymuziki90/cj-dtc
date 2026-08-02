@@ -47,6 +47,131 @@ function StatusBadge({ status }: { status: string }) {
 function fmtDate(iso: string) { return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) }
 function fmtSize(b: number) { return b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} Ko` : `${(b / (1024 * 1024)).toFixed(1)} Mo` }
 
+// ─── Manual Submission Modal ────────────────────────────────────────────────
+function ManualSubmissionModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [students,    setStudents]    = useState<{id:string;firstName:string;lastName:string;email:string}[]>([])
+  const [assignments, setAssignments] = useState<{id:number;title:string;maxGrade:number}[]>([])
+  const [studentId,   setStudentId]   = useState('')
+  const [assignmentId,setAssignmentId]= useState('')
+  const [fileUrl,     setFileUrl]     = useState('')
+  const [fileName,    setFileName]    = useState('')
+  const [note,        setNote]        = useState('')
+  const [saving,      setSaving]      = useState(false)
+  const [error,       setError]       = useState<string|null>(null)
+  const [success,     setSuccess]     = useState(false)
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/admin/travaux/diagnostic', { cache: 'no-store' }).then(r => r.json()),
+    ]).then(([diag]) => {
+      setStudents(diag.allStudents?.map((s:any) => ({
+        id: s.id, firstName: s.name?.split(' ')[0] || '', lastName: s.name?.split(' ').slice(1).join(' ') || '', email: s.email
+      })) || [])
+    }).catch(() => {})
+
+    fetch('/api/admin/travaux?pageSize=50', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => setAssignments(d.assignments?.map((a:any) => ({ id: a.id, title: a.title, maxGrade: a.maxGrade })) || []))
+      .catch(() => {})
+  }, [])
+
+  async function handleSave() {
+    if (!studentId || !assignmentId) { setError('Sélectionnez un étudiant et un travail.'); return }
+    setSaving(true); setError(null)
+    try {
+      const res = await fetch('/api/admin/travaux/submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignmentId: Number(assignmentId), studentId, fileUrl: fileUrl || undefined, fileName: fileName || undefined, note: note || undefined }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`)
+      setSuccess(true)
+      setTimeout(() => { onSuccess(); onClose() }, 1200)
+    } catch (e: any) { setError(e.message) }
+    finally { setSaving(false) }
+  }
+
+  const selectedAssignment = assignments.find(a => String(a.id) === assignmentId)
+  const inputCls = 'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[var(--cj-blue)]'
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="bg-[var(--cj-blue)] px-6 py-4 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/60">Administration</p>
+            <h3 className="text-sm font-bold text-white mt-0.5">Enregistrer une soumission manuellement</h3>
+          </div>
+          <button onClick={onClose} className="text-white/70 hover:text-white text-lg font-bold">✕</button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {success && (
+            <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-emerald-800 text-sm font-bold">
+              ✅ Soumission enregistrée avec succès !
+            </div>
+          )}
+          {error && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-red-700 text-sm font-semibold">
+              ⚠️ {error}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Étudiant *</label>
+            <select value={studentId} onChange={e => setStudentId(e.target.value)} className={inputCls}>
+              <option value="">— Sélectionner un étudiant —</option>
+              {students.map(s => (
+                <option key={s.id} value={s.id}>{s.firstName} {s.lastName} ({s.email})</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Travail *</label>
+            <select value={assignmentId} onChange={e => setAssignmentId(e.target.value)} className={inputCls}>
+              <option value="">— Sélectionner un travail —</option>
+              {assignments.map(a => (
+                <option key={a.id} value={String(a.id)}>{a.title} (sur {a.maxGrade} pts)</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">URL du fichier (optionnel)</label>
+            <input value={fileUrl} onChange={e => setFileUrl(e.target.value)} placeholder="https://..." className={inputCls} />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Nom du fichier (optionnel)</label>
+            <input value={fileName} onChange={e => setFileName(e.target.value)} placeholder="rapport_final.pdf" className={inputCls} />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Note {selectedAssignment ? `(sur ${selectedAssignment.maxGrade} pts, optionnel)` : '(optionnel)'}
+            </label>
+            <input type="number" value={note} onChange={e => setNote(e.target.value)}
+              placeholder="Ex: 75" min={0} max={selectedAssignment?.maxGrade || 100} className={inputCls} />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+            <button onClick={onClose} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50">
+              Annuler
+            </button>
+            <button onClick={handleSave} disabled={saving || success}
+              className="inline-flex items-center gap-2 rounded-xl bg-[var(--cj-blue)] px-4 py-2 text-sm font-bold text-white hover:bg-blue-900 disabled:opacity-50">
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              Enregistrer la soumission
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Pipeline Diagnostic Panel ────────────────────────────────────────────
 function PipelineDiagnostic() {
   const [open, setOpen] = useState(false)
@@ -275,6 +400,7 @@ function RemisesTab() {
   const [loading, setLoading]         = useState(true)
   const [error, setError]             = useState<string | null>(null)
   const [diagnostics, setDiagnostics] = useState<any>(null)
+  const [showManualModal, setShowManualModal] = useState(false)
 
   const [fFormation,  setFFormation]  = useState('')
   const [fAssignment, setFAssignment] = useState('')
@@ -362,8 +488,19 @@ function RemisesTab() {
         <button onClick={() => load(page, true)} className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-100" title="Lancer un diagnostic">
           🔍 Diagnostic
         </button>
+        <button onClick={() => setShowManualModal(true)} className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100" title="Enregistrer une soumission manuellement">
+          ✏️ Saisie manuelle
+        </button>
         <span className="text-xs text-slate-400 self-center ml-auto">{pagination.total} remise{pagination.total !== 1 ? 's' : ''}</span>
       </div>
+
+      {/* Manual submission modal */}
+      {showManualModal && (
+        <ManualSubmissionModal
+          onClose={() => setShowManualModal(false)}
+          onSuccess={() => { load(1); setPage(1) }}
+        />
+      )}
 
       {/* Diagnostic panel */}
       {diagnostics && (
