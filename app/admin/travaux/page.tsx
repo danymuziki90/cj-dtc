@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import AdminShell from '@/components/admin-portal/AdminShell'
+import { supabase } from '@/lib/supabase'
 import {
   Search, RefreshCw, Eye, Download, Award, CheckCircle2,
   Clock, AlertTriangle, FileText, ChevronLeft, ChevronRight,
@@ -23,7 +24,7 @@ type SubmissionItem = {
   grade: number | null; maxGrade: number; percentage: number | null
   feedback: string | null; submittedAt: string; gradedAt: string | null; gradedBy: string | null
   Student: { id: string; firstName: string; lastName: string; email: string }
-  SubmissionFile: { id: number; name: string; url: string; size: number; mimeType: string }[]
+  SubmissionFile: { id: number; name: string; originalName: string; url: string; size: number; mimeType: string }[]
   Assignment: { id: number; title: string; maxGrade: number; type: string; Formation?: { title: string }; TrainingSession?: { id: number; startDate: string } }
 }
 
@@ -187,6 +188,22 @@ function RemisesTab() {
 
   useEffect(() => { load(page) }, [page, fFormation, fAssignment, fStatus, fStudentD])
 
+  // ── Supabase realtime: refresh when a student submits ──────────────────────
+  useEffect(() => {
+    if (!supabase) return
+    const channel = supabase
+      .channel('submissions_travaux_channel')   // doit correspondre au canal du broadcast étudiant
+      .on('broadcast', { event: 'submission_created' }, () => {
+        load(page)
+      })
+      .on('broadcast', { event: 'submission_graded' }, () => {
+        load(page)
+      })
+    channel.subscribe()
+    return () => { supabase?.removeChannel(channel) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, fFormation, fAssignment, fStatus, fStudentD])
+
   const selCls = 'rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[var(--cj-blue)]'
   const inputCls = 'rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[var(--cj-blue)]'
 
@@ -222,25 +239,87 @@ function RemisesTab() {
 
       {/* Diagnostic panel */}
       {diagnostics && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm text-sm space-y-1">
-          <div className="flex items-center justify-between mb-2">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm text-sm space-y-2">
+          <div className="flex items-center justify-between mb-1">
             <h4 className="font-bold text-amber-800">🔍 Résultat du diagnostic</h4>
             <button onClick={() => setDiagnostics(null)} className="text-amber-400 hover:text-amber-700 text-xs">Fermer</button>
           </div>
-          <p><strong>Total Submissions en base :</strong> {diagnostics.totalSubmissionsInDb}</p>
-          <p><strong>Total Assignments en base :</strong> {diagnostics.totalAssignmentsInDb}</p>
-          <p><strong>Total Étudiants en base :</strong> {diagnostics.totalStudentsInDb}</p>
-          <p><strong>Submissions sans session :</strong> {diagnostics.submissionsWithoutSession}</p>
-          <p><strong>Résultat filtré :</strong> {diagnostics.filteredCount}</p>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { label: 'Submissions en base', value: diagnostics.totalSubmissionsInDb, alert: diagnostics.totalSubmissionsInDb === 0 },
+              { label: 'Assignments en base',  value: diagnostics.totalAssignmentsInDb,  alert: diagnostics.totalAssignmentsInDb === 0 },
+              { label: 'Étudiants en base',    value: diagnostics.totalStudentsInDb,     alert: false },
+              { label: 'Sans session',         value: diagnostics.submissionsWithoutSession, alert: false },
+            ].map(({ label, value, alert }) => (
+              <div key={label} className={`rounded-lg border px-3 py-2 ${alert ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200'}`}>
+                <div className={`text-lg font-black ${alert ? 'text-red-600' : 'text-slate-800'}`}>{value}</div>
+                <div className="text-[10px] text-slate-500">{label}</div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-xs text-slate-500">Filtre appliqué : <code className="bg-white border border-slate-200 rounded px-1">{diagnostics.filteredCount} résultat(s)</code></p>
+
+          {/* Status banners */}
           {diagnostics.totalSubmissionsInDb === 0 && (
-            <p className="mt-2 rounded-lg bg-red-100 border border-red-200 px-3 py-2 text-red-700 font-semibold">
-              ⚠️ Aucune soumission n'existe en base de données. Les dépôts étudiants n'ont probablement pas été enregistrés correctement.
-            </p>
+            <div className="rounded-lg bg-red-100 border border-red-200 px-3 py-2 text-red-700 font-semibold text-xs">
+              ⚠️ Aucune soumission en base. Les dépôts étudiants n'ont pas été enregistrés.
+              Vérifiez les logs de <code>/api/student/assignments</code> (POST).
+            </div>
           )}
           {diagnostics.totalSubmissionsInDb > 0 && diagnostics.filteredCount === 0 && (
-            <p className="mt-2 rounded-lg bg-amber-100 border border-amber-300 px-3 py-2 text-amber-800 font-semibold">
-              ⚠️ Des soumissions existent en base mais les filtres actuels n'en retournent aucune. Essayez de réinitialiser les filtres.
-            </p>
+            <div className="rounded-lg bg-amber-100 border border-amber-300 px-3 py-2 text-amber-800 font-semibold text-xs">
+              ⚠️ Des soumissions existent ({diagnostics.totalSubmissionsInDb}) mais aucune ne correspond aux filtres.
+              Réinitialisez les filtres pour voir toutes les remises.
+            </div>
+          )}
+
+          {/* Recent submissions table */}
+          {diagnostics.recentSubmissions && diagnostics.recentSubmissions.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs font-bold text-amber-800 mb-1">5 dernières soumissions en base :</p>
+              <div className="overflow-x-auto rounded-lg border border-amber-200">
+                <table className="w-full text-xs text-slate-600 bg-white">
+                  <thead className="bg-slate-50 text-[10px] font-bold uppercase text-slate-400 border-b border-slate-100">
+                    <tr>
+                      <th className="px-2 py-1.5 text-left">ID</th>
+                      <th className="px-2 py-1.5 text-left">Étudiant</th>
+                      <th className="px-2 py-1.5 text-left">Travail</th>
+                      <th className="px-2 py-1.5 text-left">Statut</th>
+                      <th className="px-2 py-1.5 text-left">Fichiers</th>
+                      <th className="px-2 py-1.5 text-left">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {diagnostics.recentSubmissions.map((s: any) => (
+                      <tr key={s.id}>
+                        <td className="px-2 py-1.5 font-mono text-slate-400">#{s.id}</td>
+                        <td className="px-2 py-1.5">
+                          <div className="font-semibold text-slate-800">{s.studentName}</div>
+                          <div className="text-[10px] text-slate-400">{s.studentEmail}</div>
+                        </td>
+                        <td className="px-2 py-1.5 text-slate-700">{s.assignmentTitle || `#${s.assignmentId}`}</td>
+                        <td className="px-2 py-1.5">
+                          <span className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-bold border ${CS[s.correctionStatus]?.color || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                            {CS[s.correctionStatus]?.label || s.correctionStatus}
+                          </span>
+                        </td>
+                        <td className="px-2 py-1.5">
+                          {s.fileCount > 0
+                            ? <span className="text-emerald-700 font-bold">✓ {s.fileCount} fichier(s)</span>
+                            : <span className="text-red-500 font-bold">⚠ Aucun</span>}
+                        </td>
+                        <td className="px-2 py-1.5 text-slate-400 whitespace-nowrap">
+                          {new Date(s.submittedAt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -287,7 +366,7 @@ function RemisesTab() {
                           <a key={f.id} href={f.url} target="_blank" rel="noreferrer" download
                             className="flex items-center gap-1 text-xs text-[var(--cj-blue)] hover:underline">
                             <Download className="h-3 w-3 shrink-0" />
-                            <span className="truncate max-w-[140px]">{f.name}</span>
+                            <span className="truncate max-w-[140px]">{f.originalName || f.name}</span>
                             <span className="text-slate-400">({fmtSize(f.size)})</span>
                           </a>
                         ))}

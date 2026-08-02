@@ -80,19 +80,59 @@ export async function GET(req: NextRequest) {
     // Diagnostic info
     let diagnostics = undefined
     if (debug) {
-      const [totalSubmissions, totalAssignments, totalStudents, submissionsWithoutSession] = await Promise.all([
+      const [totalSubmissions, totalAssignments, totalStudents, submissionsWithoutSession, recentSubmissions] = await Promise.all([
         prisma.submission.count(),
         prisma.assignment.count(),
         prisma.student.count(),
         prisma.submission.count({ where: { sessionId: null } }),
+        prisma.submission.findMany({
+          take: 5,
+          orderBy: { submittedAt: 'desc' },
+          select: {
+            id: true,
+            assignmentId: true,
+            studentId: true,
+            status: true,
+            correctionStatus: true,
+            submittedAt: true,
+            Student: { select: { firstName: true, lastName: true, email: true } },
+            Assignment: { select: { title: true } },
+            SubmissionFile: { select: { id: true, originalName: true, url: true } },
+          },
+        }),
       ])
+
+      // Check for orphaned submissions (student or assignment no longer exists)
+      const orphanedCount = await prisma.submission.count({
+        where: {
+          OR: [
+            { Assignment: { is: undefined as any } },
+            { Student: { is: undefined as any } },
+          ],
+        },
+      }).catch(() => -1)
+
       diagnostics = {
         totalSubmissionsInDb: totalSubmissions,
         totalAssignmentsInDb: totalAssignments,
         totalStudentsInDb: totalStudents,
         submissionsWithoutSession,
+        orphanedSubmissions: orphanedCount,
         filterApplied: where,
         filteredCount: total,
+        recentSubmissions: recentSubmissions.map(s => ({
+          id: s.id,
+          assignmentId: s.assignmentId,
+          assignmentTitle: s.Assignment?.title,
+          studentId: s.studentId,
+          studentName: s.Student ? `${s.Student.firstName} ${s.Student.lastName}` : 'Inconnu',
+          studentEmail: s.Student?.email,
+          status: s.status,
+          correctionStatus: s.correctionStatus,
+          submittedAt: s.submittedAt,
+          fileCount: s.SubmissionFile.length,
+          files: s.SubmissionFile.map(f => ({ id: f.id, name: f.originalName, hasUrl: Boolean(f.url) })),
+        })),
       }
       console.log('[submissions diagnostic]', JSON.stringify(diagnostics, null, 2))
     }
