@@ -238,8 +238,23 @@ function EspaceEtudiantsContent() {
     setUploadSuccessMessage("");
 
     try {
+      // ── Vérification auth avant d'envoyer ──────────────────────────────
+      const authCheck = await fetch("/api/student/auth/check", {
+        credentials: "include",
+        cache: "no-store",
+      }).then(r => r.json()).catch(() => null);
+
+      if (!authCheck?.authenticated) {
+        const reason = authCheck?.cookiePresent
+          ? "Votre session a expiré. Veuillez vous déconnecter et vous reconnecter."
+          : "Cookie de session absent. Veuillez vous reconnecter.";
+        console.error("[handleAssignmentSubmit] Auth check failed:", authCheck);
+        throw new Error(reason);
+      }
+
       const response = await fetch("/api/student/assignments", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           assignmentId: selectedAssignmentForSubmission.id,
@@ -253,11 +268,13 @@ function EspaceEtudiantsContent() {
         resData = await response.json().catch(() => ({}));
       } else {
         resData = {
-          error: `Une erreur serveur est survenue (Code HTTP ${response.status}). Veuillez réessayer.`,
+          error: `Erreur serveur HTTP ${response.status}. Veuillez réessayer ou contacter l'administration.`,
         };
       }
 
-      if (!response.ok || resData.success === false) {
+      if (!response.ok) {
+        // Log complet pour diagnostic
+        console.error("[handleAssignmentSubmit] POST failed:", response.status, resData);
         throw new Error(
           resData.message ||
             resData.error ||
