@@ -1,8 +1,9 @@
 import { Suspense } from 'react'
 import RecentSessions from '@/components/RecentSessions'
 import { StudentAuthProvider } from '@/lib/auth/StudentAuthContext'
-import { PageHero } from '@/components/ui/PageHero'
+import SectionHero from '@/components/ui/SectionHero'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
+import { GraduationCap, CalendarCheck, Wifi } from 'lucide-react'
 
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo-config'
@@ -24,11 +25,28 @@ export default async function LocalizedSessionsPage({ params }: { params: Promis
 
   return (
     <div className="bg-slate-50 text-slate-900 pb-20">
-      <PageHero
+      <SectionHero
+        image="/img/Formaions 2.jpg"
+        imageAlt="Participants en session de formation CJ DTC"
         eyebrow={isFr ? 'Formations Certifiantes' : 'Certified Training'}
-        title={isFr ? "Développez vos compétences dès aujourd'hui." : 'Develop your skills today.'}
-        description={isFr ? 'Découvrez nos sessions ouvertes à l\'inscription et donnez un nouvel élan à votre carrière avec CJ DTC.' : 'Discover our open training sessions and give your career a new boost with CJ DTC.'}
-        image="/img/sessions-hero.jpg"
+        title={isFr ? 'Nos Sessions de Formation' : 'Our Training Sessions'}
+        description={
+          isFr
+            ? 'Inscrivez-vous aux prochaines sessions ouvertes et développez vos compétences en RH, leadership et management avec des formateurs experts et des certifications reconnues.'
+            : 'Join our upcoming open sessions and develop your HR, leadership and management skills with expert trainers and recognized certifications.'
+        }
+        badges={[
+          { label: isFr ? 'Sessions ouvertes' : 'Open sessions',          icon: <CalendarCheck className="h-3.5 w-3.5" />, color: 'green'  },
+          { label: isFr ? 'Formations certifiantes' : 'Certified training', icon: <GraduationCap   className="h-3.5 w-3.5" />, color: 'blue'   },
+          { label: isFr ? 'En ligne & présentiel' : 'Online & in-person',  icon: <Wifi            className="h-3.5 w-3.5" />, color: 'purple' },
+        ]}
+        ctas={[
+          { label: isFr ? 'Voir les formations' : 'View programs',    href: `/${loc}/formations`           },
+          { label: isFr ? "S'inscrire maintenant" : 'Register now',   href: `/${loc}/inscription`, variant: 'secondary' },
+        ]}
+        breadcrumbs={[{ label: isFr ? 'Sessions' : 'Sessions' }]}
+        homeLabel={isFr ? 'Accueil' : 'Home'}
+        homeHref={`/${loc}`}
       />
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <StudentAuthProvider>

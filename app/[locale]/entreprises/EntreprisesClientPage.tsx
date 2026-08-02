@@ -8,7 +8,7 @@ import {
   Rocket, ShieldIcon, TargetIcon, TrendingUp, Users, ZapIcon,
 } from 'lucide-react'
 import EntrepriseContactForm from '@/components/entreprises/EntrepriseContactForm'
-import { PageHero } from '@/components/ui/PageHero'
+import SectionHero from '@/components/ui/SectionHero'
 
 type Locale = 'fr' | 'en'
 
@@ -257,27 +257,33 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
 
   return (
     <div className="bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
-        {/* Hero Section floating card */}
-        <PageHero
-          eyebrow={t.heroBadge}
-          title={t.heroTitle}
-          description={t.heroSub}
-          image="/img/ceo.jpeg"
-          primaryCta={{ label: t.heroCta1, href: '#contact' }}
-          secondaryCta={{ label: t.heroCta2, href: '#solutions' }}
-        >
-          {/* Stats bar inside card */}
-          <dl className="grid grid-cols-2 gap-y-6 gap-x-4 divide-x divide-white/10 sm:grid-cols-4">
-            {TRUST_STATS.map((s, idx) => (
-              <div key={s.value} className={`text-center ${idx === 0 ? '' : 'sm:pl-4'}`}>
-                <dt className="text-3xl font-black text-white sm:text-4xl font-montserrat">{s.value}</dt>
-                <dd className="mt-1 text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">{isFr ? s.fr : s.en}</dd>
-              </div>
-            ))}
-          </dl>
-        </PageHero>
+      {/* ── NEW HERO ── */}
+      <SectionHero
+        image="/img/ceo.jpeg"
+        imageAlt="Équipe professionnelle en réunion de formation"
+        eyebrow={t.heroBadge}
+        title={isFr ? 'Solutions de Formation pour les Entreprises' : 'Corporate Training Solutions'}
+        description={isFr
+          ? "Accompagnez le développement des compétences de vos équipes grâce à des formations adaptées aux besoins de votre organisation. Leadership, RH, management et performance."
+          : "Support your teams' skills development with training tailored to your organisation's needs. Leadership, HR, management and performance."}
+        badges={[
+          { label: isFr ? 'Formations sur mesure'          : 'Custom training',       icon: <Layers        className="h-3.5 w-3.5" />, color: 'blue'   },
+          { label: isFr ? 'Leadership & Management'        : 'Leadership & Management', icon: <Rocket       className="h-3.5 w-3.5" />, color: 'green'  },
+          { label: isFr ? 'Développement des compétences'  : 'Skills development',    icon: <TrendingUp    className="h-3.5 w-3.5" />, color: 'purple' },
+          { label: isFr ? 'Accompagnement RH'              : 'HR advisory',            icon: <Users         className="h-3.5 w-3.5" />, color: 'amber'  },
+        ]}
+        ctas={[
+          { label: t.heroCta1, href: '#contact'   },
+          { label: t.heroCta2, href: '#solutions', variant: 'secondary' },
+        ]}
+        breadcrumbs={[{ label: isFr ? 'Entreprises' : 'Corporate' }]}
+        homeLabel={isFr ? 'Accueil' : 'Home'}
+        homeHref={`/${locale}`}
+        overlayOpacity={60}
+      />
+
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
       {/* ════════════════════════════════════════
           2. POURQUOI CJ DEVELOPMENT

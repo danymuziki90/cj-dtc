@@ -6,7 +6,8 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Breadcrumbs from '../../../components/Breadcrumbs'
 import { getIntlLocale, resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
-import { PageHero } from '@/components/ui/PageHero'
+import SectionHero from '@/components/ui/SectionHero'
+import { Newspaper, Calendar, Briefcase } from 'lucide-react'
 
 type NewsItem = {
   id: string
@@ -145,20 +146,32 @@ function ActualitesContent() {
 
   return (
     <div className="bg-slate-50">
+      <SectionHero
+        image="/img/actu.jpeg"
+        imageAlt="Actualités et événements CJ DTC"
+        eyebrow={locale === 'fr' ? 'Actualités & Événements' : 'News & Events'}
+        title={locale === 'fr' ? 'Actualités et Opportunités' : 'News and Opportunities'}
+        description={
+          locale === 'fr'
+            ? "Découvrez les dernières actualités, événements, annonces et opportunités publiées par CJ Development Training Center."
+            : "Explore the latest news, events, announcements and opportunities published by CJ Development Training Center."
+        }
+        badges={[
+          { label: locale === 'fr' ? 'Actualités'       : 'News',         icon: <Newspaper  className="h-3.5 w-3.5" />, color: 'blue'  },
+          { label: locale === 'fr' ? 'Événements'       : 'Events',       icon: <Calendar   className="h-3.5 w-3.5" />, color: 'green' },
+          { label: locale === 'fr' ? "Offres d'emploi"  : 'Job openings', icon: <Briefcase  className="h-3.5 w-3.5" />, color: 'amber' },
+        ]}
+        ctas={[
+          { label: locale === 'fr' ? 'Voir les actualités'       : 'Browse news',      href: `/${locale}/actualites`          },
+          { label: locale === 'fr' ? "Consulter les offres d'emploi" : 'View job offers', href: `/${locale}/emplois`, variant: 'secondary' },
+        ]}
+        breadcrumbs={[{ label: locale === 'fr' ? 'Actualités' : 'News' }]}
+        homeLabel={locale === 'fr' ? 'Accueil' : 'Home'}
+        homeHref={`/${locale}`}
+        compact
+      />
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
-
-        <PageHero
-          eyebrow={t.heroEyebrow}
-          title={t.heroTitle}
-          description={t.heroDescription}
-          image="/img/actu.jpeg"
-          compact
-        >
-          <div className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/80">
-            {loading ? t.loading : `${pagination.total} ${t.totalSuffix}`}
-          </div>
-        </PageHero>
 
         <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="grid gap-3 md:grid-cols-4">
