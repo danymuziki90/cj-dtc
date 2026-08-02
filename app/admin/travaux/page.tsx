@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import {
   Search, RefreshCw, Eye, Download, Award, CheckCircle2,
   Clock, AlertTriangle, FileText, ChevronLeft, ChevronRight,
-  Loader2, Filter,
+  Loader2, Filter, Activity,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -46,6 +46,134 @@ function StatusBadge({ status }: { status: string }) {
 
 function fmtDate(iso: string) { return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) }
 function fmtSize(b: number) { return b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} Ko` : `${(b / (1024 * 1024)).toFixed(1)} Mo` }
+
+// ─── Pipeline Diagnostic Panel ────────────────────────────────────────────
+function PipelineDiagnostic() {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function runDiagnostic() {
+    setLoading(true); setError(null)
+    try {
+      const res = await fetch('/api/admin/travaux/diagnostic', { cache: 'no-store' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || `Erreur ${res.status}`)
+      setData(json)
+      setOpen(true)
+    } catch (e: any) { setError(e.message) }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2">
+        <button onClick={runDiagnostic} disabled={loading}
+          className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-100 disabled:opacity-50">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
+          Diagnostic pipeline complet
+        </button>
+        {error && <span className="text-sm text-red-600">{error}</span>}
+      </div>
+
+      {open && data && (
+        <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-5 space-y-4 text-sm">
+          <div className="flex items-center justify-between">
+            <h4 className="font-bold text-blue-900 text-base">🔬 Diagnostic pipeline soumissions</h4>
+            <button onClick={() => setOpen(false)} className="text-blue-400 hover:text-blue-700 text-xs font-bold">Fermer</button>
+          </div>
+
+          {/* Summary */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {[
+              { label: 'Étudiants', value: data.summary.totalStudents },
+              { label: 'Travaux', value: data.summary.totalAssignments },
+              { label: 'Soumissions', value: data.summary.totalSubmissions, alert: data.summary.totalSubmissions === 0 },
+              { label: 'Inscriptions actives', value: data.summary.totalActiveEnrollments, alert: data.summary.totalActiveEnrollments === 0 },
+              { label: 'Sans inscription', value: data.summary.studentsWithoutActiveEnrollment, alert: data.summary.studentsWithoutActiveEnrollment > 0 },
+            ].map(({ label, value, alert }) => (
+              <div key={label} className={`rounded-xl border px-3 py-2 ${alert ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200'}`}>
+                <div className={`text-xl font-black ${alert ? 'text-red-600' : 'text-slate-800'}`}>{value}</div>
+                <div className="text-[10px] text-slate-500">{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Issues */}
+          {data.issues.length > 0 && (
+            <div className="space-y-1.5">
+              <p className="font-bold text-red-700 text-xs uppercase tracking-wide">⚠️ Problèmes détectés ({data.issues.length})</p>
+              {data.issues.map((issue: string, i: number) => (
+                <div key={i} className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-800 font-semibold">
+                  {issue}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {data.issues.length === 0 && (
+            <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs text-emerald-800 font-bold">
+              ✅ Aucun problème de configuration détecté. Le POST étudiant échoue probablement à cause d'une erreur d'authentification ou de token expiré.
+            </div>
+          )}
+
+          {/* Assignment access details */}
+          {data.assignmentAccess.map((a: any) => (
+            <div key={a.assignmentId} className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold border ${a.published ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                  {a.published ? 'Publié' : 'Non publié'}
+                </span>
+                <span className="font-bold text-slate-800">{a.assignmentTitle}</span>
+                <span className="text-xs text-slate-400">formationId={a.formationId}, sessionId={a.sessionId ?? 'null'}</span>
+              </div>
+              <div className="text-xs text-slate-600">
+                <strong>{a.eligibleStudentCount}</strong> étudiant(s) éligible(s) — <strong>{a.submissionCount}</strong> soumission(s)
+              </div>
+              {a.eligibleStudents.length > 0 && (
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="text-[10px] text-slate-400 uppercase font-bold">
+                      <th className="text-left pb-1">Étudiant</th>
+                      <th className="text-left pb-1">Email</th>
+                      <th className="text-left pb-1">Statut compte</th>
+                      <th className="text-left pb-1">A soumis</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {a.eligibleStudents.map((s: any) => (
+                      <tr key={s.id} className="border-t border-slate-100">
+                        <td className="py-1 font-semibold text-slate-800">{s.name}</td>
+                        <td className="py-1 text-slate-500">{s.email}</td>
+                        <td className="py-1">
+                          <span className={`font-bold ${['ACTIVE', 'active'].includes(s.status) ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {s.status || 'inconnu'}
+                          </span>
+                        </td>
+                        <td className="py-1">
+                          {s.hasSubmitted
+                            ? <span className="text-emerald-600 font-bold">✓ Oui</span>
+                            : <span className="text-slate-400">Non</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {a.eligibleStudentCount === 0 && (
+                <p className="text-xs text-red-600 font-semibold">
+                  Aucun étudiant n'est inscrit à la formation/session de ce travail.
+                  Les étudiants ne voient pas ce travail dans leur espace.
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 // ─── Tab: Travaux list ────────────────────────────────────────────────────
 function TravauxTab() {
@@ -426,6 +554,7 @@ export default function AdminTravauxPage() {
 
   return (
     <AdminShell title="Travaux">
+      <PipelineDiagnostic />
       <div className="flex gap-2 mb-6">
         <button className={tabCls('travaux')} onClick={() => setTab('travaux')}>
           <FileText className="inline h-4 w-4 mr-1.5 -mt-0.5" /> Travaux publiés
