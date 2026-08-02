@@ -38,29 +38,36 @@ export default function AdminGererTravailPage({ params }: { params: Promise<{ id
   const [gradeInput, setGradeInput] = useState('')
   const [feedbackInput, setFeedbackInput] = useState('')
   const [savingGrade, setSavingGrade] = useState(false)
+  const [subsError, setSubsError] = useState<string | null>(null)
+
+  async function loadSubmissions() {
+    try {
+      setSubsError(null)
+      const res = await fetch(`/api/admin/travaux/${resolvedParams.id}/submissions`, { cache: 'no-store' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Erreur ${res.status}`)
+      }
+      const data = await res.json()
+      setSubmissions(Array.isArray(data) ? data : (data.submissions ?? []))
+    } catch (err) {
+      setSubsError(err instanceof Error ? err.message : 'Erreur chargement dépôts')
+    }
+  }
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [res1, res2] = await Promise.all([
-          fetch(`/api/admin/travaux/${resolvedParams.id}`, { cache: 'no-store' }),
-          fetch(`/api/admin/travaux/${resolvedParams.id}/submissions`, { cache: 'no-store' })
-        ])
-
-        if (!res1.ok || !res2.ok) {
-          const errBody = !res2.ok ? await res2.json().catch(() => ({})) : {}
-          throw new Error(errBody.error || 'Erreur de chargement des données')
-        }
-
+        const res1 = await fetch(`/api/admin/travaux/${resolvedParams.id}`, { cache: 'no-store' })
+        if (!res1.ok) throw new Error('Erreur chargement du travail')
         setAssignment(await res1.json())
-        const subsData = await res2.json()
-        // API may return array directly or wrapped in { submissions: [...] }
-        setSubmissions(Array.isArray(subsData) ? subsData : (subsData.submissions ?? []))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erreur')
       } finally {
         setLoading(false)
       }
+      // Load submissions separately so an error doesn't block the page
+      await loadSubmissions()
     }
     loadData()
   }, [resolvedParams.id])
@@ -182,7 +189,21 @@ export default function AdminGererTravailPage({ params }: { params: Promise<{ id
 
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <h2 className="text-lg font-semibold text-slate-800 mb-4">Dépôts des étudiants ({submissions.length})</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-800">Dépôts des étudiants ({submissions.length})</h2>
+              <button
+                onClick={loadSubmissions}
+                className="text-xs font-semibold text-[#2A52BE] border border-[#2A52BE]/30 rounded-lg px-3 py-1.5 hover:bg-blue-50 transition"
+              >
+                ↻ Actualiser
+              </button>
+            </div>
+
+            {subsError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                Erreur : {subsError}
+              </div>
+            )}
             
             <div className="space-y-4">
               {submissions.length === 0 ? (
