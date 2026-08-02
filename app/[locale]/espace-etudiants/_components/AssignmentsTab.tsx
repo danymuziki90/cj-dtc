@@ -80,12 +80,6 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
                       Limite :{" "}
                       {new Date(assign.deadline).toLocaleDateString("fr-FR")}
                     </span>
-                    {assign.AssignmentFile && assign.AssignmentFile.length > 0 && (
-                      <span className="text-[11px] font-semibold text-[var(--cj-blue)] flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                        <FileText className="w-3 h-3" />
-                        {assign.AssignmentFile.length} fichier(s)
-                      </span>
-                    )}
                   </div>
 
                   <button
@@ -96,6 +90,32 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
+
+                {/* Consignes / Documents joints — affichés directement sur la carte du TP */}
+                {assign.AssignmentFile && assign.AssignmentFile.length > 0 && (
+                  <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-3 space-y-2">
+                    <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-[var(--cj-blue)]" />
+                      Consignes / Documents joints
+                    </p>
+                    <div className="grid gap-1.5 sm:grid-cols-2">
+                      {assign.AssignmentFile.map((file: any) => (
+                        <a
+                          key={file.id}
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-2.5 py-2 text-[11px] font-semibold text-slate-700 hover:text-[var(--cj-blue)] hover:border-blue-300 hover:shadow-sm transition"
+                        >
+                          <ArrowRight className="w-3 h-3 shrink-0 text-[var(--cj-blue)]" />
+                          <span className="truncate" title={file.originalName || file.name}>
+                            {file.originalName || file.name}
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

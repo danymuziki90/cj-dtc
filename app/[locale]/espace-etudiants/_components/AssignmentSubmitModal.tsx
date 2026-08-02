@@ -4,7 +4,6 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
-  Download,
   FileCheck,
   FileText,
   Loader2,
@@ -354,32 +353,6 @@ export function AssignmentSubmitModal({
             <div className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-700 border border-emerald-200">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
               <span>{uploadSuccessMessage}</span>
-            </div>
-          )}
-
-          {/* Fichiers Joints / Consignes */}
-          {selectedAssignment.AssignmentFile && selectedAssignment.AssignmentFile.length > 0 && (
-            <div className="space-y-2 mb-4 p-4 rounded-2xl bg-blue-50/50 border border-blue-100">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[var(--cj-blue)]" />
-                Consignes / Documents joints
-              </label>
-              <div className="grid gap-2 sm:grid-cols-2 mt-2">
-                {selectedAssignment.AssignmentFile.map((file: any) => (
-                  <a
-                    key={file.id}
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-xl border border-blue-200 bg-white p-2.5 text-xs font-semibold text-slate-700 hover:text-[var(--cj-blue)] hover:border-blue-300 hover:shadow-sm transition"
-                  >
-                    <Download className="w-4 h-4 shrink-0 text-[var(--cj-blue)]" />
-                    <span className="truncate" title={file.originalName || file.name}>
-                      {file.originalName || file.name}
-                    </span>
-                  </a>
-                ))}
-              </div>
             </div>
           )}
 
