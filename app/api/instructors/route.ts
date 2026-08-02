@@ -34,6 +34,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
                 }
             },
             orderBy: { lastName: 'asc' }
+        })
     return NextResponse.json(instructors)
 })
 
