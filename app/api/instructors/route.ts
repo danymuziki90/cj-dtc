@@ -52,5 +52,6 @@ export const POST = apiHandler(async (request: NextRequest) => {
                 experience,
                 photoUrl
             }
+        })
     return NextResponse.json(instructor, { status: 201 })
 })
