@@ -69,6 +69,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: 'Travail introuvable' }, { status: 404 })
     }
 
+    if (!assignment.published) {
+      return NextResponse.json({ error: 'Ce travail n\'est pas encore publié' }, { status: 403 })
+    }
+
     // Find or create submission
     let submission = await prisma.submission.findFirst({
       where: {
@@ -82,7 +86,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
         where: { id: submission.id },
         data: {
           status: 'submitted',
+          correctionStatus: 'pending',
           submittedAt: new Date(),
+          sessionId: assignment.sessionId || null,
+          maxGrade: assignment.maxGrade,
         }
       })
       // Delete old files for a clean slate
@@ -94,11 +101,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
         data: {
           assignmentId: assignment.id,
           studentId: auth.student.id,
+          sessionId: assignment.sessionId || null,
+          maxGrade: assignment.maxGrade,
           status: 'submitted',
           submittedAt: new Date(),
         }
       })
     }
+
 
     // Create file records
     for (const file of files) {

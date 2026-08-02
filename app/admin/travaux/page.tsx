@@ -145,6 +145,7 @@ function RemisesTab() {
   const [pagination, setPagination]   = useState<Pagination>({ page:1, pageSize:20, total:0, pageCount:1 })
   const [loading, setLoading]         = useState(true)
   const [error, setError]             = useState<string | null>(null)
+  const [diagnostics, setDiagnostics] = useState<any>(null)
 
   const [fFormation,  setFFormation]  = useState('')
   const [fAssignment, setFAssignment] = useState('')
@@ -159,21 +160,27 @@ function RemisesTab() {
     debounceRef.current = setTimeout(() => { setFStudentD(fStudent.trim()); setPage(1) }, 300)
   }, [fStudent])
 
-  const load = useCallback(async (p: number) => {
+  const load = useCallback(async (p: number, withDebug = false) => {
     setLoading(true); setError(null)
     const qs = new URLSearchParams({ page: String(p), pageSize: '20' })
     if (fFormation)  qs.set('formationId',      fFormation)
     if (fAssignment) qs.set('assignmentId',      fAssignment)
     if (fStatus)     qs.set('correctionStatus',  fStatus)
     if (fStudentD)   qs.set('student',           fStudentD)
+    if (withDebug)   qs.set('debug',             'true')
     try {
       const res = await fetch(`/api/admin/travaux/submissions?${qs}`, { cache: 'no-store' })
-      if (!res.ok) throw new Error(`Erreur ${res.status}`)
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        if (res.status === 401) throw new Error('Authentification requise. Veuillez vous reconnecter.')
+        throw new Error(errData.error || errData.details || `Erreur serveur (${res.status})`)
+      }
       const data = await res.json()
       setSubmissions(data.submissions || [])
       setPagination(data.pagination)
       if (data.formations) setFormations(data.formations)
       if (data.assignments) setAssignments(data.assignments)
+      if (data.diagnostics) setDiagnostics(data.diagnostics)
     } catch (e: any) { setError(e.message) }
     finally { setLoading(false) }
   }, [fFormation, fAssignment, fStatus, fStudentD])
@@ -204,11 +211,39 @@ function RemisesTab() {
           <option value="">Tous statuts</option>
           {Object.entries(CS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
         </select>
-        <button onClick={() => load(page)} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+        <button onClick={() => load(page)} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50" title="Actualiser">
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        </button>
+        <button onClick={() => load(page, true)} className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-100" title="Lancer un diagnostic">
+          🔍 Diagnostic
         </button>
         <span className="text-xs text-slate-400 self-center ml-auto">{pagination.total} remise{pagination.total !== 1 ? 's' : ''}</span>
       </div>
+
+      {/* Diagnostic panel */}
+      {diagnostics && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm text-sm space-y-1">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-bold text-amber-800">🔍 Résultat du diagnostic</h4>
+            <button onClick={() => setDiagnostics(null)} className="text-amber-400 hover:text-amber-700 text-xs">Fermer</button>
+          </div>
+          <p><strong>Total Submissions en base :</strong> {diagnostics.totalSubmissionsInDb}</p>
+          <p><strong>Total Assignments en base :</strong> {diagnostics.totalAssignmentsInDb}</p>
+          <p><strong>Total Étudiants en base :</strong> {diagnostics.totalStudentsInDb}</p>
+          <p><strong>Submissions sans session :</strong> {diagnostics.submissionsWithoutSession}</p>
+          <p><strong>Résultat filtré :</strong> {diagnostics.filteredCount}</p>
+          {diagnostics.totalSubmissionsInDb === 0 && (
+            <p className="mt-2 rounded-lg bg-red-100 border border-red-200 px-3 py-2 text-red-700 font-semibold">
+              ⚠️ Aucune soumission n'existe en base de données. Les dépôts étudiants n'ont probablement pas été enregistrés correctement.
+            </p>
+          )}
+          {diagnostics.totalSubmissionsInDb > 0 && diagnostics.filteredCount === 0 && (
+            <p className="mt-2 rounded-lg bg-amber-100 border border-amber-300 px-3 py-2 text-amber-800 font-semibold">
+              ⚠️ Des soumissions existent en base mais les filtres actuels n'en retournent aucune. Essayez de réinitialiser les filtres.
+            </p>
+          )}
+        </div>
+      )}
 
       {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 

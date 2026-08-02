@@ -64,13 +64,15 @@ export function getGradientForCategory(category: string | null) {
 
 export function getAssignmentStatus(assign: any) {
   const submission = assign.submissions?.[0];
-  const isGraded = submission?.status === "graded" || submission?.grade != null;
-  const isReturned = submission?.status === "returned";
+  const corrStatus = submission?.correctionStatus;
+  const isGraded = corrStatus === "graded" || corrStatus === "validated" || submission?.status === "graded" || submission?.grade != null;
+  const isReturned = corrStatus === "returned" || submission?.status === "returned";
+  const isInReview = corrStatus === "in_review";
 
   if (isGraded) {
     return { 
       status: "graded",
-      label: "Corrigé", 
+      label: corrStatus === "validated" ? "Validé" : "Corrigé", 
       color: "border-blue-200 bg-blue-50 text-blue-800",
       className: "border-blue-200 bg-blue-50 text-blue-800",
       theme: "blue",
@@ -86,6 +88,17 @@ export function getAssignmentStatus(assign: any) {
       className: "border-amber-200 bg-amber-50 text-amber-800",
       theme: "amber",
       icon: Clock
+    };
+  }
+
+  if (isInReview) {
+    return { 
+      status: "submitted",
+      label: "En correction", 
+      color: "border-purple-200 bg-purple-50 text-purple-800",
+      className: "border-purple-200 bg-purple-50 text-purple-800",
+      theme: "purple",
+      icon: CheckCircle2
     };
   }
 

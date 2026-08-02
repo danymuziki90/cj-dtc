@@ -7,10 +7,14 @@ export const dynamic = 'force-dynamic'
 /**
  * GET /api/admin/travaux/submissions
  * Liste globale de toutes les remises avec filtres.
+ * Ajouter ?debug=true pour obtenir un diagnostic.
  */
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin(req)
-  if (auth.error) return auth.error
+  if (auth.error) {
+    console.error('[submissions global GET] Admin auth failed')
+    return auth.error
+  }
 
   const url = new URL(req.url)
   const page             = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10))
@@ -21,6 +25,7 @@ export async function GET(req: NextRequest) {
   const studentSearch    = url.searchParams.get('student') || ''
   const correctionStatus = url.searchParams.get('correctionStatus') || ''
   const status           = url.searchParams.get('status') || ''
+  const debug            = url.searchParams.get('debug') === 'true'
 
   const where: any = {}
   if (assignmentId)     where.assignmentId = parseInt(assignmentId, 10)
@@ -72,14 +77,37 @@ export async function GET(req: NextRequest) {
       }),
     ])
 
+    // Diagnostic info
+    let diagnostics = undefined
+    if (debug) {
+      const [totalSubmissions, totalAssignments, totalStudents, submissionsWithoutSession] = await Promise.all([
+        prisma.submission.count(),
+        prisma.assignment.count(),
+        prisma.student.count(),
+        prisma.submission.count({ where: { sessionId: null } }),
+      ])
+      diagnostics = {
+        totalSubmissionsInDb: totalSubmissions,
+        totalAssignmentsInDb: totalAssignments,
+        totalStudentsInDb: totalStudents,
+        submissionsWithoutSession,
+        filterApplied: where,
+        filteredCount: total,
+      }
+      console.log('[submissions diagnostic]', JSON.stringify(diagnostics, null, 2))
+    }
+
+    console.log(`[submissions global GET] Found ${total} submissions (page ${page}, filters: ${JSON.stringify(where)})`)
+
     return NextResponse.json({
       submissions,
       formations,
       assignments,
       pagination: { page, pageSize, total, pageCount: Math.max(1, Math.ceil(total / pageSize)) },
+      ...(diagnostics ? { diagnostics } : {}),
     })
   } catch (error) {
-    console.error('[submissions global GET]', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    console.error('[submissions global GET] Error:', error)
+    return NextResponse.json({ error: 'Erreur serveur', details: String(error) }, { status: 500 })
   }
 }

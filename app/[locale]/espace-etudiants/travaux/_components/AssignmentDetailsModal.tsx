@@ -315,8 +315,21 @@ export default function AssignmentDetailsModal({ isOpen, onClose, assignment }: 
                   </div>
                   <div className="mt-6 flex items-end gap-2">
                     <span className="text-5xl font-black">{submission.grade}</span>
-                    <span className="text-xl font-medium text-emerald-100 mb-1">/ 20</span>
+                    <span className="text-xl font-medium text-emerald-100 mb-1">/ {submission.maxGrade ?? assignment.maxGrade ?? 20}</span>
                   </div>
+                  {submission.percentage != null && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
+                        <div className="h-full bg-white rounded-full transition-all" style={{ width: `${Math.min(submission.percentage, 100)}%` }} />
+                      </div>
+                      <span className="text-sm font-bold text-emerald-100">{submission.percentage}%</span>
+                    </div>
+                  )}
+                  {submission.gradedAt && (
+                    <p className="text-xs text-emerald-200 mt-3">
+                      Corrigé le {new Date(submission.gradedAt).toLocaleDateString("fr-FR", { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </p>
+                  )}
                 </div>
 
                 {submission.feedback && (
