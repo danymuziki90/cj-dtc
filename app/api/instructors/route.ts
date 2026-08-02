@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '../../../lib/prisma'
+import { apiHandler, ApiError } from '@/lib/api-error'
 
 const instructorSchema = z.object({
     firstName: z.string().trim().min(2, 'Le prénom est requis'),
@@ -15,10 +16,8 @@ const instructorSchema = z.object({
 
 export const runtime = "nodejs"
 
-// GET /api/instructors - Récupérer tous les instructeurs
-export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = request.nextUrl
+export const GET = apiHandler(async (request: NextRequest) => {
+    const { searchParams } = request.nextUrl
         const status = searchParams.get('status')
 
         const instructors = await prisma.instructor.findMany({
@@ -35,28 +34,11 @@ export async function GET(request: NextRequest) {
                 }
             },
             orderBy: { lastName: 'asc' }
-        })
+    return NextResponse.json(instructors)
+})
 
-        return NextResponse.json(instructors)
-    } catch (error) {
-        console.error('Erreur lors de la récupération des instructeurs:', error)
-        return NextResponse.json(
-            { error: 'Erreur lors de la récupération des instructeurs' },
-            { status: 500 }
-        )
-    }
-}
-
-// POST /api/instructors - Créer un nouvel instructeur
-export async function POST(request: NextRequest) {
-    try {
-        const parsed = instructorSchema.safeParse(await request.json())
-        if (!parsed.success) {
-            const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-            return NextResponse.json({ error: errorMsg }, { status: 400 })
-        }
-
-        const { firstName, lastName, email, phone, bio, expertise, experience, photoUrl } = parsed.data
+export const POST = apiHandler(async (request: NextRequest) => {
+    const { firstName, lastName, email, phone, bio, expertise, experience, photoUrl } = instructorSchema.parse(await request.json())
 
         const instructor = await prisma.instructor.create({
             data: {
@@ -69,14 +51,5 @@ export async function POST(request: NextRequest) {
                 experience,
                 photoUrl
             }
-        })
-
-        return NextResponse.json(instructor, { status: 201 })
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'instructeur:', error)
-        return NextResponse.json(
-            { error: 'Erreur lors de la création de l\'instructeur' },
-            { status: 500 }
-        )
-    }
-}
+    return NextResponse.json(instructor, { status: 201 })
+})

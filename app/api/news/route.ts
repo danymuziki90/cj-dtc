@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { apiHandler, ApiError } from '@/lib/api-error'
 
 const DEFAULT_CATEGORY = 'General'
 const DEFAULT_PAGE_SIZE = 9
@@ -57,9 +58,8 @@ function mapNewsItem(item: any) {
   }
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    if (!process.env.DATABASE_URL) {
+export const GET = apiHandler(async (request: NextRequest) => {
+  if (!process.env.DATABASE_URL) {
       return NextResponse.json({
         news: [],
         categories: [],
@@ -162,22 +162,5 @@ export async function GET(request: NextRequest) {
         total,
         pageCount: shouldUseLimit ? 1 : Math.max(Math.ceil(total / pageSize), 1),
       },
-    })
-  } catch (error) {
-    console.error('Public news fetch error:', error)
-    return NextResponse.json(
-      {
-        error: 'Erreur lors du chargement des actualités.',
-        news: [],
-        categories: [],
-        pagination: {
-          page: 1,
-          pageSize: DEFAULT_PAGE_SIZE,
-          total: 0,
-          pageCount: 1,
-        },
-      },
-      { status: 500 }
-    )
-  }
-}
+  })
+})

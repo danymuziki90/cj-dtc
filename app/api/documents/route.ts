@@ -5,6 +5,7 @@ import { requireAdmin, requireStudent } from '@/lib/auth-portal/guards'
 import { ADMIN_AUTH_COOKIE, STUDENT_AUTH_COOKIE } from '@/lib/auth-portal/jwt'
 import { writeAdminAuditLog } from '@/lib/admin/audit'
 import { uploadToR2 } from '@/lib/r2'
+import { apiHandler, ApiError } from '@/lib/api-error'
 
 const documentSchema = z.object({
   title: z.string().trim().min(1, 'Le titre est obligatoire'),
@@ -49,12 +50,16 @@ function parseOptionalNumber(value: string | null) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-export async function GET(request: NextRequest) {
+export const GET = apiHandler(async (request: NextRequest) => {
   const access = await resolveDocumentAccess(request)
-  if ('error' in access) return access.error
+  if ('error' in access) {
+    if (access.error instanceof NextResponse) {
+      throw new ApiError(access.error.status || 401, 'Non autorisé')
+    }
+    throw access.error
+  }
 
-  try {
-    const { searchParams } = request.nextUrl
+  const { searchParams } = request.nextUrl
     const formationId = parseOptionalNumber(searchParams.get('formationId'))
     const sessionId = parseOptionalNumber(searchParams.get('sessionId'))
     const category = searchParams.get('category')?.trim() || null
@@ -150,58 +155,48 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json(documents)
-  } catch (error) {
-    console.error('Erreur lors de la recuperation des documents:', error)
-    return NextResponse.json({ error: 'Erreur lors de la recuperation des documents' }, { status: 500 })
-  }
-}
+  return NextResponse.json(documents)
+})
 
-export async function POST(request: NextRequest) {
+export const POST = apiHandler(async (request: NextRequest) => {
   const auth = await requireAdmin(request)
-  if (auth.error) return auth.error
+  if (auth.error) {
+    if (auth.error instanceof NextResponse) throw new ApiError(auth.error.status || 401, 'Non autorisé')
+    throw auth.error
+  }
 
-  try {
-    console.log('[API Documents] Requête POST reçue')
-    const formData = await request.formData()
-    const file = formData.get('file') as File | null
-    if (!file) {
-      console.warn('[API Documents] Fichier manquant')
-      return NextResponse.json({ error: 'Le fichier est obligatoire.' }, { status: 400 })
-    }
+  console.log('[API Documents] Requête POST reçue')
+  const formData = await request.formData()
+  const file = formData.get('file') as File | null
+  if (!file) {
+    console.warn('[API Documents] Fichier manquant')
+    throw new ApiError(400, 'Le fichier est obligatoire.')
+  }
 
-    const parsed = documentSchema.safeParse({
-      title: formData.get('title'),
-      description: formData.get('description'),
-      category: formData.get('category'),
-      formationId: formData.get('formationId'),
-      sessionId: formData.get('sessionId'),
-      isPublic: formData.get('isPublic')
-    })
-
-    if (!parsed.success) {
-      const errorMsg = parsed.error.issues[0]?.message || 'Données invalides.'
-      console.warn('[API Documents] Données requises manquantes ou invalides')
-      return NextResponse.json({ error: errorMsg }, { status: 400 })
-    }
-
-    const {
-      title,
-      description,
-      category,
-      formationId,
-      sessionId,
-      isPublic
-    } = parsed.data
+  const {
+    title,
+    description,
+    category,
+    formationId,
+    sessionId,
+    isPublic
+  } = documentSchema.parse({
+    title: formData.get('title'),
+    description: formData.get('description'),
+    category: formData.get('category'),
+    formationId: formData.get('formationId'),
+    sessionId: formData.get('sessionId'),
+    isPublic: formData.get('isPublic')
+  })
 
     const session = await prisma.trainingSession.findUnique({
       where: { id: sessionId },
       select: { id: true, formationId: true },
     })
-    if (!session) return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 })
-    if (formationId && formationId !== session.formationId) {
-      return NextResponse.json({ error: 'La formation doit correspondre a celle de la session.' }, { status: 400 })
-    }
+  if (!session) throw new ApiError(404, 'Session introuvable.')
+  if (formationId && formationId !== session.formationId) {
+    throw new ApiError(400, 'La formation doit correspondre a celle de la session.')
+  }
 
     console.log(`[API Documents] Fichier: ${file.name} (${file.size} octets), titre: ${title}, catégorie: ${category}`)
     const r2Folder = `supports/session-${sessionId}`
@@ -254,9 +249,5 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(document, { status: 201 })
-  } catch (error: any) {
-    console.error('[API Documents] Erreur lors de l upload du document:', error)
-    return NextResponse.json({ error: `Erreur lors de l'upload du document : ${error.message || error}` }, { status: 500 })
-  }
-}
+  return NextResponse.json(document, { status: 201 })
+})
