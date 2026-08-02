@@ -434,13 +434,37 @@ export default function AdminEmploisPage() {
                   </div>
                 </div>
                 {/* Actions */}
-                <div className="flex flex-wrap gap-1.5 shrink-0">
-                  <button onClick={() => openEdit(e)} title="Modifier" className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50"><Pencil className="h-4 w-4" /></button>
-                  {e.metadata.status !== 'published' && <button onClick={() => patch(e.id, 'publish')} title="Publier" className="rounded-lg border border-emerald-200 p-2 text-emerald-600 hover:bg-emerald-50"><Eye className="h-4 w-4" /></button>}
-                  {e.metadata.status === 'published' && <button onClick={() => patch(e.id, 'unpublish')} title="Dépublier" className="rounded-lg border border-amber-200 p-2 text-amber-600 hover:bg-amber-50"><EyeOff className="h-4 w-4" /></button>}
-                  <button onClick={() => patch(e.id, 'archive')} title="Archiver" className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"><Archive className="h-4 w-4" /></button>
-                  <button onClick={() => patch(e.id, 'duplicate')} title="Dupliquer" className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"><Copy className="h-4 w-4" /></button>
-                  <button onClick={() => remove(e.id)} title="Supprimer" className="rounded-lg border border-red-200 p-2 text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4" /></button>
+                <div className="flex flex-wrap gap-1.5 shrink-0 mt-2 sm:mt-0">
+                  <button onClick={() => openEdit(e)} title="Modifier"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                    <Pencil className="h-3.5 w-3.5" /> Modifier
+                  </button>
+                  {e.metadata.status !== 'published' && (
+                    <button onClick={() => patch(e.id, 'publish')} title="Publier"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
+                      <Eye className="h-3.5 w-3.5" /> Publier
+                    </button>
+                  )}
+                  {e.metadata.status === 'published' && (
+                    <button onClick={() => patch(e.id, 'unpublish')} title="Dépublier"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 hover:bg-amber-100">
+                      <EyeOff className="h-3.5 w-3.5" /> Dépublier
+                    </button>
+                  )}
+                  {e.metadata.status !== 'archived' && (
+                    <button onClick={() => patch(e.id, 'archive')} title="Archiver"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50">
+                      <Archive className="h-3.5 w-3.5" /> Archiver
+                    </button>
+                  )}
+                  <button onClick={() => patch(e.id, 'duplicate')} title="Dupliquer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50">
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                  <button onClick={() => remove(e.id)} title="Supprimer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-50">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
