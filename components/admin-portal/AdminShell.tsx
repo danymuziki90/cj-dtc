@@ -152,6 +152,11 @@ const pageDescriptions: Record<string, { eyebrow: string; description: string }>
     description:
       'Créez et gérez les travaux pratiques, examens et projets. Publiez-les pour les étudiants inscrits aux sessions concernées et suivez les remises.',
   },
+  Diagnostics: {
+    eyebrow: 'Système & infrastructure',
+    description:
+      'Vérifiez l\'état de Cloudflare R2, des secrets JWT, de la base de données et des intégrations tierces.',
+  },
 }
 
 const DEFAULT_ENTRY = {
