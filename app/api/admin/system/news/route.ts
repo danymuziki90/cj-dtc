@@ -172,7 +172,10 @@ export async function GET(request: NextRequest) {
     Boolean(category) ||
     Boolean(date)
 
-  const where: any = {}
+  const where: any = {
+    // Exclure explicitement les offres d'emploi de la liste des actualités
+    NOT: { category: { equals: 'Emplois', mode: 'insensitive' } },
+  }
 
   if (search) {
     where.OR = [
@@ -223,6 +226,7 @@ export async function GET(request: NextRequest) {
       category: {
         not: '',
       },
+      NOT: { category: { equals: 'Emplois', mode: 'insensitive' } },
     },
     select: { category: true },
     distinct: ['category'],

@@ -212,11 +212,15 @@ export default function AdminActualitesPage() {
 
     const response = await fetch(`/api/admin/system/news?${params.toString()}`, {
       cache: 'no-store',
+      credentials: 'include',
     })
 
     if (!response.ok) {
       const payload = await response.json().catch(() => ({}))
-      throw new Error(payload?.error || 'Impossible de charger les actualités.')
+      if (response.status === 401) {
+        throw new Error('Session expirée. Veuillez vous reconnecter.')
+      }
+      throw new Error(payload?.error || `Impossible de charger les actualités. (HTTP ${response.status})`)
     }
 
     const payload = (await response.json()) as NewsResponse
@@ -314,6 +318,7 @@ export default function AdminActualitesPage() {
       const url = editingId ? `/api/admin/system/news/${editingId}` : '/api/admin/system/news'
       const response = await fetch(url, {
         method,
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
@@ -344,7 +349,7 @@ export default function AdminActualitesPage() {
     if (!confirmed) return
 
     setError(null)
-    const response = await fetch(`/api/admin/system/news/${item.id}`, { method: 'DELETE' })
+    const response = await fetch(`/api/admin/system/news/${item.id}`, { method: 'DELETE', credentials: 'include' })
     if (!response.ok) {
       const body = await response.json().catch(() => ({}))
       setError(body?.error || 'Suppression impossible.')
