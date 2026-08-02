@@ -118,10 +118,15 @@ export async function requireStudent(request: NextRequest) {
 
   const normalizedStatus = typeof student.status === 'string' ? student.status.trim().toUpperCase() : ''
 
-  if (normalizedStatus !== 'ACTIVE') {
+  // Allow ACTIVE accounts; also tolerate legacy lowercase 'active'
+  const BLOCKED_STATUSES = ['SUSPENDED', 'INACTIVE', 'DELETED', 'BANNED']
+  if (BLOCKED_STATUSES.includes(normalizedStatus)) {
+    const message = normalizedStatus === 'SUSPENDED'
+      ? "Compte suspendu. Veuillez contacter l'administration."
+      : "Compte inactif. Veuillez contacter l'administration."
     return {
       error: NextResponse.json(
-        { success: false, message: 'Compte étudiant inactif. Veuillez contacter l\'administration.', error: 'Account inactive' },
+        { success: false, message, error: 'Account inactive' },
         { status: 403 }
       ),
     }

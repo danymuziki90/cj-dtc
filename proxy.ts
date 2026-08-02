@@ -30,6 +30,34 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // ── 2b. Student API routes — verify cookie, reject if invalid
+  if (pathname.startsWith('/api/student/')) {
+    // Auth endpoints are always public
+    if (pathname.startsWith('/api/student/auth/')) return NextResponse.next()
+
+    // For /api/student/system/* verify the student token
+    if (pathname.startsWith('/api/student/system')) {
+      const studentToken = request.cookies.get(STUDENT_AUTH_COOKIE)?.value
+      if (!studentToken) {
+        return NextResponse.json(
+          { error: 'Session expirée. Veuillez vous reconnecter.', success: false },
+          { status: 401 }
+        )
+      }
+      const studentPayload = await verifyStudentToken(studentToken)
+      if (!studentPayload) {
+        return NextResponse.json(
+          { error: 'Session expirée. Veuillez vous reconnecter.', success: false },
+          { status: 401 }
+        )
+      }
+      return NextResponse.next()
+    }
+
+    // All other /api/student/* routes pass through (guarded at route level)
+    return NextResponse.next()
+  }
+
   // ── 3. Admin API protection
   if (pathname.startsWith('/api/admin')) {
     if (pathname.startsWith('/api/admin/auth/')) return NextResponse.next()
