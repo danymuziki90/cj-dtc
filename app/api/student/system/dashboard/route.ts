@@ -182,7 +182,8 @@ export async function GET(request: NextRequest) {
           AssignmentFile: true,
           Submission: {
             where: { studentId: auth.student.id },
-            include: { SubmissionFile: true }
+            include: { SubmissionFile: true },
+            orderBy: { submittedAt: 'desc' },
           }
         },
         orderBy: { deadline: 'asc' }

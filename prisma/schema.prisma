@@ -558,6 +558,7 @@ model Assignment {
   allowResubmission Boolean          @default(true)
   maxFiles          Int              @default(5)
   status            String           @default("publie")
+  maxGrade          Float            @default(100)
   Formation         Formation        @relation(fields: [formationId], references: [id], onDelete: Cascade)
   TrainingSession   TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   AssignmentFile    AssignmentFile[]
@@ -603,26 +604,31 @@ model Session {
 }
 
 model Submission {
-  id              Int              @id @default(autoincrement())
-  assignmentId    Int
-  status          String           @default("submitted")
-  grade           Float?
-  feedback        String?
-  submittedAt     DateTime         @default(now())
-  gradedAt        DateTime?
-  gradedBy        String?
-  createdAt       DateTime         @default(now())
-  sessionId       Int?
-  studentId       String
-  updatedAt       DateTime @updatedAt
-  Assignment      Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  TrainingSession TrainingSession? @relation(fields: [sessionId], references: [id])
-  Student         Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  SubmissionFile  SubmissionFile[]
+  id               Int              @id @default(autoincrement())
+  assignmentId     Int
+  status           String           @default("submitted")
+  grade            Float?
+  maxGrade         Float            @default(100)
+  percentage       Float?
+  feedback         String?
+  internalNote     String?
+  correctionStatus String           @default("pending") // pending | in_review | graded | returned | validated
+  submittedAt      DateTime         @default(now())
+  gradedAt         DateTime?
+  gradedBy         String?
+  createdAt        DateTime         @default(now())
+  sessionId        Int?
+  studentId        String
+  updatedAt        DateTime         @updatedAt
+  Assignment       Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  TrainingSession  TrainingSession? @relation(fields: [sessionId], references: [id])
+  Student          Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  SubmissionFile   SubmissionFile[]
 
   @@index([assignmentId])
   @@index([sessionId])
   @@index([status])
+  @@index([correctionStatus])
   @@index([studentId])
 }
 
