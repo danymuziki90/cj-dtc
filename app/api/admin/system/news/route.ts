@@ -172,33 +172,25 @@ export async function GET(request: NextRequest) {
     Boolean(category) ||
     Boolean(date)
 
+  // Exclure les offres d'emploi — utiliser NOT avec une liste de valeurs
+  // (mode insensitive sur NOT n'est pas supporté par tous les providers)
   const where: any = {
-    // Exclure explicitement les offres d'emploi de la liste des actualités
-    NOT: { category: { equals: 'Emplois', mode: 'insensitive' } },
+    NOT: [
+      { category: 'Emplois' },
+      { category: 'emplois' },
+      { category: 'EMPLOIS' },
+    ],
   }
 
   if (search) {
     where.OR = [
-      {
-        title: {
-          contains: search,
-          mode: 'insensitive',
-        },
-      },
-      {
-        content: {
-          contains: search,
-          mode: 'insensitive',
-        },
-      },
+      { title:   { contains: search, mode: 'insensitive' } },
+      { content: { contains: search, mode: 'insensitive' } },
     ]
   }
 
   if (category && category !== 'all') {
-    where.category = {
-      equals: category,
-      mode: 'insensitive',
-    }
+    where.category = { equals: category, mode: 'insensitive' }
   }
 
   if (date && DATE_INPUT_REGEX.test(date)) {
@@ -208,45 +200,48 @@ export async function GET(request: NextRequest) {
     where.publicationDate = { gte: start, lt: end }
   }
 
-  const total = await prisma.news.count({ where })
+  try {
+    const [total, news, categoriesRows] = await Promise.all([
+      prisma.news.count({ where }),
+      prisma.news.findMany({
+        where,
+        orderBy: [{ publicationDate: 'desc' }, { createdAt: 'desc' }],
+        ...(shouldPaginate ? { skip: (page - 1) * pageSize, take: pageSize } : {}),
+      }),
+      prisma.news.findMany({
+        where: {
+          category: { not: '' },
+          NOT: [
+            { category: 'Emplois' },
+            { category: 'emplois' },
+            { category: 'EMPLOIS' },
+          ],
+        },
+        select: { category: true },
+        distinct: ['category'],
+        orderBy: { category: 'asc' },
+      }),
+    ])
 
-  const news = await prisma.news.findMany({
-    where,
-    orderBy: [{ publicationDate: 'desc' }, { createdAt: 'desc' }],
-    ...(shouldPaginate
-      ? {
-          skip: (page - 1) * pageSize,
-          take: pageSize,
-        }
-      : {}),
-  })
+    const effectivePageSize = shouldPaginate ? pageSize : Math.max(total, 1)
 
-  const categoriesRows = await prisma.news.findMany({
-    where: {
-      category: {
-        not: '',
+    return NextResponse.json({
+      news: news.map(mapNewsItem),
+      categories: categoriesRows.map((row: { category: string }) => row.category).filter(Boolean),
+      pagination: {
+        page,
+        pageSize: effectivePageSize,
+        total,
+        pageCount: shouldPaginate ? Math.max(Math.ceil(total / pageSize), 1) : 1,
       },
-      NOT: { category: { equals: 'Emplois', mode: 'insensitive' } },
-    },
-    select: { category: true },
-    distinct: ['category'],
-    orderBy: { category: 'asc' },
-  })
-
-  const effectivePageSize = shouldPaginate ? pageSize : Math.max(total, 1)
-
-  return NextResponse.json({
-    news: news.map(mapNewsItem),
-    categories: categoriesRows
-      .map((row: { category: string }) => row.category)
-      .filter(Boolean),
-    pagination: {
-      page,
-      pageSize: effectivePageSize,
-      total,
-      pageCount: shouldPaginate ? Math.max(Math.ceil(total / pageSize), 1) : 1,
-    },
-  })
+    })
+  } catch (error: any) {
+    console.error('[GET /api/admin/system/news] Error:', error)
+    return NextResponse.json(
+      { error: 'Erreur lors du chargement des actualités.', details: String(error?.message || error) },
+      { status: 500 }
+    )
+  }
 }
 
 export async function POST(request: NextRequest) {
