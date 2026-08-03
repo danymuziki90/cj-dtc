@@ -8,129 +8,142 @@ import AdminGlobalSearch from '@/components/admin-portal/AdminGlobalSearch'
 import {
   BellRing,
   BookOpenCheck,
-  Briefcase,
-  Building2,
   CalendarDays,
   ChevronDown,
   FileStack,
-  FileText,
   GraduationCap,
   LayoutDashboard,
   LogOut,
   Menu,
-  Moon,
   Newspaper,
-  Plus,
+  PlusIcon,
   Settings2,
   ShieldIcon,
-  Star,
-  Sun,
   Users,
   XIcon,
-  ChevronRight,
+  Building2,
+  Mail,
+  HelpCircle,
+  Sun,
+  Moon,
+  ClipboardList,
+  TrendingUp,
+  FileText,
+  Star,
+  Image,
+  Briefcase,
 } from 'lucide-react'
 
-// ─── Nav items ────────────────────────────────────────────────────────────────
-type NavItem = { href: string; label: string; caption: string; icon: LucideIcon }
-
-const navItems: NavItem[] = [
-  { href: '/admin/dashboard',   label: 'Dashboard',       caption: 'KPI & vue globale',         icon: LayoutDashboard },
-  { href: '/admin/sessions',    label: 'Sessions',         caption: 'Planification & cohortes',  icon: CalendarDays    },
-  { href: '/admin/travaux',     label: 'Travaux',          caption: 'Devoirs & remises',          icon: BookOpenCheck   },
-  { href: '/admin/students',    label: 'Étudiants',        caption: 'Comptes & accès',            icon: Users           },
-  { href: '/admin/enrollments', label: 'Inscriptions',     caption: 'Demandes & suivi',           icon: FileStack       },
-  { href: '/admin/documents',   label: 'Supports',         caption: 'Ressources pédagogiques',    icon: FileText        },
-  { href: '/admin/certificates',label: 'Certificats',      caption: 'Délivrance & vérification', icon: GraduationCap   },
-  { href: '/admin/articles',    label: 'Actualités',       caption: 'Contenus & annonces',        icon: Newspaper       },
-  { href: '/admin/emplois',     label: 'Emplois',          caption: 'Offres & recrutement',       icon: Briefcase       },
-  { href: '/admin/evaluations', label: 'Témoignages',      caption: 'Retours & avis',             icon: Star            },
-  { href: '/admin/b2b',         label: 'Entreprises',      caption: 'Demandes B2B & intra',       icon: Building2       },
-  { href: '/admin/settings',    label: 'Paramètres',       caption: 'Configuration & sécurité',   icon: Settings2       },
-]
-
-const quickActions = [
-  { href: '/admin/sessions/new',  label: 'Session',          icon: CalendarDays },
-  { href: '/admin/emplois',       label: "Offre d'emploi",   icon: Briefcase    },
-  { href: '/admin/articles/new',  label: 'Actualité',        icon: Newspaper    },
-  { href: '/admin/enrollments',   label: 'Inscription',      icon: FileStack    },
-]
-
-function isActive(pathname: string, href: string) {
-  return pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(href + '/'))
+type AdminWorkspaceProps = {
+  children: React.ReactNode
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-export default function AdminWorkspace({ children }: { children: React.ReactNode }) {
-  const pathname  = usePathname()
-  const router    = useRouter()
+type NavItem = {
+  href: string
+  label: string
+  caption: string
+  icon: LucideIcon
+}
 
-  const [mobileOpen,   setMobileOpen]   = useState(false)
-  const [loggingOut,   setLoggingOut]   = useState(false)
-  const [darkMode,     setDarkMode]     = useState(false)
-  const [scrolled,     setScrolled]     = useState(false)
-  const [profileOpen,  setProfileOpen]  = useState(false)
-  const [quickOpen,    setQuickOpen]    = useState(false)
-  const [unread,       setUnread]       = useState(0)
+const navRow1: NavItem[] = [
+  { href: '/admin/dashboard', label: 'Dashboard', caption: 'Vue synthétique & KPI', icon: LayoutDashboard },
+  { href: '/admin/sessions', label: 'Sessions', caption: 'Planification et cohortes', icon: CalendarDays },
+  { href: '/admin/travaux', label: 'Travaux', caption: 'Devoirs & remises', icon: BookOpenCheck },
+  { href: '/admin/students', label: 'Étudiants', caption: 'Comptes et accès', icon: Users },
+  { href: '/admin/enrollments', label: 'Inscriptions', caption: 'Suivi et demandes', icon: FileStack },
+]
+
+const navRow2: NavItem[] = [
+  { href: '/admin/documents', label: 'Supports pédagogiques', caption: 'Ressources de formation', icon: FileText },
+  { href: '/admin/certificates', label: 'Certificats', caption: 'Délivrance et vérification', icon: GraduationCap },
+  { href: '/admin/evaluations', label: 'Témoignages', caption: 'Retours et avis', icon: Star },
+  { href: '/admin/articles', label: 'Actualités', caption: 'Contenus et annonces', icon: Newspaper },
+  { href: '/admin/emplois', label: "Offres d'emploi", caption: 'Recrutement & carrières', icon: Briefcase },
+  { href: '/admin/b2b', label: 'Entreprises', caption: 'Demandes B2B & intra', icon: Building2 },
+  { href: '/admin/settings', label: 'Paramètres', caption: 'Configuration & sécurité', icon: Settings2 },
+]
+
+const navItems = [...navRow1, ...navRow2]
+
+const quickActions = [
+  { href: '/admin/articles/new', label: 'Article', icon: Newspaper },
+  { href: '/admin/emplois', label: "Offre d'emploi", icon: Briefcase },
+  { href: '/admin/enrollments', label: 'Inscriptions', icon: FileStack },
+]
+
+
+
+function isActivePath(pathname: string, href: string) {
+  return pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(`${href}/`))
+}
+
+export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
+  const pathname = usePathname()
+  const router = useRouter()
+
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [darkMode, setDarkMode] = useState(false)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
+  const [profileOpen, setProfileOpen] = useState(false)
 
   const profileRef = useRef<HTMLDivElement>(null)
-  const quickRef   = useRef<HTMLDivElement>(null)
-  const navRef     = useRef<HTMLDivElement>(null)
 
-  const currentDate = useMemo(() =>
-    new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date()),
-  [])
+  const currentDate = useMemo(
+    () =>
+      new Intl.DateTimeFormat('fr-FR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      }).format(new Date()),
+    [],
+  )
 
-  // Dark mode init
+  // Initialise dark mode from localStorage
   useEffect(() => {
-    const isDark = localStorage.getItem('cj-admin-dark-mode') === 'true'
+    const isDark = window.localStorage.getItem('cj-admin-dark-mode') === 'true'
     setDarkMode(isDark)
     document.documentElement.classList.toggle('dark', isDark)
   }, [])
 
-  // Scroll shadow
+  // Close all menus on route change
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 4)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    setMobileOpen(false)
+    setProfileOpen(false)
+  }, [pathname])
 
-  // Close menus on route change
-  useEffect(() => { setMobileOpen(false); setProfileOpen(false); setQuickOpen(false) }, [pathname])
-
-  // Click outside to close dropdowns
+  // Close dropdowns when clicking outside
   useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfileOpen(false)
-      if (quickRef.current   && !quickRef.current.contains(e.target as Node))   setQuickOpen(false)
+    function handleClickOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false)
+      }
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Notifications
+  // Fetch unread notifications count in background
   useEffect(() => {
     if (pathname === '/admin/login') return
-    const fetch$ = async () => {
+    async function fetchUnreadCount() {
       try {
-        const r = await fetch('/api/admin/dashboard/kpi')
-        if (r.ok) { const d = await r.json(); setUnread(d.totals?.notificationsTotal || 0) }
+        const res = await fetch('/api/admin/dashboard/kpi')
+        if (res.ok) {
+          const data = await res.json()
+          setUnreadNotifications(data.totals?.notificationsTotal || 0)
+        }
       } catch {}
     }
-    fetch$()
-    const t = setInterval(fetch$, 60_000)
-    return () => clearInterval(t)
+    fetchUnreadCount()
+    const timer = setInterval(fetchUnreadCount, 60000)
+    return () => clearInterval(timer)
   }, [pathname])
 
-  // Scroll active nav item into view
-  useEffect(() => {
-    const el = navRef.current?.querySelector('[aria-current="page"]') as HTMLElement | null
-    el?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
-  }, [pathname])
-
-  function toggleDark() {
+  const toggleDarkMode = () => {
     const next = !darkMode
     setDarkMode(next)
-    localStorage.setItem('cj-admin-dark-mode', String(next))
+    window.localStorage.setItem('cj-admin-dark-mode', String(next))
     document.documentElement.classList.toggle('dark', next)
   }
 
@@ -141,7 +154,7 @@ export default function AdminWorkspace({ children }: { children: React.ReactNode
     router.refresh()
   }
 
-  // ── Login page ──────────────────────────────────────────────────────────────
+  // Login page â€” render minimal background only
   if (pathname === '/admin/login') {
     return (
       <div className="admin-theme relative min-h-screen overflow-hidden">
@@ -152,268 +165,327 @@ export default function AdminWorkspace({ children }: { children: React.ReactNode
     )
   }
 
-  // ── Shared nav link style ────────────────────────────────────────────────────
-  function navLinkCls(href: string) {
-    const active = isActive(pathname, href)
-    return [
-      'group relative flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium whitespace-nowrap transition-all duration-150 select-none',
-      active
-        ? 'bg-[var(--admin-primary)] text-white shadow-sm shadow-blue-200'
-        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
-    ].join(' ')
-  }
-
   return (
-    <div className="admin-theme relative flex min-h-screen flex-col text-slate-950 dark:text-slate-100">
-      {/* Page background */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(0,48,160,0.06),transparent_50%),linear-gradient(180deg,#f8fbff_0%,#f1f5fb_100%)] dark:bg-slate-950" />
+    <div className="admin-theme relative flex min-h-screen flex-col text-slate-950">
+      {/* Decorative background */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,48,160,0.08),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(227,6,19,0.06),transparent_38%),linear-gradient(180deg,#f8fbff_0%,#eef4ff_38%,#f7f9fc_100%)]" />
+      <div className="pointer-events-none fixed inset-0 opacity-20 [background-image:linear-gradient(rgba(15,23,42,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.05)_1px,transparent_1px)] [background-size:32px_32px]" />
 
-      {/* ── TOPBAR ─────────────────────────────────────────────────────────── */}
-      <header
-        className={[
-          'sticky top-0 z-40 w-full transition-shadow duration-200',
-          'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800',
-          scrolled ? 'shadow-[0_1px_12px_rgba(15,23,42,0.08)]' : 'shadow-none',
-        ].join(' ')}
-      >
-        <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-2 px-4 lg:px-6">
+      {/* â”€â”€ HEADER PRINCIPAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl shadow-sm">
+        <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-3 px-4 md:px-6">
 
-          {/* ── Logo ── */}
-          <Link href="/admin/dashboard" className="flex shrink-0 items-center gap-2.5 pr-3 mr-1 border-r border-slate-200/80 dark:border-slate-700">
-            <div className="grid h-8 w-8 place-items-center rounded-xl bg-[var(--admin-primary)] shadow-sm shadow-blue-200">
-              <img src="/logo.png" alt="CJ DTC" className="h-5 w-5 object-contain brightness-0 invert" />
+          {/* Logo */}
+          <Link href="/admin/dashboard" className="flex shrink-0 items-center gap-2.5 mr-2">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100">
+              <img src="/logo.png" alt="CJ DTC" className="h-6 w-6 object-contain" />
             </div>
             <div className="hidden sm:block">
-              <p className="text-[13px] font-black tracking-tight text-slate-900 dark:text-white leading-none">CJ Development</p>
-              <p className="text-[10px] font-semibold tracking-[0.15em] text-slate-400 uppercase mt-0.5">Administration</p>
+              <p className="text-sm font-black tracking-tight text-slate-950 leading-none">CJ Development</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-450">Administration</p>
             </div>
           </Link>
 
-          {/* ── Nav bar (desktop) ── */}
-          <nav
-            ref={navRef}
-            className="hidden md:flex flex-1 items-center gap-0.5 overflow-x-auto scrollbar-none px-1"
-            aria-label="Navigation principale"
+          {/* Separator */}
+          <div className="hidden h-6 w-px bg-slate-200 md:block" />
+
+          {/* Search bar */}
+          <div className="hidden max-w-xs flex-1 md:block lg:max-w-sm">
+            <AdminGlobalSearch />
+          </div>
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Quick action buttons */}
+          <div className="hidden items-center gap-1.5 lg:flex">
+            {quickActions.map((action) => {
+              const Icon = action.icon
+              return (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:border-[var(--admin-primary-200)] hover:bg-[var(--admin-primary-50)] hover:text-[var(--admin-primary)]"
+                >
+                  <PlusIcon className="h-3 w-3" />
+                  {action.label}
+                </Link>
+              )
+            })}
+          </div>
+
+          {/* Notifications badge */}
+          <Link
+            href="/admin/notifications"
+            className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-[var(--admin-primary-200)] hover:text-[var(--admin-primary)]"
+            aria-label="Notifications"
           >
-            {navItems.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                aria-current={isActive(pathname, href) ? 'page' : undefined}
-                title={label}
-                className={navLinkCls(href)}
-              >
-                <Icon className="h-3.5 w-3.5 shrink-0" />
-                <span>{label}</span>
-              </Link>
-            ))}
-          </nav>
+            <BellRing className="h-4 w-4" />
+            {unreadNotifications > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--admin-accent)] px-1 text-[9px] font-bold text-white shadow">
+                {unreadNotifications > 99 ? '99+' : unreadNotifications}
+              </span>
+            )}
+          </Link>
 
-          {/* ── Spacer (fills gap when nav overflows) ── */}
-          <div className="flex-1 md:hidden" />
+          {/* Dark mode toggle */}
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300"
+            aria-label={darkMode ? 'Passer en mode clair' : 'Passer en mode sombre'}
+          >
+            {darkMode ? (
+              <Sun className="h-4 w-4 text-amber-500" />
+            ) : (
+              <Moon className="h-4 w-4 text-slate-600" />
+            )}
+          </button>
 
-          {/* ── Right controls ── */}
-          <div className="flex shrink-0 items-center gap-1.5 pl-2">
-
-            {/* Search — desktop only */}
-            <div className="hidden lg:block w-52 xl:w-64">
-              <AdminGlobalSearch />
-            </div>
-
-            {/* Date chip — xl only */}
-            <span className="hidden xl:flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400 capitalize whitespace-nowrap">
-              {currentDate}
-            </span>
-
-            {/* Quick create dropdown */}
-            <div className="relative hidden sm:block" ref={quickRef}>
-              <button
-                type="button"
-                onClick={() => setQuickOpen(v => !v)}
-                className="inline-flex items-center gap-1 rounded-lg bg-[var(--admin-primary)] px-2.5 py-1.5 text-[12px] font-bold text-white shadow-sm shadow-blue-200 hover:bg-blue-800 transition-colors"
-                aria-label="Créer"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">Créer</span>
-                <ChevronDown className={`h-3 w-3 transition-transform ${quickOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {quickOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-700 p-1.5 shadow-xl ring-1 ring-slate-900/5 z-50">
-                  <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Créer rapidement</p>
-                  {quickActions.map(({ href, label, icon: Icon }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setQuickOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                    >
-                      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--admin-primary-50)] dark:bg-blue-950">
-                        <Icon className="h-3.5 w-3.5 text-[var(--admin-primary)]" />
-                      </span>
-                      {label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Notifications */}
-            <Link
-              href="/admin/notifications"
-              className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-              aria-label="Notifications"
-            >
-              <BellRing className="h-4 w-4" />
-              {unread > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white">
-                  {unread > 99 ? '99+' : unread}
-                </span>
-              )}
-            </Link>
-
-            {/* Dark mode */}
+          {/* Profile dropdown */}
+          <div className="relative" ref={profileRef}>
             <button
               type="button"
-              onClick={toggleDark}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-              aria-label={darkMode ? 'Mode clair' : 'Mode sombre'}
+              onClick={() => setProfileOpen((v) => !v)}
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1.5 shadow-sm transition hover:border-slate-300"
+              aria-expanded={profileOpen}
             >
-              {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--admin-primary)] to-[var(--admin-primary-700)] text-[10px] font-black text-white shadow-sm">
+                A
+              </span>
+              <span className="hidden text-xs font-bold text-slate-850 sm:block">Admin</span>
+              <ChevronDown className={`h-3 w-3 text-slate-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* Profile */}
-            <div className="relative" ref={profileRef}>
-              <button
-                type="button"
-                onClick={() => setProfileOpen(v => !v)}
-                className="flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
-                aria-expanded={profileOpen}
-              >
-                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-[var(--admin-primary)] to-blue-700 text-[10px] font-black text-white">
-                  A
-                </span>
-                <span className="hidden text-[12px] font-bold text-slate-800 dark:text-slate-200 sm:block">Admin</span>
-                <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {profileOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1.5 shadow-xl ring-1 ring-slate-900/5 z-50">
-                  <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-2.5 mb-1">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--admin-primary)] to-blue-700 text-sm font-black text-white">
+            {profileOpen && (
+              <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl ring-1 ring-slate-900/5 animate-fade-in-up">
+                <div className="border-b border-slate-100 px-2 pb-2 pt-1">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--admin-primary)] to-[var(--admin-primary-700)] text-xs font-black text-white shadow">
                       AD
                     </span>
                     <div className="min-w-0">
-                      <p className="text-[12px] font-bold text-slate-900 dark:text-white">Administrateur</p>
+                      <p className="text-xs font-bold text-slate-950">Administrateur</p>
                       <p className="truncate text-[10px] text-slate-500">contact@cjdevelopmenttc.org</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 mx-1 mb-1.5">
-                    <ShieldIcon className="h-3 w-3 text-emerald-600 shrink-0" />
-                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">Session sécurisée · JWT</span>
-                  </div>
-                  <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1 space-y-0.5">
-                    <Link
-                      href="/admin/settings"
-                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                    >
-                      <Settings2 className="h-3.5 w-3.5 text-slate-400" />
-                      Paramètres
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={logout}
-                      disabled={loggingOut}
-                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors disabled:opacity-50"
-                    >
-                      <LogOut className="h-3.5 w-3.5" />
-                      {loggingOut ? 'Déconnexion…' : 'Se déconnecter'}
-                    </button>
+                  <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1">
+                    <ShieldIcon className="h-3 w-3 text-emerald-600" />
+                    <span className="text-[10px] font-semibold text-emerald-700">Session sécurisée · JWT</span>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Mobile burger */}
-            <button
-              type="button"
-              onClick={() => setMobileOpen(v => !v)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 md:hidden"
-              aria-label="Menu"
-            >
-              {mobileOpen ? <XIcon className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </button>
+                <div className="mt-1 space-y-0.5 px-1">
+                  <Link
+                    href="/admin/settings"
+                    className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-750 transition hover:bg-slate-50"
+                  >
+                    <Settings2 className="h-3.5 w-3.5" />
+                    Paramètres
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={logout}
+                    disabled={loggingOut}
+                    className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-bold text-rose-650 transition hover:bg-rose-50 disabled:opacity-50"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    {loggingOut ? 'Déconnexion…' : 'Se déconnecter'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Mobile burger */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen((v) => !v)}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-750 shadow-sm md:hidden"
+            aria-label="Menu"
+          >
+            {mobileOpen ? <XIcon className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
         </div>
       </header>
 
-      {/* ── MAIN CONTENT ───────────────────────────────────────────────────── */}
-      <main className="relative mx-auto w-full max-w-screen-2xl flex-1 px-3 py-5 sm:px-4 sm:py-6 md:px-6 xl:px-8 xl:py-8">
-        {children}
-      </main>
-
-      {/* ── MOBILE MENU OVERLAY ────────────────────────────────────────────── */}
-      {mobileOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm md:hidden"
-            onClick={() => setMobileOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="fixed inset-x-0 top-14 z-50 max-h-[calc(100svh-56px)] overflow-y-auto bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-2xl md:hidden">
-            {/* Search */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800">
-              <AdminGlobalSearch />
-            </div>
-
-            {/* Nav links */}
-            <div className="p-3 space-y-0.5">
-              <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigation</p>
-              {navItems.map(({ href, label, caption, icon: Icon }) => {
-                const active = isActive(pathname, href)
+      {/* ── Navigation Horizontale Adaptative Sur Deux Lignes ────────────────────────── */}
+      <nav
+        className="sticky top-14 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl hidden md:block dark:bg-slate-900/90 dark:border-slate-800 shadow-sm"
+        aria-label="Navigation principale"
+      >
+        <div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-2 space-y-1.5">
+          {/* Ligne 1 : Opérations & Pilotage */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-1 flex-wrap items-center gap-1 sm:gap-1.5">
+              {navRow1.map((item) => {
+                const active = isActivePath(pathname, item.href)
+                const Icon = item.icon
                 return (
                   <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setMobileOpen(false)}
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
                     className={[
-                      'flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors',
+                      'group relative flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs lg:text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
                       active
-                        ? 'bg-[var(--admin-primary)] text-white'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800',
+                        ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm ring-1 ring-[var(--admin-primary-200)]/60 dark:bg-blue-950/50 dark:text-blue-300 dark:ring-blue-800 font-bold'
+                        : 'text-slate-650 hover:bg-slate-100/80 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 hover:-translate-y-0.5',
                     ].join(' ')}
                   >
-                    <span className="flex items-center gap-3">
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span className="text-[13px] font-semibold">{label}</span>
-                    </span>
-                    <span className={`text-[11px] ${active ? 'text-white/70' : 'text-slate-400'}`}>{caption}</span>
+                    <Icon className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                    <span>{item.label}</span>
+                    {active && (
+                      <span className="absolute bottom-0 left-1/2 h-0.5 w-4/5 -translate-x-1/2 rounded-full bg-[var(--admin-primary)] shadow" />
+                    )}
                   </Link>
                 )
               })}
             </div>
 
-            {/* Quick actions */}
-            <div className="p-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Créer rapidement</p>
-              <div className="grid grid-cols-2 gap-2">
-                {quickActions.map(({ href, label, icon: Icon }) => (
+            {/* Date courante à droite de la 1ère ligne */}
+            <div className="ml-auto shrink-0 hidden xl:block pl-3 border-l border-slate-200/60 dark:border-slate-800">
+              <p className="text-[11px] font-semibold capitalize text-slate-500 dark:text-slate-400">{currentDate}</p>
+            </div>
+          </div>
+
+          {/* Ligne 2 : Ressources & Management */}
+          <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 dark:border-slate-800/60 pt-1.5">
+            <div className="flex flex-1 flex-wrap items-center gap-1 sm:gap-1.5">
+              {navRow2.map((item) => {
+                const active = isActivePath(pathname, item.href)
+                const Icon = item.icon
+                return (
                   <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2.5 text-[12px] font-semibold text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700 transition-colors"
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
+                    className={[
+                      'group relative flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs lg:text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
+                      active
+                        ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm ring-1 ring-[var(--admin-primary-200)]/60 dark:bg-blue-950/50 dark:text-blue-300 dark:ring-blue-800 font-bold'
+                        : 'text-slate-650 hover:bg-slate-100/80 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 hover:-translate-y-0.5',
+                    ].join(' ')}
                   >
-                    <Icon className="h-4 w-4 text-[var(--admin-primary)] shrink-0" />
-                    {label}
+                    <Icon className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                    <span>{item.label}</span>
+                    {active && (
+                      <span className="absolute bottom-0 left-1/2 h-0.5 w-4/5 -translate-x-1/2 rounded-full bg-[var(--admin-primary)] shadow" />
+                    )}
                   </Link>
-                ))}
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
+      <main className="relative mx-auto w-full max-w-screen-2xl flex-1 px-3 py-4 sm:px-4 sm:py-6 md:px-6 xl:px-8 xl:py-8">
+        {children}
+      </main>
+
+      {/* ── MOBILE OVERLAY MENU ─────────────────────────────────────────── */}
+      {mobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-md md:hidden"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-x-0 top-14 z-50 max-h-[calc(100svh-56px)] overflow-y-auto border-b border-slate-200 bg-white/98 dark:bg-slate-900/98 backdrop-blur-2xl shadow-2xl md:hidden animate-fade-in-up">
+            <div className="p-4 space-y-4">
+              {/* Recherche globale sur Mobile */}
+              <div className="md:hidden">
+                <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Recherche rapide</p>
+                <AdminGlobalSearch />
+              </div>
+
+              <div>
+                <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  Opérations & Pilotage
+                </p>
+                <div className="space-y-1">
+                  {navRow1.map((item) => {
+                    const active = isActivePath(pathname, item.href)
+                    const Icon = item.icon
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={[
+                          'flex min-h-[44px] items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-bold transition active:scale-[0.99]',
+                          active
+                            ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] border border-[var(--admin-primary-100)] dark:bg-blue-950/60 dark:text-blue-300'
+                            : 'text-slate-750 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800',
+                        ].join(' ')}
+                      >
+                        <span className="flex items-center gap-3">
+                          <Icon className="h-4 w-4 shrink-0 text-[var(--admin-primary)]" />
+                          {item.label}
+                        </span>
+                        <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500">{item.caption}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  Ressources & Management
+                </p>
+                <div className="space-y-1">
+                  {navRow2.map((item) => {
+                    const active = isActivePath(pathname, item.href)
+                    const Icon = item.icon
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={[
+                          'flex min-h-[44px] items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-bold transition active:scale-[0.99]',
+                          active
+                            ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] border border-[var(--admin-primary-100)] dark:bg-blue-950/60 dark:text-blue-300'
+                            : 'text-slate-750 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800',
+                        ].join(' ')}
+                      >
+                        <span className="flex items-center gap-3">
+                          <Icon className="h-4 w-4 shrink-0 text-[var(--admin-primary)]" />
+                          {item.label}
+                        </span>
+                        <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500">{item.caption}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-800 p-4 space-y-2">
+              <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Actions rapides</p>
+              <div className="grid grid-cols-2 gap-2">
+                {quickActions.map((action) => {
+                  const Icon = action.icon
+                  return (
+                    <Link
+                      key={action.href}
+                      href={action.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700 px-3 py-2.5 text-xs font-bold text-slate-750 dark:text-slate-200 transition hover:bg-white active:scale-[0.98]"
+                    >
+                      <PlusIcon className="h-4 w-4 text-[var(--admin-primary)]" />
+                      {action.label}
+                    </Link>
+                  )
+                })}
               </div>
               <button
                 type="button"
                 onClick={logout}
                 disabled={loggingOut}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 px-4 py-3 text-sm font-bold text-rose-600 dark:text-rose-400 transition-colors disabled:opacity-50 mt-1"
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-[var(--admin-accent-200)] bg-[var(--admin-accent-50)] px-4 py-3 text-sm font-bold text-[var(--admin-accent-700)] transition active:scale-[0.98] disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
                 {loggingOut ? 'Déconnexion…' : 'Se déconnecter'}
@@ -425,3 +497,4 @@ export default function AdminWorkspace({ children }: { children: React.ReactNode
     </div>
   )
 }
+
