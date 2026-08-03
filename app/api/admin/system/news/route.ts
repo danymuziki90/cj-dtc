@@ -4,7 +4,6 @@ import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth-portal/guards'
 import { uploadToR2 } from '@/lib/r2'
 import { randomUUID } from 'crypto'
-import DOMPurify from 'isomorphic-dompurify'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -41,10 +40,15 @@ const newsSchema = z.object({
 })
 
 function sanitizeRichText(value: string) {
-  return DOMPurify.sanitize(value, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div', 'blockquote', 'img'],
-    ALLOWED_ATTR: ['href', 'title', 'target', 'src', 'alt', 'class', 'style'],
-  }).trim()
+  // Sanitisation légère sans dépendance externe
+  // Supprime les balises dangereuses et les attributs d'événements
+  return value
+    .replace(/<\s*(script|style|iframe|object|embed|meta|link|form|input|button)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '')
+    .replace(/<\s*(script|style|iframe|object|embed|meta|link|form|input|button)[^>]*\/?>/gi, '')
+    .replace(/\son[a-z]+\s*=\s*(['"])[\s\S]*?\1/gi, '')
+    .replace(/\son[a-z]+\s*=\s*[^\s>]*/gi, '')
+    .replace(/\s(href|src|action)\s*=\s*(['"])\s*javascript:[\s\S]*?\2/gi, ' $1="#"')
+    .trim()
 }
 
 function normalizeTags(tags?: string[]) {
