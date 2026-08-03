@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Image as ImageIcon, ArrowLeft, GraduationCap, Award, Users, Calendar } from 'lucide-react'
 import { PageHero } from '@/components/ui/PageHero'
 import { publicMessages } from '@/lib/i18n/public-messages'
+import { getHeroData } from '@/lib/hero/getHeroData'
 
 export default async function GaleriePage({ params }: { params: Promise<{ locale?: string }> }) {
   const locale = (await params).locale === 'en' ? 'en' : 'fr'
@@ -10,6 +11,8 @@ export default async function GaleriePage({ params }: { params: Promise<{ locale
   const tTitle = isFr ? "Galerie Photos & Moments Forts" : "Photo Gallery & Highlights"
   const tDesc = isFr ? "Explorez en images l'ambiance des ateliers pratiques, les remises de diplômes et les rencontres des promotions CJ DTC." : "Explore the atmosphere of practical workshops, graduations, and CJ DTC alumni meetings in pictures."
   const tAcademic = isFr ? "Vie académique" : "Academic Life"
+
+  const heroData = await getHeroData('galerie')
 
   const galleryItems = [
     { title: isFr ? "Cérémonie de remise de certificats" : "Certificate Award Ceremony", category: "Certification", year: "2024", icon: Award },
@@ -32,6 +35,8 @@ export default async function GaleriePage({ params }: { params: Promise<{ locale
           description={tDesc}
           image="/img/actu.jpeg"
           compact
+          heroData={heroData}
+          locale={locale}
         />
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-12">

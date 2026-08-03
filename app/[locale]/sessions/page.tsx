@@ -4,6 +4,7 @@ import { StudentAuthProvider } from '@/lib/auth/StudentAuthContext'
 import SectionHero from '@/components/ui/SectionHero'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { GraduationCap, CalendarCheck, Wifi } from 'lucide-react'
+import { getHeroData } from '@/lib/hero/getHeroData'
 
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo-config'
@@ -22,6 +23,9 @@ export default async function LocalizedSessionsPage({ params }: { params: Promis
   const { locale } = await Promise.resolve(params)
   const loc = resolveSiteLocale(locale)
   const isFr = loc === 'fr'
+
+  // Charger les données Hero depuis la DB
+  const heroData = await getHeroData('sessions')
 
   return (
     <div className="bg-slate-50 text-slate-900 pb-20">
@@ -47,6 +51,8 @@ export default async function LocalizedSessionsPage({ params }: { params: Promis
         breadcrumbs={[{ label: isFr ? 'Sessions' : 'Sessions' }]}
         homeLabel={isFr ? 'Accueil' : 'Home'}
         homeHref={`/${loc}`}
+        heroData={heroData}
+        locale={loc}
       />
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <StudentAuthProvider>
@@ -58,3 +64,4 @@ export default async function LocalizedSessionsPage({ params }: { params: Promis
     </div>
   )
 }
+

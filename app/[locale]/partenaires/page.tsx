@@ -4,6 +4,7 @@ import Breadcrumbs from '../../../components/Breadcrumbs'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 import { PageHero } from '@/components/ui/PageHero'
+import { getHeroData } from '@/lib/hero/getHeroData'
 
 type PageProps = {
   params: Promise<{ locale: string }>
@@ -19,6 +20,8 @@ export default async function PartenairesPage({ params }: PageProps) {
   const locale = resolveSiteLocale(resolvedParams.locale)
   const t = copy[locale]
 
+  const heroData = await getHeroData('partenaires')
+
   return (
     <div className="bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -31,6 +34,8 @@ export default async function PartenairesPage({ params }: PageProps) {
           description={t.heroDescription}
           image="/img/certificat 1.jpeg"
           compact
+          heroData={heroData}
+          locale={locale}
         >
           <div className="grid gap-3 sm:grid-cols-3">
             {t.stats.map((label: string, index: number) => (

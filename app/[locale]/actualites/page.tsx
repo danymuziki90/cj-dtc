@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useState, Suspense } from 'react'
-import Link from 'next/link'
-import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import Breadcrumbs from '../../../components/Breadcrumbs'
-import { getIntlLocale, resolveSiteLocale } from '@/lib/i18n/locale'
+import { useEffect, useMemo, useState } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { Briefcase, Calendar, Newspaper } from 'lucide-react'
+import { resolveSiteLocale, getIntlLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import SectionHero from '@/components/ui/SectionHero'
-import { Newspaper, Calendar, Briefcase } from 'lucide-react'
+import type { HeroSectionData } from '@/lib/hero/types'
 
 type NewsItem = {
   id: string
@@ -86,6 +86,14 @@ function ActualitesContent() {
     total: 0,
     pageCount: 1,
   })
+  const [heroData, setHeroData] = useState<HeroSectionData | null>(null)
+
+  useEffect(() => {
+    fetch('/api/hero-images?pageKey=actualites')
+      .then((r) => r.json())
+      .then((data) => setHeroData(data))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -169,6 +177,8 @@ function ActualitesContent() {
         homeLabel={locale === 'fr' ? 'Accueil' : 'Home'}
         homeHref={`/${locale}`}
         compact
+        heroData={heroData}
+        locale={locale}
       />
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />

@@ -16,12 +16,14 @@ import { resolveSiteLocale, type SiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import { PageHero } from '@/components/ui/PageHero'
+import type { HeroSectionData } from '@/lib/hero/types'
 
 type AboutModernPageProps = {
   locale?: string
   homeHref: string
   formationsHref: string
   contactHref: string
+  heroData?: HeroSectionData | null
 }
 
 const PROOF_STATS = [
@@ -145,6 +147,7 @@ export default function AboutModernPage({
   homeHref,
   formationsHref,
   contactHref,
+  heroData,
 }: AboutModernPageProps) {
   const resolvedLocale: SiteLocale = resolveSiteLocale(locale)
   const isFr = resolvedLocale === 'fr'
@@ -172,6 +175,8 @@ export default function AboutModernPage({
           label: t.ctaSecondary,
           href: contactHref
         }}
+        heroData={heroData}
+        locale={resolvedLocale}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

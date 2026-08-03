@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, ChevronRight, Home } from 'lucide-react'
+import type { HeroSectionData } from '@/lib/hero/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type SectionHeroBadge = {
@@ -39,7 +40,16 @@ export interface SectionHeroProps {
   /** Extra overlay darkness 0–100, default 55 */
   overlayOpacity?: number
   compact?: boolean
+  /**
+   * Données dynamiques depuis la DB (optionnel).
+   * Quand fourni, écrase image, eyebrow, title et description.
+   * Les badges et CTAs statiques sont conservés pour la mise en page.
+   */
+  heroData?: HeroSectionData | null
+  /** Locale courante pour choisir FR ou EN */
+  locale?: string
 }
+
 
 // ─── Badge color map ──────────────────────────────────────────────────────────
 const BADGE_COLORS: Record<string, string> = {
@@ -67,16 +77,34 @@ export default function SectionHero({
   badges = [], ctas = [], breadcrumbs = [],
   homeLabel = 'Accueil', homeHref = '/',
   overlayOpacity = 55, compact = false,
+  heroData, locale = 'fr',
 }: SectionHeroProps) {
-  const overlayStyle = { opacity: overlayOpacity / 100 }
+  const isFr = locale !== 'en'
+
+  // Résoudre les valeurs effectives (DB > props statiques)
+  const effectiveImage      = heroData?.imageUrl ?? heroData?.defaultImageUrl ?? image
+  const effectiveImageAlt   = heroData?.imageAlt ?? imageAlt
+  const effectiveEyebrow    = heroData
+    ? (isFr ? heroData.eyebrowFr : heroData.eyebrowEn) ?? eyebrow
+    : eyebrow
+  const effectiveTitle      = heroData
+    ? (isFr ? heroData.titleFr : heroData.titleEn) || title
+    : title
+  const effectiveDesc       = heroData
+    ? (isFr ? heroData.descriptionFr : heroData.descriptionEn) ?? description
+    : description
+  const effectiveOpacity    = heroData?.overlayOpacity ?? overlayOpacity
+  const effectiveCompact    = heroData?.compact ?? compact
+
+  const overlayStyle = { opacity: effectiveOpacity / 100 }
 
   return (
-    <section className={`relative overflow-hidden flex flex-col justify-end ${compact ? 'min-h-[52vh]' : 'min-h-[62vh]'} pt-28 pb-10`}>
+    <section className={`relative overflow-hidden flex flex-col justify-end ${effectiveCompact ? 'min-h-[52vh]' : 'min-h-[62vh]'} pt-28 pb-10`}>
 
       {/* ── Background image ── */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={image} alt={imageAlt} fill priority
+          src={effectiveImage} alt={effectiveImageAlt} fill priority
           className="object-cover scale-[1.03] transition-transform duration-[8000ms] ease-out"
           sizes="100vw"
         />
@@ -115,24 +143,24 @@ export default function SectionHero({
         )}
 
         {/* Eyebrow */}
-        {eyebrow && (
+        {effectiveEyebrow && (
           <motion.div initial="hidden" animate="visible" custom={0.05} variants={fadeUp}
             className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-200 backdrop-blur-sm shadow-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
-            {eyebrow}
+            {effectiveEyebrow}
           </motion.div>
         )}
 
         {/* Title */}
         <motion.h1 initial="hidden" animate="visible" custom={0.12} variants={fadeUp}
           className="mt-2 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white drop-shadow-md sm:text-4xl lg:text-5xl">
-          {title}
+          {effectiveTitle}
         </motion.h1>
 
         {/* Description */}
         <motion.p initial="hidden" animate="visible" custom={0.2} variants={fadeUp}
           className="mt-4 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
-          {description}
+          {effectiveDesc}
         </motion.p>
 
         {/* Badges */}

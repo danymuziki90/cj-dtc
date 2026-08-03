@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import AboutModernPage from '@/components/about/AboutModernPage'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
+import { getHeroData } from '@/lib/hero/getHeroData'
 
 type AboutPageProps = {
   params: Promise<{ locale: string }>
@@ -28,12 +29,15 @@ export default async function AboutPage({ params }: AboutPageProps) {
   const resolvedParams = await Promise.resolve(params)
   const locale = resolveSiteLocale(resolvedParams.locale)
 
+  const heroData = await getHeroData('about')
+
   return (
     <AboutModernPage
       locale={locale}
       homeHref={`/${locale}`}
       formationsHref={`/${locale}/formations`}
       contactHref={`/${locale}/contact`}
+      heroData={heroData}
     />
   )
 }

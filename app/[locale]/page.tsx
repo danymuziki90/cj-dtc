@@ -1,7 +1,5 @@
-'use client'
-
-import { useParams } from 'next/navigation'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
+import { getHeroData } from '@/lib/hero/getHeroData'
 
 import Hero from '@/components/Hero'
 import WhoWeAre from '@/components/home/WhoWeAre'
@@ -12,14 +10,23 @@ import TestimonialsAndResults from '@/components/home/TestimonialsAndResults'
 import NewsAndOpportunities from '@/components/home/NewsAndOpportunities'
 import FinalCTA from '@/components/home/FinalCTA'
 
-export default function HomePage() {
-  const params = useParams<{ locale?: string }>()
-  const locale = resolveSiteLocale(params?.locale)
+export const revalidate = 60
+
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale?: string }>
+}) {
+  const { locale: rawLocale } = await params
+  const locale = resolveSiteLocale(rawLocale)
+
+  // Charger les données Hero depuis la DB (slides dynamiques)
+  const heroData = await getHeroData('home')
 
   return (
     <div className="flex flex-col min-h-screen">
       {/* 1. Hero Section (première impression) */}
-      <Hero />
+      <Hero dynamicSlides={heroData?.slides} />
 
       {/* 2. Présentation rapide ("Who We Are") */}
       <WhoWeAre locale={locale} />

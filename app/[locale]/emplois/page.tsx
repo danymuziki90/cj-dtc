@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { PageHero } from '@/components/ui/PageHero'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import type { HeroSectionData } from '@/lib/hero/types'
 import {
   Search, MapPin, Briefcase, Calendar, Building2, Globe,
   ChevronLeft, ChevronRight, Filter, X, SlidersHorizontal, ArrowRight,
@@ -134,6 +135,14 @@ function EmploisContent() {
   const [remote, setRemote]         = useState('')
   const [sort, setSort]             = useState('recent')
   const [showFilters, setShowFilters] = useState(false)
+  const [heroData, setHeroData] = useState<HeroSectionData | null>(null)
+
+  useEffect(() => {
+    fetch('/api/hero-images?pageKey=emplois')
+      .then((r) => r.json())
+      .then((data) => setHeroData(data))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const t = setTimeout(() => { setDebounced(search.trim()); setPage(1) }, 250)
@@ -176,10 +185,12 @@ function EmploisContent() {
         eyebrow="Offres d'emploi"
         title={locale === 'fr' ? 'Opportunités de carrière' : 'Career Opportunities'}
         description={locale === 'fr'
-          ? 'Découvrez les offres d\'emploi, stages et opportunités proposées par notre réseau de partenaires.'
+          ? "Découvrez les offres d'emploi, stages et opportunités proposées par notre réseau de partenaires."
           : 'Explore job openings, internships and opportunities from our partner network.'}
         image="/img/actu.jpeg"
         compact
+        heroData={heroData}
+        locale={locale}
       >
         <div className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/80">
           {loading ? 'Chargement…' : `${pagination.total} offre${pagination.total !== 1 ? 's' : ''}`}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ArrowRight,
   CheckCircle2,
@@ -21,6 +21,7 @@ import {
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 import { PageHero } from '@/components/ui/PageHero'
+import type { HeroSectionData } from '@/lib/hero/types'
 
 const copy = publicMessages.contact
 
@@ -94,6 +95,14 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [heroData, setHeroData] = useState<HeroSectionData | null>(null)
+
+  useEffect(() => {
+    fetch('/api/hero-images?pageKey=contact')
+      .then((r) => r.json())
+      .then((data) => setHeroData(data))
+      .catch(() => {})
+  }, [])
 
   function update(field: keyof FormData) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -131,7 +140,6 @@ export default function ContactPage() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
         {/* ── SECTION 1 — HERO ──────────────────────────────────────────────── */}
-        {/* ── SECTION 1 — HERO ──────────────────────────────────────────────── */}
         <PageHero
           eyebrow={t.heroBadge}
           title={t.heroTitle}
@@ -139,6 +147,8 @@ export default function ContactPage() {
           image="/img/team.jpeg"
           primaryCta={{ label: t.heroCta1, href: '#contact-form' }}
           secondaryCta={{ label: t.heroCta2, href: `/${locale}/formations` }}
+          heroData={heroData}
+          locale={locale}
         >
           <div className="flex justify-start">
             <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md shadow-2xl">

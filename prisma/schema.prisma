@@ -712,3 +712,75 @@ model Account {
 
   @@unique([provider, providerAccountId])
 }
+
+// =============================================
+// HERO SECTIONS — Images & contenus dynamiques
+// =============================================
+
+model HeroSection {
+  id              String      @id @default(cuid())
+  /// Identifiant de page unique: home | about | sessions | entreprises | actualites | contact | emplois | galerie | partenaires
+  pageKey         String      @unique
+  isActive        Boolean     @default(true)
+
+  // Image principale
+  imageUrl        String?
+  imageAlt        String?
+  /// URL de l'image par défaut (fallback statique, jamais supprimée)
+  defaultImageUrl String?
+
+  // Contenu FR
+  eyebrowFr       String?
+  titleFr         String      @default("")
+  descriptionFr   String?
+
+  // Contenu EN
+  eyebrowEn       String?
+  titleEn         String      @default("")
+  descriptionEn   String?
+
+  // CTAs JSON: [{label, href, variant}]
+  ctasFr          Json?
+  ctasEn          Json?
+
+  // Badges JSON: [{label, color}]
+  badgesFr        Json?
+  badgesEn        Json?
+
+  // Options d'affichage
+  overlayOpacity  Int         @default(55)
+  compact         Boolean     @default(false)
+
+  // Slides du carrousel (homepage uniquement)
+  slides          HeroSlide[]
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([pageKey])
+  @@index([isActive])
+}
+
+model HeroSlide {
+  id            String      @id @default(cuid())
+  heroId        String
+  hero          HeroSection @relation(fields: [heroId], references: [id], onDelete: Cascade)
+  order         Int         @default(0)
+
+  imageUrl      String
+  imageAlt      String?
+  eyebrowFr     String?
+  eyebrowEn     String?
+  titleFr       String      @default("")
+  titleEn       String      @default("")
+  descriptionFr String?
+  descriptionEn String?
+  badgeFr       String?
+  badgeEn       String?
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([heroId])
+  @@index([order])
+}

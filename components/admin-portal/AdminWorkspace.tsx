@@ -60,6 +60,7 @@ const navRow2: NavItem[] = [
   { href: '/admin/articles', label: 'Actualités', caption: 'Contenus et annonces', icon: Newspaper },
   { href: '/admin/emplois', label: "Offres d'emploi", caption: 'Recrutement & carrières', icon: Briefcase },
   { href: '/admin/b2b', label: 'Entreprises', caption: 'Demandes B2B & intra', icon: Building2 },
+  { href: '/admin/heroes', label: 'Apparence', caption: 'Bannières & Images', icon: Image },
   { href: '/admin/settings', label: 'Paramètres', caption: 'Configuration & sécurité', icon: Settings2 },
 ]
 

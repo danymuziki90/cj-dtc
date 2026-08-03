@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import EntreprisesClientPage from './EntreprisesClientPage'
+import { getHeroData } from '@/lib/hero/getHeroData'
 
 type Props = { params: Promise<{ locale: string }> }
 
@@ -28,5 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function EntreprisesPage({ params }: Props) {
   const { locale } = await Promise.resolve(params)
   const loc = resolveSiteLocale(locale)
-  return <EntreprisesClientPage locale={loc} />
+  const heroData = await getHeroData('entreprises')
+  return <EntreprisesClientPage locale={loc} heroData={heroData} />
 }
+

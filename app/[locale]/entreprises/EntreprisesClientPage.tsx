@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import EntrepriseContactForm from '@/components/entreprises/EntrepriseContactForm'
 import SectionHero from '@/components/ui/SectionHero'
+import type { HeroSectionData } from '@/lib/hero/types'
 
 type Locale = 'fr' | 'en'
 
@@ -241,7 +242,7 @@ function SectionBadge({ text }: { text: string }) {
 }
 
 // ─── Composant principal ──────────────────────────────────────────────────────
-export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
+export default function EntreprisesClientPage({ locale, heroData }: { locale: Locale; heroData?: HeroSectionData | null }) {
   const t        = COPY[locale]
   const isFr     = locale === 'fr'
   const [openFaq, setOpenFaq]     = useState<number | null>(null)
@@ -281,6 +282,8 @@ export default function EntreprisesClientPage({ locale }: { locale: Locale }) {
         homeLabel={isFr ? 'Accueil' : 'Home'}
         homeHref={`/${locale}`}
         overlayOpacity={60}
+        heroData={heroData}
+        locale={locale}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
