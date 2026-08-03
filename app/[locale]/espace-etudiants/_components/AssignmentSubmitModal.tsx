@@ -38,6 +38,8 @@ interface AssignmentSubmitModalProps {
   uploadErrorMessage: string;
   uploadSuccessMessage: string;
   isSubmittingWork: boolean;
+  studentId?:    string;
+  studentEmail?: string;
 }
 
 export function AssignmentSubmitModal({
@@ -47,6 +49,8 @@ export function AssignmentSubmitModal({
   uploadErrorMessage,
   uploadSuccessMessage,
   isSubmittingWork,
+  studentId,
+  studentEmail,
 }: AssignmentSubmitModalProps) {
   const [fileItems, setFileItems] = useState<UploadFileStateItem[]>([]);
   const [validationError, setValidationError] = useState<string>("");
@@ -118,6 +122,9 @@ export function AssignmentSubmitModal({
     formData.append("file", item.file);
     formData.append("assignmentId", String(selectedAssignment.id));
     formData.append("maxFileSize", String(maxFileSizeMb));
+    // Identifiants de secours pour l'auth côté upload
+    if (studentId)    formData.append("studentId",    studentId);
+    if (studentEmail) formData.append("studentEmail", studentEmail);
 
     xhr.upload.addEventListener("progress", (event) => {
       if (event.lengthComputable) {

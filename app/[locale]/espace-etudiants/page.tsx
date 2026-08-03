@@ -605,6 +605,8 @@ function EspaceEtudiantsContent() {
         uploadErrorMessage={uploadErrorMessage}
         uploadSuccessMessage={uploadSuccessMessage}
         isSubmittingWork={isSubmittingWork}
+        studentId={(student as any)?.id}
+        studentEmail={(student as any)?.email}
       />
 
       <NewsModal
