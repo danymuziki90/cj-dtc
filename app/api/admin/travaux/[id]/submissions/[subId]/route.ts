@@ -168,5 +168,15 @@ export async function PATCH(
     },
   })
 
+  // Broadcast vers l'espace étudiant
+  if (supabase) {
+    const eventName = action === 'return' ? 'submission_returned' : 'submission_graded'
+    supabase.channel('submissions_travaux_channel').send({
+      type: 'broadcast',
+      event: eventName,
+      payload: { submissionId: submission.id, assignmentId: submission.assignmentId, studentId: submission.studentId, action },
+    }).catch((e: any) => console.warn('[PATCH broadcast]', e?.message))
+  }
+
   return NextResponse.json(submission)
 }

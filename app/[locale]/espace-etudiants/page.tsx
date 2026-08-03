@@ -102,33 +102,41 @@ function EspaceEtudiantsContent() {
   useEffect(() => {
     loadDashboard();
 
-    if (!supabase) return;
+    // ── Rafraîchissement périodique toutes les 30s (fallback si Supabase indisponible) ──
+    const pollInterval = setInterval(() => loadDashboard(false), 30000);
 
+    if (!supabase) return () => clearInterval(pollInterval);
+
+    // Canal assignments (créés/modifiés par l'admin)
     const assignmentsChannel = supabase.channel("assignments_channel")
-      .on("broadcast", { event: "assignment_created" }, () => {
-        loadDashboard(false);
-      })
-      .on("broadcast", { event: "assignment_updated" }, () => {
-        loadDashboard(false);
-      })
-      .on("broadcast", { event: "assignment_deleted" }, () => {
-        loadDashboard(false);
-      });
+      .on("broadcast", { event: "assignment_created" }, () => loadDashboard(false))
+      .on("broadcast", { event: "assignment_updated" }, () => loadDashboard(false))
+      .on("broadcast", { event: "assignment_deleted" }, () => loadDashboard(false));
 
+    // Canal submissions — deux noms de canaux possibles selon la route utilisée
     const submissionsChannel = supabase.channel("submissions_channel")
-      .on("broadcast", { event: "submission_created" }, () => {
-        loadDashboard(false);
-      })
-      .on("broadcast", { event: "submission_graded" }, () => {
-        loadDashboard(false);
-      });
+      .on("broadcast", { event: "submission_created" }, () => loadDashboard(false))
+      .on("broadcast", { event: "submission_graded"  }, () => loadDashboard(false))
+      .on("broadcast", { event: "submission_updated" }, () => loadDashboard(false));
+
+    // Canal travaux — utilisé par /api/student/submit et /api/admin/travaux
+    const travauxChannel = supabase.channel("submissions_travaux_channel")
+      .on("broadcast", { event: "submission_created" }, () => loadDashboard(false))
+      .on("broadcast", { event: "submission_graded"  }, () => loadDashboard(false))
+      .on("broadcast", { event: "submission_returned"}, () => loadDashboard(false))
+      .on("broadcast", { event: "submission_updated" }, () => loadDashboard(false));
 
     assignmentsChannel.subscribe();
     submissionsChannel.subscribe();
+    travauxChannel.subscribe();
+
     return () => {
+      clearInterval(pollInterval);
       supabase?.removeChannel(assignmentsChannel);
       supabase?.removeChannel(submissionsChannel);
+      supabase?.removeChannel(travauxChannel);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Global variables extracted from data payload
