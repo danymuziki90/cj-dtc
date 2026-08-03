@@ -5,6 +5,9 @@ import { requireAdmin } from '@/lib/auth-portal/guards'
 import { uploadToR2, deleteFromR2 } from '@/lib/r2'
 import { randomUUID } from 'crypto'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 const DEFAULT_CATEGORY = 'General'
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'])

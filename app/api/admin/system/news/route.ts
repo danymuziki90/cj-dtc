@@ -6,6 +6,9 @@ import { uploadToR2 } from '@/lib/r2'
 import { randomUUID } from 'crypto'
 import DOMPurify from 'isomorphic-dompurify'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 const DEFAULT_CATEGORY = 'General'
 const DEFAULT_PAGE_SIZE = 8
 const MAX_PAGE_SIZE = 30
