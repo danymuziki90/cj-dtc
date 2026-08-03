@@ -91,7 +91,7 @@ export default function Hero() {
 
   return (
     <section
-      className="hero-bg-unified relative min-h-[75vh] pt-28 lg:pt-44 pb-12 overflow-hidden flex flex-col justify-center"
+      className="hero-bg-unified relative min-h-[75vh] pt-32 sm:pt-36 lg:pt-48 xl:pt-52 pb-16 overflow-hidden flex flex-col justify-center"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
