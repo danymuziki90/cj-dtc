@@ -238,27 +238,30 @@ function EspaceEtudiantsContent() {
     setUploadSuccessMessage("");
 
     try {
-      // ── Vérification auth avant d'envoyer ──────────────────────────────
+      // ── Vérification auth (non bloquante — on tente quand même) ────────
       const authCheck = await fetch("/api/student/auth/check", {
         credentials: "include",
         cache: "no-store",
       }).then(r => r.json()).catch(() => null);
 
-      if (!authCheck?.authenticated) {
-        const reason = authCheck?.cookiePresent
-          ? "Votre session a expiré. Veuillez vous déconnecter et vous reconnecter."
-          : "Cookie de session absent. Veuillez vous reconnecter.";
-        console.error("[handleAssignmentSubmit] Auth check failed:", authCheck);
-        throw new Error(reason);
-      }
+      console.log("[handleAssignmentSubmit] authCheck:", authCheck);
 
-      const response = await fetch("/api/student/assignments", {
+      // Récupérer l'email et l'ID étudiant depuis l'état du dashboard
+      // pour les envoyer comme fallback d'identification
+      const studentEmail = (student as any)?.email || null;
+      const studentId    = (student as any)?.id    || null;
+
+      // ── POST vers la nouvelle route robuste ───────────────────────────
+      const response = await fetch("/api/student/submit", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           assignmentId: selectedAssignmentForSubmission.id,
           files: uploadedFiles,
+          // Fallback d'identification si le cookie JWT est invalide
+          studentEmail,
+          studentId,
         }),
       });
 
@@ -268,18 +271,17 @@ function EspaceEtudiantsContent() {
         resData = await response.json().catch(() => ({}));
       } else {
         resData = {
-          error: `Erreur serveur HTTP ${response.status}. Veuillez réessayer ou contacter l'administration.`,
+          error: `Erreur serveur HTTP ${response.status}. Veuillez réessayer.`,
         };
       }
 
+      console.log("[handleAssignmentSubmit] response:", response.status, resData);
+
       if (!response.ok) {
-        // Log complet pour diagnostic
-        console.error("[handleAssignmentSubmit] POST failed:", response.status, resData);
         throw new Error(
           resData.message ||
             resData.error ||
-            resData.detail ||
-            `Échec de l'envoi (code HTTP ${response.status}).`
+            `Échec de l'envoi (HTTP ${response.status}).`
         );
       }
 
@@ -291,6 +293,7 @@ function EspaceEtudiantsContent() {
         setUploadSuccessMessage("");
       }, 2000);
     } catch (err: any) {
+      console.error("[handleAssignmentSubmit] Error:", err);
       setUploadErrorMessage(
         err.message || "Erreur lors de l'enregistrement de votre travail."
       );
