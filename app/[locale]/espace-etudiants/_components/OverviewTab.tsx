@@ -227,27 +227,34 @@ export function OverviewTab({
           </h3>
 
           <div className="space-y-4 max-h-72 overflow-y-auto pr-1">
-            {notifications.slice(0, 5).map((noti: any) => (
-              <div
-                key={noti.id}
-                className="flex gap-3 text-xs border-b border-slate-100 pb-3 last:border-0 last:pb-0"
-              >
-                <div className="flex-shrink-0 mt-0.5">
-                  <span className="flex h-2 w-2 rounded-full bg-blue-500" />
+            {notifications.slice(0, 5).map((noti: any) => {
+              const dotColor =
+                noti.type === 'correction' ? 'bg-emerald-500' :
+                noti.type === 'warning'    ? 'bg-orange-500' :
+                noti.type === 'reminder'   ? 'bg-amber-500'  :
+                                             'bg-blue-500'
+              return (
+                <div
+                  key={noti.id}
+                  className="flex gap-3 text-xs border-b border-slate-100 pb-3 last:border-0 last:pb-0"
+                >
+                  <div className="flex-shrink-0 mt-1.5">
+                    <span className={`flex h-2 w-2 rounded-full ${dotColor}`} />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-950 leading-tight">
+                      {noti.title}
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1 leading-normal">
+                      {noti.message}
+                    </p>
+                    <span className="text-[9px] text-slate-400 mt-1 block">
+                      {formatDateTime(noti.createdAt)}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-slate-950 leading-tight">
-                    {noti.title}
-                  </p>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-normal">
-                    {noti.message}
-                  </p>
-                  <span className="text-[9px] text-slate-400 mt-1 block">
-                    {formatDateTime(noti.createdAt)}
-                  </span>
-                </div>
-              </div>
-            ))}
+              )
+            })}
 
             {notifications.length === 0 && (
               <p className="text-xs text-slate-500 text-center py-4">

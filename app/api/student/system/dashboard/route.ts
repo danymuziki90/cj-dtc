@@ -495,7 +495,43 @@ export async function GET(request: NextRequest) {
           },
         ]
       : []),
-    // 11. Réponses aux questions de l'étudiant
+    // 6. Corrections et notes de travaux
+    ...assignments.flatMap((assign: any) =>
+      (assign.Submission || [])
+        .filter((sub: any) => sub.correctionStatus && sub.correctionStatus !== 'pending')
+        .map((sub: any) => {
+          const statusLabels: Record<string, string> = {
+            graded:    'Travail corrigé',
+            validated: 'Travail validé',
+            returned:  'Travail à reprendre',
+            in_review: 'Travail en cours de correction',
+          }
+          const title = statusLabels[sub.correctionStatus] || 'Mise à jour travail'
+          let message = `Votre travail "${assign.title}" a été ${sub.correctionStatus === 'graded' ? 'noté' : sub.correctionStatus === 'validated' ? 'validé' : sub.correctionStatus === 'returned' ? 'retourné pour correction' : 'mis à jour'}.`
+          if (sub.grade != null) message += ` Note : ${sub.grade}/${sub.maxGrade ?? assign.maxGrade}.`
+          if (sub.feedback) message += ` Commentaire : "${sub.feedback.slice(0, 80)}${sub.feedback.length > 80 ? '…' : ''}"`
+          return {
+            id: `submission-${sub.id}-${sub.correctionStatus}`,
+            type: sub.correctionStatus === 'returned' ? 'warning' : 'correction',
+            title,
+            message,
+            createdAt: new Date(sub.gradedAt || sub.updatedAt || sub.submittedAt),
+          }
+        })
+    ),
+    // 7. Dépôts de travaux effectués par l'étudiant
+    ...assignments.flatMap((assign: any) =>
+      (assign.Submission || [])
+        .filter((sub: any) => sub.status === 'submitted')
+        .map((sub: any) => ({
+          id: `submitted-${sub.id}`,
+          type: 'info',
+          title: 'Travail déposé',
+          message: `Votre travail "${assign.title}" a été déposé avec succès le ${new Date(sub.submittedAt).toLocaleDateString('fr-FR')}.`,
+          createdAt: new Date(sub.submittedAt),
+        }))
+    ),
+    // 8. Réponses aux questions de l'étudiant
     ...questions
       .filter((item) => item.adminReply)
       .map((item) => ({
