@@ -31,6 +31,7 @@ import {
   FileText,
   Star,
   Image,
+  Briefcase,
 } from 'lucide-react'
 
 type AdminWorkspaceProps = {
@@ -57,6 +58,7 @@ const navRow2: NavItem[] = [
   { href: '/admin/certificates', label: 'Certificats', caption: 'Délivrance et vérification', icon: GraduationCap },
   { href: '/admin/evaluations', label: 'Témoignages', caption: 'Retours et avis', icon: Star },
   { href: '/admin/articles', label: 'Actualités', caption: 'Contenus et annonces', icon: Newspaper },
+  { href: '/admin/emplois', label: "Offres d'emploi", caption: 'Recrutement & carrières', icon: Briefcase },
   { href: '/admin/b2b', label: 'Entreprises', caption: 'Demandes B2B & intra', icon: Building2 },
   { href: '/admin/settings', label: 'Paramètres', caption: 'Configuration & sécurité', icon: Settings2 },
 ]
@@ -65,6 +67,7 @@ const navItems = [...navRow1, ...navRow2]
 
 const quickActions = [
   { href: '/admin/articles/new', label: 'Article', icon: Newspaper },
+  { href: '/admin/emplois', label: "Offre d'emploi", icon: Briefcase },
   { href: '/admin/enrollments', label: 'Inscriptions', icon: FileStack },
 ]
 
