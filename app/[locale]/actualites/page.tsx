@@ -7,7 +7,7 @@ import { Briefcase, Calendar, Newspaper } from 'lucide-react'
 import { resolveSiteLocale, getIntlLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 import Breadcrumbs from '@/components/Breadcrumbs'
-import SectionHero from '@/components/ui/SectionHero'
+import UnifiedHero from '@/components/ui/UnifiedHero'
 import type { HeroSectionData } from '@/lib/hero/types'
 
 type NewsItem = {
@@ -155,7 +155,7 @@ function ActualitesContent() {
 
   return (
     <div className="bg-slate-50">
-      <SectionHero
+      <UnifiedHero
         image="/img/actu.jpeg"
         imageAlt="Actualités et événements CJ DTC"
         eyebrow={locale === 'fr' ? 'Actualités & Événements' : 'News & Events'}
@@ -166,12 +166,12 @@ function ActualitesContent() {
             : "Explore the latest news, events, announcements and opportunities published by CJ Development Training Center."
         }
         badges={[
-          { label: locale === 'fr' ? 'Actualités'       : 'News',         icon: <Newspaper  className="h-3.5 w-3.5" />, color: 'blue'  },
-          { label: locale === 'fr' ? 'Événements'       : 'Events',       icon: <Calendar   className="h-3.5 w-3.5" />, color: 'green' },
-          { label: locale === 'fr' ? "Offres d'emploi"  : 'Job openings', icon: <Briefcase  className="h-3.5 w-3.5" />, color: 'amber' },
+          { label: locale === 'fr' ? 'Actualités'       : 'News',         color: 'blue'  },
+          { label: locale === 'fr' ? 'Événements'       : 'Events',       color: 'green' },
+          { label: locale === 'fr' ? "Offres d'emploi"  : 'Job openings', color: 'amber' },
         ]}
         ctas={[
-          { label: locale === 'fr' ? 'Voir les actualités'       : 'Browse news',      href: `/${locale}/actualites`          },
+          { label: locale === 'fr' ? 'Voir les actualités'       : 'Browse news',      href: `/${locale}/actualites`,          variant: 'primary' },
           { label: locale === 'fr' ? "Consulter les offres d'emploi" : 'View job offers', href: `/${locale}/emplois`, variant: 'secondary' },
         ]}
         breadcrumbs={[{ label: locale === 'fr' ? 'Actualités' : 'News' }]}

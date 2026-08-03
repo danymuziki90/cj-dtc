@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Image as ImageIcon, ArrowLeft, GraduationCap, Award, Users, Calendar } from 'lucide-react'
-import { PageHero } from '@/components/ui/PageHero'
+import UnifiedHero from '@/components/ui/UnifiedHero'
 import { publicMessages } from '@/lib/i18n/public-messages'
 import { getHeroData } from '@/lib/hero/getHeroData'
 
@@ -23,21 +23,20 @@ export default async function GaleriePage({ params }: { params: Promise<{ locale
 
   return (
     <div className="bg-slate-50 min-h-screen">
+      <UnifiedHero
+        eyebrow={tAcademic}
+        title={tTitle}
+        description={tDesc}
+        image="/img/actu.jpeg"
+        compact
+        heroData={heroData}
+        locale={locale}
+      />
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-8">
         <Link href={`/${locale}`} className="inline-flex items-center gap-2 text-sm text-[var(--cj-blue)] hover:underline font-semibold">
           <ArrowLeft className="w-4 h-4" />
           {tHome}
         </Link>
-        
-        <PageHero
-          eyebrow={tAcademic}
-          title={tTitle}
-          description={tDesc}
-          image="/img/actu.jpeg"
-          compact
-          heroData={heroData}
-          locale={locale}
-        />
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-12">
           {galleryItems.map((item, idx) => {

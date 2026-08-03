@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import RecentSessions from '@/components/RecentSessions'
 import { StudentAuthProvider } from '@/lib/auth/StudentAuthContext'
-import SectionHero from '@/components/ui/SectionHero'
+import UnifiedHero from '@/components/ui/UnifiedHero'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { GraduationCap, CalendarCheck, Wifi } from 'lucide-react'
 import { getHeroData } from '@/lib/hero/getHeroData'
@@ -29,7 +29,7 @@ export default async function LocalizedSessionsPage({ params }: { params: Promis
 
   return (
     <div className="bg-slate-50 text-slate-900 pb-20">
-      <SectionHero
+      <UnifiedHero
         image="/img/Formaions 2.jpg"
         imageAlt="Participants en session de formation CJ DTC"
         eyebrow={isFr ? 'Formations Certifiantes' : 'Certified Training'}
@@ -40,12 +40,12 @@ export default async function LocalizedSessionsPage({ params }: { params: Promis
             : 'Join our upcoming open sessions and develop your HR, leadership and management skills with expert trainers and recognized certifications.'
         }
         badges={[
-          { label: isFr ? 'Sessions ouvertes' : 'Open sessions',          icon: <CalendarCheck className="h-3.5 w-3.5" />, color: 'green'  },
-          { label: isFr ? 'Formations certifiantes' : 'Certified training', icon: <GraduationCap   className="h-3.5 w-3.5" />, color: 'blue'   },
-          { label: isFr ? 'En ligne & présentiel' : 'Online & in-person',  icon: <Wifi            className="h-3.5 w-3.5" />, color: 'purple' },
+          { label: isFr ? 'Sessions ouvertes' : 'Open sessions',          color: 'green'  },
+          { label: isFr ? 'Formations certifiantes' : 'Certified training', color: 'blue'   },
+          { label: isFr ? 'En ligne & présentiel' : 'Online & in-person',  color: 'purple' },
         ]}
         ctas={[
-          { label: isFr ? 'Voir les formations' : 'View programs',    href: `/${loc}/formations`           },
+          { label: isFr ? 'Voir les formations' : 'View programs',    href: `/${loc}/formations`, variant: 'primary'           },
           { label: isFr ? "S'inscrire maintenant" : 'Register now',   href: `/${loc}/inscription`, variant: 'secondary' },
         ]}
         breadcrumbs={[{ label: isFr ? 'Sessions' : 'Sessions' }]}

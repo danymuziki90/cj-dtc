@@ -3,7 +3,7 @@ import { ArrowRight, Globe2, HeartHandshake, Landmark, UsersRound } from 'lucide
 import Breadcrumbs from '../../../components/Breadcrumbs'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
-import { PageHero } from '@/components/ui/PageHero'
+import UnifiedHero from '@/components/ui/UnifiedHero'
 import { getHeroData } from '@/lib/hero/getHeroData'
 
 type PageProps = {
@@ -24,28 +24,28 @@ export default async function PartenairesPage({ params }: PageProps) {
 
   return (
     <div className="bg-slate-50 text-slate-900">
+      {/* Hero Section */}
+      <UnifiedHero
+        eyebrow={t.heroBadge}
+        title={t.heroTitle}
+        description={t.heroDescription}
+        image="/img/certificat 1.jpeg"
+        compact
+        heroData={heroData}
+        locale={locale}
+      >
+        <div className="grid gap-3 sm:grid-cols-3">
+          {t.stats.map((label: string, index: number) => (
+            <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur shadow-lg">
+              <p className="text-[10px] uppercase font-bold tracking-wider text-blue-200">{label}</p>
+              <p className="mt-2 text-2xl font-black text-white font-montserrat">{t.statValues[index]}</p>
+            </div>
+          ))}
+        </div>
+      </UnifiedHero>
+      
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
-
-        {/* Hero Section */}
-        <PageHero
-          eyebrow={t.heroBadge}
-          title={t.heroTitle}
-          description={t.heroDescription}
-          image="/img/certificat 1.jpeg"
-          compact
-          heroData={heroData}
-          locale={locale}
-        >
-          <div className="grid gap-3 sm:grid-cols-3">
-            {t.stats.map((label: string, index: number) => (
-              <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur shadow-lg">
-                <p className="text-[10px] uppercase font-bold tracking-wider text-blue-200">{label}</p>
-                <p className="mt-2 text-2xl font-black text-white font-montserrat">{t.statValues[index]}</p>
-              </div>
-            ))}
-          </div>
-        </PageHero>
 
         {/* Section Cards */}
         <section className="mt-10">

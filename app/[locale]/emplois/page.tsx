@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
-import { PageHero } from '@/components/ui/PageHero'
+import UnifiedHero from '@/components/ui/UnifiedHero'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import type { HeroSectionData } from '@/lib/hero/types'
 import {
@@ -181,7 +181,7 @@ function EmploisContent() {
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      <PageHero
+      <UnifiedHero
         eyebrow="Offres d'emploi"
         title={locale === 'fr' ? 'Opportunités de carrière' : 'Career Opportunities'}
         description={locale === 'fr'
@@ -191,11 +191,7 @@ function EmploisContent() {
         compact
         heroData={heroData}
         locale={locale}
-      >
-        <div className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/80">
-          {loading ? 'Chargement…' : `${pagination.total} offre${pagination.total !== 1 ? 's' : ''}`}
-        </div>
-      </PageHero>
+      />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[

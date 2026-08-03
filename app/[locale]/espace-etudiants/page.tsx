@@ -48,6 +48,7 @@ function EspaceEtudiantsContent() {
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState("");
+  const [heroData, setHeroData] = useState<any>(null);
 
   // Tab State
   const [activeTab, setActiveTab] = useState("overview");
@@ -101,6 +102,11 @@ function EspaceEtudiantsContent() {
 
   useEffect(() => {
     loadDashboard();
+    
+    fetch('/api/hero-images?pageKey=student_space')
+      .then(res => res.json())
+      .then(data => setHeroData(data))
+      .catch(() => {});
 
     // ── Rafraîchissement périodique toutes les 30s (fallback si Supabase indisponible) ──
     const pollInterval = setInterval(() => loadDashboard(false), 30000);
@@ -510,6 +516,7 @@ function EspaceEtudiantsContent() {
           eligibility={eligibility}
           firstCertificate={firstCertificate}
           basePath={basePath}
+          heroData={heroData}
         />
 
         {/* NAVIGATION TABS */}

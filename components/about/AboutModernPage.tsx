@@ -15,7 +15,7 @@ import {
 import { resolveSiteLocale, type SiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 import Breadcrumbs from '@/components/Breadcrumbs'
-import { PageHero } from '@/components/ui/PageHero'
+import UnifiedHero from '@/components/ui/UnifiedHero'
 import type { HeroSectionData } from '@/lib/hero/types'
 
 type AboutModernPageProps = {
@@ -162,19 +162,23 @@ export default function AboutModernPage({
     <div className="bg-slate-50 text-slate-900 pb-20">
       
       {/* ── Hero Section Standardisée ─────────────────────────────────────── */}
-      <PageHero 
+      <UnifiedHero 
         eyebrow={t.heroEyebrow}
         title={t.heroTitle}
         description={t.heroDescription}
         image="/apropos.jpeg"
-        primaryCta={{
-          label: t.ctaPrimary,
-          href: formationsHref
-        }}
-        secondaryCta={{
-          label: t.ctaSecondary,
-          href: contactHref
-        }}
+        ctas={[
+          {
+            label: t.ctaPrimary,
+            href: formationsHref,
+            variant: 'primary'
+          },
+          {
+            label: t.ctaSecondary,
+            href: contactHref,
+            variant: 'secondary'
+          }
+        ]}
         heroData={heroData}
         locale={resolvedLocale}
       />

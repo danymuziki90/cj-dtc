@@ -8,7 +8,7 @@ import {
   Rocket, ShieldIcon, TargetIcon, TrendingUp, Users, ZapIcon,
 } from 'lucide-react'
 import EntrepriseContactForm from '@/components/entreprises/EntrepriseContactForm'
-import SectionHero from '@/components/ui/SectionHero'
+import UnifiedHero from '@/components/ui/UnifiedHero'
 import type { HeroSectionData } from '@/lib/hero/types'
 
 type Locale = 'fr' | 'en'
@@ -260,7 +260,7 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
     <div className="bg-slate-50 text-slate-900">
 
       {/* ── NEW HERO ── */}
-      <SectionHero
+      <UnifiedHero
         image="/img/ceo.jpeg"
         imageAlt="Équipe professionnelle en réunion de formation"
         eyebrow={t.heroBadge}
@@ -269,13 +269,13 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
           ? "Accompagnez le développement des compétences de vos équipes grâce à des formations adaptées aux besoins de votre organisation. Leadership, RH, management et performance."
           : "Support your teams' skills development with training tailored to your organisation's needs. Leadership, HR, management and performance."}
         badges={[
-          { label: isFr ? 'Formations sur mesure'          : 'Custom training',       icon: <Layers        className="h-3.5 w-3.5" />, color: 'blue'   },
-          { label: isFr ? 'Leadership & Management'        : 'Leadership & Management', icon: <Rocket       className="h-3.5 w-3.5" />, color: 'green'  },
-          { label: isFr ? 'Développement des compétences'  : 'Skills development',    icon: <TrendingUp    className="h-3.5 w-3.5" />, color: 'purple' },
-          { label: isFr ? 'Accompagnement RH'              : 'HR advisory',            icon: <Users         className="h-3.5 w-3.5" />, color: 'amber'  },
+          { label: isFr ? 'Formations sur mesure'          : 'Custom training',       color: 'blue'   },
+          { label: isFr ? 'Leadership & Management'        : 'Leadership & Management', color: 'green'  },
+          { label: isFr ? 'Développement des compétences'  : 'Skills development',    color: 'purple' },
+          { label: isFr ? 'Accompagnement RH'              : 'HR advisory',            color: 'amber'  },
         ]}
         ctas={[
-          { label: t.heroCta1, href: '#contact'   },
+          { label: t.heroCta1, href: '#contact', variant: 'primary'   },
           { label: t.heroCta2, href: '#solutions', variant: 'secondary' },
         ]}
         breadcrumbs={[{ label: isFr ? 'Entreprises' : 'Corporate' }]}
