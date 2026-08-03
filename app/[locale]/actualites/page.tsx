@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Briefcase, Calendar, Newspaper } from 'lucide-react'
 import { resolveSiteLocale, getIntlLocale } from '@/lib/i18n/locale'
