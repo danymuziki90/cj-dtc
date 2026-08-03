@@ -96,8 +96,17 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       });
 
       if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error || 'Erreur de sauvegarde');
+        let errorMsg = 'Erreur de sauvegarde';
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const d = await res.json();
+          errorMsg = d.error || errorMsg;
+        } else if (res.status === 413) {
+          errorMsg = 'Fichier ou données trop volumineux (max 4.5 Mo).';
+        } else {
+          errorMsg = `Erreur serveur (${res.status})`;
+        }
+        throw new Error(errorMsg);
       }
 
       success("Bannière mise à jour avec succès.");
@@ -118,6 +127,11 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       return;
     }
 
+    if (file.size > 4.5 * 1024 * 1024) {
+      error("L'image est trop volumineuse (maximum 4.5 Mo). Veuillez la compresser.");
+      return;
+    }
+
     try {
       setUploadingImage(true);
       const formData = new FormData();
@@ -129,12 +143,21 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       });
 
       if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error || 'Erreur d\'upload');
+        let errorMsg = 'Erreur d\'upload';
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const d = await res.json();
+          errorMsg = d.error || errorMsg;
+        } else if (res.status === 413) {
+          errorMsg = 'L\'image est trop volumineuse pour être envoyée (max 4.5 Mo).';
+        } else {
+          errorMsg = `Erreur serveur (${res.status})`;
+        }
+        throw new Error(errorMsg);
       }
 
       const data = await res.json();
-      setImageUrl(data.url);
+      setImageUrl(data.url || data.imageUrl);
       success("Image uploadée et sauvegardée avec succès.");
     } catch (err: any) {
       error(err.message || "Erreur d'upload");
@@ -156,7 +179,14 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
           order: slides.length
         })
       });
-      if (!res.ok) throw new Error("Erreur d'ajout");
+      if (!res.ok) {
+        let errorMsg = "Erreur d'ajout";
+        if (res.headers.get('content-type')?.includes('application/json')) {
+          const d = await res.json();
+          errorMsg = d.error || errorMsg;
+        }
+        throw new Error(errorMsg);
+      }
       success("Nouveau slide ajouté.");
       fetchSection();
     } catch (err) {
@@ -175,7 +205,14 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(slide)
       });
-      if (!res.ok) throw new Error("Erreur");
+      if (!res.ok) {
+        let errorMsg = "Erreur de mise à jour";
+        if (res.headers.get('content-type')?.includes('application/json')) {
+          const d = await res.json();
+          errorMsg = d.error || errorMsg;
+        }
+        throw new Error(errorMsg);
+      }
       success("Slide mis à jour.");
     } catch (err) {
       error("Erreur lors de la mise à jour du slide.");
@@ -188,7 +225,14 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       const res = await fetch(`/api/admin/heroes/${id}/slides/${slideId}`, {
         method: 'DELETE'
       });
-      if (!res.ok) throw new Error("Erreur");
+      if (!res.ok) {
+        let errorMsg = "Erreur de suppression";
+        if (res.headers.get('content-type')?.includes('application/json')) {
+          const d = await res.json();
+          errorMsg = d.error || errorMsg;
+        }
+        throw new Error(errorMsg);
+      }
       success("Slide supprimé.");
       setSlides(prev => prev.filter(s => s.id !== slideId));
     } catch (err) {
