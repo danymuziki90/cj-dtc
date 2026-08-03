@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 /** GET /api/admin/heroes — Liste toutes les sections Hero */
 export async function GET(request: NextRequest) {
   const authResult = await verifyAdminToken(request)
-  if (!authResult.ok) {
+  if (!authResult.admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

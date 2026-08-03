@@ -15,7 +15,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string; slideId: string }> }
 ) {
   const authResult = await verifyAdminToken(request)
-  if (!authResult.ok) {
+  if (!authResult.admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -95,7 +95,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; slideId: string }> }
 ) {
   const authResult = await verifyAdminToken(request)
-  if (!authResult.ok) {
+  if (!authResult.admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
