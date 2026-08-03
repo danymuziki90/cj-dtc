@@ -19,7 +19,7 @@ export default function AdminHeroesPage() {
       const res = await fetch('/api/admin/heroes');
       if (!res.ok) throw new Error('Erreur de chargement');
       const data = await res.json();
-      setSections(data || []);
+      setSections(data?.heroes || []);
     } catch (err) {
       console.error(err);
       error("Impossible de charger les sections Hero.");
