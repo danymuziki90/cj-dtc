@@ -11,7 +11,10 @@ const adminCertificateSchema = z.object({
   sessionId: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : null),
   holderName: z.string().trim().optional().nullable(),
   status: z.string().trim().optional().default('actif'),
-  fileUrl: z.string().url('URL de fichier invalide').optional().nullable(),
+  fileUrl: z.string().trim().refine(
+    (value) => value.startsWith('/api/certificates/download/file/') || value.startsWith('certificats/') || /^https?:\/\//.test(value),
+    'URL de fichier invalide'
+  ).optional().nullable(),
   type: z.string().trim().optional().default('completion'),
   issuedAt: z.string().optional().nullable()
 })

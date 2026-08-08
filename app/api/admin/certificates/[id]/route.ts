@@ -72,7 +72,8 @@ export async function PUT(
             : (sessionId === null ? null : certificate.sessionId)
         let enrollmentId = certificate.enrollmentId
 
-        if (!enrollmentId && resolvedStudentId && resolvedFormationId) {
+        const associationChanged = studentId !== undefined || formationId !== undefined || sessionId !== undefined
+        if (associationChanged && resolvedStudentId && resolvedFormationId) {
             const linkedStudent = await prisma.student.findUnique({ where: { id: resolvedStudentId } })
             const matchingEnrollment = linkedStudent
                 ? await prisma.enrollment.findFirst({
@@ -99,11 +100,20 @@ export async function PUT(
                     )
                 }
                 enrollmentId = matchingEnrollment.id
+            } else {
+                enrollmentId = null
             }
         }
 
         // Si un nouveau fichier est fourni et qu'un ancien existait, nous pourrions supprimer l'ancien
         // Mais pour simplifier et éviter les erreurs de suppression, nous mettons simplement à jour le chemin.
+
+        if (certificate.enrollmentId && certificate.enrollmentId !== enrollmentId) {
+            await prisma.enrollment.updateMany({
+                where: { id: certificate.enrollmentId, certificateId: certificate.id },
+                data: { certificateIssued: false, certificateId: null }
+            })
+        }
 
         const updated = await prisma.certificate.update({
             where: { id: certificateId },
@@ -122,6 +132,13 @@ export async function PUT(
         })
 
         // Journalisation de l'opération
+        if (enrollmentId) {
+            await prisma.enrollment.update({
+                where: { id: enrollmentId },
+                data: { certificateIssued: true, certificateId: updated.id }
+            })
+        }
+
         await writeAdminAuditLog({
             adminId: auth.admin.id,
             adminUsername: auth.admin.username,

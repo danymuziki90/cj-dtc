@@ -17,6 +17,9 @@ export async function GET(
         if (!filename || filename.trim().length === 0) {
             return NextResponse.json({ error: 'Nom de fichier requis' }, { status: 400 })
         }
+        if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+            return NextResponse.json({ error: 'Nom de fichier invalide' }, { status: 400 })
+        }
 
         // Déterminer les droits d'accès
         let isAdmin = false
