@@ -45,13 +45,21 @@ export const GET = apiHandler(async (req: NextRequest) => {
       }
     })
 
-    const formattedAssignments = assignments.map(a => ({
-      ...a,
-      formation: a.Formation,
-      session: a.TrainingSession,
-      submissions: a.Submission,
-      files: a.AssignmentFile
-    }))
+    const formattedAssignments = assignments.map(a => {
+      const submissions = a.Submission.map((submission) => ({
+        ...submission,
+        files: submission.SubmissionFile,
+      }))
+
+      return {
+        ...a,
+        formation: a.Formation,
+        session: a.TrainingSession,
+        Submission: submissions,
+        submissions,
+        files: a.AssignmentFile,
+      }
+    })
 
     return NextResponse.json({
       assignments: formattedAssignments,
@@ -94,6 +102,21 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   if (!assignment.published) {
     return NextResponse.json({ error: "Ce travail n'est pas encore publié" }, { status: 403 })
+  }
+
+  // Apply the same availability rule as the student list to direct API calls.
+  const eligibleEnrollment = await prisma.enrollment.findFirst({
+    where: {
+      studentId: auth.student.id,
+      status: { in: ['accepted', 'confirmed', 'completed'] },
+      formationId: assignment.formationId,
+      ...(assignment.sessionId === null ? {} : { sessionId: assignment.sessionId }),
+    },
+    select: { id: true },
+  })
+
+  if (!eligibleEnrollment) {
+    return NextResponse.json({ error: 'Ce travail n est pas disponible pour votre inscription.' }, { status: 403 })
   }
 
   // Find or create submission

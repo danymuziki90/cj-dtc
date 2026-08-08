@@ -31,6 +31,10 @@ export function hasStudentSubmission(assignment: AssignmentWithSubmission) {
   return Boolean(assignment.submissions?.[0] ?? assignment.Submission?.[0])
 }
 
+export function getStudentSubmission<T extends SubmissionState>(assignment: AssignmentWithSubmission): T | undefined {
+  return (assignment.submissions?.[0] ?? assignment.Submission?.[0]) as T | undefined
+}
+
 /** Shared client/server rule for the student submission lifecycle. */
 export function canStudentSubmitAssignment(assignment: AssignmentWithSubmission) {
   const submission = assignment.submissions?.[0] ?? assignment.Submission?.[0]

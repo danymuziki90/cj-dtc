@@ -63,7 +63,7 @@ export function getGradientForCategory(category: string | null) {
 }
 
 export function getAssignmentStatus(assign: any) {
-  const submission = assign.submissions?.[0];
+  const submission = assign.submissions?.[0] || assign.Submission?.[0];
   const corrStatus = submission?.correctionStatus;
   const isGraded = corrStatus === "graded" || corrStatus === "validated" || submission?.status === "graded" || submission?.grade != null;
   const isReturned = corrStatus === "returned" || submission?.status === "returned";

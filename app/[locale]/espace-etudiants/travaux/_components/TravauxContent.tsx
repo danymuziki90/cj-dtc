@@ -16,6 +16,7 @@ import {
   Clock,
   CheckCircle2,
   CalendarDays,
+  Download,
 } from "lucide-react";
 import AssignmentDetailsModal from "./AssignmentDetailsModal";
 import { getAssignmentStatus } from "../../_components/utils";
@@ -91,7 +92,7 @@ export default function TravauxContent() {
       const statusInfo = getAssignmentStatus(assign);
       if (filter === "all") return true;
       if (filter === "pending" && canStudentSubmitAssignment(assign)) return true;
-      if (filter === "submitted" && hasStudentSubmission(assign) && statusInfo.status !== "graded") return true;
+      if (filter === "submitted" && hasStudentSubmission(assign)) return true;
       if (filter === "graded" && statusInfo.status === "graded") return true;
       
       return false;
@@ -150,7 +151,7 @@ export default function TravauxContent() {
                   filter === "submitted" ? "bg-white text-[var(--cj-blue)] shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700"
                 }`}
               >
-                En correction
+                Rendus
               </button>
               <button
                 onClick={() => setFilter("graded")}
@@ -207,6 +208,7 @@ export default function TravauxContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAssignments.map((assign) => {
                 const statusInfo = getAssignmentStatus(assign);
+                const submission = assign.submissions?.[0] || assign.Submission?.[0];
                 
                 return (
                   <div
@@ -246,6 +248,35 @@ export default function TravauxContent() {
                             Pour le {new Date(assign.deadline).toLocaleDateString("fr-FR", { day: 'numeric', month: 'long' })}
                           </span>
                         </div>
+                        {submission && (
+                          <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3 space-y-2 text-xs text-slate-700">
+                            <p className="font-semibold text-emerald-800">
+                              Soumis le {new Date(submission.submittedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                            </p>
+                            {submission.grade != null && (
+                              <p><span className="font-semibold">Note :</span> {submission.grade} / {submission.maxGrade ?? assign.maxGrade ?? 20}</p>
+                            )}
+                            {submission.feedback && (
+                              <p className="line-clamp-2"><span className="font-semibold">Commentaire :</span> {submission.feedback}</p>
+                            )}
+                            {submission.files?.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 pt-1">
+                                {submission.files.map((file: any) => (
+                                  <a
+                                    key={file.id}
+                                    href={file.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex max-w-full items-center gap-1 rounded-lg border border-emerald-200 bg-white px-2 py-1 text-[10px] font-semibold text-emerald-800 hover:bg-emerald-100"
+                                  >
+                                    <Download className="h-3 w-3 shrink-0" />
+                                    <span className="truncate max-w-[160px]">{file.originalName || file.name}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
