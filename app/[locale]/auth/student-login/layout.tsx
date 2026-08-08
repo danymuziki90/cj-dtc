@@ -7,6 +7,7 @@ export const metadata: Metadata = buildMetadata({
   description: 'Connectez-vous à votre espace étudiant CJ DTC pour accéder à vos cours, devoirs et ressources pédagogiques.',
   keywords: ['connexion étudiant', 'login LMS', 'espace apprenant', 'connexion CJ DTC'],
   path: '/auth/student-login',
+  noIndex: true,
 })
 
 export default function StudentLoginLayout({ children }: { children: ReactNode }) {

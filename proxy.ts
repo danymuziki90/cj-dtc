@@ -83,9 +83,16 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── 5. Student space protection
+  // Public sub-pages that do NOT require authentication
+  const publicStudentPaths = ['/espace-etudiants/temoignages', '/espace-etudiants/supports']
+  const isPublicStudentPage = publicStudentPaths.some(
+    (p) => pathname.includes(p)
+  )
+
   if (
-    /^\/(fr|en)\/espace-etudiants/.test(pathname) ||
-    pathname.startsWith('/espace-etudiants')
+    !isPublicStudentPage &&
+    (/^\/(fr|en)\/espace-etudiants/.test(pathname) ||
+      pathname.startsWith('/espace-etudiants'))
   ) {
     const studentToken = request.cookies.get(STUDENT_AUTH_COOKIE)?.value
     const studentPayload = studentToken ? await verifyStudentToken(studentToken) : null

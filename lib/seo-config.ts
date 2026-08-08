@@ -45,7 +45,9 @@ export function buildMetadata({
 
   const combinedKeywords = Array.from(new Set([...keywords, ...baseKeywords]))
 
-  const fullTitle = title.includes('CJ DTC') || title.includes('CJ Development') ? title : `${title} | CJ DTC`
+  const fullTitle = title.includes('CJ DTC') || title.includes('CJ Development')
+    ? title.replace(/\s*\|\s*CJ DTC\s*\|\s*CJ DTC$/, ' | CJ DTC') // Deduplicate any existing double suffix
+    : `${title} | CJ DTC`
 
   return {
     title: fullTitle,

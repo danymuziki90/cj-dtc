@@ -504,7 +504,7 @@ export default function Header() {
 
             <div className="flex items-center gap-3">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/CJDevelopmentCenter"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook CJ DTC"
@@ -513,7 +513,7 @@ export default function Header() {
                 <Facebook className="h-3.5 w-3.5" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/company/CJDevelopmentCenter"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn CJ DTC"
@@ -522,7 +522,7 @@ export default function Header() {
                 <Linkedin className="h-3.5 w-3.5" />
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@CJDevelopmentCenter"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube CJ DTC"
@@ -531,7 +531,7 @@ export default function Header() {
                 <Youtube className="h-3.5 w-3.5" />
               </a>
               <a
-                href="https://wa.me/243810000000"
+                href="https://wa.me/243995136626"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp CJ DTC"
@@ -619,6 +619,12 @@ export default function Header() {
                   icon: FileText,
                 },
                 {
+                  href: `/${locale}/espace-etudiants/temoignages`,
+                  label: locale === 'fr' ? 'Témoignages' : 'Testimonials',
+                  description: locale === 'fr' ? 'Avis et retours des diplômés' : 'Feedback and reviews from graduates',
+                  icon: MessageCircle,
+                },
+                {
                   href: `/${locale}/auth/student-login`,
                   label: labels.login,
                   description: locale === 'fr' ? 'Se connecter à votre compte' : 'Log in to your account',
@@ -633,236 +639,6 @@ export default function Header() {
             <Link
               href={`/${locale}/contact`}
               className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border border-red-400/30 text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-[0_0_20px_rgba(200,16,46,0.25)] hover:shadow-[0_0_30px_rgba(200,16,46,0.4)] transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
-            >
-              <Mail className="h-3.5 w-3.5 text-white transition-colors" />
-              <span>{labels.contact}</span>
-            </Link>
-          </div>
-
-          {/* Mobile Header Quick Actions (visible on mobile lg:hidden) */}
-          <div className="flex items-center gap-3 lg:hidden">
-            <LanguageSwitcher locale={locale} pathname={pathname} search={search} darkVariant={true} />
-
-            {/* Animated Hamburger / X Transformation Toggle Button */}
-            <button
-              type="button"
-              aria-label={open ? labels.closeMenu : labels.openMenu}
-              aria-expanded={open}
-              aria-controls="fullscreen-navigation-overlay"
-              onClick={() => setOpen(!open)}
-              className={`
-                relative flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300
-                focus:outline-none focus:ring-2 focus:ring-[var(--cj-blue)] focus:ring-offset-2
-                ${
-                  open
-                    ? 'border-[var(--cj-red-200)] bg-[var(--cj-red-50)] text-[var(--cj-red)] shadow-md scale-105'
-                    : 'border-white/20 bg-slate-900/80 text-slate-100 hover:bg-slate-800 hover:border-white/40'
-                }
-              `}
-            >
-              <div className="relative flex h-5 w-5 flex-col items-center justify-center">
-                <span
-                  aria-hidden="true"
-                  className={`
-                    absolute h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out
-                    ${open ? 'rotate-45 translate-y-0 bg-[var(--cj-red)]' : '-translate-y-1.5'}
-                  `}
-                />
-                <span
-                  aria-hidden="true"
-                  className={`
-                    absolute h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out
-                    ${open ? 'opacity-0 scale-x-0' : 'opacity-100'}
-                  `}
-                />
-                <span
-                  aria-hidden="true"
-                  className={`
-                    absolute h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out
-                    ${open ? '-rotate-45 translate-y-0 bg-[var(--cj-red)]' : 'translate-y-1.5'}
-                  `}
-                />
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* FULLSCREEN MOBILE NAVIGATION OVERLAY WITH HERO SECTION BACKGROUND IMAGE */}
-      <div
-        id="fullscreen-navigation-overlay"
-        ref={overlayRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Menu principal de navigation"
-        aria-hidden={!open}
-        className={`
-          fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col justify-between lg:hidden
-          text-slate-100 backdrop-blur-2xl transition-all duration-300 ease-out overflow-hidden
-          ${open ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-95'}
-        `}
-      >
-        {/* Background image from Hero section */}
-        <div className="absolute inset-0 z-0 select-none overflow-hidden pointer-events-none">
-          <Image
-            src="/lor-de-formation.jpeg"
-            alt="Hero section background"
-            fill
-            priority
-            className="object-cover object-center scale-105 filter brightness-90"
-            sizes="100vw"
-          />
-          {/* Dark Glassmorphism Overlay gradient so all navigation content is crisp and readable */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/92 via-slate-950/88 to-slate-950/95 backdrop-blur-xl z-10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/30 via-transparent to-black/70 z-10 pointer-events-none" />
-        </div>
-
-        {/* Content Container (Layered on top of background) */}
-        <div className="relative z-20 flex flex-col h-full justify-between overflow-hidden">
-          {/* Fullscreen Overlay Top Bar Header */}
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 backdrop-blur-xl bg-slate-950/60 shrink-0">
-            <Link
-              href={`/${locale}`}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3"
-              aria-label="Accueil CJ DTC"
-            >
-              <Image
-                src="/logo.png"
-                alt="CJ DEVELOPMENT TRAINING CENTER"
-                width={70}
-                height={70}
-                className="h-12 w-auto brightness-125 filter drop-shadow-md"
-              />
-              <div>
-                <p className="text-xs font-black uppercase tracking-wider text-blue-300 drop-shadow">CJ DTC</p>
-                <p className="text-[10px] font-medium text-slate-300">Centre de Formation</p>
-              </div>
-            </Link>
-
-            {/* Close Button X */}
-            <button
-              ref={closeButtonRef}
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Fermer le menu plein écran"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-slate-900/80 text-slate-100 transition-all duration-200 hover:border-white/40 hover:bg-slate-800 hover:text-white active:scale-95 shadow-lg backdrop-blur-md"
-            >
-              <X className="h-6 w-6" />
-            </button>
-          </div>
-
-          {/* Fullscreen Categorized Navigation Scroll Container */}
-          <div className="flex-1 overflow-y-auto px-5 py-6 space-y-8">
-            {navigationCategories.map((cat) => (
-              <div key={cat.id} className="space-y-2.5">
-                {/* Non-clickable Category Section Header */}
-                <div className="flex items-center gap-2 px-2 pb-1 border-b border-white/10">
-                  <span className="text-[11px] font-black text-blue-400 tracking-wider">
-                    {cat.categoryNumber}.
-                  </span>
-                  <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-slate-300">
-                    {cat.categoryName}
-                  </h3>
-                </div>
-
-                {/* Category Link Items */}
-                <div className="space-y-1.5">
-                  {cat.items.map((item) => {
-                    const currentIndex = globalIndexCounter++
-                    const isActive =
-                      pathname === item.href || (item.href !== `/${locale}` && pathname.startsWith(item.href))
-
-                    return (
-                      <FullscreenNavItem
-                        key={item.href}
-                        item={item}
-                        isActive={isActive}
-                        index={currentIndex}
-                        isOpen={open}
-                        onClick={() => setOpen(false)}
-                      />
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-
-            {/* Action CTAs in Fullscreen Menu */}
-            <div className="pt-4 space-y-3">
-              <p className="px-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-300 border-b border-white/10 pb-1">
-                04. ASSISTANCE & CONTACT DIRECT
-              </p>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Link
-                  href={`/${locale}/contact`}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between rounded-2xl border border-blue-400/40 bg-gradient-to-r from-[var(--cj-blue)] to-blue-700 p-4 text-sm font-bold text-white shadow-xl shadow-blue-950/70 transition-all duration-200 hover:shadow-blue-900/80 active:scale-[0.98] backdrop-blur-md"
-                >
-                  <div className="flex items-center gap-3">
-                    <Headphones className="h-5 w-5 text-blue-200" />
-                    <span>{labels.advisor}</span>
-                  </div>
-                  <ArrowUpRight className="h-4 w-4 text-blue-200" />
-                </Link>
-
-                <Link
-                  href={`/${locale}/contact`}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between rounded-2xl border border-red-400/40 bg-gradient-to-r from-[var(--cj-red)] to-red-700 p-4 text-sm font-bold text-white shadow-xl shadow-red-950/70 transition-all duration-200 hover:shadow-red-900/80 active:scale-[0.98] backdrop-blur-md"
-                >
-                  <div className="flex items-center gap-3">
-                    <Send className="h-5 w-5 text-red-200" />
-                    <span>{labels.contact}</span>
-                  </div>
-                  <ArrowUpRight className="h-4 w-4 text-red-200" />
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Fullscreen Overlay Footer (Language, Socials & Credits) */}
-          <div className="border-t border-white/10 bg-slate-950/80 backdrop-blur-xl px-5 py-4 space-y-3 shrink-0">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              {/* Quick Language Switcher */}
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-blue-400" />
-                <span className="text-xs font-semibold text-slate-300">{labels.language} :</span>
-                <LanguageSwitcher
-                  locale={locale}
-                  pathname={pathname}
-                  search={search}
-                  darkVariant={true}
-                  onNavigate={() => setOpen(false)}
-                />
-              </div>
-
-              {/* Social Network Quick Icons */}
-              <div className="flex items-center gap-2">
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn CJ DTC"
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-slate-900/80 text-slate-300 transition hover:border-white/30 hover:bg-slate-800 hover:text-white"
-                >
-                  <Linkedin className="h-4 w-4" />
-                </a>
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook CJ DTC"
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-slate-900/80 text-slate-300 transition hover:border-white/30 hover:bg-slate-800 hover:text-white"
-                >
-                  <Facebook className="h-4 w-4" />
-                </a>
-                <a
-                  href="mailto:contact@cjdevelopmenttc.org"
-                  aria-label="Email CJ DTC"
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-slate-900/80 text-slate-300 transition hover:border-white/30 hover:bg-slate-800 hover:text-white"
-                >
                   <Mail className="h-4 w-4" />
                 </a>
               </div>
