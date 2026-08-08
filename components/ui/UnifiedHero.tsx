@@ -172,7 +172,7 @@ export default function UnifiedHero({
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* ── Background Slides ── */}
-      <div className={`absolute inset-0 z-0 select-none overflow-hidden bg-[#001020] ${isHomeHero || isPageHero ? 'hidden' : ''}`}>
+      <div className={`absolute inset-0 z-0 select-none overflow-hidden bg-[#001020] ${isHomeHero ? 'hidden' : ''}`}>
         {slides.map((slide, index) => (
           <div
             key={`${slide.id}-${index}`}
@@ -196,7 +196,7 @@ export default function UnifiedHero({
         ))}
 
         {/* ── Gradient Overlays ── */}
-        <div className={`absolute inset-0 z-20 bg-gradient-to-r from-black/80 via-black/50 to-black/30 ${isHomeHero ? 'lg:hidden' : ''}`} style={{ opacity: effectiveOpacity / 100 }} />
+        <div className={`absolute inset-0 z-20 bg-gradient-to-r from-[#000d1f]/90 via-[#000d1f]/60 to-[#000d1f]/30 ${isHomeHero ? 'lg:hidden' : ''}`} style={{ opacity: effectiveOpacity / 100 }} />
         <div className={`absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#000d1f]/80 via-[#000d1f]/40 to-transparent z-20 pointer-events-none ${isHomeHero ? 'lg:hidden' : ''}`} />
         <div className={`absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-50 to-transparent z-20 pointer-events-none ${isHomeHero ? 'lg:hidden' : ''}`} />
       </div>
@@ -265,17 +265,17 @@ export default function UnifiedHero({
                 <motion.nav
                   aria-label="Breadcrumb"
                   custom={0} variants={fadeIn}
-                  className={`mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium ${isPageHero ? 'text-slate-500' : 'text-white/70'}`}
+                  className={`mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium ${isHomeHero ? 'text-slate-500' : 'text-white/70'}`}
                 >
-                  <Link href={homeHref} className={`inline-flex items-center gap-1 transition-colors ${isPageHero ? 'hover:text-[var(--cj-blue)]' : 'hover:text-white'}`}>
+                  <Link href={homeHref} className={`inline-flex items-center gap-1 transition-colors ${isHomeHero ? 'hover:text-[var(--cj-blue)]' : 'hover:text-white'}`}>
                     <Home className="h-3.5 w-3.5" />{homeLabel}
                   </Link>
                   {breadcrumbs.map((item, i) => (
                     <span key={i} className="flex items-center gap-1.5">
                       <ChevronRight className="h-3.5 w-3.5 opacity-50" />
                       {item.href
-                          ? <Link href={item.href} className={`transition-colors ${isPageHero ? 'hover:text-[var(--cj-blue)]' : 'hover:text-white'}`}>{item.label}</Link>
-                          : <span className={`${isPageHero ? 'text-[var(--cj-blue)]' : 'text-white'} font-semibold`}>{item.label}</span>
+                          ? <Link href={item.href} className={`transition-colors ${isHomeHero ? 'hover:text-[var(--cj-blue)]' : 'hover:text-white'}`}>{item.label}</Link>
+                          : <span className={`${isHomeHero ? 'text-[var(--cj-blue)]' : 'text-white'} font-semibold`}>{item.label}</span>
                       }
                     </span>
                   ))}
@@ -285,7 +285,7 @@ export default function UnifiedHero({
               {/* Eyebrow */}
               {(isHomeHero || (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)) && (
                 <motion.div custom={0.05} variants={fadeUp}
-                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm ${isHomeHero || isPageHero ? 'border-blue-100 bg-[var(--cj-blue-50)] text-[var(--cj-blue)]' : 'border-white/20 bg-white/10 text-blue-200 backdrop-blur-sm'}`}
+                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm ${isHomeHero ? 'border-blue-100 bg-[var(--cj-blue-50)] text-[var(--cj-blue)]' : 'border-white/20 bg-white/10 text-blue-200 backdrop-blur-sm'}`}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
                   {isHomeHero ? 'CJ DEVELOPMENT' : (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)}
@@ -294,7 +294,7 @@ export default function UnifiedHero({
 
               {/* Title */}
               <motion.h1 custom={0.12} variants={fadeUp}
-                className={`hero-title-unified max-w-4xl ${isHomeHero || isPageHero ? 'text-[var(--cj-blue)] drop-shadow-none' : 'drop-shadow-md text-white'}`}
+                className={`hero-title-unified max-w-4xl ${isHomeHero ? 'text-[var(--cj-blue)] drop-shadow-none' : 'drop-shadow-md text-white'}`}
               >
                 {isFr ? currentSlide.titleFr : currentSlide.titleEn}
               </motion.h1>
@@ -305,7 +305,7 @@ export default function UnifiedHero({
               {/* Description */}
               {(isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn) && (
                 <motion.p custom={0.2} variants={fadeUp}
-                  className={`hero-home-description max-w-2xl text-base sm:text-lg leading-relaxed font-opensans ${isHomeHero || isPageHero ? 'text-slate-700 drop-shadow-none' : 'text-white/90 drop-shadow-sm'}`}
+                  className={`hero-home-description max-w-2xl text-base sm:text-lg leading-relaxed font-opensans ${isHomeHero ? 'text-slate-700 drop-shadow-none' : 'text-white/90 drop-shadow-sm'}`}
                 >
                   {isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn}
                 </motion.p>
@@ -329,7 +329,7 @@ export default function UnifiedHero({
                     effectiveCtas.map((cta, i) => (
                       cta.variant === 'secondary'
                         ? <Link key={i} href={cta.href}
-                            className={`inline-flex items-center justify-center gap-2 rounded-xl border px-6 py-3.5 text-sm font-bold transition duration-200 hover:scale-[1.02] active:scale-95 ${isHomeHero || isPageHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-[var(--cj-blue-50)]' : 'border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md'}`}>
+                            className={`inline-flex items-center justify-center gap-2 rounded-xl border px-6 py-3.5 text-sm font-bold transition duration-200 hover:scale-[1.02] active:scale-95 ${isHomeHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-[var(--cj-blue-50)]' : 'border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md'}`}>
                             {cta.label}
                           </Link>
                         : <Link key={i} href={cta.href}
@@ -345,7 +345,7 @@ export default function UnifiedHero({
                         {isFr ? 'Découvrir nos formations' : 'Discover our courses'}
                         <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                       </Link>
-                      <Link href={`/${locale}/espace-etudiants`} className={`inline-flex items-center justify-center rounded-xl border px-8 py-3.5 text-sm font-semibold transition duration-300 hover:scale-[1.02] ${isHomeHero || isPageHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-[var(--cj-blue-50)]' : 'border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md'}`}>
+                      <Link href={`/${locale}/espace-etudiants`} className={`inline-flex items-center justify-center rounded-xl border px-8 py-3.5 text-sm font-semibold transition duration-300 hover:scale-[1.02] ${isHomeHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-[var(--cj-blue-50)]' : 'border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md'}`}>
                         {isFr ? 'Espace étudiant' : 'Student space'}
                       </Link>
                     </>
@@ -373,7 +373,7 @@ export default function UnifiedHero({
                 <motion.div
                   custom={0.4}
                   variants={fadeUp}
-                  className={isPageHero ? 'mt-8 rounded-3xl bg-[var(--cj-blue)] p-5 text-white shadow-xl shadow-blue-900/15' : 'mt-8 pt-8 border-t border-white/10'}
+                  className={isPageHero ? 'mt-8 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 p-5 text-white shadow-xl' : 'mt-8 pt-8 border-t border-white/10'}
                 >
                   {children}
                 </motion.div>
@@ -406,7 +406,7 @@ export default function UnifiedHero({
               </motion.div>
             )}
 
-            {showPageVisual && (
+            {false && showPageVisual && (
               <motion.div custom={0.28} variants={fadeIn} className="relative order-last hidden lg:col-span-5 lg:block">
                 <div className="relative min-h-[280px] overflow-hidden rounded-[2rem] border border-blue-100 bg-[var(--cj-blue)] shadow-[0_24px_54px_-32px_rgba(10,79,179,0.55)]">
                   <Image
