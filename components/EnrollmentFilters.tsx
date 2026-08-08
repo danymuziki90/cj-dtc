@@ -138,7 +138,7 @@ export default function EnrollmentFilters({
       {showAdvanced ? (
         <div className="mt-5 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Date de debut - du</label>
+            <label className="mb-2 block text-sm font-medium text-slate-700">Date d'inscription - du</label>
             <input
               type="date"
               value={filters.startDateFrom}
@@ -147,7 +147,7 @@ export default function EnrollmentFilters({
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Date de debut - au</label>
+            <label className="mb-2 block text-sm font-medium text-slate-700">Date d'inscription - au</label>
             <input
               type="date"
               value={filters.startDateTo}

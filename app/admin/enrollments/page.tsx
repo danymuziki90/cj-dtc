@@ -326,6 +326,11 @@ export default function EnrollmentsPage() {
   // ─── Export ────────────────────────────────────────────────────────────────
 
   async function handleExport(format: 'excel' | 'csv') {
+    if (format === 'excel' && !filters.sessionId) {
+      alert('Sélectionnez une session avant d’exporter Excel.')
+      return
+    }
+
     try {
       const params = new URLSearchParams()
       Object.entries(filters).forEach(([key, value]) => {
@@ -333,17 +338,23 @@ export default function EnrollmentsPage() {
       })
       params.append('format', format)
       const res = await fetch(`/api/enrollments/export?${params}`)
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}))
+        throw new Error(payload.error || 'Erreur lors de l’export')
+      }
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `inscriptions_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : 'csv'}`
+      const contentDisposition = res.headers.get('content-disposition') || ''
+      const serverFilename = contentDisposition.match(/filename="?([^";]+)"?/i)?.[1]
+      a.download = serverFilename || `inscriptions_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : 'csv'}`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
-    } catch {
-      alert("Erreur lors de l'export")
+    } catch (error: any) {
+      alert(error.message || "Erreur lors de l'export")
     }
   }
 
@@ -406,9 +417,15 @@ export default function EnrollmentsPage() {
               <Download className="h-4 w-4" />
               CSV
             </button>
-            <button type="button" onClick={() => handleExport('excel')} className={adminSecondaryButtonClassName}>
+            <button
+              type="button"
+              onClick={() => handleExport('excel')}
+              disabled={!filters.sessionId}
+              title={filters.sessionId ? 'Exporter les inscriptions de la session sélectionnée' : 'Sélectionnez une session pour exporter Excel'}
+              className={`${adminSecondaryButtonClassName} disabled:cursor-not-allowed disabled:opacity-50`}
+            >
               <FileSpreadsheet className="h-4 w-4" />
-              Excel
+              Excel par session
             </button>
             <Link
               href="/admin/enrollments/templates"
@@ -615,7 +632,7 @@ export default function EnrollmentsPage() {
             <div className="mt-4 grid gap-4 border-t border-slate-100 pt-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="date-from" className="mb-1.5 block text-xs font-semibold text-slate-600">
-                  Date de début — du
+                  Date d'inscription — du
                 </label>
                 <input
                   id="date-from"
@@ -627,7 +644,7 @@ export default function EnrollmentsPage() {
               </div>
               <div>
                 <label htmlFor="date-to" className="mb-1.5 block text-xs font-semibold text-slate-600">
-                  Date de début — au
+                  Date d'inscription — au
                 </label>
                 <input
                   id="date-to"

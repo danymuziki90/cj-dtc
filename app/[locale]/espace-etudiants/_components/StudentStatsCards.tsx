@@ -90,7 +90,7 @@ export function StudentStatsCards({
           </div>
         </div>
         <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">{submittedAssignmentsCount}</p>
-        <p className="text-[10px] text-slate-500 mt-1 font-medium">En attente de correction</p>
+        <p className="text-[10px] text-slate-500 mt-1 font-medium">Travaux transmis</p>
       </div>
 
       {/* Card 5: Actualités (Violet/Indigo) */}

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getAssignmentStatus } from "./utils";
+import { canStudentSubmitAssignment } from "@/lib/submission-rules";
 
 interface AssignmentsTabProps {
   assignments: any[];
@@ -157,6 +158,7 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
             const StatusIcon  = statusInfo.icon;
             const submission  = assign.submissions?.[0] || assign.Submission?.[0];
             const hasResult   = submission && (submission.grade !== null || submission.feedback || submission.correctionStatus !== "pending");
+            const canSubmit = canStudentSubmitAssignment(assign);
 
             return (
               <div key={assign.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col">
@@ -226,11 +228,13 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
                   <span className="text-[11px] text-slate-400">
                     {submission ? `Remis le ${new Date(submission.submittedAt).toLocaleDateString("fr-FR")}` : "Non remis"}
                   </span>
-                  <button onClick={() => setSelectedAssignmentForSubmission(assign)}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cj-blue)] px-3 py-2 text-xs font-bold text-white hover:bg-blue-900 transition">
-                    {submission ? "Voir / Remettre" : "Déposer mon travail"}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                  {canSubmit && (
+                    <button onClick={() => setSelectedAssignmentForSubmission(assign)}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cj-blue)] px-3 py-2 text-xs font-bold text-white hover:bg-blue-900 transition">
+                      {submission ? "Voir / Remettre" : "Déposer mon travail"}
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
             );

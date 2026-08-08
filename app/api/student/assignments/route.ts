@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
 import { supabase } from '@/lib/supabase'
 import { apiHandler, ApiError } from '@/lib/api-error'
+import { canStudentResubmit, getStudentAssignmentSummary } from '@/lib/submission-rules'
 
 const submissionSchema = z.object({
   assignmentId: z.union([z.number(), z.string()]).transform(val => Number(val)),
@@ -52,7 +53,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
       files: a.AssignmentFile
     }))
 
-    return NextResponse.json({ assignments: formattedAssignments }, { status: 200 })
+    return NextResponse.json({
+      assignments: formattedAssignments,
+      summary: getStudentAssignmentSummary(formattedAssignments),
+    }, { status: 200 })
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {
@@ -101,6 +105,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
   })
 
   if (submission) {
+    if (!canStudentResubmit(assignment.allowResubmission, submission)) {
+      return NextResponse.json({
+        error: 'Ce travail a déjà été remis et ne peut plus être soumis à nouveau.',
+      }, { status: 409 })
+    }
+
     submission = await prisma.submission.update({
       where: { id: submission.id },
       data: {

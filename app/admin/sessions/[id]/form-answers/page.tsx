@@ -130,13 +130,14 @@ export default function SessionFormAnswersPage() {
   const handleExport = async () => {
     setExporting(true)
     try {
-      const res = await fetch(`/api/sessions/${sessionId}/form-answers/export`)
+      const res = await fetch(`/api/enrollments/export?format=excel&sessionId=${encodeURIComponent(sessionId)}`)
       if (!res.ok) throw new Error()
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `reponses_session_${sessionId}.csv`
+      const contentDisposition = res.headers.get('content-disposition') || ''
+      a.download = contentDisposition.match(/filename="?([^";]+)"?/i)?.[1] || `inscriptions_session_${sessionId}.xlsx`
       a.click()
       URL.revokeObjectURL(url)
     } catch {
@@ -211,7 +212,7 @@ export default function SessionFormAnswersPage() {
             className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
           >
             {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            Exporter CSV
+            Exporter Excel
           </button>
         </div>
       </div>

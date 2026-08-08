@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import AssignmentDetailsModal from "./AssignmentDetailsModal";
 import { getAssignmentStatus } from "../../_components/utils";
+import { canStudentSubmitAssignment, hasStudentSubmission } from "@/lib/submission-rules";
 
 export default function TravauxContent() {
   const params = useParams<{ locale?: string }>();
@@ -28,6 +29,7 @@ export default function TravauxContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [summary, setSummary] = useState({ toSubmit: 0, submitted: 0 });
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "pending" | "submitted" | "graded">("all");
   
@@ -47,6 +49,7 @@ export default function TravauxContent() {
       
       const data = await response.json();
       setAssignments(data.assignments || []);
+      setSummary(data.summary || { toSubmit: 0, submitted: 0 });
     } catch (err: any) {
       setError(err.message || "Une erreur est survenue");
     } finally {
@@ -77,20 +80,6 @@ export default function TravauxContent() {
     };
   }, []);
 
-  const pendingCount = useMemo(() => {
-    return assignments.filter((a) => {
-      const statusInfo = getAssignmentStatus(a);
-      return statusInfo.status === "pending" || statusInfo.status === "late";
-    }).length;
-  }, [assignments]);
-  
-  const submittedCount = useMemo(() => {
-    return assignments.filter((a) => {
-      const statusInfo = getAssignmentStatus(a);
-      return statusInfo.status === "submitted" || statusInfo.status === "graded";
-    }).length;
-  }, [assignments]);
-
   const filteredAssignments = useMemo(() => {
     return assignments.filter((assign) => {
       const matchesSearch =
@@ -101,8 +90,8 @@ export default function TravauxContent() {
       
       const statusInfo = getAssignmentStatus(assign);
       if (filter === "all") return true;
-      if (filter === "pending" && (statusInfo.status === "pending" || statusInfo.status === "late")) return true;
-      if (filter === "submitted" && statusInfo.status === "submitted") return true;
+      if (filter === "pending" && canStudentSubmitAssignment(assign)) return true;
+      if (filter === "submitted" && hasStudentSubmission(assign) && statusInfo.status !== "graded") return true;
       if (filter === "graded" && statusInfo.status === "graded") return true;
       
       return false;
@@ -121,14 +110,14 @@ export default function TravauxContent() {
         metrics={[
           {
             label: "À remettre",
-            value: pendingCount,
+            value: summary.toSubmit,
             icon: Clock,
             accent: "from-amber-500 via-amber-600 to-amber-700",
             helper: "Devoirs en attente d'un rendu.",
           },
           {
             label: "Rendus",
-            value: submittedCount,
+            value: summary.submitted,
             icon: CheckCircle2,
             accent: "from-emerald-500 via-emerald-600 to-teal-700",
             helper: "Travaux transmis ou corrigés.",

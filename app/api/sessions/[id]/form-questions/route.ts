@@ -143,6 +143,26 @@ export async function PUT(
       return NextResponse.json({ error: 'Format invalide : tableau attendu' }, { status: 400 })
     }
 
+    const existingQuestions = await prisma.sessionFormQuestion.findMany({
+      where: { sessionId },
+      select: { id: true },
+    })
+    const requestedQuestionIds = body.filter((q: any) => q.id).map((q: any) => q.id)
+    const removedQuestionIds = existingQuestions
+      .map((question) => question.id)
+      .filter((questionId) => !requestedQuestionIds.includes(questionId))
+
+    if (removedQuestionIds.length > 0) {
+      const answersCount = await prisma.sessionFormAnswer.count({
+        where: { questionId: { in: removedQuestionIds } },
+      })
+      if (answersCount > 0) {
+        return NextResponse.json({
+          error: 'Une ou plusieurs questions à supprimer possèdent des réponses enregistrées. Les données existantes sont protégées.',
+        }, { status: 409 })
+      }
+    }
+
     // Sécurisation de l'opération en transaction
     const result = await prisma.$transaction(async (tx) => {
       // 1. Récupérer les questions existantes de la session

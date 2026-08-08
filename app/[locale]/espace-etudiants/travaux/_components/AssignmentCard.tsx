@@ -2,6 +2,7 @@ import { Calendar, CheckCircle2, Clock, Download, FileCode2, Info, MessageSquare
 import { motion } from "framer-motion";
 import { FormattedDate } from "@/components/FormattedDate";
 import { getAssignmentStatus } from "../../_components/utils";
+import { canStudentSubmitAssignment } from "@/lib/submission-rules";
 
 interface AssignmentCardProps {
   assign: any;
@@ -16,6 +17,7 @@ export function AssignmentCard({ assign, onOpenSubmitDialog, index }: Assignment
   const isGraded = submission?.status === "graded" || submission?.grade != null;
   const isReturned = submission?.status === "returned";
   const isPastDeadline = new Date(assign.deadline).getTime() < Date.now();
+  const canSubmit = canStudentSubmitAssignment(assign);
 
   return (
     <motion.div
@@ -171,7 +173,7 @@ export function AssignmentCard({ assign, onOpenSubmitDialog, index }: Assignment
           </span>
         </div>
 
-        {(!submission || (assign.allowResubmission !== false && !isGraded) || isReturned) && (
+        {canSubmit && (
           <button
             onClick={() => onOpenSubmitDialog(assign)}
             className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition shadow-sm active:scale-95 ${

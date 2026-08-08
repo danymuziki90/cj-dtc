@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
 import { supabase } from '@/lib/supabase'
+import { canStudentResubmit } from '@/lib/submission-rules'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -103,6 +104,13 @@ export async function POST(req: NextRequest) {
   })
 
   if (submission) {
+    if (!canStudentResubmit(assignment.allowResubmission, submission)) {
+      return NextResponse.json({
+        success: false,
+        error: 'Ce travail a déjà été remis et ne peut plus être soumis à nouveau.',
+      }, { status: 409 })
+    }
+
     submission = await prisma.submission.update({
       where: { id: submission.id },
       data: {

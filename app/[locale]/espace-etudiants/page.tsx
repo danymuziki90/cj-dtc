@@ -159,6 +159,7 @@ function EspaceEtudiantsContent() {
   const firstCertificate = certificates[0];
   const news = dashboard.news || [];
   const assignments = dashboard.assignments || [];
+  const assignmentSummary = dashboard.assignmentSummary || { toSubmit: 0, submitted: 0 };
 
   // Calculations
   const completionRate = useMemo(() => {
@@ -174,24 +175,8 @@ function EspaceEtudiantsContent() {
       .length;
   }, [sessionsHistory]);
 
-  const pendingAssignmentsCount = useMemo(() => {
-    return assignments.filter((assign: any) => {
-      const hasSub = assign.submissions && assign.submissions.length > 0;
-      const isFuture = new Date(assign.deadline).getTime() >= Date.now();
-      return !hasSub && isFuture;
-    }).length;
-  }, [assignments]);
-
-  const submittedAssignmentsCount = useMemo(() => {
-    return assignments.filter((assign: any) => {
-      const hasSub = assign.submissions && assign.submissions.length > 0;
-      if (!hasSub) return false;
-      const isEvaluated = assign.submissions?.some(
-        (sub: any) => sub.status === "graded" || sub.status === "returned" || sub.grade != null
-      );
-      return !isEvaluated;
-    }).length;
-  }, [assignments]);
+  const pendingAssignmentsCount = assignmentSummary.toSubmit || 0;
+  const submittedAssignmentsCount = assignmentSummary.submitted || 0;
 
   const totalFormationsCount = sessionsHistory.length;
   const totalNotifications = notifications.length;

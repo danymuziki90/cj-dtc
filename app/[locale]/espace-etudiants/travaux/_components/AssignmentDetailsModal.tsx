@@ -17,6 +17,7 @@ import {
   MessageSquare
 } from "lucide-react";
 import { getAssignmentStatus } from "../../_components/utils";
+import { canStudentSubmitAssignment } from "@/lib/submission-rules";
 
 export interface UploadedFileData {
   name: string;
@@ -91,7 +92,7 @@ export default function AssignmentDetailsModal({ isOpen, onClose, assignment }: 
   const statusInfo = getAssignmentStatus(assignment);
   const isPastDeadline = new Date(assignment.deadline).getTime() < Date.now();
   const submission = assignment.submissions?.[0];
-  const canSubmit = !isPastDeadline && statusInfo.status !== "graded" && (assignment.allowResubmission || !submission);
+  const canSubmit = canStudentSubmitAssignment(assignment);
 
   // Upload Logic (Adapted from existing modal)
   const uploadFileToServer = (item: UploadFileStateItem) => {
@@ -386,8 +387,14 @@ export default function AssignmentDetailsModal({ isOpen, onClose, assignment }: 
                 {!canSubmit ? (
                   <div className="rounded-2xl border border-dashed border-red-200 bg-red-50 p-6 text-center text-red-600">
                     <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm font-semibold">La date limite est dépassée.</p>
-                    <p className="text-xs mt-1 opacity-80">Vous ne pouvez plus soumettre ou modifier ce travail.</p>
+                    <p className="text-sm font-semibold">
+                      {isPastDeadline ? "La date limite est dépassée." : "Ce travail a déjà été remis."}
+                    </p>
+                    <p className="text-xs mt-1 opacity-80">
+                      {isPastDeadline
+                        ? "Vous ne pouvez plus soumettre ou modifier ce travail."
+                        : "Votre remise est en attente de correction, en cours de correction ou corrigée."}
+                    </p>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmitFinal} className="flex flex-col flex-1">

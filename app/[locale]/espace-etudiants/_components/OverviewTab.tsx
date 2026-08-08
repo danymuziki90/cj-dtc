@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { formatDateShort, formatDateTime, getAssignmentStatus } from "./utils";
+import { canStudentSubmitAssignment } from "@/lib/submission-rules";
 
 interface OverviewTabProps {
   currentSession: any;
@@ -114,10 +115,7 @@ export function OverviewTab({
                 const statusInfo = getAssignmentStatus(assign);
                 const StatusIcon = statusInfo.icon;
                 const submission = assign.submissions?.[0];
-                const canSubmit =
-                  !submission ||
-                  (assign.allowResubmission !== false && submission.status !== "graded" && submission.grade == null) ||
-                  submission.status === "returned";
+                const canSubmit = canStudentSubmitAssignment(assign);
 
                 return (
                   <div

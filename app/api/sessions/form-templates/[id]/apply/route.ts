@@ -35,7 +35,16 @@ export async function POST(
     }
 
     if (replaceExisting) {
-      // Supprime les questions existantes de la session cible
+      const answersCount = await prisma.sessionFormAnswer.count({
+        where: { question: { sessionId: sid } },
+      })
+      if (answersCount > 0) {
+        return NextResponse.json({
+          error: 'Le formulaire actuel contient des réponses enregistrées et ne peut pas être remplacé.',
+        }, { status: 409 })
+      }
+
+      // Supprime uniquement des questions sans réponses enregistrées.
       await prisma.sessionFormQuestion.deleteMany({ where: { sessionId: sid } })
     }
 

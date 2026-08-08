@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireStudent } from '@/lib/auth-portal/guards'
+import { getStudentAssignmentSummary } from '@/lib/submission-rules'
 import { parseSessionMetadata } from '@/lib/sessions/metadata'
 import { getPublishedSessions } from '@/lib/sessions/published'
 import { getStudentQuestions, parseEnrollmentNotes } from '@/lib/student/enrollment-notes'
@@ -648,6 +649,7 @@ export async function GET(request: NextRequest) {
       attendance,
       results,
       assignments,
+      assignmentSummary: getStudentAssignmentSummary(assignments),
       progress: {
         hoursCompleted,
         hoursRemaining,

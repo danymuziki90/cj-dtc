@@ -41,9 +41,9 @@ function buildEnrollmentWhere(url: URL): EnrollmentWhere {
   if (sessionId) where.sessionId = parseInt(sessionId)
   if (status) where.status = status
   if (startDateFrom || startDateTo) {
-    where.startDate = {}
-    if (startDateFrom) where.startDate.gte = new Date(startDateFrom)
-    if (startDateTo) where.startDate.lte = new Date(startDateTo)
+    where.createdAt = {}
+    if (startDateFrom) where.createdAt.gte = new Date(startDateFrom)
+    if (startDateTo) where.createdAt.lte = new Date(startDateTo)
   }
   if (search) {
     where.OR = [

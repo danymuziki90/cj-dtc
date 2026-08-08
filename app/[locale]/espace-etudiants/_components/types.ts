@@ -37,6 +37,10 @@ export type DashboardPayload = {
     }
     news?: any[]
     assignments?: any[]
+    assignmentSummary?: {
+      toSubmit?: number
+      submitted?: number
+    }
   }
 }
 
