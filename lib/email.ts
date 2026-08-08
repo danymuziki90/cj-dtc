@@ -1,4 +1,4 @@
-import * as nodemailer from 'nodemailer'
+﻿import * as nodemailer from 'nodemailer'
 
 export type EmailMessage = {
   to: string | string[]
@@ -119,7 +119,7 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
     ? `
         <tr>
           <td style="padding: 24px 32px 0 32px;">
-            <a href="${escapeHtml(options.action.href)}" style="display: inline-block; border-radius: 16px; background: #e30613; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 22px;">
+            <a href="${escapeHtml(options.action.href)}" style="display: inline-block; border-radius: 16px; background: #E53935; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 22px;">
               ${escapeHtml(options.action.label)}
             </a>
           </td>
@@ -157,7 +157,7 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
           <td>
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; overflow: hidden; border-radius: 28px; background: #ffffff; border: 1px solid #dbe6f5; box-shadow: 0 24px 70px -38px rgba(15, 23, 42, 0.35);">
               <tr>
-                <td style="background: linear-gradient(135deg, #001f5c 0%, #003b9d 68%, #e30613 100%); padding: 32px;">
+                <td style="background: linear-gradient(135deg, #001f5c 0%, #003b9d 68%, #E53935 100%); padding: 32px;">
                   <div style="display: inline-block; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,0.14); color: #dbeafe; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;">
                     ${escapeHtml(options.eyebrow)}
                   </div>
@@ -303,7 +303,7 @@ export async function sendPasswordResetEmail(
       introHtml:
         'Nous avons recu une demande de reinitialisation de mot de passe pour votre compte CJ DTC. Utilisez le lien securise ci-dessous pour definir un nouveau mot de passe.',
       badgeHtml:
-        '<div style="display: inline-block; border-radius: 999px; background: #eef4ff; color: #002d72; border: 1px solid #c9d9ff; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Lien valable pendant 1 heure</div>',
+        '<div style="display: inline-block; border-radius: 999px; background: #eef4ff; color: #0A4FB3; border: 1px solid #c9d9ff; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Lien valable pendant 1 heure</div>',
       bodyHtml: `
         <div style="border: 1px solid #d7e3ff; border-radius: 22px; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); padding: 20px;">
           <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #64748b; font-weight: 700; margin-bottom: 8px;">
@@ -352,7 +352,7 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
     ? `
         <tr>
           <td style="padding: 0 32px 20px 32px;">
-            <div style="display: inline-block; border-radius: 999px; background: #eef4ff; color: #002d72; border: 1px solid #c9d9ff; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">
+            <div style="display: inline-block; border-radius: 999px; background: #eef4ff; color: #0A4FB3; border: 1px solid #c9d9ff; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">
               Session: ${safeSessionTitle}
             </div>
           </td>
@@ -405,7 +405,7 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
             <td>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; overflow: hidden; border-radius: 28px; background: #ffffff; border: 1px solid #dbe6f5; box-shadow: 0 24px 70px -38px rgba(15, 23, 42, 0.35);">
                 <tr>
-                  <td style="background: linear-gradient(135deg, #001f5c 0%, #003b9d 68%, #e30613 100%); padding: 32px;">
+                  <td style="background: linear-gradient(135deg, #001f5c 0%, #003b9d 68%, #E53935 100%); padding: 32px;">
                     <div style="display: inline-block; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,0.14); color: #dbeafe; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;">
                       CJ DTC
                     </div>
@@ -424,7 +424,7 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
                       Bonjour ${safeFullName},
                     </div>
                     <div style="margin-top: 12px; font-size: 15px; line-height: 1.8; color: #334155;">
-                      Votre compte etudiant CJ DTC est maintenant actif${safeSessionTitle ? ` pour la session <strong style="color: #002d72;">${safeSessionTitle}</strong>` : ''}. Gardez ces informations en lieu sur et utilisez-les pour acceder a votre espace personnel.
+                      Votre compte etudiant CJ DTC est maintenant actif${safeSessionTitle ? ` pour la session <strong style="color: #0A4FB3;">${safeSessionTitle}</strong>` : ''}. Gardez ces informations en lieu sur et utilisez-les pour acceder a votre espace personnel.
                     </div>
                   </td>
                 </tr>
@@ -449,7 +449,7 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
 
                 <tr>
                   <td style="padding: 24px 32px 0 32px;">
-                    <a href="${safeLoginLink}" style="display: inline-block; border-radius: 16px; background: #e30613; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 22px;">
+                    <a href="${safeLoginLink}" style="display: inline-block; border-radius: 16px; background: #E53935; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 22px;">
                       Acceder a l'espace etudiant
                     </a>
                     <div style="margin-top: 14px; font-size: 13px; line-height: 1.7; color: #64748b;">
@@ -528,7 +528,7 @@ export async function sendAcceptanceEmail(email: string, formationTitle: string)
     html: renderBrandedEmailLayout({
       eyebrow: 'Admission',
       title: 'Votre inscription est acceptee',
-      introHtml: `Votre candidature pour la formation <strong style="color: #002d72;">${safeFormationTitle}</strong> a ete validee par notre equipe.`,
+      introHtml: `Votre candidature pour la formation <strong style="color: #0A4FB3;">${safeFormationTitle}</strong> a ete validee par notre equipe.`,
       badgeHtml:
         '<div style="display: inline-block; border-radius: 999px; background: #ecfdf3; color: #047857; border: 1px solid #a7f3d0; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Admission confirmee</div>',
       bodyHtml: `
@@ -583,7 +583,7 @@ export async function sendRejectionEmail(email: string, formationTitle: string, 
     html: renderBrandedEmailLayout({
       eyebrow: 'Suivi candidature',
       title: 'Votre inscription n a pas ete retenue',
-      introHtml: `Apres examen de votre dossier pour la formation <strong style="color: #002d72;">${safeFormationTitle}</strong>, nous ne pouvons pas donner une suite favorable a cette candidature pour le moment.`,
+      introHtml: `Apres examen de votre dossier pour la formation <strong style="color: #0A4FB3;">${safeFormationTitle}</strong>, nous ne pouvons pas donner une suite favorable a cette candidature pour le moment.`,
       badgeHtml:
         '<div style="display: inline-block; border-radius: 999px; background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Decision non favorable</div>',
       bodyHtml: `
@@ -647,7 +647,7 @@ export async function sendAssignmentGradedEmail(email: string, assignmentTitle: 
     html: renderBrandedEmailLayout({
       eyebrow: 'Evaluation',
       title: 'Votre travail a ete note',
-      introHtml: `Votre depot pour le travail <strong style="color: #002d72;">${safeAssignmentTitle}</strong> a ete corrige par l'equipe pedagogique.`,
+      introHtml: `Votre depot pour le travail <strong style="color: #0A4FB3;">${safeAssignmentTitle}</strong> a ete corrige par l'equipe pedagogique.`,
       badgeHtml:
         '<div style="display: inline-block; border-radius: 999px; background: #ecfdf3; color: #047857; border: 1px solid #a7f3d0; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Correction terminee</div>',
       bodyHtml: `

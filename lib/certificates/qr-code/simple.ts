@@ -1,4 +1,4 @@
-// CJ DTC - QR Code Generation Services (Simplified)
+﻿// CJ DTC - QR Code Generation Services (Simplified)
 // Version 1.0 - Production Ready
 
 import QRCode from 'qrcode'
@@ -10,7 +10,7 @@ export async function generateCertificateQRCode(data: string): Promise<string> {
       width: 256,
       margin: 2,
       color: {
-        dark: '#002D72',
+        dark: '#0A4FB3',
         light: '#FFFFFF'
       }
     })
@@ -180,7 +180,7 @@ export function printCertificateQRCode(qrCode: string): void {
             .certificate-number {
               font-size: 18px;
               font-weight: bold;
-              color: #002D72;
+              color: #0A4FB3;
               margin-bottom: 5px;
             }
             .verification-url {

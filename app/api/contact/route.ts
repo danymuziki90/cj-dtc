@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { sendEmail } from '../../../lib/email'
 import { prisma } from '@/lib/prisma'
@@ -30,13 +30,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
   // Send email using existing email service
   const emailHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #002D72;">Nouveau message de contact</h2>
+      <h2 style="color: #0A4FB3;">Nouveau message de contact</h2>
       <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <p><strong>Nom :</strong> ${name}</p>
         <p><strong>Email :</strong> ${email}</p>
         <p><strong>Sujet :</strong> ${subject}</p>
       </div>
-      <div style="background-color: white; padding: 20px; border-left: 4px solid #E30613; margin: 20px 0;">
+      <div style="background-color: white; padding: 20px; border-left: 4px solid #E53935; margin: 20px 0;">
         <p style="white-space: pre-wrap;">${message}</p>
       </div>
       <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
