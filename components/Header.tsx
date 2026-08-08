@@ -476,7 +476,7 @@ export default function Header() {
         className={`hidden lg:block text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
           scrolled
             ? 'border-b border-white/10 bg-[var(--cj-blue)] text-slate-100 shadow-sm backdrop-blur-3xl'
-            : 'border-b border-white/15 bg-[var(--cj-blue)]/90 text-white backdrop-blur-2xl'
+            : 'border-b border-white/15 bg-[var(--cj-blue)] text-white backdrop-blur-2xl'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -550,7 +550,7 @@ export default function Header() {
         className={`w-full transition-all duration-500 ease-in-out ${
           scrolled
             ? 'lg:border-b lg:border-white/10 lg:bg-[var(--cj-blue)] lg:backdrop-blur-3xl lg:shadow-[0_10px_40px_-10px_rgba(0,45,114,0.5)] border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
-            : 'lg:border-b lg:border-white/15 lg:bg-[var(--cj-blue)]/90 lg:backdrop-blur-2xl lg:shadow-[0_8px_32px_rgba(0,0,0,0.15)] border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
+            : 'lg:border-b lg:border-white/15 lg:bg-[var(--cj-blue)] lg:backdrop-blur-2xl lg:shadow-[0_8px_32px_rgba(0,0,0,0.15)] border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">

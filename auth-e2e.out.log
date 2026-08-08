@@ -1,0 +1,38 @@
+
+Running 5 tests using 1 worker
+
+  ok 1 [chrome] › tests\e2e\admin-student-auth.spec.ts:167:7 › Admin and student critical flows › admin login works (1.0m)
+  x  2 [chrome] › tests\e2e\admin-student-auth.spec.ts:172:7 › Admin and student critical flows › admin cannot create a student account before payment is fully validated (2.0m)
+  -  3 [chrome] › tests\e2e\admin-student-auth.spec.ts:205:7 › Admin and student critical flows › free session registration creates the student account automatically
+  -  4 [chrome] › tests\e2e\admin-student-auth.spec.ts:227:7 › Admin and student critical flows › paid session validation creates the student account automatically
+  -  5 [chrome] › tests\e2e\admin-student-auth.spec.ts:252:7 › Admin and student critical flows › student can log in after admin resets credentials on an auto-created account
+
+
+  1) [chrome] › tests\e2e\admin-student-auth.spec.ts:172:7 › Admin and student critical flows › admin cannot create a student account before payment is fully validated 
+
+    [31mTest timeout of 120000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 120000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('student-create-name')[22m
+
+
+      187 |     await page.goto('/admin/students')
+      188 |
+    > 189 |     await page.getByTestId('student-create-name').fill(fullName)
+          |                                                   ^
+      190 |     await page.getByTestId('student-create-email').fill(email)
+      191 |     const createResponsePromise = page.waitForResponse(
+      192 |       (response) =>
+        at C:\Users\danym\Desktop\cjdtc\cj-dtc\tests\e2e\admin-student-auth.spec.ts:189:51
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\admin-student-auth-Admin-a-5577e--payment-is-fully-validated-chrome\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\admin-student-auth-Admin-a-5577e--payment-is-fully-validated-chrome\error-context.md
+
+  1 failed
+    [chrome] › tests\e2e\admin-student-auth.spec.ts:172:7 › Admin and student critical flows › admin cannot create a student account before payment is fully validated 
+  3 did not run
+  1 passed (4.9m)

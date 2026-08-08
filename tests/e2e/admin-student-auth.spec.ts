@@ -35,7 +35,7 @@ async function loginAsAdmin(page: Page, request: APIRequestContext) {
   ])
 
   await page.goto('/admin/dashboard')
-  await expect(page.getByText('Pilotage global de la plateforme')).toBeVisible({ timeout: 30_000 })
+  await expect(page.getByRole('heading', { name: 'Pilotage' })).toBeVisible({ timeout: 30_000 })
 }
 
 async function createFormationAndSession(
@@ -166,7 +166,7 @@ test.describe('Admin and student critical flows', () => {
 
   test('admin login works', async ({ page, request }) => {
     await loginAsAdmin(page, request)
-    await expect(page.getByText('Pilotage global de la plateforme')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Pilotage' })).toBeVisible()
   })
 
   test('admin cannot create a student account before payment is fully validated', async ({ page, request }) => {
@@ -185,21 +185,21 @@ test.describe('Admin and student critical flows', () => {
     })
 
     await page.goto('/admin/students')
-
-    await page.getByTestId('student-create-name').fill(fullName)
-    await page.getByTestId('student-create-email').fill(email)
+    await page.getByRole('button', { name: 'Nouveau compte étudiant' }).click()
+    await page.getByPlaceholder('Ex. Nicole Zephonie').fill(fullName)
+    await page.getByPlaceholder('nom@exemple.com').fill(email)
     const createResponsePromise = page.waitForResponse(
       (response) =>
         response.url().includes('/api/admin/system/students') && response.request().method() === 'POST',
       { timeout: 90_000 },
     )
-    await page.getByTestId('student-create-submit').click()
+    await page.getByRole('button', { name: 'Créer le compte' }).click()
     const createResponse = await createResponsePromise
     expect(createResponse.status()).toBe(409)
-    await expect(page.getByTestId('student-create-error')).toContainText(
+    await expect(page.getByText(
       "Le compte etudiant ne peut etre cree qu'apres validation complete du paiement de la session souscrite.",
-    )
-    await expect(page.getByTestId('student-credentials-panel')).toHaveCount(0)
+    )).toBeVisible()
+    await expect(page.getByText('Identifiants Générés')).toHaveCount(0)
   })
 
   test('free session registration creates the student account automatically', async ({ page, request }) => {
