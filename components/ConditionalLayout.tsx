@@ -5,29 +5,28 @@ import Header from './Header'
 import Footer from './Footer'
 
 /**
- * Detect if the current route has a UnifiedHero at the very top.
- * For these pages, we do NOT apply the global top padding, so the Hero can slide up underneath the transparent header.
+ * Detect if the current route is strictly the Home Page.
+ * For the Home Page, we do NOT apply the global top padding, so the Hero can slide up underneath the transparent header.
+ * For all other internal pages, we apply the top padding so the solid blue header sits independently above the content.
  */
-function isHeroPage(pathname: string): boolean {
-  // Matches root home or specific main sections that start with a UnifiedHero
-  const regex = /^\/(fr|en)(\/(about|formations|sessions|entreprises|actualites|emplois|contact|galerie|partenaires|espace-etudiants))?\/?$/
-  return regex.test(pathname)
+function isHomePage(pathname: string): boolean {
+  // Matches strictly root /fr, /en, or /
+  return /^\/(fr|en)\/?$/.test(pathname) || pathname === '/' || pathname === ''
 }
 
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? ''
   const isAdmin = pathname.includes('/admin')
-  const hasHero = isHeroPage(pathname)
+  const isHome = isHomePage(pathname)
 
   return (
     <>
       {!isAdmin && <Header />}
       {/* 
-        Le Header global possède désormais un fond solide et indépendant.
-        Toutes les pages publiques doivent conserver ce padding supérieur
-        pour éviter que le contenu ne glisse sous la barre de navigation.
+        Home page: no top padding so Hero slides under transparent header.
+        Internal pages: pt-[70px] lg:pt-[105px] so content stays below the solid blue header.
       */}
-      <main className="pt-[70px] lg:pt-[105px]">{children}</main>
+      <main className={isHome ? '' : 'pt-[70px] lg:pt-[105px]'}>{children}</main>
       {!isAdmin && <Footer />}
     </>
   )

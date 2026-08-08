@@ -340,6 +340,8 @@ function FullscreenNavItem({
 export default function Header() {
   const params = useParams<{ locale?: string }>()
   const pathname = usePathname() || '/fr'
+  const isHome = /^\/(fr|en)\/?$/.test(pathname) || pathname === '/' || pathname === ''
+
   const searchParams = useSearchParams()
   const locale = resolveSiteLocale(params?.locale)
   const [open, setOpen] = useState(false)
@@ -545,10 +547,13 @@ export default function Header() {
       </div>
 
       {/* 2. MAIN HEADER */}
-      {/* Desktop uses an opaque CJ blue background; mobile keeps its existing overlay treatment. */}
       <div
-        className={`w-full transition-all duration-500 ease-in-out border-b border-white/15 bg-[var(--cj-blue)] shadow-md ${
-          scrolled ? 'py-2.5' : 'py-3.5'
+        className={`w-full transition-all duration-500 ease-in-out ${
+          !isHome
+            ? `border-b border-white/15 bg-[var(--cj-blue)] shadow-md ${scrolled ? 'py-2.5' : 'py-3.5'}`
+            : scrolled
+              ? 'lg:border-b lg:border-white/10 lg:bg-[var(--cj-blue)] lg:backdrop-blur-none lg:shadow-[0_10px_34px_-18px_rgba(10,79,179,0.75)] border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
+              : 'lg:border-b lg:border-white/15 lg:bg-[var(--cj-blue)] lg:backdrop-blur-none lg:shadow-[0_8px_28px_-18px_rgba(10,79,179,0.55)] border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -700,11 +705,26 @@ export default function Header() {
           ${open ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-95'}
         `}
       >
-        {/* Solid Blue Background matching desktop */}
-        <div className="absolute inset-0 z-0 bg-[var(--cj-blue)] pointer-events-none">
-          {/* Subtle gradient for depth on mobile */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[var(--cj-blue-700)]/30 to-black/20" />
-        </div>
+        {isHome ? (
+          <div className="absolute inset-0 z-0 select-none overflow-hidden pointer-events-none">
+            <Image
+              src="/lor-de-formation.jpeg"
+              alt="Hero section background"
+              fill
+              priority
+              className="object-cover object-center scale-105 filter brightness-90"
+              sizes="100vw"
+            />
+            {/* Dark Glassmorphism Overlay gradient so all navigation content is crisp and readable */}
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/92 via-slate-950/88 to-slate-950/95 backdrop-blur-xl z-10" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/30 via-transparent to-black/70 z-10 pointer-events-none" />
+          </div>
+        ) : (
+          <div className="absolute inset-0 z-0 bg-[var(--cj-blue)] pointer-events-none">
+            {/* Subtle gradient for depth on mobile */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[var(--cj-blue-700)]/30 to-black/20" />
+          </div>
+        )}
 
         {/* Content Container (Layered on top of background) */}
         <div className="relative z-20 flex flex-col h-full justify-between overflow-hidden">
