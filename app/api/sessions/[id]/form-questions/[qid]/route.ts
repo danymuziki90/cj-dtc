@@ -76,7 +76,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'IDs invalides' }, { status: 400 })
     }
 
-    const answersCount = await prisma.sessionFormAnswer.count({ where: { questionId } })
+    const answersCount = await prisma.sessionFormAnswer.count({
+      where: { question: { id: questionId, sessionId } },
+    })
     if (answersCount > 0) {
       return NextResponse.json({
         error: 'Cette question possède des réponses enregistrées et ne peut pas être supprimée.',

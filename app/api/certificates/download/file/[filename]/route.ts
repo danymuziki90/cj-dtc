@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin, requireStudent } from '@/lib/auth-portal/guards'
 import { downloadFromR2 } from '@/lib/r2'
+import { studentOwnsCertificate } from '@/lib/certificates/access'
 
 export const runtime = "nodejs"
 
@@ -19,8 +20,7 @@ export async function GET(
 
         // Déterminer les droits d'accès
         let isAdmin = false
-        let studentEmail: string | null = null
-        let studentId: string | null = null
+        let student: { id: string; email: string } | null = null
 
         const adminAuth = await requireAdmin(request)
         if (!adminAuth.error) {
@@ -30,8 +30,7 @@ export async function GET(
             if (studentAuth.error) {
                 return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
             }
-            studentEmail = studentAuth.student.email
-            studentId = studentAuth.student.id
+            student = studentAuth.student
         }
 
         // Rechercher le certificat correspondant à ce fichier en base de données
@@ -47,10 +46,7 @@ export async function GET(
 
         // Vérifier les permissions de l'étudiant
         if (!isAdmin) {
-            const isOwnerByEmail = studentEmail && certificate.enrollment?.email === studentEmail
-            const isOwnerById = studentId && certificate.studentId === studentId
-
-            if (!isOwnerByEmail && !isOwnerById) {
+            if (!student || !studentOwnsCertificate(certificate, student)) {
                 return NextResponse.json({ error: 'Accès interdit à ce fichier' }, { status: 403 })
             }
 

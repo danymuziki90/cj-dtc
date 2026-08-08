@@ -169,6 +169,13 @@ export function sanitizeR2Key(rawKey: string): string {
   return cleanKey
 }
 
+/** Resolves the private storage key used for a certificate file URL. */
+export function getCertificateStorageKey(fileUrl: string): string | null {
+  const key = sanitizeR2Key(fileUrl)
+  if (!key || key.includes('..')) return null
+  return key.startsWith('certificats/') ? key : `certificats/${key.split('/').pop()}`
+}
+
 /**
  * Resolves exact MIME types for all supported file formats.
  */

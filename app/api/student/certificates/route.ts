@@ -21,7 +21,10 @@ export async function GET(req: NextRequest) {
           { studentId },
           {
             enrollment: {
-              email: studentEmail
+              is: {
+                studentId: null,
+                email: { equals: studentEmail, mode: 'insensitive' }
+              }
             }
           }
         ]

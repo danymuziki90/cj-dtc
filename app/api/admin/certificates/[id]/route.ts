@@ -65,6 +65,43 @@ export async function PUT(
             }
         }
 
+        const resolvedStudentId = studentId ?? certificate.studentId
+        const resolvedFormationId = formationId ? parseInt(formationId) : certificate.formationId
+        const resolvedSessionId = sessionId
+            ? parseInt(sessionId)
+            : (sessionId === null ? null : certificate.sessionId)
+        let enrollmentId = certificate.enrollmentId
+
+        if (!enrollmentId && resolvedStudentId && resolvedFormationId) {
+            const linkedStudent = await prisma.student.findUnique({ where: { id: resolvedStudentId } })
+            const matchingEnrollment = linkedStudent
+                ? await prisma.enrollment.findFirst({
+                    where: {
+                        formationId: resolvedFormationId,
+                        sessionId: resolvedSessionId,
+                        OR: [
+                            { studentId: resolvedStudentId },
+                            { studentId: null, email: { equals: linkedStudent.email, mode: 'insensitive' } }
+                        ]
+                    },
+                    orderBy: { createdAt: 'desc' }
+                })
+                : null
+
+            if (matchingEnrollment) {
+                const linkedCertificate = await prisma.certificate.findUnique({
+                    where: { enrollmentId: matchingEnrollment.id }
+                })
+                if (linkedCertificate && linkedCertificate.id !== certificateId) {
+                    return NextResponse.json(
+                        { error: 'Un autre certificat est deja associe a cette inscription.' },
+                        { status: 409 }
+                    )
+                }
+                enrollmentId = matchingEnrollment.id
+            }
+        }
+
         // Si un nouveau fichier est fourni et qu'un ancien existait, nous pourrions supprimer l'ancien
         // Mais pour simplifier et éviter les erreurs de suppression, nous mettons simplement à jour le chemin.
 
@@ -76,6 +113,7 @@ export async function PUT(
                 holderName: holderName ?? undefined,
                 formationId: formationId ? parseInt(formationId) : undefined,
                 sessionId: sessionId ? parseInt(sessionId) : (sessionId === null ? null : undefined),
+                enrollmentId,
                 studentId: studentId ?? undefined,
                 status: status ?? undefined,
                 fileUrl: fileUrl !== undefined ? fileUrl : undefined,

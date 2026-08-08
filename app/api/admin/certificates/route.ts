@@ -132,6 +132,44 @@ export async function POST(request: NextRequest) {
         }
 
         // Si le nom complet du titulaire n'est pas fourni, utiliser celui de l'étudiant
+        const formation = await prisma.formation.findUnique({ where: { id: formationId } })
+        if (!formation) {
+            return NextResponse.json({ error: 'Formation introuvable' }, { status: 404 })
+        }
+
+        if (sessionId !== null) {
+            const session = await prisma.trainingSession.findFirst({
+                where: { id: sessionId, formationId }
+            })
+            if (!session) {
+                return NextResponse.json({ error: 'La session ne correspond pas a la formation choisie' }, { status: 400 })
+            }
+        }
+
+        const enrollment = await prisma.enrollment.findFirst({
+            where: {
+                formationId,
+                sessionId,
+                OR: [
+                    { studentId },
+                    { studentId: null, email: { equals: student.email, mode: 'insensitive' } }
+                ]
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+
+        if (enrollment) {
+            const existingEnrollmentCertificate = await prisma.certificate.findUnique({
+                where: { enrollmentId: enrollment.id }
+            })
+            if (existingEnrollmentCertificate) {
+                return NextResponse.json(
+                    { error: 'Un certificat est deja associe a cette inscription. Modifiez-le au lieu d en creer un nouveau.' },
+                    { status: 409 }
+                )
+            }
+        }
+
         if (!holderName || holderName.trim().length === 0) {
             holderName = `${student.firstName} ${student.lastName}`.trim()
         }
@@ -165,6 +203,7 @@ export async function POST(request: NextRequest) {
                 holderName,
                 formationId: formationId,
                 sessionId: sessionId,
+                enrollmentId: enrollment?.id,
                 studentId,
                 status,
                 fileUrl,
@@ -175,6 +214,13 @@ export async function POST(request: NextRequest) {
         })
 
         // Journalisation de l'opération
+        if (enrollment) {
+            await prisma.enrollment.update({
+                where: { id: enrollment.id },
+                data: { certificateIssued: true, certificateId: certificate.id }
+            })
+        }
+
         await writeAdminAuditLog({
             adminId: auth.admin.id,
             adminUsername: auth.admin.username,

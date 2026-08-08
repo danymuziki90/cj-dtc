@@ -156,7 +156,7 @@ export async function GET(req: NextRequest) {
       const formationPart = exportFilePart(session.formation.title)
       const sessionPart = exportFilePart(`Session-${new Date(session.startDate).toLocaleDateString('fr-FR')}`)
       const filename = `Inscriptions_${formationPart}_${sessionPart}.xlsx`
-      const file = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' })
+      const file = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' }) as ArrayBuffer
 
       return new NextResponse(file, {
         headers: {
