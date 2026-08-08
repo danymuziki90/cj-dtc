@@ -639,10 +639,11 @@ export default function Header() {
             <Link
               href={`/${locale}/contact`}
               className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border border-red-400/30 text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-[0_0_20px_rgba(200,16,46,0.25)] hover:shadow-[0_0_30px_rgba(200,16,46,0.4)] transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
-                  <Mail className="h-4 w-4" />
-                </a>
-              </div>
-            </div>
+            >
+              <Mail className="h-4 w-4" />
+              <span>Contact</span>
+            </Link>
+          </div>
 
             <p className="text-center text-[10px] text-slate-400">
               © {new Date().getFullYear()} CJ Development Training Center — Tous droits réservés.
