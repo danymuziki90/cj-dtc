@@ -2,8 +2,32 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function ForgotPasswordPage() {
+  const params = useParams<{ locale?: string }>();
+  const locale = params?.locale === "en" ? "en" : "fr";
+  const copy = locale === "en"
+    ? {
+        title: "Forgot password",
+        description: "Enter your email address to receive a reset link.",
+        email: "Email address",
+        sent: "Email sent",
+        send: "Send link",
+        sending: "Sending...",
+        back: "Back to sign in",
+        unavailable: "We are unable to send the email right now. Please try again in a few minutes.",
+      }
+    : {
+        title: "Mot de passe oublié",
+        description: "Entrez votre email pour recevoir un lien de réinitialisation.",
+        email: "E-mail",
+        sent: "E-mail envoyé",
+        send: "Envoyer le lien",
+        sending: "Envoi en cours...",
+        back: "Retour à la connexion",
+        unavailable: "Impossible d'envoyer l'e-mail. Veuillez réessayer dans quelques instants.",
+      };
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -19,7 +43,7 @@ export default function ForgotPasswordPage() {
       const res = await fetch("/api/student/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, locale }),
       });
 
       const data = await res.json();
@@ -33,7 +57,7 @@ export default function ForgotPasswordPage() {
       }
     } catch (error) {
       setStatus("error");
-      setMessage("Une erreur est survenue");
+      setMessage(copy.unavailable);
     } finally {
       setLoading(false);
     }
@@ -43,10 +67,10 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Mot de passe oublié
+          {copy.title}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Entrez votre email pour recevoir un lien de réinitialisation.
+          {copy.description}
         </p>
       </div>
 
@@ -70,17 +94,17 @@ export default function ForgotPasswordPage() {
                 </div>
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-blue-800">
-                    Email envoyé
+                    {copy.sent}
                   </h3>
                   <div className="mt-2 text-sm text-blue-700">
                     <p>{message}</p>
                   </div>
                   <div className="mt-4">
                     <Link
-                      href="/auth/login"
+                      href={`/${locale}/auth/student-login`}
                       className="text-sm font-medium text-blue-700 hover:text-blue-600"
                     >
-                      Retour à la connexion &rarr;
+                      {copy.back} &rarr;
                     </Link>
                   </div>
                 </div>
@@ -93,7 +117,7 @@ export default function ForgotPasswordPage() {
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Email
+                  {copy.email}
                 </label>
                 <div className="mt-1">
                   <input
@@ -119,7 +143,7 @@ export default function ForgotPasswordPage() {
                   disabled={loading}
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
-                  {loading ? "Envoi en cours..." : "Envoyer le lien"}
+                  {loading ? copy.sending : copy.send}
                 </button>
               </div>
             </form>
@@ -128,10 +152,10 @@ export default function ForgotPasswordPage() {
           {status !== "success" && (
             <div className="mt-6">
               <Link
-                href="/auth/login"
+                href={`/${locale}/auth/student-login`}
                 className="flex justify-center text-sm font-medium text-blue-600 hover:text-blue-500"
               >
-                Retour à la connexion
+                {copy.back}
               </Link>
             </div>
           )}

@@ -212,6 +212,10 @@ export function resolveAppBaseUrl(requestUrl?: string) {
     return fromEnv.replace(/\/+$/, '')
   }
 
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('APP_URL_MISSING: NEXT_PUBLIC_APP_URL (ou NEXTAUTH_URL) doit etre configuree en production.')
+  }
+
   if (requestUrl) {
     try {
       const url = new URL(requestUrl, 'http://localhost:3000')
@@ -233,6 +237,10 @@ export async function sendEmail(
   const transporter = getMailTransporter()
 
   if (!transporter) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('MAIL_CONFIGURATION_MISSING: MAIL_HOST, MAIL_USER et MAIL_PASSWORD sont requis en production.')
+    }
+
     console.log('---------------------------------------------------------')
     console.log(`MOCK EMAIL TO: ${Array.isArray(message.to) ? message.to.join(', ') : message.to}`)
     if (message.replyTo) {
@@ -278,9 +286,10 @@ export async function sendVerificationEmail(email: string, token: string) {
 export async function sendPasswordResetEmail(
   email: string,
   token: string,
-  resetPath: string = '/auth/reset-password'
+  resetPath: string = '/auth/reset-password',
+  appBaseUrl?: string,
 ) {
-  const resetLink = `${resolveAppBaseUrl()}${resetPath}?token=${token}`
+  const resetLink = `${(appBaseUrl || resolveAppBaseUrl()).replace(/\/+$/, '')}${resetPath}?token=${token}`
   const safeResetLink = escapeHtml(resetLink)
   const subject = 'Reinitialisation de mot de passe'
   const text = toPlainTextEmail([

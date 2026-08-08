@@ -1,11 +1,42 @@
 ﻿"use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 function ResetPasswordForm() {
   const router = useRouter();
+  const params = useParams<{ locale?: string }>();
+  const locale = params?.locale === "en" ? "en" : "fr";
+  const copy = locale === "en"
+    ? {
+        missingToken: "This reset link is missing or invalid.",
+        requestNew: "Request a new link",
+        title: "Reset your password",
+        password: "New password",
+        confirm: "Confirm password",
+        submit: "Reset password",
+        submitting: "Updating...",
+        success: "Password updated!",
+        redirect: "You will be redirected to the sign-in page...",
+        mismatch: "Passwords do not match.",
+        minimum: "Your password must contain at least 8 characters.",
+        unavailable: "An unexpected error occurred. Please try again.",
+      }
+    : {
+        missingToken: "Lien invalide ou incomplet.",
+        requestNew: "Demander un nouveau lien",
+        title: "Réinitialisation du mot de passe",
+        password: "Nouveau mot de passe",
+        confirm: "Confirmer le mot de passe",
+        submit: "Modifier le mot de passe",
+        submitting: "Modification...",
+        success: "Mot de passe modifié !",
+        redirect: "Vous allez être redirigé vers la page de connexion...",
+        mismatch: "Les mots de passe ne correspondent pas.",
+        minimum: "Le mot de passe doit contenir au moins 8 caractères.",
+        unavailable: "Une erreur temporaire est survenue. Veuillez réessayer.",
+      };
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -20,18 +51,18 @@ function ResetPasswordForm() {
 
     if (!token) {
       setError(
-        "Token manquant. Veuillez recliquer sur le lien reçu par email.",
+        copy.missingToken,
       );
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.");
+      setError(copy.mismatch);
       return;
     }
 
     if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères.");
+      setError(copy.minimum);
       return;
     }
 
@@ -42,7 +73,7 @@ function ResetPasswordForm() {
       const res = await fetch("/api/student/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, newPassword: password }),
+        body: JSON.stringify({ token, newPassword: password, locale }),
       });
 
       const data = await res.json();
@@ -50,13 +81,13 @@ function ResetPasswordForm() {
       if (res.ok) {
         setSuccess(true);
         setTimeout(() => {
-          router.push("/fr/auth/student-login?reset=success");
+          router.push(`/${locale}/auth/student-login?reset=success`);
         }, 3000);
       } else {
         setError(data.error || "Erreur lors de la réinitialisation");
       }
     } catch (err) {
-      setError("Une erreur est survenue.");
+      setError(copy.unavailable);
     } finally {
       setLoading(false);
     }
@@ -66,12 +97,12 @@ function ResetPasswordForm() {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-          <p className="text-red-600">Lien invalide ou manquant.</p>
+          <p className="text-red-600">{copy.missingToken}</p>
           <Link
-            href="/auth/forgot-password"
+            href={`/${locale}/auth/forgot-password`}
             className="text-blue-600 mt-4 block"
           >
-            Demander un nouveau lien
+            {copy.requestNew}
           </Link>
         </div>
       </div>
@@ -82,7 +113,7 @@ function ResetPasswordForm() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Réinitialisation du mot de passe
+          {copy.title}
         </h2>
       </div>
 
@@ -106,10 +137,10 @@ function ResetPasswordForm() {
                 </div>
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-blue-800">
-                    Mot de passe modifié !
+                    {copy.success}
                   </h3>
                   <div className="mt-2 text-sm text-blue-700">
-                    <p>Vous allez être redirigé vers la page de connexion...</p>
+                    <p>{copy.redirect}</p>
                   </div>
                 </div>
               </div>
@@ -121,7 +152,7 @@ function ResetPasswordForm() {
                   htmlFor="password"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Nouveau mot de passe
+                  {copy.password}
                 </label>
                 <div className="mt-1">
                   <input
@@ -141,7 +172,7 @@ function ResetPasswordForm() {
                   htmlFor="confirmPassword"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Confirmer le mot de passe
+                  {copy.confirm}
                 </label>
                 <div className="mt-1">
                   <input
@@ -164,7 +195,7 @@ function ResetPasswordForm() {
                   disabled={loading}
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
-                  {loading ? "Modification..." : "Modifier le mot de passe"}
+                  {loading ? copy.submitting : copy.submit}
                 </button>
               </div>
             </form>
