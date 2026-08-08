@@ -22,9 +22,12 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
   return (
     <>
       {!isAdmin && <Header />}
-      {/* Pages with a Hero: no top padding — Hero sits under the transparent fixed navbar.
-          Other pages (e.g. details pages): pt-[70px] lg:pt-[105px] compensates for the fixed header height. */}
-      <main className={hasHero ? '' : 'pt-[70px] lg:pt-[105px]'}>{children}</main>
+      {/* 
+        Le Header global possède désormais un fond solide et indépendant.
+        Toutes les pages publiques doivent conserver ce padding supérieur
+        pour éviter que le contenu ne glisse sous la barre de navigation.
+      */}
+      <main className="pt-[70px] lg:pt-[105px]">{children}</main>
       {!isAdmin && <Footer />}
     </>
   )
