@@ -1,0 +1,52 @@
+
+> cj-dtc-next@0.1.0 test:e2e
+> playwright test
+
+
+Running 7 tests using 1 worker
+
+  ok 1 [chrome] › tests\e2e\admin-responsive-qa.spec.ts:74:11 › Admin responsive visual QA › desktop › critical admin pages render well on desktop (4.0m)
+  ok 2 [chrome] › tests\e2e\admin-responsive-qa.spec.ts:74:11 › Admin responsive visual QA › mobile › critical admin pages render well on mobile (1.6m)
+  x  3 [chrome] › tests\e2e\admin-student-auth.spec.ts:167:7 › Admin and student critical flows › admin login works (1.1m)
+  -  4 [chrome] › tests\e2e\admin-student-auth.spec.ts:172:7 › Admin and student critical flows › admin cannot create a student account before payment is fully validated
+  -  5 [chrome] › tests\e2e\admin-student-auth.spec.ts:205:7 › Admin and student critical flows › free session registration creates the student account automatically
+  -  6 [chrome] › tests\e2e\admin-student-auth.spec.ts:227:7 › Admin and student critical flows › paid session validation creates the student account automatically
+  -  7 [chrome] › tests\e2e\admin-student-auth.spec.ts:252:7 › Admin and student critical flows › student can log in after admin resets credentials on an auto-created account
+
+
+  1) [chrome] › tests\e2e\admin-student-auth.spec.ts:167:7 › Admin and student critical flows › admin login works 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('Pilotage global de la plateforme')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 30000ms[22m
+    [2m  - waiting for getByText('Pilotage global de la plateforme')[22m
+
+
+      36 |
+      37 |   await page.goto('/admin/dashboard')
+    > 38 |   await expect(page.getByText('Pilotage global de la plateforme')).toBeVisible({ timeout: 30_000 })
+         |                                                                    ^
+      39 | }
+      40 |
+      41 | async function createFormationAndSession(
+        at loginAsAdmin (C:\Users\danym\Desktop\cjdtc\cj-dtc\tests\e2e\admin-student-auth.spec.ts:38:68)
+        at C:\Users\danym\Desktop\cjdtc\cj-dtc\tests\e2e\admin-student-auth.spec.ts:168:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\admin-student-auth-Admin-a-1227f-cal-flows-admin-login-works-chrome\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\admin-student-auth-Admin-a-1227f-cal-flows-admin-login-works-chrome\error-context.md
+
+  Slow test file: [chrome] › tests\e2e\admin-responsive-qa.spec.ts (5.6m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    [chrome] › tests\e2e\admin-student-auth.spec.ts:167:7 › Admin and student critical flows › admin login works 
+  4 did not run
+  2 passed (8.5m)
