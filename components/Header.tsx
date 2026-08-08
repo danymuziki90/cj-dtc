@@ -112,8 +112,8 @@ function NavLink({ href, label }: { href: string; label: string }) {
         relative rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap
         ${
           isActive
-            ? 'text-white bg-gradient-to-r from-[var(--cj-blue)] to-[#0a2e54] shadow-md shadow-[var(--cj-blue)]/30 border border-white/20'
-            : 'text-white/80 hover:text-white hover:bg-white/[0.1] active:scale-95'
+            ? 'text-white bg-[var(--cj-blue-700)] shadow-md shadow-[var(--cj-blue)]/30 border border-white/20'
+            : 'text-white/80 hover:text-white hover:bg-[var(--cj-blue-700)] active:scale-95'
         }
       `}
     >
@@ -191,8 +191,8 @@ function DesktopDropdown({
         aria-haspopup="true"
         className={`
           flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-white/30
-          ${isOpen ? 'text-white bg-white/[0.12] shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/[0.1]'}
-          group-hover/dropdown:text-white group-hover/dropdown:bg-white/[0.1]
+          ${isOpen ? 'text-white bg-[var(--cj-blue-700)] shadow-sm' : 'text-white/80 hover:text-white hover:bg-[var(--cj-blue-700)]'}
+          group-hover/dropdown:text-white group-hover/dropdown:bg-[var(--cj-blue-700)]
         `}
       >
         <span>{label}</span>
@@ -475,8 +475,8 @@ export default function Header() {
       <div
         className={`hidden lg:block text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'border-b border-white/10 bg-gradient-to-r from-[#001a3f]/95 to-[var(--cj-blue)]/95 text-slate-100 shadow-sm backdrop-blur-3xl'
-            : 'border-b border-white/15 bg-gradient-to-r from-[#001a3f]/70 via-[var(--cj-blue)]/50 to-[#001a3f]/70 text-white backdrop-blur-2xl'
+            ? 'border-b border-white/10 bg-[var(--cj-blue)] text-slate-100 shadow-sm backdrop-blur-3xl'
+            : 'border-b border-white/15 bg-[var(--cj-blue)]/90 text-white backdrop-blur-2xl'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -549,8 +549,8 @@ export default function Header() {
       <div
         className={`w-full transition-all duration-500 ease-in-out ${
           scrolled
-            ? 'lg:border-b lg:border-white/10 lg:bg-gradient-to-r lg:from-[#001a3f]/95 lg:to-[var(--cj-blue)]/95 lg:backdrop-blur-3xl lg:shadow-[0_10px_40px_-10px_rgba(0,45,114,0.5)] border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
-            : 'lg:border-b lg:border-white/15 lg:bg-gradient-to-r lg:from-[#001a3f]/60 lg:via-[var(--cj-blue)]/40 lg:to-[#001a3f]/60 lg:backdrop-blur-2xl lg:shadow-[0_8px_32px_rgba(0,0,0,0.15)] border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
+            ? 'lg:border-b lg:border-white/10 lg:bg-[var(--cj-blue)] lg:backdrop-blur-3xl lg:shadow-[0_10px_40px_-10px_rgba(0,45,114,0.5)] border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
+            : 'lg:border-b lg:border-white/15 lg:bg-[var(--cj-blue)]/90 lg:backdrop-blur-2xl lg:shadow-[0_8px_32px_rgba(0,0,0,0.15)] border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -632,7 +632,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href={`/${locale}/contact`}
-              className="group bg-gradient-to-r from-[var(--cj-red)] to-red-600 hover:from-[var(--cj-red-700)] hover:to-red-700 border border-red-400/30 text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-[0_0_20px_rgba(200,16,46,0.25)] hover:shadow-[0_0_30px_rgba(200,16,46,0.4)] transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
+              className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border border-red-400/30 text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-[0_0_20px_rgba(200,16,46,0.25)] hover:shadow-[0_0_30px_rgba(200,16,46,0.4)] transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
             >
               <Mail className="h-3.5 w-3.5 text-white transition-colors" />
               <span>{labels.contact}</span>
