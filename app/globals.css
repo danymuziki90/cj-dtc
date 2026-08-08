@@ -411,6 +411,29 @@ a:hover {
   z-index: 0;
 }
 
+/* The home page uses a dedicated editorial layout rather than the shared dark hero. */
+.hero-bg-unified.hero-home {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.hero-bg-unified.hero-home::before,
+.hero-bg-unified.hero-home::after {
+  display: none;
+}
+
+.hero-bg-unified.hero-home .hero-title-unified {
+  color: var(--cj-blue) !important;
+}
+
+.hero-bg-unified.hero-home .hero-home-description {
+  color: #334155 !important;
+}
+
+.hero-bg-unified.hero-home .hero-home-visual-copy {
+  color: #ffffff !important;
+}
+
 /* Premium Ken Burns Slow-Zoom Animation */
 @keyframes kenburns {
   0% {

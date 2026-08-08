@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, ChevronLeft, ChevronRight, Home, CheckCircle2 } from 'lucide-react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { ArrowRight, ChevronLeft, ChevronRight, Home, CheckCircle2, Award, GraduationCap, Sparkles } from 'lucide-react'
 import type { HeroSectionData, HeroSlideData, HeroBadge, HeroCta } from '@/lib/hero/types'
 import { useParams } from 'next/navigation'
 
@@ -61,10 +61,10 @@ const DEFAULT_HOME_SLIDES = [
     imageUrl: '/lor-de-formation.jpeg',
     eyebrowFr: 'Centre de Formation Panafricain',
     eyebrowEn: 'Pan-African Training Center',
-    titleFr: 'CJ DEVELOPMENT TRAINING CENTER',
-    titleEn: 'CJ DEVELOPMENT TRAINING CENTER',
-    descriptionFr: "Former, accompagner, inspirer et révéler les talents pour bâtir des carrières solides, des entreprises performantes et des leaders d'impact.",
-    descriptionEn: 'Training, guiding, inspiring, and unleashing talents to build solid careers, high-performing enterprises, and impactful leaders.',
+    titleFr: 'Développez vos compétences. Construisez votre avenir.',
+    titleEn: 'Build your skills. Shape your future.',
+    descriptionFr: 'Des formations pratiques et professionnalisantes conçues pour développer des compétences concrètes, obtenir des certifications et progresser dans votre carrière.',
+    descriptionEn: 'Practical, career-focused training designed to build concrete skills, earn certifications, and advance your career.',
     badgeFr: 'Excellence Panafricaine',
     badgeEn: 'Pan-African Excellence',
   },
@@ -106,6 +106,7 @@ export default function UnifiedHero({
   const params = useParams<{ locale?: string }>()
   const locale = defaultLocale || params?.locale || 'fr'
   const isFr = locale !== 'en'
+  const shouldReduceMotion = useReducedMotion()
 
   const effectiveCompact = heroData?.compact ?? compact
   const effectiveOpacity = heroData?.overlayOpacity ?? overlayOpacity
@@ -149,14 +150,14 @@ export default function UnifiedHero({
   }, [slides.length])
 
   useEffect(() => {
-    if (!isSlideshow || isPaused) return
+    if (!isSlideshow || isPaused || shouldReduceMotion) return
     timerRef.current = setInterval(() => {
       nextSlide()
     }, 6000)
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [isSlideshow, isPaused, nextSlide])
+  }, [isSlideshow, isPaused, nextSlide, shouldReduceMotion])
 
   if (!slides.length) return null
 
@@ -164,12 +165,12 @@ export default function UnifiedHero({
 
   return (
     <section 
-      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'bg-white lg:min-h-[680px] lg:pt-36 lg:pb-24' : ''} ${effectiveCompact ? 'min-h-[400px] lg:min-h-[50vh] pt-32 pb-12' : 'min-h-[450px] lg:min-h-[75vh] pt-36 pb-16'}`}
+      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home lg:min-h-[680px] lg:pt-36 lg:pb-24' : ''} ${effectiveCompact ? 'min-h-[400px] lg:min-h-[50vh] pt-32 pb-12' : 'min-h-[450px] lg:min-h-[75vh] pt-36 pb-16'}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* ── Background Slides ── */}
-      <div className={`absolute inset-0 z-0 select-none overflow-hidden bg-[#001020] ${isHomeHero ? 'lg:left-auto lg:w-[54%]' : ''}`}>
+      <div className={`absolute inset-0 z-0 select-none overflow-hidden bg-[#001020] ${isHomeHero ? 'hidden' : ''}`}>
         {slides.map((slide, index) => (
           <div
             key={`${slide.id}-${index}`}
@@ -184,7 +185,7 @@ export default function UnifiedHero({
                 fill
                 priority={index === 0}
                 className={`object-cover ${
-                  index === currentIndex ? 'scale-105 transition-transform duration-[8000ms] ease-out' : 'scale-100'
+                  index === currentIndex && !shouldReduceMotion ? 'scale-105 transition-transform duration-[8000ms] ease-out' : 'scale-100'
                 }`}
                 sizes="100vw"
               />
@@ -198,9 +199,6 @@ export default function UnifiedHero({
         <div className={`absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-50 to-transparent z-20 pointer-events-none ${isHomeHero ? 'lg:hidden' : ''}`} />
       </div>
 
-      {isHomeHero && (
-        <div className="pointer-events-none absolute inset-y-0 left-[40%] z-20 hidden w-32 bg-white lg:block" style={{ clipPath: 'polygon(0 0, 72% 0, 26% 100%, 0 100%)' }} />
-      )}
 
       {/* ── Nav Arrows (for Slideshow) ── */}
       {isSlideshow && (
@@ -221,7 +219,7 @@ export default function UnifiedHero({
           </button>
 
           {/* Progress Dots */}
-          <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 backdrop-blur-md px-5 py-2.5 rounded-full shadow-xl ${isHomeHero ? 'border border-slate-200 bg-white/90 lg:left-[24%]' : 'border border-white/15 bg-black/40'}`}>
+          <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-30 items-center gap-2.5 backdrop-blur-md px-5 py-2.5 rounded-full shadow-xl ${isHomeHero ? 'hidden lg:flex border border-slate-200 bg-white/90 lg:left-[24%]' : 'flex border border-white/15 bg-black/40'}`}>
             {slides.map((slide, index) => (
               <button
                 key={`dot-${index}`}
@@ -275,12 +273,12 @@ export default function UnifiedHero({
               )}
 
               {/* Eyebrow */}
-              {(isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn) && (
+              {(isHomeHero || (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)) && (
                 <motion.div custom={0.05} variants={fadeUp}
                   className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] backdrop-blur-sm shadow-sm ${isHomeHero ? 'border-blue-100 bg-blue-50 text-[var(--cj-blue)]' : 'border-white/20 bg-white/10 text-blue-200'}`}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
-                  {isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn}
+                  {isHomeHero ? 'CJ DEVELOPMENT' : (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)}
                 </motion.div>
               )}
 
@@ -297,7 +295,7 @@ export default function UnifiedHero({
               {/* Description */}
               {(isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn) && (
                 <motion.p custom={0.2} variants={fadeUp}
-                  className={`max-w-2xl text-base sm:text-lg leading-relaxed font-opensans ${isHomeHero ? 'text-slate-700 drop-shadow-none' : 'text-white/90 drop-shadow-sm'}`}
+                  className={`hero-home-description max-w-2xl text-base sm:text-lg leading-relaxed font-opensans ${isHomeHero ? 'text-slate-700 drop-shadow-none' : 'text-white/90 drop-shadow-sm'}`}
                 >
                   {isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn}
                 </motion.p>
@@ -337,12 +335,27 @@ export default function UnifiedHero({
                         {isFr ? 'Découvrir nos formations' : 'Discover our courses'}
                         <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                       </Link>
-                      <Link href={`/${locale}/inscription`} className={`inline-flex items-center justify-center rounded-xl border px-8 py-3.5 text-sm font-semibold backdrop-blur-md transition duration-300 hover:scale-[1.02] ${isHomeHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-blue-50' : 'border-white/30 bg-white/10 text-white hover:bg-white/20'}`}>
-                        {isFr ? "S'inscrire maintenant" : 'Register now'}
+                      <Link href={`/${locale}/espace-etudiants`} className={`inline-flex items-center justify-center rounded-xl border px-8 py-3.5 text-sm font-semibold backdrop-blur-md transition duration-300 hover:scale-[1.02] ${isHomeHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-blue-50' : 'border-white/30 bg-white/10 text-white hover:bg-white/20'}`}>
+                        {isFr ? 'Espace étudiant' : 'Student space'}
                       </Link>
                     </>
                   ) : null}
                 </motion.div>
+              )}
+
+              {isHomeHero && (
+                <motion.ul custom={0.42} variants={fadeUp} className="grid gap-2 pt-2 text-xs font-semibold text-slate-600 sm:grid-cols-3">
+                  {[
+                    { label: isFr ? 'Formations pratiques' : 'Practical training', icon: GraduationCap },
+                    { label: isFr ? 'Accompagnement personnalisé' : 'Personalized support', icon: Sparkles },
+                    { label: isFr ? 'Certifications professionnelles' : 'Professional certifications', icon: Award },
+                  ].map(({ label, icon: Icon }) => (
+                    <li key={label} className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 shrink-0 text-[var(--cj-red)]" aria-hidden="true" />
+                      <span>{label}</span>
+                    </li>
+                  ))}
+                </motion.ul>
               )}
 
               {/* Children (e.g. extra stats blocks) */}
@@ -352,6 +365,32 @@ export default function UnifiedHero({
                 </motion.div>
               )}
             </div>
+
+            {isHomeHero && currentSlide.imageUrl && (
+              <motion.div custom={0.28} variants={fadeIn} className="relative order-last mt-2 lg:col-span-6 lg:mt-0">
+                <div className="relative min-h-[280px] overflow-hidden rounded-[2rem] border border-blue-100 bg-[var(--cj-blue)] shadow-[0_28px_60px_-30px_rgba(10,79,179,0.55)] sm:min-h-[360px] lg:min-h-[470px]">
+                  <Image
+                    src={currentSlide.imageUrl}
+                    alt={currentSlide.imageAlt || currentSlide.titleFr || 'CJ Development'}
+                    fill
+                    priority
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 45vw, 100vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#052a62]/65 via-transparent to-transparent" />
+                  <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/90 px-3 py-1.5 text-[11px] font-bold text-[var(--cj-blue)] shadow-sm backdrop-blur-sm sm:left-6 sm:top-6">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[var(--cj-red)]" />
+                    {isFr ? 'Apprendre. Progresser. Réussir.' : 'Learn. Grow. Succeed.'}
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/20 bg-slate-950/65 p-4 text-white shadow-xl backdrop-blur-md sm:bottom-6 sm:left-6 sm:right-auto sm:max-w-[280px]">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-100">CJ Development</p>
+                    <p className="hero-home-visual-copy mt-1 text-sm font-semibold leading-snug">
+                      {isFr ? 'Des compétences concrètes pour avancer avec confiance.' : 'Practical skills to move forward with confidence.'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* Right Column Glassmorphism Badge (Only for Slideshow mode if badge exists) */}
             {!isHomeHero && isSlideshow && (currentSlide.badgeFr || currentSlide.badgeEn) && (
