@@ -345,13 +345,14 @@ export default function CertificatesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-50 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="flex items-center space-x-3 mb-8">
-          <Link href="/fr/student" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
-            <ChevronRight className="w-5 h-5 rotate-180" />
-            <span>Retour au tableau de bord</span>
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900 ml-4 border-l pl-4 border-gray-300">Mes Certificats</h1>
-        </div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div className="flex items-center space-x-3">
+            <Link href="/fr/student" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+              <ChevronRight className="w-5 h-5 rotate-180" />
+              <span>Retour au tableau de bord</span>
+            </Link>
+            <h1 className="text-2xl font-bold text-gray-900 ml-4 border-l pl-4 border-gray-300">Mes Certificats</h1>
+          </div>
             
             <div className="flex items-center space-x-4">
               <div className="relative">
@@ -447,7 +448,6 @@ export default function CertificatesPage() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
