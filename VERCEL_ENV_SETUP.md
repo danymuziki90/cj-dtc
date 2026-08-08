@@ -11,11 +11,11 @@ Les déploiements échouent car les variables d'environnement ne sont pas config
 
 ```
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DB?sslmode=require
-NEXTAUTH_URL=https://cjdevelopmenttc.org
+NEXTAUTH_URL=https://cj-dtc-main.vercel.app
 NEXTAUTH_SECRET=votre-secret-long-aleatoire
 JWT_SECRET=votre-secret-long-aleatoire
-NEXT_PUBLIC_APP_URL=https://cjdevelopmenttc.org
-NEXT_RES_URL=https://cjdevelopmenttc.org
+NEXT_PUBLIC_APP_URL=https://cj-dtc-main.vercel.app
+NEXT_RES_URL=https://cj-dtc-main.vercel.app
 ```
 
 ### Variables Admin (obligatoires)

@@ -21,7 +21,7 @@ Variables critiques :
 Notes :
 - Garder `ADMIN_ALLOW_EMERGENCY_LOGIN=false` en production.
 - Pour la configuration SMTP actuelle, `MAIL_TLS_SERVERNAME=web-hosting.com` est requis.
-- Pour la réinitialisation de mot de passe, définir `NEXT_PUBLIC_APP_URL` sur l'URL publique canonique (par exemple `https://www.cjdevelopmenttc.org`) ; ne pas utiliser localhost ni une URL Vercel temporaire.
+- Pour la réinitialisation de mot de passe, définir `NEXT_PUBLIC_APP_URL` sur l'URL publique de production : `https://cj-dtc-main.vercel.app`.
 - Le service refuse désormais l'envoi simulé en production : `MAIL_HOST`, `MAIL_USER` et `MAIL_PASSWORD` doivent être configurés dans Vercel avant de demander un lien.
 
 ## 2. Base de données
