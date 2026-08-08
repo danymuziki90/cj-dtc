@@ -162,15 +162,17 @@ export default function UnifiedHero({
   if (!slides.length) return null
 
   const currentSlide = slides[currentIndex] || slides[0]
+  const isPageHero = !isHomeHero
+  const showPageVisual = isPageHero && Boolean(currentSlide.imageUrl)
 
   return (
     <section 
-      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home lg:min-h-[680px] lg:pt-36 lg:pb-24' : ''} ${effectiveCompact ? 'min-h-[400px] lg:min-h-[50vh] pt-32 pb-12' : 'min-h-[450px] lg:min-h-[75vh] pt-36 pb-16'}`}
+      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home lg:min-h-[680px] lg:pt-36 lg:pb-24' : 'hero-page'} ${effectiveCompact ? 'min-h-[360px] lg:min-h-[440px] pt-32 pb-12' : 'min-h-[420px] lg:min-h-[520px] pt-32 pb-14'}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* ── Background Slides ── */}
-      <div className={`absolute inset-0 z-0 select-none overflow-hidden bg-[#001020] ${isHomeHero ? 'hidden' : ''}`}>
+      <div className={`absolute inset-0 z-0 select-none overflow-hidden bg-[#001020] ${isHomeHero || isPageHero ? 'hidden' : ''}`}>
         {slides.map((slide, index) => (
           <div
             key={`${slide.id}-${index}`}
@@ -201,7 +203,7 @@ export default function UnifiedHero({
 
 
       {/* ── Nav Arrows (for Slideshow) ── */}
-      {isSlideshow && (
+      {isSlideshow && isHomeHero && (
         <>
           <button
             onClick={prevSlide}
@@ -249,23 +251,31 @@ export default function UnifiedHero({
             exit="exit"
           >
             {/* Left Column (Text & CTAs) */}
-            <div className={`${isSlideshow && (currentSlide.badgeFr || currentSlide.badgeEn) ? "lg:col-span-7" : "lg:col-span-9"} space-y-6 ${isHomeHero ? 'lg:col-span-6' : ''}`}>
+            <div className={`space-y-6 ${
+              isHomeHero
+                ? 'lg:col-span-6'
+                : showPageVisual
+                ? 'lg:col-span-7'
+                : isSlideshow && (currentSlide.badgeFr || currentSlide.badgeEn)
+                ? 'lg:col-span-7'
+                : 'lg:col-span-9'
+            }`}>
               {/* Breadcrumb */}
               {(breadcrumbs.length > 0) && (
                 <motion.nav
                   aria-label="Breadcrumb"
                   custom={0} variants={fadeIn}
-                  className="mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium text-white/70"
+                  className={`mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium ${isPageHero ? 'text-slate-500' : 'text-white/70'}`}
                 >
-                  <Link href={homeHref} className="inline-flex items-center gap-1 hover:text-white transition-colors">
+                  <Link href={homeHref} className={`inline-flex items-center gap-1 transition-colors ${isPageHero ? 'hover:text-[var(--cj-blue)]' : 'hover:text-white'}`}>
                     <Home className="h-3.5 w-3.5" />{homeLabel}
                   </Link>
                   {breadcrumbs.map((item, i) => (
                     <span key={i} className="flex items-center gap-1.5">
                       <ChevronRight className="h-3.5 w-3.5 opacity-50" />
                       {item.href
-                        ? <Link href={item.href} className="hover:text-white transition-colors">{item.label}</Link>
-                        : <span className="text-white font-semibold">{item.label}</span>
+                          ? <Link href={item.href} className={`transition-colors ${isPageHero ? 'hover:text-[var(--cj-blue)]' : 'hover:text-white'}`}>{item.label}</Link>
+                          : <span className={`${isPageHero ? 'text-[var(--cj-blue)]' : 'text-white'} font-semibold`}>{item.label}</span>
                       }
                     </span>
                   ))}
@@ -275,7 +285,7 @@ export default function UnifiedHero({
               {/* Eyebrow */}
               {(isHomeHero || (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)) && (
                 <motion.div custom={0.05} variants={fadeUp}
-                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] backdrop-blur-sm shadow-sm ${isHomeHero ? 'border-blue-100 bg-blue-50 text-[var(--cj-blue)]' : 'border-white/20 bg-white/10 text-blue-200'}`}
+                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm ${isHomeHero || isPageHero ? 'border-blue-100 bg-[var(--cj-blue-50)] text-[var(--cj-blue)]' : 'border-white/20 bg-white/10 text-blue-200 backdrop-blur-sm'}`}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
                   {isHomeHero ? 'CJ DEVELOPMENT' : (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)}
@@ -284,18 +294,18 @@ export default function UnifiedHero({
 
               {/* Title */}
               <motion.h1 custom={0.12} variants={fadeUp}
-                className={`hero-title-unified max-w-4xl ${isHomeHero ? 'text-[var(--cj-blue)] drop-shadow-none' : 'drop-shadow-md text-white'}`}
+                className={`hero-title-unified max-w-4xl ${isHomeHero || isPageHero ? 'text-[var(--cj-blue)] drop-shadow-none' : 'drop-shadow-md text-white'}`}
               >
                 {isFr ? currentSlide.titleFr : currentSlide.titleEn}
               </motion.h1>
-              {isHomeHero && (
+              {(isHomeHero || isPageHero) && (
                 <motion.div custom={0.16} variants={fadeUp} className="h-1 w-16 rounded-full bg-[var(--cj-red)]" />
               )}
 
               {/* Description */}
               {(isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn) && (
                 <motion.p custom={0.2} variants={fadeUp}
-                  className={`hero-home-description max-w-2xl text-base sm:text-lg leading-relaxed font-opensans ${isHomeHero ? 'text-slate-700 drop-shadow-none' : 'text-white/90 drop-shadow-sm'}`}
+                  className={`hero-home-description max-w-2xl text-base sm:text-lg leading-relaxed font-opensans ${isHomeHero || isPageHero ? 'text-slate-700 drop-shadow-none' : 'text-white/90 drop-shadow-sm'}`}
                 >
                   {isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn}
                 </motion.p>
@@ -319,7 +329,7 @@ export default function UnifiedHero({
                     effectiveCtas.map((cta, i) => (
                       cta.variant === 'secondary'
                         ? <Link key={i} href={cta.href}
-                            className={`inline-flex items-center justify-center gap-2 rounded-xl border px-6 py-3.5 text-sm font-bold backdrop-blur-md transition duration-200 hover:scale-[1.02] active:scale-95 ${isHomeHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-blue-50' : 'border-white/30 bg-white/10 text-white hover:bg-white/20'}`}>
+                            className={`inline-flex items-center justify-center gap-2 rounded-xl border px-6 py-3.5 text-sm font-bold transition duration-200 hover:scale-[1.02] active:scale-95 ${isHomeHero || isPageHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-[var(--cj-blue-50)]' : 'border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md'}`}>
                             {cta.label}
                           </Link>
                         : <Link key={i} href={cta.href}
@@ -335,7 +345,7 @@ export default function UnifiedHero({
                         {isFr ? 'Découvrir nos formations' : 'Discover our courses'}
                         <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                       </Link>
-                      <Link href={`/${locale}/espace-etudiants`} className={`inline-flex items-center justify-center rounded-xl border px-8 py-3.5 text-sm font-semibold backdrop-blur-md transition duration-300 hover:scale-[1.02] ${isHomeHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-blue-50' : 'border-white/30 bg-white/10 text-white hover:bg-white/20'}`}>
+                      <Link href={`/${locale}/espace-etudiants`} className={`inline-flex items-center justify-center rounded-xl border px-8 py-3.5 text-sm font-semibold transition duration-300 hover:scale-[1.02] ${isHomeHero || isPageHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-[var(--cj-blue-50)]' : 'border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md'}`}>
                         {isFr ? 'Espace étudiant' : 'Student space'}
                       </Link>
                     </>
@@ -360,7 +370,11 @@ export default function UnifiedHero({
 
               {/* Children (e.g. extra stats blocks) */}
               {children && (
-                <motion.div custom={0.4} variants={fadeUp} className="mt-8 pt-8 border-t border-white/10">
+                <motion.div
+                  custom={0.4}
+                  variants={fadeUp}
+                  className={isPageHero ? 'mt-8 rounded-3xl bg-[var(--cj-blue)] p-5 text-white shadow-xl shadow-blue-900/15' : 'mt-8 pt-8 border-t border-white/10'}
+                >
                   {children}
                 </motion.div>
               )}
@@ -392,8 +406,30 @@ export default function UnifiedHero({
               </motion.div>
             )}
 
+            {showPageVisual && (
+              <motion.div custom={0.28} variants={fadeIn} className="relative order-last hidden lg:col-span-5 lg:block">
+                <div className="relative min-h-[280px] overflow-hidden rounded-[2rem] border border-blue-100 bg-[var(--cj-blue)] shadow-[0_24px_54px_-32px_rgba(10,79,179,0.55)]">
+                  <Image
+                    src={currentSlide.imageUrl}
+                    alt={currentSlide.imageAlt || currentSlide.titleFr || 'CJ Development'}
+                    fill
+                    priority
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 34vw, 100vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#052a62]/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-white/20 bg-white/90 p-4 text-[var(--cj-blue)] shadow-lg">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--cj-red)]">CJ Development</p>
+                    <p className="mt-1 text-sm font-bold leading-snug">
+                      {isFr ? 'Une expérience claire, moderne et orientée résultat.' : 'A clear, modern, results-focused experience.'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Right Column Glassmorphism Badge (Only for Slideshow mode if badge exists) */}
-            {!isHomeHero && isSlideshow && (currentSlide.badgeFr || currentSlide.badgeEn) && (
+            {!isHomeHero && !showPageVisual && isSlideshow && (currentSlide.badgeFr || currentSlide.badgeEn) && (
               <motion.div custom={0.4} variants={fadeIn} className="lg:col-span-5 relative flex items-center justify-center min-h-[200px] lg:min-h-0 hidden md:flex">
                 <div className="relative rounded-3xl border border-white/15 bg-white/10 p-8 backdrop-blur-md shadow-2xl transition duration-500 hover:scale-[1.02] max-w-sm hover:border-white/30">
                   <div className="absolute -inset-1 rounded-3xl bg-gradient-to-tr from-blue-500/20 to-red-500/20 blur-lg opacity-60 pointer-events-none" />

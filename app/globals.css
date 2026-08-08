@@ -417,16 +417,26 @@ a:hover {
   color: #0f172a !important;
 }
 
+/* Internal public pages use a compact content-first hero derived from the CJ identity. */
+.hero-bg-unified.hero-page {
+  background: linear-gradient(180deg, #ffffff 0%, var(--cj-blue-50) 100%) !important;
+  color: #0f172a !important;
+}
+
 .hero-bg-unified.hero-home::before,
-.hero-bg-unified.hero-home::after {
+.hero-bg-unified.hero-home::after,
+.hero-bg-unified.hero-page::before,
+.hero-bg-unified.hero-page::after {
   display: none;
 }
 
-.hero-bg-unified.hero-home .hero-title-unified {
+.hero-bg-unified.hero-home .hero-title-unified,
+.hero-bg-unified.hero-page .hero-title-unified {
   color: var(--cj-blue) !important;
 }
 
-.hero-bg-unified.hero-home .hero-home-description {
+.hero-bg-unified.hero-home .hero-home-description,
+.hero-bg-unified.hero-page .hero-home-description {
   color: #334155 !important;
 }
 
@@ -781,6 +791,26 @@ a:hover {
   font-weight: 900 !important;
   letter-spacing: -0.025em !important;
   font-family: 'Montserrat', sans-serif !important;
+}
+
+.hero-bg-unified.hero-home h1,
+.hero-bg-unified.hero-page h1 {
+  color: var(--cj-blue) !important;
+}
+
+.hero-bg-unified.hero-home p,
+.hero-bg-unified.hero-page p,
+.hero-bg-unified.hero-home .hero-description,
+.hero-bg-unified.hero-page .hero-description,
+.hero-bg-unified.hero-home .hero-subtitle,
+.hero-bg-unified.hero-page .hero-subtitle {
+  color: #334155 !important;
+}
+
+.hero-bg-unified.hero-page [class*="bg-[var(--cj-blue)]"] p,
+.hero-bg-unified.hero-page [class*="bg-[var(--cj-blue)]"] span,
+.hero-bg-unified.hero-page [class*="bg-[var(--cj-blue)]"] svg {
+  color: #ffffff !important;
 }
 
 .cj-section-title {
