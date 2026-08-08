@@ -197,8 +197,12 @@ export default function UnifiedHero({
 
         {/* ── Gradient Overlays ── */}
         <div className={`absolute inset-0 z-20 bg-gradient-to-r from-[#000d1f]/90 via-[#000d1f]/60 to-[#000d1f]/30 ${isHomeHero ? 'lg:hidden' : ''}`} style={{ opacity: effectiveOpacity / 100 }} />
-        <div className={`absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#000d1f]/80 via-[#000d1f]/40 to-transparent z-20 pointer-events-none ${isHomeHero ? 'lg:hidden' : ''}`} />
-        <div className={`absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-50 to-transparent z-20 pointer-events-none ${isHomeHero ? 'lg:hidden' : ''}`} />
+        {isHomeHero && (
+          <>
+            <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#000d1f]/80 via-[#000d1f]/40 to-transparent z-20 pointer-events-none lg:hidden" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-50 to-transparent z-20 pointer-events-none lg:hidden" />
+          </>
+        )}
       </div>
 
 
