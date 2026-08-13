@@ -15,7 +15,9 @@ export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const auth = await requireStudent(req)
-  if (auth.error) throw new ApiError(401, "Non authentifié")
+  if (auth.error || !auth.student) throw new ApiError(401, "Non authentifié")
+  
+  try {
     const enrollments = await prisma.enrollment.findMany({
       where: {
         studentId: auth.student.id,
@@ -65,6 +67,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
       assignments: formattedAssignments,
       summary: getStudentAssignmentSummary(formattedAssignments),
     }, { status: 200 })
+  } catch (err: unknown) {
+    console.error('[GET /api/student/assignments] Erreur Prisma:', err)
+    throw new ApiError(500, "Erreur lors de la récupération des travaux.")
+  }
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {

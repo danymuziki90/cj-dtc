@@ -40,12 +40,24 @@ export default function TravauxContent() {
     if (showSpinner) setLoading(true);
     try {
       const response = await fetch(`/api/student/assignments?t=${Date.now()}`);
+      
       if (!response.ok) {
         if (response.status === 401) {
           router.push(`/${locale}/auth/student-login`);
           return;
         }
-        throw new Error("Erreur de chargement des travaux");
+        const ct = response.headers.get("content-type") || "";
+        const errData = ct.includes("application/json") 
+          ? await response.json().catch(() => ({})) 
+          : {};
+        throw new Error(errData.error || `Erreur serveur (${response.status})`);
+      }
+      
+      const ct = response.headers.get("content-type") || "";
+      if (!ct.includes("application/json")) {
+        const text = await response.text().catch(() => "");
+        console.error("[TravauxContent] Réponse non-JSON reçue :", text.substring(0, 500));
+        throw new Error("Le serveur a retourné une réponse inattendue. Veuillez réessayer.");
       }
       
       const data = await response.json();
