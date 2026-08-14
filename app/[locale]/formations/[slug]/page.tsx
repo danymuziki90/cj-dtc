@@ -689,6 +689,12 @@ export default function FormationDetailPage() {
                         #{tag}
                       </span>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'overview' && (
+                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   {publicTargets.length > 0 && (
                     <section>
                       <h2 className="text-2xl font-bold text-slate-900 mb-6">{isFr ? 'Public cible' : 'Target audience'}</h2>

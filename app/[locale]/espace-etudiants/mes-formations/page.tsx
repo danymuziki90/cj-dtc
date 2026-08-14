@@ -20,8 +20,8 @@ import {
   studentMutedButtonClassName,
   studentPrimaryButtonClassName,
   studentStatusClass,
-  type StudentMetric,
 } from "@/components/ui/student-space";
+import { useTranslations } from "next-intl";
 
 interface Enrollment {
   id: number;
@@ -58,6 +58,7 @@ function enrollmentStatusLabel(status: string) {
 export default function MesFormationsPage() {
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale || "fr";
+  const t = useTranslations('student');
 
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,36 +67,7 @@ export default function MesFormationsPage() {
     fetchEnrollments();
   }, []);
 
-  const metrics = useMemo<StudentMetric[]>(() => {
-    const completedCount = enrollments.filter(
-      (item) => item.status === "completed",
-    ).length;
-    const activeSessions = enrollments.filter((item) => item.session).length;
 
-    return [
-      {
-        label: "Formations",
-        value: enrollments.length,
-        helper: "Parcours actuellement visibles dans votre compte.",
-        icon: GraduationCap,
-        accent: "from-[#0c4da2] via-[var(--cj-blue)] to-[#02142f]",
-      },
-      {
-        label: "Sessions liees",
-        value: activeSessions,
-        helper: "Inscriptions rattachees a une session planifiee.",
-        icon: CalendarDays,
-        accent: "from-[#003b96] via-[var(--cj-blue)] to-[#0f172a]",
-      },
-      {
-        label: "Formations terminees",
-        value: completedCount,
-        helper: "Programmes deja finalises ou certificables.",
-        icon: BadgeCheck,
-        accent: "from-[#1d4ed8] via-[#1e3a8a] to-[#020617]",
-      },
-    ];
-  }, [enrollments]);
 
   const fetchEnrollments = async () => {
     setLoading(true);
@@ -117,19 +89,19 @@ export default function MesFormationsPage() {
     return (
       <StudentPageShell
         locale={locale}
-        eyebrow="Espace etudiant"
-        title="Mes formations"
-        description="Chargement de vos inscriptions, de vos sessions et de vos informations de paiement."
+        eyebrow={locale === 'fr' ? "Espace étudiant" : "Student Space"}
+        title={t('my_formations')}
+        description={locale === 'fr' ? "Chargement de vos inscriptions, de vos sessions et de vos informations de paiement." : "Loading your enrollments, sessions and payment info."}
         icon={GraduationCap}
       >
         <StudentSectionCard
-          eyebrow="Parcours"
-          title="Preparation des formations"
-          description="Nous recuperons vos inscriptions, vos sessions liees et vos statuts de progression."
+          eyebrow={locale === 'fr' ? "Parcours" : "Pathways"}
+          title={locale === 'fr' ? "Préparation des formations" : "Preparing your programs"}
+          description={locale === 'fr' ? "Nous récupérons vos inscriptions, vos sessions liées et vos statuts de progression." : "We are retrieving your enrollments, linked sessions and progress."}
           icon={BookOpen}
         >
           <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
-            Chargement de vos formations...
+            {locale === 'fr' ? "Chargement de vos formations..." : "Loading your programs..."}
           </div>
         </StudentSectionCard>
       </StudentPageShell>
@@ -139,36 +111,35 @@ export default function MesFormationsPage() {
   return (
     <StudentPageShell
       locale={locale}
-      eyebrow="Espace etudiant"
-      title="Mes formations"
-      description="Consultez vos inscriptions, suivez l'avancement de vos paiements et retrouvez les liens utiles vers vos sessions et vos supports."
+      eyebrow={locale === 'fr' ? "Espace étudiant" : "Student Space"}
+      title={t('my_formations')}
+      description={locale === 'fr' ? "Consultez vos inscriptions, suivez l'avancement de vos paiements et retrouvez les liens utiles vers vos sessions et vos supports." : "View your enrollments, track payments and find useful links to your sessions and materials."}
       icon={GraduationCap}
-      metrics={metrics}
       actions={
         <Link
           href={`/${locale}/formations#sessions`}
           className={studentPrimaryButtonClassName}
         >
-          Explorer les sessions
+          {locale === 'fr' ? "Explorer les sessions" : "Explore sessions"}
         </Link>
       }
     >
       <StudentSectionCard
-        eyebrow="Parcours"
-        title="Vue d'ensemble de vos formations"
-        description="Chaque carte rassemble le statut d'inscription, l'etat du paiement, le calendrier et les acces utiles pour continuer votre progression."
+        eyebrow={locale === 'fr' ? "Parcours" : "Pathways"}
+        title={locale === 'fr' ? "Vue d'ensemble de vos formations" : "Overview of your programs"}
+        description={locale === 'fr' ? "Chaque carte rassemble le statut d'inscription, l'état du paiement, le calendrier et les accès utiles pour continuer votre progression." : "Each card gathers enrollment status, payment state, calendar and useful accesses."}
         icon={BookOpen}
       >
         {enrollments.length === 0 ? (
           <StudentEmptyState
-            title="Aucune formation active"
-            description="Vous n'etes inscrit a aucune formation pour le moment. Parcourez les sessions disponibles pour demarrer un nouveau parcours."
+            title={locale === 'fr' ? "Aucune formation active" : "No active programs"}
+            description={locale === 'fr' ? "Vous n'êtes inscrit à aucune formation pour le moment. Parcourez les sessions disponibles pour démarrer un nouveau parcours." : "You are not enrolled in any program yet. Browse available sessions to start a new pathway."}
             action={
               <Link
                 href={`/${locale}/formations#sessions`}
                 className={studentPrimaryButtonClassName}
               >
-                Decouvrir les sessions
+                {locale === 'fr' ? "Découvrir les sessions" : "Discover sessions"}
               </Link>
             }
           />
@@ -183,10 +154,10 @@ export default function MesFormationsPage() {
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="max-w-3xl">
                       <h3 className="text-xl font-semibold tracking-tight text-slate-950">
-                        {enrollment.formation.title}
+                        {locale === 'fr' ? enrollment.formation.title : ((enrollment.formation as any).titleEn || enrollment.formation.title)}
                       </h3>
                       <p className="mt-3 text-sm leading-6 text-slate-600">
-                        {enrollment.formation.description}
+                        {locale === 'fr' ? enrollment.formation.description : ((enrollment.formation as any).descriptionEn || enrollment.formation.description)}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -202,7 +173,7 @@ export default function MesFormationsPage() {
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         <CalendarDays className="h-4 w-4 text-[var(--cj-blue)]" />
-                        Debut de parcours
+                        {locale === 'fr' ? "Début de parcours" : "Start Date"}
                       </div>
                       <p className="mt-2 text-sm font-medium text-slate-900">
                         <FormattedDate date={enrollment.startDate} />
@@ -211,12 +182,12 @@ export default function MesFormationsPage() {
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         <MonitorSmartphone className="h-4 w-4 text-[var(--cj-blue)]" />
-                        Session / format
+                        {locale === 'fr' ? "Session / format" : "Session / Format"}
                       </div>
                       <p className="mt-2 text-sm font-medium text-slate-900">
                         {enrollment.session
-                          ? `${enrollment.session.format || "Format non renseigne"}`
-                          : "Session non encore planifiee"}
+                          ? (locale === 'fr' ? enrollment.session.format : ((enrollment.session as any).formatEn || enrollment.session.format)) || (locale === 'fr' ? "Format non renseigné" : "Format not provided")
+                          : (locale === 'fr' ? "Session non encore planifiée" : "Session not scheduled yet")}
                       </p>
                       {enrollment.session ? (
                         <p className="mt-1 text-xs text-slate-500">
@@ -228,10 +199,12 @@ export default function MesFormationsPage() {
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         <MapPinIcon className="h-4 w-4 text-[var(--cj-blue)]" />
-                        Lieu
+                        {locale === 'fr' ? "Lieu" : "Location"}
                       </div>
                       <p className="mt-2 text-sm font-medium text-slate-900">
-                        {enrollment.session?.location || "A preciser"}
+                        {enrollment.session?.location 
+                          ? (locale === 'fr' ? enrollment.session.location : ((enrollment.session as any).locationEn || enrollment.session.location))
+                          : (locale === 'fr' ? "À préciser" : "TBD")}
                       </p>
                     </div>
                   </div>
@@ -241,20 +214,20 @@ export default function MesFormationsPage() {
                       href={`/${locale}/formations/${enrollment.formation.slug}`}
                       className={studentMutedButtonClassName}
                     >
-                      Voir les details
+                      {locale === 'fr' ? "Voir les détails" : "View Details"}
                     </Link>
                     <Link
                       href={`/${locale}/espace-etudiants/supports?formationId=${enrollment.formation.id}`}
                       className={studentMutedButtonClassName}
                     >
-                      Supports de cours
+                      {locale === 'fr' ? "Supports de cours" : "Materials"}
                     </Link>
                     {enrollment.status === "completed" ? (
                       <Link
                         href={`/${locale}/espace-etudiants/resultats`}
                         className={studentPrimaryButtonClassName}
                       >
-                        Voir les resultats
+                        {locale === 'fr' ? "Voir les résultats" : "View Results"}
                         <ArrowRight className="h-4 w-4" />
                       </Link>
                     ) : null}

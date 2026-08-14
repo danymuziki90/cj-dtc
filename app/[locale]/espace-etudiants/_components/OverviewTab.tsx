@@ -68,16 +68,16 @@ export function OverviewTab({
                   {toverview('next_course')}
                 </span>
                 <h3 className="mt-1 truncate text-base font-bold text-slate-900 sm:text-lg">
-                  {currentSession.formationTitle}
+                  {locale === "fr" ? currentSession.formationTitle : (currentSession.formationTitleEn || currentSession.formationTitle)}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Format :{" "}
+                  {locale === "fr" ? "Format" : "Format"} :{" "}
                   <span className="font-semibold text-slate-700">
-                    {currentSession.format}
+                    {locale === "fr" ? currentSession.format : (currentSession.formatEn || currentSession.format)}
                   </span>{" "}
-                  | Lieu :{" "}
+                  | {locale === "fr" ? "Lieu" : "Location"} :{" "}
                   <span className="font-semibold text-slate-700">
-                    {currentSession.location}
+                    {locale === "fr" ? currentSession.location : (currentSession.locationEn || currentSession.location)}
                   </span>
                 </p>
               </div>
@@ -130,9 +130,11 @@ export function OverviewTab({
                           {statusInfo.label}
                         </span>
                       </div>
-                      <h4 className="text-sm font-bold text-slate-900 truncate">{assign.title}</h4>
+                      <h4 className="text-sm font-bold text-slate-900 truncate">
+                        {locale === "fr" ? assign.title : (assign.titleEn || assign.title)}
+                      </h4>
                       <p className="text-[11px] text-slate-500">
-                        Échéance : {formatDateShort(assign.deadline)}
+                        {locale === "fr" ? "Échéance" : "Deadline"} : {formatDateShort(assign.deadline)}
                       </p>
                     </div>
                     {canSubmit ? (
@@ -148,7 +150,7 @@ export function OverviewTab({
                         onClick={() => setActiveTab("travaux")}
                         className="inline-flex items-center gap-1 text-xs font-bold text-[var(--cj-blue)] hover:underline"
                       >
-                        Voir le détail
+                        {locale === "fr" ? "Voir le détail" : "View details"}
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     )}
@@ -165,13 +167,13 @@ export function OverviewTab({
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
               <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                 <Newspaper className="w-4 h-4 text-indigo-600" />
-                Dernières actualités
+                {locale === "fr" ? "Dernières actualités" : "Latest News"}
               </h3>
               <button
                 onClick={() => setActiveTab("news")}
                 className="text-xs font-bold text-[var(--cj-blue)] hover:underline"
               >
-                Toutes ({news.length})
+                {locale === "fr" ? `Toutes (${news.length})` : `All (${news.length})`}
               </button>
             </div>
 
@@ -187,10 +189,10 @@ export function OverviewTab({
                       {formatDateShort(item.createdAt)}
                     </span>
                     <h4 className="mt-1 text-xs font-bold text-slate-900 line-clamp-1">
-                      {item.title}
+                      {locale === "fr" ? item.title : (item.titleEn || item.title)}
                     </h4>
                     <p className="mt-1 text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
-                      {item.content}
+                      {locale === "fr" ? item.content : (item.contentEn || item.content)}
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 flex justify-end">
@@ -198,8 +200,7 @@ export function OverviewTab({
                       onClick={() => setSelectedNewsForModal(item)}
                       className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--cj-blue)] hover:underline"
                     >
-                      Lire la suite
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      {locale === "fr" ? "Lire la suite" : "Read more"} <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>
                 </div>

@@ -385,7 +385,7 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
                     rows={4} placeholder="Interactive presentations, real-world case studies…"
                     className={inputCls} />
                 </Field>
-              </div>>
+              </div>
             </>
           )}
  

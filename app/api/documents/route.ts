@@ -79,7 +79,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
         },
         include: {
           formation: {
-            select: { id: true, title: true },
+            select: { id: true, title: true, titleEn: true },
           },
           session: {
             select: { id: true, startDate: true, endDate: true, location: true, format: true },
@@ -103,7 +103,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
           ...(category ? { category } : {}),
         },
         include: {
-          formation: { select: { id: true, title: true } },
+          formation: { select: { id: true, title: true, titleEn: true } },
           session: { select: { id: true, startDate: true, endDate: true, location: true, format: true } },
         },
         orderBy: { createdAt: 'desc' },
@@ -148,7 +148,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
       },
       include: {
         formation: {
-          select: { id: true, title: true },
+          select: { id: true, title: true, titleEn: true },
         },
         session: {
           select: { id: true, startDate: true, endDate: true, location: true, format: true },

@@ -5,7 +5,7 @@ import {
   ArrowRight, Clock, FileText, Award, MessageSquare,
   CheckCircle2, AlertTriangle, Eye, Download, ChevronDown, ChevronUp,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { getAssignmentStatus } from "./utils";
 import { canStudentSubmitAssignment } from "@/lib/submission-rules";
 
@@ -135,6 +135,7 @@ function SubmissionResult({ submission }: { submission: any }) {
 // ─── Main component ─────────────────────────────────────────────────────────
 export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission }: AssignmentsTabProps) {
   const t = useTranslations("student.assignments");
+  const locale = useLocale();
 
   return (
     <div className="space-y-6">
@@ -149,7 +150,9 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
             <FileText className="w-6 h-6" />
           </div>
           <p className="font-bold text-slate-800 text-sm">{t("no_assignments")}</p>
-          <p className="text-xs text-slate-500">Vos prochains travaux apparaîtront automatiquement dès leur publication.</p>
+          <p className="text-xs text-slate-500">
+            {locale === "fr" ? "Vos prochains travaux apparaîtront automatiquement dès leur publication." : "Your upcoming assignments will appear automatically once published."}
+          </p>
         </div>
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
@@ -170,8 +173,14 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--cj-blue)] bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
                         {assign.type?.toUpperCase() || "TP"}
                       </span>
-                      <h4 className="text-sm font-bold text-slate-900 leading-snug">{assign.title}</h4>
-                      <p className="text-[11px] text-slate-500 font-semibold">{assign.formation?.title || assign.Formation?.title || "Formation"}</p>
+                      <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                        {locale === "fr" ? assign.title : (assign.titleEn || assign.title)}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 font-semibold">
+                        {locale === "fr" 
+                          ? (assign.formation?.title || assign.Formation?.title || "Formation")
+                          : (assign.formation?.titleEn || assign.Formation?.titleEn || assign.formation?.title || assign.Formation?.title || "Program")}
+                      </p>
                     </div>
                     <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border shrink-0 ${statusInfo.color}`}>
                       <StatusIcon className="w-3 h-3" /> {statusInfo.label}
@@ -179,7 +188,9 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
                   </div>
 
                   {assign.description && (
-                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{assign.description}</p>
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      {locale === "fr" ? assign.description : (assign.descriptionEn || assign.description)}
+                    </p>
                   )}
 
                   {/* Deadline + note max */}
