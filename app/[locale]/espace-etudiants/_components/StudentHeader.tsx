@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, LogOut, UserIcon } from "lucide-react";
+import { LogOut, UserIcon } from "lucide-react";
 
 interface StudentHeaderProps {
   student: any;
   studentInitial: string;
   basePath: string;
-  pendingAssignmentsCount: number;
+  pendingAssignmentsCount?: number;
   onLogout: () => void;
 }
 
@@ -15,7 +15,6 @@ export function StudentHeader({
   student,
   studentInitial,
   basePath,
-  pendingAssignmentsCount,
   onLogout,
 }: StudentHeaderProps) {
   return (
@@ -46,21 +45,6 @@ export function StudentHeader({
 
         {/* Right — actions */}
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          {/* Mes Travaux — icône seule sur mobile, texte visible sur sm+ */}
-          <Link
-            href={`${basePath}/travaux`}
-            className="relative inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-xs font-semibold text-white/90 transition hover:bg-white/10 sm:px-3"
-            title="Mes Travaux"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Mes Travaux</span>
-            {pendingAssignmentsCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--cj-red)] text-[9px] font-extrabold text-white shadow">
-                {pendingAssignmentsCount > 9 ? "9+" : pendingAssignmentsCount}
-              </span>
-            )}
-          </Link>
-
           {/* Mon profil — icône seule sur mobile */}
           <Link
             href={`${basePath}/mon-compte`}
