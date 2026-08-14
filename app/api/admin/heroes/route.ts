@@ -53,9 +53,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Supprimer automatiquement la section 'galerie' si présente dans la base de données
+    await prisma.heroSection
+      .deleteMany({
+        where: { pageKey: 'galerie' },
+      })
+      .catch(() => {})
+
     // L'espace étudiant utilise la même configuration que les autres bannières.
-    // L'upsert rend cette section éditable immédiatement sur les installations
-    // qui possèdent déjà les anciennes sections Hero.
     await prisma.heroSection.upsert({
       where: { pageKey: 'student_space' },
       update: {},
@@ -71,21 +76,33 @@ export async function GET(request: NextRequest) {
 
     let heroes: Array<Record<string, unknown>>
     try {
-      heroes = await prisma.heroSection.findMany({ select: heroCarouselSelect, orderBy: { pageKey: 'asc' } })
+      heroes = await prisma.heroSection.findMany({
+        where: { NOT: { pageKey: 'galerie' } },
+        select: heroCarouselSelect,
+        orderBy: { pageKey: 'asc' },
+      })
     } catch (error) {
       if (!hasMissingColumn(error)) throw error
       console.warn('[GET /api/admin/heroes] Migration carousel absente, repli sur les médias existants.')
-      heroes = await prisma.heroSection.findMany({ select: heroMediaSelect, orderBy: { pageKey: 'asc' } })
+      heroes = await prisma.heroSection.findMany({
+        where: { NOT: { pageKey: 'galerie' } },
+        select: heroMediaSelect,
+        orderBy: { pageKey: 'asc' },
+      })
     }
 
     return NextResponse.json({
-      heroes: heroes.map((hero) => ({
-        ...hero,
-        // Valeurs par défaut pour le frontend sur une base avant migration.
-        carouselEnabled: hero.carouselEnabled ?? true,
-        slideDuration: hero.slideDuration ?? 6000,
-        slides: ((hero.slides as Array<Record<string, unknown>>) ?? []).map((slide) => ({ ...slide, isActive: slide.isActive ?? true })),
-      })),
+      heroes: heroes
+        .filter((hero) => (hero.pageKey as string)?.toLowerCase() !== 'galerie')
+        .map((hero) => ({
+          ...hero,
+          carouselEnabled: hero.carouselEnabled ?? true,
+          slideDuration: hero.slideDuration ?? 6000,
+          slides: ((hero.slides as Array<Record<string, unknown>>) ?? []).map((slide) => ({
+            ...slide,
+            isActive: slide.isActive ?? true,
+          })),
+        })),
     })
   } catch (error) {
     console.error('[GET /api/admin/heroes] Erreur lors du chargement des Hero Sections:', error)

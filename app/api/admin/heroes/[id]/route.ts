@@ -213,3 +213,46 @@ export async function PUT(
     return NextResponse.json({ error: error?.message || 'Erreur interne du serveur' }, { status: 500 })
   }
 }
+
+/** DELETE /api/admin/heroes/[id] — Supprimer une section Hero */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const authResult = await verifyAdminToken(request)
+  if (!authResult.admin) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { id } = await params
+
+  try {
+    const existing = await prisma.heroSection.findFirst({
+      where: { OR: [{ id }, { pageKey: id }] },
+      select: { id: true, pageKey: true },
+    })
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Section Hero introuvable' }, { status: 404 })
+    }
+
+    await prisma.heroSection.delete({
+      where: { id: existing.id },
+    })
+
+    const paths = REVALIDATE_PATHS[existing.pageKey] ?? []
+    for (const path of paths) {
+      try {
+        revalidatePath(path)
+      } catch {}
+    }
+    try {
+      revalidateTag(`hero-${existing.pageKey}`)
+    } catch {}
+
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    console.error('[DELETE /api/admin/heroes/[id]]', error)
+    return NextResponse.json({ error: error?.message || 'Erreur interne du serveur' }, { status: 500 })
+  }
+}

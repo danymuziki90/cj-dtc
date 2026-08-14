@@ -22,7 +22,9 @@ export default function AdminHeroesPage() {
         console.error('[Admin heroes] Échec de l’API', { status: res.status, response: data });
         throw new Error(data?.error || 'Erreur de chargement');
       }
-      setSections(data?.heroes || []);
+      setSections(
+        (data?.heroes || []).filter((s: HeroSectionData) => s.pageKey?.toLowerCase() !== 'galerie')
+      );
     } catch (err) {
       console.error('[Admin heroes] Impossible de charger les sections Hero:', err);
       error("Impossible de charger les sections Hero.");
