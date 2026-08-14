@@ -26,7 +26,7 @@ export default async function HomePage({
   return (
     <div className="flex flex-col min-h-screen">
       {/* 1. Hero Section (première impression) */}
-      <UnifiedHero heroData={heroData} locale={locale} />
+      <UnifiedHero heroData={heroData} locale={locale} pageKey="home" />
 
       {/* 2. Présentation rapide ("Who We Are") */}
       <WhoWeAre locale={locale} />

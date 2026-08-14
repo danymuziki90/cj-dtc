@@ -161,24 +161,20 @@ function ActualitesContent() {
       <UnifiedHero
         image="/img/actu.jpeg"
         imageAlt="Actualités et événements CJ DTC"
-        eyebrow={locale === 'fr' ? 'Actualités & Événements' : 'News & Events'}
-        title={locale === 'fr' ? 'Actualités et Opportunités' : 'News and Opportunities'}
-        description={
-          locale === 'fr'
-            ? "Découvrez les dernières actualités, événements, annonces et opportunités publiées par CJ Development Training Center."
-            : "Explore the latest news, events, announcements and opportunities published by CJ Development Training Center."
-        }
+        eyebrow={t.heroEyebrow}
+        title={t.heroTitle}
+        description={t.heroDescription}
         badges={[
-          { label: locale === 'fr' ? 'Actualités'       : 'News',         color: 'blue'  },
-          { label: locale === 'fr' ? 'Événements'       : 'Events',       color: 'green' },
-          { label: locale === 'fr' ? "Offres d'emploi"  : 'Job openings', color: 'amber' },
+          { label: t.badgeNews,   color: 'blue'  },
+          { label: t.badgeEvents, color: 'green' },
+          { label: t.badgeJobs,   color: 'amber' },
         ]}
         ctas={[
-          { label: locale === 'fr' ? 'Voir les actualités'       : 'Browse news',      href: `/${locale}/actualites`,          variant: 'primary' },
-          { label: locale === 'fr' ? "Consulter les offres d'emploi" : 'View job offers', href: `/${locale}/emplois`, variant: 'secondary' },
+          { label: t.ctaNews, href: `/${locale}/actualites`,  variant: 'primary' },
+          { label: t.ctaJobs, href: `/${locale}/emplois`, variant: 'secondary' },
         ]}
-        breadcrumbs={[{ label: locale === 'fr' ? 'Actualités' : 'News' }]}
-        homeLabel={locale === 'fr' ? 'Accueil' : 'Home'}
+        breadcrumbs={[{ label: t.breadcrumb }]}
+        homeLabel={t.breadcrumb === 'News' ? 'Home' : 'Accueil'}
         homeHref={`/${locale}`}
         compact
         heroData={heroData}
@@ -322,7 +318,7 @@ function ActualitesContent() {
                   </p>
 
                   <div className="mt-4 text-xs font-bold text-[var(--cj-red)] uppercase tracking-wider flex items-center gap-1">
-                    <span>{item.category?.toLowerCase() === 'emplois' ? (locale === 'fr' ? "Voir l'offre" : 'View offer') : t.readMore}</span>
+                    <span>{item.category?.toLowerCase() === 'emplois' ? t.seeOffer : t.readMore}</span>
                     <span>→</span>
                   </div>
                 </div>

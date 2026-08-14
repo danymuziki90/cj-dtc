@@ -32,6 +32,8 @@ export interface UnifiedHeroProps {
   overlayOpacity?: number
   compact?: boolean
   locale?: string
+  /** Identifie explicitement la page lorsque les données distantes sont indisponibles. */
+  pageKey?: string
   children?: React.ReactNode
 }
 
@@ -101,6 +103,7 @@ export default function UnifiedHero({
   homeLabel = 'Accueil', homeHref = '/',
   overlayOpacity = 55, compact = false,
   locale: defaultLocale,
+  pageKey,
   children,
 }: UnifiedHeroProps) {
   const params = useParams<{ locale?: string }>()
@@ -110,14 +113,14 @@ export default function UnifiedHero({
 
   const effectiveCompact = heroData?.compact ?? compact
   const effectiveOpacity = heroData?.overlayOpacity ?? overlayOpacity
-  const isHomeHero = heroData?.pageKey === 'home' || (!heroData && !image && title === 'CJ DEVELOPMENT TRAINING CENTER')
+  const isHomeHero = pageKey === 'home' || heroData?.pageKey === 'home' || (!heroData && !image && title === 'CJ DEVELOPMENT TRAINING CENTER')
 
   // Determine slides
   let slides: any[] = []
   
-  if (heroData?.carouselEnabled !== false && heroData?.slides && heroData.slides.filter((slide) => slide.isActive).length > 0) {
+  if (heroData?.carouselEnabled !== false && heroData?.slides && heroData.slides.filter((slide) => slide.isActive !== false).length > 0) {
     // Si l'admin a configuré des slides (carrousel activé pour cette page)
-    slides = heroData.slides.filter((slide) => slide.isActive)
+    slides = heroData.slides.filter((slide) => slide.isActive !== false)
   } else if (isHomeHero) {
     // Page d'accueil sans configuration DB : fallback par défaut (carrousel)
     slides = DEFAULT_HOME_SLIDES

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { publicMessages } from '@/lib/i18n/public-messages'
 import {
   Award,
   ShieldCheck,
@@ -38,6 +39,7 @@ interface Certificate {
 export default function MesCertificatsPage() {
   const params = useParams<{ locale?: string }>()
   const locale = params?.locale || 'fr'
+  const tc = (publicMessages.espaceEtudiants.certificats as any)[locale] ?? publicMessages.espaceEtudiants.certificats.fr
 
   const [certificates, setCertificates] = useState<Certificate[]>([])
   const [loading, setLoading] = useState(true)
@@ -92,11 +94,7 @@ export default function MesCertificatsPage() {
   }
 
   const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      completion: 'Certificat de réussite',
-      attendance: 'Certificat de présence',
-      excellence: "Certificat d'excellence",
-    }
+    const labels: Record<string, string> = tc.typeLabels
     return labels[type] || type
   }
 
@@ -104,14 +102,14 @@ export default function MesCertificatsPage() {
     return (
       <StudentPageShell
         locale={locale}
-        eyebrow="Espace étudiant"
-        title="Mes certificats"
-        description="Chargement de vos documents..."
+        eyebrow={tc.eyebrow}
+        title={tc.title}
+        description={tc.loadingDesc}
         icon={Award}
       >
         <div className="flex justify-center items-center py-20 text-slate-500 text-sm">
           <Loader2 className="h-6 w-6 animate-spin text-blue-600 mr-2" />
-          <span>Récupération de vos certificats...</span>
+          <span>{tc.loading}</span>
         </div>
       </StudentPageShell>
     )
@@ -120,25 +118,25 @@ export default function MesCertificatsPage() {
   return (
     <StudentPageShell
       locale={locale}
-      eyebrow="Espace étudiant"
-      title="Mes certificats"
-      description="Retrouvez ici vos certificats officiels, téléchargez-les au format PDF et retrouvez un certificat via son identifiant unique."
+      eyebrow={tc.eyebrow}
+      title={tc.title}
+      description={tc.description}
       icon={Award}
     >
       {/* Certificats — section principale */}
       <StudentSectionCard
-        eyebrow="Mes documents"
-        title="Certificats académiques"
-        description="Liste de tous vos certificats émis pour vos formations validées."
+        eyebrow={tc.docs}
+        title={tc.certTitle}
+        description={tc.certDesc}
         icon={Award}
       >
         {certificates.length === 0 ? (
           <StudentEmptyState
-            title="Aucun certificat disponible pour le moment"
-            description="Dès qu'un certificat aura été délivré par l'administration, il apparaîtra ici avec son numéro unique de vérification et son option de téléchargement sécurisé."
+            title={tc.empty}
+            description={tc.emptyDesc}
             action={
               <Link href={`/${locale}/espace-etudiants`} className={studentPrimaryButtonClassName}>
-                Retour au dashboard
+                {tc.backDashboard}
               </Link>
             }
           />
@@ -161,18 +159,18 @@ export default function MesCertificatsPage() {
                   </div>
                   <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
                     <CheckCircle2 className="h-3 w-3" />
-                    Actif
+                    {tc.active}
                   </span>
                 </div>
 
                 {/* Détails */}
                 <div className="mt-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600 space-y-1.5">
                   <p>
-                    <span className="font-semibold text-slate-800">Titulaire :</span>{' '}
+                    <span className="font-semibold text-slate-800">{tc.holder}</span>{' '}
                     {certificate.holderName}
                   </p>
                   <p>
-                    <span className="font-semibold text-slate-800">Délivré le :</span>{' '}
+                    <span className="font-semibold text-slate-800">{tc.issuedAt}</span>{' '}
                     <FormattedDate date={certificate.issuedAt} />
                   </p>
                   <p className="font-mono text-[10px] text-slate-400 uppercase pt-0.5">
@@ -190,11 +188,11 @@ export default function MesCertificatsPage() {
                       className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[var(--cj-blue)] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-[var(--cj-blue-700)] sm:flex-none sm:px-5"
                     >
                       <Download className="h-3.5 w-3.5" />
-                      Télécharger (PDF)
+                      {tc.download}
                     </a>
                   ) : (
                     <span className="text-xs text-slate-400 italic self-center">
-                      Aucun PDF attaché
+                      {tc.noPdf}
                     </span>
                   )}
                   <Link
@@ -203,7 +201,7 @@ export default function MesCertificatsPage() {
                     className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-medium text-slate-700 transition hover:border-blue-200 hover:text-[var(--cj-blue)] sm:flex-none sm:px-5"
                   >
                     <ShieldCheck className="h-3.5 w-3.5" />
-                    Vérifier
+                    {tc.verify}
                   </Link>
                 </div>
               </div>
@@ -216,16 +214,16 @@ export default function MesCertificatsPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Recherche par ID */}
         <StudentSectionCard
-          eyebrow="Recherche"
-          title="Retrouver un certificat par ID"
-          description="Saisissez l'identifiant unique fourni par l'administration pour retrouver et télécharger le document PDF."
+          eyebrow={tc.searchSection}
+          title={tc.searchTitle}
+          description={tc.searchDesc}
           icon={Search}
         >
           <form onSubmit={handleSearchIdSubmit} className="space-y-4">
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="Ex: CERT-1-XXXX-XXXX"
+                placeholder={tc.searchPlaceholder}
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
                 className="flex-1 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white"
@@ -235,7 +233,7 @@ export default function MesCertificatsPage() {
                 disabled={searching || !searchId.trim()}
                 className={`${studentPrimaryButtonClassName} shrink-0 min-w-[100px] text-xs sm:text-sm`}
               >
-                {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Rechercher'}
+                {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : tc.searchBtn}
               </button>
             </div>
 
@@ -256,7 +254,7 @@ export default function MesCertificatsPage() {
                 </button>
                 <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  Certificat retrouvé
+                  {tc.found}
                 </p>
                 <h4 className="font-bold text-slate-900 text-base mt-2 leading-snug">
                   {searchResult.formationTitle}
@@ -264,8 +262,8 @@ export default function MesCertificatsPage() {
                 <p className="text-xs text-slate-500 mt-0.5">{getTypeLabel(searchResult.type)}</p>
 
                 <div className="mt-3 space-y-1.5 text-xs text-slate-600">
-                  <p><strong className="text-slate-800">Titulaire :</strong> {searchResult.holderName}</p>
-                  <p><strong className="text-slate-800">Délivré le :</strong> <FormattedDate date={searchResult.issuedAt} /></p>
+                  <p><strong className="text-slate-800">{tc.holder}</strong> {searchResult.holderName}</p>
+                  <p><strong className="text-slate-800">{tc.issuedAt}</strong> <FormattedDate date={searchResult.issuedAt} /></p>
                   <p className="font-mono text-[10px] text-slate-400 uppercase">ID : {searchResult.code}</p>
                 </div>
 
@@ -277,7 +275,7 @@ export default function MesCertificatsPage() {
                     className={studentPrimaryButtonClassName}
                   >
                     <Download className="h-4 w-4" />
-                    Télécharger le PDF
+                    {tc.downloadPdf}
                   </a>
                 </div>
               </div>
@@ -287,21 +285,21 @@ export default function MesCertificatsPage() {
 
         {/* Sécurité & Navigation */}
         <StudentSectionCard
-          eyebrow="Sécurité"
-          title="Authenticité & Accès sécurisé"
-          description="Chaque certificat dispose d'un identifiant crypté unique qui garantit son authenticité."
+          eyebrow={tc.securitySection}
+          title={tc.securityTitle}
+          description={tc.securityDesc}
           icon={ShieldCheck}
         >
           <div className="space-y-4">
             <div className="rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-4">
               <ul className="space-y-2 text-xs leading-6 text-slate-600 list-disc pl-4">
-                <li>Vos certificats sont stockés de manière sécurisée hors du répertoire public.</li>
-                <li>Seul votre compte connecté ou les administrateurs peuvent y accéder.</li>
-                <li>Toute modification par l'admin est instantanément répercutée ici.</li>
+                {(tc.securityPoints as readonly string[]).map((pt, i) => (
+                  <li key={i}>{pt}</li>
+                ))}
               </ul>
             </div>
             <Link href={`/${locale}/espace-etudiants`} className={studentMutedButtonClassName}>
-              ← Dashboard Principal
+              {tc.backMain}
             </Link>
           </div>
         </StudentSectionCard>
