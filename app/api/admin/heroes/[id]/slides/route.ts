@@ -6,6 +6,13 @@ import { uploadToR2 } from '@/lib/r2'
 
 export const dynamic = 'force-dynamic'
 
+const legacySlideSelect = {
+  id: true, heroId: true, order: true, imageUrl: true, imageAlt: true,
+  eyebrowFr: true, eyebrowEn: true, titleFr: true, titleEn: true,
+  descriptionFr: true, descriptionEn: true, badgeFr: true, badgeEn: true,
+  createdAt: true, updatedAt: true,
+} as const
+
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif']
 const MAX_SIZE_BYTES = 5 * 1024 * 1024
 
@@ -25,8 +32,9 @@ export async function GET(
     const slides = await prisma.heroSlide.findMany({
       where: { heroId: id },
       orderBy: { order: 'asc' },
+      select: legacySlideSelect,
     })
-    return NextResponse.json({ slides })
+    return NextResponse.json({ slides: slides.map((slide) => ({ ...slide, isActive: true })) })
   } catch (error) {
     console.error('[GET /api/admin/heroes/[id]/slides]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -46,7 +54,10 @@ export async function POST(
   const { id } = await params
 
   try {
-    const hero = await prisma.heroSection.findUnique({ where: { id } })
+    const hero = await prisma.heroSection.findUnique({
+      where: { id },
+      select: { id: true, pageKey: true, imageUrl: true, defaultImageUrl: true },
+    })
     if (!hero) {
       return NextResponse.json({ error: 'Hero not found' }, { status: 404 })
     }
@@ -59,7 +70,7 @@ export async function POST(
         return NextResponse.json({ error: 'Image invalide ou supérieure à 5 Mo.' }, { status: 400 })
       }
 
-      const lastSlide = await prisma.heroSlide.findFirst({ where: { heroId: id }, orderBy: { order: 'desc' } })
+      const lastSlide = await prisma.heroSlide.findFirst({ where: { heroId: id }, orderBy: { order: 'desc' }, select: { order: true } })
       const buffer = Buffer.from(await file.arrayBuffer())
       const ext = file.name.split('.').pop() || 'jpg'
       const imageUrl = await uploadToR2(buffer, `hero-slide-${hero.pageKey}-${Date.now()}.${ext}`, 'heroes', file.type)
@@ -70,10 +81,10 @@ export async function POST(
           titleFr: '',
           titleEn: '',
           order: lastSlide ? lastSlide.order + 1 : 0,
-        },
+        }, select: legacySlideSelect,
       })
       revalidateTag(`hero-${hero.pageKey}`)
-      return NextResponse.json({ slide }, { status: 201 })
+      return NextResponse.json({ slide: { ...slide, isActive: true } }, { status: 201 })
     }
 
     const body = await request.json()
@@ -89,6 +100,7 @@ export async function POST(
     const lastSlide = await prisma.heroSlide.findFirst({
       where: { heroId: id },
       orderBy: { order: 'desc' },
+      select: { order: true },
     })
     const slideOrder = order ?? (lastSlide ? lastSlide.order + 1 : 0)
 
@@ -105,17 +117,13 @@ export async function POST(
         descriptionEn,
         badgeFr,
         badgeEn,
-        ctaLabelFr,
-        ctaLabelEn,
-        ctaHref,
         order: slideOrder,
-        isActive: isActive ?? true,
-      },
+      }, select: legacySlideSelect,
     })
 
     revalidateTag(`hero-${hero.pageKey}`)
 
-    return NextResponse.json({ slide }, { status: 201 })
+    return NextResponse.json({ slide: { ...slide, isActive: true } }, { status: 201 })
   } catch (error) {
     console.error('[POST /api/admin/heroes/[id]/slides]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

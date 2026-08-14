@@ -42,7 +42,7 @@ export async function POST(
       )
     }
 
-    const hero = await prisma.heroSection.findUnique({ where: { id } })
+    const hero = await prisma.heroSection.findUnique({ where: { id }, select: { id: true, pageKey: true } })
     if (!hero) {
       return NextResponse.json({ error: 'Hero not found' }, { status: 404 })
     }

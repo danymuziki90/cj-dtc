@@ -17,11 +17,14 @@ export default function AdminHeroesPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/heroes');
-      if (!res.ok) throw new Error('Erreur de chargement');
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        console.error('[Admin heroes] Échec de l’API', { status: res.status, response: data });
+        throw new Error(data?.error || 'Erreur de chargement');
+      }
       setSections(data?.heroes || []);
     } catch (err) {
-      console.error(err);
+      console.error('[Admin heroes] Impossible de charger les sections Hero:', err);
       error("Impossible de charger les sections Hero.");
     } finally {
       setLoading(false);

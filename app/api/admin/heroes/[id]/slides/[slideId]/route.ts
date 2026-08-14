@@ -22,6 +22,14 @@ export async function PUT(
   const { id, slideId } = await params
 
   try {
+    const existingSlide = await prisma.heroSlide.findFirst({
+      where: { id: slideId, heroId: id },
+      select: { id: true },
+    })
+    if (!existingSlide) {
+      return NextResponse.json({ error: 'Slide not found' }, { status: 404 })
+    }
+
     // Vérifier si c'est un upload multipart ou JSON
     const contentType = request.headers.get('content-type') ?? ''
 
@@ -47,7 +55,7 @@ export async function PUT(
       const imageUrl = await uploadToR2(buffer, fileName, 'heroes', file.type)
 
       const slide = await prisma.heroSlide.update({
-        where: { id: slideId, heroId: id },
+        where: { id: slideId },
         data: { imageUrl },
       })
 
@@ -63,7 +71,7 @@ export async function PUT(
             descriptionFr, descriptionEn, badgeFr, badgeEn, ctaLabelFr, ctaLabelEn, ctaHref, order, isActive } = body
 
     const slide = await prisma.heroSlide.update({
-      where: { id: slideId, heroId: id },
+      where: { id: slideId },
       data: {
         ...(imageUrl !== undefined && { imageUrl }),
         ...(imageAlt !== undefined && { imageAlt }),
@@ -106,8 +114,16 @@ export async function DELETE(
   const { id, slideId } = await params
 
   try {
-    await prisma.heroSlide.delete({
+    const existingSlide = await prisma.heroSlide.findFirst({
       where: { id: slideId, heroId: id },
+      select: { id: true },
+    })
+    if (!existingSlide) {
+      return NextResponse.json({ error: 'Slide not found' }, { status: 404 })
+    }
+
+    await prisma.heroSlide.delete({
+      where: { id: slideId },
     })
 
     const hero = await prisma.heroSection.findUnique({ where: { id } })

@@ -5,6 +5,23 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 
 export const dynamic = 'force-dynamic'
 
+const heroEditorSelect = {
+  id: true, pageKey: true, isActive: true, imageUrl: true, imageAlt: true,
+  defaultImageUrl: true, eyebrowFr: true, titleFr: true, descriptionFr: true,
+  eyebrowEn: true, titleEn: true, descriptionEn: true, ctasFr: true,
+  ctasEn: true, badgesFr: true, badgesEn: true, overlayOpacity: true,
+  compact: true, createdAt: true, updatedAt: true,
+  slides: {
+    orderBy: { order: 'asc' as const },
+    select: {
+      id: true, heroId: true, order: true, imageUrl: true, imageAlt: true,
+      eyebrowFr: true, eyebrowEn: true, titleFr: true, titleEn: true,
+      descriptionFr: true, descriptionEn: true, badgeFr: true, badgeEn: true,
+      createdAt: true, updatedAt: true,
+    },
+  },
+} as const
+
 /** Mapping pageKey → chemins à revalider */
 const REVALIDATE_PATHS: Record<string, string[]> = {
   home:        ['/fr', '/en', '/'],
@@ -33,7 +50,7 @@ export async function GET(
   try {
     const hero = await prisma.heroSection.findUnique({
       where: { id },
-      include: { slides: { orderBy: { order: 'asc' } } },
+      select: heroEditorSelect,
     })
 
     if (!hero) {
@@ -42,7 +59,13 @@ export async function GET(
 
     // Les deux formes sont retournées temporairement : la forme directe est
     // utilisée par l'éditeur, et `hero` préserve les anciens consommateurs.
-    return NextResponse.json({ ...hero, hero })
+    const normalizedHero = {
+      ...hero,
+      carouselEnabled: true,
+      slideDuration: 6000,
+      slides: hero.slides.map((slide) => ({ ...slide, isActive: true })),
+    }
+    return NextResponse.json({ ...normalizedHero, hero: normalizedHero })
   } catch (error) {
     console.error('[GET /api/admin/heroes/[id]]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
 import Header from './Header'
 import Footer from './Footer'
 
@@ -14,9 +15,25 @@ function isHomePage(pathname: string): boolean {
   return /^\/(fr|en)\/?$/.test(pathname) || pathname === '/' || pathname === ''
 }
 
+const pageFadeUpVariants = {
+  initial: {
+    opacity: 0,
+    y: 20,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.45,
+      ease: [0.22, 1, 0.36, 1], // cubic-bezier for smooth deceleration
+    },
+  },
+}
+
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? ''
   const isAdmin = pathname.includes('/admin')
+  const isEspaceEtudiant = pathname.includes('/espace-etudiants')
   const isHome = isHomePage(pathname)
 
   return (
@@ -26,7 +43,21 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
         Home page: no top padding so Hero slides under transparent header.
         Internal pages: pt-[70px] lg:pt-[105px] so content stays below the solid blue header.
       */}
-      <main className={isHome ? '' : 'pt-[70px] lg:pt-[105px]'}>{children}</main>
+      <main className={isHome ? '' : 'pt-[70px] lg:pt-[105px]'}>
+        {isAdmin || isEspaceEtudiant ? (
+          children
+        ) : (
+          <motion.div
+            key={pathname}
+            initial="initial"
+            animate="animate"
+            variants={pageFadeUpVariants}
+            className="w-full flex-1"
+          >
+            {children}
+          </motion.div>
+        )}
+      </main>
       {!isAdmin && <Footer />}
     </>
   )
