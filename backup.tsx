@@ -660,6 +660,200 @@ export default function FormationDetailPage() {
               )}
             </div>
 
+            <div className="lg:col-span-1 space-y-6">
+              <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                {formation.sessions && formation.sessions.length > 0 && (
+                  <>
+                    <h3 className="font-bold text-slate-800 text-xs mb-3 uppercase tracking-wider">{isFr ? 'Prochaines sessions' : 'Upcoming sessions'}</h3>
+                    <div className="space-y-3">
+                      {formation.sessions.map((session: any) => (
+                        <div key={session.id} className="text-sm">
+                          <div className="font-bold">{new Date(session.startDate).toLocaleDateString()}</div>
+                          <div className="text-slate-500">{session.location}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {formation.tags && formation.tags.length > 0 && (
+                <div className="cj-card-interactive">
+                  <h3 className="text-lg font-bold text-slate-950 font-montserrat mb-3">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {formation.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg text-xs font-medium"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  {publicTargets.length > 0 && (
+                    <section>
+                      <h2 className="text-2xl font-bold text-slate-900 mb-6">{isFr ? 'Public cible' : 'Target audience'}</h2>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        {publicTargets.map((target, index) => (
+                          <div key={index} className="flex items-center gap-2 text-slate-700 bg-white p-4 rounded-xl border border-slate-200">
+                            <ChevronRight className="w-4 h-4 text-[var(--cj-blue)]" />
+                            <span>{target}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {displayPrerequisites && (
+                    <section>
+                      <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                        <ShieldIcon className="w-6 h-6 text-purple-600" />
+                        {isFr ? 'Prérequis' : 'Prerequisites'}
+                      </h2>
+                      <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm flex gap-4 items-start">
+                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                          <CheckCircle className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <p className="text-slate-700 font-opensans mt-2">{displayPrerequisites}</p>
+                      </div>
+                    </section>
+                  )}
+
+                  {displayCertification && (
+                    <section>
+                      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 md:p-10 text-white relative overflow-hidden shadow-xl">
+                        <div className="absolute -right-10 -top-10 opacity-10">
+                          <Award className="w-64 h-64" />
+                        </div>
+                        <div className="relative z-10 max-w-2xl">
+                          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                            <Award className="w-6 h-6 text-amber-400" />
+                            {isFr ? 'Certification et validation' : 'Certification and validation'}
+                          </h2>
+                          <p className="text-white font-opensans leading-relaxed">{displayCertification}</p>
+                        </div>
+                      </div>
+                    </section>
+                  )}
+
+                  {Array.isArray(formation.gallery) && formation.gallery.length > 0 && (
+                    <section>
+                      <h2 className="text-2xl font-bold text-slate-900 mb-6">{isFr ? 'Galerie photos' : 'Photo gallery'}</h2>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {formation.gallery.map((imgUrl: string, i: number) => (
+                          <div key={i} className="group relative h-40 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                            <img
+                              src={imgUrl}
+                              alt={`Galerie ${i + 1}`}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              onError={e => (e.currentTarget.style.display = 'none')}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'program' && (
+                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <section>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                      <BookOpen className="w-6 h-6 text-[var(--cj-blue)]" />
+                      {isFr ? 'Contenu du programme' : 'Program Content'}
+                    </h2>
+                    {modules.length > 0 ? (
+                      <div className="space-y-4">
+                        {modules.map((module, index) => (
+                          <div key={index} className="border border-slate-200 rounded-2xl p-6 transition duration-200 hover:border-[var(--cj-blue)] hover:bg-slate-50/50">
+                            <div className="flex items-start gap-4">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--cj-blue-50)] text-[var(--cj-blue)] font-bold flex-shrink-0">
+                                <span>{index + 1}</span>
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-slate-950 font-montserrat mb-2">
+                                  {module}
+                                </h3>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-slate-600 font-opensans">
+                        {isFr ? 'Le programme détaillé sera communiqué lors de l\'inscription.' : 'Detailed program will be provided upon registration.'}
+                      </p>
+                    )}
+                  </section>
+
+                  {methods.length > 0 && (
+                    <section>
+                      <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                        <Layers className="w-6 h-6 text-[var(--cj-orange)]" />
+                        {isFr ? 'Méthodologie pédagogique' : 'Teaching Methodology'}
+                      </h2>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {methods.map((method: string, index: number) => (
+                          <div key={index} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex gap-4">
+                            <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
+                              <span className="text-[var(--cj-orange)] font-bold text-sm">{index + 1}</span>
+                            </div>
+                            <p className="text-slate-700 font-medium pt-1">{method}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'instructor' && formation.instructor && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-6">{isFr ? 'Votre formateur' : 'Your Instructor'}</h2>
+                  <div className="flex flex-col sm:flex-row items-start gap-6 bg-white p-8 rounded-2xl border border-slate-200">
+                    <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center flex-shrink-0 shadow-inner">
+                      {formation.instructor.photoUrl ? (
+                        <img
+                          src={formation.instructor.photoUrl}
+                          alt={`${formation.instructor.firstName} ${formation.instructor.lastName}`}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <UserIcon className="w-12 h-12 text-blue-600" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-slate-900 font-montserrat mb-1">
+                        {formation.instructor.firstName} {formation.instructor.lastName}
+                      </h3>
+                      <p className="text-[var(--cj-blue)] font-semibold text-sm mb-4">
+                        {formation.instructor.title}
+                      </p>
+                      {formation.instructor.bio && (
+                        <p className="text-slate-600 leading-relaxed font-opensans mb-4 text-sm">
+                          {formation.instructor.bio}
+                        </p>
+                      )}
+                      {formation.instructor.expertise && formation.instructor.expertise.length > 0 && (
+                        <div>
+                          <p className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-2">Domaines d'expertise :</p>
+                          <div className="flex flex-wrap gap-2">
+                            {formation.instructor.expertise.map((exp, index) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold"
+                              >
+                                {exp}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="lg:col-span-1 space-y-6">
               <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
