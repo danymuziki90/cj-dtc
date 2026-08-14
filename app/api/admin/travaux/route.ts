@@ -5,12 +5,15 @@ import { Prisma } from '@prisma/client'
 
 const assignmentSchema = z.object({
   title: z.string().trim().min(1, 'Titre requis'),
+  titleEn: z.string().optional().nullable(),
   description: z.string().trim().min(1, 'Description requise'),
+  descriptionEn: z.string().optional().nullable(),
   type: z.string().optional().nullable(),
   formationId: z.union([z.number(), z.string()]).transform(val => Number(val)),
   sessionId: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : undefined),
   deadline: z.string().min(1, 'Date limite requise'),
   instructions: z.string().optional().nullable(),
+  instructionsEn: z.string().optional().nullable(),
   maxFileSize: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : undefined),
   allowedFileTypes: z.string().optional().nullable(),
   difficulty: z.string().optional().nullable(),
@@ -90,12 +93,15 @@ export async function POST(req: NextRequest) {
 
     const {
       title,
+      titleEn,
       description,
+      descriptionEn,
       type,
       formationId,
       sessionId,
       deadline,
       instructions,
+      instructionsEn,
       maxFileSize,
       allowedFileTypes,
       difficulty,
@@ -109,12 +115,15 @@ export async function POST(req: NextRequest) {
     const assignment = await prisma.assignment.create({
       data: {
         title,
+        titleEn,
         description,
+        descriptionEn,
         type: type || 'tp',
         formationId: formationId,
         sessionId: sessionId || null,
         deadline: new Date(deadline),
         instructions: instructions || '',
+        instructionsEn: instructionsEn || '',
         maxFileSize: maxFileSize || 10,
         allowedFileTypes: allowedFileTypes || 'pdf,doc,docx,zip,rar,png,jpg,jpeg,excel,xls,xlsx',
         difficulty: difficulty || 'intermediaire',

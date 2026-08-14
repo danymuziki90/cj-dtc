@@ -22,6 +22,7 @@ interface Session {
   startTime: string
   endTime: string
   location: string
+  locationEn?: string
   format: string
   maxParticipants: number
   currentParticipants: number
@@ -410,6 +411,7 @@ export default function AdminSessionsPage() {
       startTime: '09:00',
       endTime: '17:00',
       location: '',
+      locationEn: '',
       format: 'presentiel',
       maxParticipants: 25,
       description: '',
@@ -435,6 +437,7 @@ export default function AdminSessionsPage() {
       startTime: session.startTime ?? '09:00',
       endTime: session.endTime ?? '17:00',
       location: session.location ?? '',
+      locationEn: session.locationEn ?? '',
       format: session.format,
       maxParticipants: session.maxParticipants,
       description: session.description ?? '',
@@ -504,8 +507,10 @@ export default function AdminSessionsPage() {
         body: JSON.stringify(customQuestions.map((q) => ({
           id: q.id,
           label: q.label,
+          labelEn: q.labelEn,
           type: q.type,
           helpText: q.helpText,
+          helpTextEn: q.helpTextEn,
           required: q.required,
           options: q.options,
           fileTypes: q.fileTypes,
@@ -1059,16 +1064,28 @@ export default function AdminSessionsPage() {
               </div>
 
               {/* Lieu */}
-              <div className="md:col-span-2">
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Lieu / Lien de connexion *</label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={e => setFormData(p => ({ ...p, location: e.target.value }))}
-                  placeholder="ex. Kinshasa — Salle A, ou https://meet.google.com/xxx"
-                  className="w-full px-3.5 py-2.5 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:outline-none font-bold text-slate-800"
-                  required
-                />
+              <div className="grid gap-4 sm:grid-cols-2 md:col-span-2">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Lieu / Lien de connexion (FR) *</label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={e => setFormData(p => ({ ...p, location: e.target.value }))}
+                    placeholder="ex. Kinshasa — Salle A, ou https://meet.google.com/xxx"
+                    className="w-full px-3.5 py-2.5 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:outline-none font-bold text-slate-800"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Lieu / Lien (EN)</label>
+                  <input
+                    type="text"
+                    value={formData.locationEn || ''}
+                    onChange={e => setFormData(p => ({ ...p, locationEn: e.target.value }))}
+                    placeholder="ex. Kinshasa — Room A"
+                    className="w-full px-3.5 py-2.5 text-xs border border-slate-200 bg-slate-50/30 rounded-xl focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:outline-none font-bold text-slate-800"
+                  />
+                </div>
               </div>
 
               {/* Format & Capacité */}
@@ -1266,8 +1283,10 @@ export default function AdminSessionsPage() {
                           ...prev,
                           {
                             label: '',
+                            labelEn: '',
                             type: 'text_short',
                             helpText: '',
+                            helpTextEn: '',
                             required: false,
                             options: [],
                             fileTypes: ['pdf', 'docx', 'jpg', 'png']
@@ -1344,16 +1363,28 @@ export default function AdminSessionsPage() {
 
                           {/* Libellé et Type */}
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 pr-20">
-                            <div className="md:col-span-8">
-                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Libellé de la question *</label>
-                              <input
-                                type="text"
-                                required
-                                value={q.label}
-                                onChange={e => updateQuestion({ label: e.target.value })}
-                                placeholder="ex. Nom de votre entreprise, Années d'expérience, etc."
-                                className="w-full px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none font-bold text-slate-800"
-                              />
+                            <div className="md:col-span-8 space-y-2">
+                              <div>
+                                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Libellé de la question (FR) *</label>
+                                <input
+                                  type="text"
+                                  required
+                                  value={q.label}
+                                  onChange={e => updateQuestion({ label: e.target.value })}
+                                  placeholder="ex. Nom de votre entreprise, Années d'expérience, etc."
+                                  className="w-full px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none font-bold text-slate-800"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Libellé (EN)</label>
+                                <input
+                                  type="text"
+                                  value={q.labelEn || ''}
+                                  onChange={e => updateQuestion({ labelEn: e.target.value })}
+                                  placeholder="ex. Company Name, Years of Experience, etc."
+                                  className="w-full px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none font-bold text-slate-800"
+                                />
+                              </div>
                             </div>
                             <div className="md:col-span-4">
                               <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Type de champ</label>
@@ -1377,15 +1408,27 @@ export default function AdminSessionsPage() {
 
                           {/* Aide à la saisie (Help text) et Obligatoire */}
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                            <div className="md:col-span-9">
-                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Aide à la saisie (optionnel)</label>
-                              <input
-                                type="text"
-                                value={q.helpText || ''}
-                                onChange={e => updateQuestion({ helpText: e.target.value })}
-                                placeholder="ex. Renseignez votre poste actuel de préférence"
-                                className="w-full px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none text-slate-600 font-semibold"
-                              />
+                            <div className="md:col-span-9 space-y-2">
+                              <div>
+                                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Aide à la saisie (FR) (optionnel)</label>
+                                <input
+                                  type="text"
+                                  value={q.helpText || ''}
+                                  onChange={e => updateQuestion({ helpText: e.target.value })}
+                                  placeholder="ex. Renseignez votre poste actuel de préférence"
+                                  className="w-full px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none text-slate-600 font-semibold"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Aide (EN) (optionnel)</label>
+                                <input
+                                  type="text"
+                                  value={q.helpTextEn || ''}
+                                  onChange={e => updateQuestion({ helpTextEn: e.target.value })}
+                                  placeholder="ex. Please provide your current position"
+                                  className="w-full px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none text-slate-600 font-semibold"
+                                />
+                              </div>
                             </div>
                             <div className="md:col-span-3 flex items-center h-full pt-4">
                               <label className="inline-flex items-center gap-2 cursor-pointer">

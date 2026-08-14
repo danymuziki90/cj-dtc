@@ -38,6 +38,7 @@ export async function PATCH(
     status?: TestimonialStatus
     adminReply?: string | null
     adminNote?: string | null
+    contentEn?: string | null
   } = {}
 
   if (body.status !== undefined) {
@@ -62,6 +63,11 @@ export async function PATCH(
       typeof body.adminNote === 'string' ? body.adminNote.trim() || null : null
   }
 
+  if ((body as any).contentEn !== undefined) {
+    updateData.contentEn =
+      typeof (body as any).contentEn === 'string' ? (body as any).contentEn.trim() || null : null
+  }
+
   if (Object.keys(updateData).length === 0) {
     return NextResponse.json(
       { error: 'Aucun champ à mettre à jour fourni.' },
@@ -78,6 +84,7 @@ export async function PATCH(
         status: true,
         adminReply: true,
         adminNote: true,
+        contentEn: true,
         updatedAt: true,
       },
     })
@@ -93,6 +100,7 @@ export async function PATCH(
       status: updated.status,
       adminReply: updated.adminReply ?? null,
       adminNote: updated.adminNote ?? null,
+      contentEn: updated.contentEn ?? null,
       updatedAt: updated.updatedAt.toISOString(),
     })
   } catch (err: unknown) {

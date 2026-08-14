@@ -9,7 +9,9 @@ import { apiHandler, ApiError } from '@/lib/api-error'
 
 const documentSchema = z.object({
   title: z.string().trim().min(1, 'Le titre est obligatoire'),
+  titleEn: z.string().trim().optional().nullable(),
   description: z.string().trim().optional().nullable(),
+  descriptionEn: z.string().trim().optional().nullable(),
   category: z.string().trim().min(1, 'La catégorie est obligatoire'),
   formationId: z.union([z.number(), z.string()]).optional().nullable().transform(val => val ? Number(val) : null),
   sessionId: z.union([z.number(), z.string()]).transform(val => Number(val)),
@@ -175,14 +177,18 @@ export const POST = apiHandler(async (request: NextRequest) => {
 
   const {
     title,
+    titleEn,
     description,
+    descriptionEn,
     category,
     formationId,
     sessionId,
     isPublic
   } = documentSchema.parse({
     title: formData.get('title'),
+    titleEn: formData.get('titleEn'),
     description: formData.get('description'),
+    descriptionEn: formData.get('descriptionEn'),
     category: formData.get('category'),
     formationId: formData.get('formationId'),
     sessionId: formData.get('sessionId'),
@@ -210,7 +216,9 @@ export const POST = apiHandler(async (request: NextRequest) => {
     const document = await prisma.document.create({
       data: {
         title,
+        titleEn,
         description,
+        descriptionEn,
         fileName: file.name,
         filePath: relativeFilePath,
         fileSize: file.size,

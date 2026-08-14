@@ -62,13 +62,20 @@ export interface Formation {
   // Champs de base (existants en DB)
   id: number
   title: string
+  titleEn?: string
   slug: string
   description: string
+  descriptionEn?: string
   objectifs?: string
+  objectifsEn?: string
   duree?: string
+  dureeEn?: string
   modules?: string
+  modulesEn?: string
   methodes?: string
+  methodesEn?: string
   certification?: string
+  certificationEn?: string
   categorie?: string
   statut: FormationStatus
   imageUrl?: string
@@ -80,8 +87,11 @@ export interface Formation {
   format?: FormationFormat
   shortDescription?: string // Promesse de résultat courte
   publicTargets?: string[] // Public cible
+  publicTargetsEn?: string[]
   prerequisites?: string // Prérequis
+  prerequisitesEn?: string
   skillsAcquired?: string[] // Compétences développées
+  skillsAcquiredEn?: string[]
   
   // Inclusions
   hasCertificate?: boolean

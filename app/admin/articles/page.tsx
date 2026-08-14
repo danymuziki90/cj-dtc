@@ -6,7 +6,9 @@ import AdminShell from '@/components/admin-portal/AdminShell'
 type NewsItem = {
   id: string
   title: string
+  titleEn?: string | null
   content: string
+  contentEn?: string | null
   published: boolean
   createdAt: string
   updatedAt: string
@@ -30,7 +32,9 @@ type NewsResponse = {
 
 type NewsFormState = {
   title: string
+  titleEn: string
   content: string
+  contentEn: string
   category: string
   tagsInput: string
   publicationDate: string
@@ -49,7 +53,9 @@ function todayAsInputDate() {
 function emptyFormState(): NewsFormState {
   return {
     title: '',
+    titleEn: '',
     content: '',
+    contentEn: '',
     category: DEFAULT_CATEGORY,
     tagsInput: '',
     publicationDate: todayAsInputDate(),
@@ -262,7 +268,9 @@ export default function AdminActualitesPage() {
     setSuccessMessage(null)
     setForm({
       title: item.title,
+      titleEn: item.titleEn || '',
       content: item.content,
+      contentEn: item.contentEn || '',
       category: item.category || DEFAULT_CATEGORY,
       tagsInput: item.tags.join(', '),
       publicationDate: item.publicationDate.slice(0, 10),
@@ -305,7 +313,9 @@ export default function AdminActualitesPage() {
 
     const payload = {
       title: form.title.trim(),
+      titleEn: form.titleEn.trim(),
       content: form.content.trim(),
+      contentEn: form.contentEn.trim(),
       category: form.category.trim() || DEFAULT_CATEGORY,
       tags: parseTagInput(form.tagsInput),
       publicationDate: form.publicationDate || todayAsInputDate(),
@@ -388,17 +398,30 @@ export default function AdminActualitesPage() {
 
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="space-y-4">
-              <div>
-                <label htmlFor="title" className="mb-1 block text-sm font-medium text-slate-700">
-                  Titre
-                </label>
-                <input
-                  id="title"
-                  value={form.title}
-                  onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-                  required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
-                />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="title" className="mb-1 block text-sm font-medium text-slate-700">
+                    Titre (FR)
+                  </label>
+                  <input
+                    id="title"
+                    value={form.title}
+                    onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                    required
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="titleEn" className="mb-1 block text-sm font-medium text-slate-700">
+                    Title (EN)
+                  </label>
+                  <input
+                    id="titleEn"
+                    value={form.titleEn}
+                    onChange={(event) => setForm((prev) => ({ ...prev, titleEn: event.target.value }))}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring"
+                  />
+                </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -484,12 +507,21 @@ export default function AdminActualitesPage() {
               </label>
             </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Contenu</label>
-              <RichTextEditor
-                value={form.content}
-                onChange={(next) => setForm((prev) => ({ ...prev, content: next }))}
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Contenu (FR)</label>
+                <RichTextEditor
+                  value={form.content}
+                  onChange={(next) => setForm((prev) => ({ ...prev, content: next }))}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Content (EN)</label>
+                <RichTextEditor
+                  value={form.contentEn}
+                  onChange={(next) => setForm((prev) => ({ ...prev, contentEn: next }))}
+                />
+              </div>
             </div>
           </div>
 

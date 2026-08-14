@@ -14,6 +14,7 @@ type SessionItem = {
   startTime: string
   endTime: string
   location: string
+  locationEn?: string
   format: string
   status: string
   maxParticipants: number
@@ -24,9 +25,11 @@ type SessionItem = {
   formation: {
     id: number
     title: string
+    titleEn?: string
     slug: string
     categorie?: string | null
     description?: string | null
+    descriptionEn?: string | null
     imageUrl?: string | null
   }
   adminMeta?: {
@@ -207,7 +210,7 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredSessions.map((session) => {
             const availableSpots = Math.max(0, (session.maxParticipants || 0) - (session.currentParticipants || 0))
-            const title = session.adminMeta?.customTitle || session.formation.title
+            const title = session.adminMeta?.customTitle || (locale === 'fr' ? session.formation.title : (session.formation.titleEn || session.formation.title))
             const headerImage = session.adminMeta?.imageUrl || session.imageUrl || session.formation.imageUrl || '/logo.png'
 
             return (
@@ -235,9 +238,9 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
                     </p>
 
                     <Link href={`/${locale}/formations/${session.formation.slug}`}>
-                      {session.adminMeta?.customTitle && session.adminMeta.customTitle !== session.formation.title && (
+                      {session.adminMeta?.customTitle && session.adminMeta.customTitle !== (locale === 'fr' ? session.formation.title : (session.formation.titleEn || session.formation.title)) && (
                         <p className="mb-1 text-sm font-semibold text-[var(--cj-red)]">
-                          {session.formation.title}
+                          {locale === 'fr' ? session.formation.title : (session.formation.titleEn || session.formation.title)}
                         </p>
                       )}
                       <h3 className="mb-3 line-clamp-2 text-xl font-bold text-slate-900 transition-colors hover:text-[var(--cj-blue)] font-montserrat">
@@ -246,7 +249,7 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
                     </Link>
 
                     <div className="space-y-2 text-sm text-slate-600 mb-4 font-opensans">
-                      <p className="font-semibold">{session.location || (locale === 'fr' ? 'À définir' : 'TBD')}</p>
+                      <p className="font-semibold">{locale === 'fr' ? session.location : (session.locationEn || session.location) || (locale === 'fr' ? 'À définir' : 'TBD')}</p>
                       <p>{formatLabel(session.format, locale)} · {session.startTime} - {session.endTime}</p>
                       <p className="text-emerald-700 font-medium">
                         {availableSpots} {t.spotsLabel} {session.maxParticipants}
@@ -254,7 +257,7 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
                     </div>
 
                     <p className="line-clamp-3 text-sm text-gray-550">
-                      {session.description || session.formation.description || t.fallbackDescription}
+                      {session.description || (locale === 'fr' ? session.formation.description : (session.formation.descriptionEn || session.formation.description)) || t.fallbackDescription}
                     </p>
                   </div>
                 </div>

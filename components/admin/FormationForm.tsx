@@ -55,14 +55,20 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
 
   // Champs de base (existants en DB)
   const [title, setTitle]                     = useState(initialData?.title ?? '')
+  const [titleEn, setTitleEn]                 = useState(initialData?.titleEn ?? '')
   const [slug, setSlug]                       = useState(initialData?.slug ?? '')
   const [slugEdited, setSlugEdited]           = useState(false)
   const [description, setDescription]         = useState(initialData?.description ?? '')
+  const [descriptionEn, setDescriptionEn]     = useState(initialData?.descriptionEn ?? '')
   const [objectifs, setObjectifs]             = useState(initialData?.objectifs ?? '')
+  const [objectifsEn, setObjectifsEn]         = useState(initialData?.objectifsEn ?? '')
   const [duree, setDuree]                     = useState(initialData?.duree ?? '')
   const [modules, setModules]                 = useState(initialData?.modules ?? '')
+  const [modulesEn, setModulesEn]             = useState(initialData?.modulesEn ?? '')
   const [methodes, setMethodes]               = useState(initialData?.methodes ?? '')
+  const [methodesEn, setMethodesEn]           = useState(initialData?.methodesEn ?? '')
   const [certification, setCertification]     = useState(initialData?.certification ?? '')
+  const [certificationEn, setCertificationEn] = useState(initialData?.certificationEn ?? '')
   const [categorie, setCategorie]             = useState(initialData?.categorie ?? '')
   const [level, setLevel]                     = useState(initialData?.level ?? '')
   const [format, setFormat]                   = useState(initialData?.format ?? '')
@@ -72,6 +78,7 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
   // Nouveaux champs (synchronisation complete)
   const [name, setName]                       = useState(initialData?.name ?? '')
   const [shortDescription, setShortDescription] = useState(initialData?.shortDescription ?? '')
+  const [shortDescriptionEn, setShortDescriptionEn] = useState(initialData?.shortDescriptionEn ?? '')
   const [galleryText, setGalleryText]         = useState(
     Array.isArray(initialData?.gallery) ? (initialData.gallery as string[]).join('\n') : ''
   )
@@ -79,6 +86,7 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
     Array.isArray(initialData?.skillsAcquired) ? (initialData.skillsAcquired as string[]).join('\n') : ''
   )
   const [prerequisites, setPrerequisites]     = useState(initialData?.prerequisites ?? '')
+  const [prerequisitesEn, setPrerequisitesEn] = useState(initialData?.prerequisitesEn ?? '')
   const [publicTargetsText, setPublicTargetsText] = useState(
     Array.isArray(initialData?.publicTargets) ? (initialData.publicTargets as string[]).join('\n') : ''
   )
@@ -99,21 +107,29 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
     e.preventDefault()
     onSubmit({
       title,
+      titleEn,
       slug,
       description,
+      descriptionEn,
       objectifs,
+      objectifsEn,
       duree,
       modules,
+      modulesEn,
       methodes,
+      methodesEn,
       certification,
+      certificationEn,
       categorie,
       statut,
       imageUrl,
       name: name || null,
       shortDescription: shortDescription || null,
+      shortDescriptionEn: shortDescriptionEn || null,
       gallery: galleryText.split('\n').map(x => x.trim()).filter(Boolean),
       skillsAcquired: skillsText.split('\n').map(x => x.trim()).filter(Boolean),
       prerequisites: prerequisites || null,
+      prerequisitesEn: prerequisitesEn || null,
       publicTargets: publicTargetsText.split('\n').map(x => x.trim()).filter(Boolean),
       level: level || null,
       format: format || null,
@@ -157,11 +173,18 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
                   className={inputCls} />
               </Field>
 
-              <Field label="Titre officiel *" required>
-                <input type="text" value={title} onChange={e => setTitle(e.target.value)} required
-                  placeholder="Ex : Management des Ressources Humaines"
-                  className={inputCls} />
-              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Titre officiel (FR) *" required>
+                  <input type="text" value={title} onChange={e => setTitle(e.target.value)} required
+                    placeholder="Ex : Management des Ressources Humaines"
+                    className={inputCls} />
+                </Field>
+                <Field label="Title (EN)">
+                  <input type="text" value={titleEn} onChange={e => setTitleEn(e.target.value)}
+                    placeholder="Ex : Human Resources Management"
+                    className={inputCls} />
+                </Field>
+              </div>
  
               <Field label="Slug (URL)" hint="Généré automatiquement depuis le titre">
                 <input type="text" value={slug}
@@ -173,17 +196,31 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
                 </p>
               </Field>
 
-              <Field label="Description courte (Accroche / Promesse) *" required>
-                <input type="text" value={shortDescription} onChange={e => setShortDescription(e.target.value)} required
-                  placeholder="Ex : Devenez un leader stratégique RH et pilotez la performance humaine."
-                  className={inputCls} />
-              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Description courte (Accroche / Promesse) (FR) *" required>
+                  <input type="text" value={shortDescription} onChange={e => setShortDescription(e.target.value)} required
+                    placeholder="Ex : Devenez un leader stratégique RH et pilotez la performance humaine."
+                    className={inputCls} />
+                </Field>
+                <Field label="Short description (EN)">
+                  <input type="text" value={shortDescriptionEn} onChange={e => setShortDescriptionEn(e.target.value)}
+                    placeholder="Ex : Become a strategic HR leader and drive human performance."
+                    className={inputCls} />
+                </Field>
+              </div>
  
-              <Field label="Description complète / Présentation *" required>
-                <textarea value={description} onChange={e => setDescription(e.target.value)} required
-                  rows={6} placeholder="Présentation détaillée de la formation, de ses enjeux et de sa valeur ajoutée..."
-                  className={inputCls} />
-              </Field>
+              <div className="space-y-4">
+                <Field label="Description complète / Présentation (FR) *" required>
+                  <textarea value={description} onChange={e => setDescription(e.target.value)} required
+                    rows={6} placeholder="Présentation détaillée de la formation, de ses enjeux et de sa valeur ajoutée..."
+                    className={inputCls} />
+                </Field>
+                <Field label="Full description (EN)">
+                  <textarea value={descriptionEn} onChange={e => setDescriptionEn(e.target.value)}
+                    rows={6} placeholder="Detailed presentation of the training..."
+                    className={inputCls} />
+                </Field>
+              </div>
             </>
           )}
 
@@ -216,10 +253,14 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
                 </select>
               </Field>
 
-              <div className="sm:col-span-2">
-                <Field label="Certifications délivrées" hint="Ex : Certificat de formation professionnelle CJ DTC">
+              <div className="grid gap-4 sm:grid-cols-2 sm:col-span-2">
+                <Field label="Certifications délivrées (FR)" hint="Ex : Certificat de formation professionnelle CJ DTC">
                   <input type="text" value={certification} onChange={e => setCertification(e.target.value)}
                     placeholder="Certificat de formation CJ DTC + Préparation SHRM-CP" className={inputCls} />
+                </Field>
+                <Field label="Certifications (EN)">
+                  <input type="text" value={certificationEn} onChange={e => setCertificationEn(e.target.value)}
+                    placeholder="CJ DTC Professional Training Certificate" className={inputCls} />
                 </Field>
               </div>
 
@@ -272,23 +313,37 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
                 )}
               </Field>
  
-              <Field label="Programme / Modules" hint="Un module par ligne">
-                <textarea value={modules} onChange={e => setModules(e.target.value)}
-                  rows={6} placeholder={"Module 1 : Introduction générale\nModule 2 : Approfondissement opérationnel\n…"}
-                  className={inputCls} />
-              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Programme / Modules (FR)" hint="Un module par ligne">
+                  <textarea value={modules} onChange={e => setModules(e.target.value)}
+                    rows={6} placeholder={"Module 1 : Introduction générale\nModule 2 : Approfondissement opérationnel\n…"}
+                    className={inputCls} />
+                </Field>
+                <Field label="Modules (EN)">
+                  <textarea value={modulesEn} onChange={e => setModulesEn(e.target.value)}
+                    rows={6} placeholder={"Module 1: General introduction\nModule 2: Operational deep dive\n…"}
+                    className={inputCls} />
+                </Field>
+              </div>
             </>
           )}
  
           {/* ── Onglet Pédagogie ── */}
           {activeTab === 'pedagogie' && (
             <>
-              <Field label="Objectifs pédagogiques"
-                hint="Un objectif par ligne — ce que l'apprenant sera capable de faire">
-                <textarea value={objectifs} onChange={e => setObjectifs(e.target.value)}
-                  rows={4} placeholder={"Développer une stratégie RH globale\nMaîtriser les bases du recrutement\n…"}
-                  className={inputCls} />
-              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Objectifs pédagogiques (FR)"
+                  hint="Un objectif par ligne — ce que l'apprenant sera capable de faire">
+                  <textarea value={objectifs} onChange={e => setObjectifs(e.target.value)}
+                    rows={4} placeholder={"Développer une stratégie RH globale\nMaîtriser les bases du recrutement\n…"}
+                    className={inputCls} />
+                </Field>
+                <Field label="Learning Objectives (EN)" hint="One objective per line">
+                  <textarea value={objectifsEn} onChange={e => setObjectifsEn(e.target.value)}
+                    rows={4} placeholder={"Develop a global HR strategy\nMaster the basics of recruitment\n…"}
+                    className={inputCls} />
+                </Field>
+              </div>
 
               <Field label="Compétences développées"
                 hint="Une compétence par ligne">
@@ -297,12 +352,19 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
                   className={inputCls} />
               </Field>
 
-              <Field label="Prérequis"
-                hint="Connaissances ou diplômes nécessaires pour suivre le cours">
-                <textarea value={prerequisites} onChange={e => setPrerequisites(e.target.value)}
-                  rows={3} placeholder="Avoir une expérience managériale de base ou un niveau d'études Bac+2."
-                  className={inputCls} />
-              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Prérequis (FR)"
+                  hint="Connaissances ou diplômes nécessaires pour suivre le cours">
+                  <textarea value={prerequisites} onChange={e => setPrerequisites(e.target.value)}
+                    rows={3} placeholder="Avoir une expérience managériale de base ou un niveau d'études Bac+2."
+                    className={inputCls} />
+                </Field>
+                <Field label="Prerequisites (EN)">
+                  <textarea value={prerequisitesEn} onChange={e => setPrerequisitesEn(e.target.value)}
+                    rows={3} placeholder="Have basic managerial experience."
+                    className={inputCls} />
+                </Field>
+              </div>
 
               <Field label="Public cible"
                 hint="Un public par ligne">
@@ -311,12 +373,19 @@ export default function FormationForm({ initialData, onSubmit, isSubmitting, sub
                   className={inputCls} />
               </Field>
  
-              <Field label="Méthodes pédagogiques"
-                hint="Décrivez comment la formation est animée (ex. ateliers interactifs, mises en situation)">
-                <textarea value={methodes} onChange={e => setMethodes(e.target.value)}
-                  rows={4} placeholder="Présentations interactives, études de cas réels, simulations pratiques…"
-                  className={inputCls} />
-              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Méthodes pédagogiques (FR)"
+                  hint="Décrivez comment la formation est animée (ex. ateliers interactifs, mises en situation)">
+                  <textarea value={methodes} onChange={e => setMethodes(e.target.value)}
+                    rows={4} placeholder="Présentations interactives, études de cas réels, simulations pratiques…"
+                    className={inputCls} />
+                </Field>
+                <Field label="Teaching Methods (EN)">
+                  <textarea value={methodesEn} onChange={e => setMethodesEn(e.target.value)}
+                    rows={4} placeholder="Interactive presentations, real-world case studies…"
+                    className={inputCls} />
+                </Field>
+              </div>>
             </>
           )}
  

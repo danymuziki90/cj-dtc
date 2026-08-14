@@ -38,12 +38,15 @@ export default function AdminNouveauTravailPage() {
 
   const [form, setForm] = useState({
     title: '',
+    titleEn: '',
     description: '',
+    descriptionEn: '',
     type: 'tp',
     formationId: '',
     sessionId: '',
     deadline: new Date().toISOString().slice(0, 10),
     instructions: '',
+    instructionsEn: '',
     maxFileSize: '10',
     allowedFileTypes: 'pdf,doc,docx,zip,rar,png,jpg,jpeg,excel,xls,xlsx',
     difficulty: 'intermediaire',
@@ -210,14 +213,22 @@ export default function AdminNouveauTravailPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Titre *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Titre (FR) *</label>
                 <input
                   required
                   type="text"
                   value={form.title}
                   onChange={e => setForm({ ...form, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm mb-3"
                   placeholder="Ex: TP1 - Introduction à la comptabilité"
+                />
+                <label className="block text-sm font-medium text-slate-700 mb-1">Titre (EN)</label>
+                <input
+                  type="text"
+                  value={form.titleEn}
+                  onChange={e => setForm({ ...form, titleEn: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  placeholder="Ex: Lab 1 - Intro to Accounting"
                 />
               </div>
               
@@ -237,27 +248,51 @@ export default function AdminNouveauTravailPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Description courte *</label>
-              <textarea
-                required
-                rows={2}
-                value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                placeholder="Description rapide du travail à effectuer"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Description courte (FR) *</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={form.description}
+                  onChange={e => setForm({ ...form, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  placeholder="Description rapide du travail à effectuer"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Description courte (EN)</label>
+                <textarea
+                  rows={3}
+                  value={form.descriptionEn}
+                  onChange={e => setForm({ ...form, descriptionEn: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  placeholder="Quick description"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Consignes détaillées</label>
-              <textarea
-                rows={5}
-                value={form.instructions}
-                onChange={e => setForm({ ...form, instructions: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                placeholder="Détaillez les instructions, les objectifs, les critères d'évaluation..."
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Consignes détaillées (FR)</label>
+                <textarea
+                  rows={5}
+                  value={form.instructions}
+                  onChange={e => setForm({ ...form, instructions: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  placeholder="Détaillez les instructions, les objectifs, les critères d'évaluation..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Consignes détaillées (EN)</label>
+                <textarea
+                  rows={5}
+                  value={form.instructionsEn}
+                  onChange={e => setForm({ ...form, instructionsEn: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  placeholder="Instructions in English..."
+                />
+              </div>
             </div>
           </div>
 

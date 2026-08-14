@@ -6,7 +6,9 @@ import AdminShell from '@/components/admin-portal/AdminShell'
 interface Document {
     id: number
     title: string
+    titleEn?: string | null
     description?: string
+    descriptionEn?: string | null
     fileName: string
     filePath: string
     fileSize: number
@@ -49,7 +51,9 @@ export default function DocumentsPage() {
 
     const [uploadForm, setUploadForm] = useState({
         title: '',
+        titleEn: '',
         description: '',
+        descriptionEn: '',
         category: 'cours',
         formationId: '',
         sessionId: '',
@@ -124,7 +128,9 @@ export default function DocumentsPage() {
             const formData = new FormData()
             formData.append('file', selectedFile)
             formData.append('title', uploadForm.title)
+            formData.append('titleEn', uploadForm.titleEn)
             formData.append('description', uploadForm.description)
+            formData.append('descriptionEn', uploadForm.descriptionEn)
             formData.append('category', uploadForm.category)
             formData.append('formationId', uploadForm.formationId)
             formData.append('sessionId', uploadForm.sessionId)
@@ -139,7 +145,9 @@ export default function DocumentsPage() {
                 fetchDocuments()
                 setUploadForm({
                     title: '',
+                    titleEn: '',
                     description: '',
+                    descriptionEn: '',
                     category: 'cours',
                     formationId: '',
                     sessionId: '',
@@ -314,29 +322,55 @@ export default function DocumentsPage() {
                         )}
 
                         <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Titre *
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={uploadForm.title}
-                                    onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Titre (FR) *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={uploadForm.title}
+                                        onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Titre (EN)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={uploadForm.titleEn}
+                                        onChange={(e) => setUploadForm(prev => ({ ...prev, titleEn: e.target.value }))}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Description
-                                </label>
-                                <textarea
-                                    value={uploadForm.description}
-                                    onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
-                                    rows={2}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Description (FR)
+                                    </label>
+                                    <textarea
+                                        value={uploadForm.description}
+                                        onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
+                                        rows={2}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Description (EN)
+                                    </label>
+                                    <textarea
+                                        value={uploadForm.descriptionEn}
+                                        onChange={(e) => setUploadForm(prev => ({ ...prev, descriptionEn: e.target.value }))}
+                                        rows={2}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
                             </div>
 
                             <div>
@@ -376,7 +410,9 @@ export default function DocumentsPage() {
                                     }
                                     setUploadForm({
                                         title: '',
+                                        titleEn: '',
                                         description: '',
+                                        descriptionEn: '',
                                         category: 'syllabus',
                                         formationId: '',
                                         sessionId: '',

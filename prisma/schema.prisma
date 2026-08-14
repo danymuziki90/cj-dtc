@@ -132,44 +132,44 @@ model News {
 }
 
 model Formation {
-  id               Int               @id @default(autoincrement())
-  name             String?
-  title            String
-  titleEn          String?
-  slug             String            @unique
-  description      String
-  descriptionEn    String?
-  shortDescription String?
+  id                 Int               @id @default(autoincrement())
+  name               String?
+  title              String
+  titleEn            String?
+  slug               String            @unique
+  description        String
+  descriptionEn      String?
+  shortDescription   String?
   shortDescriptionEn String?
-  objectifs        String?
-  objectifsEn      String?
-  duree            String?
-  modules          String?
-  modulesEn        String?
-  methodes         String?
-  methodesEn       String?
-  certification    String?
-  certificationEn  String?
-  categorie        String?
-  statut           String            @default("brouillon") // brouillon, publie, archive
-  imageUrl         String?
-  gallery          Json?
-  skillsAcquired   Json?
-  prerequisites    String?
-  prerequisitesEn  String?
-  publicTargets    Json?
-  level            String?
-  format           String?
-  languages        Json?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  certificates     Certificate[]
-  enrollments      Enrollment[]
-  sessions         TrainingSession[]
-  documents        Document[]
-  evaluations      Evaluation[]
-  Assignment       Assignment[]
-  Testimonial      Testimonial[]
+  objectifs          String?
+  objectifsEn        String?
+  duree              String?
+  modules            String?
+  modulesEn          String?
+  methodes           String?
+  methodesEn         String?
+  certification      String?
+  certificationEn    String?
+  categorie          String?
+  statut             String            @default("brouillon") // brouillon, publie, archive
+  imageUrl           String?
+  gallery            Json?
+  skillsAcquired     Json?
+  prerequisites      String?
+  prerequisitesEn    String?
+  publicTargets      Json?
+  level              String?
+  format             String?
+  languages          Json?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  certificates       Certificate[]
+  enrollments        Enrollment[]
+  sessions           TrainingSession[]
+  documents          Document[]
+  evaluations        Evaluation[]
+  Assignment         Assignment[]
+  Testimonial        Testimonial[]
 }
 
 model Certificate {
@@ -329,24 +329,24 @@ model SessionInstructor {
 }
 
 model Document {
-  id          Int              @id @default(autoincrement())
-  title       String
-  titleEn     String?
-  description String?
+  id            Int              @id @default(autoincrement())
+  title         String
+  titleEn       String?
+  description   String?
   descriptionEn String?
-  fileName    String
-  filePath    String
-  fileSize    Int
-  mimeType    String
-  formationId Int?
-  formation   Formation?       @relation(fields: [formationId], references: [id])
-  sessionId   Int?
-  session     TrainingSession? @relation(fields: [sessionId], references: [id])
-  category    String // syllabus, presentation, exercise, resource, certificate_template
-  isPublic    Boolean          @default(false)
-  uploadedBy  String? // user ID
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  fileName      String
+  filePath      String
+  fileSize      Int
+  mimeType      String
+  formationId   Int?
+  formation     Formation?       @relation(fields: [formationId], references: [id])
+  sessionId     Int?
+  session       TrainingSession? @relation(fields: [sessionId], references: [id])
+  category      String // syllabus, presentation, exercise, resource, certificate_template
+  isPublic      Boolean          @default(false)
+  uploadedBy    String? // user ID
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@index([formationId])
   @@index([sessionId])
@@ -460,14 +460,14 @@ model ContactMessage {
 }
 
 model FAQ {
-  id        Int      @id @default(autoincrement())
-  question  String
+  id         Int      @id @default(autoincrement())
+  question   String
   questionEn String?
-  answer    String
+  answer     String
   answerEn   String?
-  category  String   @default("General")
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
+  category   String   @default("General")
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
 
   @@index([category])
 }
@@ -510,15 +510,17 @@ model SessionFormQuestion {
   templateId Int?
   template   SessionFormTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
 
-  label     String
-  type      String // text_short | text_long | number | date | select | radio | checkbox | yes_no | file_upload
-  helpText  String?
-  required  Boolean  @default(false)
-  order     Int      @default(0)
-  options   String? // JSON array ["Option A", "Option B"] pour select/radio/checkbox
-  fileTypes String? // JSON array ["pdf","docx"] pour file_upload
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  label      String
+  labelEn    String?
+  type       String // text_short | text_long | number | date | select | radio | checkbox | yes_no | file_upload
+  helpText   String?
+  helpTextEn String?
+  required   Boolean  @default(false)
+  order      Int      @default(0)
+  options    String? // JSON array ["Option A", "Option B"] pour select/radio/checkbox
+  fileTypes  String? // JSON array ["pdf","docx"] pour file_upload
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   answers SessionFormAnswer[]
 
@@ -557,13 +559,16 @@ model EmailTemplate {
 model Assignment {
   id                Int              @id @default(autoincrement())
   title             String
+  titleEn           String?
   description       String
+  descriptionEn     String?
   type              String           @default("tp")
   formationId       Int
   deadline          DateTime
   maxFileSize       Int              @default(10)
   allowedFileTypes  String           @default("pdf,doc,docx,zip,rar,png,jpg,jpeg,excel,xls,xlsx")
   instructions      String?
+  instructionsEn    String?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
   sessionId         Int?
@@ -673,9 +678,11 @@ model Testimonial {
   status          String           @default("pending")
   studentId       String
   title           String?
-  updatedAt       DateTime @updatedAt
+  titleEn         String?
+  updatedAt       DateTime         @updatedAt
   adminNote       String?
   content         String
+  contentEn       String?
   Formation       Formation?       @relation(fields: [formationId], references: [id])
   TrainingSession TrainingSession? @relation(fields: [sessionId], references: [id])
   Student         Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -734,10 +741,10 @@ model Account {
 // =============================================
 
 model HeroSection {
-  id              String      @id @default(cuid())
+  id       String  @id @default(cuid())
   /// Identifiant de page unique: home | about | sessions | entreprises | actualites | contact | emplois | galerie | partenaires
-  pageKey         String      @unique
-  isActive        Boolean     @default(true)
+  pageKey  String  @unique
+  isActive Boolean @default(true)
 
   // Image principale
   imageUrl        String?
@@ -746,62 +753,62 @@ model HeroSection {
   defaultImageUrl String?
 
   // Contenu FR
-  eyebrowFr       String?
-  titleFr         String      @default("")
-  descriptionFr   String?
+  eyebrowFr     String?
+  titleFr       String  @default("")
+  descriptionFr String?
 
   // Contenu EN
-  eyebrowEn       String?
-  titleEn         String      @default("")
-  descriptionEn   String?
+  eyebrowEn     String?
+  titleEn       String  @default("")
+  descriptionEn String?
 
   // CTAs JSON: [{label, href, variant}]
-  ctasFr          Json?
-  ctasEn          Json?
+  ctasFr Json?
+  ctasEn Json?
 
   // Badges JSON: [{label, color}]
-  badgesFr        Json?
-  badgesEn        Json?
+  badgesFr Json?
+  badgesEn Json?
 
   // Options d'affichage
-  overlayOpacity  Int         @default(55)
-  compact         Boolean     @default(false)
+  overlayOpacity  Int     @default(55)
+  compact         Boolean @default(false)
   /// Active le défilement automatique lorsqu'au moins deux slides sont publiés.
-  carouselEnabled Boolean     @default(true)
+  carouselEnabled Boolean @default(true)
   /// Durée d'affichage d'un slide, en millisecondes.
-  slideDuration   Int         @default(6000)
+  slideDuration   Int     @default(6000)
 
   // Slides du carrousel (homepage uniquement)
-  slides          HeroSlide[]
+  slides HeroSlide[]
 
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([pageKey])
   @@index([isActive])
 }
 
 model HeroSlide {
-  id            String      @id @default(cuid())
-  heroId        String
-  hero          HeroSection @relation(fields: [heroId], references: [id], onDelete: Cascade)
-  order         Int         @default(0)
+  id       String      @id @default(cuid())
+  heroId   String
+  hero     HeroSection @relation(fields: [heroId], references: [id], onDelete: Cascade)
+  order    Int         @default(0)
   /// Permet de retirer un slide du carrousel sans le supprimer.
-  isActive      Boolean     @default(true)
+  isActive Boolean     @default(true)
 
   imageUrl      String
   imageAlt      String?
   eyebrowFr     String?
   eyebrowEn     String?
-  titleFr       String      @default("")
-  titleEn       String      @default("")
+  titleFr       String  @default("")
+  titleEn       String  @default("")
   descriptionFr String?
   descriptionEn String?
   badgeFr       String?
   badgeEn       String?
 
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([heroId])
   @@index([order])

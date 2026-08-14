@@ -106,6 +106,7 @@ export default function AdminEvaluationsPage() {
   // Modale de réponse Admin
   const [replyingTestimonial, setReplyingTestimonial] = useState<Testimonial | null>(null)
   const [replyText, setReplyText] = useState('')
+  const [contentEnText, setContentEnText] = useState('')
   const [submittingReply, setSubmittingReply] = useState(false)
 
   // Modale de confirmation de suppression
@@ -203,7 +204,7 @@ export default function AdminEvaluationsPage() {
       const res = await fetch(`/api/admin/testimonials/${replyingTestimonial.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminReply: replyText })
+        body: JSON.stringify({ adminReply: replyText, contentEn: contentEnText })
       })
 
       if (!res.ok) {
@@ -214,12 +215,13 @@ export default function AdminEvaluationsPage() {
       const updated = await res.json()
 
       setTestimonials(prev =>
-        prev.map(t => (t.id === replyingTestimonial.id ? { ...t, adminReply: updated.adminReply || replyText } : t))
+        prev.map(t => (t.id === replyingTestimonial.id ? { ...t, adminReply: updated.adminReply || replyText, contentEn: updated.contentEn || contentEnText } : t))
       )
 
       success('Réponse enregistrée avec succès.')
       setReplyingTestimonial(null)
       setReplyText('')
+      setContentEnText('')
     } catch (err: any) {
       console.error(err)
       toastError(err.message || 'Erreur lors de l’enregistrement.')
@@ -609,6 +611,7 @@ export default function AdminEvaluationsPage() {
                         onClick={() => {
                           setReplyingTestimonial(t)
                           setReplyText(t.adminReply || '')
+                          setContentEnText(t.contentEn || '')
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold transition"
                       >
@@ -703,11 +706,24 @@ export default function AdminEvaluationsPage() {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xl max-w-lg w-full p-6 space-y-4">
             <h3 className="text-lg font-bold text-slate-900">
-              Répondre au témoignage de {replyingTestimonial.student?.firstName} {replyingTestimonial.student?.lastName}
+              Gérer le témoignage de {replyingTestimonial.student?.firstName} {replyingTestimonial.student?.lastName}
             </h3>
 
             <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-xs text-slate-600">
               <p className="font-semibold text-slate-900 mb-1">« {replyingTestimonial.content} »</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Traduction EN du témoignage
+              </label>
+              <textarea
+                value={contentEnText}
+                onChange={e => setContentEnText(e.target.value)}
+                rows={3}
+                placeholder="Traduire le témoignage en anglais..."
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-900/20 outline-none"
+              />
             </div>
 
             <div>

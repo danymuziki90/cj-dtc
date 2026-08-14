@@ -6,7 +6,9 @@ import { useToastNotification } from '@/components/ui/toast';
 interface FAQItem {
   id: number;
   question: string;
+  questionEn?: string | null;
   answer: string;
+  answerEn?: string | null;
   category: string;
   order: number;
 }
@@ -18,7 +20,9 @@ export default function AdminFAQPage() {
   const [editingItem, setEditingItem] = useState<FAQItem | null>(null);
 
   const [formQuestion, setFormQuestion] = useState('');
+  const [formQuestionEn, setFormQuestionEn] = useState('');
   const [formAnswer, setFormAnswer] = useState('');
+  const [formAnswerEn, setFormAnswerEn] = useState('');
   const [formCategory, setFormCategory] = useState('General');
   const [formOrder, setFormOrder] = useState(0);
 
@@ -50,7 +54,9 @@ export default function AdminFAQPage() {
   const openCreate = () => {
     setEditingItem(null);
     setFormQuestion('');
+    setFormQuestionEn('');
     setFormAnswer('');
+    setFormAnswerEn('');
     setFormCategory('General');
     setFormOrder(0);
     setShowForm(true);
@@ -59,7 +65,9 @@ export default function AdminFAQPage() {
   const openEdit = (item: FAQItem) => {
     setEditingItem(item);
     setFormQuestion(item.question);
+    setFormQuestionEn(item.questionEn || '');
     setFormAnswer(item.answer);
+    setFormAnswerEn(item.answerEn || '');
     setFormCategory(item.category);
     setFormOrder(item.order);
     setShowForm(true);
@@ -74,7 +82,9 @@ export default function AdminFAQPage() {
 
     const payload = {
       question: formQuestion,
+      questionEn: formQuestionEn,
       answer: formAnswer,
+      answerEn: formAnswerEn,
       category: formCategory,
       order: formOrder
     };
@@ -154,15 +164,24 @@ export default function AdminFAQPage() {
           </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
-              <label htmlFor="faq-question" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Question *</label>
+              <label htmlFor="faq-question" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Question (FR) *</label>
               <input
                 id="faq-question"
                 type="text"
                 value={formQuestion}
                 onChange={(e) => setFormQuestion(e.target.value)}
                 placeholder="ex. Comment s'inscrire à une formation ?"
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30 mb-2"
                 required
+              />
+              <label htmlFor="faq-question-en" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Question (EN)</label>
+              <input
+                id="faq-question-en"
+                type="text"
+                value={formQuestionEn}
+                onChange={(e) => setFormQuestionEn(e.target.value)}
+                placeholder="ex. How to enroll in a course?"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30"
               />
             </div>
             <div>
@@ -180,15 +199,24 @@ export default function AdminFAQPage() {
               </select>
             </div>
             <div className="md:col-span-2">
-              <label htmlFor="faq-answer" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Réponse *</label>
+              <label htmlFor="faq-answer" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Réponse (FR) *</label>
               <textarea
                 id="faq-answer"
-                rows={4}
+                rows={3}
                 value={formAnswer}
                 onChange={(e) => setFormAnswer(e.target.value)}
                 placeholder="Rédiger la réponse détaillée..."
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30 mb-2"
                 required
+              />
+              <label htmlFor="faq-answer-en" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Réponse (EN)</label>
+              <textarea
+                id="faq-answer-en"
+                rows={3}
+                value={formAnswerEn}
+                onChange={(e) => setFormAnswerEn(e.target.value)}
+                placeholder="Write the detailed answer..."
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30"
               />
             </div>
             <div>
