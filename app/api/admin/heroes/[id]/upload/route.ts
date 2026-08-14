@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdminToken } from '@/lib/admin/auth'
 import { uploadToR2 } from '@/lib/r2'
+import { R2StorageError } from '@/lib/r2'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
+// Les uploads utilisent Buffer, le SDK S3 et Prisma : ils doivent toujours
+// s'exécuter dans une fonction Node.js, y compris sur Vercel.
+export const runtime = 'nodejs'
+export const maxDuration = 60
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif']
 const MAX_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB
@@ -65,6 +70,9 @@ export async function POST(
     return NextResponse.json({ imageUrl })
   } catch (error) {
     console.error('[POST /api/admin/heroes/[id]/upload]', error)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    if (error instanceof R2StorageError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 503 })
+    }
+    return NextResponse.json({ error: "Impossible de téléverser l'image. Réessayez dans quelques instants." }, { status: 500 })
   }
 }

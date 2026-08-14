@@ -41,6 +41,13 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
     error: (msg: string) => alert(msg),
   };
 
+  const uploadErrorMessage = (caughtError: unknown, fallback: string) => {
+    if (caughtError instanceof TypeError && /fetch/i.test(caughtError.message)) {
+      return 'Impossible de joindre le serveur. Vérifiez votre connexion puis réessayez.';
+    }
+    return caughtError instanceof Error ? caughtError.message : fallback;
+  };
+
   const fetchSection = async () => {
     try {
       setLoading(true);
@@ -162,8 +169,8 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       const data = await res.json();
       setImageUrl(data.url || data.imageUrl);
       success("Image uploadée et sauvegardée avec succès.");
-    } catch (err: any) {
-      error(err.message || "Erreur d'upload");
+    } catch (err: unknown) {
+      error(uploadErrorMessage(err, "Impossible de téléverser l'image."));
     } finally {
       setUploadingImage(false);
       if (e.target) e.target.value = ''; // reset file input
@@ -280,8 +287,8 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       }
       await fetchSection();
       success(`${files.length} image${files.length > 1 ? 's' : ''} ajoutée${files.length > 1 ? 's' : ''} au slider.`);
-    } catch (err: any) {
-      error(err.message || "Erreur lors de l'ajout des images.");
+    } catch (err: unknown) {
+      error(uploadErrorMessage(err, "Erreur lors de l'ajout des images."));
     } finally {
       event.target.value = '';
     }

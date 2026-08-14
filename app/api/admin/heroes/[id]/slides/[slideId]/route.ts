@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminToken } from '@/lib/admin/auth'
 import { revalidateTag } from 'next/cache'
-import { uploadToR2 } from '@/lib/r2'
+import { R2StorageError, uploadToR2 } from '@/lib/r2'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const maxDuration = 60
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif']
 const MAX_SIZE_BYTES = 5 * 1024 * 1024
@@ -97,6 +99,9 @@ export async function PUT(
     return NextResponse.json({ slide })
   } catch (error) {
     console.error('[PUT /api/admin/heroes/[id]/slides/[slideId]]', error)
+    if (error instanceof R2StorageError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 503 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

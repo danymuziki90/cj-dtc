@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminToken } from '@/lib/admin/auth'
 import { revalidateTag } from 'next/cache'
-import { uploadToR2 } from '@/lib/r2'
+import { R2StorageError, uploadToR2 } from '@/lib/r2'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const maxDuration = 60
 
 const legacySlideSelect = {
   id: true, heroId: true, order: true, imageUrl: true, imageAlt: true,
@@ -126,6 +128,9 @@ export async function POST(
     return NextResponse.json({ slide: { ...slide, isActive: true } }, { status: 201 })
   } catch (error) {
     console.error('[POST /api/admin/heroes/[id]/slides]', error)
+    if (error instanceof R2StorageError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 503 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
