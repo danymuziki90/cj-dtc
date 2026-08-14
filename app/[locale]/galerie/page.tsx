@@ -6,7 +6,6 @@ import { getHeroData } from '@/lib/hero/getHeroData'
 
 export default async function GaleriePage({ params }: { params: Promise<{ locale?: string }> }) {
   const locale = (await params).locale === 'en' ? 'en' : 'fr'
-  const isFr = locale === 'fr'
   const tHome = publicMessages.header[locale].home
   const tGallery = publicMessages.galerie[locale]
 
