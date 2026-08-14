@@ -20,7 +20,7 @@ export function CalendarTab({ calendarTimeline }: CalendarTabProps) {
       </div>
 
       {calendarTimeline.length > 0 ? (
-        <div className="relative border-l-2 border-slate-200 ml-4 pl-6 space-y-8 py-4">
+        <div className="relative ml-4 overflow-x-hidden border-l-2 border-slate-200 pl-5 space-y-6 py-2 sm:ml-4 sm:pl-6 sm:space-y-8 sm:py-4">
           {calendarTimeline.map((evt) => {
             const EvtIcon = evt.icon;
             return (

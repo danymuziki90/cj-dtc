@@ -4,19 +4,10 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import {
-  Award,
-  CalendarDays,
-  FileText,
-  GraduationCap,
-  Loader2,
-  MapPinIcon,
-  Phone,
-} from "lucide-react";
+import { Award, FileText, GraduationCap, Loader2 } from "lucide-react";
 import { StudentHeader } from "./_components/StudentHeader";
 import { StudentHeroSection } from "./_components/StudentHeroSection";
 import { StudentNavTabs } from "./_components/StudentNavTabs";
-import { StudentStatsCards } from "./_components/StudentStatsCards";
 import { OverviewTab } from "./_components/OverviewTab";
 import { FormationsTab } from "./_components/FormationsTab";
 import { AssignmentsTab } from "./_components/AssignmentsTab";
@@ -27,7 +18,6 @@ import { SupportTab } from "./_components/SupportTab";
 import { AssignmentSubmitModal, type UploadedFileData } from "./_components/AssignmentSubmitModal";
 import { NewsModal } from "./_components/NewsModal";
 import { DashboardPayload } from "./_components/types";
-import { formatDate } from "./_components/utils";
 
 function EspaceEtudiantsContent() {
   const router = useRouter();
@@ -102,7 +92,7 @@ function EspaceEtudiantsContent() {
 
   useEffect(() => {
     loadDashboard();
-    
+
     fetch('/api/hero-images?pageKey=student_space')
       .then(res => res.json())
       .then(data => setHeroData(data))
@@ -119,7 +109,7 @@ function EspaceEtudiantsContent() {
       .on("broadcast", { event: "assignment_updated" }, () => loadDashboard(false))
       .on("broadcast", { event: "assignment_deleted" }, () => loadDashboard(false));
 
-    // Canal submissions — deux noms de canaux possibles selon la route utilisée
+    // Canal submissions
     const submissionsChannel = supabase.channel("submissions_channel")
       .on("broadcast", { event: "submission_created" }, () => loadDashboard(false))
       .on("broadcast", { event: "submission_graded"  }, () => loadDashboard(false))
@@ -171,8 +161,7 @@ function EspaceEtudiantsContent() {
   }, [data, progress]);
 
   const activeSessionsCount = useMemo(() => {
-    return sessionsHistory.filter((s: any) => s.sessionLifecycle === "active")
-      .length;
+    return sessionsHistory.filter((s: any) => s.sessionLifecycle === "active").length;
   }, [sessionsHistory]);
 
   const pendingAssignmentsCount = assignmentSummary.toSubmit || 0;
@@ -237,7 +226,7 @@ function EspaceEtudiantsContent() {
     setUploadSuccessMessage("");
 
     try {
-      // ── Vérification auth (non bloquante — on tente quand même) ────────
+      // ── Vérification auth (non bloquante) ────────
       const authCheck = await fetch("/api/student/auth/check", {
         credentials: "include",
         cache: "no-store",
@@ -245,12 +234,9 @@ function EspaceEtudiantsContent() {
 
       console.log("[handleAssignmentSubmit] authCheck:", authCheck);
 
-      // Récupérer l'email et l'ID étudiant depuis l'état du dashboard
-      // pour les envoyer comme fallback d'identification
       const studentEmail = (student as any)?.email || null;
       const studentId    = (student as any)?.id    || null;
 
-      // ── POST vers la nouvelle route robuste ───────────────────────────
       const response = await fetch("/api/student/submit", {
         method: "POST",
         credentials: "include",
@@ -258,7 +244,6 @@ function EspaceEtudiantsContent() {
         body: JSON.stringify({
           assignmentId: selectedAssignmentForSubmission.id,
           files: uploadedFiles,
-          // Fallback d'identification si le cookie JWT est invalide
           studentEmail,
           studentId,
         }),
@@ -448,32 +433,6 @@ function EspaceEtudiantsContent() {
     ? `Vous suivez actuellement la formation : ${currentSession.formationTitle}. Retrouvez l'ensemble de votre suivi ci-dessous.`
     : "Bienvenue dans votre tableau de bord. Retrouvez vos cours et échéances académiques en un coup d'œil.";
 
-  const heroStats = [
-    {
-      icon: CalendarDays,
-      label: "Période active",
-      value: currentSession
-        ? `${formatDate(currentSession.startDate)} - ${formatDate(
-            currentSession.endDate
-          )}`
-        : "Pas de session active",
-    },
-    {
-      icon: MapPinIcon,
-      label: "Lieu / Format",
-      value: currentSession
-        ? [currentSession.location, currentSession.format]
-            .filter(Boolean)
-            .join(" | ")
-        : "Session à venir",
-    },
-    {
-      icon: Phone,
-      label: "Contact WhatsApp",
-      value: student.whatsapp || "Non renseigné",
-    },
-  ];
-
   const basePath = `${localePrefix}/espace-etudiants`;
 
   return (
@@ -492,13 +451,13 @@ function EspaceEtudiantsContent() {
         onLogout={logout}
       />
 
-      <main className="relative z-10 mx-auto max-w-7xl space-y-5 px-4 pb-8 pt-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 mx-auto max-w-7xl space-y-4 px-3 pb-8 pt-4 sm:px-6 lg:px-8">
         {/* SECTION 1: HERO */}
         <StudentHeroSection
           student={student}
           currentSession={currentSession}
           heroSummary={heroSummary}
-          heroStats={heroStats}
+          heroStats={[]}
           eligibility={eligibility}
           firstCertificate={firstCertificate}
           basePath={basePath}
@@ -516,18 +475,8 @@ function EspaceEtudiantsContent() {
           locale={locale}
         />
 
-        {/* SECTION 2: STATS CARD ROW */}
-        <StudentStatsCards
-          totalFormationsCount={totalFormationsCount}
-          activeSessionsCount={activeSessionsCount}
-          pendingAssignmentsCount={pendingAssignmentsCount}
-          submittedAssignmentsCount={submittedAssignmentsCount}
-          newsCount={news.length}
-          locale={locale}
-        />
-
         {/* DYNAMIC CONTENT CONTAINER BASED ON TAB */}
-        <div className="space-y-6">
+        <div className="space-y-5">
           {activeTab === "overview" && (
             <OverviewTab
               currentSession={currentSession}

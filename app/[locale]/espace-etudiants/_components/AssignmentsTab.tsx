@@ -16,11 +16,11 @@ interface AssignmentsTabProps {
 
 // ─── Correction status config ───────────────────────────────────────────────
 const CORRECTION_STATUS: Record<string, { label: string; color: string; icon: any }> = {
-  pending:   { label: "En attente de correction", color: "bg-amber-50 text-amber-700 border-amber-200",    icon: Clock         },
-  in_review: { label: "En cours de correction",   color: "bg-blue-50 text-blue-700 border-blue-200",       icon: Eye           },
-  graded:    { label: "Corrigé",                  color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
-  returned:  { label: "À reprendre",              color: "bg-orange-50 text-orange-700 border-orange-200", icon: AlertTriangle  },
-  validated: { label: "Validé",                   color: "bg-purple-50 text-purple-700 border-purple-200", icon: Award         },
+  pending:   { label: "En attente de correction", color: "bg-amber-50 text-amber-700 border-amber-200",       icon: Clock         },
+  in_review: { label: "En cours de correction",   color: "bg-blue-50 text-blue-700 border-blue-200",          icon: Eye           },
+  graded:    { label: "Corrigé",                  color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle2  },
+  returned:  { label: "À reprendre",              color: "bg-orange-50 text-orange-700 border-orange-200",    icon: AlertTriangle },
+  validated: { label: "Validé",                   color: "bg-purple-50 text-purple-700 border-purple-200",    icon: Award         },
 }
 
 function CorrectionBadge({ status }: { status: string }) {
@@ -33,22 +33,22 @@ function CorrectionBadge({ status }: { status: string }) {
   );
 }
 
-// ─── Grade display ──────────────────────────────────────────────────────────
+// ─── Grade display — responsive mobile ──────────────────────────────────────
 function GradeDisplay({ grade, maxGrade, percentage }: { grade: number; maxGrade: number; percentage: number | null }) {
   const pct = percentage ?? Math.round((grade / maxGrade) * 100);
   const color = pct >= 60 ? "text-emerald-600" : pct >= 40 ? "text-amber-600" : "text-red-600";
   const bg    = pct >= 60 ? "bg-emerald-50 border-emerald-200" : pct >= 40 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200";
 
   return (
-    <div className={`rounded-2xl border ${bg} px-4 py-3 flex items-center justify-between gap-4`}>
+    <div className={`rounded-2xl border ${bg} px-4 py-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4`}>
       <div>
         <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-0.5">Note obtenue</p>
         <p className="text-2xl font-black text-slate-900">
           {grade}<span className="text-sm font-normal text-slate-400">/{maxGrade}</span>
         </p>
       </div>
-      <div className="text-right">
-        <p className={`text-3xl font-black ${color}`}>{pct}%</p>
+      <div className="sm:text-right">
+        <p className={`text-2xl font-black sm:text-3xl ${color}`}>{pct}%</p>
         <p className="text-[10px] text-slate-400 font-semibold">Pourcentage</p>
       </div>
     </div>
@@ -144,7 +144,7 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
       </div>
 
       {assignments.length === 0 ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center space-y-3">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center space-y-3 sm:p-12">
           <div className="w-12 h-12 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center mx-auto border border-slate-200">
             <FileText className="w-6 h-6" />
           </div>
@@ -158,13 +158,13 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
             const StatusIcon  = statusInfo.icon;
             const submission  = assign.submissions?.[0] || assign.Submission?.[0];
             const hasResult   = submission && (submission.grade !== null || submission.feedback || submission.correctionStatus !== "pending");
-            const canSubmit = canStudentSubmitAssignment(assign);
+            const canSubmit   = canStudentSubmitAssignment(assign);
 
             return (
               <div key={assign.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col">
 
                 {/* Card header */}
-                <div className="p-5 space-y-3 flex-1">
+                <div className="p-4 space-y-3 flex-1 sm:p-5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="space-y-1 min-w-0">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--cj-blue)] bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
@@ -218,13 +218,13 @@ export function AssignmentsTab({ assignments, setSelectedAssignmentForSubmission
 
                 {/* Result section */}
                 {hasResult && (
-                  <div className="px-5 pb-5">
+                  <div className="px-4 pb-4 sm:px-5 sm:pb-5">
                     <SubmissionResult submission={submission} />
                   </div>
                 )}
 
                 {/* Action button */}
-                <div className="px-5 pb-5 border-t border-slate-100 pt-3 flex items-center justify-between">
+                <div className="px-4 pb-4 border-t border-slate-100 pt-3 flex items-center justify-between sm:px-5 sm:pb-5">
                   <span className="text-[11px] text-slate-400">
                     {submission ? `Remis le ${new Date(submission.submittedAt).toLocaleDateString("fr-FR")}` : "Non remis"}
                   </span>

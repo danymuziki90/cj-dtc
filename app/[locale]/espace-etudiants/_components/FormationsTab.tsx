@@ -185,7 +185,7 @@ export function FormationsTab({
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
 
-                    <div className="grid grid-cols-3 gap-2 mt-1 text-center border-t border-slate-100 pt-3">
+                    <div className="grid grid-cols-2 gap-2 mt-1 text-center border-t border-slate-100 pt-3 sm:grid-cols-3">
                       <button
                         onClick={() => setActiveTab("calendrier")}
                         className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
@@ -202,7 +202,6 @@ export function FormationsTab({
                         <BookOpen className="w-4 h-4 mb-1 text-slate-400" />
                         Supports
                       </Link>
-
                     </div>
                   </>
                 ) : (
@@ -269,7 +268,7 @@ export function FormationsTab({
       </div>
 
       {/* Sessions ouvertes */}
-      <div className="mt-12 space-y-6">
+      <div className="mt-8 space-y-5 sm:mt-12 sm:space-y-6">
         <div>
           <h3 className="text-lg font-bold text-slate-900">Sessions ouvertes</h3>
           <p className="text-xs text-slate-500">

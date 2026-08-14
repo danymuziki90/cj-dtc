@@ -56,18 +56,18 @@ export function OverviewTab({
   const tassign = useTranslations('student.assignments');
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      {/* Left Column - Formations & Deadlines previews */}
-      <div className="lg:col-span-2 space-y-6">
+    <div className="grid gap-4 lg:grid-cols-3 lg:gap-6">
+      {/* Left Column — Session active + Travaux + Actualités */}
+      <div className="lg:col-span-2 space-y-4">
         {/* Active Session Info */}
         {currentSession ? (
-          <div className="rounded-2xl border border-white bg-white/60 p-6 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
+          <div className="rounded-2xl border border-white bg-white/60 p-4 shadow-sm sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   {toverview('next_course')}
                 </span>
-                <h3 className="mt-1 text-lg font-bold text-slate-900">
+                <h3 className="mt-1 truncate text-base font-bold text-slate-900 sm:text-lg">
                   {currentSession.formationTitle}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
@@ -92,9 +92,9 @@ export function OverviewTab({
           </div>
         ) : null}
 
-        {/* Travaux à venir — sync admin en temps réel */}
+        {/* Travaux à venir */}
         {assignments.length > 0 && (
-          <div className="rounded-2xl border border-white bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all hover:shadow-md">
+          <div className="rounded-2xl border border-white bg-white/80 p-4 shadow-sm backdrop-blur-sm transition-all hover:shadow-md sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3 mb-4">
               <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                 <FileText className="w-4 h-4 text-[var(--cj-blue)]" />
@@ -113,13 +113,12 @@ export function OverviewTab({
               {assignments.slice(0, 3).map((assign: any) => {
                 const statusInfo = getAssignmentStatus(assign);
                 const StatusIcon = statusInfo.icon;
-                const submission = assign.submissions?.[0];
                 const canSubmit = canStudentSubmitAssignment(assign);
 
                 return (
                   <div
                     key={assign.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-blue-100"
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-3 shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-blue-100 sm:p-4"
                   >
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -162,7 +161,7 @@ export function OverviewTab({
 
         {/* Mini News Feed */}
         {news.length > 0 && (
-          <div className="rounded-2xl border border-white bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all hover:shadow-md">
+          <div className="rounded-2xl border border-white bg-white/80 p-4 shadow-sm backdrop-blur-sm transition-all hover:shadow-md sm:p-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
               <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                 <Newspaper className="w-4 h-4 text-indigo-600" />
@@ -172,7 +171,7 @@ export function OverviewTab({
                 onClick={() => setActiveTab("news")}
                 className="text-xs font-bold text-[var(--cj-blue)] hover:underline"
               >
-                Toutes les actualités ({news.length})
+                Toutes ({news.length})
               </button>
             </div>
 
@@ -180,7 +179,7 @@ export function OverviewTab({
               {news.slice(0, 2).map((item: any) => (
                 <div
                   key={item.id}
-                  className="flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-100"
+                  className="flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-3 shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-100 sm:p-4"
                 >
                   <div>
                     <span className="text-[9px] font-bold text-indigo-500 uppercase tracking-wider">
@@ -210,12 +209,12 @@ export function OverviewTab({
         )}
       </div>
 
-      {/* Right Column - Questions & Support widget + Mini Notifications Stream */}
-      <div className="space-y-6">
-        
+      {/* Right Column — Éligibilité, Notifications, Témoignages, Support */}
+      <div className="space-y-4">
+
         {/* Certificate Eligibility widget */}
         {eligibility && (
-          <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/90 to-indigo-50/90 p-5 shadow-sm backdrop-blur-sm transition-all hover:shadow-md">
+          <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/90 to-indigo-50/90 p-4 shadow-sm backdrop-blur-sm transition-all hover:shadow-md sm:p-5">
             <div className="flex items-center justify-between gap-2 border-b border-blue-100/50 pb-3 mb-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -224,10 +223,10 @@ export function OverviewTab({
                 <p className="mt-1 text-sm font-bold text-slate-900">
                   {eligibility.eligible
                     ? "Prêt pour la délivrance"
-                    : "Critères d'évaluation en cours"}
+                    : "Critères en cours"}
                 </p>
               </div>
-              <div className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ${eligibility.eligible ? 'bg-emerald-100 text-emerald-600' : 'bg-white text-blue-600'}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-sm ${eligibility.eligible ? 'bg-emerald-100 text-emerald-600' : 'bg-white text-blue-600'}`}>
                 <CheckCircle2 className="h-5 w-5" />
               </div>
             </div>
@@ -258,13 +257,13 @@ export function OverviewTab({
         )}
 
         {/* Unified Notifications Feed */}
-        <div className="rounded-2xl border border-white bg-white/60 p-6 shadow-sm">
+        <div className="rounded-2xl border border-white bg-white/60 p-4 shadow-sm sm:p-5">
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
             <Bell className="w-4 h-4 text-blue-600" />
             Activités récentes
           </h3>
 
-          <div className="space-y-4 max-h-72 overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
             {notifications.slice(0, 5).map((noti: any) => {
               const dotColor =
                 noti.type === 'correction' ? 'bg-emerald-500' :
@@ -279,14 +278,14 @@ export function OverviewTab({
                   <div className="flex-shrink-0 mt-1.5">
                     <span className={`flex h-2 w-2 rounded-full ${dotColor}`} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-semibold text-slate-950 leading-tight">
                       {noti.title}
                     </p>
-                    <p className="text-[10px] text-slate-500 mt-1 leading-normal">
+                    <p className="text-[10px] text-slate-500 mt-0.5 leading-normal line-clamp-2">
                       {noti.message}
                     </p>
-                    <span className="text-[9px] text-slate-400 mt-1 block">
+                    <span className="text-[9px] text-slate-400 mt-0.5 block">
                       {formatDateTime(noti.createdAt)}
                     </span>
                   </div>
@@ -309,18 +308,17 @@ export function OverviewTab({
         </div>
 
         {/* Témoignages / Avis Card */}
-        <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 p-5 shadow-sm">
+        <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 p-4 shadow-sm sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--cj-blue)] text-white shadow-sm">
-              <MessageSquare className="h-5 w-5" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--cj-blue)] text-white shadow-sm">
+              <MessageSquare className="h-4 w-4" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h4 className="text-xs font-bold text-slate-900">
                 Vos témoignages & avis
               </h4>
               <p className="text-[10px] text-slate-500 mt-0.5">
-                Partagez votre expérience et donnez votre avis sur vos
-                formations.
+                Partagez votre expérience sur vos formations.
               </p>
             </div>
           </div>
@@ -334,14 +332,13 @@ export function OverviewTab({
         </div>
 
         {/* Quick Support / Questions form */}
-        <div className="rounded-2xl border border-white bg-white/60 p-6 shadow-sm">
+        <div className="rounded-2xl border border-white bg-white/60 p-4 shadow-sm sm:p-5">
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-emerald-600" />
             Poser une question
           </h3>
-          <p className="text-[11px] text-slate-500 leading-normal mb-4">
-            Une difficulté sur un cours ou un paiement ? Écrivez directement
-            au secrétariat académique.
+          <p className="text-[11px] text-slate-500 leading-normal mb-3">
+            Une difficulté sur un cours ? Écrivez au secrétariat académique.
           </p>
 
           <form onSubmit={sendQuestion} className="space-y-3">

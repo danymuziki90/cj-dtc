@@ -22,10 +22,10 @@ export function SupportTab({
   questionLoading,
 }: SupportTabProps) {
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="grid gap-4 lg:grid-cols-3 lg:gap-6">
       {/* Question submission form */}
       <div className="lg:col-span-1">
-        <div className="rounded-2xl border border-white bg-white/60 p-6 shadow-sm sticky top-24">
+        <div className="rounded-2xl border border-white bg-white/60 p-4 shadow-sm sm:p-6 lg:sticky lg:top-24">
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-blue-600" />
             Poser une question

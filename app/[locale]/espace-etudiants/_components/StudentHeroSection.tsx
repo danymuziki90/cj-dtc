@@ -53,9 +53,9 @@ export function StudentHeroSection({
     const timer = window.setInterval(() => goToSlide(currentSlide + 1), slideDuration);
     return () => window.clearInterval(timer);
   }, [currentSlide, goToSlide, isCarousel, isPaused, slideDuration]);
-  
+
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-slate-900 shadow-[0_18px_45px_-24px_rgba(2,20,47,0.75)] sm:-mx-2">
+    <section className="relative overflow-hidden rounded-2xl bg-slate-900 shadow-[0_18px_45px_-24px_rgba(2,20,47,0.75)] sm:rounded-3xl">
       {/* Background Image & Overlay */}
       <div className="absolute inset-0" aria-hidden="true">
         {slides.map((slide: any, index: number) => (
@@ -71,42 +71,42 @@ export function StudentHeroSection({
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,20,47,0.93)_0%,rgba(2,36,86,0.82)_48%,rgba(2,20,47,0.48)_100%)]" />
       <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full border border-white/15 bg-white/5" />
       <div className="pointer-events-none absolute bottom-0 right-1/4 h-24 w-24 translate-y-1/2 rounded-full bg-[var(--cj-blue)]/35 blur-2xl" />
-      
+
       {/* Content */}
       <div
-        className="relative flex min-h-[200px] flex-col justify-end p-5 sm:min-h-[220px] sm:p-7 lg:p-8"
+        className="relative flex min-h-[140px] flex-col justify-end p-4 sm:min-h-[200px] sm:p-7 lg:min-h-[220px] lg:p-8"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        <div className="max-w-3xl space-y-3">
+        <div className="max-w-3xl space-y-2 sm:space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-md">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
             Statut : {student.status || "Actif"}
           </div>
-          
-          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+
+          <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-4xl">
             Bonjour, <span className="text-blue-400">{firstName}</span>
           </h1>
-          
-          <p className="max-w-2xl text-sm font-medium leading-relaxed text-white/80 sm:text-base">
+
+          <p className="max-w-2xl text-xs font-medium leading-relaxed text-white/80 sm:text-sm">
             Continuez votre parcours de formation. {heroSummary}
           </p>
 
-          <div className="flex flex-wrap items-center gap-2.5 pt-1">
+          <div className="flex flex-wrap items-center gap-2 pt-0.5 sm:pt-1">
             <Link
               href={`${basePath}/supports`}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/25 hover:shadow-lg"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/25 hover:shadow-lg sm:px-5 sm:py-2.5"
             >
               <BookOpen className="h-4 w-4" />
               Supports de cours
             </Link>
-            
+
             {firstCertificate && firstCertificate.fileUrl && (
               <a
                 href={firstCertificate.fileUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/20 px-5 py-2.5 text-sm font-semibold text-emerald-100 backdrop-blur-sm transition-all hover:bg-emerald-500/40 hover:shadow-lg"
+                className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/20 px-4 py-2 text-xs font-semibold text-emerald-100 backdrop-blur-sm transition-all hover:bg-emerald-500/40 hover:shadow-lg sm:px-5 sm:py-2.5"
               >
                 <Download className="h-4 w-4" />
                 Mon certificat
@@ -117,11 +117,11 @@ export function StudentHeroSection({
       </div>
 
       {isCarousel && (
-        <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2 sm:bottom-5 sm:right-5">
+        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2 sm:bottom-5 sm:right-5">
           <button
             type="button"
             onClick={() => goToSlide(currentSlide - 1)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-slate-950/35 text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-slate-950/35 text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white sm:h-9 sm:w-9"
             aria-label="Image précédente"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -143,7 +143,7 @@ export function StudentHeroSection({
           <button
             type="button"
             onClick={() => goToSlide(currentSlide + 1)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-slate-950/35 text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-slate-950/35 text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white sm:h-9 sm:w-9"
             aria-label="Image suivante"
           >
             <ChevronRight className="h-4 w-4" />
@@ -153,4 +153,3 @@ export function StudentHeroSection({
     </section>
   );
 }
-
