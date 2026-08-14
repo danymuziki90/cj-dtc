@@ -113,7 +113,9 @@ model AdminAuditLog {
 model News {
   id              String   @id @default(cuid())
   title           String
+  titleEn         String?
   content         String
+  contentEn       String?
   published       Boolean  @default(false)
   author          String   @default("Admin")
   category        String   @default("General")
@@ -133,20 +135,28 @@ model Formation {
   id               Int               @id @default(autoincrement())
   name             String?
   title            String
+  titleEn          String?
   slug             String            @unique
   description      String
+  descriptionEn    String?
   shortDescription String?
+  shortDescriptionEn String?
   objectifs        String?
+  objectifsEn      String?
   duree            String?
   modules          String?
+  modulesEn        String?
   methodes         String?
+  methodesEn       String?
   certification    String?
+  certificationEn  String?
   categorie        String?
   statut           String            @default("brouillon") // brouillon, publie, archive
   imageUrl         String?
   gallery          Json?
   skillsAcquired   Json?
   prerequisites    String?
+  prerequisitesEn  String?
   publicTargets    Json?
   level            String?
   format           String?
@@ -255,7 +265,9 @@ model TrainingSession {
   startTime           String
   endTime             String
   location            String?               @map("locationDetails")
+  locationEn          String?
   format              String                @map("mode") // presentiel, distanciel, hybride
+  formatEn            String?
   maxParticipants     Int                   @default(25)
   currentParticipants Int                   @default(0)
   status              String                @default("ouverte") // ouverte, fermee, complete, annulee, terminee
@@ -319,7 +331,9 @@ model SessionInstructor {
 model Document {
   id          Int              @id @default(autoincrement())
   title       String
+  titleEn     String?
   description String?
+  descriptionEn String?
   fileName    String
   filePath    String
   fileSize    Int
@@ -448,7 +462,9 @@ model ContactMessage {
 model FAQ {
   id        Int      @id @default(autoincrement())
   question  String
+  questionEn String?
   answer    String
+  answerEn   String?
   category  String   @default("General")
   order     Int      @default(0)
   createdAt DateTime @default(now())
