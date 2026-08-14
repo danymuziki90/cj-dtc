@@ -183,7 +183,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
             </div>
             <div className="hidden sm:block">
               <p className="text-sm font-black tracking-tight text-white leading-none">CJ Development</p>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Administration</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/85">Administration</p>
             </div>
           </Link>
 
@@ -255,7 +255,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                 A
               </span>
               <span className="hidden text-xs font-bold text-white sm:block">Admin</span>
-              <ChevronDown className={`h-3 w-3 text-white/80 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-3 w-3 text-white/90 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {profileOpen && (
@@ -345,7 +345,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
 
             {/* Date courante à droite de la 1ère ligne */}
             <div className="ml-auto shrink-0 hidden border-l border-white/25 pl-3 xl:block">
-              <p className="text-[11px] font-semibold capitalize text-white/75">{currentDate}</p>
+              <p className="text-[11px] font-semibold capitalize text-white/85">{currentDate}</p>
             </div>
           </div>
 
