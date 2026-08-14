@@ -747,5 +747,6 @@ export default function FormationDetailPage() {
         </div>
       </div>
     </div>
+    </div>
   )
 }
