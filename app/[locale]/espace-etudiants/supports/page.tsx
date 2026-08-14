@@ -174,11 +174,11 @@ function SupportsContent() {
           >
             <div className="rounded-2xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-4 sm:p-5">
               <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-700">Filtrer par formation</label>
-              <select
-                value={selectedFormation}
-                onChange={(event) => setSelectedFormation(event.target.value)}
-                className={`${studentInputClassName} text-xs py-2.5`}
-              >
+                <select
+                  value={selectedFormation}
+                  onChange={(event) => setSelectedFormation(event.target.value)}
+                  className={`${studentInputClassName} text-xs py-2.5 max-w-full text-ellipsis overflow-hidden`}
+                >
                 <option value="">Toutes les formations</option>
                 {formations.map((formation) => (
                   <option key={formation.id} value={formation.id.toString()}>
