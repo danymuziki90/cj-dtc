@@ -32,10 +32,6 @@ const heroEditorCarouselSelect = {
   },
 } as const
 
-function hasMissingColumn(error: unknown) {
-  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2022'
-}
-
 /** Mapping pageKey → chemins à revalider */
 const REVALIDATE_PATHS: Record<string, string[]> = {
   home:        ['/fr', '/en', '/'],
@@ -62,26 +58,32 @@ export async function GET(
   const { id } = await params
 
   try {
-    let hero: Record<string, unknown> | null
+    let hero: Record<string, unknown> | null = null
     try {
-      hero = await prisma.heroSection.findUnique({ where: { id }, select: heroEditorCarouselSelect })
+      hero = await prisma.heroSection.findFirst({
+        where: { OR: [{ id }, { pageKey: id }] },
+        select: heroEditorCarouselSelect,
+      })
     } catch (error) {
-      if (!hasMissingColumn(error)) throw error
-      console.warn('[GET /api/admin/heroes/[id]] Migration carousel absente, repli sur les médias existants.')
-      hero = await prisma.heroSection.findUnique({ where: { id }, select: heroEditorSelect })
+      console.warn('[GET /api/admin/heroes/[id]] Retrying with legacy select:', error)
+      hero = await prisma.heroSection.findFirst({
+        where: { OR: [{ id }, { pageKey: id }] },
+        select: heroEditorSelect,
+      })
     }
 
     if (!hero) {
       return NextResponse.json({ error: 'Hero not found' }, { status: 404 })
     }
 
-    // Les deux formes sont retournées temporairement : la forme directe est
-    // utilisée par l'éditeur, et `hero` préserve les anciens consommateurs.
     const normalizedHero = {
       ...hero,
       carouselEnabled: hero.carouselEnabled ?? true,
       slideDuration: hero.slideDuration ?? 6000,
-      slides: ((hero.slides as Array<Record<string, unknown>>) ?? []).map((slide) => ({ ...slide, isActive: slide.isActive ?? true })),
+      slides: ((hero.slides as Array<Record<string, unknown>>) ?? []).map((slide) => ({
+        ...slide,
+        isActive: slide.isActive ?? true,
+      })),
     }
     return NextResponse.json({ ...normalizedHero, hero: normalizedHero })
   } catch (error) {
@@ -103,6 +105,16 @@ export async function PUT(
   const { id } = await params
 
   try {
+    // Identifier la section soit par son ID direct soit par son pageKey
+    const existing = await prisma.heroSection.findFirst({
+      where: { OR: [{ id }, { pageKey: id }] },
+      select: { id: true, pageKey: true },
+    })
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Section Hero introuvable' }, { status: 404 })
+    }
+
     const body = await request.json()
     const {
       isActive,
@@ -118,40 +130,86 @@ export async function PUT(
       slideDuration,
     } = body
 
-    const hero = await prisma.heroSection.update({
-      where: { id },
-      data: {
-        ...(isActive !== undefined && { isActive }),
-        ...(imageUrl !== undefined && { imageUrl }),
-        ...(imageAlt !== undefined && { imageAlt }),
-        ...(eyebrowFr !== undefined && { eyebrowFr }),
-        ...(titleFr !== undefined && { titleFr }),
-        ...(descriptionFr !== undefined && { descriptionFr }),
-        ...(eyebrowEn !== undefined && { eyebrowEn }),
-        ...(titleEn !== undefined && { titleEn }),
-        ...(descriptionEn !== undefined && { descriptionEn }),
-        ...(ctasFr !== undefined && { ctasFr }),
-        ...(ctasEn !== undefined && { ctasEn }),
-        ...(badgesFr !== undefined && { badgesFr }),
-        ...(badgesEn !== undefined && { badgesEn }),
-        ...(overlayOpacity !== undefined && { overlayOpacity }),
-        ...(compact !== undefined && { compact }),
-        ...(carouselEnabled !== undefined && { carouselEnabled }),
-        ...(slideDuration !== undefined && { slideDuration: Math.max(2000, Math.min(30000, Number(slideDuration) || 6000)) }),
-      },
-      include: { slides: { orderBy: { order: 'asc' } } },
-    })
+    const targetId = existing.id
 
-    // Invalider le cache pour les pages concernées
-    const paths = REVALIDATE_PATHS[hero.pageKey] ?? []
-    for (const path of paths) {
-      revalidatePath(path)
+    let hero: any
+    try {
+      hero = await prisma.heroSection.update({
+        where: { id: targetId },
+        data: {
+          ...(isActive !== undefined && { isActive }),
+          ...(imageUrl !== undefined && { imageUrl }),
+          ...(imageAlt !== undefined && { imageAlt }),
+          ...(eyebrowFr !== undefined && { eyebrowFr }),
+          ...(titleFr !== undefined && { titleFr }),
+          ...(descriptionFr !== undefined && { descriptionFr }),
+          ...(eyebrowEn !== undefined && { eyebrowEn }),
+          ...(titleEn !== undefined && { titleEn }),
+          ...(descriptionEn !== undefined && { descriptionEn }),
+          ...(ctasFr !== undefined && { ctasFr }),
+          ...(ctasEn !== undefined && { ctasEn }),
+          ...(badgesFr !== undefined && { badgesFr }),
+          ...(badgesEn !== undefined && { badgesEn }),
+          ...(overlayOpacity !== undefined && { overlayOpacity: Number(overlayOpacity) || 55 }),
+          ...(compact !== undefined && { compact: Boolean(compact) }),
+          ...(carouselEnabled !== undefined && { carouselEnabled: Boolean(carouselEnabled) }),
+          ...(slideDuration !== undefined && {
+            slideDuration: Math.max(2000, Math.min(30000, Number(slideDuration) || 6000)),
+          }),
+        },
+        select: heroEditorCarouselSelect,
+      })
+    } catch (error) {
+      console.warn('[PUT /api/admin/heroes/[id]] Primary update failed, attempting fallback update:', error)
+      hero = await prisma.heroSection.update({
+        where: { id: targetId },
+        data: {
+          ...(isActive !== undefined && { isActive }),
+          ...(imageUrl !== undefined && { imageUrl }),
+          ...(imageAlt !== undefined && { imageAlt }),
+          ...(eyebrowFr !== undefined && { eyebrowFr }),
+          ...(titleFr !== undefined && { titleFr }),
+          ...(descriptionFr !== undefined && { descriptionFr }),
+          ...(eyebrowEn !== undefined && { eyebrowEn }),
+          ...(titleEn !== undefined && { titleEn }),
+          ...(descriptionEn !== undefined && { descriptionEn }),
+          ...(ctasFr !== undefined && { ctasFr }),
+          ...(ctasEn !== undefined && { ctasEn }),
+          ...(badgesFr !== undefined && { badgesFr }),
+          ...(badgesEn !== undefined && { badgesEn }),
+          ...(overlayOpacity !== undefined && { overlayOpacity: Number(overlayOpacity) || 55 }),
+          ...(compact !== undefined && { compact: Boolean(compact) }),
+        },
+        select: heroEditorSelect,
+      })
     }
-    revalidateTag(`hero-${hero.pageKey}`)
 
-    return NextResponse.json({ hero })
-  } catch (error) {
+    const pageKey = hero.pageKey || existing.pageKey
+    if (pageKey) {
+      const paths = REVALIDATE_PATHS[pageKey] ?? []
+      for (const path of paths) {
+        try {
+          revalidatePath(path)
+        } catch {}
+      }
+      try {
+        revalidateTag(`hero-${pageKey}`)
+      } catch {}
+    }
+
+    const normalizedHero = {
+      ...hero,
+      carouselEnabled: hero.carouselEnabled ?? carouselEnabled ?? true,
+      slideDuration: hero.slideDuration ?? slideDuration ?? 6000,
+      slides: ((hero.slides as Array<Record<string, unknown>>) ?? []).map((slide) => ({
+        ...slide,
+        isActive: slide.isActive ?? true,
+      })),
+    }
+
+    return NextResponse.json({ hero: normalizedHero, ...normalizedHero })
+  } catch (error: any) {
     console.error('[PUT /api/admin/heroes/[id]]', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: error?.message || 'Erreur interne du serveur' }, { status: 500 })
   }
 }

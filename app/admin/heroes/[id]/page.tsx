@@ -187,9 +187,9 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
         throw new Error(errorMsg);
       }
       success("Nouveau slide ajouté.");
-      fetchSection();
-    } catch (err) {
-      error("Erreur d'ajout de slide");
+      await fetchSection();
+    } catch (err: any) {
+      error(err?.message || "Erreur d'ajout de slide");
     }
   };
 
@@ -205,13 +205,62 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ carouselEnabled: isDynamic, slideDuration }),
       });
-      if (!res.ok) throw new Error('Sauvegarde impossible');
+      if (!res.ok) {
+        let errorMsg = 'Impossible d’enregistrer les paramètres du slider.';
+        try {
+          const d = await res.json();
+          if (d.error) errorMsg = d.error;
+        } catch {}
+        throw new Error(errorMsg);
+      }
       success('Paramètres du slider enregistrés.');
       await fetchSection();
-    } catch {
-      error('Impossible d’enregistrer les paramètres du slider.');
+    } catch (err: any) {
+      error(err?.message || 'Impossible d’enregistrer les paramètres du slider.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveSlide = async (slide: HeroSlideData) => {
+    try {
+      const res = await fetch(`/api/admin/heroes/${id}/slides/${slide.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(slide)
+      });
+      if (!res.ok) {
+        let errorMsg = "Erreur de mise à jour";
+        if (res.headers.get('content-type')?.includes('application/json')) {
+          const d = await res.json();
+          errorMsg = d.error || errorMsg;
+        }
+        throw new Error(errorMsg);
+      }
+      success("Slide mis à jour.");
+    } catch (err: any) {
+      error(err?.message || "Erreur lors de la mise à jour du slide.");
+    }
+  };
+
+  const handleDeleteSlide = async (slideId: string) => {
+    if (!confirm("Voulez-vous vraiment supprimer ce slide ?")) return;
+    try {
+      const res = await fetch(`/api/admin/heroes/${id}/slides/${slideId}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) {
+        let errorMsg = "Erreur de suppression";
+        if (res.headers.get('content-type')?.includes('application/json')) {
+          const d = await res.json();
+          errorMsg = d.error || errorMsg;
+        }
+        throw new Error(errorMsg);
+      }
+      success("Slide supprimé.");
+      setSlides(prev => prev.filter(s => s.id !== slideId));
+    } catch (err: any) {
+      error(err?.message || "Erreur lors de la suppression.");
     }
   };
 
@@ -260,51 +309,6 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       event.target.value = '';
     }
   };
-
-  const handleSaveSlide = async (slide: HeroSlideData) => {
-    try {
-      const res = await fetch(`/api/admin/heroes/${id}/slides/${slide.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(slide)
-      });
-      if (!res.ok) {
-        let errorMsg = "Erreur de mise à jour";
-        if (res.headers.get('content-type')?.includes('application/json')) {
-          const d = await res.json();
-          errorMsg = d.error || errorMsg;
-        }
-        throw new Error(errorMsg);
-      }
-      success("Slide mis à jour.");
-    } catch (err) {
-      error("Erreur lors de la mise à jour du slide.");
-    }
-  };
-
-  const handleDeleteSlide = async (slideId: string) => {
-    if (!confirm("Voulez-vous vraiment supprimer ce slide ?")) return;
-    try {
-      const res = await fetch(`/api/admin/heroes/${id}/slides/${slideId}`, {
-        method: 'DELETE'
-      });
-      if (!res.ok) {
-        let errorMsg = "Erreur de suppression";
-        if (res.headers.get('content-type')?.includes('application/json')) {
-          const d = await res.json();
-          errorMsg = d.error || errorMsg;
-        }
-        throw new Error(errorMsg);
-      }
-      success("Slide supprimé.");
-      setSlides(prev => prev.filter(s => s.id !== slideId));
-    } catch (err) {
-      error("Erreur lors de la suppression.");
-    }
-  };
-
-  if (loading) {
-    return (
       <div className="w-full p-8 min-h-screen flex items-center justify-center">
         <span className="text-slate-400">Chargement...</span>
       </div>
