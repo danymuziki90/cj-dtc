@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminToken } from '@/lib/admin/auth'
 import { revalidateTag } from 'next/cache'
+import { uploadToR2 } from '@/lib/r2'
 
 export const dynamic = 'force-dynamic'
+
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif']
+const MAX_SIZE_BYTES = 5 * 1024 * 1024
 
 /** GET /api/admin/heroes/[id]/slides — Liste les slides d'un hero */
 export async function GET(
@@ -45,6 +49,31 @@ export async function POST(
     const hero = await prisma.heroSection.findUnique({ where: { id } })
     if (!hero) {
       return NextResponse.json({ error: 'Hero not found' }, { status: 404 })
+    }
+
+    const contentType = request.headers.get('content-type') ?? ''
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData()
+      const file = formData.get('file') as File | null
+      if (!file || !ALLOWED_TYPES.includes(file.type) || file.size > MAX_SIZE_BYTES) {
+        return NextResponse.json({ error: 'Image invalide ou supérieure à 5 Mo.' }, { status: 400 })
+      }
+
+      const lastSlide = await prisma.heroSlide.findFirst({ where: { heroId: id }, orderBy: { order: 'desc' } })
+      const buffer = Buffer.from(await file.arrayBuffer())
+      const ext = file.name.split('.').pop() || 'jpg'
+      const imageUrl = await uploadToR2(buffer, `hero-slide-${hero.pageKey}-${Date.now()}.${ext}`, 'heroes', file.type)
+      const slide = await prisma.heroSlide.create({
+        data: {
+          heroId: id,
+          imageUrl,
+          titleFr: '',
+          titleEn: '',
+          order: lastSlide ? lastSlide.order + 1 : 0,
+        },
+      })
+      revalidateTag(`hero-${hero.pageKey}`)
+      return NextResponse.json({ slide }, { status: 201 })
     }
 
     const body = await request.json()

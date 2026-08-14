@@ -176,11 +176,7 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       const res = await fetch(`/api/admin/heroes/${id}/slides`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          titleFr: 'Nouveau slide',
-          titleEn: 'New slide',
-          order: slides.length
-        })
+        body: JSON.stringify({ order: slides.length })
       });
       if (!res.ok) {
         let errorMsg = "Erreur d'ajout";
@@ -199,6 +195,47 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
 
   const handleUpdateSlideField = (slideId: string, field: string, value: any) => {
     setSlides(prev => prev.map(s => s.id === slideId ? { ...s, [field]: value } : s));
+  };
+
+  const saveCarouselSettings = async () => {
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/admin/heroes/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ carouselEnabled: isDynamic, slideDuration }),
+      });
+      if (!res.ok) throw new Error('Sauvegarde impossible');
+      success('Paramètres du slider enregistrés.');
+      await fetchSection();
+    } catch {
+      error('Impossible d’enregistrer les paramètres du slider.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleMultipleSlideUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    try {
+      for (const file of files) {
+        if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+          throw new Error('Chaque image doit être valide et inférieure à 5 Mo.');
+        }
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch(`/api/admin/heroes/${id}/slides`, { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('Impossible d’ajouter une des images.');
+      }
+      await fetchSection();
+      success(`${files.length} image${files.length > 1 ? 's' : ''} ajoutée${files.length > 1 ? 's' : ''} au slider.`);
+    } catch (err: any) {
+      error(err.message || "Erreur lors de l'ajout des images.");
+    } finally {
+      event.target.value = '';
+    }
   };
 
   const handleSlideImageUpload = async (slideId: string, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -294,7 +331,7 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
         
         {/* Colonne gauche : Formulaire principal */}
         <div className="lg:col-span-2 space-y-6">
-          <form onSubmit={handleSave} className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+          <form onSubmit={handleSave} className="hidden">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
               <h2 className="text-lg font-bold text-slate-800">Paramètres de la bannière</h2>
               
@@ -383,7 +420,7 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
             </div>
           </form>
 
-          {isDynamic && (
+          {section.pageKey === 'home' && (
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
                 <div>
@@ -391,6 +428,10 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
                   <p className="mt-1 text-xs text-slate-500">Les slides actifs sont diffusés dans l'ordre indiqué.</p>
                 </div>
                 <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                    <input type="checkbox" checked={isDynamic} onChange={e => setIsDynamic(e.target.checked)} className="h-4 w-4 rounded border-slate-300 text-blue-900" />
+                    Défilement auto
+                  </label>
                   <label className="text-xs font-semibold text-slate-600">
                     Durée (secondes)
                     <input
@@ -407,6 +448,13 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
                     className="flex items-center gap-1 text-sm font-bold text-blue-900 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
                   >
                     <Plus className="w-4 h-4" /> Ajouter un slide
+                  </button>
+                  <label className="flex cursor-pointer items-center gap-1 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-900 transition-colors hover:text-blue-700">
+                    <Plus className="w-4 h-4" /> Ajouter des images
+                    <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={handleMultipleSlideUpload} />
+                  </label>
+                  <button onClick={saveCarouselSettings} disabled={saving} className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-50">
+                    Enregistrer
                   </button>
                 </div>
               </div>
@@ -441,26 +489,6 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Titre (FR)</label>
-                          <input type="text" value={slide.titleFr || ''} onChange={e => handleUpdateSlideField(slide.id, 'titleFr', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Titre (EN)</label>
-                          <input type="text" value={slide.titleEn || ''} onChange={e => handleUpdateSlideField(slide.id, 'titleEn', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Description (FR)</label>
-                          <textarea rows={2} value={slide.descriptionFr || ''} onChange={e => handleUpdateSlideField(slide.id, 'descriptionFr', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Description (EN)</label>
-                          <textarea rows={2} value={slide.descriptionEn || ''} onChange={e => handleUpdateSlideField(slide.id, 'descriptionEn', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                        <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">URL Image (optionnel)</label>
                           <input type="text" value={slide.imageUrl || ''} onChange={e => handleUpdateSlideField(slide.id, 'imageUrl', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" placeholder="https://..." />
                           <label className="mt-2 inline-flex cursor-pointer items-center rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-[11px] font-bold text-blue-800 hover:bg-blue-100">
@@ -469,16 +497,8 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
                           </label>
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Texte Bouton (optionnel)</label>
-                          <input type="text" value={slide.ctaLabelFr || ''} onChange={e => handleUpdateSlideField(slide.id, 'ctaLabelFr', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" placeholder="Label FR" />
-                        </div>
-                        <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Ordre</label>
                           <input type="number" min="0" value={slide.order} onChange={e => handleUpdateSlideField(slide.id, 'order', Number(e.target.value))} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Lien Bouton</label>
-                          <input type="text" value={slide.ctaHref || ''} onChange={e => handleUpdateSlideField(slide.id, 'ctaHref', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" placeholder="/formations" />
                         </div>
                       </div>
 

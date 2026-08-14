@@ -139,7 +139,7 @@ export default function UnifiedHero({
     }]
   }
 
-  const isSlideshow = slides.length > 1
+  const isSlideshow = isHomeHero && slides.length > 1
   const effectiveCtas = isFr ? (heroData?.ctasFr ?? ctas) : (heroData?.ctasEn ?? ctas)
   const effectiveBadges = isFr ? (heroData?.badgesFr ?? badges) : (heroData?.badgesEn ?? badges)
 
@@ -168,10 +168,19 @@ export default function UnifiedHero({
   if (!slides.length) return null
 
   const currentSlide = slides[currentIndex] || slides[0]
+  const contentSlide = {
+    ...currentSlide,
+    eyebrowFr: heroData?.eyebrowFr || currentSlide.eyebrowFr,
+    eyebrowEn: heroData?.eyebrowEn || currentSlide.eyebrowEn,
+    titleFr: heroData?.titleFr || currentSlide.titleFr,
+    titleEn: heroData?.titleEn || currentSlide.titleEn,
+    descriptionFr: heroData?.descriptionFr || currentSlide.descriptionFr,
+    descriptionEn: heroData?.descriptionEn || currentSlide.descriptionEn,
+  }
   const slideCtaLabel = isFr
-    ? currentSlide.ctaLabelFr
-    : currentSlide.ctaLabelEn || currentSlide.ctaLabelFr
-  const slideCtas: HeroCta[] = currentSlide.ctaHref && slideCtaLabel
+    ? contentSlide.ctaLabelFr
+    : contentSlide.ctaLabelEn || contentSlide.ctaLabelFr
+  const slideCtas: HeroCta[] = !isHomeHero && contentSlide.ctaHref && slideCtaLabel
     ? [{ label: slideCtaLabel, href: currentSlide.ctaHref }]
     : effectiveCtas
   const isPageHero = !isHomeHero
@@ -299,12 +308,12 @@ export default function UnifiedHero({
               )}
 
               {/* Eyebrow */}
-              {(isHomeHero || (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)) && (
+              {(isHomeHero || (isFr ? contentSlide.eyebrowFr : contentSlide.eyebrowEn)) && (
                 <motion.div custom={0.05} variants={fadeUp}
                   className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-sm backdrop-blur-sm"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
-                  {isHomeHero ? 'CJ DEVELOPMENT' : (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)}
+                  {isHomeHero ? 'CJ DEVELOPMENT' : (isFr ? contentSlide.eyebrowFr : contentSlide.eyebrowEn)}
                 </motion.div>
               )}
 
@@ -312,18 +321,18 @@ export default function UnifiedHero({
               <motion.h1 custom={0.12} variants={fadeUp}
                 className="hero-title-unified max-w-4xl text-white drop-shadow-md"
               >
-                {isFr ? currentSlide.titleFr : currentSlide.titleEn}
+                {isFr ? contentSlide.titleFr : contentSlide.titleEn}
               </motion.h1>
               {(isHomeHero || isPageHero) && (
                 <motion.div custom={0.16} variants={fadeUp} className="h-1 w-16 rounded-full bg-[var(--cj-red)]" />
               )}
 
               {/* Description */}
-              {(isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn) && (
+              {(isFr ? contentSlide.descriptionFr : contentSlide.descriptionEn) && (
                 <motion.p custom={0.2} variants={fadeUp}
                   className="hero-home-description max-w-2xl text-base leading-relaxed font-opensans text-white/90 drop-shadow-sm sm:text-lg"
                 >
-                  {isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn}
+                  {isFr ? contentSlide.descriptionFr : contentSlide.descriptionEn}
                 </motion.p>
               )}
 
