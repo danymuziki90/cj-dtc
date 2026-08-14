@@ -7,6 +7,7 @@ import {
   FileText,
   GraduationCap,
   Laptop,
+  ArrowRight,
 } from "lucide-react";
 import { StudentEmptyState as EmptyState } from "@/components/ui/student-space";
 import {
