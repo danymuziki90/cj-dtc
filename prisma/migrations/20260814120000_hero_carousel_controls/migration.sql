@@ -4,4 +4,7 @@ ALTER TABLE "HeroSection"
   ADD COLUMN "slideDuration" INTEGER NOT NULL DEFAULT 6000;
 
 ALTER TABLE "HeroSlide"
-  ADD COLUMN "isActive" BOOLEAN NOT NULL DEFAULT true;
+  ADD COLUMN "isActive" BOOLEAN NOT NULL DEFAULT true,
+  ADD COLUMN "ctaLabelFr" TEXT,
+  ADD COLUMN "ctaLabelEn" TEXT,
+  ADD COLUMN "ctaHref" TEXT;

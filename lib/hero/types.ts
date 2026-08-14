@@ -26,6 +26,7 @@ export type HeroSlideData = {
   badgeFr?: string | null
   badgeEn?: string | null
   ctaLabelFr?: string | null
+  ctaLabelEn?: string | null
   ctaHref?: string | null
 }
 

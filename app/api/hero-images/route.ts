@@ -81,6 +81,9 @@ export async function GET(request: NextRequest) {
           descriptionEn: s.descriptionEn,
           badgeFr: s.badgeFr,
           badgeEn: s.badgeEn,
+          ctaLabelFr: s.ctaLabelFr,
+          ctaLabelEn: s.ctaLabelEn,
+          ctaHref: s.ctaHref,
         })),
       })
     }

@@ -55,6 +55,9 @@ export async function getHeroData(pageKey: string): Promise<HeroSectionData | nu
           descriptionEn: s.descriptionEn,
           badgeFr: s.badgeFr,
           badgeEn: s.badgeEn,
+          ctaLabelFr: s.ctaLabelFr,
+          ctaLabelEn: s.ctaLabelEn,
+          ctaHref: s.ctaHref,
         })
       ),
       createdAt: hero.createdAt.toISOString(),

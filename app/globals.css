@@ -413,10 +413,10 @@ a:hover {
   z-index: 0;
 }
 
-/* The home page uses a dedicated editorial layout rather than the shared dark hero. */
+/* The home page is a full-width background-image slider. */
 .hero-bg-unified.hero-home {
-  background: #ffffff !important;
-  color: #0f172a !important;
+  background: #001020 !important;
+  color: #ffffff !important;
 }
 
 /* Internal public pages use a compact content-first hero derived from the CJ identity. */
@@ -432,12 +432,18 @@ a:hover {
   display: none;
 }
 
-.hero-bg-unified.hero-home .hero-title-unified,
+.hero-bg-unified.hero-home .hero-title-unified {
+  color: #ffffff !important;
+}
+
 .hero-bg-unified.hero-page .hero-title-unified {
   color: var(--cj-blue) !important;
 }
 
-.hero-bg-unified.hero-home .hero-home-description,
+.hero-bg-unified.hero-home .hero-home-description {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
 .hero-bg-unified.hero-page .hero-home-description {
   color: #334155 !important;
 }
@@ -795,16 +801,22 @@ a:hover {
   font-family: 'Montserrat', sans-serif !important;
 }
 
-.hero-bg-unified.hero-home h1,
+.hero-bg-unified.hero-home h1 {
+  color: #ffffff !important;
+}
+
 .hero-bg-unified.hero-page h1 {
   color: var(--cj-blue) !important;
 }
 
 .hero-bg-unified.hero-home p,
-.hero-bg-unified.hero-page p,
 .hero-bg-unified.hero-home .hero-description,
+.hero-bg-unified.hero-home .hero-subtitle {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.hero-bg-unified.hero-page p,
 .hero-bg-unified.hero-page .hero-description,
-.hero-bg-unified.hero-home .hero-subtitle,
 .hero-bg-unified.hero-page .hero-subtitle {
   color: #334155 !important;
 }

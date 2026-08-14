@@ -165,6 +165,12 @@ export default function UnifiedHero({
   if (!slides.length) return null
 
   const currentSlide = slides[currentIndex] || slides[0]
+  const slideCtaLabel = isFr
+    ? currentSlide.ctaLabelFr
+    : currentSlide.ctaLabelEn || currentSlide.ctaLabelFr
+  const slideCtas: HeroCta[] = currentSlide.ctaHref && slideCtaLabel
+    ? [{ label: slideCtaLabel, href: currentSlide.ctaHref }]
+    : effectiveCtas
   const isPageHero = !isHomeHero
   const showPageVisual = isPageHero && Boolean(currentSlide.imageUrl)
 
@@ -175,7 +181,7 @@ export default function UnifiedHero({
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* ── Background Slides ── */}
-      <div className={`absolute inset-0 z-0 select-none overflow-hidden bg-[#001020] ${isHomeHero ? 'hidden' : ''}`}>
+      <div className="absolute inset-0 z-0 select-none overflow-hidden bg-[#001020]">
         {slides.map((slide, index) => (
           <div
             key={`${slide.id}-${index}`}
@@ -199,11 +205,11 @@ export default function UnifiedHero({
         ))}
 
         {/* ── Gradient Overlays ── */}
-        <div className={`absolute inset-0 z-20 bg-gradient-to-r from-[#000d1f]/90 via-[#000d1f]/60 to-[#000d1f]/30 ${isHomeHero ? 'lg:hidden' : ''}`} style={{ opacity: effectiveOpacity / 100 }} />
+        <div className="absolute inset-0 z-20 bg-gradient-to-r from-[#000d1f]/95 via-[#000d1f]/72 to-[#000d1f]/42" style={{ opacity: effectiveOpacity / 100 }} />
         {isHomeHero && (
           <>
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#000d1f]/80 via-[#000d1f]/40 to-transparent z-20 pointer-events-none lg:hidden" />
-            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-50 to-transparent z-20 pointer-events-none lg:hidden" />
+            <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#000d1f]/70 to-transparent z-20 pointer-events-none" />
           </>
         )}
       </div>
@@ -228,13 +234,13 @@ export default function UnifiedHero({
           </button>
 
           {/* Progress Dots */}
-          <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-30 items-center gap-2.5 backdrop-blur-md px-5 py-2.5 rounded-full shadow-xl ${isHomeHero ? 'hidden lg:flex border border-slate-200 bg-white/90 lg:left-[24%]' : 'flex border border-white/15 bg-black/40'}`}>
+          <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2.5 rounded-full border border-white/15 bg-black/40 px-5 py-2.5 shadow-xl backdrop-blur-md">
             {slides.map((slide, index) => (
               <button
                 key={`dot-${index}`}
                 onClick={() => setCurrentIndex(index)}
                 className={`relative h-2.5 rounded-full transition-all duration-300 overflow-hidden focus:outline-none ${
-                  index === currentIndex ? (isHomeHero ? 'w-10 bg-[var(--cj-blue)]/15' : 'w-10 bg-white/20') : (isHomeHero ? 'w-2.5 bg-slate-300 hover:bg-slate-400' : 'w-2.5 bg-white/40 hover:bg-white/70')
+                  index === currentIndex ? 'w-10 bg-white/20' : 'w-2.5 bg-white/40 hover:bg-white/70'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               >
@@ -260,7 +266,7 @@ export default function UnifiedHero({
             {/* Left Column (Text & CTAs) */}
             <div className={`space-y-6 ${
               isHomeHero
-                ? 'lg:col-span-6'
+                ? 'lg:col-span-8'
                 : showPageVisual
                 ? 'lg:col-span-7'
                 : isSlideshow && (currentSlide.badgeFr || currentSlide.badgeEn)
@@ -272,17 +278,17 @@ export default function UnifiedHero({
                 <motion.nav
                   aria-label="Breadcrumb"
                   custom={0} variants={fadeIn}
-                  className={`mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium ${isHomeHero ? 'text-slate-500' : 'text-white/70'}`}
+                  className="mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium text-white/75"
                 >
-                  <Link href={homeHref} className={`inline-flex items-center gap-1 transition-colors ${isHomeHero ? 'hover:text-[var(--cj-blue)]' : 'hover:text-white'}`}>
+                  <Link href={homeHref} className="inline-flex items-center gap-1 transition-colors hover:text-white">
                     <Home className="h-3.5 w-3.5" />{homeLabel}
                   </Link>
                   {breadcrumbs.map((item, i) => (
                     <span key={i} className="flex items-center gap-1.5">
                       <ChevronRight className="h-3.5 w-3.5 opacity-50" />
                       {item.href
-                          ? <Link href={item.href} className={`transition-colors ${isHomeHero ? 'hover:text-[var(--cj-blue)]' : 'hover:text-white'}`}>{item.label}</Link>
-                          : <span className={`${isHomeHero ? 'text-[var(--cj-blue)]' : 'text-white'} font-semibold`}>{item.label}</span>
+                          ? <Link href={item.href} className="transition-colors hover:text-white">{item.label}</Link>
+                          : <span className="font-semibold text-white">{item.label}</span>
                       }
                     </span>
                   ))}
@@ -292,7 +298,7 @@ export default function UnifiedHero({
               {/* Eyebrow */}
               {(isHomeHero || (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)) && (
                 <motion.div custom={0.05} variants={fadeUp}
-                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm ${isHomeHero ? 'border-blue-100 bg-[var(--cj-blue-50)] text-[var(--cj-blue)]' : 'border-white/20 bg-white/10 text-blue-200 backdrop-blur-sm'}`}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-sm backdrop-blur-sm"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
                   {isHomeHero ? 'CJ DEVELOPMENT' : (isFr ? currentSlide.eyebrowFr : currentSlide.eyebrowEn)}
@@ -301,7 +307,7 @@ export default function UnifiedHero({
 
               {/* Title */}
               <motion.h1 custom={0.12} variants={fadeUp}
-                className={`hero-title-unified max-w-4xl ${isHomeHero ? 'text-[var(--cj-blue)] drop-shadow-none' : 'drop-shadow-md text-white'}`}
+                className="hero-title-unified max-w-4xl text-white drop-shadow-md"
               >
                 {isFr ? currentSlide.titleFr : currentSlide.titleEn}
               </motion.h1>
@@ -312,7 +318,7 @@ export default function UnifiedHero({
               {/* Description */}
               {(isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn) && (
                 <motion.p custom={0.2} variants={fadeUp}
-                  className={`hero-home-description max-w-2xl text-base sm:text-lg leading-relaxed font-opensans ${isHomeHero ? 'text-slate-700 drop-shadow-none' : 'text-white/90 drop-shadow-sm'}`}
+                  className="hero-home-description max-w-2xl text-base leading-relaxed font-opensans text-white/90 drop-shadow-sm sm:text-lg"
                 >
                   {isFr ? currentSlide.descriptionFr : currentSlide.descriptionEn}
                 </motion.p>
@@ -330,13 +336,13 @@ export default function UnifiedHero({
               )}
 
               {/* Actions CTAs */}
-              {(effectiveCtas.length > 0 || isSlideshow) && (
+              {(slideCtas.length > 0 || isSlideshow) && (
                 <motion.div custom={0.35} variants={fadeUp} className="flex flex-col gap-4 sm:flex-row pt-4">
-                  {effectiveCtas.length > 0 ? (
-                    effectiveCtas.map((cta, i) => (
+                  {slideCtas.length > 0 ? (
+                    slideCtas.map((cta, i) => (
                       cta.variant === 'secondary'
                         ? <Link key={i} href={cta.href}
-                            className={`inline-flex items-center justify-center gap-2 rounded-xl border px-6 py-3.5 text-sm font-bold transition duration-200 hover:scale-[1.02] active:scale-95 ${isHomeHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-[var(--cj-blue-50)]' : 'border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md'}`}>
+                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-bold text-white backdrop-blur-md transition duration-200 hover:scale-[1.02] hover:bg-white/20 active:scale-95">
                             {cta.label}
                           </Link>
                         : <Link key={i} href={cta.href}
@@ -352,7 +358,7 @@ export default function UnifiedHero({
                         {isFr ? 'Découvrir nos formations' : 'Discover our courses'}
                         <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                       </Link>
-                      <Link href={`/${locale}/espace-etudiants`} className={`inline-flex items-center justify-center rounded-xl border px-8 py-3.5 text-sm font-semibold transition duration-300 hover:scale-[1.02] ${isHomeHero ? 'border-[var(--cj-blue)] bg-white text-[var(--cj-blue)] hover:bg-[var(--cj-blue-50)]' : 'border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md'}`}>
+                      <Link href={`/${locale}/espace-etudiants`} className="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition duration-300 hover:scale-[1.02] hover:bg-white/20">
                         {isFr ? 'Espace étudiant' : 'Student space'}
                       </Link>
                     </>
@@ -361,7 +367,7 @@ export default function UnifiedHero({
               )}
 
               {isHomeHero && (
-                <motion.ul custom={0.42} variants={fadeUp} className="grid gap-2 pt-2 text-xs font-semibold text-slate-600 sm:grid-cols-3">
+                <motion.ul custom={0.42} variants={fadeUp} className="grid gap-2 pt-2 text-xs font-semibold text-white/85 sm:grid-cols-3">
                   {[
                     { label: isFr ? 'Formations pratiques' : 'Practical training', icon: GraduationCap },
                     { label: isFr ? 'Accompagnement personnalisé' : 'Personalized support', icon: Sparkles },
@@ -387,7 +393,7 @@ export default function UnifiedHero({
               )}
             </div>
 
-            {isHomeHero && currentSlide.imageUrl && (
+            {false && isHomeHero && currentSlide.imageUrl && (
               <motion.div custom={0.28} variants={fadeIn} className="relative order-last mt-2 lg:col-span-6 lg:mt-0">
                 <div className="relative min-h-[280px] overflow-hidden rounded-[2rem] border border-blue-100 bg-[var(--cj-blue)] shadow-[0_28px_60px_-30px_rgba(10,79,179,0.55)] sm:min-h-[360px] lg:min-h-[470px]">
                   <Image

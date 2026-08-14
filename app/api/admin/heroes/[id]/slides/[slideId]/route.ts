@@ -60,7 +60,7 @@ export async function PUT(
     // Mise à jour des champs texte
     const body = await request.json()
     const { imageUrl, imageAlt, eyebrowFr, eyebrowEn, titleFr, titleEn,
-            descriptionFr, descriptionEn, badgeFr, badgeEn, order, isActive } = body
+            descriptionFr, descriptionEn, badgeFr, badgeEn, ctaLabelFr, ctaLabelEn, ctaHref, order, isActive } = body
 
     const slide = await prisma.heroSlide.update({
       where: { id: slideId, heroId: id },
@@ -75,6 +75,9 @@ export async function PUT(
         ...(descriptionEn !== undefined && { descriptionEn }),
         ...(badgeFr !== undefined && { badgeFr }),
         ...(badgeEn !== undefined && { badgeEn }),
+        ...(ctaLabelFr !== undefined && { ctaLabelFr }),
+        ...(ctaLabelEn !== undefined && { ctaLabelEn }),
+        ...(ctaHref !== undefined && { ctaHref }),
         ...(order !== undefined && { order }),
         ...(isActive !== undefined && { isActive }),
       },

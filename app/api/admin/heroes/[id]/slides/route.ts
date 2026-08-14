@@ -49,7 +49,7 @@ export async function POST(
 
     const body = await request.json()
     const { imageUrl, imageAlt, eyebrowFr, eyebrowEn, titleFr, titleEn,
-            descriptionFr, descriptionEn, badgeFr, badgeEn, order, isActive } = body
+            descriptionFr, descriptionEn, badgeFr, badgeEn, ctaLabelFr, ctaLabelEn, ctaHref, order, isActive } = body
 
     const fallbackImageUrl = hero.imageUrl || hero.defaultImageUrl
     if (!imageUrl && !fallbackImageUrl) {
@@ -76,6 +76,9 @@ export async function POST(
         descriptionEn,
         badgeFr,
         badgeEn,
+        ctaLabelFr,
+        ctaLabelEn,
+        ctaHref,
         order: slideOrder,
         isActive: isActive ?? true,
       },
