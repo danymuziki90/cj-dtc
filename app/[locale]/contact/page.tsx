@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   ArrowRight,
   CheckCircle2,
@@ -20,8 +20,6 @@ import {
 } from 'lucide-react'
 import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
-import UnifiedHero from '@/components/ui/UnifiedHero'
-import type { HeroSectionData } from '@/lib/hero/types'
 
 const copy = publicMessages.contact
 
@@ -95,14 +93,6 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
-  const [heroData, setHeroData] = useState<HeroSectionData | null>(null)
-
-  useEffect(() => {
-    fetch('/api/hero-images?pageKey=contact')
-      .then((r) => r.json())
-      .then((data) => setHeroData(data))
-      .catch(() => {})
-  }, [])
 
   function update(field: keyof FormData) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -137,41 +127,18 @@ export default function ContactPage() {
 
   return (
     <div className="bg-slate-50 text-slate-900">
-      {/* ── SECTION 1 — HERO COMPACT ──────────────────────────────────────── */}
-      <UnifiedHero
-        eyebrow={t.heroBadge}
-        title={t.heroTitle}
-        description={t.heroSubtitle}
-        image="/img/team.jpeg"
-        ctas={[
-          { label: t.heroCta1, href: '#contact-form', variant: 'primary' },
-          { label: t.heroCta2, href: `/${locale}/formations`, variant: 'secondary' }
-        ]}
-        heroData={heroData}
-        locale={locale}
-        compact
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-6">
-          <div className="flex items-center gap-5 sm:gap-8">
-            {[
-              { value: '15+', label: locale === 'fr' ? 'Années' : 'Years' },
-              { value: '10+', label: locale === 'fr' ? 'Pays' : 'Countries' },
-              { value: '8 500+', label: locale === 'fr' ? 'Étudiants' : 'Students' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-left font-opensans">
-                <div className="text-lg sm:text-xl font-black text-white font-montserrat">{stat.value}</div>
-                <div className="text-[10px] uppercase font-bold tracking-wider text-blue-200">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-1.5 border border-white/15 backdrop-blur-sm">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-            <span className="text-xs font-bold text-white">
-              {locale === 'fr' ? 'Réponse sous 24h' : 'Reply within 24h'}
-            </span>
-          </div>
+      {/* ── EN-TÊTE DE PAGE ──────────────────────────────────────────── */}
+      <section className="bg-white pt-10 pb-8 sm:pt-14 sm:pb-10 border-b border-slate-200">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center max-w-3xl">
+          <SectionBadge text={t.heroBadge} />
+          <h1 className="mt-2 text-3xl font-black text-slate-950 sm:text-4xl lg:text-5xl font-montserrat tracking-tight leading-tight">
+            {t.heroTitle}
+          </h1>
+          <p className="mt-3 text-base sm:text-lg text-slate-600 font-opensans leading-relaxed">
+            {t.heroSubtitle}
+          </p>
         </div>
-      </UnifiedHero>
+      </section>
 
       {/* ── SECTION 2 — CONTACT CHANNELS ─────────────────────────────────── */}
       <section id="contact-channels" className="bg-white py-10 sm:py-14 lg:py-16 border-b border-slate-200">
