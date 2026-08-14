@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  ArrowRight,
   BookOpen,
   Calendar,
   FileText,
@@ -177,13 +176,6 @@ export function FormationsTab({
                   item.enrollmentStatus
                 ) ? (
                   <>
-                    <Link
-                      href={`${basePath}/elearning`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-blue)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-blue-700)] transition text-center shadow-sm mb-3"
-                    >
-                      Continuer
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
 
                     <div className="grid grid-cols-2 gap-2 mt-1 text-center border-t border-slate-100 pt-3 sm:grid-cols-3">
                       <button
