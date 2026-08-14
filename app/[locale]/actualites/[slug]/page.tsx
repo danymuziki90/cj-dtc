@@ -173,10 +173,10 @@ export default async function NewsDetailPage({ params }: PageProps) {
               </Link>
               {news.category?.toLowerCase() === 'emplois' && (news.metadata as any)?.contactEmail ? (
                 <a
-                  href={`mailto:${(news.metadata as any).contactEmail}?subject=${locale === 'fr' ? 'Candidature' : 'Application'} : ${locale === 'fr' ? news.title : ((news as any).titleEn || news.title)}`}
+                  href={`mailto:${(news.metadata as any).contactEmail}?subject=${t.applySubject} : ${locale === 'fr' ? news.title : ((news as any).titleEn || news.title)}`}
                   className="ml-auto inline-flex items-center gap-2 rounded-xl bg-green-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
                 >
-                  {locale === 'fr' ? 'Postuler maintenant' : 'Apply now'}
+                  {t.applyNow}
                 </a>
               ) : null}
             </div>

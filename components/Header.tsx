@@ -94,6 +94,102 @@ function LanguageSwitcher({
           >
             {option.toUpperCase()}
           </Link>
+'use client'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { useParams, usePathname, useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Home,
+  Info,
+  GraduationCap,
+  Building2,
+  Newspaper,
+  UserCheck,
+  Send,
+  X,
+  ChevronRight,
+  ChevronDown,
+  Globe,
+  ArrowUpRight,
+  ShieldCheck,
+  Linkedin,
+  Facebook,
+  Youtube,
+  MessageCircle,
+  Mail,
+  Phone,
+  Headphones,
+  Image as ImageIcon,
+  Users,
+  LogIn,
+  UserPlus,
+  FileText,
+  Briefcase,
+} from 'lucide-react'
+import { resolveSiteLocale, type SiteLocale } from '@/lib/i18n/locale'
+import { publicMessages } from '@/lib/i18n/public-messages'
+import { useActiveLink } from '@/hooks/useActiveLink'
+
+const navigationLabels = publicMessages.header
+
+function buildLocaleHref(pathname: string, search: string, targetLocale: SiteLocale) {
+  const segments = pathname.split('/').filter(Boolean)
+
+  if (segments[0] === 'fr' || segments[0] === 'en') {
+    segments[0] = targetLocale
+  } else {
+    segments.unshift(targetLocale)
+  }
+
+  const localizedPath = `/${segments.join('/')}`
+  return search ? `${localizedPath}?${search}` : localizedPath
+}
+
+function LanguageSwitcher({
+  locale,
+  pathname,
+  search,
+  darkVariant = false,
+  onNavigate,
+}: {
+  locale: SiteLocale
+  pathname: string
+  search: string
+  darkVariant?: boolean
+  onNavigate?: () => void
+}) {
+  const options: SiteLocale[] = ['fr', 'en']
+
+  return (
+    <div
+      className={`inline-flex items-center rounded-full p-1 shadow-sm backdrop-blur ${
+        darkVariant
+          ? 'border border-slate-800 bg-slate-900/90 shadow-slate-950'
+          : 'border border-slate-200 bg-white/90 shadow-slate-200/70'
+      }`}
+    >
+      {options.map((option) => {
+        const active = locale === option
+
+        return (
+          <Link
+            key={option}
+            href={buildLocaleHref(pathname, search, option)}
+            hrefLang={option}
+            onClick={onNavigate}
+            className={`rounded-full px-3 py-1 text-xs font-bold tracking-[0.16em] transition-all duration-200 ${
+              active
+                ? 'bg-[var(--cj-blue)] text-white shadow-md scale-105'
+                : darkVariant
+                ? 'text-slate-400 hover:text-white'
+                : 'text-slate-600 hover:text-[var(--cj-blue)]'
+            }`}
+            aria-current={active ? 'page' : undefined}
+          >
+            {option.toUpperCase()}
+          </Link>
         )
       })}
     </div>
@@ -112,8 +208,8 @@ function NavLink({ href, label }: { href: string; label: string }) {
         relative rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap
         ${
           isActive
-            ? 'text-white bg-[var(--cj-blue-700)] shadow-sm border border-white/20'
-            : 'text-white/85 hover:text-white hover:bg-[var(--cj-blue-700)] active:scale-95'
+            ? 'text-white bg-[var(--cj-blue)] shadow-sm shadow-blue-900/20'
+            : 'text-slate-700 hover:text-[var(--cj-blue)] hover:bg-white active:scale-95'
         }
       `}
     >
@@ -178,7 +274,7 @@ function DesktopDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="relative group/dropdown py-1"
+      className="relative group/dropdown py-0.5"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onKeyDown={handleKeyDown}
@@ -190,15 +286,15 @@ function DesktopDropdown({
         aria-expanded={isOpen}
         aria-haspopup="true"
         className={`
-          flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-white/30
-          ${isOpen ? 'text-white bg-[var(--cj-blue-700)] shadow-sm' : 'text-white/85 hover:text-white hover:bg-[var(--cj-blue-700)]'}
-          group-hover/dropdown:text-white group-hover/dropdown:bg-[var(--cj-blue-700)]
+          flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold tracking-wide transition-all duration-200 whitespace-nowrap focus:outline-none
+          ${isOpen ? 'text-[var(--cj-blue)] bg-white shadow-sm' : 'text-slate-700 hover:text-[var(--cj-blue)] hover:bg-white'}
+          group-hover/dropdown:text-[var(--cj-blue)] group-hover/dropdown:bg-white
         `}
       >
         <span>{label}</span>
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-white' : 'text-white/50 group-hover/dropdown:text-white'
+            isOpen ? 'rotate-180 text-[var(--cj-blue)]' : 'text-slate-400 group-hover/dropdown:text-[var(--cj-blue)]'
           } group-hover/dropdown:rotate-180`}
         />
       </button>
@@ -207,7 +303,7 @@ function DesktopDropdown({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={`
-          absolute left-1/2 -translate-x-1/2 top-full z-50 pt-2 w-68 transition-all duration-200 ease-out
+          absolute left-1/2 -translate-x-1/2 top-full z-50 pt-2 w-72 transition-all duration-200 ease-out
           before:absolute before:-top-5 before:-left-6 before:-right-6 before:h-8 before:content-['']
           group-hover/dropdown:opacity-100 group-hover/dropdown:translate-y-0 group-hover/dropdown:pointer-events-auto group-hover/dropdown:visible
           ${
@@ -217,7 +313,7 @@ function DesktopDropdown({
           }
         `}
       >
-        <div className="rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl shadow-slate-200/50 backdrop-blur-xl space-y-1">
+        <div className="rounded-2xl border border-slate-200 bg-white p-2.5 shadow-2xl shadow-slate-300/60 backdrop-blur-xl space-y-1">
           {items.map((item) => {
             const Icon = item.icon
             return (
@@ -225,13 +321,13 @@ function DesktopDropdown({
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-all duration-200 hover:bg-[var(--cj-blue-50)] hover:translate-x-1 focus:bg-[var(--cj-blue-50)] focus:outline-none"
+                className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-all duration-200 hover:bg-blue-50/80 hover:translate-x-0.5 focus:bg-blue-50/80 focus:outline-none"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--cj-blue)]/5 text-[var(--cj-blue)] border border-[var(--cj-blue)]/10 transition-colors group-hover/item:bg-[var(--cj-blue-700)] group-hover/item:text-white group-hover/item:border-[var(--cj-blue-700)]/30 shadow-sm">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--cj-blue-50)] text-[var(--cj-blue)] border border-blue-100 transition-colors group-hover/item:bg-[var(--cj-blue)] group-hover/item:text-white shadow-sm">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-800 group-hover/item:text-[var(--cj-blue-700)] transition-colors">
+                  <div className="text-xs font-bold text-slate-800 group-hover/item:text-[var(--cj-blue)] transition-colors">
                     {item.label}
                   </div>
                   {item.description && (
@@ -473,13 +569,8 @@ export default function Header() {
   return (
     <header className="header fixed top-0 left-0 right-0 z-50 transition-all duration-300">
       {/* 1. DESKTOP TOP-BAR (VISIBLE DESKTOP ONLY lg:block) */}
-      {/* Opaque CJ blue bar, visually independent from the home hero. */}
       <div
-        className={`hidden lg:block text-xs font-medium py-2 transition-all duration-500 ease-in-out ${
-          scrolled
-            ? 'border-b border-white/10 bg-[var(--cj-blue)] text-slate-100 shadow-sm'
-            : 'border-b border-white/15 bg-[var(--cj-blue)] text-white'
-        }`}
+        className="hidden lg:block text-xs font-medium py-2 transition-all duration-500 ease-in-out bg-[#061b36] border-b border-slate-800/80 text-slate-200 shadow-sm"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
           {/* Left: Email Info */}
@@ -548,12 +639,8 @@ export default function Header() {
 
       {/* 2. MAIN HEADER */}
       <div
-        className={`w-full transition-all duration-500 ease-in-out ${
-          !isHome
-            ? `border-b border-white/15 bg-[var(--cj-blue)] shadow-md ${scrolled ? 'py-2.5' : 'py-3.5'}`
-            : scrolled
-              ? 'lg:border-b lg:border-white/10 lg:bg-[var(--cj-blue)] lg:backdrop-blur-none lg:shadow-[0_10px_34px_-18px_rgba(10,79,179,0.75)] border-b border-[#0a2e54]/50 bg-[#061b36]/95 backdrop-blur-2xl shadow-2xl shadow-[#061b36]/60 py-2.5'
-              : 'lg:border-b lg:border-white/15 lg:bg-[var(--cj-blue)] lg:backdrop-blur-none lg:shadow-[0_8px_28px_-18px_rgba(10,79,179,0.55)] border-b border-white/10 bg-[#061b36]/40 backdrop-blur-md shadow-lg shadow-[#061b36]/20 py-3.5'
+        className={`w-full transition-all duration-300 ease-in-out border-b border-slate-200/90 bg-white/95 backdrop-blur-md ${
+          scrolled ? 'py-2.5 shadow-md bg-white/98' : 'py-3.5 shadow-sm'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -562,19 +649,16 @@ export default function Header() {
             <Image
               src="/logo.png"
               alt="CJ DEVELOPMENT TRAINING CENTER"
-              width={80}
-              height={80}
-              className={`h-10 w-auto sm:h-12 transition-all duration-300 hover:scale-[1.02] filter ${scrolled ? 'brightness-110' : 'brightness-125 drop-shadow-xl'}`}
+              width={160}
+              height={50}
+              className="h-10 w-auto sm:h-12 transition-all duration-300 hover:scale-[1.02] object-contain"
+              priority
             />
           </Link>
 
           {/* ÎLOT 2 (CENTRE) : CAPSULE NAVIGATION DESKTOP */}
           <nav
-            className={`hidden lg:flex items-center gap-0.5 rounded-full px-3 py-1.5 transition-all duration-500 ${
-              scrolled
-                ? 'border border-white/15 bg-[var(--cj-blue)] shadow-sm'
-                : 'border border-white/20 bg-[var(--cj-blue)] shadow-sm'
-            }`}
+            className="hidden lg:flex items-center gap-1 rounded-full p-1 bg-slate-100/90 border border-slate-200/80 shadow-inner"
             aria-label="Navigation principale Desktop"
           >
             <NavLink href={`/${locale}`} label={labels.home} />
@@ -631,11 +715,11 @@ export default function Header() {
             />
           </nav>
 
-          {/* ÎLOT 3 (DROIT) : BOUTON CTA CONTACT CAPSULE ARSP */}
+          {/* ÎLOT 3 (DROIT) : BOUTON CTA CONTACT CAPSULE */}
           <div className="hidden lg:flex items-center gap-3">
             <Link
               href={`/${locale}/contact`}
-              className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] border border-red-400/30 text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-300 shadow-[0_0_20px_rgba(200,16,46,0.25)] hover:shadow-[0_0_30px_rgba(200,16,46,0.4)] transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
+              className="group bg-[var(--cj-red)] hover:bg-[var(--cj-red-700)] text-white rounded-full px-5 py-2 text-xs font-bold tracking-wide transition-all duration-200 shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30 transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2"
             >
               <Mail className="h-3.5 w-3.5 text-white transition-colors" />
               <span>{labels.contact}</span>
@@ -644,7 +728,7 @@ export default function Header() {
 
           {/* Mobile Header Quick Actions (visible on mobile lg:hidden) */}
           <div className="flex items-center gap-3 lg:hidden">
-            <LanguageSwitcher locale={locale} pathname={pathname} search={search} darkVariant={true} />
+            <LanguageSwitcher locale={locale} pathname={pathname} search={search} darkVariant={false} />
 
             {/* Animated Hamburger / X Transformation Toggle Button */}
             <button
@@ -655,11 +739,11 @@ export default function Header() {
               onClick={() => setOpen(!open)}
               className={`
                 relative flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300
-                focus:outline-none focus:ring-2 focus:ring-[var(--cj-blue)] focus:ring-offset-2
+                focus:outline-none focus:ring-2 focus:ring-[var(--cj-blue)]
                 ${
                   open
                     ? 'border-[var(--cj-red-200)] bg-[var(--cj-red-50)] text-[var(--cj-red)] shadow-md scale-105'
-                    : 'border-white/20 bg-slate-900/80 text-slate-100 hover:bg-slate-800 hover:border-white/40'
+                    : 'border-slate-200 bg-slate-100 text-slate-800 hover:bg-slate-200'
                 }
               `}
             >
@@ -690,7 +774,6 @@ export default function Header() {
           </div>
         </div>
       </div>
-
       {/* FULLSCREEN MOBILE NAVIGATION OVERLAY WITH HERO SECTION BACKGROUND IMAGE */}
       <div
         id="fullscreen-navigation-overlay"

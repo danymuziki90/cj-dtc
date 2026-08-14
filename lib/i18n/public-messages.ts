@@ -820,6 +820,8 @@ export const publicMessages = {
       backToNews: 'Retour aux actualités',
       moreNews: 'Voir toutes les actualités',
       contact: 'Contacter CJ DTC',
+      applySubject: 'Candidature',
+      applyNow: 'Postuler maintenant',
     },
     en: {
       metadataMissingTitle: 'News item not found',
@@ -832,6 +834,8 @@ export const publicMessages = {
       backToNews: 'Back to news',
       moreNews: 'View all news',
       contact: 'Contact CJ DTC',
+      applySubject: 'Application',
+      applyNow: 'Apply now',
     },
   },
   contact: {
