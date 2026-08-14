@@ -33,7 +33,7 @@ export function StudentStatsCards({
       {/* Card 1: Sessions (Bleu) */}
       <Link
         href={`${prefix}/espace-etudiants/mes-formations`}
-        className="group relative overflow-hidden rounded-[26px] border border-blue-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer"
+        className="group relative overflow-hidden rounded-[26px] border border-blue-100 bg-white/80 backdrop-blur-md p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-[var(--cj-blue)]" />
         <div className="flex items-center justify-between">
@@ -49,7 +49,7 @@ export function StudentStatsCards({
       {/* Card 2: En cours (Orange) */}
       <Link
         href={`${prefix}/espace-etudiants/mes-formations`}
-        className="group relative overflow-hidden rounded-[26px] border border-orange-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-orange-200 hover:bg-orange-50/30 cursor-pointer"
+        className="group relative overflow-hidden rounded-[26px] border border-orange-100 bg-white/80 backdrop-blur-md p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-orange-200 hover:bg-orange-50/30 cursor-pointer"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
         <div className="flex items-center justify-between">
@@ -65,7 +65,7 @@ export function StudentStatsCards({
 
       {/* Card 3: À remettre (Rouge) */}
       <div
-        className="group relative overflow-hidden rounded-[26px] border border-red-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-200 hover:bg-red-50/30"
+        className="group relative overflow-hidden rounded-[26px] border border-red-100 bg-white/80 backdrop-blur-md p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-200 hover:bg-red-50/30"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 to-[var(--cj-red)]" />
         <div className="flex items-center justify-between">
@@ -80,7 +80,7 @@ export function StudentStatsCards({
 
       {/* Card 4: Rendus (Vert) */}
       <div
-        className="group relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 hover:bg-emerald-50/30"
+        className="group relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white/80 backdrop-blur-md p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 hover:bg-emerald-50/30"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
         <div className="flex items-center justify-between">
@@ -94,7 +94,7 @@ export function StudentStatsCards({
       </div>
 
       {/* Card 5: Actualités (Violet/Indigo) */}
-      <div className="group relative overflow-hidden rounded-[26px] border border-indigo-100 bg-white/90 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200 hover:bg-indigo-50/20">
+      <div className="group relative overflow-hidden rounded-[26px] border border-indigo-100 bg-white/80 backdrop-blur-md p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200 hover:bg-indigo-50/20">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-600" />
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Actualités</span>

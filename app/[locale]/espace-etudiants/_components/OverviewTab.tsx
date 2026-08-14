@@ -5,6 +5,7 @@ import { FormEvent } from "react";
 import {
   ArrowRight,
   Bell,
+  CheckCircle2,
   Clock,
   FileText,
   Loader2,
@@ -90,26 +91,22 @@ export function OverviewTab({
         ) : null}
 
         {/* Travaux à venir — sync admin en temps réel */}
-        <div className="rounded-2xl border border-white bg-white/60 p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3 mb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <FileText className="w-4 h-4 text-[var(--cj-blue)]" />
-              {toverview('recent_activities')}
-            </h3>
-            <button
-              onClick={() => setActiveTab("travaux")}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cj-blue)] px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[var(--cj-blue-700)] transition"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              {tassign('title')}
-            </button>
-          </div>
+        {assignments.length > 0 && (
+          <div className="rounded-2xl border border-white bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all hover:shadow-md">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3 mb-4">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[var(--cj-blue)]" />
+                {toverview('recent_activities')}
+              </h3>
+              <button
+                onClick={() => setActiveTab("travaux")}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cj-blue)] px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[var(--cj-blue-700)] transition"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                {tassign('title')}
+              </button>
+            </div>
 
-          {assignments.length === 0 ? (
-            <p className="text-xs text-slate-500 text-center py-6">
-              {tassign('no_assignments')}
-            </p>
-          ) : (
             <div className="space-y-3">
               {assignments.slice(0, 3).map((assign: any) => {
                 const statusInfo = getAssignmentStatus(assign);
@@ -120,7 +117,7 @@ export function OverviewTab({
                 return (
                   <div
                     key={assign.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm"
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-blue-100"
                   >
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -140,7 +137,7 @@ export function OverviewTab({
                     {canSubmit ? (
                       <button
                         onClick={() => setSelectedAssignmentForSubmission(assign)}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--cj-blue)] bg-blue-50 px-3 py-2 text-xs font-bold text-[var(--cj-blue)] hover:bg-blue-100 transition"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--cj-blue)] bg-blue-50 px-3 py-2 text-xs font-bold text-[var(--cj-blue)] hover:bg-[var(--cj-blue)] hover:text-white transition-all shadow-sm"
                       >
                         <Upload className="w-3.5 h-3.5" />
                         {tassign('submit_work')}
@@ -158,65 +155,106 @@ export function OverviewTab({
                 );
               })}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Mini News Feed */}
-        <div className="rounded-2xl border border-white bg-white/60 p-6 shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <Newspaper className="w-4 h-4 text-indigo-600" />
-              Dernières actualités
-            </h3>
-            <button
-              onClick={() => setActiveTab("news")}
-              className="text-xs font-bold text-[var(--cj-blue)] hover:underline"
-            >
-              Toutes les actualités ({news.length})
-            </button>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {news.slice(0, 2).map((item: any) => (
-              <div
-                key={item.id}
-                className="flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm hover:border-indigo-100 transition"
+        {news.length > 0 && (
+          <div className="rounded-2xl border border-white bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all hover:shadow-md">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <Newspaper className="w-4 h-4 text-indigo-600" />
+                Dernières actualités
+              </h3>
+              <button
+                onClick={() => setActiveTab("news")}
+                className="text-xs font-bold text-[var(--cj-blue)] hover:underline"
               >
-                <div>
-                  <span className="text-[9px] font-bold text-indigo-500 uppercase tracking-wider">
-                    {item.category || "Annonce"} •{" "}
-                    {formatDateShort(item.createdAt)}
-                  </span>
-                  <h4 className="mt-1 text-xs font-bold text-slate-900 line-clamp-1">
-                    {item.title}
-                  </h4>
-                  <p className="mt-1 text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
-                    {item.content}
-                  </p>
-                </div>
-                <div className="mt-3 pt-2 border-t border-slate-100 flex justify-end">
-                  <button
-                    onClick={() => setSelectedNewsForModal(item)}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--cj-blue)] hover:underline"
-                  >
-                    Lire la suite
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
+                Toutes les actualités ({news.length})
+              </button>
+            </div>
 
-            {news.length === 0 && (
-              <p className="text-xs text-slate-500 text-center py-4 col-span-2">
-                Aucune actualité disponible.
-              </p>
-            )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {news.slice(0, 2).map((item: any) => (
+                <div
+                  key={item.id}
+                  className="flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-100"
+                >
+                  <div>
+                    <span className="text-[9px] font-bold text-indigo-500 uppercase tracking-wider">
+                      {item.category || "Annonce"} •{" "}
+                      {formatDateShort(item.createdAt)}
+                    </span>
+                    <h4 className="mt-1 text-xs font-bold text-slate-900 line-clamp-1">
+                      {item.title}
+                    </h4>
+                    <p className="mt-1 text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                      {item.content}
+                    </p>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-slate-100 flex justify-end">
+                    <button
+                      onClick={() => setSelectedNewsForModal(item)}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--cj-blue)] hover:underline"
+                    >
+                      Lire la suite
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Right Column - Questions & Support widget + Mini Notifications Stream */}
       <div className="space-y-6">
+        
+        {/* Certificate Eligibility widget */}
+        {eligibility && (
+          <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/90 to-indigo-50/90 p-5 shadow-sm backdrop-blur-sm transition-all hover:shadow-md">
+            <div className="flex items-center justify-between gap-2 border-b border-blue-100/50 pb-3 mb-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  Éligibilité au certificat
+                </p>
+                <p className="mt-1 text-sm font-bold text-slate-900">
+                  {eligibility.eligible
+                    ? "Prêt pour la délivrance"
+                    : "Critères d'évaluation en cours"}
+                </p>
+              </div>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ${eligibility.eligible ? 'bg-emerald-100 text-emerald-600' : 'bg-white text-blue-600'}`}>
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="space-y-2 text-xs font-medium text-slate-700">
+              <div className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2 border border-white/40 shadow-sm">
+                <span>Projet académique validé</span>
+                {eligibility.projectValidated ? (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                ) : (
+                  <Clock className="h-4 w-4 text-amber-500" />
+                )}
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2 border border-white/40 shadow-sm">
+                <span>
+                  Taux de présence{" "}
+                  {eligibility.attendanceRate !== null
+                    ? `(${eligibility.attendanceRate}%)`
+                    : ""}
+                </span>
+                {eligibility.attendanceValidated ? (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                ) : (
+                  <Clock className="h-4 w-4 text-amber-500" />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Unified Notifications Feed */}
         <div className="rounded-2xl border border-white bg-white/60 p-6 shadow-sm">
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">

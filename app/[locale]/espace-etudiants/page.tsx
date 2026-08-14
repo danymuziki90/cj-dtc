@@ -477,10 +477,11 @@ function EspaceEtudiantsContent() {
   const basePath = `${localePrefix}/espace-etudiants`;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-800">
-      {/* Background gradients */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#020617_0%,#0b1629_18%,#f1f5f9_58%,#f8fafc_100%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_top_left,rgba(12,77,162,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(227,6,19,0.12),transparent_25%)]" />
+    <div className="relative min-h-screen overflow-hidden bg-slate-50 text-slate-800">
+      {/* Background gradients & subtle pattern */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_top_left,rgba(12,77,162,0.08),transparent_35%),radial-gradient(circle_at_top_right,rgba(227,6,19,0.05),transparent_25%)]" />
 
       {/* Modern top header */}
       <StudentHeader
@@ -491,7 +492,7 @@ function EspaceEtudiantsContent() {
         onLogout={logout}
       />
 
-      <main className="relative z-10 mx-auto max-w-7xl space-y-8 px-4 pb-16 pt-6 sm:px-6 lg:px-8">
+      <main className="relative z-10 mx-auto max-w-7xl space-y-6 px-4 pb-10 pt-4 sm:px-6 lg:px-8">
         {/* SECTION 1: HERO */}
         <StudentHeroSection
           student={student}
@@ -526,13 +527,14 @@ function EspaceEtudiantsContent() {
         />
 
         {/* DYNAMIC CONTENT CONTAINER BASED ON TAB */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           {activeTab === "overview" && (
             <OverviewTab
               currentSession={currentSession}
               assignments={assignments}
               news={news}
               notifications={notifications}
+              eligibility={eligibility}
               setActiveTab={setActiveTab}
               setSelectedAssignmentForSubmission={
                 setSelectedAssignmentForSubmission
