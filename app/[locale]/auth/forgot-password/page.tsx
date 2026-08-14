@@ -1,33 +1,14 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { publicMessages } from "@/lib/i18n/public-messages";
 
 export default function ForgotPasswordPage() {
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale === "en" ? "en" : "fr";
-  const copy = locale === "en"
-    ? {
-        title: "Forgot password",
-        description: "Enter your email address to receive a reset link.",
-        email: "Email address",
-        sent: "Email sent",
-        send: "Send link",
-        sending: "Sending...",
-        back: "Back to sign in",
-        unavailable: "We are unable to send the email right now. Please try again in a few minutes.",
-      }
-    : {
-        title: "Mot de passe oublié",
-        description: "Entrez votre email pour recevoir un lien de réinitialisation.",
-        email: "E-mail",
-        sent: "E-mail envoyé",
-        send: "Envoyer le lien",
-        sending: "Envoi en cours...",
-        back: "Retour à la connexion",
-        unavailable: "Impossible d'envoyer l'e-mail. Veuillez réessayer dans quelques instants.",
-      };
+  const copy = publicMessages.authForgot[locale];
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");

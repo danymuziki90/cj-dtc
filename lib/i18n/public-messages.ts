@@ -1552,6 +1552,140 @@ export const publicMessages = {
       }
     }
   },
+  authForgot: {
+    fr: {
+      title: "Mot de passe oublié",
+      description: "Entrez votre email pour recevoir un lien de réinitialisation.",
+      email: "E-mail",
+      sent: "E-mail envoyé",
+      send: "Envoyer le lien",
+      sending: "Envoi en cours...",
+      back: "Retour à la connexion",
+      unavailable: "Impossible d'envoyer l'e-mail. Veuillez réessayer dans quelques instants."
+    },
+    en: {
+      title: "Forgot password",
+      description: "Enter your email address to receive a reset link.",
+      email: "Email address",
+      sent: "Email sent",
+      send: "Send link",
+      sending: "Sending...",
+      back: "Back to sign in",
+      unavailable: "We are unable to send the email right now. Please try again in a few minutes."
+    }
+  },
+  authReset: {
+    fr: {
+      missingToken: "Lien invalide ou incomplet.",
+      requestNew: "Demander un nouveau lien",
+      title: "Réinitialisation du mot de passe",
+      password: "Nouveau mot de passe",
+      confirm: "Confirmer le mot de passe",
+      submit: "Modifier le mot de passe",
+      submitting: "Modification...",
+      success: "Mot de passe modifié !",
+      redirect: "Vous allez être redirigé vers la page de connexion...",
+      mismatch: "Les mots de passe ne correspondent pas.",
+      minimum: "Le mot de passe doit contenir au moins 8 caractères.",
+      unavailable: "Une erreur temporaire est survenue. Veuillez réessayer."
+    },
+    en: {
+      missingToken: "This reset link is missing or invalid.",
+      requestNew: "Request a new link",
+      title: "Reset your password",
+      password: "New password",
+      confirm: "Confirm password",
+      submit: "Reset password",
+      submitting: "Updating...",
+      success: "Password updated!",
+      redirect: "You will be redirected to the sign-in page...",
+      mismatch: "Passwords do not match.",
+      minimum: "Your password must contain at least 8 characters.",
+      unavailable: "An unexpected error occurred. Please try again."
+    }
+  },
+  emplois: {
+    fr: {
+      title: "Opportunités de carrière",
+      eyebrow: "Offres d'emploi",
+      description: "Découvrez les offres d'emploi, stages et opportunités proposées par notre réseau de partenaires.",
+      breadcrumbs: "Offres d'emploi",
+      searchPlaceholder: "Poste, entreprise, mot-clé…",
+      filters: "Filtres",
+      sortLabels: {
+        recent: "Plus récentes",
+        deadline: "Date limite",
+        alpha: "Alphabétique"
+      },
+      filterLabels: {
+        location: "Localisation",
+        contract: "Type de contrat",
+        domain: "Secteur",
+        remote: "Télétravail",
+        all: "Toutes",
+        allM: "Tous"
+      },
+      remoteOptions: {
+        oui: "Télétravail",
+        hybride: "Hybride",
+        non: "Présentiel"
+      },
+      resetFilters: "Réinitialiser les filtres",
+      loading: "Chargement des offres…",
+      empty: {
+        title: "Aucune offre disponible",
+        desc: "Revenez prochainement ou modifiez vos filtres.",
+        btn: "Voir toutes les offres"
+      },
+      card: {
+        urgent: "⚡ Expire bientôt",
+        deadline: "Limite",
+        seeOffer: "Voir l'offre",
+        days: "j"
+      },
+      error: "Chargement impossible."
+    },
+    en: {
+      title: "Career Opportunities",
+      eyebrow: "Job Offers",
+      description: "Explore job openings, internships and opportunities from our partner network.",
+      breadcrumbs: "Job Offers",
+      searchPlaceholder: "Position, company, keyword…",
+      filters: "Filters",
+      sortLabels: {
+        recent: "Most recent",
+        deadline: "Deadline",
+        alpha: "Alphabetical"
+      },
+      filterLabels: {
+        location: "Location",
+        contract: "Contract type",
+        domain: "Sector",
+        remote: "Remote work",
+        all: "All",
+        allM: "All"
+      },
+      remoteOptions: {
+        oui: "Remote",
+        hybride: "Hybrid",
+        non: "On-site"
+      },
+      resetFilters: "Reset filters",
+      loading: "Loading offers…",
+      empty: {
+        title: "No offers available",
+        desc: "Check back soon or adjust your filters.",
+        btn: "See all offers"
+      },
+      card: {
+        urgent: "⚡ Expiring soon",
+        deadline: "Deadline",
+        seeOffer: "View offer",
+        days: "d"
+      },
+      error: "Unable to load."
+    }
+  },
   legal: {
     fr: {
       back: "Retour à l'accueil",

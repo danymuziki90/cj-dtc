@@ -1,42 +1,16 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { publicMessages } from "@/lib/i18n/public-messages";
 
 function ResetPasswordForm() {
   const router = useRouter();
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale === "en" ? "en" : "fr";
-  const copy = locale === "en"
-    ? {
-        missingToken: "This reset link is missing or invalid.",
-        requestNew: "Request a new link",
-        title: "Reset your password",
-        password: "New password",
-        confirm: "Confirm password",
-        submit: "Reset password",
-        submitting: "Updating...",
-        success: "Password updated!",
-        redirect: "You will be redirected to the sign-in page...",
-        mismatch: "Passwords do not match.",
-        minimum: "Your password must contain at least 8 characters.",
-        unavailable: "An unexpected error occurred. Please try again.",
-      }
-    : {
-        missingToken: "Lien invalide ou incomplet.",
-        requestNew: "Demander un nouveau lien",
-        title: "Réinitialisation du mot de passe",
-        password: "Nouveau mot de passe",
-        confirm: "Confirmer le mot de passe",
-        submit: "Modifier le mot de passe",
-        submitting: "Modification...",
-        success: "Mot de passe modifié !",
-        redirect: "Vous allez être redirigé vers la page de connexion...",
-        mismatch: "Les mots de passe ne correspondent pas.",
-        minimum: "Le mot de passe doit contenir au moins 8 caractères.",
-        unavailable: "Une erreur temporaire est survenue. Veuillez réessayer.",
-      };
+  const copy = publicMessages.authReset[locale];
+
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -58,7 +32,6 @@ function ResetPasswordForm() {
 
     if (password !== confirmPassword) {
       setError(copy.mismatch);
-      return;
     }
 
     if (password.length < 8) {

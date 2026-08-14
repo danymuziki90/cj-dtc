@@ -1,13 +1,17 @@
 import Link from 'next/link'
 import { ShieldCheck, Lock, ArrowLeft } from 'lucide-react'
 
-export default function PolitiqueConfidentialitePage() {
+import { publicMessages } from '@/lib/i18n/public-messages'
+
+export default async function PolitiqueConfidentialitePage({ params }: { params: Promise<{ locale?: string }> }) {
+  const locale = (await params).locale === 'en' ? 'en' : 'fr'
+  const tLegal = publicMessages.legal[locale]
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-blue-400 hover:underline">
+        <Link href={`/${locale}`} className="inline-flex items-center gap-2 text-sm text-blue-400 hover:underline">
           <ArrowLeft className="w-4 h-4" />
-          Retour à l'accueil
+          {tLegal.back}
         </Link>
         <div className="space-y-4 border-b border-slate-800 pb-6">
           <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-xs font-semibold uppercase text-blue-400">
@@ -15,7 +19,7 @@ export default function PolitiqueConfidentialitePage() {
             Protection des données
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-white">
-            Politique de Confidentialité
+            {tLegal.privacyTitle}
           </h1>
           <p className="text-sm text-slate-400">
             Dernière mise à jour : {new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}

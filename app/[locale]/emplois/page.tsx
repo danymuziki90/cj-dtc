@@ -13,6 +13,8 @@ import {
   Clock, Loader2,
 } from 'lucide-react'
 
+import { publicMessages } from '@/lib/i18n/public-messages'
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 type EmploiMeta = {
   company: string; contractType: string; location: string; remote: string
@@ -37,15 +39,9 @@ function daysUntil(deadline: string): number {
   return Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000)
 }
 
-const REMOTE_LABELS: Record<string, string> = { oui: 'Télétravail', hybride: 'Hybride', non: '' }
-const SORT_OPTIONS = [
-  { value: 'recent',   label: 'Plus récentes' },
-  { value: 'deadline', label: 'Date limite' },
-  { value: 'alpha',    label: 'Alphabétique' },
-]
-
 // ─── Card component ───────────────────────────────────────────────────────────
 function EmploiCard({ e, locale }: { e: Emploi; locale: string }) {
+  const t = publicMessages.emplois[locale as 'fr' | 'en'] || publicMessages.emplois.fr
   const days = e.metadata.deadline ? daysUntil(e.metadata.deadline) : null
   const urgent = days !== null && days <= 7 && days >= 0
   return (
@@ -64,14 +60,14 @@ function EmploiCard({ e, locale }: { e: Emploi; locale: string }) {
               {e.metadata.contractType}
             </span>
           )}
-          {REMOTE_LABELS[e.metadata.remote] && (
+          {e.metadata.remote && t.remoteOptions[e.metadata.remote as keyof typeof t.remoteOptions] && (
             <span className="rounded-full bg-purple-500/80 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-bold text-white">
-              {REMOTE_LABELS[e.metadata.remote]}
+              {t.remoteOptions[e.metadata.remote as keyof typeof t.remoteOptions]}
             </span>
           )}
           {urgent && (
             <span className="rounded-full bg-red-500/90 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-bold text-white animate-pulse">
-              ⚡ Expire bientôt
+              {t.card.urgent}
             </span>
           )}
         </div>
@@ -98,8 +94,8 @@ function EmploiCard({ e, locale }: { e: Emploi; locale: string }) {
           {e.metadata.deadline && (
             <span className={`flex items-center gap-1.5 ${urgent ? 'text-red-600 font-semibold' : ''}`}>
               <Calendar className="h-3.5 w-3.5 shrink-0" />
-              Limite : {formatDate(e.metadata.deadline, locale)}
-              {days !== null && days >= 0 && <span className="ml-1 text-[10px]">({days}j)</span>}
+              {t.card.deadline} : {formatDate(e.metadata.deadline, locale)}
+              {days !== null && days >= 0 && <span className="ml-1 text-[10px]">({days}{t.card.days})</span>}
             </span>
           )}
         </div>
@@ -108,7 +104,7 @@ function EmploiCard({ e, locale }: { e: Emploi; locale: string }) {
         )}
         <Link href={`/${locale}/emplois/${e.id}`}
           className="mt-auto inline-flex items-center gap-2 rounded-xl bg-[var(--cj-blue)] px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-900 transition-colors group/btn">
-          Voir l'offre <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+          {t.card.seeOffer} <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
         </Link>
       </div>
     </article>
@@ -137,6 +133,14 @@ function EmploisContent() {
   const [showFilters, setShowFilters] = useState(false)
   const [heroData, setHeroData] = useState<HeroSectionData | null>(null)
 
+  const t = publicMessages.emplois[locale as 'fr' | 'en'] || publicMessages.emplois.fr
+
+  const SORT_OPTIONS = [
+    { value: 'recent',   label: t.sortLabels.recent },
+    { value: 'deadline', label: t.sortLabels.deadline },
+    { value: 'alpha',    label: t.sortLabels.alpha },
+  ]
+
   useEffect(() => {
     fetch('/api/hero-images?pageKey=emplois')
       .then((r) => r.json())
@@ -159,7 +163,7 @@ function EmploisContent() {
     if (remote)       qs.set('remote', remote)
     try {
       const res = await fetch(`/api/emplois?${qs}`, { cache: 'no-store' })
-      if (!res.ok) throw new Error('Chargement impossible.')
+      if (!res.ok) throw new Error(t.error)
       const data = await res.json()
       setEmplois(data.emplois || [])
       setFilters(data.filters || { locations: [], contracts: [], domains: [] })
@@ -182,11 +186,9 @@ function EmploisContent() {
   return (
     <div className="bg-slate-50 min-h-screen">
       <UnifiedHero
-        eyebrow="Offres d'emploi"
-        title={locale === 'fr' ? 'Opportunités de carrière' : 'Career Opportunities'}
-        description={locale === 'fr'
-          ? "Découvrez les offres d'emploi, stages et opportunités proposées par notre réseau de partenaires."
-          : 'Explore job openings, internships and opportunities from our partner network.'}
+        eyebrow={t.eyebrow}
+        title={t.title}
+        description={t.description}
         image="/img/actu.jpeg"
         compact
         heroData={heroData}
@@ -195,7 +197,7 @@ function EmploisContent() {
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Breadcrumbs items={[
-          { label: 'Offres d\'emploi' }
+          { label: t.breadcrumbs }
         ]} />
 
         {/* ── Search + Filters ── */}
@@ -203,12 +205,12 @@ function EmploisContent() {
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Poste, entreprise, mot-clé…"
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t.searchPlaceholder}
                 className="w-full rounded-lg border border-slate-200 pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[var(--cj-blue)] focus:ring-1 focus:ring-[var(--cj-blue)]" />
             </div>
             <button onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${showFilters ? 'border-[var(--cj-blue)] bg-[var(--cj-blue)] text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-              <SlidersHorizontal className="h-4 w-4" /> Filtres {hasActiveFilters && <span className="ml-1 h-2 w-2 rounded-full bg-[var(--cj-red)]" />}
+              <SlidersHorizontal className="h-4 w-4" /> {t.filters} {hasActiveFilters && <span className="ml-1 h-2 w-2 rounded-full bg-[var(--cj-red)]" />}
             </button>
             <select value={sort} onChange={e => setSort(e.target.value)}
               className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[var(--cj-blue)]">
@@ -219,33 +221,33 @@ function EmploisContent() {
           {showFilters && (
             <div className="grid gap-3 pt-3 border-t border-slate-100 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Localisation</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.filterLabels.location}</label>
                 <select className={selectCls} value={location} onChange={e => { setLocation(e.target.value); setPage(1) }}>
-                  <option value="">Toutes</option>
+                  <option value="">{t.filterLabels.all}</option>
                   {filters.locations.map(l => <option key={l}>{l}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Type de contrat</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.filterLabels.contract}</label>
                 <select className={selectCls} value={contractType} onChange={e => { setContract(e.target.value); setPage(1) }}>
-                  <option value="">Tous</option>
+                  <option value="">{t.filterLabels.allM}</option>
                   {filters.contracts.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Secteur</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.filterLabels.domain}</label>
                 <select className={selectCls} value={domain} onChange={e => { setDomain(e.target.value); setPage(1) }}>
-                  <option value="">Tous</option>
+                  <option value="">{t.filterLabels.allM}</option>
                   {filters.domains.map(d => <option key={d}>{d}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Télétravail</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.filterLabels.remote}</label>
                 <select className={selectCls} value={remote} onChange={e => { setRemote(e.target.value); setPage(1) }}>
-                  <option value="">Tous</option>
-                  <option value="oui">Télétravail</option>
-                  <option value="hybride">Hybride</option>
-                  <option value="non">Présentiel</option>
+                  <option value="">{t.filterLabels.allM}</option>
+                  <option value="oui">{t.remoteOptions.oui}</option>
+                  <option value="hybride">{t.remoteOptions.hybride}</option>
+                  <option value="non">{t.remoteOptions.non}</option>
                 </select>
               </div>
             </div>
@@ -253,7 +255,7 @@ function EmploisContent() {
 
           {hasActiveFilters && (
             <button onClick={resetFilters} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--cj-blue)] hover:underline">
-              <X className="h-3.5 w-3.5" /> Réinitialiser les filtres
+              <X className="h-3.5 w-3.5" /> {t.resetFilters}
             </button>
           )}
         </div>
@@ -263,16 +265,16 @@ function EmploisContent() {
 
         {loading ? (
           <div className="flex items-center justify-center py-24 text-slate-400 gap-2">
-            <Loader2 className="h-6 w-6 animate-spin" /> Chargement des offres…
+            <Loader2 className="h-6 w-6 animate-spin" /> {t.loading}
           </div>
         ) : emplois.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
             <Briefcase className="mx-auto h-12 w-12 text-slate-300 mb-3" />
-            <h2 className="text-xl font-bold text-slate-700">Aucune offre disponible</h2>
-            <p className="mt-2 text-sm text-slate-500">Revenez prochainement ou modifiez vos filtres.</p>
+            <h2 className="text-xl font-bold text-slate-700">{t.empty.title}</h2>
+            <p className="mt-2 text-sm text-slate-500">{t.empty.desc}</p>
             {hasActiveFilters && (
               <button onClick={resetFilters} className="mt-4 rounded-xl bg-[var(--cj-blue)] px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-900">
-                Voir toutes les offres
+                {t.empty.btn}
               </button>
             )}
           </div>
