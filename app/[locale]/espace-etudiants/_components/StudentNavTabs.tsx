@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Award,
   BarChart3,
   Bell,
   BookOpen,
@@ -43,6 +44,7 @@ export function StudentNavTabs({
     { id: "news", label: t('news'), icon: Newspaper, count: newsCount, href: null },
     { id: "calendrier", label: t('calendar'), icon: Calendar, count: null, href: null },
     { id: "notifications", label: t('notifications'), icon: Bell, count: totalNotifications, href: null },
+    { id: "certificats", label: "Mes certificats", icon: Award, count: null, href: `/${locale}/espace-etudiants/mes-certificats` },
     { id: "support", label: t('support'), icon: HelpCircle, count: null, href: null },
   ];
 

@@ -57,7 +57,7 @@ export function StudentHeader({
             className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/90 hover:bg-white/10 transition"
           >
             <UserIcon className="h-3.5 w-3.5" />
-            Mon compte
+            Mon profil
           </Link>
           <button
             onClick={onLogout}

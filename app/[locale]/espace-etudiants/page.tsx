@@ -492,7 +492,7 @@ function EspaceEtudiantsContent() {
         onLogout={logout}
       />
 
-      <main className="relative z-10 mx-auto max-w-7xl space-y-6 px-4 pb-10 pt-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 mx-auto max-w-7xl space-y-5 px-4 pb-8 pt-4 sm:px-6 lg:px-8">
         {/* SECTION 1: HERO */}
         <StudentHeroSection
           student={student}

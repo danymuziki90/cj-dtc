@@ -14,6 +14,7 @@ const STATIC_FALLBACKS: Record<string, string> = {
   emplois:     '/img/actu.jpeg',
   galerie:     '/img/actu.jpeg',
   partenaires: '/img/certificat 1.jpeg',
+  student_space: '/books-wood.jpg',
 }
 
 export async function GET(request: NextRequest) {
