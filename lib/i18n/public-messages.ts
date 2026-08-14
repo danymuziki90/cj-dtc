@@ -1699,5 +1699,109 @@ export const publicMessages = {
       privacyTitle: "Privacy Policy",
       termsTitle: "Terms of Use"
     }
+  },
+  espaceEtudiants: {
+    fr: {
+      support: {
+        formTitle: "Poser une question",
+        formDesc: "Nos secrétariats pédagogiques et administratifs s'engagent à vous répondre sous 24 à 48 heures ouvrées.",
+        messageLabel: "Message *",
+        messagePlaceholder: "Rédigez clairement votre question pédagogique ou demande d'assistance...",
+        submitBtn: "Soumettre ma question",
+        historyTitle: "Historique de vos échanges",
+        askedOn: "Posée le",
+        yourQuestion: "Votre question :",
+        adminReply: "Réponse de l'administration",
+        pending: "En attente de réponse administrative",
+        empty: "Aucune question soumise pour le moment."
+      },
+      calendar: {
+        title: "Calendrier des échéances",
+        desc: "Planifiez vos travaux et consultez les dates clés de vos sessions.",
+        emptyTitle: "Calendrier vide",
+        emptyDesc: "Aucune échéance académique enregistrée."
+      },
+      formations: {
+        title: "Mes formations",
+        desc: "Parcourez vos programmes d'apprentissage et suivez votre progression.",
+        noDesc: "Aucune description fournie par l'administration.",
+        program: "Programme",
+        dates: "Dates",
+        status: "Statut",
+        location: "Lieu / Format",
+        spots: "Places restantes",
+        progress: "Progression",
+        calendar: "Calendrier",
+        materials: "Supports",
+        viewDetails: "Voir les détails",
+        enrollBtn: "S'inscrire à cette session",
+        emptyTitle: "Aucune formation enregistrée",
+        emptyDesc: "Vous n'êtes inscrit à aucune formation de CJ DTC pour le moment.",
+        openSessions: "Sessions ouvertes",
+        openSessionsDesc: "Découvrez les opportunités d'apprentissage ouvertes à l'inscription.",
+        noOpenSessions: "Aucune autre session ouverte disponible pour le moment.",
+        statuses: {
+          waitlist: "⏳ En liste d'attente",
+          waitlistDesc: "Votre candidature a été placée sur liste d'attente. Nous vous contacterons dès qu'une place se libèrera.",
+          pending: "🔍 Candidature en examen",
+          pendingDesc: "Nos équipes examinent votre dossier. Une décision vous sera notifiée très prochainement par e-mail.",
+          rejected: "❌ Candidature non retenue",
+          rejectedDesc: "Votre dossier n'a pas été retenu pour cette session. N'hésitez pas à postuler à d'autres parcours.",
+          cancelled: "🚫 Inscription annulée",
+          cancelledDesc: "Cette inscription a été annulée. Veuillez contacter le secrétariat pour toute question."
+        }
+      }
+    },
+    en: {
+      support: {
+        formTitle: "Ask a question",
+        formDesc: "Our academic and administrative teams are committed to replying within 24 to 48 business hours.",
+        messageLabel: "Message *",
+        messagePlaceholder: "Clearly describe your academic question or support request...",
+        submitBtn: "Submit my question",
+        historyTitle: "Your conversation history",
+        askedOn: "Asked on",
+        yourQuestion: "Your question:",
+        adminReply: "Administration reply",
+        pending: "Waiting for an administrative reply",
+        empty: "No questions submitted yet."
+      },
+      calendar: {
+        title: "Deadline calendar",
+        desc: "Plan your work and check the key dates of your sessions.",
+        emptyTitle: "Empty calendar",
+        emptyDesc: "No academic deadlines registered."
+      },
+      formations: {
+        title: "My trainings",
+        desc: "Browse your learning programs and track your progress.",
+        noDesc: "No description provided by administration.",
+        program: "Program",
+        dates: "Dates",
+        status: "Status",
+        location: "Location / Format",
+        spots: "Remaining spots",
+        progress: "Progress",
+        calendar: "Calendar",
+        materials: "Materials",
+        viewDetails: "View details",
+        enrollBtn: "Enroll in this session",
+        emptyTitle: "No training registered",
+        emptyDesc: "You are not enrolled in any CJ DTC training at the moment.",
+        openSessions: "Open sessions",
+        openSessionsDesc: "Discover learning opportunities open for enrollment.",
+        noOpenSessions: "No other open sessions available at the moment.",
+        statuses: {
+          waitlist: "⏳ On waitlist",
+          waitlistDesc: "Your application has been waitlisted. We will contact you as soon as a spot becomes available.",
+          pending: "🔍 Application under review",
+          pendingDesc: "Our teams are reviewing your file. A decision will be notified to you shortly by email.",
+          rejected: "❌ Application not accepted",
+          rejectedDesc: "Your file was not selected for this session. Feel free to apply to other programs.",
+          cancelled: "🚫 Enrollment cancelled",
+          cancelledDesc: "This enrollment has been cancelled. Please contact the secretariat for any questions."
+        }
+      }
+    }
   }
 } as const

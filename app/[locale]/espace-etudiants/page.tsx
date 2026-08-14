@@ -524,7 +524,7 @@ function EspaceEtudiantsContent() {
           )}
 
           {activeTab === "calendrier" && (
-            <CalendarTab calendarTimeline={calendarTimeline} />
+            <CalendarTab calendarTimeline={calendarTimeline} locale={locale} />
           )}
 
           {activeTab === "notifications" && (
@@ -539,6 +539,7 @@ function EspaceEtudiantsContent() {
               setQuestion={setQuestion}
               questionError={questionError}
               questionLoading={questionLoading}
+              locale={locale}
             />
           )}
         </div>

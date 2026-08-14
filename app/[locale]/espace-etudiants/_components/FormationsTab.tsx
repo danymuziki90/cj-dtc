@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   BookOpen,
   Calendar,
-  FileText,
   GraduationCap,
   Laptop,
   ArrowRight,
@@ -16,6 +15,7 @@ import {
   statusClass,
   translateEnrollmentStatus,
 } from "./utils";
+import { publicMessages } from "@/lib/i18n/public-messages";
 
 interface FormationsTabProps {
   sessionsHistory: any[];
@@ -34,17 +34,18 @@ export function FormationsTab({
   basePath,
   locale,
 }: FormationsTabProps) {
+  const tBase = publicMessages.espaceEtudiants[locale as "fr" | "en"] ?? publicMessages.espaceEtudiants.fr;
+  const t = tBase.formations;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-bold text-slate-900">
-            {locale === "fr" ? "Mes formations" : "My Trainings"}
+            {t.title}
           </h3>
           <p className="text-xs text-slate-500">
-            {locale === "fr" 
-              ? "Parcourez vos programmes d'apprentissage et suivez votre progression." 
-              : "Browse your learning programs and track your progress."}
+            {t.desc}
           </p>
         </div>
         <Link
@@ -99,7 +100,7 @@ export function FormationsTab({
                         : "bg-blue-50 text-blue-700 border border-blue-100"
                     }`}
                   >
-                    {item.formationCategory || (locale === "fr" ? "Programme" : "Program")}
+                    {item.formationCategory || t.program}
                   </span>
 
                   <h4 className="mt-3 text-sm font-bold text-slate-900 leading-snug line-clamp-2">
@@ -107,21 +108,21 @@ export function FormationsTab({
                   </h4>
 
                   <p className="mt-2 text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
-                    {locale === "fr" 
-                      ? (item.formationDescription || "Aucune description fournie par l'administration.")
-                      : (item.formationDescriptionEn || item.formationDescription || "No description provided by administration.")}
+                    {locale === "fr"
+                      ? (item.formationDescription || t.noDesc)
+                      : (item.formationDescriptionEn || item.formationDescription || t.noDesc)}
                   </p>
 
                   <div className="mt-4 space-y-2 border-t border-slate-100 pt-4">
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-slate-400 font-medium">{locale === "fr" ? "Dates" : "Dates"}</span>
+                      <span className="text-slate-400 font-medium">{t.dates}</span>
                       <span className="font-semibold text-slate-700">
                         {formatDateShort(item.startDate)} -{" "}
                         {formatDateShort(item.endDate)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-slate-400 font-medium">{locale === "fr" ? "Statut" : "Status"}</span>
+                      <span className="text-slate-400 font-medium">{t.status}</span>
                       <span
                         className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${statusClass(
                           item.enrollmentStatus
@@ -140,7 +141,7 @@ export function FormationsTab({
                   <div className="space-y-1 mb-4">
                     <div className="flex items-center justify-between text-[10px]">
                       <span className="text-slate-400 font-medium">
-                        {locale === "fr" ? "Progression" : "Progress"}
+                        {t.progress}
                       </span>
                       <span className="font-bold text-orange-600">
                         {completionRate}%
@@ -157,7 +158,7 @@ export function FormationsTab({
                   <div className="space-y-1 mb-4">
                     <div className="flex items-center justify-between text-[10px]">
                       <span className="text-slate-400 font-medium">
-                        Progression
+                        {t.progress}
                       </span>
                       <span className="font-bold text-slate-500">
                         {item.sessionLifecycle === "completed" ? "100%" : "0%"}
@@ -181,24 +182,22 @@ export function FormationsTab({
                   item.enrollmentStatus
                 ) ? (
                   <>
-
                     <div className="grid grid-cols-2 gap-2 mt-1 text-center border-t border-slate-100 pt-3 sm:grid-cols-3">
                       <button
                         onClick={() => setActiveTab("calendrier")}
                         className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
-                        title="Consulter le calendrier"
-                        title={locale === "fr" ? "Consulter le calendrier" : "View calendar"}
+                        title={t.calendar}
                       >
                         <Calendar className="w-4 h-4 mb-1 text-slate-400" />
-                        {locale === "fr" ? "Calendrier" : "Calendar"}
+                        {t.calendar}
                       </button>
                       <Link
                         href={`${basePath}/supports?formationId=${item.formationId}`}
                         className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[10px] text-slate-600 hover:text-[var(--cj-blue)] font-bold transition-all"
-                        title={locale === "fr" ? "Accéder aux supports de cours" : "Access course materials"}
+                        title={t.materials}
                       >
                         <BookOpen className="w-4 h-4 mb-1 text-slate-400" />
-                        {locale === "fr" ? "Supports" : "Materials"}
+                        {t.materials}
                       </Link>
                     </div>
                   </>
@@ -207,45 +206,40 @@ export function FormationsTab({
                     {item.enrollmentStatus === "waitlist" && (
                       <>
                         <p className="font-extrabold text-amber-700">
-                          {locale === "fr" ? "⏳ En liste d'attente" : "⏳ On waitlist"}
+                          {t.statuses.waitlist}
                         </p>
                         <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
-                          {locale === "fr" 
-                            ? "Votre candidature a été placée sur liste d'attente. Nous vous contacterons dès qu'une place se libèrera."
-                            : "Your application has been waitlisted. We will contact you as soon as a spot becomes available."}
+                          {t.statuses.waitlistDesc}
                         </p>
                       </>
                     )}
                     {item.enrollmentStatus === "pending" && (
                       <>
                         <p className="font-extrabold text-blue-700">
-                          🔍 Candidature en examen
+                          {t.statuses.pending}
                         </p>
                         <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
-                          Nos équipes examinent votre dossier. Une décision vous
-                          sera notifiée très prochainement par e-mail.
+                          {t.statuses.pendingDesc}
                         </p>
                       </>
                     )}
                     {item.enrollmentStatus === "rejected" && (
                       <>
                         <p className="font-extrabold text-red-600">
-                          ❌ Candidature non retenue
+                          {t.statuses.rejected}
                         </p>
                         <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
-                          Votre dossier n'a pas été retenu pour cette session.
-                          N'hésitez pas à postuler à d'autres parcours.
+                          {t.statuses.rejectedDesc}
                         </p>
                       </>
                     )}
                     {item.enrollmentStatus === "cancelled" && (
                       <>
                         <p className="font-extrabold text-slate-650">
-                          🚫 Inscription annulée
+                          {t.statuses.cancelled}
                         </p>
                         <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
-                          Cette inscription a été annulée. Veuillez contacter
-                          le secrétariat pour toute question.
+                          {t.statuses.cancelledDesc}
                         </p>
                       </>
                     )}
@@ -259,8 +253,8 @@ export function FormationsTab({
         {sessionsHistory.length === 0 && (
           <div className="col-span-full py-12 text-center">
             <EmptyState
-              title="Aucune formation enregistrée"
-              description="Vous n'êtes inscrit à aucune formation de CJ DTC pour le moment."
+              title={t.emptyTitle}
+              description={t.emptyDesc}
             />
           </div>
         )}
@@ -269,9 +263,9 @@ export function FormationsTab({
       {/* Sessions ouvertes */}
       <div className="mt-8 space-y-5 sm:mt-12 sm:space-y-6">
         <div>
-          <h3 className="text-lg font-bold text-slate-900">Sessions ouvertes</h3>
+          <h3 className="text-lg font-bold text-slate-900">{t.openSessions}</h3>
           <p className="text-xs text-slate-500">
-            Découvrez les opportunités d'apprentissage ouvertes à l'inscription.
+            {t.openSessionsDesc}
           </p>
         </div>
 
@@ -306,7 +300,7 @@ export function FormationsTab({
 
                 <div className="p-5">
                   <span className="inline-block rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-red-50 text-[var(--cj-red)] border border-red-100">
-                    {session.formationCategory || "Programme"}
+                    {session.formationCategory || t.program}
                   </span>
 
                   <h4 className="mt-3 text-sm font-bold text-slate-900 leading-snug line-clamp-2">
@@ -315,7 +309,7 @@ export function FormationsTab({
 
                   <div className="mt-4 space-y-2 border-t border-slate-100 pt-4">
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-slate-400 font-medium">Dates</span>
+                      <span className="text-slate-400 font-medium">{t.dates}</span>
                       <span className="font-semibold text-slate-700">
                         {formatDateShort(session.startDate)} -{" "}
                         {formatDateShort(session.endDate)}
@@ -323,7 +317,7 @@ export function FormationsTab({
                     </div>
                     <div className="flex items-center justify-between text-[10px]">
                       <span className="text-slate-400 font-medium">
-                        Lieu / Format
+                        {t.location}
                       </span>
                       <span className="font-semibold text-slate-700">
                         {session.location} ({session.format})
@@ -331,7 +325,7 @@ export function FormationsTab({
                     </div>
                     <div className="flex items-center justify-between text-[10px]">
                       <span className="text-slate-400 font-medium">
-                        Places restantes
+                        {t.spots}
                       </span>
                       <span className="font-semibold text-slate-700">
                         {session.availableSpots} /{" "}
@@ -347,13 +341,13 @@ export function FormationsTab({
                   href={`/${locale}/formations/${session.formationSlug}`}
                   className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 py-2 text-xs font-semibold text-slate-700 hover:border-[var(--cj-blue)] hover:text-[var(--cj-blue)] transition text-center"
                 >
-                  Voir les détails
+                  {t.viewDetails}
                 </Link>
                 <Link
                   href={`/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formationId}&sessionId=${session.id}`}
                   className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cj-red)] py-2 text-xs font-semibold text-white hover:bg-[var(--cj-red-700)] transition text-center shadow-sm"
                 >
-                  S'inscrire à cette session
+                  {t.enrollBtn}
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -363,7 +357,7 @@ export function FormationsTab({
           {availableSessions.length === 0 && (
             <div className="col-span-full py-8 text-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">
               <p className="text-xs text-slate-500">
-                Aucune autre session ouverte disponible pour le moment.
+                {t.noOpenSessions}
               </p>
             </div>
           )}

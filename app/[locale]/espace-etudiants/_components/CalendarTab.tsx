@@ -2,20 +2,24 @@
 
 import { StudentEmptyState as EmptyState } from "@/components/ui/student-space";
 import { formatDate } from "./utils";
+import { publicMessages } from "@/lib/i18n/public-messages";
 
 interface CalendarTabProps {
   calendarTimeline: any[];
+  locale: string;
 }
 
-export function CalendarTab({ calendarTimeline }: CalendarTabProps) {
+export function CalendarTab({ calendarTimeline, locale }: CalendarTabProps) {
+  const t = (publicMessages.espaceEtudiants[locale as "fr" | "en"] ?? publicMessages.espaceEtudiants.fr).calendar;
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-bold text-slate-900">
-          Calendrier des échéances
+          {t.title}
         </h3>
         <p className="text-xs text-slate-500">
-          Planifiez vos travaux et consultez les dates clés de vos sessions.
+          {t.desc}
         </p>
       </div>
 
@@ -57,8 +61,8 @@ export function CalendarTab({ calendarTimeline }: CalendarTabProps) {
       ) : (
         <div className="py-12 text-center">
           <EmptyState
-            title="Calendrier vide"
-            description="Aucune échéance académique enregistrée."
+            title={t.emptyTitle}
+            description={t.emptyDesc}
           />
         </div>
       )}

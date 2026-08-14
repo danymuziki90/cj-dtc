@@ -3,6 +3,7 @@
 import { FormEvent } from "react";
 import { Clock3, Loader2, MessageSquare, Send } from "lucide-react";
 import { formatDate, formatDateTime } from "./utils";
+import { publicMessages } from "@/lib/i18n/public-messages";
 
 interface SupportTabProps {
   questions: any[];
@@ -11,6 +12,7 @@ interface SupportTabProps {
   setQuestion: (val: string) => void;
   questionError: string;
   questionLoading: boolean;
+  locale: string;
 }
 
 export function SupportTab({
@@ -20,7 +22,10 @@ export function SupportTab({
   setQuestion,
   questionError,
   questionLoading,
+  locale,
 }: SupportTabProps) {
+  const t = (publicMessages.espaceEtudiants[locale as "fr" | "en"] ?? publicMessages.espaceEtudiants.fr).support;
+
   return (
     <div className="grid gap-4 lg:grid-cols-3 lg:gap-6">
       {/* Question submission form */}
@@ -28,11 +33,10 @@ export function SupportTab({
         <div className="rounded-2xl border border-white bg-white/60 p-4 shadow-sm sm:p-6 lg:sticky lg:top-24">
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-blue-600" />
-            Poser une question
+            {t.formTitle}
           </h3>
           <p className="text-xs text-slate-500 mb-4 leading-normal">
-            Nos secrétariats pédagogiques et administratifs s'engagent à vous
-            répondre sous 24 à 48 heures ouvrées.
+            {t.formDesc}
           </p>
 
           <form onSubmit={sendQuestion} className="space-y-4">
@@ -43,14 +47,14 @@ export function SupportTab({
             )}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                Message *
+                {t.messageLabel}
               </label>
               <textarea
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 rows={5}
                 required
-                placeholder="Rédigez clairement votre question pédagogique ou demande d'assistance..."
+                placeholder={t.messagePlaceholder}
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-[var(--cj-blue)] focus:ring-4 focus:ring-blue-100 outline-none"
               />
             </div>
@@ -64,7 +68,7 @@ export function SupportTab({
               ) : (
                 <Send className="w-4 h-4" />
               )}
-              Soumettre ma question
+              {t.submitBtn}
             </button>
           </form>
         </div>
@@ -73,7 +77,7 @@ export function SupportTab({
       {/* Past questions with admin answers list */}
       <div className="lg:col-span-2 space-y-4">
         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
-          Historique de vos échanges
+          {t.historyTitle}
         </h3>
 
         <div className="space-y-3">
@@ -87,14 +91,14 @@ export function SupportTab({
                   {item.formationTitle}
                 </span>
                 <span className="text-[10px] text-slate-400">
-                  Posée le {formatDateTime(item.createdAt)}
+                  {t.askedOn} {formatDateTime(item.createdAt)}
                 </span>
               </div>
 
               <div className="space-y-3">
                 <div className="text-xs">
                   <p className="font-semibold text-slate-800">
-                    Votre question :
+                    {t.yourQuestion}
                   </p>
                   <p className="mt-1 text-slate-600 leading-relaxed">
                     {item.message}
@@ -104,7 +108,7 @@ export function SupportTab({
                 {item.adminReply ? (
                   <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 text-xs">
                     <div className="flex items-center justify-between font-semibold text-[var(--cj-blue)]">
-                      <span>Réponse de l'administration</span>
+                      <span>{t.adminReply}</span>
                       <span className="text-[10px] text-slate-400 font-normal">
                         {item.adminReplyAt ? formatDate(item.adminReplyAt) : ""}
                       </span>
@@ -116,7 +120,7 @@ export function SupportTab({
                 ) : (
                   <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-600 bg-amber-50 rounded-full px-3 py-1 border border-amber-100">
                     <Clock3 className="w-3.5 h-3.5" />
-                    En attente de réponse administrative
+                    {t.pending}
                   </div>
                 )}
               </div>
@@ -126,7 +130,7 @@ export function SupportTab({
           {questions.length === 0 && (
             <div className="py-8 text-center bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
               <p className="text-xs text-slate-500 italic">
-                Aucune question soumise pour le moment.
+                {t.empty}
               </p>
             </div>
           )}
