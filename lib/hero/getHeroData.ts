@@ -17,7 +17,7 @@ export async function getHeroData(pageKey: string): Promise<HeroSectionData | nu
       },
     })
 
-    if (!hero) return null
+    if (!hero || !hero.isActive) return null
 
     return {
       id: hero.id,
@@ -38,10 +38,13 @@ export async function getHeroData(pageKey: string): Promise<HeroSectionData | nu
       badgesEn: hero.badgesEn as HeroBadge[] | null,
       overlayOpacity: hero.overlayOpacity,
       compact: hero.compact,
+      carouselEnabled: hero.carouselEnabled,
+      slideDuration: hero.slideDuration,
       slides: hero.slides.map(
         (s): HeroSlideData => ({
           id: s.id,
           order: s.order,
+          isActive: s.isActive,
           imageUrl: s.imageUrl,
           imageAlt: s.imageAlt,
           eyebrowFr: s.eyebrowFr,

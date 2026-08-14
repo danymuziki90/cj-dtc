@@ -74,7 +74,7 @@ export default function AdminHeroesPage() {
                       Sans image
                     </div>
                   )}
-                  {section.isDynamic && (
+                  {section.carouselEnabled && (section.slides?.filter((slide) => slide.isActive).length || 0) > 1 && (
                     <div className="absolute top-3 right-3 bg-blue-900/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
                       Carrousel ({section.slides?.length || 0})
                     </div>

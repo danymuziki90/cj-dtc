@@ -40,7 +40,9 @@ export async function GET(
       return NextResponse.json({ error: 'Hero not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ hero })
+    // Les deux formes sont retournées temporairement : la forme directe est
+    // utilisée par l'éditeur, et `hero` préserve les anciens consommateurs.
+    return NextResponse.json({ ...hero, hero })
   } catch (error) {
     console.error('[GET /api/admin/heroes/[id]]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -71,6 +73,8 @@ export async function PUT(
       badgesFr, badgesEn,
       overlayOpacity,
       compact,
+      carouselEnabled,
+      slideDuration,
     } = body
 
     const hero = await prisma.heroSection.update({
@@ -91,6 +95,8 @@ export async function PUT(
         ...(badgesEn !== undefined && { badgesEn }),
         ...(overlayOpacity !== undefined && { overlayOpacity }),
         ...(compact !== undefined && { compact }),
+        ...(carouselEnabled !== undefined && { carouselEnabled }),
+        ...(slideDuration !== undefined && { slideDuration: Math.max(2000, Math.min(30000, Number(slideDuration) || 6000)) }),
       },
       include: { slides: { orderBy: { order: 'asc' } } },
     })

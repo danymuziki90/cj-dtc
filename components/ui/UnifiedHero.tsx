@@ -115,9 +115,9 @@ export default function UnifiedHero({
   // Determine slides
   let slides: any[] = []
   
-  if (heroData?.slides && heroData.slides.length > 0) {
+  if (heroData?.carouselEnabled !== false && heroData?.slides && heroData.slides.filter((slide) => slide.isActive).length > 0) {
     // Si l'admin a configuré des slides (carrousel activé pour cette page)
-    slides = heroData.slides
+    slides = heroData.slides.filter((slide) => slide.isActive)
   } else if (isHomeHero) {
     // Page d'accueil sans configuration DB : fallback par défaut (carrousel)
     slides = DEFAULT_HOME_SLIDES
@@ -156,11 +156,11 @@ export default function UnifiedHero({
     if (!isSlideshow || isPaused || shouldReduceMotion) return
     timerRef.current = setInterval(() => {
       nextSlide()
-    }, 6000)
+    }, heroData?.slideDuration ?? 6000)
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [isSlideshow, isPaused, nextSlide, shouldReduceMotion])
+  }, [heroData?.slideDuration, isSlideshow, isPaused, nextSlide, shouldReduceMotion])
 
   if (!slides.length) return null
 
@@ -210,7 +210,7 @@ export default function UnifiedHero({
 
 
       {/* ── Nav Arrows (for Slideshow) ── */}
-      {isSlideshow && isHomeHero && (
+      {isSlideshow && (
         <>
           <button
             onClick={prevSlide}

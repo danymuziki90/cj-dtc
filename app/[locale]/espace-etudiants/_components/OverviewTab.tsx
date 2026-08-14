@@ -23,6 +23,7 @@ interface OverviewTabProps {
   assignments: any[];
   news: any[];
   notifications: any[];
+  eligibility: any;
   setActiveTab: (tab: string) => void;
   setSelectedAssignmentForSubmission: (assignment: any) => void;
   setSelectedNewsForModal: (news: any) => void;
@@ -39,6 +40,7 @@ export function OverviewTab({
   assignments,
   news,
   notifications,
+  eligibility,
   setActiveTab,
   setSelectedAssignmentForSubmission,
   setSelectedNewsForModal,

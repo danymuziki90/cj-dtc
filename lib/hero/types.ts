@@ -14,6 +14,7 @@ export type HeroBadge = {
 export type HeroSlideData = {
   id: string
   order: number
+  isActive: boolean
   imageUrl: string
   imageAlt?: string | null
   eyebrowFr?: string | null
@@ -24,6 +25,8 @@ export type HeroSlideData = {
   descriptionEn?: string | null
   badgeFr?: string | null
   badgeEn?: string | null
+  ctaLabelFr?: string | null
+  ctaHref?: string | null
 }
 
 export type HeroSectionData = {
@@ -35,6 +38,12 @@ export type HeroSectionData = {
   imageUrl?: string | null
   imageAlt?: string | null
   defaultImageUrl?: string | null
+  defaultEyebrowFr?: string | null
+  defaultEyebrowEn?: string | null
+  defaultTitleFr?: string | null
+  defaultTitleEn?: string | null
+  defaultDescriptionFr?: string | null
+  defaultDescriptionEn?: string | null
 
   // Contenu FR
   eyebrowFr?: string | null
@@ -57,6 +66,8 @@ export type HeroSectionData = {
   // Options
   overlayOpacity: number
   compact: boolean
+  carouselEnabled: boolean
+  slideDuration: number
 
   // Slides (home uniquement)
   slides?: HeroSlideData[]
@@ -76,6 +87,7 @@ export const HERO_PAGE_KEYS = [
   'emplois',
   'galerie',
   'partenaires',
+  'student_space',
 ] as const
 
 export type HeroPageKey = (typeof HERO_PAGE_KEYS)[number]

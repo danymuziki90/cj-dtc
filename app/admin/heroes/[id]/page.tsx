@@ -19,6 +19,7 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
   // Form states (Section level)
   const [isActive, setIsActive] = useState(true);
   const [isDynamic, setIsDynamic] = useState(false);
+  const [slideDuration, setSlideDuration] = useState(6000);
   const [compact, setCompact] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [imageAlt, setImageAlt] = useState('');
@@ -49,7 +50,8 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       setSection(data);
       
       setIsActive(data.isActive);
-      setIsDynamic(data.isDynamic);
+      setIsDynamic(data.carouselEnabled !== false);
+      setSlideDuration(data.slideDuration || 6000);
       setCompact(data.compact);
       setImageUrl(data.imageUrl || '');
       setImageAlt(data.imageAlt || '');
@@ -82,7 +84,8 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           isActive,
-          isDynamic,
+          carouselEnabled: isDynamic,
+          slideDuration,
           compact,
           imageUrl,
           imageAlt,
@@ -198,6 +201,29 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
     setSlides(prev => prev.map(s => s.id === slideId ? { ...s, [field]: value } : s));
   };
 
+  const handleSlideImageUpload = async (slideId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+      error("Choisissez une image de moins de 5 Mo.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`/api/admin/heroes/${id}/slides/${slideId}`, { method: 'PUT', body: formData });
+      if (!res.ok) throw new Error('Upload impossible');
+      const { slide } = await res.json();
+      setSlides(prev => prev.map(item => item.id === slideId ? { ...item, imageUrl: slide.imageUrl } : item));
+      success("Image du slide téléversée.");
+    } catch {
+      error("Erreur lors du téléversement de l'image.");
+    } finally {
+      event.target.value = '';
+    }
+  };
+
   const handleSaveSlide = async (slide: HeroSlideData) => {
     try {
       const res = await fetch(`/api/admin/heroes/${id}/slides/${slide.id}`, {
@@ -291,17 +317,15 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
                   />
                   <span className="text-sm font-semibold text-slate-700">Compact</span>
                 </label>
-                {section.pageKey === 'home' && (
-                  <label className="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
-                    <input
-                      type="checkbox"
-                      checked={isDynamic}
-                      onChange={e => setIsDynamic(e.target.checked)}
-                      className="w-4 h-4 text-blue-900 border-blue-300 rounded focus:ring-blue-900"
-                    />
-                    <span className="text-sm font-bold text-blue-900">Mode Carrousel</span>
-                  </label>
-                )}
+                <label className="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+                  <input
+                    type="checkbox"
+                    checked={isDynamic}
+                    onChange={e => setIsDynamic(e.target.checked)}
+                    className="w-4 h-4 text-blue-900 border-blue-300 rounded focus:ring-blue-900"
+                  />
+                  <span className="text-sm font-bold text-blue-900">Défilement automatique</span>
+                </label>
               </div>
             </div>
 
@@ -309,7 +333,7 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
             <div className={`space-y-6 ${isDynamic ? 'opacity-50 grayscale pointer-events-none' : ''}`}>
               {isDynamic && (
                 <div className="bg-amber-50 text-amber-800 text-sm p-3 rounded-lg border border-amber-200">
-                  Le mode Carrousel est activé. Les textes ci-dessous seront ignorés au profit des Slides. (L'image de fond reste utilisée si aucun slide n'a d'image).
+                  Le carrousel utilise les slides actifs ci-dessous. L'image principale reste le fallback si aucun slide n'est publié.
                 </div>
               )}
 
@@ -362,13 +386,29 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
           {isDynamic && (
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
-                <h2 className="text-lg font-bold text-slate-800">Slides du Carrousel</h2>
-                <button
-                  onClick={handleAddSlide}
-                  className="flex items-center gap-1 text-sm font-bold text-blue-900 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4" /> Ajouter un slide
-                </button>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800">Slides du Carrousel</h2>
+                  <p className="mt-1 text-xs text-slate-500">Les slides actifs sont diffusés dans l'ordre indiqué.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="text-xs font-semibold text-slate-600">
+                    Durée (secondes)
+                    <input
+                      type="number"
+                      min="2"
+                      max="30"
+                      value={Math.round(slideDuration / 1000)}
+                      onChange={e => setSlideDuration(Math.max(2000, Math.min(30000, Number(e.target.value || 6) * 1000)))}
+                      className="ml-2 w-16 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                    />
+                  </label>
+                  <button
+                    onClick={handleAddSlide}
+                    className="flex items-center gap-1 text-sm font-bold text-blue-900 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Plus className="w-4 h-4" /> Ajouter un slide
+                  </button>
+                </div>
               </div>
 
               {slides.length === 0 ? (
@@ -388,6 +428,15 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
                       <div className="flex items-center gap-2 mb-4">
                         <GripVertical className="w-4 h-4 text-slate-400 cursor-move" />
                         <span className="font-bold text-slate-700">Slide #{index + 1}</span>
+                        <label className="ml-auto flex items-center gap-2 text-xs font-semibold text-slate-600">
+                          <input
+                            type="checkbox"
+                            checked={slide.isActive !== false}
+                            onChange={e => handleUpdateSlideField(slide.id, 'isActive', e.target.checked)}
+                            className="h-4 w-4 rounded border-slate-300 text-blue-900"
+                          />
+                          Actif
+                        </label>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -410,14 +459,22 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
                           <textarea rows={2} value={slide.descriptionEn || ''} onChange={e => handleUpdateSlideField(slide.id, 'descriptionEn', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" />
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                         <div>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">URL Image (optionnel)</label>
                           <input type="text" value={slide.imageUrl || ''} onChange={e => handleUpdateSlideField(slide.id, 'imageUrl', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" placeholder="https://..." />
+                          <label className="mt-2 inline-flex cursor-pointer items-center rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-[11px] font-bold text-blue-800 hover:bg-blue-100">
+                            Téléverser une image
+                            <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={e => handleSlideImageUpload(slide.id, e)} />
+                          </label>
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Texte Bouton (optionnel)</label>
                           <input type="text" value={slide.ctaLabelFr || ''} onChange={e => handleUpdateSlideField(slide.id, 'ctaLabelFr', e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" placeholder="Label FR" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Ordre</label>
+                          <input type="number" min="0" value={slide.order} onChange={e => handleUpdateSlideField(slide.id, 'order', Number(e.target.value))} className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Lien Bouton</label>

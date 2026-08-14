@@ -750,6 +750,10 @@ model HeroSection {
   // Options d'affichage
   overlayOpacity  Int         @default(55)
   compact         Boolean     @default(false)
+  /// Active le défilement automatique lorsqu'au moins deux slides sont publiés.
+  carouselEnabled Boolean     @default(true)
+  /// Durée d'affichage d'un slide, en millisecondes.
+  slideDuration   Int         @default(6000)
 
   // Slides du carrousel (homepage uniquement)
   slides          HeroSlide[]
@@ -766,6 +770,8 @@ model HeroSlide {
   heroId        String
   hero          HeroSection @relation(fields: [heroId], references: [id], onDelete: Cascade)
   order         Int         @default(0)
+  /// Permet de retirer un slide du carrousel sans le supprimer.
+  isActive      Boolean     @default(true)
 
   imageUrl      String
   imageAlt      String?

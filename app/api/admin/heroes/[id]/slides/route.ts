@@ -49,10 +49,11 @@ export async function POST(
 
     const body = await request.json()
     const { imageUrl, imageAlt, eyebrowFr, eyebrowEn, titleFr, titleEn,
-            descriptionFr, descriptionEn, badgeFr, badgeEn, order } = body
+            descriptionFr, descriptionEn, badgeFr, badgeEn, order, isActive } = body
 
-    if (!imageUrl || !titleFr || !titleEn) {
-      return NextResponse.json({ error: 'imageUrl, titleFr and titleEn are required' }, { status: 400 })
+    const fallbackImageUrl = hero.imageUrl || hero.defaultImageUrl
+    if (!imageUrl && !fallbackImageUrl) {
+      return NextResponse.json({ error: 'Ajoutez une image principale ou indiquez une URL d’image pour ce slide.' }, { status: 400 })
     }
 
     // Calculer l'ordre si non fourni
@@ -65,17 +66,18 @@ export async function POST(
     const slide = await prisma.heroSlide.create({
       data: {
         heroId: id,
-        imageUrl,
+        imageUrl: imageUrl || fallbackImageUrl!,
         imageAlt,
         eyebrowFr,
         eyebrowEn,
-        titleFr,
-        titleEn,
+        titleFr: titleFr || 'Nouveau slide',
+        titleEn: titleEn || 'New slide',
         descriptionFr,
         descriptionEn,
         badgeFr,
         badgeEn,
         order: slideOrder,
+        isActive: isActive ?? true,
       },
     })
 

@@ -12,6 +12,21 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // L'espace étudiant utilise la même configuration que les autres bannières.
+    // L'upsert rend cette section éditable immédiatement sur les installations
+    // qui possèdent déjà les anciennes sections Hero.
+    await prisma.heroSection.upsert({
+      where: { pageKey: 'student_space' },
+      update: {},
+      create: {
+        pageKey: 'student_space',
+        defaultImageUrl: '/books-wood.jpg',
+        imageAlt: 'Livres et salle de formation CJ Development',
+        titleFr: 'Espace Étudiant',
+        titleEn: 'Student Space',
+      },
+    })
+
     const heroes = await prisma.heroSection.findMany({
       include: {
         slides: { orderBy: { order: 'asc' } },

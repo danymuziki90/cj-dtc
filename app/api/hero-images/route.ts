@@ -39,6 +39,14 @@ export async function GET(request: NextRequest) {
         })
       }
 
+      if (!hero.isActive) {
+        return NextResponse.json({
+          imageUrl: STATIC_FALLBACKS[pageKey] ?? null,
+          slides: [],
+          carouselEnabled: false,
+        })
+      }
+
       return NextResponse.json({
         id: hero.id,
         pageKey: hero.pageKey,
@@ -57,9 +65,12 @@ export async function GET(request: NextRequest) {
         badgesEn: hero.badgesEn,
         overlayOpacity: hero.overlayOpacity,
         compact: hero.compact,
+        carouselEnabled: hero.carouselEnabled,
+        slideDuration: hero.slideDuration,
         slides: hero.slides.map((s) => ({
           id: s.id,
           order: s.order,
+          isActive: s.isActive,
           imageUrl: s.imageUrl,
           imageAlt: s.imageAlt,
           eyebrowFr: s.eyebrowFr,

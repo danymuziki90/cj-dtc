@@ -25,6 +25,14 @@ interface StudentNavTabsProps {
   locale: string;
 }
 
+type StudentTab = {
+  id: string;
+  label: string;
+  icon: typeof BarChart3;
+  count: number | null;
+  href: string | null;
+};
+
 export function StudentNavTabs({
   activeTab,
   setActiveTab,
@@ -37,7 +45,7 @@ export function StudentNavTabs({
   const pathname = usePathname();
   const t = useTranslations('student');
 
-  const tabs = [
+  const tabs: StudentTab[] = [
     { id: "overview", label: t('dashboard'), icon: BarChart3, count: null, href: null },
     { id: "formations", label: t('my_formations'), icon: BookOpen, count: totalFormationsCount, href: null },
     { id: "travaux", label: t('my_assignments'), icon: FileText, count: pendingAssignmentsCount, href: null },
