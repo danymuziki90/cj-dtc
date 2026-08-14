@@ -316,6 +316,9 @@ export default function AdminHeroEditPage({ params }: { params: Promise<{ id: st
       event.target.value = '';
     }
   };
+
+  if (loading) {
+    return (
       <div className="w-full p-8 min-h-screen flex items-center justify-center">
         <span className="text-slate-400">Chargement...</span>
       </div>
