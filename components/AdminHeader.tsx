@@ -17,11 +17,11 @@ const navRow2 = [
   { href: '/admin/certificates', label: 'Certificats' },
   { href: '/admin/evaluations', label: 'Témoignages' },
   { href: '/admin/articles', label: 'Actualités' },
+  { href: '/admin/emplois', label: "Offres d'emploi" },
   { href: '/admin/b2b', label: 'Entreprises' },
+  { href: '/admin/heroes', label: 'Apparence' },
   { href: '/admin/settings', label: 'Paramètres' },
 ]
-
-const navLinks = [...navRow1, ...navRow2]
 
 export default function AdminHeader() {
   const pathname = usePathname()
@@ -31,11 +31,13 @@ export default function AdminHeader() {
     pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(`${href}/`))
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white text-black shadow-sm backdrop-blur">
-      <div className="flex w-full items-center justify-between px-3 py-3 sm:px-4 lg:px-5 xl:px-6 2xl:px-8">
-        <Link href="/admin/dashboard" className="shrink-0" aria-label="Accueil admin">
-          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gray-100 ring-1 ring-gray-300">
-            <img src="/logo.png" alt="CJ DTC" className="h-10 w-10 object-contain" />
+    <header className="sticky top-0 z-50 border-b border-slate-200/90 bg-white/95 text-slate-900 shadow-sm backdrop-blur-xl">
+      <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-4 py-3 sm:px-6">
+        <Link href="/admin/dashboard" className="flex shrink-0 items-center gap-3 group" aria-label="Accueil admin">
+          <img src="/logo.png" alt="CJ Development Training Center" className="h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105" />
+          <div className="hidden sm:block border-l border-slate-200 pl-3">
+            <p className="text-sm font-black tracking-tight text-slate-900 leading-tight">CJ Development</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--admin-primary)]">Administration</p>
           </div>
         </Link>
 
@@ -46,25 +48,25 @@ export default function AdminHeader() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-xl px-2.5 py-1 text-xs font-semibold transition ${
+                className={`rounded-full px-3.5 py-1 text-xs font-bold transition ${
                   isActive(link.href)
-                    ? 'bg-blue-50 text-[var(--admin-primary)] ring-1 ring-blue-200 font-bold'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                    ? 'bg-[var(--admin-primary)] text-white shadow-sm shadow-blue-900/20'
+                    : 'text-slate-700 bg-slate-100/80 hover:bg-slate-200/80 hover:text-[var(--admin-primary)]'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
           </nav>
-          <nav className="flex items-center gap-1.5 border-t border-gray-100 pt-1" aria-label="Navigation Ligne 2">
+          <nav className="flex items-center gap-1.5 border-t border-slate-100 pt-1.5" aria-label="Navigation Ligne 2">
             {navRow2.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-xl px-2.5 py-1 text-xs font-semibold transition ${
+                className={`rounded-full px-3.5 py-1 text-xs font-bold transition ${
                   isActive(link.href)
-                    ? 'bg-blue-50 text-[var(--admin-primary)] ring-1 ring-blue-200 font-bold'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                    ? 'bg-[var(--admin-primary)] text-white shadow-sm shadow-blue-900/20'
+                    : 'text-slate-700 bg-slate-100/80 hover:bg-slate-200/80 hover:text-[var(--admin-primary)]'
                 }`}
               >
                 {link.label}
@@ -75,7 +77,7 @@ export default function AdminHeader() {
 
         <button
           type="button"
-          className="rounded-lg p-2 text-gray-800 transition hover:bg-gray-100 md:hidden"
+          className="rounded-xl border border-slate-200 bg-slate-50 p-2 text-slate-700 transition hover:bg-slate-100 md:hidden"
           onClick={() => setMenuOpen((current) => !current)}
           aria-expanded={menuOpen}
           aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
@@ -93,36 +95,36 @@ export default function AdminHeader() {
       </div>
 
       <div
-        className={`overflow-hidden border-t border-gray-200 bg-white transition-all duration-300 ease-out md:hidden ${
+        className={`overflow-hidden border-t border-slate-200 bg-white transition-all duration-300 ease-out md:hidden ${
           menuOpen ? 'max-h-[32rem] opacity-100' : 'max-h-0 opacity-0'
         }`}
         aria-hidden={!menuOpen}
       >
-        <nav className="flex w-full flex-col gap-1 px-3 py-3 sm:px-4 lg:px-5 xl:px-6 2xl:px-8">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-2 pt-1">Ligne 1</p>
+        <nav className="flex w-full flex-col gap-1 px-4 py-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 pt-1">Opérations & Pilotage</p>
           {navRow1.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
+              className={`rounded-xl px-3 py-2 text-xs font-bold transition ${
                 isActive(link.href)
-                  ? 'bg-blue-50 text-[var(--admin-primary)] ring-1 ring-blue-200'
-                  : 'text-gray-800 hover:bg-gray-100 hover:text-black'
+                  ? 'bg-[var(--admin-primary)] text-white'
+                  : 'text-slate-800 hover:bg-slate-50'
               }`}
               onClick={() => setMenuOpen(false)}
             >
               {link.label}
             </Link>
           ))}
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-2 pt-2 border-t border-gray-100">Ligne 2</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 pt-2 border-t border-slate-100">Ressources & Management</p>
           {navRow2.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
+              className={`rounded-xl px-3 py-2 text-xs font-bold transition ${
                 isActive(link.href)
-                  ? 'bg-blue-50 text-[var(--admin-primary)] ring-1 ring-blue-200'
-                  : 'text-gray-800 hover:bg-gray-100 hover:text-black'
+                  ? 'bg-[var(--admin-primary)] text-white'
+                  : 'text-slate-800 hover:bg-slate-50'
               }`}
               onClick={() => setMenuOpen(false)}
             >
