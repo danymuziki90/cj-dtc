@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
-import { BookOpen, Download, ExternalLink, FileText, Filter, GraduationCap, Layers3, Video, FileArchive, ChevronDown } from 'lucide-react'
+import { BookOpen, Download, ExternalLink, FileText, Filter, GraduationCap, Layers3, Video, FileArchive, ChevronDown, Loader2 } from 'lucide-react'
 import {
   StudentEmptyState,
   StudentPageShell,
