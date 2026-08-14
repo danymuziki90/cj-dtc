@@ -195,7 +195,7 @@ function EmploisContent() {
         locale={locale}
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
         <Breadcrumbs items={[
           { label: t.breadcrumbs }
         ]} />

@@ -28,7 +28,7 @@ export default async function LocalizedSessionsPage({ params }: { params: Promis
   const heroData = await getHeroData('sessions')
 
   return (
-    <div className="bg-slate-50 text-slate-900 pb-20">
+    <div className="bg-slate-50 text-slate-900 pb-12 sm:pb-16">
       <UnifiedHero
         image="/img/Formaions 2.jpg"
         imageAlt="Participants en session de formation CJ DTC"
@@ -53,8 +53,9 @@ export default async function LocalizedSessionsPage({ params }: { params: Promis
         homeHref={`/${loc}`}
         heroData={heroData}
         locale={loc}
+        compact
       />
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <StudentAuthProvider>
           <Suspense fallback={<div className="p-10 text-center text-sm text-slate-500">Chargement des sessions...</div>}>
             <RecentSessions limit={0} hideHeader />

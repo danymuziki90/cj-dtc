@@ -159,7 +159,7 @@ export default function AboutModernPage({
   const team = isFr ? TEAM.fr : TEAM.en
 
   return (
-    <div className="bg-slate-50 text-slate-900 pb-20">
+    <div className="bg-slate-50 text-slate-900 pb-12 sm:pb-16">
       
       {/* ── Hero Section Standardisée ─────────────────────────────────────── */}
       <UnifiedHero 
@@ -181,52 +181,53 @@ export default function AboutModernPage({
         ]}
         heroData={heroData}
         locale={resolvedLocale}
+        compact
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: nav.about }]} homeHref={homeHref} />
 
         {/* ── Notre histoire ───────────────────── */}
-        <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_1fr] items-center">
-          <article className="space-y-6">
+        <section className="mt-8 sm:mt-10 grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-10 items-center">
+          <article className="space-y-4 sm:space-y-5">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--cj-red)]">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--cj-red)]">
                 {isFr ? 'Notre histoire' : 'Our story'}
               </p>
-              <h2 className="mt-3 text-3xl font-black text-[var(--cj-blue)] leading-tight">
+              <h2 className="mt-2 text-2xl sm:text-3xl font-black text-[var(--cj-blue)] leading-tight">
                 {isFr
                   ? "Né d'un constat : le diplôme seul ne suffit pas."
                   : 'Born from an observation: a degree alone is not enough.'}
               </h2>
             </div>
-            <p className="text-base leading-relaxed text-slate-600">
+            <p className="text-sm sm:text-base leading-relaxed text-slate-600">
               {isFr
                 ? "En 2018, CJ Development Training Center est fondé à Kinshasa avec une conviction simple : des milliers de jeunes africains obtiennent des diplômes sans trouver d'emploi, parce que leurs compétences opérationnelles ne correspondent pas aux attentes réelles des entreprises."
                 : 'In 2018, CJ Development Training Center was founded in Kinshasa with a simple conviction: thousands of young Africans obtain degrees without finding jobs, because their operational skills do not match what employers actually need.'}
             </p>
-            <p className="text-base leading-relaxed text-slate-600">
+            <p className="text-sm sm:text-base leading-relaxed text-slate-600">
               {isFr
                 ? "Nous avons créé un espace pour combler cet écart — pas avec des cours supplémentaires, mais avec une méthode pratique, un accompagnement humain et un réseau actif."
                 : "We created a space to bridge that gap — not with more courses, but with a practical method, human support and an active network."}
             </p>
           </article>
 
-          <article className="rounded-3xl border border-slate-200 bg-white p-8 shadow-md">
-            <h3 className="text-xl font-bold text-[var(--cj-blue)] mb-6">
+          <article className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm">
+            <h3 className="text-lg sm:text-xl font-bold text-[var(--cj-blue)] mb-4 sm:mb-5">
               {t.timelineTitle}
             </h3>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-5">
               {timeline.map((item, i) => (
-                <div key={item.year} className="flex gap-4">
+                <div key={item.year} className="flex gap-3.5 sm:gap-4">
                   <div className="flex flex-col items-center">
-                    <span className="flex h-10 w-16 shrink-0 items-center justify-center rounded-lg bg-[var(--cj-blue-50)] text-sm font-bold text-[var(--cj-blue)]">
+                    <span className="flex h-9 w-14 sm:h-10 sm:w-16 shrink-0 items-center justify-center rounded-lg bg-[var(--cj-blue-50)] text-xs sm:text-sm font-bold text-[var(--cj-blue)]">
                       {item.year}
                     </span>
                     {i < timeline.length - 1 && (
-                      <div className="mt-2 w-px flex-1 bg-slate-200" />
+                      <div className="mt-1.5 w-px flex-1 bg-slate-200" />
                     )}
                   </div>
-                  <p className="pb-4 pt-1 text-sm leading-6 text-slate-700">{item.text}</p>
+                  <p className="pb-2 pt-1 text-xs sm:text-sm leading-relaxed text-slate-700">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -234,76 +235,76 @@ export default function AboutModernPage({
         </section>
 
         {/* ── Mission et valeurs ───────────────────────────────────────── */}
-        <section className="mt-24">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--cj-red)]">
+        <section className="mt-10 sm:mt-14 lg:mt-16">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--cj-red)]">
               ADN CJ DTC
             </p>
-            <h2 className="mt-3 text-3xl font-black text-[var(--cj-blue)] sm:text-4xl">
+            <h2 className="mt-1.5 text-2xl sm:text-3xl font-black text-[var(--cj-blue)] lg:text-4xl">
               {isFr ? 'Mission, Vision & Valeurs' : 'Mission, Vision & Values'}
             </h2>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2 mb-12">
-            <div className="rounded-3xl border-2 border-[var(--cj-blue-50)] bg-white p-8 md:p-10 shadow-sm transition hover:shadow-md">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--cj-blue)] text-white mb-6">
-                <TargetIcon className="h-7 w-7" />
+          <div className="grid gap-5 sm:gap-6 lg:grid-cols-2 mb-8 sm:mb-10">
+            <div className="rounded-3xl border-2 border-[var(--cj-blue-50)] bg-white p-6 sm:p-8 shadow-sm transition hover:shadow-md">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--cj-blue)] text-white mb-4 sm:mb-5">
+                <TargetIcon className="h-6 w-6" />
               </div>
-              <h3 className="text-2xl font-bold text-[var(--cj-blue)] mb-4">{t.missionTitle}</h3>
-              <p className="text-slate-600 leading-relaxed text-lg">{t.missionDescription}</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-[var(--cj-blue)] mb-2.5">{t.missionTitle}</h3>
+              <p className="text-slate-600 leading-relaxed text-sm sm:text-base">{t.missionDescription}</p>
             </div>
-            <div className="rounded-3xl border-2 border-red-50 bg-white p-8 md:p-10 shadow-sm transition hover:shadow-md">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--cj-red)] text-white mb-6">
-                <Globe2 className="h-7 w-7" />
+            <div className="rounded-3xl border-2 border-red-50 bg-white p-6 sm:p-8 shadow-sm transition hover:shadow-md">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--cj-red)] text-white mb-4 sm:mb-5">
+                <Globe2 className="h-6 w-6" />
               </div>
-              <h3 className="text-2xl font-bold text-[var(--cj-blue)] mb-4">{t.visionTitle}</h3>
-              <p className="text-slate-600 leading-relaxed text-lg">{t.visionDescription}</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-[var(--cj-blue)] mb-2.5">{t.visionTitle}</h3>
+              <p className="text-slate-600 leading-relaxed text-sm sm:text-base">{t.visionDescription}</p>
             </div>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((value) => {
               const Icon = value.icon
               return (
                 <div
                   key={value.title}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:-translate-y-1 transition duration-300"
+                  className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm hover:-translate-y-1 transition duration-300"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--cj-blue-50)] text-[var(--cj-blue)] mb-4">
-                    <Icon className="h-6 w-6" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--cj-blue-50)] text-[var(--cj-blue)] mb-3">
+                    <Icon className="h-5 w-5" />
                   </div>
-                  <h4 className="text-lg font-bold text-slate-900 mb-2">{value.title}</h4>
-                  <p className="text-sm leading-6 text-slate-600">{value.desc}</p>
+                  <h4 className="text-base font-bold text-slate-900 mb-1.5">{value.title}</h4>
+                  <p className="text-xs sm:text-sm leading-relaxed text-slate-600">{value.desc}</p>
                 </div>
               )
             })}
           </div>
         </section>
 
-        {/* ── Notre impact ────────────────────────────────────────── */}
-        <section className="mt-24 overflow-hidden rounded-3xl bg-[var(--cj-blue)] px-8 py-16 text-white shadow-xl relative">
+        {/* ── Notre impact — BLOC COMPACTÉ ────────────────────────── */}
+        <section className="mt-10 sm:mt-14 lg:mt-16 overflow-hidden rounded-3xl bg-[var(--cj-blue)] px-5 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 text-white shadow-xl relative">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(227,6,19,0.15),transparent_50%)] pointer-events-none" />
           
-          <div className="relative z-10 mb-12 text-center">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-blue-300">
+          <div className="relative z-10 mb-6 sm:mb-8 text-center max-w-2xl mx-auto">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-300">
               {isFr ? 'Les chiffres parlent' : 'The numbers speak'}
             </p>
-            <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">
+            <h2 className="mt-1.5 text-2xl sm:text-3xl font-black text-white">
               {isFr ? 'Notre Impact' : 'Our Impact'}
             </h2>
           </div>
           
-          <div className="relative z-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="relative z-10 grid gap-3.5 sm:gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {PROOF_STATS.map((stat) => {
               const Icon = stat.icon
               return (
                 <article
                   key={stat.value}
-                  className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur text-center"
+                  className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 backdrop-blur text-center transition-all duration-300 hover:bg-white/10"
                 >
-                  <Icon className="h-8 w-8 text-blue-300 mb-4" />
-                  <p className="text-4xl font-black text-white tracking-tight">{stat.value}</p>
-                  <p className="mt-2 text-sm font-semibold uppercase tracking-wider text-blue-200">
+                  <Icon className="h-6 w-6 text-blue-300 mb-2 sm:mb-2.5" />
+                  <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">{stat.value}</p>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-blue-200">
                     {isFr ? stat.label : stat.labelEn}
                   </p>
                 </article>
@@ -313,25 +314,25 @@ export default function AboutModernPage({
         </section>
 
         {/* ── Équipe / Expertise ───────────────────────────────────── */}
-        <section className="mt-24">
-          <div className="mb-12">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--cj-red)]">
+        <section className="mt-10 sm:mt-14 lg:mt-16">
+          <div className="mb-6 sm:mb-8">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--cj-red)]">
               {isFr ? 'Notre écosystème' : 'Our ecosystem'}
             </p>
-            <h2 className="mt-3 text-3xl font-black text-[var(--cj-blue)] sm:text-4xl">
+            <h2 className="mt-1.5 text-2xl sm:text-3xl font-black text-[var(--cj-blue)]">
               {isFr ? "L'Expertise CJ DTC" : "CJ DTC Expertise"}
             </h2>
-            <p className="mt-4 max-w-2xl text-lg text-slate-600">
+            <p className="mt-2 max-w-2xl text-sm sm:text-base text-slate-600">
               {isFr 
                 ? "Une équipe dédiée de formateurs, coachs et partenaires pour garantir votre succès."
                 : "A dedicated team of trainers, coaches and partners to guarantee your success."}
             </p>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-3">
+          <div className="grid gap-5 sm:gap-6 sm:grid-cols-3">
             {team.map((member, i) => (
-              <div key={i} className="group overflow-hidden rounded-3xl bg-white shadow-sm border border-slate-200 transition hover:shadow-lg">
-                <div className="relative h-64 w-full overflow-hidden">
+              <div key={i} className="group overflow-hidden rounded-3xl bg-white shadow-sm border border-slate-200 transition hover:shadow-md">
+                <div className="relative h-48 sm:h-56 w-full overflow-hidden">
                   <Image
                     src={member.image}
                     alt={member.name}
@@ -339,15 +340,15 @@ export default function AboutModernPage({
                     className="object-cover transition duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-4 left-6 text-white">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--cj-red)] bg-white px-2 py-1 rounded inline-block mb-2">
+                  <div className="absolute bottom-3 left-4 right-4 text-white">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--cj-red)] bg-white px-2 py-0.5 rounded inline-block mb-1.5">
                       {member.role}
                     </p>
-                    <h3 className="text-xl font-bold">{member.name}</h3>
+                    <h3 className="text-base sm:text-lg font-bold leading-tight">{member.name}</h3>
                   </div>
                 </div>
-                <div className="p-6">
-                  <p className="text-sm text-slate-600 leading-relaxed">{member.desc}</p>
+                <div className="p-4 sm:p-5">
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{member.desc}</p>
                 </div>
               </div>
             ))}

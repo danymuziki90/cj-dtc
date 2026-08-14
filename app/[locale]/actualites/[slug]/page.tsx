@@ -79,7 +79,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
 
   return (
     <div className="bg-slate-50">
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
         <Breadcrumbs
           items={[
             { label: t.breadcrumb, href: `/${locale}/actualites` },
@@ -105,7 +105,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
               </span>
             </div>
 
-            <h1 className="mt-5 text-3xl font-bold leading-tight text-cjblue sm:text-4xl lg:text-5xl">{locale === 'fr' ? news.title : ((news as any).titleEn || news.title)}</h1>
+            <h1 className="mt-4 text-2xl font-bold leading-tight text-cjblue sm:text-3xl lg:text-4xl">{locale === 'fr' ? news.title : ((news as any).titleEn || news.title)}</h1>
 
             {news.category?.toLowerCase() === 'emplois' && news.metadata ? (
               <div className="mt-6 flex flex-wrap gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">

@@ -29,7 +29,7 @@ export default async function GaleriePage({ params }: { params: Promise<{ locale
         heroData={heroData}
         locale={locale}
       />
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         <Link href={`/${locale}`} className="inline-flex items-center gap-2 text-sm text-[var(--cj-blue)] hover:underline font-semibold">
           <ArrowLeft className="w-4 h-4" />
           {tHome}

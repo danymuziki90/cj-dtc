@@ -27,6 +27,52 @@
   }
 }
 
+/* ── Typographie et Justification des Paragraphes Côté Client ─────────────────────── */
+body:not(.admin-theme) main p {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+/* Exclusions pour conserver l'alignement naturel des composants courts, boutons, badges, navigation */
+body:not(.admin-theme) header p,
+body:not(.admin-theme) footer p,
+body:not(.admin-theme) nav p,
+body:not(.admin-theme) button p,
+body:not(.admin-theme) [role="button"] p,
+body:not(.admin-theme) .no-justify,
+body:not(.admin-theme) .no-justify p,
+body:not(.admin-theme) p.text-center,
+body:not(.admin-theme) p[class*="text-center"],
+body:not(.admin-theme) .text-center > p {
+  text-align: center;
+}
+
+body:not(.admin-theme) .text-left > p,
+body:not(.admin-theme) p.text-left {
+  text-align: left;
+}
+
+body:not(.admin-theme) .text-right > p,
+body:not(.admin-theme) p.text-right {
+  text-align: right;
+}
+
+/* ── Équilibre des Grands Titres Côté Client ────────────────────────────────────────── */
+body:not(.admin-theme) main h1:not(.hero-title-unified) {
+  font-size: clamp(1.75rem, 2.5vw + 0.75rem, 2.5rem);
+  line-height: 1.18;
+}
+
+body:not(.admin-theme) main h2 {
+  font-size: clamp(1.4rem, 2vw + 0.6rem, 2.1rem);
+  line-height: 1.22;
+}
+
+body:not(.admin-theme) main h3 {
+  font-size: clamp(1.15rem, 1.2vw + 0.45rem, 1.5rem);
+  line-height: 1.28;
+}
+
 /* Colors */
 :root {
   --cj-blue: #0A4FB3;

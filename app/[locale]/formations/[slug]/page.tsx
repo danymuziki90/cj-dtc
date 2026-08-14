@@ -318,7 +318,7 @@ export default function FormationDetailPage() {
                               </div>
                               {!isFull ? (
                                 <Link
-                                  to={
+                                  href={
                                     isLoggedIn
                                       ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${formation.id}&sessionId=${session.id}`
                                       : `/${locale}/espace-etudiants?formationId=${formation.id}&sessionId=${session.id}`
@@ -448,9 +448,9 @@ export default function FormationDetailPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               {activeTab === 'overview' && (
-                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="space-y-8 sm:space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <section>
-                    <h2 className="text-2xl font-bold text-slate-900 mb-4">{isFr ? 'À propos de cette formation' : 'About this course'}</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">{isFr ? 'À propos de cette formation' : 'About this course'}</h2>
                     <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed font-opensans whitespace-pre-wrap">
                       {displayDesc}
                     </div>
@@ -458,12 +458,12 @@ export default function FormationDetailPage() {
 
                   {objectives.length > 0 && (
                     <section>
-                      <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                        <TargetIcon className="w-6 h-6 text-[var(--cj-blue)]" />
+                      <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <TargetIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--cj-blue)]" />
                         {isFr ? 'Objectifs visés' : 'Objectives'}
                       </h2>
-                      <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-                        <p className="text-slate-600 mb-6 font-medium">
+                      <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 shadow-sm">
+                        <p className="text-slate-600 mb-4 font-medium">
                           {isFr ? "À l'issue de cette formation, vous serez capable de :" : 'Upon completion of this course, you will be able to:'}
                         </p>
                         <ul className="space-y-3 font-opensans">

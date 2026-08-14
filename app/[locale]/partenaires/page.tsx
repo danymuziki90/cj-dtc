@@ -44,14 +44,14 @@ export default async function PartenairesPage({ params }: PageProps) {
         </div>
       </UnifiedHero>
       
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: t.breadcrumb }]} />
 
         {/* Section Cards */}
-        <section className="mt-10">
-          <div className="max-w-3xl mb-8">
-            <h2 className="text-3xl font-black text-[var(--cj-blue)] font-montserrat tracking-tight">{t.sectionTitle}</h2>
-            <p className="mt-3 text-base leading-relaxed text-slate-600 font-opensans">{t.sectionDescription}</p>
+        <section className="mt-6 sm:mt-8">
+          <div className="max-w-3xl mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-black text-[var(--cj-blue)] font-montserrat tracking-tight">{t.sectionTitle}</h2>
+            <p className="mt-2 text-sm sm:text-base leading-relaxed text-slate-600 font-opensans">{t.sectionDescription}</p>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">

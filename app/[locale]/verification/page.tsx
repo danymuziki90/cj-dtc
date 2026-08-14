@@ -176,57 +176,57 @@ export default function VerificationPage() {
 
   return (
     <div className="bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
 
         {/* Header Section floating card */}
-        <section className="cj-hero-card mb-10 text-center flex flex-col items-center">
+        <section className="cj-hero-card mb-6 sm:mb-8 text-center flex flex-col items-center">
           <div className="relative z-10 flex flex-col items-center">
-            <div className="flex justify-center space-x-4 mb-6">
-              <div className="w-12 h-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
-                <ShieldIcon className="w-6 h-6 text-white" />
+            <div className="flex justify-center space-x-4 mb-4">
+              <div className="w-11 h-11 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
+                <ShieldIcon className="w-5 h-5 text-white" />
               </div>
-              <div className="w-12 h-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
-                <QrCode className="w-6 h-6 text-white" />
+              <div className="w-11 h-11 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
+                <QrCode className="w-5 h-5 text-white" />
               </div>
             </div>
             
-            <h1 className="cj-hero-title mb-6">
+            <h1 className="cj-hero-title mb-4">
               Vérification de
               <span className="text-blue-200">
                 {" "}Certificats
               </span>
             </h1>
             
-            <p className="max-w-2xl text-base leading-8 text-blue-100/90 sm:text-lg mb-8">
+            <p className="max-w-2xl text-sm sm:text-base leading-relaxed text-blue-100/90 mb-6">
               Vérifiez l'authenticité des certificats CJ DTC grâce à notre système de vérification sécurisé avec QR codes.
             </p>
             
             {/* Stats inside card */}
-            <div className="w-full border-t border-white/10 pt-8 mt-2">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 max-w-4xl mx-auto">
+            <div className="w-full border-t border-white/10 pt-6 mt-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-4xl mx-auto">
                 <div className="text-center">
-                  <div className="text-2xl font-black text-white font-montserrat">{stats.totalCertificates}</div>
-                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Certificats émis</div>
+                  <div className="text-xl sm:text-2xl font-black text-white font-montserrat">{stats.totalCertificates}</div>
+                  <div className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider font-opensans">Certificats émis</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-black text-white font-montserrat">{stats.issuedThisMonth}</div>
-                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Ce mois</div>
+                  <div className="text-xl sm:text-2xl font-black text-white font-montserrat">{stats.issuedThisMonth}</div>
+                  <div className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider font-opensans">Ce mois</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-black text-white font-montserrat">{stats.verificationCount}</div>
-                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Vérifications</div>
+                  <div className="text-xl sm:text-2xl font-black text-white font-montserrat">{stats.verificationCount}</div>
+                  <div className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider font-opensans">Vérifications</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-black text-[var(--cj-red)] font-montserrat">{stats.averageScore}%</div>
-                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Score moyen</div>
+                  <div className="text-xl sm:text-2xl font-black text-[var(--cj-red)] font-montserrat">{stats.averageScore}%</div>
+                  <div className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider font-opensans">Score moyen</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-black text-white font-montserrat">{stats.completionRate}%</div>
-                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Taux de réussite</div>
+                  <div className="text-xl sm:text-2xl font-black text-white font-montserrat">{stats.completionRate}%</div>
+                  <div className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider font-opensans">Taux de réussite</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-black text-[var(--cj-red)] font-montserrat">{stats.satisfactionRate}%</div>
-                  <div className="text-xs font-semibold text-blue-200 uppercase tracking-wider font-opensans">Satisfaction</div>
+                  <div className="text-xl sm:text-2xl font-black text-[var(--cj-red)] font-montserrat">{stats.satisfactionRate}%</div>
+                  <div className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider font-opensans">Satisfaction</div>
                 </div>
               </div>
             </div>
@@ -234,9 +234,9 @@ export default function VerificationPage() {
         </section>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto py-6 sm:py-8">
         {/* Verification Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-12">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 mb-6 sm:mb-8">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Vérifier un Certificat

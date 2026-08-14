@@ -284,21 +284,22 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
         overlayOpacity={60}
         heroData={heroData}
         locale={locale}
+        compact
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
 
       {/* ════════════════════════════════════════
           2. POURQUOI CJ DEVELOPMENT
       ════════════════════════════════════════ */}
-      <section className="bg-white py-20">
+      <section className="bg-white py-10 sm:py-14 lg:py-16 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-14 text-center">
+          <div className="mb-8 sm:mb-10 text-center">
             <SectionBadge text={t.whyBadge} />
-            <h2 className="text-3xl font-black text-slate-900 sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.whyTitle}</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-base text-slate-600">{t.whySub}</p>
+            <h2 className="text-2xl font-black text-slate-900 sm:text-3xl lg:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.whyTitle}</h2>
+            <p className="mt-2 max-w-2xl mx-auto text-sm sm:text-base text-slate-600">{t.whySub}</p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {whyCards.map((card, i) => (
               <div key={i} className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[var(--cj-blue)]/20">
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--cj-blue)]/10 transition group-hover:bg-[var(--cj-blue)]/20">
@@ -316,23 +317,23 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
       {/* ════════════════════════════════════════
           3. SOLUTIONS
       ════════════════════════════════════════ */}
-      <section id="solutions" className="scroll-mt-20 bg-slate-50 py-20">
+      <section id="solutions" className="scroll-mt-20 bg-slate-50 py-10 sm:py-14 lg:py-16 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-14 text-center">
+          <div className="mb-8 sm:mb-10 text-center">
             <SectionBadge text={t.solutionsBadge} />
-            <h2 className="text-3xl font-black text-slate-900 sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.solutionsTitle}</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-base text-slate-600">{t.solutionsSub}</p>
+            <h2 className="text-2xl font-black text-slate-900 sm:text-3xl lg:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.solutionsTitle}</h2>
+            <p className="mt-2 max-w-2xl mx-auto text-sm sm:text-base text-slate-600">{t.solutionsSub}</p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((sol, i) => (
-              <article key={i} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[var(--cj-blue)]/30">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--cj-blue)]/10">
-                  <sol.icon className="h-6 w-6 text-[var(--cj-blue)]" />
+              <article key={i} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[var(--cj-blue)]/30">
+                <div className="mb-3.5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--cj-blue)]/10">
+                  <sol.icon className="h-5 w-5 text-[var(--cj-blue)]" />
                 </div>
-                <h3 className="mb-2 text-lg font-bold text-slate-900">{sol.title}</h3>
-                <p className="mb-4 flex-1 text-sm leading-relaxed text-slate-600">{sol.desc}</p>
+                <h3 className="mb-1.5 text-base sm:text-lg font-bold text-slate-900">{sol.title}</h3>
+                <p className="mb-3 flex-1 text-xs sm:text-sm leading-relaxed text-slate-600">{sol.desc}</p>
                 <div className="mb-3">
-                  <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-400">{t.benefits}</p>
+                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400">{t.benefits}</p>
                   <ul className="space-y-1">
                     {sol.benefits.map((b, j) => (
                       <li key={j} className="flex items-center gap-2 text-xs text-slate-600">
@@ -342,20 +343,20 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
                     ))}
                   </ul>
                 </div>
-                <div className="mb-5 rounded-lg bg-slate-50 px-3 py-2 text-xs">
+                <div className="mb-4 rounded-lg bg-slate-50 px-3 py-1.5 text-xs">
                   <span className="font-bold text-slate-500">{t.audience} : </span>
                   <span className="text-slate-700">{sol.audience}</span>
                 </div>
-                <a href="#contact" className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--cj-blue)] hover:text-[var(--cj-red)] transition-colors">
+                <a href="#contact" className="mt-auto inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[var(--cj-blue)] hover:text-[var(--cj-red)] transition-colors">
                   {t.learnMore}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </article>
             ))}
           </div>
-          <div className="mt-10 text-center">
+          <div className="mt-8 text-center">
             <button onClick={() => setShowAll(v => !v)}
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-[var(--cj-blue)] px-7 py-3 text-sm font-bold text-[var(--cj-blue)] transition hover:bg-[var(--cj-blue)] hover:text-white">
+              className="inline-flex items-center gap-2 rounded-xl border-2 border-[var(--cj-blue)] px-6 py-2.5 text-xs sm:text-sm font-bold text-[var(--cj-blue)] transition hover:bg-[var(--cj-blue)] hover:text-white">
               {showAll ? t.showLess : t.showAll}
               {showAll ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
@@ -366,20 +367,20 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
       {/* ════════════════════════════════════════
           4. SECTEURS
       ════════════════════════════════════════ */}
-      <section className="bg-white py-20">
+      <section className="bg-white py-10 sm:py-14 lg:py-16 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-14 text-center">
+          <div className="mb-8 sm:mb-10 text-center">
             <SectionBadge text={t.sectorsBadge} />
-            <h2 className="text-3xl font-black text-slate-900 sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.sectorsTitle}</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-base text-slate-600">{t.sectorsSub}</p>
+            <h2 className="text-2xl font-black text-slate-900 sm:text-3xl lg:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.sectorsTitle}</h2>
+            <p className="mt-2 max-w-2xl mx-auto text-sm sm:text-base text-slate-600">{t.sectorsSub}</p>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3.5 sm:gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {sectors.map((s, i) => (
-              <div key={i} className="group flex flex-col items-center rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center transition hover:-translate-y-1 hover:border-[var(--cj-blue)]/30 hover:bg-[var(--cj-blue)]/5 hover:shadow-md">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm transition group-hover:bg-[var(--cj-blue)]/10">
-                  <s.icon className="h-6 w-6 text-[var(--cj-blue)]" />
+              <div key={i} className="group flex flex-col items-center rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center transition hover:-translate-y-1 hover:border-[var(--cj-blue)]/30 hover:bg-[var(--cj-blue)]/5 hover:shadow-md">
+                <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-xl bg-white shadow-sm transition group-hover:bg-[var(--cj-blue)]/10">
+                  <s.icon className="h-5 w-5 text-[var(--cj-blue)]" />
                 </div>
-                <p className="text-sm font-semibold text-slate-700">{s.label}</p>
+                <p className="text-xs sm:text-sm font-semibold text-slate-700">{s.label}</p>
               </div>
             ))}
           </div>
@@ -389,20 +390,20 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
       {/* ════════════════════════════════════════
           5. MÉTHODE
       ════════════════════════════════════════ */}
-      <section className="bg-gradient-to-br from-[#001B47] via-[var(--cj-blue)] to-[#0B3A8E] py-20">
+      <section className="bg-gradient-to-br from-[#001B47] via-[var(--cj-blue)] to-[#0B3A8E] py-10 sm:py-14 lg:py-16 rounded-3xl my-6 sm:my-8 text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <span className="mb-4 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white/80">{t.methodBadge}</span>
-            <h2 className="text-3xl font-black text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.methodTitle}</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-base text-white">{t.methodSub}</p>
+          <div className="mb-8 sm:mb-10 text-center">
+            <span className="mb-2.5 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-white/80">{t.methodBadge}</span>
+            <h2 className="text-2xl font-black text-white sm:text-3xl lg:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.methodTitle}</h2>
+            <p className="mt-2 max-w-2xl mx-auto text-sm sm:text-base text-blue-100">{t.methodSub}</p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {steps.map((step, i) => (
-              <div key={i} className="relative rounded-2xl border border-white/15 bg-white/10 p-7 backdrop-blur-sm transition hover:bg-white/15">
-                <span className="mb-4 inline-block text-4xl font-black text-white/20 leading-none">{step.n}</span>
-                <div className="mb-4 h-0.5 w-12 rounded-full bg-[var(--cj-red)]" />
-                <h3 className="mb-2 text-base font-bold text-white">{step.title}</h3>
-                <p className="text-sm leading-relaxed text-white/80">{step.desc}</p>
+              <div key={i} className="relative rounded-2xl border border-white/15 bg-white/10 p-5 sm:p-6 backdrop-blur-sm transition hover:bg-white/15">
+                <span className="mb-2 inline-block text-3xl font-black text-white/20 leading-none">{step.n}</span>
+                <div className="mb-3 h-0.5 w-10 rounded-full bg-[var(--cj-red)]" />
+                <h3 className="mb-1.5 text-sm sm:text-base font-bold text-white">{step.title}</h3>
+                <p className="text-xs sm:text-sm leading-relaxed text-white/80">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -412,21 +413,21 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
       {/* ════════════════════════════════════════
           6. DIFFÉRENCIANTS
       ════════════════════════════════════════ */}
-      <section className="bg-white py-20">
+      <section className="bg-white py-10 sm:py-14 lg:py-16 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-14 text-center">
+          <div className="mb-8 sm:mb-10 text-center">
             <SectionBadge text={t.differsBadge} />
-            <h2 className="text-3xl font-black text-slate-900 sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.differsTitle}</h2>
+            <h2 className="text-2xl font-black text-slate-900 sm:text-3xl lg:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.differsTitle}</h2>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {differs.map((d, i) => (
-              <div key={i} className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-6 transition hover:shadow-md">
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--cj-red)]/10">
+              <div key={i} className="flex gap-3.5 rounded-2xl border border-slate-100 bg-slate-50 p-5 transition hover:shadow-md">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--cj-red)]/10">
                   <d.icon className="h-5 w-5 text-[var(--cj-red)]" />
                 </div>
                 <div>
                   <h3 className="mb-1 text-sm font-bold text-slate-900">{d.title}</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">{d.desc}</p>
+                  <p className="text-xs sm:text-sm leading-relaxed text-slate-600">{d.desc}</p>
                 </div>
               </div>
             ))}
@@ -437,24 +438,24 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
       {/* ════════════════════════════════════════
           7. CONFIANCE / PREUVES
       ════════════════════════════════════════ */}
-      <section className="bg-slate-50 py-20">
+      <section className="bg-slate-50 py-10 sm:py-14 lg:py-16 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-14 text-center">
+          <div className="mb-8 sm:mb-10 text-center">
             <SectionBadge text={t.trustBadge} />
-            <h2 className="text-3xl font-black text-slate-900 sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.trustTitle}</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-base text-slate-600">{t.trustSub}</p>
+            <h2 className="text-2xl font-black text-slate-900 sm:text-3xl lg:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.trustTitle}</h2>
+            <p className="mt-2 max-w-2xl mx-auto text-sm sm:text-base text-slate-600">{t.trustSub}</p>
           </div>
           {/* Métriques */}
-          <div className="mb-12 grid grid-cols-2 gap-6 sm:grid-cols-4">
+          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {TRUST_STATS.map(s => (
-              <div key={s.value} className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-                <p className="text-4xl font-black text-[var(--cj-blue)]">{s.value}</p>
+              <div key={s.value} className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 text-center shadow-sm">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-[var(--cj-blue)]">{s.value}</p>
                 <p className="mt-1 text-xs font-semibold text-slate-500">{isFr ? s.fr : s.en}</p>
               </div>
             ))}
           </div>
           {/* Témoignages */}
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {(isFr ? [
               { quote: '"CJ Development a transformé notre management. Les résultats sont visibles dès les premières semaines."', name: 'Directeur Général', org: 'Groupe industriel, Kinshasa' },
               { quote: '"Un accompagnement RH structuré, des formateurs de haut niveau et une vraie compréhension de notre contexte."', name: 'DRH', org: 'Institution financière' },
@@ -464,11 +465,11 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
               { quote: '"Structured HR support, top-level trainers and a genuine understanding of our operational context."', name: 'CHRO', org: 'Financial institution' },
               { quote: '"Our teams developed skills quickly. The hybrid format was perfectly suited to our needs."', name: 'Training Manager', org: 'International NGO' },
             ]).map((item, i) => (
-              <blockquote key={i} className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
-                <p className="mb-5 text-sm leading-relaxed text-slate-700 italic">{item.quote}</p>
+              <blockquote key={i} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+                <p className="mb-4 text-xs sm:text-sm leading-relaxed text-slate-700 italic">{item.quote}</p>
                 <footer>
-                  <p className="text-sm font-bold text-slate-900">{item.name}</p>
-                  <p className="text-xs text-slate-500">{item.org}</p>
+                  <p className="text-xs sm:text-sm font-bold text-slate-900">{item.name}</p>
+                  <p className="text-[11px] text-slate-500">{item.org}</p>
                 </footer>
               </blockquote>
             ))}
@@ -479,25 +480,25 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
       {/* ════════════════════════════════════════
           8. FAQ
       ════════════════════════════════════════ */}
-      <section className="bg-white py-20">
+      <section className="bg-white py-10 sm:py-14 lg:py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
+          <div className="mb-8 sm:mb-10 text-center">
             <SectionBadge text={t.faqBadge} />
-            <h2 className="text-3xl font-black text-slate-900 sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.faqTitle}</h2>
+            <h2 className="text-2xl font-black text-slate-900 sm:text-3xl lg:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t.faqTitle}</h2>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {faqItems.map((item, i) => (
               <div key={i} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-[var(--cj-blue)]/30">
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="flex w-full items-center justify-between px-6 py-5 text-left">
+                  className="flex w-full items-center justify-between px-5 py-4 text-left">
                   <span className="pr-4 text-sm font-bold text-slate-900">{item.q}</span>
                   {openFaq === i
-                    ? <ChevronUp className="h-5 w-5 flex-shrink-0 text-[var(--cj-blue)]" />
-                    : <ChevronDown className="h-5 w-5 flex-shrink-0 text-slate-400" />}
+                    ? <ChevronUp className="h-4 w-4 flex-shrink-0 text-[var(--cj-blue)]" />
+                    : <ChevronDown className="h-4 w-4 flex-shrink-0 text-slate-400" />}
                 </button>
                 {openFaq === i && (
-                  <div className="border-t border-slate-200 bg-white px-6 py-5">
-                    <p className="text-sm leading-relaxed text-slate-600">{item.a}</p>
+                  <div className="border-t border-slate-200 bg-white px-5 py-4">
+                    <p className="text-xs sm:text-sm leading-relaxed text-slate-600">{item.a}</p>
                   </div>
                 )}
               </div>
