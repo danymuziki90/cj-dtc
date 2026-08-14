@@ -94,109 +94,13 @@ function LanguageSwitcher({
           >
             {option.toUpperCase()}
           </Link>
-'use client'
-
-import Image from 'next/image'
-import Link from 'next/link'
-import { useParams, usePathname, useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  Home,
-  Info,
-  GraduationCap,
-  Building2,
-  Newspaper,
-  UserCheck,
-  Send,
-  X,
-  ChevronRight,
-  ChevronDown,
-  Globe,
-  ArrowUpRight,
-  ShieldCheck,
-  Linkedin,
-  Facebook,
-  Youtube,
-  MessageCircle,
-  Mail,
-  Phone,
-  Headphones,
-  Image as ImageIcon,
-  Users,
-  LogIn,
-  UserPlus,
-  FileText,
-  Briefcase,
-} from 'lucide-react'
-import { resolveSiteLocale, type SiteLocale } from '@/lib/i18n/locale'
-import { publicMessages } from '@/lib/i18n/public-messages'
-import { useActiveLink } from '@/hooks/useActiveLink'
-
-const navigationLabels = publicMessages.header
-
-function buildLocaleHref(pathname: string, search: string, targetLocale: SiteLocale) {
-  const segments = pathname.split('/').filter(Boolean)
-
-  if (segments[0] === 'fr' || segments[0] === 'en') {
-    segments[0] = targetLocale
-  } else {
-    segments.unshift(targetLocale)
-  }
-
-  const localizedPath = `/${segments.join('/')}`
-  return search ? `${localizedPath}?${search}` : localizedPath
-}
-
-function LanguageSwitcher({
-  locale,
-  pathname,
-  search,
-  darkVariant = false,
-  onNavigate,
-}: {
-  locale: SiteLocale
-  pathname: string
-  search: string
-  darkVariant?: boolean
-  onNavigate?: () => void
-}) {
-  const options: SiteLocale[] = ['fr', 'en']
-
-  return (
-    <div
-      className={`inline-flex items-center rounded-full p-1 shadow-sm backdrop-blur ${
-        darkVariant
-          ? 'border border-slate-800 bg-slate-900/90 shadow-slate-950'
-          : 'border border-slate-200 bg-white/90 shadow-slate-200/70'
-      }`}
-    >
-      {options.map((option) => {
-        const active = locale === option
-
-        return (
-          <Link
-            key={option}
-            href={buildLocaleHref(pathname, search, option)}
-            hrefLang={option}
-            onClick={onNavigate}
-            className={`rounded-full px-3 py-1 text-xs font-bold tracking-[0.16em] transition-all duration-200 ${
-              active
-                ? 'bg-[var(--cj-blue)] text-white shadow-md scale-105'
-                : darkVariant
-                ? 'text-slate-400 hover:text-white'
-                : 'text-slate-600 hover:text-[var(--cj-blue)]'
-            }`}
-            aria-current={active ? 'page' : undefined}
-          >
-            {option.toUpperCase()}
-          </Link>
         )
       })}
     </div>
   )
 }
 
-/** Desktop navigation link for ARSP-style capsule navbar */
+/** Desktop navigation link for capsule navbar */
 function NavLink({ href, label }: { href: string; label: string }) {
   const isActive = useActiveLink(href)
 
@@ -218,7 +122,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
   )
 }
 
-/** Desktop navigation dropdown component (ARSP style with fade & slide transition) */
+/** Desktop navigation dropdown component */
 function DesktopDropdown({
   label,
   items,
@@ -774,6 +678,7 @@ export default function Header() {
           </div>
         </div>
       </div>
+
       {/* FULLSCREEN MOBILE NAVIGATION OVERLAY WITH HERO SECTION BACKGROUND IMAGE */}
       <div
         id="fullscreen-navigation-overlay"
@@ -969,4 +874,3 @@ export default function Header() {
     </header>
   )
 }
-
