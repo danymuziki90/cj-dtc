@@ -31,6 +31,20 @@ const heroMediaSelect = {
   },
 } as const
 
+const heroCarouselSelect = {
+  ...heroMediaSelect,
+  carouselEnabled: true,
+  slideDuration: true,
+  slides: {
+    ...heroMediaSelect.slides,
+    select: { ...heroMediaSelect.slides.select, isActive: true },
+  },
+} as const
+
+function hasMissingColumn(error: unknown) {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2022'
+}
+
 /** GET /api/admin/heroes — Liste toutes les sections Hero */
 export async function GET(request: NextRequest) {
   const authResult = await verifyAdminToken(request)
@@ -55,18 +69,22 @@ export async function GET(request: NextRequest) {
       select: heroMediaSelect,
     })
 
-    const heroes = await prisma.heroSection.findMany({
-      select: heroMediaSelect,
-      orderBy: { pageKey: 'asc' },
-    })
+    let heroes: Array<Record<string, unknown>>
+    try {
+      heroes = await prisma.heroSection.findMany({ select: heroCarouselSelect, orderBy: { pageKey: 'asc' } })
+    } catch (error) {
+      if (!hasMissingColumn(error)) throw error
+      console.warn('[GET /api/admin/heroes] Migration carousel absente, repli sur les médias existants.')
+      heroes = await prisma.heroSection.findMany({ select: heroMediaSelect, orderBy: { pageKey: 'asc' } })
+    }
 
     return NextResponse.json({
       heroes: heroes.map((hero) => ({
         ...hero,
         // Valeurs par défaut pour le frontend sur une base avant migration.
-        carouselEnabled: true,
-        slideDuration: 6000,
-        slides: hero.slides.map((slide) => ({ ...slide, isActive: true })),
+        carouselEnabled: hero.carouselEnabled ?? true,
+        slideDuration: hero.slideDuration ?? 6000,
+        slides: ((hero.slides as Array<Record<string, unknown>>) ?? []).map((slide) => ({ ...slide, isActive: slide.isActive ?? true })),
       })),
     })
   } catch (error) {

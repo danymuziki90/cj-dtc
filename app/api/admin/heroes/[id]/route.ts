@@ -22,6 +22,20 @@ const heroEditorSelect = {
   },
 } as const
 
+const heroEditorCarouselSelect = {
+  ...heroEditorSelect,
+  carouselEnabled: true,
+  slideDuration: true,
+  slides: {
+    ...heroEditorSelect.slides,
+    select: { ...heroEditorSelect.slides.select, isActive: true },
+  },
+} as const
+
+function hasMissingColumn(error: unknown) {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2022'
+}
+
 /** Mapping pageKey → chemins à revalider */
 const REVALIDATE_PATHS: Record<string, string[]> = {
   home:        ['/fr', '/en', '/'],
@@ -48,10 +62,14 @@ export async function GET(
   const { id } = await params
 
   try {
-    const hero = await prisma.heroSection.findUnique({
-      where: { id },
-      select: heroEditorSelect,
-    })
+    let hero: Record<string, unknown> | null
+    try {
+      hero = await prisma.heroSection.findUnique({ where: { id }, select: heroEditorCarouselSelect })
+    } catch (error) {
+      if (!hasMissingColumn(error)) throw error
+      console.warn('[GET /api/admin/heroes/[id]] Migration carousel absente, repli sur les médias existants.')
+      hero = await prisma.heroSection.findUnique({ where: { id }, select: heroEditorSelect })
+    }
 
     if (!hero) {
       return NextResponse.json({ error: 'Hero not found' }, { status: 404 })
@@ -61,9 +79,9 @@ export async function GET(
     // utilisée par l'éditeur, et `hero` préserve les anciens consommateurs.
     const normalizedHero = {
       ...hero,
-      carouselEnabled: true,
-      slideDuration: 6000,
-      slides: hero.slides.map((slide) => ({ ...slide, isActive: true })),
+      carouselEnabled: hero.carouselEnabled ?? true,
+      slideDuration: hero.slideDuration ?? 6000,
+      slides: ((hero.slides as Array<Record<string, unknown>>) ?? []).map((slide) => ({ ...slide, isActive: slide.isActive ?? true })),
     }
     return NextResponse.json({ ...normalizedHero, hero: normalizedHero })
   } catch (error) {
