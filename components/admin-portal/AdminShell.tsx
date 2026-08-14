@@ -180,23 +180,23 @@ export default function AdminShell({
     <div className="space-y-6">
       <section
         className={[
-          'rounded-[28px] border border-white/80 bg-white/92 shadow-[0_24px_70px_-52px_rgba(15,23,42,0.4)] backdrop-blur',
+          'rounded-[28px] border border-blue-900/20 bg-[#0A4FB3] shadow-[0_24px_70px_-52px_rgba(10,79,179,0.5)]',
           compact ? 'px-5 py-4 md:px-6 md:py-5' : 'px-6 py-5 md:px-7 md:py-6',
         ].join(' ')}
       >
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-blue-100/80">
             {entry.eyebrow}
           </p>
           <h1
             className={[
-              'mt-2 font-bold tracking-tight text-slate-950',
+              'mt-2 font-bold tracking-tight text-white',
               compact ? 'text-2xl' : 'text-3xl md:text-4xl',
             ].join(' ')}
           >
             {title}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 md:text-[15px]">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-blue-50 md:text-[15px]">
             {entry.description}
           </p>
         </div>

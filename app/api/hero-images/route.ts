@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 // Fallback statiques par pageKey si la DB n'est pas disponible
 const STATIC_FALLBACKS: Record<string, string> = {
   home:        '/lor-de-formation.jpeg',

@@ -115,11 +115,14 @@ export default function UnifiedHero({
   // Determine slides
   let slides: any[] = []
   
-  if (isHomeHero) {
-    // It's the home page
-    slides = heroData?.slides?.length ? heroData.slides : DEFAULT_HOME_SLIDES
+  if (heroData?.slides && heroData.slides.length > 0) {
+    // Si l'admin a configuré des slides (carrousel activé pour cette page)
+    slides = heroData.slides
+  } else if (isHomeHero) {
+    // Page d'accueil sans configuration DB : fallback par défaut (carrousel)
+    slides = DEFAULT_HOME_SLIDES
   } else {
-    // Single image mode
+    // Mode image unique (fallback pour les autres pages)
     slides = [{
       id: 'single',
       imageUrl: heroData?.imageUrl ?? heroData?.defaultImageUrl ?? image,
