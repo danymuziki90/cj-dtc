@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { FormEvent, Suspense, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { publicMessages } from '@/lib/i18n/public-messages'
 
 function safeRedirect(value: string | null, locale: string) {
   if (!value || !value.startsWith('/') || value.startsWith('//')) return `/${locale}/espace-etudiants`
@@ -18,20 +19,22 @@ function StudentLoginForm() {
   const params = useParams<{ locale?: string }>()
   const locale = params?.locale || 'fr'
   const nextPath = safeRedirect(searchParams.get('next') || searchParams.get('callbackUrl'), locale)
+  const t = publicMessages.authLogin[locale as 'fr' | 'en'] || publicMessages.authLogin.fr
+
   let successMessage = ''
   if (searchParams.get('verified')) {
-    successMessage = 'Votre adresse e-mail a été vérifiée avec succès. Vous êtes maintenant connecté(e).'
+    successMessage = t.verified
   } else if (searchParams.get('registered')) {
-    successMessage = 'Un e-mail de confirmation vous a été envoyé. Veuillez vérifier votre boîte de réception.'
+    successMessage = t.registered
   }
   
   const tokenError = searchParams.get('error')
   let tokenErrorMessage = ''
-  if (tokenError === 'InvalidToken') tokenErrorMessage = 'Le lien de vérification est invalide.'
-  if (tokenError === 'ExpiredToken') tokenErrorMessage = 'Le lien de vérification a expiré.'
-  if (tokenError === 'UserNotFound') tokenErrorMessage = "L'utilisateur associé à ce lien n'existe plus."
-  if (tokenError === 'MissingToken') tokenErrorMessage = 'Aucun jeton de vérification fourni.'
-  if (tokenError === 'ServerError') tokenErrorMessage = 'Erreur lors de la vérification de votre compte.'
+  if (tokenError === 'InvalidToken') tokenErrorMessage = t.errors.InvalidToken
+  if (tokenError === 'ExpiredToken') tokenErrorMessage = t.errors.ExpiredToken
+  if (tokenError === 'UserNotFound') tokenErrorMessage = t.errors.UserNotFound
+  if (tokenError === 'MissingToken') tokenErrorMessage = t.errors.MissingToken
+  if (tokenError === 'ServerError') tokenErrorMessage = t.errors.ServerError
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -52,14 +55,14 @@ function StudentLoginForm() {
       const payload = await response.json().catch(() => ({}))
 
       if (!response.ok) {
-        setError(payload.error || "Nom d'utilisateur ou mot de passe incorrect.")
+        setError(payload.error || t.errors.default)
         return
       }
 
       router.push(nextPath)
       router.refresh()
     } catch (err: any) {
-      setError(err?.message || "Erreur de réseau ou serveur indisponible. Veuillez réessayer.")
+      setError(err?.message || t.errors.network)
     } finally {
       setLoading(false)
     }
@@ -72,8 +75,8 @@ function StudentLoginForm() {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-xl items-center justify-center">
 
         <section className="w-full rounded-[28px] border border-white bg-white p-6 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.45)] sm:p-8">
-          <h2 className="text-2xl font-semibold text-slate-950">Se connecter</h2>
-          <p className="mt-2 text-sm text-slate-600">Utilisez votre nom d'utilisateur ou votre adresse e-mail.</p>
+          <h2 className="text-2xl font-semibold text-slate-950">{t.title}</h2>
+          <p className="mt-2 text-sm text-slate-600">{t.subtitle}</p>
 
           {successMessage ? (
             <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
@@ -86,7 +89,7 @@ function StudentLoginForm() {
               <svg className="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Connectez-vous ou créez votre compte étudiant pour poursuivre votre inscription à la session sélectionnée.</span>
+              <span>{t.confirmInfo}</span>
             </div>
           ) : null}
 
@@ -99,7 +102,7 @@ function StudentLoginForm() {
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div>
               <label htmlFor="student-username" className="mb-1 block text-sm font-medium text-slate-700">
-                Nom d'utilisateur ou adresse e-mail
+                {t.usernameLabel}
               </label>
               <input
                 id="student-username"
@@ -113,7 +116,7 @@ function StudentLoginForm() {
 
             <div>
               <label htmlFor="student-password" className="mb-1 block text-sm font-medium text-slate-700">
-                Mot de passe
+                {t.passwordLabel}
               </label>
               <input
                 id="student-password"
@@ -131,16 +134,16 @@ function StudentLoginForm() {
               disabled={loading}
               className="w-full rounded-2xl bg-[var(--cj-blue)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--cj-blue-700)] disabled:opacity-70"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? t.loginLoading : t.loginBtn}
             </button>
           </form>
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
             <Link href={registerHref} className="font-semibold text-[var(--cj-blue)] hover:underline">
-              Creer un compte
+              {t.createAccount}
             </Link>
             <Link href={`/${locale}/auth/forgot-password`} className="font-semibold text-[var(--cj-blue)] hover:underline">
-              Mot de passe oublie ?
+              {t.forgotPassword}
             </Link>
           </div>
         </section>

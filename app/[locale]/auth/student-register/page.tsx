@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { FormEvent, Suspense, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { publicMessages } from '@/lib/i18n/public-messages'
 
 type FieldError = Record<string, string>
 
@@ -20,6 +21,7 @@ function StudentRegisterForm() {
   const params = useParams<{ locale?: string }>()
   const locale = params?.locale || 'fr'
   const nextPath = safeRedirect(searchParams.get('next') || searchParams.get('callbackUrl'), locale)
+  const t = publicMessages.authRegister[locale as 'fr' | 'en'] || publicMessages.authRegister.fr
 
   const [form, setForm] = useState({
     fullName: '',
@@ -46,13 +48,13 @@ function StudentRegisterForm() {
 
   function validateClient(): FieldError {
     const errors: FieldError = {}
-    if (form.fullName.trim().length < 2) errors.fullName = 'Le nom complet doit comporter au moins 2 caracteres.'
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = 'Adresse e-mail invalide.'
+    if (form.fullName.trim().length < 2) errors.fullName = t.errors.fullName
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = t.errors.email
     if (!/^[a-zA-Z0-9._-]{3,40}$/.test(form.username.trim())) {
-      errors.username = 'Le nom d utilisateur doit contenir 3 a 40 caracteres valides.'
+      errors.username = t.errors.username
     }
-    if (form.password.length < 8) errors.password = 'Le mot de passe doit comporter au moins 8 caracteres.'
-    if (form.password !== form.confirmPassword) errors.confirmPassword = 'Les mots de passe ne correspondent pas.'
+    if (form.password.length < 8) errors.password = t.errors.password
+    if (form.password !== form.confirmPassword) errors.confirmPassword = t.errors.confirmPassword
     return errors
   }
 
@@ -89,7 +91,7 @@ function StudentRegisterForm() {
           }
           setFieldErrors(serverFieldErrors)
         } else {
-          setGlobalError(data.error || 'Impossible de creer le compte.')
+          setGlobalError(data.error || t.errors.server)
         }
         return
       }
@@ -97,7 +99,7 @@ function StudentRegisterForm() {
       router.push(nextPath)
       router.refresh()
     } catch {
-      setGlobalError('Impossible de creer le compte pour le moment.')
+      setGlobalError(t.errors.network)
     } finally {
       setLoading(false)
     }
@@ -134,15 +136,15 @@ function StudentRegisterForm() {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-xl items-center justify-center">
 
         <section className="w-full rounded-[28px] border border-white bg-white p-6 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.45)] sm:p-8">
-          <h2 className="text-2xl font-semibold text-slate-950">Créer un compte étudiant</h2>
-          <p className="mt-2 text-sm text-slate-600">Renseignez les informations de base de votre compte.</p>
+          <h2 className="text-2xl font-semibold text-slate-950">{t.title}</h2>
+          <p className="mt-2 text-sm text-slate-600">{t.subtitle}</p>
 
           {nextPath.includes('confirm-inscription') ? (
             <div className="mt-5 flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50/80 px-4 py-3.5 text-xs font-bold text-[var(--cj-blue)] shadow-sm">
               <svg className="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Créez votre compte étudiant pour finaliser votre inscription à la session sélectionnée.</span>
+              <span>{t.confirmInfo}</span>
             </div>
           ) : null}
 
@@ -153,12 +155,12 @@ function StudentRegisterForm() {
           ) : null}
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
-            {field('fullName', 'Nom complet', 'text', 'name')}
-            {field('email', 'Adresse e-mail', 'email', 'email')}
-            {field('username', "Nom d'utilisateur", 'text', 'username')}
+            {field('fullName', t.fields.fullName, 'text', 'name')}
+            {field('email', t.fields.email, 'email', 'email')}
+            {field('username', t.fields.username, 'text', 'username')}
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('password', 'Mot de passe', 'password', 'new-password')}
-              {field('confirmPassword', 'Confirmation du mot de passe', 'password', 'new-password')}
+              {field('password', t.fields.password, 'password', 'new-password')}
+              {field('confirmPassword', t.fields.confirmPassword, 'password', 'new-password')}
             </div>
 
             <button
@@ -166,14 +168,14 @@ function StudentRegisterForm() {
               disabled={loading}
               className="w-full rounded-2xl bg-[var(--cj-blue)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--cj-blue-700)] disabled:opacity-70"
             >
-              {loading ? 'Creation en cours...' : 'Creer mon compte'}
+              {loading ? t.submitting : t.submit}
             </button>
           </form>
 
           <p className="mt-5 text-center text-sm text-slate-600">
-            Vous avez deja un compte ?{' '}
+            {t.hasAccount}{' '}
             <Link href={loginHref} className="font-semibold text-[var(--cj-blue)] hover:underline">
-              Se connecter
+              {t.loginLink}
             </Link>
           </p>
         </section>

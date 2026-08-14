@@ -8,25 +8,23 @@ export default async function GaleriePage({ params }: { params: Promise<{ locale
   const locale = (await params).locale === 'en' ? 'en' : 'fr'
   const isFr = locale === 'fr'
   const tHome = publicMessages.header[locale].home
-  const tTitle = isFr ? "Galerie Photos & Moments Forts" : "Photo Gallery & Highlights"
-  const tDesc = isFr ? "Explorez en images l'ambiance des ateliers pratiques, les remises de diplômes et les rencontres des promotions CJ DTC." : "Explore the atmosphere of practical workshops, graduations, and CJ DTC alumni meetings in pictures."
-  const tAcademic = isFr ? "Vie académique" : "Academic Life"
+  const tGallery = publicMessages.galerie[locale]
 
   const heroData = await getHeroData('galerie')
 
   const galleryItems = [
-    { title: isFr ? "Cérémonie de remise de certificats" : "Certificate Award Ceremony", category: "Certification", year: "2024", icon: Award },
-    { title: isFr ? "Atelier pratique en Management des RH" : "HR Management Practical Workshop", category: isFr ? "Formation Présentiel" : "On-site Training", year: "2024", icon: GraduationCap },
-    { title: isFr ? "Session Leadership & Masterclass" : "Leadership Session & Masterclass", category: "Leadership", year: "2023", icon: Users },
-    { title: isFr ? "Rencontre réseau & Alumni CJ DTC" : "Network & Alumni Meeting CJ DTC", category: isFr ? "Événement" : "Event", year: "2023", icon: Calendar },
+    { title: tGallery.items.certif, category: tGallery.categories.certification, year: "2024", icon: Award },
+    { title: tGallery.items.workshop, category: tGallery.categories.onsite, year: "2024", icon: GraduationCap },
+    { title: tGallery.items.leadership, category: tGallery.categories.leadership, year: "2023", icon: Users },
+    { title: tGallery.items.alumni, category: tGallery.categories.event, year: "2023", icon: Calendar },
   ]
 
   return (
     <div className="bg-slate-50 min-h-screen">
       <UnifiedHero
-        eyebrow={tAcademic}
-        title={tTitle}
-        description={tDesc}
+        eyebrow={tGallery.academicLife}
+        title={tGallery.title}
+        description={tGallery.description}
         image="/img/actu.jpeg"
         compact
         heroData={heroData}

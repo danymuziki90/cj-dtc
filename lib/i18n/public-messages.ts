@@ -1418,4 +1418,152 @@ export const publicMessages = {
         'Discover CJ DTC partners and collaborations that support training and employability across Africa.',
     },
   },
+  authLogin: {
+    fr: {
+      verified: 'Votre adresse e-mail a été vérifiée avec succès. Vous êtes maintenant connecté(e).',
+      registered: 'Un e-mail de confirmation vous a été envoyé. Veuillez vérifier votre boîte de réception.',
+      errors: {
+        InvalidToken: 'Le lien de vérification est invalide.',
+        ExpiredToken: 'Le lien de vérification a expiré.',
+        UserNotFound: "L'utilisateur associé à ce lien n'existe plus.",
+        MissingToken: 'Aucun jeton de vérification fourni.',
+        ServerError: 'Erreur lors de la vérification de votre compte.',
+        default: "Nom d'utilisateur ou mot de passe incorrect.",
+        network: "Erreur de réseau ou serveur indisponible. Veuillez réessayer."
+      },
+      title: 'Se connecter',
+      subtitle: "Utilisez votre nom d'utilisateur ou votre adresse e-mail.",
+      confirmInfo: "Connectez-vous ou créez votre compte étudiant pour poursuivre votre inscription à la session sélectionnée.",
+      usernameLabel: "Nom d'utilisateur ou adresse e-mail",
+      passwordLabel: 'Mot de passe',
+      loginBtn: 'Se connecter',
+      loginLoading: 'Connexion...',
+      createAccount: 'Créer un compte',
+      forgotPassword: 'Mot de passe oublié ?'
+    },
+    en: {
+      verified: 'Your email address has been successfully verified. You are now logged in.',
+      registered: 'A confirmation email has been sent to you. Please check your inbox.',
+      errors: {
+        InvalidToken: 'The verification link is invalid.',
+        ExpiredToken: 'The verification link has expired.',
+        UserNotFound: "The user associated with this link no longer exists.",
+        MissingToken: 'No verification token provided.',
+        ServerError: 'Error verifying your account.',
+        default: "Incorrect username or password.",
+        network: "Network error or server unavailable. Please try again."
+      },
+      title: 'Sign in',
+      subtitle: "Use your username or email address.",
+      confirmInfo: "Log in or create your student account to continue your registration for the selected session.",
+      usernameLabel: "Username or email address",
+      passwordLabel: 'Password',
+      loginBtn: 'Sign in',
+      loginLoading: 'Signing in...',
+      createAccount: 'Create an account',
+      forgotPassword: 'Forgot password?'
+    }
+  },
+  authRegister: {
+    fr: {
+      title: 'Créer un compte étudiant',
+      subtitle: 'Renseignez les informations de base de votre compte.',
+      confirmInfo: "Créez votre compte étudiant pour finaliser votre inscription à la session sélectionnée.",
+      errors: {
+        fullName: 'Le nom complet doit comporter au moins 2 caractères.',
+        email: 'Adresse e-mail invalide.',
+        username: "Le nom d'utilisateur doit contenir 3 à 40 caractères valides.",
+        password: 'Le mot de passe doit comporter au moins 8 caractères.',
+        confirmPassword: 'Les mots de passe ne correspondent pas.',
+        server: 'Impossible de créer le compte.',
+        network: 'Impossible de créer le compte pour le moment.'
+      },
+      fields: {
+        fullName: 'Nom complet',
+        email: 'Adresse e-mail',
+        username: "Nom d'utilisateur",
+        password: 'Mot de passe',
+        confirmPassword: 'Confirmation du mot de passe'
+      },
+      submit: 'Créer mon compte',
+      submitting: 'Création en cours...',
+      hasAccount: 'Vous avez déjà un compte ?',
+      loginLink: 'Se connecter'
+    },
+    en: {
+      title: 'Create a student account',
+      subtitle: 'Enter your basic account information.',
+      confirmInfo: "Create your student account to finalize your registration for the selected session.",
+      errors: {
+        fullName: 'Full name must be at least 2 characters.',
+        email: 'Invalid email address.',
+        username: 'Username must contain 3 to 40 valid characters.',
+        password: 'Password must be at least 8 characters long.',
+        confirmPassword: 'Passwords do not match.',
+        server: 'Unable to create the account.',
+        network: 'Unable to create the account at this time.'
+      },
+      fields: {
+        fullName: 'Full name',
+        email: 'Email address',
+        username: 'Username',
+        password: 'Password',
+        confirmPassword: 'Confirm password'
+      },
+      submit: 'Create my account',
+      submitting: 'Creating...',
+      hasAccount: 'Already have an account?',
+      loginLink: 'Sign in'
+    }
+  },
+  galerie: {
+    fr: {
+      title: "Galerie Photos & Moments Forts",
+      description: "Explorez en images l'ambiance des ateliers pratiques, les remises de diplômes et les rencontres des promotions CJ DTC.",
+      academicLife: "Vie académique",
+      items: {
+        certif: "Cérémonie de remise de certificats",
+        workshop: "Atelier pratique en Management des RH",
+        leadership: "Session Leadership & Masterclass",
+        alumni: "Rencontre réseau & Alumni CJ DTC"
+      },
+      categories: {
+        onsite: "Formation Présentiel",
+        event: "Événement",
+        certification: "Certification",
+        leadership: "Leadership"
+      }
+    },
+    en: {
+      title: "Photo Gallery & Highlights",
+      description: "Explore the atmosphere of practical workshops, graduations, and CJ DTC alumni meetings in pictures.",
+      academicLife: "Academic Life",
+      items: {
+        certif: "Certificate Award Ceremony",
+        workshop: "HR Management Practical Workshop",
+        leadership: "Leadership Session & Masterclass",
+        alumni: "Network & Alumni Meeting CJ DTC"
+      },
+      categories: {
+        onsite: "On-site Training",
+        event: "Event",
+        certification: "Certification",
+        leadership: "Leadership"
+      }
+    }
+  },
+  legal: {
+    fr: {
+      back: "Retour à l'accueil",
+      mentionsTitle: "Mentions Légales",
+      privacyTitle: "Politique de Confidentialité",
+      termsTitle: "Conditions d'Utilisation"
+    },
+    en: {
+      back: "Back to home",
+      mentionsTitle: "Legal Notice",
+      privacyTitle: "Privacy Policy",
+      termsTitle: "Terms of Use"
+    }
+  }
 } as const
