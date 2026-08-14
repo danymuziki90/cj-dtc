@@ -9,8 +9,11 @@ interface PublicTestimonialItem {
   name: string
   rating: number
   title: string | null
+  titleEn?: string | null
   content: string
+  contentEn?: string | null
   formation: string | null
+  formationEn?: string | null
   sessionDate: string | null
   createdAt: string
 }
@@ -38,6 +41,7 @@ export async function GET() {
         Formation: {
           select: {
             title: true,
+            titleEn: true,
           },
         },
         TrainingSession: {
@@ -81,8 +85,11 @@ export async function GET() {
         name: displayName,
         rating: t.rating ?? 5,
         title: t.title ?? null,
+        titleEn: (t as any).titleEn ?? null,
         content: t.content,
+        contentEn: t.contentEn ?? null,
         formation: t.Formation?.title ?? null,
+        formationEn: t.Formation?.titleEn ?? null,
         sessionDate,
         createdAt: t.createdAt.toISOString(),
       }

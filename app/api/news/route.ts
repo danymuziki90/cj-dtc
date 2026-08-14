@@ -40,12 +40,16 @@ function createNewsSlug(id: string, title?: string | null) {
 
 function mapNewsItem(item: any) {
   const excerpt = toPlainText(item.content)
+  const excerptEn = toPlainText(item.contentEn || item.content)
   return {
     id: item.id,
     slug: createNewsSlug(item.id, item.title),
     title: item.title,
+    titleEn: item.titleEn || null,
     content: item.content,
+    contentEn: item.contentEn || null,
     excerpt: excerpt.length > 170 ? `${excerpt.slice(0, 170).trimEnd()}...` : excerpt,
+    excerptEn: excerptEn.length > 170 ? `${excerptEn.slice(0, 170).trimEnd()}...` : excerptEn,
     published: item.published,
     author: item.author || 'Admin',
     category: item.category || DEFAULT_CATEGORY,

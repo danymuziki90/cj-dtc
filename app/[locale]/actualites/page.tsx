@@ -14,8 +14,11 @@ type NewsItem = {
   id: string
   slug: string
   title: string
+  titleEn?: string | null
   content: string
+  contentEn?: string | null
   excerpt: string
+  excerptEn?: string | null
   author: string
   category: string
   tags: string[]
@@ -300,7 +303,7 @@ function ActualitesContent() {
                     <time className="text-xs text-slate-500 font-medium font-opensans">{formatDate(item.publicationDate, locale)}</time>
                   </div>
 
-                  <h2 className="text-lg font-black leading-tight text-[var(--cj-blue)] font-montserrat">{item.title}</h2>
+                  <h2 className="text-lg font-black leading-tight text-[var(--cj-blue)] font-montserrat">{locale === 'fr' ? item.title : (item.titleEn || item.title)}</h2>
                   
                   {item.category?.toLowerCase() === 'emplois' && item.metadata?.location ? (
                     <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
@@ -312,10 +315,14 @@ function ActualitesContent() {
                     </div>
                   ) : null}
 
-                  <p className="mt-2 text-xs leading-relaxed text-slate-600 font-opensans">{item.excerpt || stripHtml(item.content).slice(0, 150)}...</p>
+                  <p className="mt-2 text-xs leading-relaxed text-slate-600 font-opensans">
+                    {locale === 'fr' 
+                      ? (item.excerpt || stripHtml(item.content).slice(0, 150)) 
+                      : (item.excerptEn || item.excerpt || stripHtml(item.contentEn || item.content).slice(0, 150))}...
+                  </p>
 
                   <div className="mt-4 text-xs font-bold text-[var(--cj-red)] uppercase tracking-wider flex items-center gap-1">
-                    <span>{item.category?.toLowerCase() === 'emplois' ? "Voir l'offre" : t.readMore}</span>
+                    <span>{item.category?.toLowerCase() === 'emplois' ? (locale === 'fr' ? "Voir l'offre" : 'View offer') : t.readMore}</span>
                     <span>→</span>
                   </div>
                 </div>

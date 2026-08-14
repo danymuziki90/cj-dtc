@@ -9,9 +9,12 @@ interface TestimonialItem {
   name: string
   rating: number
   title?: string | null
+  titleEn?: string | null
   content: string
+  contentEn?: string | null
   quote?: string
   formation?: string | null
+  formationEn?: string | null
   sessionDate?: string | null
   createdAt?: string
   role?: string
@@ -27,8 +30,11 @@ const FALLBACK_TESTIMONIALS: TestimonialItem[] = [
     name: 'Marie-Laure K.',
     rating: 5,
     title: 'Une reconversion réussie en Management RH',
+    titleEn: 'A successful career change in HR Management',
     content: "La formation en Management des Ressources Humaines m'a apporté des compétences pratiques directement applicables en entreprise. L'accompagnement personnalisé et les formateurs de haut niveau m'ont permis de décrocher mon poste de Responsable RH.",
+    contentEn: "The HR Management course provided me with practical skills directly applicable in the corporate world. The personalized support and high-level instructors helped me land my position as HR Manager.",
     formation: 'Management des Ressources Humaines (DRH)',
+    formationEn: 'Human Resources Management (HRM)',
     sessionDate: 'Session 2025-2026'
   },
   {
@@ -36,8 +42,11 @@ const FALLBACK_TESTIMONIALS: TestimonialItem[] = [
     name: 'Jean-Pierre M.',
     rating: 5,
     title: 'Excellence pédagogique et cas réels',
+    titleEn: 'Educational excellence and real-world cases',
     content: "Une expérience de formation exceptionnelle ! La concrétisation des concepts théoriques au travers de cas pratiques et de simulations réelles a fait toute la différence. Je recommande vivement CJ Development TC.",
+    contentEn: "An exceptional training experience! Applying theoretical concepts through practical cases and real simulations made all the difference. I highly recommend CJ Development TC.",
     formation: 'Gestion de Projet Agile & Scrum Master',
+    formationEn: 'Agile Project Management & Scrum Master',
     sessionDate: 'Session 2025'
   },
   {
@@ -45,8 +54,11 @@ const FALLBACK_TESTIMONIALS: TestimonialItem[] = [
     name: 'Sarah B.',
     rating: 5,
     title: 'Des outils modernes et un réseau solide',
+    titleEn: 'Modern tools and a strong network',
     content: "Le programme en Audit & Diagnostic Organisationnel est d'une grande rigueur. La communauté d'anciens et le réseau de partenaires m'ont permis d'élargir mes opportunités professionnelles dès la fin de ma certification.",
+    contentEn: "The Organizational Audit & Diagnostics program is highly rigorous. The alumni community and partner network helped me expand my professional opportunities right after my certification.",
     formation: 'Audit & Diagnostic Organisationnel',
+    formationEn: 'Organizational Audit & Diagnostics',
     sessionDate: 'Session 2026'
   }
 ]

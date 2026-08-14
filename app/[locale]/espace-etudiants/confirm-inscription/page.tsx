@@ -16,8 +16,10 @@ import {
 type Formation = {
   id: number
   title: string
+  titleEn?: string
   slug: string
   description?: string | null
+  descriptionEn?: string | null
   categorie?: string | null
 }
 
@@ -29,6 +31,7 @@ type TrainingSession = {
   startTime: string
   endTime: string
   location?: string | null
+  locationEn?: string | null
   format: string
   status?: string
   formation: Formation
@@ -48,9 +51,11 @@ type SubmitState = 'idle' | 'loading' | 'success' | 'duplicate' | 'error'
 type FormQuestion = {
   id: number
   label: string
+  labelEn?: string
   type: 'text_short' | 'text_long' | 'number' | 'date' | 'select' | 'radio' | 'checkbox' | 'yes_no' | 'file_upload'
   required: boolean
   helpText?: string | null
+  helpTextEn?: string | null
   options: string[]
   fileTypes?: string[] | null
 }
@@ -232,21 +237,22 @@ function ConfirmInscriptionContent() {
   }, [formationId, sessionId])
 
   const summary = useMemo(() => {
+    const isFr = locale === 'fr'
     if (!formation) return []
     return [
-      { label: 'Formation', value: formation.title, icon: GraduationCap },
+      { label: isFr ? 'Formation' : 'Course', value: isFr ? formation.title : (formation.titleEn || formation.title), icon: GraduationCap },
       {
-        label: 'Periode',
-        value: session ? `${formatDate(session.startDate)} - ${formatDate(session.endDate)}` : 'A confirmer',
+        label: isFr ? 'Période' : 'Period',
+        value: session ? `${formatDate(session.startDate)} - ${formatDate(session.endDate)}` : (isFr ? 'À confirmer' : 'TBD'),
         icon: CalendarDays,
       },
       {
-        label: 'Lieu / format',
-        value: session ? [session.location, session.format].filter(Boolean).join(' | ') : 'A confirmer',
+        label: isFr ? 'Lieu / format' : 'Location / format',
+        value: session ? [isFr ? session.location : (session.locationEn || session.location), session.format].filter(Boolean).join(' | ') : (isFr ? 'À confirmer' : 'TBD'),
         icon: MapPinIcon,
       },
     ]
-  }, [formation, session])
+  }, [formation, session, locale])
 
   async function confirmEnrollment(event: FormEvent) {
     event.preventDefault()
@@ -342,7 +348,7 @@ function ConfirmInscriptionContent() {
           icon={Loader2}
         >
           <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
-            Chargement...
+            {locale === 'fr' ? 'Chargement...' : 'Loading...'}
           </div>
         </StudentSectionCard>
       </StudentPageShell>
@@ -353,15 +359,15 @@ function ConfirmInscriptionContent() {
     return (
       <StudentPageShell
         locale={locale}
-        eyebrow="Espace etudiant"
-        title="Connectez-vous pour continuer"
-        description="Les demandes d'inscription sont maintenant rattachees a un compte etudiant unique."
+        eyebrow={locale === 'fr' ? 'Espace étudiant' : 'Student Space'}
+        title={locale === 'fr' ? 'Connectez-vous pour continuer' : 'Sign in to continue'}
+        description={locale === 'fr' ? "Les demandes d'inscription sont maintenant rattachées à un compte étudiant unique." : 'Registration requests are now linked to a unique student account.'}
         icon={ShieldCheck}
       >
         <StudentSectionCard
-          eyebrow="Compte requis"
-          title="Un compte etudiant est necessaire"
-          description="Connectez-vous ou creez votre compte. Vous reviendrez automatiquement sur cette confirmation."
+          eyebrow={locale === 'fr' ? 'Compte requis' : 'Account required'}
+          title={locale === 'fr' ? 'Un compte étudiant est nécessaire' : 'A student account is required'}
+          description={locale === 'fr' ? 'Connectez-vous ou créez votre compte. Vous reviendrez automatiquement sur cette confirmation.' : 'Sign in or create your account. You will automatically return to this confirmation.'}
           icon={ShieldCheck}
         >
           <div className="flex flex-wrap gap-3">
@@ -369,13 +375,13 @@ function ConfirmInscriptionContent() {
               href={`/${locale}/auth/student-login?next=${encodeURIComponent(nextPath)}`}
               className={studentPrimaryButtonClassName}
             >
-              Se connecter
+              {locale === 'fr' ? 'Se connecter' : 'Sign in'}
             </Link>
             <Link
               href={`/${locale}/auth/student-register?next=${encodeURIComponent(nextPath)}`}
               className={studentMutedButtonClassName}
             >
-              Creer un compte
+              {locale === 'fr' ? 'Créer un compte' : 'Create an account'}
             </Link>
           </div>
         </StudentSectionCard>
@@ -387,17 +393,17 @@ function ConfirmInscriptionContent() {
     return (
       <StudentPageShell
         locale={locale}
-        eyebrow="Espace etudiant"
-        title="Demande impossible"
-        description="La formation demandee n'a pas pu etre chargee."
+        eyebrow={locale === 'fr' ? 'Espace étudiant' : 'Student Space'}
+        title={locale === 'fr' ? 'Demande impossible' : 'Request unavailable'}
+        description={locale === 'fr' ? "La formation demandée n'a pas pu être chargée." : 'The requested course could not be loaded.'}
         icon={ShieldCheck}
       >
         <StudentEmptyState
-          title="Formation introuvable"
+          title={locale === 'fr' ? 'Formation introuvable' : 'Course not found'}
           description={error}
           action={
             <Link href={`/${locale}/formations#sessions`} className={studentPrimaryButtonClassName}>
-              Voir les formations
+              {locale === 'fr' ? 'Voir les formations' : 'View courses'}
             </Link>
           }
         />
@@ -408,22 +414,22 @@ function ConfirmInscriptionContent() {
   return (
     <StudentPageShell
       locale={locale}
-      eyebrow="Espace etudiant"
-      title="Confirmer votre inscription"
-      description="Aucune ressaisie n'est necessaire. La demande sera liee a votre compte et transmise a l'administration."
+      eyebrow={locale === 'fr' ? 'Espace étudiant' : 'Student Space'}
+      title={locale === 'fr' ? 'Confirmer votre inscription' : 'Confirm your registration'}
+      description={locale === 'fr' ? "Aucune ressaisie n'est nécessaire. La demande sera liée à votre compte et transmise à l'administration." : 'No re-entry required. The request will be linked to your account and sent to administration.'}
       icon={ShieldCheck}
       actions={
         <Link href={`/${locale}/formations#sessions`} className={studentSecondaryButtonClassName}>
           <ArrowLeft className="h-4 w-4" />
-          Changer de formation
+          {locale === 'fr' ? 'Changer de formation' : 'Change course'}
         </Link>
       }
     >
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <StudentSectionCard
-          eyebrow="Demande"
-          title={formation?.title || 'Formation selectionnee'}
-          description="Verifiez les informations puis confirmez. Le statut initial sera En attente."
+          eyebrow={locale === 'fr' ? 'Demande' : 'Request'}
+          title={locale === 'fr' ? formation?.title || 'Formation sélectionnée' : formation?.titleEn || formation?.title || 'Selected course'}
+          description={locale === 'fr' ? 'Vérifiez les informations puis confirmez. Le statut initial sera En attente.' : 'Verify the information and confirm. The initial status will be Pending.'}
           icon={GraduationCap}
         >
           <div className="grid gap-4">
@@ -445,28 +451,28 @@ function ConfirmInscriptionContent() {
         </StudentSectionCard>
 
         <StudentSectionCard
-          eyebrow="Confirmation"
-          title="Envoi a l'administration"
-          description="Votre profil etudiant fournit automatiquement nom, telephone et email."
+          eyebrow={locale === 'fr' ? 'Confirmation' : 'Confirmation'}
+          title={locale === 'fr' ? "Envoi à l'administration" : 'Sent to administration'}
+          description={locale === 'fr' ? 'Votre profil étudiant fournit automatiquement nom, téléphone et email.' : 'Your student profile automatically provides name, phone, and email.'}
           icon={CheckCircle2}
         >
           {submitState === 'success' ? (
             <StudentEmptyState
-              title="Demande envoyee"
-              description="Votre demande est maintenant en attente de validation dans le tableau de bord administrateur."
+              title={locale === 'fr' ? 'Demande envoyée' : 'Request sent'}
+              description={locale === 'fr' ? "Votre demande est maintenant en attente de validation dans le tableau de bord administrateur." : 'Your request is now pending validation in the admin dashboard.'}
               action={
                 <Link href={`/${locale}/espace-etudiants/mes-formations`} className={studentPrimaryButtonClassName}>
-                  Voir mes formations
+                  {locale === 'fr' ? 'Voir mes formations' : 'View my courses'}
                 </Link>
               }
             />
           ) : submitState === 'duplicate' ? (
             <StudentEmptyState
-              title="Demande deja existante"
-              description="Vous avez deja une demande active pour cette formation."
+              title={locale === 'fr' ? 'Demande déjà existante' : 'Request already exists'}
+              description={locale === 'fr' ? 'Vous avez déjà une demande active pour cette formation.' : 'You already have an active request for this course.'}
               action={
                 <Link href={`/${locale}/espace-etudiants/mes-formations`} className={studentPrimaryButtonClassName}>
-                  Suivre mes demandes
+                  {locale === 'fr' ? 'Suivre mes demandes' : 'Track my requests'}
                 </Link>
               }
             />
@@ -482,11 +488,11 @@ function ConfirmInscriptionContent() {
               {studentInfo && (
                 <div className="space-y-3 bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs">
                   <h4 className="font-bold text-slate-800 uppercase tracking-wider mb-1">
-                    Informations du profil étudiant
+                    {locale === 'fr' ? 'Informations du profil étudiant' : 'Student profile information'}
                   </h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <span className="text-slate-400 block font-semibold">Nom complet</span>
+                      <span className="text-slate-400 block font-semibold">{locale === 'fr' ? 'Nom complet' : 'Full name'}</span>
                       <span className="font-bold text-slate-850">{studentInfo.name}</span>
                     </div>
                     <div>
@@ -494,8 +500,8 @@ function ConfirmInscriptionContent() {
                       <span className="font-bold text-slate-850 break-all">{studentInfo.email}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block font-semibold">Identifiant</span>
-                      <span className="font-bold text-slate-850">{studentInfo.username || 'Non défini'}</span>
+                      <span className="text-slate-400 block font-semibold">{locale === 'fr' ? 'Identifiant' : 'Username'}</span>
+                      <span className="font-bold text-slate-850">{studentInfo.username || (locale === 'fr' ? 'Non défini' : 'Not set')}</span>
                     </div>
                   </div>
                 </div>
@@ -505,7 +511,7 @@ function ConfirmInscriptionContent() {
               {customQuestions.length > 0 && (
                 <div className="border-t border-slate-200 pt-5 mt-5 space-y-4">
                   <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3">
-                    Questions complémentaires
+                    {locale === 'fr' ? 'Questions complémentaires' : 'Additional questions'}
                   </h4>
                   {customQuestions.map((q) => {
                     const questionError = customErrors[q.id]
@@ -516,11 +522,11 @@ function ConfirmInscriptionContent() {
                     return (
                       <div key={q.id} className="space-y-1">
                         <label className="block text-xs font-bold text-slate-500">
-                          {q.label}
+                          {locale === 'fr' ? q.label : (q.labelEn || q.label)}
                           {q.required && <span className="text-red-500 ml-1">*</span>}
                         </label>
-                        {q.helpText && (
-                          <p className="text-[10px] text-slate-450 leading-relaxed">{q.helpText}</p>
+                        {(q.helpText || q.helpTextEn) && (
+                          <p className="text-[10px] text-slate-450 leading-relaxed">{locale === 'fr' ? q.helpText : (q.helpTextEn || q.helpText)}</p>
                         )}
 
                         {q.type === 'text_short' && (
@@ -571,7 +577,7 @@ function ConfirmInscriptionContent() {
                               questionError ? 'border-red-400 bg-red-50' : 'border-slate-200'
                             }`}
                           >
-                            <option value="">-- Choisir --</option>
+                            <option value="">{locale === 'fr' ? '-- Choisir --' : '-- Select --'}</option>
                             {q.options.map((opt) => (
                               <option key={opt} value={opt}>
                                 {opt}
@@ -619,14 +625,14 @@ function ConfirmInscriptionContent() {
                         )}
                         {q.type === 'yes_no' && (
                           <div className="flex gap-4 pt-1">
-                            {['Oui', 'Non'].map((opt) => (
+                            {(locale === 'fr' ? ['Oui', 'Non'] : ['Yes', 'No']).map((opt) => (
                               <label key={opt} className="flex items-center gap-2 cursor-pointer">
                                 <input
                                   type="radio"
                                   name={`q_${q.id}`}
                                   value={opt}
-                                  checked={val === opt}
-                                  onChange={() => setVal(opt)}
+                                  checked={val === opt || (locale === 'en' && val === 'Oui' && opt === 'Yes') || (locale === 'en' && val === 'Non' && opt === 'No')}
+                                  onChange={() => setVal(opt === 'Yes' ? 'Oui' : opt === 'No' ? 'Non' : opt)}
                                   className="h-3.5 w-3.5 border-slate-300 accent-[var(--cj-blue)]"
                                 />
                                 <span className="text-xs text-slate-650">{opt}</span>
@@ -652,7 +658,7 @@ function ConfirmInscriptionContent() {
                                 <div className="py-2 flex flex-col items-center">
                                   <Loader2 className="h-4 w-4 animate-spin text-[var(--cj-blue)] mb-1" />
                                   <p className="text-[10px] text-slate-450 font-bold">
-                                    Envoi du fichier...
+                                    {locale === 'fr' ? 'Envoi du fichier...' : 'Uploading file...'}
                                   </p>
                                 </div>
                               ) : fileObj ? (
@@ -671,20 +677,20 @@ function ConfirmInscriptionContent() {
                                     }
                                     className="text-red-500 hover:text-red-700 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-50 transition"
                                   >
-                                    Supprimer
+                                    {locale === 'fr' ? 'Supprimer' : 'Remove'}
                                   </button>
                                 </div>
                               ) : (
                                 <label className="cursor-pointer block py-1">
                                   <FileUp className="h-5 w-5 text-slate-400 mx-auto mb-1" />
                                   <span className="text-xs font-bold text-[var(--cj-blue)] hover:underline block mb-0.5">
-                                    Sélectionner un fichier
+                                    {locale === 'fr' ? 'Sélectionner un fichier' : 'Select a file'}
                                   </span>
                                   <p className="text-[9px] text-slate-450">
-                                    Formats :{' '}
+                                    {locale === 'fr' ? 'Formats :' : 'Formats:'}{' '}
                                     {q.fileTypes && q.fileTypes.length > 0
                                       ? q.fileTypes.map((t) => `.${t}`).join(', ')
-                                      : 'tous'}{' '}
+                                      : (locale === 'fr' ? 'tous' : 'all')}{' '}
                                     (max 10 Mo)
                                   </p>
                                   <input
@@ -716,14 +722,18 @@ function ConfirmInscriptionContent() {
               )}
 
               <div className="rounded-3xl border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] p-5 text-sm leading-6 text-slate-600">
-                En confirmant, une demande d'inscription sera creee avec le statut En attente. Aucune nouvelle fiche etudiant ne sera creee.
+                {locale === 'fr' 
+                  ? "En confirmant, une demande d'inscription sera créée avec le statut En attente. Aucune nouvelle fiche étudiant ne sera créée."
+                  : 'By confirming, a registration request will be created with Pending status. No new student record will be created.'}
               </div>
               <button
                 type="submit"
                 disabled={submitState === 'loading'}
                 className={`${studentPrimaryButtonClassName} w-full disabled:opacity-70`}
               >
-                {submitState === 'loading' ? 'Envoi en cours...' : "Confirmer l'inscription"}
+                {submitState === 'loading' 
+                  ? (locale === 'fr' ? 'Envoi en cours...' : 'Sending...') 
+                  : (locale === 'fr' ? "Confirmer l'inscription" : 'Confirm registration')}
               </button>
             </form>
           )}

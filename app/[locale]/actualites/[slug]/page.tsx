@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const excerpt = toPlainText(news.content || '').slice(0, 160)
 
   return generatePageMetadata({
-    title: news.title,
+    title: locale === 'fr' ? news.title : ((news as any).titleEn || news.title),
     description: excerpt || t.metadataFallbackDescription,
     keywords: ['news', news.title, news.category || 'CJ DTC'],
     image: news.imageData || '/logo.png',
@@ -83,14 +83,14 @@ export default async function NewsDetailPage({ params }: PageProps) {
         <Breadcrumbs
           items={[
             { label: t.breadcrumb, href: `/${locale}/actualites` },
-            { label: news.title },
+            { label: locale === 'fr' ? news.title : ((news as any).titleEn || news.title) },
           ]}
         />
 
         <article className="mt-6 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)]">
           {news.imageData ? (
             <div className="h-72 w-full bg-slate-100 sm:h-96">
-              <img src={news.imageData} alt={news.title} className="h-full w-full object-cover" />
+              <img src={news.imageData} alt={locale === 'fr' ? news.title : ((news as any).titleEn || news.title)} className="h-full w-full object-cover" />
             </div>
           ) : null}
 
@@ -105,7 +105,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
               </span>
             </div>
 
-            <h1 className="mt-5 text-3xl font-bold leading-tight text-cjblue sm:text-4xl lg:text-5xl">{news.title}</h1>
+            <h1 className="mt-5 text-3xl font-bold leading-tight text-cjblue sm:text-4xl lg:text-5xl">{locale === 'fr' ? news.title : ((news as any).titleEn || news.title)}</h1>
 
             {news.category?.toLowerCase() === 'emplois' && news.metadata ? (
               <div className="mt-6 flex flex-wrap gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
@@ -149,7 +149,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
               </div>
             ) : null}
 
-            <div className="prose prose-slate mt-8 max-w-none prose-headings:text-slate-950 prose-a:text-cjblue prose-strong:text-slate-950" dangerouslySetInnerHTML={{ __html: news.content || '' }} />
+            <div className="prose prose-slate mt-8 max-w-none prose-headings:text-slate-950 prose-a:text-cjblue prose-strong:text-slate-950" dangerouslySetInnerHTML={{ __html: locale === 'fr' ? (news.content || '') : ((news as any).contentEn || news.content || '') }} />
 
             <div className="mt-10 flex flex-wrap gap-3 border-t border-slate-200 pt-6">
               <Link
@@ -173,10 +173,10 @@ export default async function NewsDetailPage({ params }: PageProps) {
               </Link>
               {news.category?.toLowerCase() === 'emplois' && (news.metadata as any)?.contactEmail ? (
                 <a
-                  href={`mailto:${(news.metadata as any).contactEmail}?subject=Candidature : ${news.title}`}
+                  href={`mailto:${(news.metadata as any).contactEmail}?subject=${locale === 'fr' ? 'Candidature' : 'Application'} : ${locale === 'fr' ? news.title : ((news as any).titleEn || news.title)}`}
                   className="ml-auto inline-flex items-center gap-2 rounded-xl bg-green-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
                 >
-                  Postuler maintenant
+                  {locale === 'fr' ? 'Postuler maintenant' : 'Apply now'}
                 </a>
               ) : null}
             </div>
