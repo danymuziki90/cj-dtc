@@ -385,7 +385,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
         {children}
       </main>
 
-      {/* ── MOBILE OVERLAY MENU ─────────────────────────────────────────── */}
+      {/* ── MOBILE OVERLAY MENU (DRAWER) ─────────────────────────────── */}
       {mobileOpen && (
         <>
           <div
@@ -393,8 +393,14 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className="fixed inset-x-0 top-14 z-50 max-h-[calc(100svh-56px)] overflow-y-auto border-b border-slate-200 bg-white/98 dark:bg-slate-900/98 backdrop-blur-2xl shadow-2xl md:hidden animate-fade-in-up">
+          <div className="fixed inset-y-0 left-0 z-50 w-[280px] max-w-[calc(100vw-2rem)] overflow-y-auto border-r border-slate-200 bg-white/98 dark:bg-slate-900/98 backdrop-blur-2xl shadow-2xl md:hidden animate-fade-in-right flex flex-col">
             <div className="p-4 space-y-4">
+              <div className="flex items-center justify-between md:hidden">
+                <span className="text-[14px] font-black tracking-tight text-[var(--admin-primary)]">Admin Menu</span>
+                <button onClick={() => setMobileOpen(false)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+                  <XIcon className="h-5 w-5" />
+                </button>
+              </div>
               {/* Recherche globale sur Mobile */}
               <div className="md:hidden">
                 <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Recherche rapide</p>

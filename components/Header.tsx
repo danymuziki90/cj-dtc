@@ -700,7 +700,7 @@ export default function Header() {
         aria-label="Menu principal de navigation"
         aria-hidden={!open}
         className={`
-          fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col justify-between lg:hidden
+          fixed inset-0 z-[100] flex h-[100dvh] w-full flex-col justify-between lg:hidden
           text-slate-100 transition-all duration-300 ease-out overflow-hidden
           ${open ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-95'}
         `}

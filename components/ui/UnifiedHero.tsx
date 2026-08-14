@@ -170,7 +170,7 @@ export default function UnifiedHero({
 
   return (
     <section 
-      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home lg:min-h-[680px] lg:pt-36 lg:pb-24' : 'hero-page'} ${effectiveCompact ? 'min-h-[360px] lg:min-h-[440px] pt-32 pb-12' : 'min-h-[420px] lg:min-h-[520px] pt-32 pb-14'}`}
+      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[500px] lg:min-h-[680px] pt-28 pb-16 lg:pt-36 lg:pb-24' : 'hero-page'} ${effectiveCompact ? 'min-h-[280px] lg:min-h-[440px] pt-24 pb-8 lg:pt-32 lg:pb-12' : 'min-h-[320px] lg:min-h-[520px] pt-24 pb-10 lg:pt-32 lg:pb-14'}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >

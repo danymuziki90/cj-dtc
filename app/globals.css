@@ -177,6 +177,8 @@ body {
   background: linear-gradient(180deg, #ffffff 0%, var(--cj-blue-50) 100%);
   color: #111827;
   line-height: 1.6;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Typography Scale - Consistent Visual Hierarchy */
