@@ -118,13 +118,13 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
   }
 
   return (
-    <section className="bg-slate-50 py-20 sm:py-24 border-b border-slate-200 overflow-hidden relative">
+    <section className="bg-slate-50 py-12 sm:py-16 lg:py-20 border-b border-slate-200 overflow-hidden relative">
       {/* Texture de fond subtile */}
       <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-30 pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header de section */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 space-y-3">
           <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-50/80 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-[var(--cj-blue)] backdrop-blur-sm">
             <Quote className="w-3.5 h-3.5 text-[var(--cj-blue)]" />
             {isFr ? 'Témoignages & Avis d’Étudiants' : 'Student Testimonials & Reviews'}

@@ -4,6 +4,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Apparition progressive des sections publiques, déclenchée au viewport. */
+[data-fade-up="pending"] {
+  opacity: 0;
+  transform: translate3d(0, 30px, 0);
+  transition: opacity 620ms cubic-bezier(0.22, 1, 0.36, 1) var(--fade-up-delay, 0ms),
+    transform 620ms cubic-bezier(0.22, 1, 0.36, 1) var(--fade-up-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-fade-up="visible"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-fade-up="pending"],
+  [data-fade-up="visible"] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Colors */
 :root {
   --cj-blue: #0A4FB3;

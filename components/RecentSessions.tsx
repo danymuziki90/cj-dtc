@@ -149,13 +149,13 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
 
   if (loading) {
     return (
-      <section className="bg-gradient-to-b from-white to-gray-50 py-16">
+      <section className="bg-gradient-to-b from-white to-gray-50 py-12 sm:py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <div className="mx-auto mb-4 h-10 w-1/2 animate-pulse rounded bg-gray-200" />
-            <div className="mx-auto h-6 w-3/4 animate-pulse rounded bg-gray-200" />
+          <div className="mb-8 sm:mb-10 text-center">
+            <div className="mx-auto mb-3 h-8 w-1/2 animate-pulse rounded bg-gray-200" />
+            <div className="mx-auto h-5 w-3/4 animate-pulse rounded bg-gray-200" />
           </div>
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
             {[1, 2, 3].map((item) => (
               <div key={item} className="overflow-hidden rounded-xl bg-white shadow-md">
                 <div className="h-48 w-full animate-pulse bg-gray-200" />
@@ -176,14 +176,14 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
   if (sessions.length === 0) return null
 
   return (
-    <section className={hideHeader ? '' : 'bg-gradient-to-b from-white to-gray-50 py-16'}>
+    <section className={hideHeader ? '' : 'bg-gradient-to-b from-white to-gray-50 py-12 sm:py-16 lg:py-20'}>
       <div className={hideHeader ? '' : 'container mx-auto px-4'}>
         {!hideHeader && (
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold text-cjblue font-montserrat">
+          <div className="mb-8 sm:mb-10 text-center">
+            <h2 className="mb-3 text-3xl font-bold text-cjblue font-montserrat sm:text-4xl">
               {locale === 'fr' ? 'Sessions ouvertes' : 'Open Sessions'}
             </h2>
-            <p className="mx-auto max-w-2xl text-lg text-gray-600 font-opensans">
+            <p className="mx-auto max-w-2xl text-base text-gray-600 font-opensans sm:text-lg">
               {locale === 'fr' 
                 ? 'Découvrez nos sessions de formation actuellement ouvertes aux inscriptions.' 
                 : 'Discover our training sessions currently open for registration.'}

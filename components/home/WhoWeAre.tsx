@@ -18,14 +18,14 @@ export default function WhoWeAre({ locale }: WhoWeAreProps) {
   ]
 
   return (
-    <section className="bg-white py-20 sm:py-28 overflow-hidden">
+    <section className="bg-white py-12 sm:py-16 lg:py-20 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 lg:items-center">
           
           {/* Text Content */}
-          <div className="space-y-8 relative z-10">
+          <div className="space-y-6 relative z-10">
             <div>
-              <span className="inline-flex items-center rounded-full bg-[var(--cj-blue)]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-4">
+              <span className="inline-flex items-center rounded-full bg-[var(--cj-blue)]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-3">
                 {isFr ? 'Qui sommes-nous' : 'Who We Are'}
               </span>
               <h2 className="text-3xl font-black text-slate-950 sm:text-4xl lg:text-5xl font-montserrat leading-tight">
@@ -36,7 +36,7 @@ export default function WhoWeAre({ locale }: WhoWeAreProps) {
               </h2>
             </div>
             
-            <div className="space-y-4 text-base sm:text-lg text-slate-600 font-opensans leading-relaxed">
+            <div className="space-y-3 text-base sm:text-lg text-slate-600 font-opensans leading-relaxed">
               <p>
                 {isFr 
                   ? "CJ Development Training Center est un pôle d'excellence dédié à la formation professionnelle continue, à l'accompagnement des dirigeants et à l'insertion professionnelle." 
@@ -49,7 +49,7 @@ export default function WhoWeAre({ locale }: WhoWeAreProps) {
               </p>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-2">
               <Link 
                 href={`/${locale}/about`}
                 className="inline-flex items-center gap-2 text-sm font-bold text-[var(--cj-blue)] hover:text-[var(--cj-red)] transition-colors group"
@@ -76,11 +76,11 @@ export default function WhoWeAre({ locale }: WhoWeAreProps) {
               
               {/* Floating Badge */}
               <div className="absolute bottom-6 left-6 right-6">
-                <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-5 shadow-lg">
-                  <p className="text-white font-bold font-montserrat text-lg">
+                <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-4 sm:p-5 shadow-lg">
+                  <p className="text-white font-bold font-montserrat text-base sm:text-lg">
                     {isFr ? "L'Excellence comme standard" : "Excellence as a standard"}
                   </p>
-                  <p className="text-white/80 text-sm mt-1">
+                  <p className="text-white/80 text-xs sm:text-sm mt-1">
                     {isFr ? "Formations accréditées et reconnues." : "Accredited and recognized training."}
                   </p>
                 </div>
@@ -95,15 +95,15 @@ export default function WhoWeAre({ locale }: WhoWeAreProps) {
         </div>
 
         {/* Stats Grid - "Notre Impact" */}
-        <div className="mt-20 overflow-hidden rounded-3xl bg-[var(--cj-blue)] px-8 py-12 text-white shadow-xl relative">
+        <div className="mt-12 sm:mt-14 overflow-hidden rounded-3xl bg-[var(--cj-blue)] px-6 py-8 sm:px-8 sm:py-10 text-white shadow-xl relative">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(227,6,19,0.15),transparent_50%)] pointer-events-none" />
-          <div className="relative z-10 grid grid-cols-2 gap-8 md:grid-cols-4">
+          <div className="relative z-10 grid grid-cols-2 gap-6 md:grid-cols-4 sm:gap-8">
             {stats.map((stat, i) => (
               <div key={i} className="text-center group">
-                <p className="text-4xl font-black text-white font-montserrat transition-colors group-hover:text-blue-300">
+                <p className="text-3xl sm:text-4xl font-black text-white font-montserrat transition-colors group-hover:text-blue-300">
                   {stat.value}
                 </p>
-                <p className="mt-2 text-xs font-bold uppercase tracking-wider text-blue-200 font-opensans">
+                <p className="mt-1.5 text-xs font-bold uppercase tracking-wider text-blue-200 font-opensans">
                   {stat.label}
                 </p>
               </div>

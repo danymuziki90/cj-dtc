@@ -47,12 +47,12 @@ export default function NewsAndOpportunities({ locale }: NewsAndOpportunitiesPro
 
   if (loading) {
     return (
-      <section className="bg-slate-50 py-20 border-b border-slate-200">
+      <section className="bg-slate-50 py-12 sm:py-16 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="h-10 w-48 mx-auto bg-slate-200 animate-pulse rounded-md mb-8" />
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div className="h-64 bg-slate-200 animate-pulse rounded-3xl" />
-            <div className="h-64 bg-slate-200 animate-pulse rounded-3xl" />
+          <div className="h-8 w-48 mx-auto bg-slate-200 animate-pulse rounded-md mb-6" />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="h-56 bg-slate-200 animate-pulse rounded-3xl" />
+            <div className="h-56 bg-slate-200 animate-pulse rounded-3xl" />
           </div>
         </div>
       </section>
@@ -63,11 +63,11 @@ export default function NewsAndOpportunities({ locale }: NewsAndOpportunitiesPro
   if (articles.length === 0 && jobs.length === 0) return null
 
   return (
-    <section className="bg-white py-20 sm:py-28 border-b border-slate-200">
+    <section className="bg-white py-12 sm:py-16 lg:py-20 border-b border-slate-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        <div className="mb-16 text-center max-w-3xl mx-auto">
-          <span className="inline-flex items-center rounded-full border border-[var(--cj-blue)]/20 bg-[var(--cj-blue)]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-4">
+        <div className="mb-10 sm:mb-12 text-center max-w-3xl mx-auto">
+          <span className="inline-flex items-center rounded-full border border-[var(--cj-blue)]/20 bg-[var(--cj-blue)]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-3">
             {isFr ? 'Actualités & Opportunités' : 'News & Opportunities'}
           </span>
           <h2 className="text-3xl font-black text-slate-950 sm:text-4xl font-montserrat leading-tight">
@@ -78,13 +78,13 @@ export default function NewsAndOpportunities({ locale }: NewsAndOpportunitiesPro
           </h2>
         </div>
 
-        <div className="grid gap-12 lg:grid-cols-2">
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
           
           {/* ACTUS */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-bold flex items-center gap-2 text-slate-900 font-montserrat">
-                <Newspaper className="h-6 w-6 text-[var(--cj-blue)]" />
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h3 className="text-xl sm:text-2xl font-bold flex items-center gap-2 text-slate-900 font-montserrat">
+                <Newspaper className="h-5 w-5 sm:h-6 sm:w-6 text-[var(--cj-blue)]" />
                 {isFr ? 'À la une' : 'Latest News'}
               </h3>
               <Link href={`/${locale}/actualites`} className="text-sm font-bold text-[var(--cj-blue)] hover:text-[var(--cj-red)] transition-colors flex items-center gap-1">

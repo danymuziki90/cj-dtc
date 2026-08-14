@@ -188,7 +188,7 @@ export default function UnifiedHero({
 
   return (
     <section 
-      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[500px] lg:min-h-[680px] pt-28 pb-16 lg:pt-36 lg:pb-24' : 'hero-page'} ${effectiveCompact ? 'min-h-[280px] lg:min-h-[440px] pt-24 pb-8 lg:pt-32 lg:pb-12' : 'min-h-[320px] lg:min-h-[520px] pt-24 pb-10 lg:pt-32 lg:pb-14'}`}
+      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[440px] sm:min-h-[480px] lg:min-h-[560px] pt-24 pb-8 sm:pt-28 sm:pb-10 lg:pt-32 lg:pb-12' : 'hero-page'} ${effectiveCompact ? 'min-h-[220px] sm:min-h-[260px] lg:min-h-[320px] pt-18 pb-6 sm:pt-22 sm:pb-8 lg:pt-26 lg:pb-8' : 'min-h-[280px] lg:min-h-[420px] pt-20 pb-8 lg:pt-28 lg:pb-12'}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -246,7 +246,7 @@ export default function UnifiedHero({
           </button>
 
           {/* Progress Dots */}
-          <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2.5 rounded-full border border-white/15 bg-black/40 px-5 py-2.5 shadow-xl backdrop-blur-md">
+          <div className="absolute bottom-4 sm:bottom-5 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 shadow-xl backdrop-blur-md">
             {slides.map((slide, index) => (
               <button
                 key={`dot-${index}`}
@@ -398,7 +398,7 @@ export default function UnifiedHero({
                 <motion.div
                   custom={0.4}
                   variants={fadeUp}
-                  className={isPageHero ? 'mt-8 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 p-5 text-white shadow-xl' : 'mt-8 pt-8 border-t border-white/10'}
+                  className={isPageHero ? (effectiveCompact ? 'mt-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-3.5 sm:p-4 text-white shadow-lg' : 'mt-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 p-5 text-white shadow-xl') : 'mt-6 pt-6 border-t border-white/10'}
                 >
                   {children}
                 </motion.div>

@@ -61,11 +61,11 @@ export default function ExpertiseServices({ locale }: ExpertiseServicesProps) {
   }
 
   return (
-    <section className="bg-slate-50 py-20 sm:py-24 border-b border-slate-200">
+    <section className="bg-slate-50 py-12 sm:py-16 lg:py-20 border-b border-slate-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        <div className="mb-16 text-center max-w-3xl mx-auto">
-          <span className="inline-flex items-center rounded-full border border-[var(--cj-red)]/20 bg-red-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-red)] mb-4">
+        <div className="mb-10 sm:mb-12 text-center max-w-3xl mx-auto">
+          <span className="inline-flex items-center rounded-full border border-[var(--cj-red)]/20 bg-red-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-red)] mb-3">
             {isFr ? 'Nos Domaines d\'Expertise' : 'Our Areas of Expertise'}
           </span>
           <h2 className="text-3xl font-black text-slate-950 sm:text-4xl lg:text-5xl font-montserrat leading-tight">
@@ -74,29 +74,29 @@ export default function ExpertiseServices({ locale }: ExpertiseServicesProps) {
               {isFr ? "votre développement." : "your growth."}
             </span>
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-slate-600 font-opensans leading-relaxed">
+          <p className="mt-3 text-base sm:text-lg text-slate-600 font-opensans leading-relaxed">
             {isFr 
               ? 'Nous intervenons sur toute la chaîne de valeur du capital humain, de la formation initiale au conseil stratégique en entreprise.' 
               : 'We operate across the entire human capital value chain, from initial training to strategic corporate consulting.'}
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           {services.map((service) => (
             <Link 
               key={service.id} 
               href={service.link}
-              className="group flex flex-col rounded-3xl border border-slate-200 bg-white p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-slate-300"
+              className="group flex flex-col rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300"
             >
-              <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border transition-colors duration-300 ${colorMap[service.color]}`}>
+              <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border transition-colors duration-300 ${colorMap[service.color]}`}>
                 {service.icon}
               </div>
               
-              <h3 className="mb-3 text-xl font-bold text-slate-900 font-montserrat group-hover:text-[var(--cj-blue)] transition-colors">
+              <h3 className="mb-2 text-lg sm:text-xl font-bold text-slate-900 font-montserrat group-hover:text-[var(--cj-blue)] transition-colors">
                 {service.title}
               </h3>
               
-              <p className="mb-8 flex-1 text-sm leading-relaxed text-slate-600 font-opensans">
+              <p className="mb-6 flex-1 text-xs sm:text-sm leading-relaxed text-slate-600 font-opensans">
                 {service.description}
               </p>
               
