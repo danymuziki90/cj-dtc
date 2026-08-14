@@ -8,6 +8,7 @@ import {
 } from '@/lib/emplois/shared'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 // ─── GET /api/admin/system/emplois/[id] ───────────────────────────────────────
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -87,25 +88,28 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const body: { action: string } = await request.json()
 
   if (body.action === 'publish') {
+    const meta = (typeof existing.metadata === 'object' && !Array.isArray(existing.metadata) && existing.metadata !== null) ? existing.metadata : {}
     const row = await prisma.news.update({
       where: { id },
-      data: { published: true, metadata: { ...(existing.metadata as any), status: 'published' } },
+      data: { published: true, metadata: { ...meta, status: 'published' } },
     })
     return NextResponse.json({ emploi: mapEmploi(row) })
   }
 
   if (body.action === 'unpublish') {
+    const meta = (typeof existing.metadata === 'object' && !Array.isArray(existing.metadata) && existing.metadata !== null) ? existing.metadata : {}
     const row = await prisma.news.update({
       where: { id },
-      data: { published: false, metadata: { ...(existing.metadata as any), status: 'draft' } },
+      data: { published: false, metadata: { ...meta, status: 'draft' } },
     })
     return NextResponse.json({ emploi: mapEmploi(row) })
   }
 
   if (body.action === 'archive') {
+    const meta = (typeof existing.metadata === 'object' && !Array.isArray(existing.metadata) && existing.metadata !== null) ? existing.metadata : {}
     const row = await prisma.news.update({
       where: { id },
-      data: { published: false, metadata: { ...(existing.metadata as any), status: 'archived' } },
+      data: { published: false, metadata: { ...meta, status: 'archived' } },
     })
     return NextResponse.json({ emploi: mapEmploi(row) })
   }

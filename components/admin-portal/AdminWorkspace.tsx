@@ -173,22 +173,22 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
       <div className="pointer-events-none fixed inset-0 opacity-20 [background-image:linear-gradient(rgba(15,23,42,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.05)_1px,transparent_1px)] [background-size:32px_32px]" />
 
       {/* â”€â”€ HEADER PRINCIPAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl shadow-sm">
+      <header className="sticky top-0 z-40 border-b border-white/20 bg-[var(--admin-primary)] text-white shadow-lg shadow-blue-950/20 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-3 px-4 md:px-6">
 
           {/* Logo */}
           <Link href="/admin/dashboard" className="flex shrink-0 items-center gap-2.5 mr-2">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/30 bg-white/10 shadow-sm ring-1 ring-white/10">
               <img src="/logo.png" alt="CJ DTC" className="h-6 w-6 object-contain" />
             </div>
             <div className="hidden sm:block">
-              <p className="text-sm font-black tracking-tight text-slate-950 leading-none">CJ Development</p>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-450">Administration</p>
+              <p className="text-sm font-black tracking-tight text-white leading-none">CJ Development</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Administration</p>
             </div>
           </Link>
 
           {/* Separator */}
-          <div className="hidden h-6 w-px bg-slate-200 md:block" />
+          <div className="hidden h-6 w-px bg-white/25 md:block" />
 
           {/* Search bar */}
           <div className="hidden max-w-xs flex-1 md:block lg:max-w-sm">
@@ -206,7 +206,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                 <Link
                   key={action.href}
                   href={action.href}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:border-[var(--admin-primary-200)] hover:bg-[var(--admin-primary-50)] hover:text-[var(--admin-primary)]"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:border-white/50 hover:bg-white/20"
                 >
                   <PlusIcon className="h-3 w-3" />
                   {action.label}
@@ -218,7 +218,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
           {/* Notifications badge */}
           <Link
             href="/admin/notifications"
-            className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-[var(--admin-primary-200)] hover:text-[var(--admin-primary)]"
+            className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/10 text-white shadow-sm transition hover:border-white/50 hover:bg-white/20"
             aria-label="Notifications"
           >
             <BellRing className="h-4 w-4" />
@@ -233,13 +233,13 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
           <button
             type="button"
             onClick={toggleDarkMode}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/10 text-white shadow-sm transition hover:border-white/50 hover:bg-white/20"
             aria-label={darkMode ? 'Passer en mode clair' : 'Passer en mode sombre'}
           >
             {darkMode ? (
               <Sun className="h-4 w-4 text-amber-500" />
             ) : (
-              <Moon className="h-4 w-4 text-slate-600" />
+              <Moon className="h-4 w-4 text-white" />
             )}
           </button>
 
@@ -248,14 +248,14 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
             <button
               type="button"
               onClick={() => setProfileOpen((v) => !v)}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1.5 shadow-sm transition hover:border-slate-300"
+              className="flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-2 py-1.5 shadow-sm transition hover:border-white/50 hover:bg-white/20"
               aria-expanded={profileOpen}
             >
               <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--admin-primary)] to-[var(--admin-primary-700)] text-[10px] font-black text-white shadow-sm">
                 A
               </span>
-              <span className="hidden text-xs font-bold text-slate-850 sm:block">Admin</span>
-              <ChevronDown className={`h-3 w-3 text-slate-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+              <span className="hidden text-xs font-bold text-white sm:block">Admin</span>
+              <ChevronDown className={`h-3 w-3 text-white/80 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {profileOpen && (
@@ -301,7 +301,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
           <button
             type="button"
             onClick={() => setMobileOpen((v) => !v)}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-750 shadow-sm md:hidden"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/10 text-white shadow-sm transition hover:border-white/50 hover:bg-white/20 md:hidden"
             aria-label="Menu"
           >
             {mobileOpen ? <XIcon className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -311,7 +311,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
 
       {/* ── Navigation Horizontale Adaptative Sur Deux Lignes ────────────────────────── */}
       <nav
-        className="sticky top-14 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl hidden md:block dark:bg-slate-900/90 dark:border-slate-800 shadow-sm"
+        className="sticky top-14 z-30 hidden border-b border-white/20 bg-[var(--admin-primary)] text-white shadow-md shadow-blue-950/15 backdrop-blur-xl md:block"
         aria-label="Navigation principale"
       >
         <div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-2 space-y-1.5">
@@ -329,8 +329,8 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                     className={[
                       'group relative flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs lg:text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
                       active
-                        ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm ring-1 ring-[var(--admin-primary-200)]/60 dark:bg-blue-950/50 dark:text-blue-300 dark:ring-blue-800 font-bold'
-                        : 'text-slate-650 hover:bg-slate-100/80 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 hover:-translate-y-0.5',
+                        ? 'bg-white text-[var(--admin-primary)] shadow-sm ring-1 ring-white/70 font-bold'
+                        : 'text-white/85 hover:bg-white/15 hover:text-white hover:-translate-y-0.5',
                     ].join(' ')}
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
@@ -344,13 +344,13 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
             </div>
 
             {/* Date courante à droite de la 1ère ligne */}
-            <div className="ml-auto shrink-0 hidden xl:block pl-3 border-l border-slate-200/60 dark:border-slate-800">
-              <p className="text-[11px] font-semibold capitalize text-slate-500 dark:text-slate-400">{currentDate}</p>
+            <div className="ml-auto shrink-0 hidden border-l border-white/25 pl-3 xl:block">
+              <p className="text-[11px] font-semibold capitalize text-white/75">{currentDate}</p>
             </div>
           </div>
 
           {/* Ligne 2 : Ressources & Management */}
-          <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 dark:border-slate-800/60 pt-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 border-t border-white/20 pt-1.5">
             <div className="flex flex-1 flex-wrap items-center gap-1 sm:gap-1.5">
               {navRow2.map((item) => {
                 const active = isActivePath(pathname, item.href)
@@ -363,8 +363,8 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
                     className={[
                       'group relative flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs lg:text-[12.5px] font-semibold transition-all duration-200 whitespace-nowrap',
                       active
-                        ? 'bg-[var(--admin-primary-50)] text-[var(--admin-primary)] shadow-sm ring-1 ring-[var(--admin-primary-200)]/60 dark:bg-blue-950/50 dark:text-blue-300 dark:ring-blue-800 font-bold'
-                        : 'text-slate-650 hover:bg-slate-100/80 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 hover:-translate-y-0.5',
+                        ? 'bg-white text-[var(--admin-primary)] shadow-sm ring-1 ring-white/70 font-bold'
+                        : 'text-white/85 hover:bg-white/15 hover:text-white hover:-translate-y-0.5',
                     ].join(' ')}
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />

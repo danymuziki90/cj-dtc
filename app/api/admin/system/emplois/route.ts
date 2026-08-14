@@ -8,6 +8,7 @@ import {
 } from '@/lib/emplois/shared'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 // ─── GET /api/admin/system/emplois ────────────────────────────────────────────
 export async function GET(request: NextRequest) {
