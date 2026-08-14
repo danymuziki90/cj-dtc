@@ -9,10 +9,21 @@ export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const legacySlideSelect = {
-  id: true, heroId: true, order: true, imageUrl: true, imageAlt: true,
-  eyebrowFr: true, eyebrowEn: true, titleFr: true, titleEn: true,
-  descriptionFr: true, descriptionEn: true, badgeFr: true, badgeEn: true,
-  createdAt: true, updatedAt: true,
+  id: true,
+  heroId: true,
+  order: true,
+  imageUrl: true,
+  imageAlt: true,
+  eyebrowFr: true,
+  eyebrowEn: true,
+  titleFr: true,
+  titleEn: true,
+  descriptionFr: true,
+  descriptionEn: true,
+  badgeFr: true,
+  badgeEn: true,
+  createdAt: true,
+  updatedAt: true,
 } as const
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif']
@@ -31,8 +42,17 @@ export async function GET(
   const { id } = await params
 
   try {
+    const hero = await prisma.heroSection.findFirst({
+      where: { OR: [{ id }, { pageKey: id }] },
+      select: { id: true },
+    })
+
+    if (!hero) {
+      return NextResponse.json({ error: 'Section Hero introuvable' }, { status: 404 })
+    }
+
     const slides = await prisma.heroSlide.findMany({
-      where: { heroId: id },
+      where: { heroId: hero.id },
       orderBy: { order: 'asc' },
       select: legacySlideSelect,
     })
@@ -56,13 +76,15 @@ export async function POST(
   const { id } = await params
 
   try {
-    const hero = await prisma.heroSection.findUnique({
-      where: { id },
+    const hero = await prisma.heroSection.findFirst({
+      where: { OR: [{ id }, { pageKey: id }] },
       select: { id: true, pageKey: true, imageUrl: true, defaultImageUrl: true },
     })
     if (!hero) {
-      return NextResponse.json({ error: 'Hero not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Section Hero introuvable' }, { status: 404 })
     }
+
+    const targetHeroId = hero.id
 
     const contentType = request.headers.get('content-type') ?? ''
     if (contentType.includes('multipart/form-data')) {
@@ -72,65 +94,105 @@ export async function POST(
         return NextResponse.json({ error: 'Image invalide ou supérieure à 5 Mo.' }, { status: 400 })
       }
 
-      const lastSlide = await prisma.heroSlide.findFirst({ where: { heroId: id }, orderBy: { order: 'desc' }, select: { order: true } })
+      const lastSlide = await prisma.heroSlide.findFirst({
+        where: { heroId: targetHeroId },
+        orderBy: { order: 'desc' },
+        select: { order: true },
+      })
       const buffer = Buffer.from(await file.arrayBuffer())
       const ext = file.name.split('.').pop() || 'jpg'
       const imageUrl = await uploadToR2(buffer, `hero-slide-${hero.pageKey}-${Date.now()}.${ext}`, 'heroes', file.type)
       const slide = await prisma.heroSlide.create({
         data: {
-          heroId: id,
+          heroId: targetHeroId,
           imageUrl,
           titleFr: '',
           titleEn: '',
           order: lastSlide ? lastSlide.order + 1 : 0,
-        }, select: legacySlideSelect,
+        },
+        select: legacySlideSelect,
       })
       revalidateTag(`hero-${hero.pageKey}`)
       return NextResponse.json({ slide: { ...slide, isActive: true } }, { status: 201 })
     }
 
     const body = await request.json()
-    const { imageUrl, imageAlt, eyebrowFr, eyebrowEn, titleFr, titleEn,
-            descriptionFr, descriptionEn, badgeFr, badgeEn, ctaLabelFr, ctaLabelEn, ctaHref, order, isActive } = body
+    const {
+      imageUrl,
+      imageAlt,
+      eyebrowFr,
+      eyebrowEn,
+      titleFr,
+      titleEn,
+      descriptionFr,
+      descriptionEn,
+      badgeFr,
+      badgeEn,
+      ctaLabelFr,
+      ctaLabelEn,
+      ctaHref,
+      order,
+      isActive,
+    } = body
 
     const fallbackImageUrl = hero.imageUrl || hero.defaultImageUrl
     if (!imageUrl && !fallbackImageUrl) {
-      return NextResponse.json({ error: 'Ajoutez une image principale ou indiquez une URL d’image pour ce slide.' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Ajoutez une image principale ou indiquez une URL d’image pour ce slide.' },
+        { status: 400 }
+      )
     }
 
     // Calculer l'ordre si non fourni
     const lastSlide = await prisma.heroSlide.findFirst({
-      where: { heroId: id },
+      where: { heroId: targetHeroId },
       orderBy: { order: 'desc' },
       select: { order: true },
     })
     const slideOrder = order ?? (lastSlide ? lastSlide.order + 1 : 0)
 
-    const slide = await prisma.heroSlide.create({
-      data: {
-        heroId: id,
-        imageUrl: imageUrl || fallbackImageUrl!,
-        imageAlt,
-        eyebrowFr,
-        eyebrowEn,
-        titleFr: titleFr || 'Nouveau slide',
-        titleEn: titleEn || 'New slide',
-        descriptionFr,
-        descriptionEn,
-        badgeFr,
-        badgeEn,
-        order: slideOrder,
-      }, select: legacySlideSelect,
-    })
+    let slide: any
+    try {
+      slide = await prisma.heroSlide.create({
+        data: {
+          heroId: targetHeroId,
+          imageUrl: imageUrl || fallbackImageUrl!,
+          imageAlt,
+          eyebrowFr,
+          eyebrowEn,
+          titleFr: titleFr || 'Nouveau slide',
+          titleEn: titleEn || 'New slide',
+          descriptionFr,
+          descriptionEn,
+          badgeFr,
+          badgeEn,
+          order: slideOrder,
+        },
+        select: legacySlideSelect,
+      })
+    } catch (error) {
+      console.warn('[POST /api/admin/heroes/[id]/slides] Fallback slide create:', error)
+      slide = await prisma.heroSlide.create({
+        data: {
+          heroId: targetHeroId,
+          imageUrl: imageUrl || fallbackImageUrl!,
+          imageAlt,
+          titleFr: titleFr || 'Nouveau slide',
+          titleEn: titleEn || 'New slide',
+          order: slideOrder,
+        },
+        select: { id: true, heroId: true, order: true, imageUrl: true, titleFr: true, titleEn: true },
+      })
+    }
 
     revalidateTag(`hero-${hero.pageKey}`)
 
     return NextResponse.json({ slide: { ...slide, isActive: true } }, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[POST /api/admin/heroes/[id]/slides]', error)
     if (error instanceof R2StorageError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 503 })
     }
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: error?.message || 'Erreur interne du serveur' }, { status: 500 })
   }
 }

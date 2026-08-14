@@ -188,7 +188,7 @@ export default function UnifiedHero({
 
   return (
     <section 
-      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[440px] sm:min-h-[480px] lg:min-h-[560px] pt-24 pb-8 sm:pt-28 sm:pb-10 lg:pt-32 lg:pb-12' : 'hero-page'} ${effectiveCompact ? 'min-h-[220px] sm:min-h-[260px] lg:min-h-[320px] pt-18 pb-6 sm:pt-22 sm:pb-8 lg:pt-26 lg:pb-8' : 'min-h-[280px] lg:min-h-[420px] pt-20 pb-8 lg:pt-28 lg:pb-12'}`}
+      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[460px] sm:min-h-[500px] lg:min-h-[560px] py-10 sm:py-12 lg:py-16' : 'hero-page'} ${effectiveCompact ? 'min-h-[220px] sm:min-h-[250px] lg:min-h-[280px] py-6 sm:py-8 lg:py-10' : 'min-h-[260px] lg:min-h-[340px] py-8 sm:py-10 lg:py-12'}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -207,7 +207,7 @@ export default function UnifiedHero({
                 alt={slide.imageAlt || slide.titleFr || 'Hero Image'}
                 fill
                 priority={index === 0}
-                className={`object-cover ${
+                className={`object-cover object-center ${
                   index === currentIndex && !shouldReduceMotion ? 'scale-105 transition-transform duration-[8000ms] ease-out' : 'scale-100'
                 }`}
                 sizes="100vw"

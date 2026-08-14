@@ -24,12 +24,15 @@ export async function PUT(
   const { id, slideId } = await params
 
   try {
-    const existingSlide = await prisma.heroSlide.findFirst({
-      where: { id: slideId, heroId: id },
-      select: { id: true },
+    const existingSlide = await prisma.heroSlide.findUnique({
+      where: { id: slideId },
+      // Ne sélectionner que les champs nécessaires : les anciennes bases ne
+      // possèdent pas forcément les colonnes récentes du carrousel.
+      select: { id: true, heroId: true, hero: { select: { id: true, pageKey: true } } },
     })
-    if (!existingSlide) {
-      return NextResponse.json({ error: 'Slide not found' }, { status: 404 })
+
+    if (!existingSlide || existingSlide.heroId !== id) {
+      return NextResponse.json({ error: 'Slide introuvable' }, { status: 404 })
     }
 
     // Vérifier si c'est un upload multipart ou JSON
@@ -61,48 +64,82 @@ export async function PUT(
         data: { imageUrl },
       })
 
-      const hero = await prisma.heroSection.findUnique({ where: { id } })
-      if (hero) revalidateTag(`hero-${hero.pageKey}`)
+      const pageKey = existingSlide.hero?.pageKey
+      if (pageKey) {
+        try { revalidateTag(`hero-${pageKey}`, 'max') } catch {}
+      }
 
       return NextResponse.json({ slide })
     }
 
     // Mise à jour des champs texte
     const body = await request.json()
-    const { imageUrl, imageAlt, eyebrowFr, eyebrowEn, titleFr, titleEn,
-            descriptionFr, descriptionEn, badgeFr, badgeEn, ctaLabelFr, ctaLabelEn, ctaHref, order, isActive } = body
+    const {
+      imageUrl,
+      imageAlt,
+      eyebrowFr,
+      eyebrowEn,
+      titleFr,
+      titleEn,
+      descriptionFr,
+      descriptionEn,
+      badgeFr,
+      badgeEn,
+      ctaLabelFr,
+      ctaLabelEn,
+      ctaHref,
+      order,
+      isActive,
+    } = body
 
-    const slide = await prisma.heroSlide.update({
-      where: { id: slideId },
-      data: {
-        ...(imageUrl !== undefined && { imageUrl }),
-        ...(imageAlt !== undefined && { imageAlt }),
-        ...(eyebrowFr !== undefined && { eyebrowFr }),
-        ...(eyebrowEn !== undefined && { eyebrowEn }),
-        ...(titleFr !== undefined && { titleFr }),
-        ...(titleEn !== undefined && { titleEn }),
-        ...(descriptionFr !== undefined && { descriptionFr }),
-        ...(descriptionEn !== undefined && { descriptionEn }),
-        ...(badgeFr !== undefined && { badgeFr }),
-        ...(badgeEn !== undefined && { badgeEn }),
-        ...(ctaLabelFr !== undefined && { ctaLabelFr }),
-        ...(ctaLabelEn !== undefined && { ctaLabelEn }),
-        ...(ctaHref !== undefined && { ctaHref }),
-        ...(order !== undefined && { order }),
-        ...(isActive !== undefined && { isActive }),
-      },
-    })
+    let slide: any
+    try {
+      slide = await prisma.heroSlide.update({
+        where: { id: slideId },
+        data: {
+          ...(imageUrl !== undefined && { imageUrl: imageUrl || '' }),
+          ...(imageAlt !== undefined && { imageAlt }),
+          ...(eyebrowFr !== undefined && { eyebrowFr }),
+          ...(eyebrowEn !== undefined && { eyebrowEn }),
+          ...(titleFr !== undefined && { titleFr: titleFr || '' }),
+          ...(titleEn !== undefined && { titleEn: titleEn || '' }),
+          ...(descriptionFr !== undefined && { descriptionFr }),
+          ...(descriptionEn !== undefined && { descriptionEn }),
+          ...(badgeFr !== undefined && { badgeFr }),
+          ...(badgeEn !== undefined && { badgeEn }),
+          ...(ctaLabelFr !== undefined && { ctaLabelFr }),
+          ...(ctaLabelEn !== undefined && { ctaLabelEn }),
+          ...(ctaHref !== undefined && { ctaHref }),
+          ...(order !== undefined && { order: Number(order) || 0 }),
+          ...(isActive !== undefined && { isActive: Boolean(isActive) }),
+        },
+      })
+    } catch (error) {
+      console.warn('[PUT /api/admin/heroes/[id]/slides/[slideId]] Fallback update without extended columns:', error)
+      slide = await prisma.heroSlide.update({
+        where: { id: slideId },
+        data: {
+          ...(imageUrl !== undefined && { imageUrl: imageUrl || '' }),
+          ...(imageAlt !== undefined && { imageAlt }),
+          ...(titleFr !== undefined && { titleFr: titleFr || '' }),
+          ...(titleEn !== undefined && { titleEn: titleEn || '' }),
+          ...(order !== undefined && { order: Number(order) || 0 }),
+        },
+      })
+    }
 
-    const hero = await prisma.heroSection.findUnique({ where: { id } })
-    if (hero) revalidateTag(`hero-${hero.pageKey}`)
+    const pageKey = existingSlide.hero?.pageKey
+    if (pageKey) {
+      try { revalidateTag(`hero-${pageKey}`, 'max') } catch {}
+    }
 
     return NextResponse.json({ slide })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[PUT /api/admin/heroes/[id]/slides/[slideId]]', error)
     if (error instanceof R2StorageError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 503 })
     }
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: error?.message || 'Erreur interne du serveur' }, { status: 500 })
   }
 }
 
@@ -119,24 +156,29 @@ export async function DELETE(
   const { id, slideId } = await params
 
   try {
-    const existingSlide = await prisma.heroSlide.findFirst({
-      where: { id: slideId, heroId: id },
-      select: { id: true },
+    const existingSlide = await prisma.heroSlide.findUnique({
+      where: { id: slideId },
+      // `include` charge toutes les colonnes HeroSlide, dont certaines peuvent
+      // manquer si la migration carousel n'a pas encore été appliquée.
+      select: { id: true, heroId: true, hero: { select: { pageKey: true } } },
     })
-    if (!existingSlide) {
-      return NextResponse.json({ error: 'Slide not found' }, { status: 404 })
+
+    if (!existingSlide || existingSlide.heroId !== id) {
+      return NextResponse.json({ error: 'Slide introuvable' }, { status: 404 })
     }
 
     await prisma.heroSlide.delete({
       where: { id: slideId },
+      select: { id: true },
     })
 
-    const hero = await prisma.heroSection.findUnique({ where: { id } })
-    if (hero) revalidateTag(`hero-${hero.pageKey}`)
+    if (existingSlide.hero?.pageKey) {
+      try { revalidateTag(`hero-${existingSlide.hero.pageKey}`, 'max') } catch {}
+    }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[DELETE /api/admin/heroes/[id]/slides/[slideId]]', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: error?.message || 'Erreur interne du serveur' }, { status: 500 })
   }
 }

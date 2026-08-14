@@ -34,16 +34,17 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
   const pathname = usePathname() ?? ''
   const isAdmin = pathname.includes('/admin')
   const isEspaceEtudiant = pathname.includes('/espace-etudiants')
-  const isHome = isHomePage(pathname)
 
   return (
     <>
       {!isAdmin && <Header />}
       {/* 
-        Home page: no top padding so Hero slides under transparent header.
-        Internal pages: pt-[70px] lg:pt-[105px] so content stays below the solid blue header.
+        Positionnement propre sous la navbar fixe :
+        - Mobile & tablette : pt-[70px] (hauteur de la navbar mobile)
+        - Desktop : lg:pt-[108px] (hauteur de la top-bar + main-bar desktop)
+        Ainsi, toutes les Hero Sections commencent exactement sous la navbar sans masquer le haut des images.
       */}
-      <main className={isHome ? '' : 'pt-[70px] lg:pt-[105px]'}>
+      <main className={isAdmin ? '' : 'pt-[70px] lg:pt-[108px]'}>
         {isAdmin || isEspaceEtudiant ? (
           children
         ) : (
