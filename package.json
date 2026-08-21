@@ -11,6 +11,7 @@
     "postinstall": "prisma generate",
     "prebuild": "node scripts/check-node-version.js",
     "build": "prisma generate && prisma db push --accept-data-loss && node scripts/next-build-with-memory.js",
+    "build:docker": "prisma generate && node scripts/next-build-with-memory.js",
     "start": "next start",
     "lint": "eslint .",
     "deploy": "vercel --prod --no-wait",
