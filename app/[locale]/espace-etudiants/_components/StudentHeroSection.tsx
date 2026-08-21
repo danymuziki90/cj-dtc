@@ -74,7 +74,7 @@ export function StudentHeroSection({
 
       {/* Content */}
       <div
-        className="relative flex min-h-[140px] flex-col justify-end p-4 sm:min-h-[200px] sm:p-7 lg:min-h-[220px] lg:p-8"
+        className="relative flex min-h-[140px] flex-col justify-end p-4 sm:min-h-[200px] sm:p-7 lg:min-h-[360px] lg:p-10 xl:min-h-[400px]"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
