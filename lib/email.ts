@@ -1,4 +1,4 @@
-﻿import * as nodemailer from 'nodemailer'
+import * as nodemailer from 'nodemailer'
 
 export type EmailMessage = {
   to: string | string[]
@@ -157,34 +157,23 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
           <td>
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; background: #ffffff; border: 1px solid #e2e8f0;">
 
+              <!-- Header noir -->
               <tr>
-                <td style="padding: 24px 32px 20px 32px; border-bottom: 3px solid #1a1a2e;">
-                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                    <tr>
-                      <td>
-                        <div style="font-size: 20px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.02em;">CJ DTC</div>
-                        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;">CJ Development Training Center</div>
-                      </td>
-                      <td style="text-align: right; vertical-align: middle;">
-                        <div style="display: inline-block; padding: 4px 10px; background: #f1f5f9; color: #475569; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-                          ${escapeHtml(options.eyebrow)}
-                        </div>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding: 32px 32px 0 32px;">
-                  <div style="font-size: 24px; line-height: 1.3; font-weight: 700; color: #0f172a;">
+                <td style="padding: 36px 36px 32px 36px; background: #0f172a;">
+                  <div style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px;">
+                    ${escapeHtml(options.eyebrow)}
+                  </div>
+                  <div style="font-size: 26px; line-height: 1.25; font-weight: 700; color: #ffffff; margin-bottom: 12px;">
                     ${escapeHtml(options.title)}
+                  </div>
+                  <div style="font-size: 14px; line-height: 1.7; color: #94a3b8;">
+                    CJ DTC vous accompagne avec un message clair, professionnel et directement exploitable.
                   </div>
                 </td>
               </tr>
 
               <tr>
-                <td style="padding: 14px 32px 16px 32px;">
+                <td style="padding: 28px 36px 16px 36px;">
                   <div style="font-size: 15px; line-height: 1.8; color: #475569;">
                     ${options.introHtml}
                   </div>
@@ -194,13 +183,13 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
               ${badgeBlock}
 
               <tr>
-                <td style="padding: 0 32px;">
+                <td style="padding: 0 36px;">
                   <div style="border-top: 1px solid #f1f5f9;"></div>
                 </td>
               </tr>
 
               <tr>
-                <td style="padding: 20px 32px 0 32px;">
+                <td style="padding: 20px 36px 0 36px;">
                   ${options.bodyHtml}
                 </td>
               </tr>
@@ -445,29 +434,15 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
             <td>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; background: #ffffff; border: 1px solid #e2e8f0;">
 
+                <!-- Header noir -->
                 <tr>
-                  <td style="padding: 24px 32px 20px 32px; border-bottom: 3px solid #1a1a2e;">
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                      <tr>
-                        <td>
-                          <div style="font-size: 20px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.02em;">CJ DTC</div>
-                          <div style="font-size: 10px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;">CJ Development Training Center</div>
-                        </td>
-                        <td style="text-align: right; vertical-align: middle;">
-                          <div style="display: inline-block; padding: 4px 10px; background: #f1f5f9; color: #475569; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">Espace Etudiant</div>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding: 32px 32px 0 32px;">
-                    <div style="font-size: 22px; line-height: 1.35; font-weight: 700; color: #0f172a;">
+                  <td style="padding: 36px 36px 32px 36px; background: #0f172a;">
+                    <div style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px;">Espace Etudiant</div>
+                    <div style="font-size: 26px; line-height: 1.25; font-weight: 700; color: #ffffff; margin-bottom: 12px;">
                       Bonjour ${safeFullName},
                     </div>
-                    <div style="margin-top: 10px; font-size: 15px; line-height: 1.8; color: #475569;">
-                      Votre compte etudiant CJ DTC est maintenant actif${safeSessionTitle ? ` pour la session <strong style="color: #1a1a2e;">${safeSessionTitle}</strong>` : ''}. Retrouvez ci-dessous vos identifiants de connexion.
+                    <div style="font-size: 14px; line-height: 1.7; color: #94a3b8;">
+                      Votre compte etudiant CJ DTC est maintenant actif${safeSessionTitle ? ` pour la session <strong style="color: #e2e8f0;">${safeSessionTitle}</strong>` : ''}. Retrouvez ci-dessous vos identifiants de connexion.
                     </div>
                   </td>
                 </tr>
@@ -475,13 +450,13 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
                 ${sessionBadge}
 
                 <tr>
-                  <td style="padding: 16px 32px 0 32px;">
+                  <td style="padding: 16px 36px 0 36px;">
                     <div style="border-top: 1px solid #f1f5f9;"></div>
                   </td>
                 </tr>
 
                 <tr>
-                  <td style="padding: 16px 32px 0 32px;">
+                  <td style="padding: 16px 36px 0 36px;">
                     <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 16px 20px;">
                       <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">Nom d'utilisateur</div>
                       <div style="font-size: 18px; line-height: 1.5; color: #0f172a; font-weight: 700;">${safeUsername}</div>
