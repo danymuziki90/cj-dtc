@@ -268,12 +268,6 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
         description={isFr
           ? "Accompagnez le développement des compétences de vos équipes grâce à des formations adaptées aux besoins de votre organisation. Leadership, RH, management et performance."
           : "Support your teams' skills development with training tailored to your organisation's needs. Leadership, HR, management and performance."}
-        badges={[
-          { label: isFr ? 'Formations sur mesure'          : 'Custom training',       color: 'blue'   },
-          { label: isFr ? 'Leadership & Management'        : 'Leadership & Management', color: 'green'  },
-          { label: isFr ? 'Développement des compétences'  : 'Skills development',    color: 'purple' },
-          { label: isFr ? 'Accompagnement RH'              : 'HR advisory',            color: 'amber'  },
-        ]}
         ctas={[
           { label: t.heroCta1, href: '#contact', variant: 'primary'   },
           { label: t.heroCta2, href: '#solutions', variant: 'secondary' },
@@ -285,7 +279,24 @@ export default function EntreprisesClientPage({ locale, heroData }: { locale: Lo
         heroData={heroData}
         locale={locale}
         compact
-      />
+      >
+        {/* 4 badges — une seule ligne sur desktop, colonne sur mobile */}
+        <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-nowrap sm:justify-center sm:gap-3">
+          {([
+            { label: isFr ? 'Formations sur mesure'         : 'Custom training',        cls: 'bg-blue-500/20 border-blue-300/30 text-blue-100'   },
+            { label: isFr ? 'Leadership & Management'       : 'Leadership & Management', cls: 'bg-emerald-500/20 border-emerald-300/30 text-emerald-100' },
+            { label: isFr ? 'Développement des compétences' : 'Skills development',     cls: 'bg-purple-500/20 border-purple-300/30 text-purple-100' },
+            { label: isFr ? 'Accompagnement RH'             : 'HR advisory',            cls: 'bg-amber-500/20 border-amber-300/30 text-amber-100'  },
+          ] as const).map((b, i) => (
+            <span
+              key={i}
+              className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-sm ${b.cls}`}
+            >
+              {b.label}
+            </span>
+          ))}
+        </div>
+      </UnifiedHero>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
 
