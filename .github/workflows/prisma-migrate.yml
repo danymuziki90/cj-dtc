@@ -5,11 +5,11 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
     inputs:
-      recover_failed_submission_migration:
-        description: Recover the previously failed submission migration before applying migrations
+      recover_failed_migration:
+        description: Failed migration name to recover before applying migrations (leave blank normally)
         required: false
-        default: false
-        type: boolean
+        default: ''
+        type: string
 
 jobs:
   migrate:
@@ -27,11 +27,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Recover failed submission migration
-        if: ${{ inputs.recover_failed_submission_migration }}
+      - name: Recover an explicitly approved failed migration
+        if: ${{ inputs.recover_failed_migration != '' }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: npx prisma migrate resolve --rolled-back 20260724220000_submission_unique_per_assignment
+          MIGRATION_NAME: ${{ inputs.recover_failed_migration }}
+        run: |
+          case "$MIGRATION_NAME" in
+            20260724220000_submission_unique_per_assignment|20260814120000_hero_carousel_controls)
+              npx prisma migrate resolve --rolled-back "$MIGRATION_NAME"
+              ;;
+            *)
+              echo "Unsupported migration recovery request: $MIGRATION_NAME"
+              exit 1
+              ;;
+          esac
 
       - name: Apply Prisma migrations
         env:
