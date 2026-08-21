@@ -80,6 +80,25 @@ function formToPayload(f: FormState, status: string) {
 
 const MAX_IMG = 2 * 1024 * 1024
 
+// ─── CSS classes (module-level constants — stable across renders) ──────────────
+const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[var(--cj-blue)] focus:ring-1 focus:ring-[var(--cj-blue)]'
+const selectCls = inputCls
+const textareaCls = `${inputCls} resize-y min-h-[90px]`
+
+// ─── Field wrapper (module-level — must NOT be defined inside a component) ─────
+// Defining it inside would cause React to treat it as a new component type on
+// every render, unmounting/remounting the focused input and losing the cursor.
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-semibold text-slate-600 uppercase tracking-wide">
+        {label}{required && <span className="ml-0.5 text-red-500">*</span>}
+      </label>
+      {children}
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function AdminEmploisPage() {
   const [emplois, setEmplois]       = useState<Emploi[]>([])
@@ -194,21 +213,7 @@ export default function AdminEmploisPage() {
     reader.readAsDataURL(file)
   }
 
-  // ─── Input helpers ─────────────────────────────────────────────────────────
-  function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
-    return (
-      <div>
-        <label className="mb-1 block text-xs font-semibold text-slate-600 uppercase tracking-wide">
-          {label}{required && <span className="ml-0.5 text-red-500">*</span>}
-        </label>
-        {children}
-      </div>
-    )
-  }
-
-  const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[var(--cj-blue)] focus:ring-1 focus:ring-[var(--cj-blue)]'
-  const selectCls = inputCls
-  const textareaCls = `${inputCls} resize-y min-h-[90px]`
+  // ─── Input helpers removed — Field and CSS consts are now module-level ────────
 
   return (
     <AdminShell title="Offres d'emploi">
