@@ -54,6 +54,7 @@ export default async function LocalizedSessionsPage({ params }: { params: Promis
         heroData={heroData}
         locale={loc}
         compact
+        desktopTall
       />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <StudentAuthProvider>
