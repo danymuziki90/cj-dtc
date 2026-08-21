@@ -188,7 +188,7 @@ export default function UnifiedHero({
 
   return (
     <section 
-      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[460px] sm:min-h-[500px] lg:min-h-[560px] py-10 sm:py-12 lg:py-16' : 'hero-page'} ${effectiveCompact ? 'min-h-[220px] sm:min-h-[250px] lg:min-h-[280px] py-6 sm:py-8 lg:py-10' : 'min-h-[260px] lg:min-h-[340px] py-8 sm:py-10 lg:py-12'}`}
+      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[460px] sm:min-h-[500px] lg:min-h-[560px] py-10 sm:py-12 lg:py-16' : 'hero-page'} ${effectiveCompact ? 'min-h-[300px] sm:min-h-[350px] lg:min-h-[400px] py-6 sm:py-8 lg:py-10' : 'min-h-[340px] sm:min-h-[400px] lg:min-h-[450px] py-8 sm:py-10 lg:py-12'}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
