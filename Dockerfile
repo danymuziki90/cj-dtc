@@ -3,6 +3,8 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
+# Provide a dummy DATABASE_URL so Prisma schema validation passes during build
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN npm ci --prefer-offline --no-audit
 COPY . .
 RUN npm run build
