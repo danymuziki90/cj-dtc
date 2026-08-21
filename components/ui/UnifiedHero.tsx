@@ -217,7 +217,10 @@ export default function UnifiedHero({
         ))}
 
         {/* ── Gradient Overlays ── */}
-        <div className="absolute inset-0 z-20 bg-gradient-to-r from-[#000d1f]/95 via-[#000d1f]/72 to-[#000d1f]/42" style={{ opacity: effectiveOpacity / 100 }} />
+        {isHomeHero
+          ? <div className="absolute inset-0 z-20 bg-gradient-to-r from-[#000d1f]/95 via-[#000d1f]/72 to-[#000d1f]/42" style={{ opacity: effectiveOpacity / 100 }} />
+          : <div className="absolute inset-0 z-20 bg-[#000d1f]" style={{ opacity: effectiveOpacity / 100 }} />
+        }
         {isHomeHero && (
           <>
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#000d1f]/80 via-[#000d1f]/40 to-transparent z-20 pointer-events-none lg:hidden" />
@@ -270,7 +273,10 @@ export default function UnifiedHero({
         <AnimatePresence mode="wait">
           <motion.div 
             key={currentIndex}
-            className="grid gap-10 lg:grid-cols-12 lg:items-center"
+            className={isHomeHero
+              ? 'grid gap-10 lg:grid-cols-12 lg:items-center'
+              : 'flex flex-col items-center text-center'
+            }
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -278,19 +284,19 @@ export default function UnifiedHero({
             {/* Left Column (Text & CTAs) */}
             <div className={`space-y-6 ${
               isHomeHero
-                ? 'lg:col-span-8'
-                : showPageVisual
-                ? 'lg:col-span-7'
-                : isSlideshow && (currentSlide.badgeFr || currentSlide.badgeEn)
-                ? 'lg:col-span-7'
-                : 'lg:col-span-9'
+                ? isSlideshow && (currentSlide.badgeFr || currentSlide.badgeEn)
+                  ? 'lg:col-span-7'
+                  : 'lg:col-span-8'
+                : 'w-full max-w-3xl mx-auto'
             }`}>
               {/* Breadcrumb */}
               {(breadcrumbs.length > 0) && (
                 <motion.nav
                   aria-label="Breadcrumb"
                   custom={0} variants={fadeIn}
-                  className="mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium text-white/75"
+                  className={`mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium text-white/75 ${
+                    isPageHero ? 'justify-center' : ''
+                  }`}
                 >
                   <Link href={homeHref} className="inline-flex items-center gap-1 transition-colors hover:text-white">
                     <Home className="h-3.5 w-3.5" />{homeLabel}
@@ -310,7 +316,9 @@ export default function UnifiedHero({
               {/* Eyebrow */}
               {(isHomeHero || (isFr ? contentSlide.eyebrowFr : contentSlide.eyebrowEn)) && (
                 <motion.div custom={0.05} variants={fadeUp}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-sm backdrop-blur-sm"
+                  className={`inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-sm backdrop-blur-sm ${
+                    isPageHero ? 'self-center' : ''
+                  }`}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)] animate-pulse" />
                   {isHomeHero ? 'CJ DEVELOPMENT' : (isFr ? contentSlide.eyebrowFr : contentSlide.eyebrowEn)}
@@ -319,18 +327,24 @@ export default function UnifiedHero({
 
               {/* Title */}
               <motion.h1 custom={0.12} variants={fadeUp}
-                className="hero-title-unified max-w-4xl text-white drop-shadow-md"
+                className={`hero-title-unified text-white drop-shadow-md ${
+                  isPageHero ? 'max-w-3xl mx-auto' : 'max-w-4xl'
+                }`}
               >
                 {isFr ? contentSlide.titleFr : contentSlide.titleEn}
               </motion.h1>
               {(isHomeHero || isPageHero) && (
-                <motion.div custom={0.16} variants={fadeUp} className="h-1 w-16 rounded-full bg-[var(--cj-red)]" />
+                <motion.div custom={0.16} variants={fadeUp} className={`h-1 w-16 rounded-full bg-[var(--cj-red)] ${
+                  isPageHero ? 'mx-auto' : ''
+                }`} />
               )}
 
               {/* Description */}
               {(isFr ? contentSlide.descriptionFr : contentSlide.descriptionEn) && (
                 <motion.p custom={0.2} variants={fadeUp}
-                  className="hero-home-description max-w-2xl text-base leading-relaxed font-opensans text-white/90 drop-shadow-sm sm:text-lg"
+                  className={`hero-home-description text-base leading-relaxed font-opensans text-white/90 drop-shadow-sm sm:text-lg ${
+                    isPageHero ? 'max-w-2xl mx-auto' : 'max-w-2xl'
+                  }`}
                 >
                   {isFr ? contentSlide.descriptionFr : contentSlide.descriptionEn}
                 </motion.p>
@@ -338,7 +352,9 @@ export default function UnifiedHero({
 
               {/* Badges (For Single Image Mode mostly) */}
               {!isSlideshow && effectiveBadges.length > 0 && (
-                <motion.div custom={0.28} variants={fadeUp} className="flex flex-wrap gap-2 pt-2">
+                <motion.div custom={0.28} variants={fadeUp} className={`flex flex-wrap gap-2 pt-2 ${
+                  isPageHero ? 'justify-center' : ''
+                }`}>
                   {effectiveBadges.map((b, i) => (
                     <span key={i} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-sm ${BADGE_COLORS[b.color || 'blue']}`}>
                       {b.label}
@@ -349,7 +365,9 @@ export default function UnifiedHero({
 
               {/* Actions CTAs */}
               {(slideCtas.length > 0 || isSlideshow) && (
-                <motion.div custom={0.35} variants={fadeUp} className="flex flex-col gap-4 sm:flex-row pt-4">
+                <motion.div custom={0.35} variants={fadeUp} className={`flex flex-col gap-4 sm:flex-row pt-4 ${
+                  isPageHero ? 'justify-center' : ''
+                }`}>
                   {slideCtas.length > 0 ? (
                     slideCtas.map((cta, i) => (
                       cta.variant === 'secondary'
