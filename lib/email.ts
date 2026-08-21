@@ -119,7 +119,7 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
     ? `
         <tr>
           <td style="padding: 24px 32px 0 32px;">
-            <a href="${escapeHtml(options.action.href)}" style="display: inline-block; border-radius: 16px; background: #E53935; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 22px;">
+            <a href="${escapeHtml(options.action.href)}" style="display: inline-block; border-radius: 6px; background: #1a1a2e; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 28px; letter-spacing: 0.02em;">
               ${escapeHtml(options.action.label)}
             </a>
           </td>
@@ -129,8 +129,8 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
   const actionHintBlock = options.actionHintHtml
     ? `
         <tr>
-          <td style="padding: 14px 32px 0 32px;">
-            <div style="font-size: 13px; line-height: 1.7; color: #64748b;">
+          <td style="padding: 12px 32px 0 32px;">
+            <div style="font-size: 13px; line-height: 1.7; color: #94a3b8;">
               ${options.actionHintHtml}
             </div>
           </td>
@@ -148,31 +148,44 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
     : ''
   const footerHtml =
     options.footerHtml ||
-    `Besoin d'aide ? Contactez-nous via <a href="mailto:${supportEmail}" style="color: #003b9d; text-decoration: none; font-weight: 700;">${supportEmail}</a>.<br />Cet e-mail vous a ete envoye automatiquement par CJ DTC.`
+    `Besoin d'aide ? Contactez-nous via <a href="mailto:${supportEmail}" style="color: #1a1a2e; text-decoration: none; font-weight: 700;">${supportEmail}</a>.<br />Cet e-mail vous a ete envoye automatiquement par CJ DTC.`
 
   return `
-    <div style="margin: 0; padding: 24px 12px; background: #eef3f9; font-family: Arial, Helvetica, sans-serif; color: #0f172a;">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 680px; margin: 0 auto; border-collapse: collapse;">
+    <div style="margin: 0; padding: 32px 16px; background: #f5f5f5; font-family: Arial, Helvetica, sans-serif; color: #1e293b;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 640px; margin: 0 auto; border-collapse: collapse;">
         <tr>
           <td>
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; overflow: hidden; border-radius: 28px; background: #ffffff; border: 1px solid #dbe6f5; box-shadow: 0 24px 70px -38px rgba(15, 23, 42, 0.35);">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; background: #ffffff; border: 1px solid #e2e8f0;">
+
               <tr>
-                <td style="background: linear-gradient(135deg, #001f5c 0%, #003b9d 68%, #E53935 100%); padding: 32px;">
-                  <div style="display: inline-block; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,0.14); color: #dbeafe; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;">
-                    ${escapeHtml(options.eyebrow)}
-                  </div>
-                  <div style="margin-top: 18px; font-size: 30px; line-height: 1.2; font-weight: 700; color: #ffffff;">
+                <td style="padding: 24px 32px 20px 32px; border-bottom: 3px solid #1a1a2e;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td>
+                        <div style="font-size: 20px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.02em;">CJ DTC</div>
+                        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;">CJ Development Training Center</div>
+                      </td>
+                      <td style="text-align: right; vertical-align: middle;">
+                        <div style="display: inline-block; padding: 4px 10px; background: #f1f5f9; color: #475569; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
+                          ${escapeHtml(options.eyebrow)}
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding: 32px 32px 0 32px;">
+                  <div style="font-size: 24px; line-height: 1.3; font-weight: 700; color: #0f172a;">
                     ${escapeHtml(options.title)}
-                  </div>
-                  <div style="margin-top: 12px; max-width: 520px; font-size: 15px; line-height: 1.7; color: #dbeafe;">
-                    CJ DTC vous accompagne avec un message clair, professionnel et directement exploitable.
                   </div>
                 </td>
               </tr>
 
               <tr>
-                <td style="padding: 32px 32px 12px 32px;">
-                  <div style="font-size: 15px; line-height: 1.8; color: #334155;">
+                <td style="padding: 14px 32px 16px 32px;">
+                  <div style="font-size: 15px; line-height: 1.8; color: #475569;">
                     ${options.introHtml}
                   </div>
                 </td>
@@ -181,7 +194,13 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
               ${badgeBlock}
 
               <tr>
-                <td style="padding: 0 32px 0 32px;">
+                <td style="padding: 0 32px;">
+                  <div style="border-top: 1px solid #f1f5f9;"></div>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding: 20px 32px 0 32px;">
                   ${options.bodyHtml}
                 </td>
               </tr>
@@ -190,13 +209,25 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
               ${actionHintBlock}
 
               <tr>
-                <td style="padding: 24px 32px 32px 32px;">
-                  <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 13px; line-height: 1.8; color: #64748b;">
+                <td style="padding: 28px 32px 32px 32px;">
+                  <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 12px; line-height: 1.8; color: #94a3b8;">
                     ${footerHtml}
                   </div>
                 </td>
               </tr>
+
             </table>
+
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; margin-top: 16px;">
+              <tr>
+                <td style="padding: 0 8px; text-align: center;">
+                  <div style="font-size: 11px; color: #94a3b8; line-height: 1.7;">
+                    CJ Development Training Center &bull; E-mail automatique &bull; Ne pas repondre directement a ce message
+                  </div>
+                </td>
+              </tr>
+            </table>
+
           </td>
         </tr>
       </table>
@@ -312,22 +343,22 @@ export async function sendPasswordResetEmail(
       introHtml:
         'Nous avons recu une demande de reinitialisation de mot de passe pour votre compte CJ DTC. Utilisez le lien securise ci-dessous pour definir un nouveau mot de passe.',
       badgeHtml:
-        '<div style="display: inline-block; border-radius: 999px; background: #eef4ff; color: #0A4FB3; border: 1px solid #c9d9ff; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Lien valable pendant 1 heure</div>',
+        '<div style="display: inline-block; background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; padding: 6px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Lien valable pendant 1 heure</div>',
       bodyHtml: `
-        <div style="border: 1px solid #d7e3ff; border-radius: 22px; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); padding: 20px;">
-          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #64748b; font-weight: 700; margin-bottom: 8px;">
+        <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 20px; margin-bottom: 16px;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">
             Lien de reinitialisation
           </div>
           <div style="font-size: 14px; line-height: 1.8; color: #334155;">
             Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe. Si le bouton ne fonctionne pas, utilisez ce lien direct:<br />
-            <a href="${safeResetLink}" style="color: #003b9d; text-decoration: none; word-break: break-all;">${safeResetLink}</a>
+            <a href="${safeResetLink}" style="color: #1a1a2e; text-decoration: none; word-break: break-all; font-weight: 600;">${safeResetLink}</a>
           </div>
         </div>
-        <div style="margin-top: 16px; border-radius: 22px; background: #0f172a; padding: 22px 24px; color: #e2e8f0;">
-          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #93c5fd; font-weight: 700; margin-bottom: 10px;">
+        <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 20px;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">
             Protection du compte
           </div>
-          <div style="font-size: 14px; line-height: 1.8;">
+          <div style="font-size: 14px; line-height: 1.8; color: #475569;">
             Si vous n'etes pas a l'origine de cette demande, ignorez cet e-mail. Votre mot de passe actuel restera actif tant qu'aucune modification n'est confirmee.
           </div>
         </div>
@@ -361,8 +392,8 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
     ? `
         <tr>
           <td style="padding: 0 32px 20px 32px;">
-            <div style="display: inline-block; border-radius: 999px; background: #eef4ff; color: #0A4FB3; border: 1px solid #c9d9ff; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">
-              Session: ${safeSessionTitle}
+            <div style="display: inline-block; background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; padding: 6px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">
+              Session : ${safeSessionTitle}
             </div>
           </td>
         </tr>
@@ -372,18 +403,18 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
   const passwordBlock = hasPassword
     ? `
         <tr>
-          <td style="padding: 0 32px 0 32px;">
-            <div style="border: 1px solid #d7e3ff; border-radius: 18px; background: #ffffff; padding: 18px 20px; margin-top: 12px;">
-              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; font-weight: 700; margin-bottom: 8px;">Mot de passe temporaire</div>
-              <div style="font-size: 18px; line-height: 1.5; color: #0f172a; font-weight: 700;">${safePassword}</div>
+          <td style="padding: 12px 32px 0 32px;">
+            <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 16px 20px;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">Mot de passe temporaire</div>
+              <div style="font-size: 18px; line-height: 1.5; color: #0f172a; font-weight: 700; letter-spacing: 0.04em;">${safePassword}</div>
             </div>
           </td>
         </tr>
       `
     : `
         <tr>
-          <td style="padding: 0 32px 0 32px;">
-            <div style="border: 1px solid #d7e3ff; border-radius: 18px; background: #ffffff; padding: 18px 20px; margin-top: 12px; color: #334155; font-size: 14px; line-height: 1.7;">
+          <td style="padding: 12px 32px 0 32px;">
+            <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 16px 20px; color: #475569; font-size: 14px; line-height: 1.7;">
               Votre mot de passe a ete mis a jour. Utilisez les nouveaux acces communiques par l'administration pour vous connecter.
             </div>
           </td>
@@ -408,32 +439,35 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
     subject,
     text,
     html: `
-      <div style="margin: 0; padding: 24px 12px; background: #eef3f9; font-family: Arial, Helvetica, sans-serif; color: #0f172a;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 680px; margin: 0 auto; border-collapse: collapse;">
+      <div style="margin: 0; padding: 32px 16px; background: #f5f5f5; font-family: Arial, Helvetica, sans-serif; color: #1e293b;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 640px; margin: 0 auto; border-collapse: collapse;">
           <tr>
             <td>
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; overflow: hidden; border-radius: 28px; background: #ffffff; border: 1px solid #dbe6f5; box-shadow: 0 24px 70px -38px rgba(15, 23, 42, 0.35);">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; background: #ffffff; border: 1px solid #e2e8f0;">
+
                 <tr>
-                  <td style="background: linear-gradient(135deg, #001f5c 0%, #003b9d 68%, #E53935 100%); padding: 32px;">
-                    <div style="display: inline-block; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,0.14); color: #dbeafe; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;">
-                      CJ DTC
-                    </div>
-                    <div style="margin-top: 18px; font-size: 30px; line-height: 1.2; font-weight: 700; color: #ffffff;">
-                      Vos acces a l'espace etudiant sont prets
-                    </div>
-                    <div style="margin-top: 12px; max-width: 520px; font-size: 15px; line-height: 1.7; color: #dbeafe;">
-                      Retrouvez ci-dessous vos identifiants de connexion et le lien direct vers votre espace etudiant.
-                    </div>
+                  <td style="padding: 24px 32px 20px 32px; border-bottom: 3px solid #1a1a2e;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                      <tr>
+                        <td>
+                          <div style="font-size: 20px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.02em;">CJ DTC</div>
+                          <div style="font-size: 10px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;">CJ Development Training Center</div>
+                        </td>
+                        <td style="text-align: right; vertical-align: middle;">
+                          <div style="display: inline-block; padding: 4px 10px; background: #f1f5f9; color: #475569; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">Espace Etudiant</div>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
 
                 <tr>
-                  <td style="padding: 32px 32px 12px 32px;">
+                  <td style="padding: 32px 32px 0 32px;">
                     <div style="font-size: 22px; line-height: 1.35; font-weight: 700; color: #0f172a;">
                       Bonjour ${safeFullName},
                     </div>
-                    <div style="margin-top: 12px; font-size: 15px; line-height: 1.8; color: #334155;">
-                      Votre compte etudiant CJ DTC est maintenant actif${safeSessionTitle ? ` pour la session <strong style="color: #0A4FB3;">${safeSessionTitle}</strong>` : ''}. Gardez ces informations en lieu sur et utilisez-les pour acceder a votre espace personnel.
+                    <div style="margin-top: 10px; font-size: 15px; line-height: 1.8; color: #475569;">
+                      Votre compte etudiant CJ DTC est maintenant actif${safeSessionTitle ? ` pour la session <strong style="color: #1a1a2e;">${safeSessionTitle}</strong>` : ''}. Retrouvez ci-dessous vos identifiants de connexion.
                     </div>
                   </td>
                 </tr>
@@ -441,15 +475,16 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
                 ${sessionBadge}
 
                 <tr>
-                  <td style="padding: 0 32px 0 32px;">
-                    <div style="border: 1px solid #d7e3ff; border-radius: 22px; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); padding: 20px;">
-                      <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #64748b; font-weight: 700; margin-bottom: 8px;">
-                        Identifiants de connexion
-                      </div>
-                      <div style="border: 1px solid #d7e3ff; border-radius: 18px; background: #ffffff; padding: 18px 20px; margin-top: 12px;">
-                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; font-weight: 700; margin-bottom: 8px;">Nom d'utilisateur</div>
-                        <div style="font-size: 18px; line-height: 1.5; color: #0f172a; font-weight: 700;">${safeUsername}</div>
-                      </div>
+                  <td style="padding: 16px 32px 0 32px;">
+                    <div style="border-top: 1px solid #f1f5f9;"></div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding: 16px 32px 0 32px;">
+                    <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 16px 20px;">
+                      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">Nom d'utilisateur</div>
+                      <div style="font-size: 18px; line-height: 1.5; color: #0f172a; font-weight: 700;">${safeUsername}</div>
                     </div>
                   </td>
                 </tr>
@@ -458,23 +493,23 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
 
                 <tr>
                   <td style="padding: 24px 32px 0 32px;">
-                    <a href="${safeLoginLink}" style="display: inline-block; border-radius: 16px; background: #E53935; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 22px;">
+                    <a href="${safeLoginLink}" style="display: inline-block; border-radius: 6px; background: #1a1a2e; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 28px; letter-spacing: 0.02em;">
                       Acceder a l'espace etudiant
                     </a>
-                    <div style="margin-top: 14px; font-size: 13px; line-height: 1.7; color: #64748b;">
+                    <div style="margin-top: 12px; font-size: 13px; line-height: 1.7; color: #94a3b8;">
                       Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur:<br />
-                      <a href="${safeLoginLink}" style="color: #003b9d; text-decoration: none; word-break: break-all;">${safeLoginLink}</a>
+                      <a href="${safeLoginLink}" style="color: #1a1a2e; text-decoration: none; word-break: break-all; font-weight: 600;">${safeLoginLink}</a>
                     </div>
                   </td>
                 </tr>
 
                 <tr>
-                  <td style="padding: 24px 32px 0 32px;">
-                    <div style="border-radius: 22px; background: #0f172a; padding: 22px 24px; color: #e2e8f0;">
-                      <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #93c5fd; font-weight: 700; margin-bottom: 10px;">
+                  <td style="padding: 20px 32px 0 32px;">
+                    <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 18px 20px;">
+                      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">
                         Bonnes pratiques
                       </div>
-                      <div style="font-size: 14px; line-height: 1.8;">
+                      <div style="font-size: 14px; line-height: 1.9; color: #475569;">
                         1. Connectez-vous des reception de cet e-mail.<br />
                         2. Modifiez votre mot de passe apres votre premiere connexion.<br />
                         3. Conservez vos identifiants de maniere confidentielle.
@@ -485,13 +520,25 @@ export async function sendStudentPortalAccessEmail(params: StudentPortalAccessEm
 
                 <tr>
                   <td style="padding: 24px 32px 32px 32px;">
-                    <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 13px; line-height: 1.8; color: #64748b;">
-                      Besoin d'aide ? Contactez-nous via <a href="mailto:${safeSupportEmail}" style="color: #003b9d; text-decoration: none; font-weight: 700;">${safeSupportEmail}</a>.<br />
+                    <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; font-size: 12px; line-height: 1.8; color: #94a3b8;">
+                      Besoin d'aide ? Contactez-nous via <a href="mailto:${safeSupportEmail}" style="color: #1a1a2e; text-decoration: none; font-weight: 700;">${safeSupportEmail}</a>.<br />
                       Cet e-mail vous a ete envoye automatiquement par CJ DTC.
                     </div>
                   </td>
                 </tr>
+
               </table>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; margin-top: 16px;">
+                <tr>
+                  <td style="padding: 0 8px; text-align: center;">
+                    <div style="font-size: 11px; color: #94a3b8; line-height: 1.7;">
+                      CJ Development Training Center &bull; E-mail automatique &bull; Ne pas repondre directement a ce message
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
             </td>
           </tr>
         </table>
@@ -537,24 +584,24 @@ export async function sendAcceptanceEmail(email: string, formationTitle: string)
     html: renderBrandedEmailLayout({
       eyebrow: 'Admission',
       title: 'Votre inscription est acceptee',
-      introHtml: `Votre candidature pour la formation <strong style="color: #0A4FB3;">${safeFormationTitle}</strong> a ete validee par notre equipe.`,
+      introHtml: `Votre candidature pour la formation <strong style="color: #0f172a;">${safeFormationTitle}</strong> a ete validee par notre equipe.`,
       badgeHtml:
-        '<div style="display: inline-block; border-radius: 999px; background: #ecfdf3; color: #047857; border: 1px solid #a7f3d0; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Admission confirmee</div>',
+        '<div style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 6px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Admission confirmee</div>',
       bodyHtml: `
-        <div style="border: 1px solid #d7e3ff; border-radius: 22px; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); padding: 20px;">
-          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #64748b; font-weight: 700; margin-bottom: 8px;">
+        <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 20px; margin-bottom: 16px;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">
             Formation retenue
           </div>
-          <div style="font-size: 20px; line-height: 1.5; color: #0f172a; font-weight: 700;">${safeFormationTitle}</div>
-          <div style="margin-top: 10px; font-size: 14px; line-height: 1.8; color: #334155;">
-            Votre dossier est maintenant retenu. Surveillez votre boite mail: les prochaines consignes pratiques, dates utiles et informations de demarrage vous seront partagees prochainement.
+          <div style="font-size: 20px; line-height: 1.4; color: #0f172a; font-weight: 700;">${safeFormationTitle}</div>
+          <div style="margin-top: 10px; font-size: 14px; line-height: 1.8; color: #475569;">
+            Votre dossier est maintenant retenu. Surveillez votre boite mail : les prochaines consignes pratiques, dates utiles et informations de demarrage vous seront partagees prochainement.
           </div>
         </div>
-        <div style="margin-top: 16px; border-radius: 22px; background: #0f172a; padding: 22px 24px; color: #e2e8f0;">
-          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #93c5fd; font-weight: 700; margin-bottom: 10px;">
+        <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 20px;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">
             Prochaines etapes
           </div>
-          <div style="font-size: 14px; line-height: 1.8;">
+          <div style="font-size: 14px; line-height: 1.9; color: #475569;">
             1. Surveillez vos prochains e-mails de confirmation.<br />
             2. Preparez les elements administratifs demandes si besoin.<br />
             3. Contactez notre equipe en cas de question avant le demarrage.
@@ -591,35 +638,35 @@ export async function sendRejectionEmail(email: string, formationTitle: string, 
     text,
     html: renderBrandedEmailLayout({
       eyebrow: 'Suivi candidature',
-      title: 'Votre inscription n a pas ete retenue',
-      introHtml: `Apres examen de votre dossier pour la formation <strong style="color: #0A4FB3;">${safeFormationTitle}</strong>, nous ne pouvons pas donner une suite favorable a cette candidature pour le moment.`,
+      title: "Votre inscription n'a pas ete retenue",
+      introHtml: `Apres examen de votre dossier pour la formation <strong style="color: #0f172a;">${safeFormationTitle}</strong>, nous ne pouvons pas donner une suite favorable a cette candidature pour le moment.`,
       badgeHtml:
-        '<div style="display: inline-block; border-radius: 999px; background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Decision non favorable</div>',
+        '<div style="display: inline-block; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 6px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Decision non favorable</div>',
       bodyHtml: `
-        <div style="border: 1px solid #fde2e8; border-radius: 22px; background: linear-gradient(180deg, #fff7f8 0%, #ffffff 100%); padding: 20px;">
-          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #9f1239; font-weight: 700; margin-bottom: 8px;">
+        <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 20px; margin-bottom: 16px;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">
             Formation concernee
           </div>
-          <div style="font-size: 20px; line-height: 1.5; color: #0f172a; font-weight: 700;">${safeFormationTitle}</div>
-          <div style="margin-top: 10px; font-size: 14px; line-height: 1.8; color: #334155;">
+          <div style="font-size: 20px; line-height: 1.4; color: #0f172a; font-weight: 700;">${safeFormationTitle}</div>
+          <div style="margin-top: 10px; font-size: 14px; line-height: 1.8; color: #475569;">
             Cette decision ne remet pas en cause votre interet pour nos programmes. D'autres opportunites peuvent mieux correspondre a votre profil ou a vos disponibilites.
           </div>
         </div>
         ${
           safeReason
-            ? `<div style="margin-top: 16px; border: 1px solid #fecdd3; border-radius: 22px; background: #fff1f2; padding: 20px;">
-                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #9f1239; font-weight: 700; margin-bottom: 8px;">
+            ? `<div style="border: 1px solid #fecaca; background: #fef2f2; padding: 20px; margin-bottom: 16px;">
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #991b1b; font-weight: 700; margin-bottom: 8px;">
                   Motif communique
                 </div>
-                <div style="font-size: 14px; line-height: 1.8; color: #4c0519;">${safeReason}</div>
+                <div style="font-size: 14px; line-height: 1.8; color: #7f1d1d;">${safeReason}</div>
               </div>`
             : ''
         }
-        <div style="margin-top: 16px; border-radius: 22px; background: #0f172a; padding: 22px 24px; color: #e2e8f0;">
-          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #93c5fd; font-weight: 700; margin-bottom: 10px;">
+        <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 20px;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">
             Suite possible
           </div>
-          <div style="font-size: 14px; line-height: 1.8;">
+          <div style="font-size: 14px; line-height: 1.8; color: #475569;">
             Si vous souhaitez explorer une autre formation ou obtenir plus d'explications, notre equipe peut vous orienter vers la meilleure suite a donner.
           </div>
         </div>
@@ -629,7 +676,7 @@ export async function sendRejectionEmail(email: string, formationTitle: string, 
         href: `mailto:${supportEmail}`,
       },
       actionHintHtml:
-        'Vous pouvez repondre a cet accompagnement en nous ecrivant directement pour etudier une autre option.',
+        "Vous pouvez nous ecrire directement pour etudier une autre option ou obtenir plus d'informations.",
     }),
   })
 }
@@ -656,23 +703,23 @@ export async function sendAssignmentGradedEmail(email: string, assignmentTitle: 
     html: renderBrandedEmailLayout({
       eyebrow: 'Evaluation',
       title: 'Votre travail a ete note',
-      introHtml: `Votre depot pour le travail <strong style="color: #0A4FB3;">${safeAssignmentTitle}</strong> a ete corrige par l'equipe pedagogique.`,
+      introHtml: `Votre depot pour le travail <strong style="color: #0f172a;">${safeAssignmentTitle}</strong> a ete corrige par l'equipe pedagogique.`,
       badgeHtml:
-        '<div style="display: inline-block; border-radius: 999px; background: #ecfdf3; color: #047857; border: 1px solid #a7f3d0; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Correction terminee</div>',
+        '<div style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 6px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">Correction terminee</div>',
       bodyHtml: `
-        <div style="border: 1px solid #d7e3ff; border-radius: 22px; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); padding: 20px;">
-          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #64748b; font-weight: 700; margin-bottom: 8px;">
+        <div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 20px; margin-bottom: 16px;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">
             Note obtenue
           </div>
-          <div style="font-size: 32px; line-height: 1.2; color: #003b9d; font-weight: 800;">${grade} <span style="font-size: 18px; color: #64748b;">/ 100</span></div>
+          <div style="font-size: 36px; line-height: 1.1; color: #0f172a; font-weight: 800;">${grade} <span style="font-size: 18px; color: #94a3b8; font-weight: 400;">/ 100</span></div>
         </div>
         ${
           safeFeedback
-            ? `<div style="margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 22px; background: #f8fafc; padding: 20px;">
-                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: #475569; font-weight: 700; margin-bottom: 8px;">
+            ? `<div style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 20px;">
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">
                   Commentaire du correcteur
                 </div>
-                <div style="font-size: 14px; line-height: 1.8; color: #334155; font-style: italic;">"${safeFeedback}"</div>
+                <div style="font-size: 14px; line-height: 1.8; color: #475569; font-style: italic;">"${safeFeedback}"</div>
               </div>`
             : ''
         }
