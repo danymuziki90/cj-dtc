@@ -15,6 +15,7 @@ type EmploiMeta = {
   company: string; contractType: string; location: string; remote: string
   domain: string; educationLevel: string; experience: string; salary: string
   positions: number; deadline: string; applyUrl: string; contactEmail: string
+  whereToApply: string; howToApply: string
   missions: string; profile: string; skills: string; excerpt: string; status: string
 }
 type Emploi = {
@@ -169,6 +170,18 @@ export default function EmploiDetailPage() {
             {m.skills?.trim() && (
               <Section title="Compétences requises" icon={GraduationCap}>
                 <RichContent html={m.skills} />
+              </Section>
+            )}
+
+            {m.whereToApply?.trim() && (
+              <Section title="Où postuler" icon={MapPin}>
+                <p className="text-sm text-slate-600 leading-relaxed">{m.whereToApply}</p>
+              </Section>
+            )}
+
+            {m.howToApply?.trim() && (
+              <Section title="Comment postuler" icon={ArrowRight}>
+                <RichContent html={m.howToApply} />
               </Section>
             )}
 

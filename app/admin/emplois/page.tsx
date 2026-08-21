@@ -14,6 +14,7 @@ type EmploiMeta = {
   company: string; contractType: string; location: string; remote: string
   domain: string; educationLevel: string; experience: string; salary: string
   positions: number; deadline: string; applyUrl: string; contactEmail: string
+  whereToApply: string; howToApply: string
   missions: string; profile: string; skills: string; status: string; excerpt: string
 }
 type Emploi = {
@@ -30,6 +31,7 @@ type FormState = {
   company: string; contractType: string; location: string; remote: string
   domain: string; educationLevel: string; experience: string; salary: string
   positions: string; deadline: string; applyUrl: string; contactEmail: string
+  whereToApply: string; howToApply: string
   missions: string; profile: string; skills: string; excerpt: string
 }
 
@@ -50,6 +52,7 @@ function emptyForm(): FormState {
     company: '', contractType: '', location: '', remote: 'non',
     domain: '', educationLevel: '', experience: '', salary: '',
     positions: '1', deadline: '', applyUrl: '', contactEmail: '',
+    whereToApply: '', howToApply: '',
     missions: '', profile: '', skills: '', excerpt: '',
   }
 }
@@ -68,6 +71,7 @@ function formToPayload(f: FormState, status: string) {
       experience: f.experience, salary: f.salary,
       positions: parseInt(f.positions) || 1,
       deadline: f.deadline, applyUrl: f.applyUrl, contactEmail: f.contactEmail,
+      whereToApply: f.whereToApply, howToApply: f.howToApply,
       missions: f.missions, profile: f.profile, skills: f.skills,
       excerpt: f.excerpt, status,
     },
@@ -140,6 +144,7 @@ export default function AdminEmploisPage() {
       experience: e.metadata.experience || '', salary: e.metadata.salary || '',
       positions: String(e.metadata.positions || 1), deadline: e.metadata.deadline || '',
       applyUrl: e.metadata.applyUrl || '', contactEmail: e.metadata.contactEmail || '',
+      whereToApply: e.metadata.whereToApply || '', howToApply: e.metadata.howToApply || '',
       missions: e.metadata.missions || '', profile: e.metadata.profile || '',
       skills: e.metadata.skills || '', excerpt: e.metadata.excerpt || '',
     })
@@ -320,6 +325,12 @@ export default function AdminEmploisPage() {
                 <input className={inputCls} type="email" value={form.contactEmail} onChange={f('contactEmail')} placeholder="recrutement@example.com" />
               </Field>
             </div>
+            <Field label="Où postuler">
+              <input className={inputCls} value={form.whereToApply} onChange={f('whereToApply')} placeholder="Ex : sur notre site, au bureau, via LinkedIn…" />
+            </Field>
+            <Field label="Comment postuler">
+              <textarea className={textareaCls} value={form.howToApply} onChange={f('howToApply')} rows={4} placeholder="Décrivez les étapes pour postuler : envoyer un CV à…, remplir le formulaire sur…, etc." />
+            </Field>
           </div>
 
           {/* Section 4 : Médias */}

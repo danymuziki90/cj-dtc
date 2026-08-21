@@ -37,6 +37,8 @@ export const emploiMetadataSchema = z.object({
   // Application
   applyUrl:         z.string().max(500).optional().default(''),
   contactEmail:     z.string().max(120).optional().default(''),
+  whereToApply:     z.string().max(500).optional().default(''),
+  howToApply:       z.string().optional().default(''),
   // Rich sections (HTML stored as strings)
   missions:         z.string().optional().default(''),
   profile:          z.string().optional().default(''),
@@ -185,6 +187,8 @@ export function mapEmploi(item: any) {
       deadline:       meta.deadline       ?? '',
       applyUrl:       meta.applyUrl       ?? '',
       contactEmail:   meta.contactEmail   ?? '',
+      whereToApply:   meta.whereToApply   ?? '',
+      howToApply:     meta.howToApply     ?? '',
       missions:       meta.missions       ?? '',
       profile:        meta.profile        ?? '',
       skills:         meta.skills         ?? '',
