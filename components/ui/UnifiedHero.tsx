@@ -33,6 +33,8 @@ export interface UnifiedHeroProps {
   compact?: boolean
   /** Augmente uniquement la hauteur du Hero sur les écrans desktop. */
   desktopTall?: boolean
+  /** Variante plus haute, réservée aux pages nécessitant davantage d'espace visuel sur desktop. */
+  desktopExtraTall?: boolean
   locale?: string
   /** Identifie explicitement la page lorsque les données distantes sont indisponibles. */
   pageKey?: string
@@ -103,7 +105,7 @@ export default function UnifiedHero({
   image, imageAlt = '', eyebrow, title, description,
   badges = [], ctas = [], breadcrumbs = [],
   homeLabel = 'Accueil', homeHref = '/',
-  overlayOpacity = 55, compact = false, desktopTall = false,
+  overlayOpacity = 55, compact = false, desktopTall = false, desktopExtraTall = false,
   locale: defaultLocale,
   pageKey,
   children,
@@ -190,7 +192,7 @@ export default function UnifiedHero({
 
   return (
     <section 
-      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[460px] sm:min-h-[500px] lg:min-h-[660px] xl:min-h-[720px] py-10 sm:py-12 lg:py-16' : 'hero-page'} ${effectiveCompact ? (desktopTall ? 'min-h-[300px] sm:min-h-[350px] lg:min-h-[540px] xl:min-h-[600px] py-6 sm:py-8 lg:py-10' : 'min-h-[300px] sm:min-h-[350px] lg:min-h-[400px] py-6 sm:py-8 lg:py-10') : 'min-h-[340px] sm:min-h-[400px] lg:min-h-[450px] py-8 sm:py-10 lg:py-12'}`}
+      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[460px] sm:min-h-[500px] lg:min-h-[660px] xl:min-h-[720px] py-10 sm:py-12 lg:py-16' : 'hero-page'} ${effectiveCompact ? (desktopExtraTall ? 'min-h-[300px] sm:min-h-[350px] lg:min-h-[620px] xl:min-h-[680px] py-6 sm:py-8 lg:py-10' : desktopTall ? 'min-h-[300px] sm:min-h-[350px] lg:min-h-[540px] xl:min-h-[600px] py-6 sm:py-8 lg:py-10' : 'min-h-[300px] sm:min-h-[350px] lg:min-h-[400px] py-6 sm:py-8 lg:py-10') : 'min-h-[340px] sm:min-h-[400px] lg:min-h-[450px] py-8 sm:py-10 lg:py-12'}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
