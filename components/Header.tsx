@@ -717,7 +717,7 @@ export default function Header() {
         {/* Content Container (Layered on top of background) */}
         <div className="relative z-20 flex flex-col h-full justify-between overflow-hidden">
           {/* Fullscreen Overlay Top Bar Header */}
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 bg-[var(--cj-blue)] shrink-0">
+          <div className="flex items-center justify-between shrink-0 border-b border-slate-200 bg-white px-5 py-4 shadow-sm">
             <Link
               href={`/${locale}`}
               onClick={() => setOpen(false)}
@@ -732,8 +732,8 @@ export default function Header() {
                 className="h-12 w-auto brightness-125 filter drop-shadow-md"
               />
               <div>
-                <p className="text-xs font-black uppercase tracking-wider text-blue-300 drop-shadow">CJ DTC</p>
-                <p className="text-[10px] font-medium text-slate-300">Centre de Formation</p>
+                <p className="text-xs font-black uppercase tracking-wider text-[var(--cj-blue)]">CJ DTC</p>
+                <p className="text-[10px] font-medium text-slate-600">Centre de Formation</p>
               </div>
             </Link>
 
@@ -743,7 +743,7 @@ export default function Header() {
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Fermer le menu plein écran"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-slate-900/80 text-slate-100 transition-all duration-200 hover:border-white/40 hover:bg-slate-800 hover:text-white active:scale-95 shadow-lg backdrop-blur-md"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 text-slate-800 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-200 hover:text-slate-950 active:scale-95"
             >
               <X className="h-6 w-6" />
             </button>
