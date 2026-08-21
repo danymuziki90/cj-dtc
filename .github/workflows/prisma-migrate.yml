@@ -3,7 +3,13 @@ name: Apply Prisma migrations
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      recover_failed_submission_migration:
+        description: Recover the previously failed submission migration before applying migrations
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   migrate:
@@ -20,6 +26,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Recover failed submission migration
+        if: ${{ inputs.recover_failed_submission_migration }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma migrate resolve --rolled-back 20260724220000_submission_unique_per_assignment
 
       - name: Apply Prisma migrations
         env:
