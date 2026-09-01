@@ -10,6 +10,7 @@ import WhyChooseUs from '@/components/home/WhyChooseUs'
 import TestimonialsAndResults from '@/components/home/TestimonialsAndResults'
 import Partners from '@/components/home/Partners'
 import NewsAndOpportunities from '@/components/home/NewsAndOpportunities'
+import HomeFAQ from '@/components/home/HomeFAQ'
 import FinalCTA from '@/components/home/FinalCTA'
 
 export const revalidate = 60
@@ -52,7 +53,10 @@ export default async function HomePage({
       {/* 8. Actualités et opportunités */}
       <NewsAndOpportunities locale={locale} />
 
-      {/* 9. Call To Action final */}
+      {/* 9. Questions frÃ©quentes */}
+      <HomeFAQ locale={locale} />
+
+      {/* 10. Call To Action final */}
       <FinalCTA locale={locale} />
     </div>
   )

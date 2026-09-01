@@ -4,8 +4,8 @@ import { apiHandler } from '@/lib/api-error'
 
 export const GET = apiHandler(async () => {
   const faq = await prisma.fAQ.findMany({
+    where: { enabled: true },
     orderBy: [
-      { category: 'asc' },
       { order: 'asc' }
     ]
   })

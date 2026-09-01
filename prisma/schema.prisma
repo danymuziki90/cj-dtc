@@ -468,6 +468,7 @@ model FAQ {
   answerEn   String?
   category   String   @default("General")
   order      Int      @default(0)
+  enabled    Boolean  @default(true)
   createdAt  DateTime @default(now())
 
   @@index([category])

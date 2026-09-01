@@ -20,13 +20,16 @@ export async function PUT(
     }
 
     const body = await req.json()
-    const { question, answer, category, order } = body
+    const { question, questionEn, answer, answerEn, category, order, enabled } = body
 
     const updateData: any = {}
     if (question !== undefined) updateData.question = question
+    if (questionEn !== undefined) updateData.questionEn = questionEn?.trim() || null
     if (answer !== undefined) updateData.answer = answer
+    if (answerEn !== undefined) updateData.answerEn = answerEn?.trim() || null
     if (category !== undefined) updateData.category = category
     if (order !== undefined) updateData.order = order
+    if (enabled !== undefined) updateData.enabled = enabled
 
     const updated = await prisma.fAQ.update({
       where: { id: faqId },

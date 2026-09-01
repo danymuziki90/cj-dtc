@@ -11,6 +11,7 @@ interface FAQItem {
   answerEn?: string | null;
   category: string;
   order: number;
+  enabled: boolean;
 }
 
 export default function AdminFAQPage() {
@@ -25,6 +26,7 @@ export default function AdminFAQPage() {
   const [formAnswerEn, setFormAnswerEn] = useState('');
   const [formCategory, setFormCategory] = useState('General');
   const [formOrder, setFormOrder] = useState(0);
+  const [formEnabled, setFormEnabled] = useState(true);
 
   const { success, error, info } = useToastNotification() || {
     success: (msg: string) => alert(msg),
@@ -59,6 +61,7 @@ export default function AdminFAQPage() {
     setFormAnswerEn('');
     setFormCategory('General');
     setFormOrder(0);
+    setFormEnabled(true);
     setShowForm(true);
   };
 
@@ -70,6 +73,7 @@ export default function AdminFAQPage() {
     setFormAnswerEn(item.answerEn || '');
     setFormCategory(item.category);
     setFormOrder(item.order);
+    setFormEnabled(item.enabled ?? true);
     setShowForm(true);
   };
 
@@ -86,7 +90,8 @@ export default function AdminFAQPage() {
       answer: formAnswer,
       answerEn: formAnswerEn,
       category: formCategory,
-      order: formOrder
+      order: formOrder,
+      enabled: formEnabled
     };
 
     try {
@@ -132,6 +137,23 @@ export default function AdminFAQPage() {
     } catch (err) {
       console.error(err);
       error("Erreur lors de la suppression.");
+    }
+  };
+
+  const toggleEnabled = async (item: FAQItem) => {
+    try {
+      const res = await fetch(`/api/admin/marketing/faq/${item.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: !item.enabled })
+      });
+      if (!res.ok) throw new Error('Unable to update FAQ publication');
+      const updated = await res.json();
+      setFaqList(prev => prev.map(entry => entry.id === item.id ? updated : entry));
+      success(updated.enabled ? 'FAQ publiÃ©e.' : 'FAQ dÃ©publiÃ©e.');
+    } catch (err) {
+      console.error(err);
+      error('Impossible de modifier la publication.');
     }
   };
 
@@ -228,6 +250,15 @@ export default function AdminFAQPage() {
                 onChange={(e) => setFormOrder(parseInt(e.target.value) || 0)}
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent bg-slate-50/30"
               />
+              <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={formEnabled}
+                  onChange={(e) => setFormEnabled(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-900 focus:ring-blue-900"
+                />
+                PubliÃ©e sur le site
+              </label>
             </div>
 
             <div className="md:col-span-3 flex gap-2 justify-end mt-4">
@@ -290,6 +321,12 @@ export default function AdminFAQPage() {
                             className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold"
                           >
                             Modifier
+                          </button>
+                          <button
+                            onClick={() => toggleEnabled(item)}
+                            className={`px-3 py-1.5 border rounded-xl text-xs font-bold ${item.enabled ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}
+                          >
+                            {item.enabled ? 'DÃ©publier' : 'Publier'}
                           </button>
                           <button
                             onClick={() => deleteFAQ(item.id)}

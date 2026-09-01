@@ -6,9 +6,12 @@ import { prisma } from '@/lib/prisma'
 
 const faqSchema = z.object({
   question: z.string().trim().min(1, 'La question est obligatoire'),
+  questionEn: z.string().trim().optional().nullable(),
   answer: z.string().trim().min(1, 'La réponse est obligatoire'),
+  answerEn: z.string().trim().optional().nullable(),
   category: z.string().trim().optional().default('General'),
-  order: z.union([z.number(), z.string()]).optional().transform(val => val !== undefined ? Number(val) : 0)
+  order: z.union([z.number(), z.string()]).optional().transform(val => val !== undefined ? Number(val) : 0),
+  enabled: z.boolean().optional().default(true)
 })
 
 export async function GET(req: NextRequest) {
@@ -45,14 +48,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
 
-    const { question, answer, category, order } = parsed.data
+    const { question, questionEn, answer, answerEn, category, order, enabled } = parsed.data
 
     const created = await prisma.fAQ.create({
       data: {
         question,
+        questionEn: questionEn || null,
         answer,
+        answerEn: answerEn || null,
         category,
-        order
+        order,
+        enabled
       }
     })
 
