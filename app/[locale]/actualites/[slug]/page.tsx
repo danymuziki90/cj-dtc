@@ -5,7 +5,7 @@ import { ArrowLeft, CalendarDays, Tag } from 'lucide-react'
 import { prisma } from '../../../../lib/prisma'
 import Breadcrumbs from '../../../../components/Breadcrumbs'
 import { generatePageMetadata } from '../../../../components/PageMetadata'
-import { getIntlLocale, resolveSiteLocale } from '@/lib/i18n/locale'
+import { getIntlLocale, getLocalizedCategory, resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
 interface PageProps {
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     })
   }
 
-  const excerpt = toPlainText(news.content || '').slice(0, 160)
+  const excerpt = toPlainText(locale === 'fr' ? news.content || '' : (news as any).contentEn || news.content || '').slice(0, 160)
 
   return generatePageMetadata({
     title: locale === 'fr' ? news.title : ((news as any).titleEn || news.title),
@@ -97,7 +97,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
           <div className="p-6 sm:p-8 lg:p-10">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                {news.category || t.defaultCategory}
+                {getLocalizedCategory(news.category, locale) || t.defaultCategory}
               </span>
               <span className="inline-flex items-center gap-2 text-xs text-slate-500 sm:text-sm">
                 <CalendarDays className="h-4 w-4" />
@@ -111,19 +111,19 @@ export default async function NewsDetailPage({ params }: PageProps) {
               <div className="mt-6 flex flex-wrap gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
                 {(news.metadata as any).contractType ? (
                   <div className="flex flex-col">
-                    <span className="text-xs font-semibold uppercase text-slate-500">Contrat</span>
+                    <span className="text-xs font-semibold uppercase text-slate-500">{locale === 'fr' ? 'Contrat' : 'Contract'}</span>
                     <span className="text-sm font-medium text-slate-900">{(news.metadata as any).contractType}</span>
                   </div>
                 ) : null}
                 {(news.metadata as any).location ? (
                   <div className="flex flex-col">
-                    <span className="text-xs font-semibold uppercase text-slate-500">Lieu</span>
+                    <span className="text-xs font-semibold uppercase text-slate-500">{locale === 'fr' ? 'Lieu' : 'Location'}</span>
                     <span className="text-sm font-medium text-slate-900">{(news.metadata as any).location}</span>
                   </div>
                 ) : null}
                 {(news.metadata as any).deadline ? (
                   <div className="flex flex-col">
-                    <span className="text-xs font-semibold uppercase text-slate-500">Date limite</span>
+                    <span className="text-xs font-semibold uppercase text-slate-500">{locale === 'fr' ? 'Date limite' : 'Deadline'}</span>
                     <span className="text-sm font-medium text-slate-900">{new Date((news.metadata as any).deadline).toLocaleDateString(getIntlLocale(locale))}</span>
                   </div>
                 ) : null}

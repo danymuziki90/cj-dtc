@@ -68,6 +68,7 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
   const [loading, setLoading] = useState(true)
 
   const isFr = locale === 'fr'
+  const localize = (fr?: string | null, en?: string | null) => (isFr ? fr : en || fr)
 
   useEffect(() => {
     let active = true
@@ -183,7 +184,7 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
                           {t.name}
                         </h4>
                         <p className="text-[9.5pt] font-medium text-slate-500 line-clamp-1 mt-0.5 font-segoe">
-                          {t.formation || (t.role ? t.role.replace('Étudiant — ', '') : 'CJ DTC')}
+                          {localize(t.formation, t.formationEn) || (t.role ? t.role.replace('Étudiant — ', '') : 'CJ DTC')}
                         </p>
                       </div>
                     </div>
@@ -215,14 +216,14 @@ export default function TestimonialsSection({ locale = 'fr' }: TestimonialsSecti
                   </div>
 
                   {/* Titre du témoignage */}
-                  {t.title && (
+                  {localize(t.title, t.titleEn) && (
                     <h3 className="testimonial-card-title font-bold text-slate-900 group-hover:text-[var(--cj-blue)] transition font-segoe">
-                      « {t.title} »
+                      « {localize(t.title, t.titleEn)} »
                     </h3>
                   )}
 
                   {/* Corps du texte EN ITALIQUE (Taille 10 pt, Segoe UI, Justifié) */}
-                  {renderContent(t.content || t.quote || '')}
+                  {renderContent(localize(t.content, t.contentEn) || t.quote || '')}
                 </div>
 
                 {/* Pied de Carte Subtil (Date / Session) */}

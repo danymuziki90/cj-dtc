@@ -4,13 +4,17 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { FormattedDate } from '@/components/FormattedDate'
 import { Briefcase, ArrowRight, Newspaper } from 'lucide-react'
+import { getLocalizedCategory } from '@/lib/i18n/locale'
 
 interface NewsItem {
   id: string
   slug: string
   title: string
+  titleEn?: string | null
   excerpt: string
+  excerptEn?: string | null
   content: string
+  contentEn?: string | null
   imageDataUrl: string | null
   category: string
   publicationDate: string
@@ -98,26 +102,29 @@ export default function NewsAndOpportunities({ locale }: NewsAndOpportunitiesPro
               </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2">
-                {articles.map((article) => (
+                {articles.map((article) => {
+                  const title = isFr ? article.title : article.titleEn || article.title
+                  return (
                   <Link key={article.id} href={`/${locale}/actualites/${article.slug}`} className="group flex flex-col rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
                     <div className="relative h-40 w-full overflow-hidden bg-slate-100">
                       {article.imageDataUrl ? (
-                        <img src={article.imageDataUrl} alt={article.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <img src={article.imageDataUrl} alt={title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       ) : (
                         <div className="h-full w-full bg-[var(--cj-blue)]/10" />
                       )}
                       <div className="absolute top-2 left-2 rounded-full bg-[var(--cj-blue)] px-2.5 py-1 text-[10px] font-bold text-white uppercase">
-                        {article.category || 'News'}
+                        {getLocalizedCategory(article.category, locale) || 'News'}
                       </div>
                     </div>
                     <div className="flex flex-col flex-1 p-5">
                       <time className="mb-2 text-[10px] uppercase tracking-widest text-slate-400 font-bold">
                         <FormattedDate date={article.publicationDate} locale={locale} options={{ year: 'numeric', month: 'short', day: 'numeric' } as any} />
                       </time>
-                      <h4 className="font-bold text-slate-900 line-clamp-2 group-hover:text-[var(--cj-blue)] transition-colors font-montserrat">{article.title}</h4>
+                      <h4 className="font-bold text-slate-900 line-clamp-2 group-hover:text-[var(--cj-blue)] transition-colors font-montserrat">{title}</h4>
                     </div>
                   </Link>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -140,10 +147,13 @@ export default function NewsAndOpportunities({ locale }: NewsAndOpportunitiesPro
               </div>
             ) : (
               <div className="space-y-4">
-                {jobs.map((job) => (
+                {jobs.map((job) => {
+                  const title = isFr ? job.title : job.titleEn || job.title
+                  const excerpt = isFr ? job.excerpt : job.excerptEn || job.excerpt
+                  return (
                   <Link key={job.id} href={`/${locale}/actualites/${job.slug}`} className="group block rounded-2xl border border-slate-100 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:border-[var(--cj-red)]/30">
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-bold text-slate-900 group-hover:text-[var(--cj-red)] transition-colors font-montserrat text-lg">{job.title}</h4>
+                      <h4 className="font-bold text-slate-900 group-hover:text-[var(--cj-red)] transition-colors font-montserrat text-lg">{title}</h4>
                       <span className="inline-flex rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600 uppercase whitespace-nowrap ml-4">
                         {isFr ? 'Nouveau' : 'New'}
                       </span>
@@ -151,12 +161,13 @@ export default function NewsAndOpportunities({ locale }: NewsAndOpportunitiesPro
                     <time className="mb-3 block text-[10px] uppercase tracking-widest text-slate-400 font-bold">
                       <FormattedDate date={job.publicationDate} locale={locale} options={{ year: 'numeric', month: 'long', day: 'numeric' } as any} />
                     </time>
-                    <p className="text-sm text-slate-600 line-clamp-2 font-opensans">{job.excerpt}</p>
+                    <p className="text-sm text-slate-600 line-clamp-2 font-opensans">{excerpt}</p>
                     <div className="mt-4 flex items-center text-sm font-bold text-[var(--cj-red)] group-hover:text-[var(--cj-red-700)] transition-colors">
                       {isFr ? 'Voir l\'offre' : 'View job'} <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
                     </div>
                   </Link>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

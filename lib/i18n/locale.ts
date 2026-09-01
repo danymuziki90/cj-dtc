@@ -8,6 +8,24 @@ export function getIntlLocale(locale?: string | null) {
   return resolveSiteLocale(locale) === 'en' ? 'en-US' : 'fr-FR'
 }
 
+/** Labels for the built-in news categories. Custom categories remain unchanged
+ * until their bilingual value is supplied by the content manager. */
+export function getLocalizedCategory(value: string | null | undefined, locale?: string | null) {
+  const label = String(value || '').trim()
+  if (resolveSiteLocale(locale) !== 'en') return label
+
+  const translations: Record<string, string> = {
+    emplois: 'Jobs',
+    actualités: 'News',
+    actualites: 'News',
+    événements: 'Events',
+    evenements: 'Events',
+    général: 'General',
+  }
+
+  return translations[label.toLocaleLowerCase('fr-FR')] || label
+}
+
 /**
  * Utilitaires pour récupérer le contenu traduit depuis la base de données.
  * @param obj L'objet provenant de la DB (ex: Formation, News)

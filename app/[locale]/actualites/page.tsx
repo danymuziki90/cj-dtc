@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, Suspense } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Briefcase, Calendar, Newspaper } from 'lucide-react'
-import { resolveSiteLocale, getIntlLocale } from '@/lib/i18n/locale'
+import { getLocalizedCategory, resolveSiteLocale, getIntlLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import UnifiedHero from '@/components/ui/UnifiedHero'
@@ -288,7 +288,7 @@ function ActualitesContent() {
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex gap-2">
                       <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
-                        {item.category || t.defaultCategory}
+                    {getLocalizedCategory(item.category, locale) || t.defaultCategory}
                       </span>
                       {item.category?.toLowerCase() === 'emplois' && item.metadata?.contractType ? (
                         <span className="inline-flex rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700">

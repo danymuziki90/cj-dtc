@@ -4,15 +4,18 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { FormattedDate } from './FormattedDate'
-import { resolveSiteLocale } from '@/lib/i18n/locale'
+import { getLocalizedCategory, resolveSiteLocale } from '@/lib/i18n/locale'
 import { publicMessages } from '@/lib/i18n/public-messages'
 
 interface NewsItem {
   id: string
   slug: string
   title: string
+  titleEn?: string | null
   excerpt: string
+  excerptEn?: string | null
   content: string
+  contentEn?: string | null
   imageDataUrl: string | null
   category: string
   publicationDate: string
@@ -87,7 +90,11 @@ export default function RecentArticles() {
 
         <div className="grid gap-8 md:grid-cols-3">
           {articles.map((article) => {
-            const excerpt = article.excerpt || article.content.substring(0, 150)
+            const title = locale === 'en' ? article.titleEn || article.title : article.title
+            const content = locale === 'en' ? article.contentEn || article.content : article.content
+            const excerpt = locale === 'en'
+              ? article.excerptEn || content.substring(0, 150)
+              : article.excerpt || content.substring(0, 150)
 
             return (
               <Link key={article.id} href={`/${locale}/actualites/${article.slug}`} className="group">
@@ -96,14 +103,14 @@ export default function RecentArticles() {
                     {article.imageDataUrl ? (
                       <img
                         src={article.imageDataUrl}
-                        alt={article.title}
+                        alt={title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                     ) : (
                       <div className="grid h-full place-items-center text-4xl text-white/70">{t.defaultImageLabel}</div>
                     )}
                     <div className="absolute left-3 top-3 rounded-full bg-[var(--cj-red)] px-3 py-1 text-xs font-semibold text-white">
-                      {article.category || t.defaultCategory}
+                      {getLocalizedCategory(article.category, locale) || t.defaultCategory}
                     </div>
                   </div>
 
@@ -117,7 +124,7 @@ export default function RecentArticles() {
                     </time>
 
                     <h3 className="mb-3 line-clamp-2 text-xl font-bold text-cjblue transition-colors group-hover:text-[var(--cj-red)]">
-                      {article.title}
+                      {title}
                     </h3>
 
                     <p className="mb-4 flex-grow line-clamp-4 text-sm text-gray-600">

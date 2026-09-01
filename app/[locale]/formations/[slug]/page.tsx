@@ -111,7 +111,7 @@ export default function FormationDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement...</p>
+          <p className="text-gray-600">{locale === 'fr' ? 'Chargement...' : 'Loading...'}</p>
         </div>
       </div>
     )
@@ -121,12 +121,12 @@ export default function FormationDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Formation non trouvée</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{locale === 'fr' ? 'Formation non trouvée' : 'Course not found'}</h1>
           <Link
             href={`/${locale}/formations`}
             className="text-blue-600 hover:text-blue-700 font-medium"
           >
-            Retour au catalogue
+            {locale === 'fr' ? 'Retour au catalogue' : 'Back to catalogue'}
           </Link>
         </div>
       </div>
