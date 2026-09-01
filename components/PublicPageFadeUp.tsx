@@ -6,18 +6,16 @@ import { usePathname } from 'next/navigation'
 /**
  * PublicPageFadeUp
  * ─────────────────
- * Applique une animation Fade-Up (opacity 0 → 1, translateY 30px → 0)
- * à chaque <section>, <article> ou [data-fade-up-target] visible dans
- * les pages publiques, au fur et à mesure du scroll.
+ * Applique une animation Fade-In (entrée) et Fade-Out (sortie) au défilement (scroll)
+ * à chaque <section>, <article>, .cj-hero-card, .cj-cta-banner ou [data-fade-up-target]
+ * sur toutes les pages et sous-pages publiques.
  *
  * Stratégie :
- * • On utilise un MutationObserver pour détecter l'apparition tardive
- *   des nœuds DOM (hydratation SSR, chargements asynchrones).
- * • Un IntersectionObserver déclenche l'animation une seule fois par
- *   élément lorsqu'il entre dans le viewport.
- * • Les éléments déjà dans le viewport au chargement initial sont
- *   animés immédiatement (délai court) sans attendre le scroll.
- * • prefers-reduced-motion est respecté (pas d'animation si activé).
+ * • Un IntersectionObserver observe continuellement les éléments :
+ *   - Entrée dans le viewport → data-fade-up="visible" (opacité 1, translateY 0)
+ *   - Sortie du viewport → data-fade-up="pending" (opacité 0, translateY 24px)
+ * • MutationObserver pour capter dynamiquement le contenu hydraté.
+ * • prefers-reduced-motion est respecté (aucune animation si activé).
  */
 export default function PublicPageFadeUp({ children }: { children: ReactNode }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -37,74 +35,76 @@ export default function PublicPageFadeUp({ children }: { children: ReactNode }) 
     const container = containerRef.current
     if (!container) return
 
-    // Ensemble des éléments déjà observés (évite les doublons)
+    // Ensemble des éléments déjà observés
     const observed = new Set<Element>()
 
-    const SELECTOR = 'section, article, [data-fade-up-target]'
+    const SELECTOR = 'section, article, .cj-hero-card, .cj-cta-banner, [data-fade-up-target]'
 
     /**
      * Filtre un élément pour l'animation :
-     * – Pas dans le hero, le header, le footer, la nav
+     * – Pas dans le header, le footer, la nav
      * – Pas marqué [data-no-fade-up]
-     * – Pas déjà observé
+     * – Pas la section hero pleine hauteur principale
      */
     function isAnimatable(el: Element): el is HTMLElement {
       if (observed.has(el)) return false
       if (el.matches('[data-no-fade-up]')) return false
       if (el.closest('header, footer, nav, [data-no-fade-up]')) return false
-      if (el.matches('.hero-bg-unified')) return false
+      if (el.matches('.hero-bg-unified') || el.closest('.hero-bg-unified')) return false
       return true
     }
 
-    // ── IntersectionObserver : déclenche le fade-up au scroll ─────────────
+    // ── IntersectionObserver : déclenche le fade-in et fade-out au scroll ─────
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
           const el = entry.target as HTMLElement
-          el.setAttribute('data-fade-up', 'visible')
-          io.unobserve(el)
+          if (entry.isIntersecting) {
+            el.setAttribute('data-fade-up', 'visible')
+          } else {
+            // Fade out quand l'élément quitte l'écran
+            el.setAttribute('data-fade-up', 'pending')
+          }
         })
       },
-      // rootMargin légèrement négatif pour éviter un déclenchement
-      // sur les éléments partiellement hors-écran en bas
-      { rootMargin: '0px 0px -5% 0px', threshold: 0.05 }
+      {
+        rootMargin: '0px 0px -4% 0px',
+        threshold: 0.05,
+      }
     )
-
-    let staggerIndex = 0
 
     /**
      * Enregistre un élément pour l'animation.
-     * Les éléments déjà dans le viewport reçoivent un délai court (≤160ms)
-     * pour que l'animation soit visible dès le chargement.
      */
     function registerElement(el: HTMLElement) {
       if (!isAnimatable(el)) return
       observed.add(el)
 
-      const delay = (staggerIndex % 6) * 80
-      staggerIndex++
+      // Si l'élément est déjà visible dans le viewport au chargement, on l'affiche directement
+      const rect = el.getBoundingClientRect()
+      const inView = rect.top < window.innerHeight && rect.bottom > 0
 
-      el.style.setProperty('--fade-up-delay', `${delay}ms`)
-      el.setAttribute('data-fade-up', 'pending')
+      if (inView) {
+        el.setAttribute('data-fade-up', 'visible')
+      } else {
+        el.setAttribute('data-fade-up', 'pending')
+      }
+
       io.observe(el)
     }
 
     /**
-     * Scanne le container et enregistre tous les éléments
-     * correspondant au sélecteur.
+     * Scanne le container et enregistre tous les éléments ciblés.
      */
     function scanAndRegister() {
       const elements = Array.from(container.querySelectorAll<HTMLElement>(SELECTOR))
       elements.forEach(registerElement)
     }
 
-    // Premier scan : tente de capturer le DOM déjà disponible
+    // Premier scan
     scanAndRegister()
 
     // ── MutationObserver : capture les nœuds ajoutés après hydratation ────
-    // Nécessaire car les Server Components / Client Components chargés
-    // dynamiquement peuvent injecter leurs sections APRÈS le premier useEffect.
     const mo = new MutationObserver((mutations) => {
       let hasNewNodes = false
       for (const m of mutations) {
@@ -127,3 +127,4 @@ export default function PublicPageFadeUp({ children }: { children: ReactNode }) 
 
   return <div ref={containerRef}>{children}</div>
 }
+

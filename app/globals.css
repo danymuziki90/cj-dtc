@@ -4,24 +4,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Animation Fade-Up — Apparition progressive des sections publiques ─────
+/* ── Animation Fade-Up & Fade-Out au scroll ────────────────────────────────
    Déclenchée par IntersectionObserver via PublicPageFadeUp.tsx.
-   data-fade-up="pending" : état initial (invisible, décalé vers le bas)
-   data-fade-up="visible" : état final (visible, position normale)
-   La transition est définie sur les DEUX états pour garantir que
-   l'animation joue même pour les éléments déjà dans le viewport.
+   - data-fade-up="pending" : état hors viewport (invisible, décalé de 24px)
+   - data-fade-up="visible" : état dans le viewport (visible, position normale)
+   La transition fluide s'applique à l'entrée et à la sortie lors du scroll.
 ──────────────────────────────────────────────────────────────────────────── */
 [data-fade-up="pending"],
 [data-fade-up="visible"] {
   transition:
-    opacity 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--fade-up-delay, 0ms),
-    transform 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--fade-up-delay, 0ms);
+    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
 }
 
 [data-fade-up="pending"] {
   opacity: 0;
-  transform: translate3d(0, 28px, 0);
+  transform: translate3d(0, 24px, 0);
 }
 
 [data-fade-up="visible"] {
@@ -38,6 +37,7 @@
     transition: none !important;
   }
 }
+
 
 
 /* ── Animation Transition de Page ───────────────────────────────────────────
