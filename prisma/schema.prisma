@@ -818,3 +818,16 @@ model HeroSlide {
   @@index([heroId])
   @@index([order])
 }
+
+model DirectorWelcome {
+  id        String   @id @default("director-welcome")
+  isActive  Boolean  @default(true)
+  imageUrl  String?
+  name      String?
+  titleFr   String?
+  titleEn   String?
+  messageFr String?
+  messageEn String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

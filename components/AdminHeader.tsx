@@ -20,6 +20,7 @@ const navRow2 = [
   { href: '/admin/emplois', label: "Offres d'emploi" },
   { href: '/admin/b2b', label: 'Entreprises' },
   { href: '/admin/heroes', label: 'Apparence' },
+  { href: '/admin/director-welcome', label: 'Mot du DG' },
   { href: '/admin/settings', label: 'Paramètres' },
 ]
 

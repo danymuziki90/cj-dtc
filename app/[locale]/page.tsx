@@ -2,6 +2,7 @@ import { resolveSiteLocale } from '@/lib/i18n/locale'
 import { getHeroData } from '@/lib/hero/getHeroData'
 
 import UnifiedHero from '@/components/ui/UnifiedHero'
+import DirectorWelcome from '@/components/home/DirectorWelcome'
 import WhoWeAre from '@/components/home/WhoWeAre'
 import ExpertiseServices from '@/components/home/ExpertiseServices'
 import RecentSessions from '@/components/RecentSessions'
@@ -28,6 +29,7 @@ export default async function HomePage({
     <div className="flex flex-col min-h-screen">
       {/* 1. Hero Section (première impression) */}
       <UnifiedHero heroData={heroData} locale={locale} pageKey="home" />
+      <DirectorWelcome locale={locale} />
 
       {/* 2. Présentation rapide ("Who We Are") */}
       <WhoWeAre locale={locale} />
