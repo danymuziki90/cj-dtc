@@ -84,7 +84,7 @@ export async function proxy(request: NextRequest) {
 
   // ── 5. Student space protection
   // Public sub-pages that do NOT require authentication
-  const publicStudentPaths = ['/espace-etudiants/temoignages', '/espace-etudiants/supports']
+  const publicStudentPaths = ['/espace-etudiants/temoignages']
   const isPublicStudentPage = publicStudentPaths.some(
     (p) => pathname.includes(p)
   )
