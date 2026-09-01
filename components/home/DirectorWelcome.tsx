@@ -26,7 +26,6 @@ export default async function DirectorWelcome({ locale }: { locale: string }) {
   const isFr = locale === 'fr'
   const role = isFr ? content.titleFr : content.titleEn
   const message = isFr ? content.messageFr : content.messageEn
-  const eyebrow = isFr ? 'Mot du Directeur Général' : 'Message from the Managing Director'
   const headline = isFr
     ? 'Une direction proche de vos ambitions.'
     : 'Leadership close to your ambitions.'
@@ -77,18 +76,10 @@ export default async function DirectorWelcome({ locale }: { locale: string }) {
           {/* ── Colonne droite : Message éditorial ───────────────────────── */}
           <div className="flex flex-col justify-center">
 
-            {/* Eyebrow badge */}
-            <div className="inline-flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--cj-red)]" />
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--cj-red)] font-montserrat">
-                {eyebrow}
-              </p>
-            </div>
-
             {/* Titre éditorial */}
             <h2
               id="director-welcome-title"
-              className="mt-2.5 font-montserrat text-2xl font-black leading-tight text-slate-900 sm:text-3xl"
+              className="font-montserrat text-2xl font-black leading-tight text-slate-900 sm:text-3xl"
             >
               {headline}
             </h2>
