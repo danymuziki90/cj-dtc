@@ -20,7 +20,6 @@ import {
   ShieldCheck,
   Linkedin,
   Facebook,
-  Youtube,
   MessageCircle,
   Mail,
   Phone,
@@ -516,15 +515,6 @@ export default function Header() {
                 className="rounded-full p-1 text-slate-200 transition-colors hover:bg-[var(--cj-blue-700)] hover:text-white"
               >
                 <Linkedin className="h-3.5 w-3.5" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube CJ DTC"
-                className="rounded-full p-1 text-slate-200 transition-colors hover:bg-[var(--cj-blue-700)] hover:text-white"
-              >
-                <Youtube className="h-3.5 w-3.5" />
               </a>
               <a
                 href="https://wa.me/243810000000"

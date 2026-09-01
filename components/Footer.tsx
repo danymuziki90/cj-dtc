@@ -115,10 +115,6 @@ function SocialRow() {
         className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">
         <IconFacebook />
       </a>
-      <a href="https://www.instagram.com/CJDevelopmentCenter" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">
-        <IconInstagram />
-      </a>
       <a href="https://x.com/CJDevelopmentTC" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"
         className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">
         <IconX />
@@ -126,10 +122,6 @@ function SocialRow() {
       <a href="https://t.me/+ukOVkVi8tlA2ZTI0" target="_blank" rel="noopener noreferrer" aria-label="Telegram"
         className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">
         <IconTelegram />
-      </a>
-      <a href="https://www.youtube.com/@CJDevelopmentCenter" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">
-        <IconYouTube />
       </a>
     </div>
   )
