@@ -12,7 +12,7 @@ export default function TestimonialsAndResults({ locale }: TestimonialsAndResult
   return (
     <>
       {/* ── Bloc Résultats ─────────────────────────────────────────────── */}
-      <section className="bg-slate-900 py-12 sm:py-16 lg:py-20 text-white relative overflow-hidden">
+      <section className="bg-slate-900 py-8 sm:py-10 lg:py-12 text-white relative overflow-hidden">
         {/* Abstract design elements */}
         <div className="absolute inset-0 z-0 opacity-15">
           <div className="absolute top-1/2 -translate-y-1/2 right-0 w-96 h-96 rounded-full bg-[var(--cj-red)]/30 blur-3xl" />
@@ -20,7 +20,7 @@ export default function TestimonialsAndResults({ locale }: TestimonialsAndResult
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200 mb-3">
               {isFr ? "Mesure d'impact" : 'Impact Metrics'}
             </span>

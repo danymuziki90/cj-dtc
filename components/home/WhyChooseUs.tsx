@@ -11,9 +11,9 @@ export default function WhyChooseUs({ locale }: WhyChooseUsProps) {
   const t = publicMessages.home[locale as keyof typeof publicMessages.home] || publicMessages.home.fr
 
   return (
-    <section className="bg-white py-12 sm:py-16 lg:py-20 border-b border-slate-200">
+    <section className="bg-white py-8 sm:py-10 lg:py-12 border-b border-slate-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 sm:mb-12 text-center max-w-3xl mx-auto">
+        <div className="mb-6 sm:mb-8 text-center max-w-3xl mx-auto">
           <span className="inline-flex items-center rounded-full border border-[var(--cj-blue)]/20 bg-[var(--cj-blue-50)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-3">
             {t.whyChooseBadge}
           </span>

@@ -128,22 +128,22 @@ export default function ContactPage() {
   return (
     <div className="bg-slate-50 text-slate-900">
       {/* ── EN-TÊTE DE PAGE ──────────────────────────────────────────── */}
-      <section className="bg-white pt-10 pb-8 sm:pt-14 sm:pb-10 border-b border-slate-200">
+      <section className="bg-white pt-8 pb-6 sm:pt-10 sm:pb-8 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center max-w-3xl">
           <SectionBadge text={t.heroBadge} />
-          <h1 className="mt-2 text-3xl font-black text-slate-950 sm:text-4xl lg:text-5xl font-montserrat tracking-tight leading-tight">
+          <h1 className="mt-2 text-2xl font-black text-slate-950 sm:text-3xl lg:text-4xl font-montserrat tracking-tight leading-tight">
             {t.heroTitle}
           </h1>
-          <p className="mt-3 text-base sm:text-lg text-slate-600 font-opensans leading-relaxed">
+          <p className="mt-2 text-sm sm:text-base text-slate-600 font-opensans leading-relaxed">
             {t.heroSubtitle}
           </p>
         </div>
       </section>
 
       {/* ── SECTION 2 — CONTACT CHANNELS ─────────────────────────────────── */}
-      <section id="contact-channels" className="bg-white py-10 sm:py-14 lg:py-16 border-b border-slate-200">
+      <section id="contact-channels" className="bg-white py-8 sm:py-10 lg:py-12 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 sm:mb-10 text-center max-w-3xl mx-auto">
+          <div className="mb-6 sm:mb-8 text-center max-w-3xl mx-auto">
             <SectionBadge text={t.contactSectionBadge} />
             <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
               {t.contactSectionTitle}
@@ -205,9 +205,9 @@ export default function ContactPage() {
       </section>
 
       {/* ── SECTION 3 — HOURS + FORM ──────────────────────────────────────── */}
-      <section className="bg-slate-50 py-10 sm:py-14 lg:py-16 border-b border-slate-200">
+      <section className="bg-slate-50 py-8 sm:py-10 lg:py-12 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 lg:items-start">
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-10 lg:items-start">
 
             {/* LEFT: Hours panel */}
             <div>
@@ -414,9 +414,9 @@ export default function ContactPage() {
       </section>
 
       {/* ── SECTION 4 — WHY CONTACT US ───────────────────────────────────── */}
-      <section className="bg-white py-10 sm:py-14 lg:py-16 border-b border-slate-200">
+      <section className="bg-white py-8 sm:py-10 lg:py-12 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 sm:mb-10 text-center max-w-3xl mx-auto">
+          <div className="mb-6 sm:mb-8 text-center max-w-3xl mx-auto">
             <SectionBadge text={t.whyBadge} />
             <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
               {t.whyTitle}
@@ -432,9 +432,9 @@ export default function ContactPage() {
               return (
                 <div
                   key={card.icon}
-                  className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-slate-300"
+                  className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-slate-300"
                 >
-                  <div className="mb-3.5 flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--cj-blue)]/8 text-[var(--cj-blue)]">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--cj-blue)]/8 text-[var(--cj-blue)]">
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="mb-1.5 text-sm font-bold text-slate-900">{card.title}</h3>
@@ -447,9 +447,9 @@ export default function ContactPage() {
       </section>
 
       {/* ── SECTION 5 — FAQ ──────────────────────────────────────────────── */}
-      <section id="faq" className="bg-slate-50 py-10 sm:py-14 lg:py-16 border-b border-slate-200">
+      <section id="faq" className="bg-slate-50 py-8 sm:py-10 lg:py-12 border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 sm:mb-10 text-center max-w-3xl mx-auto">
+          <div className="mb-6 sm:mb-8 text-center max-w-3xl mx-auto">
             <SectionBadge text={t.faqBadge} />
             <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
               {t.faqTitle}
@@ -468,9 +468,9 @@ export default function ContactPage() {
       </section>
 
       {/* ── SECTION 6 — FINAL CTA ─────────────────────────────────────────── */}
-      <section className="py-10 sm:py-14 lg:py-16">
+      <section className="py-8 sm:py-10 lg:py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-[var(--cj-blue)] px-6 py-10 sm:px-12 sm:py-14 text-center shadow-xl">
+          <div className="relative overflow-hidden rounded-3xl bg-[var(--cj-blue)] px-5 py-8 sm:px-10 sm:py-12 text-center shadow-xl">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(227,6,19,0.25),transparent_50%)] pointer-events-none" />
             <div className="relative z-10 mx-auto max-w-3xl">
               <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 border border-white/20 mb-3 backdrop-blur-sm">

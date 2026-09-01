@@ -63,14 +63,14 @@ export default function NewsAndOpportunities({ locale }: NewsAndOpportunitiesPro
   if (articles.length === 0 && jobs.length === 0) return null
 
   return (
-    <section className="bg-white py-12 sm:py-16 lg:py-20 border-b border-slate-200">
+    <section className="bg-white py-8 sm:py-10 lg:py-12 border-b border-slate-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        <div className="mb-10 sm:mb-12 text-center max-w-3xl mx-auto">
-          <span className="inline-flex items-center rounded-full border border-[var(--cj-blue)]/20 bg-[var(--cj-blue)]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-3">
+        <div className="mb-6 sm:mb-8 text-center max-w-3xl mx-auto">
+          <span className="inline-flex items-center rounded-full border border-[var(--cj-blue)]/20 bg-[var(--cj-blue)]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-2">
             {isFr ? 'Actualités & Opportunités' : 'News & Opportunities'}
           </span>
-          <h2 className="text-3xl font-black text-slate-950 sm:text-4xl font-montserrat leading-tight">
+          <h2 className="text-2xl font-black text-slate-950 sm:text-3xl lg:text-4xl font-montserrat leading-tight">
             {isFr ? 'Restez connecté à ' : 'Stay connected with '}{' '}
             <span className="text-[var(--cj-red)]">
               {isFr ? "notre écosystème." : "our ecosystem."}

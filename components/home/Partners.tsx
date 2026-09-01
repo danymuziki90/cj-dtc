@@ -25,14 +25,14 @@ export default function Partners({ locale }: PartnersProps) {
 
   return (
     <section
-      className="relative bg-white py-12 sm:py-16 border-y border-slate-100 overflow-hidden"
+      className="relative bg-white py-6 sm:py-8 border-y border-slate-100 overflow-hidden"
       aria-label={isFr ? 'Nos partenaires' : 'Our partners'}
     >
       {/* Subtle gradient top accent */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--cj-blue)]/20 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--cj-blue)]/20 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center mb-8 sm:mb-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center mb-4 sm:mb-5">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
           <span className="block h-px w-6 bg-[var(--cj-blue)]/40 rounded-full" />
           {isFr ? 'Nos partenaires' : 'Our partners'}

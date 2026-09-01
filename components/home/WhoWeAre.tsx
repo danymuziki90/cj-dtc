@@ -18,12 +18,12 @@ export default function WhoWeAre({ locale }: WhoWeAreProps) {
   ]
 
   return (
-    <section className="bg-white py-12 sm:py-16 lg:py-20 overflow-hidden">
+    <section className="bg-white py-8 sm:py-10 lg:py-12 overflow-hidden border-b border-slate-100">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 lg:items-center">
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-10 lg:items-center">
           
           {/* Text Content */}
-          <div className="space-y-6 relative z-10">
+          <div className="space-y-4 relative z-10">
             <div>
               <span className="inline-flex items-center rounded-full bg-[var(--cj-blue)]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-3">
                 {isFr ? 'Qui sommes-nous' : 'Who We Are'}

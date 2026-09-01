@@ -153,9 +153,9 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
 
   if (loading) {
     return (
-      <section className="bg-gradient-to-b from-white to-gray-50 py-12 sm:py-16">
+      <section className="bg-gradient-to-b from-white to-gray-50 py-8 sm:py-10">
         <div className="container mx-auto px-4">
-          <div className="mb-8 sm:mb-10 text-center">
+          <div className="mb-6 sm:mb-8 text-center">
             <div className="mx-auto mb-3 h-8 w-1/2 animate-pulse rounded bg-gray-200" />
             <div className="mx-auto h-5 w-3/4 animate-pulse rounded bg-gray-200" />
           </div>
@@ -180,11 +180,11 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
   if (sessions.length === 0) return null
 
   return (
-    <section className={hideHeader ? '' : 'bg-gradient-to-b from-white to-gray-50 py-12 sm:py-16 lg:py-20'}>
+    <section className={hideHeader ? '' : 'bg-gradient-to-b from-white to-gray-50 py-8 sm:py-10 lg:py-12 border-b border-slate-100'}>
       <div className={hideHeader ? '' : 'container mx-auto px-4'}>
         {!hideHeader && (
-          <div className="mb-8 sm:mb-10 text-center">
-            <h2 className="mb-3 text-3xl font-bold text-cjblue font-montserrat sm:text-4xl">
+          <div className="mb-6 sm:mb-8 text-center">
+            <h2 className="mb-2 text-3xl font-bold text-cjblue font-montserrat sm:text-4xl">
               {locale === 'fr' ? 'Sessions ouvertes' : 'Open Sessions'}
             </h2>
             <p className="mx-auto max-w-2xl text-base text-gray-600 font-opensans sm:text-lg">
@@ -197,7 +197,7 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
 
         {/* Barre de recherche uniquement sur la page complète (limit === 0) */}
         {limit === 0 && (
-          <div className="mb-10 max-w-md mx-auto relative">
+          <div className="mb-8 max-w-md mx-auto relative">
             <input
               type="text"
               placeholder={locale === 'fr' ? 'Rechercher une session...' : 'Search for a session...'}
@@ -211,7 +211,7 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
           </div>
         )}
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredSessions.map((session) => {
             const availableSpots = Math.max(0, (session.maxParticipants || 0) - (session.currentParticipants || 0))
             const title = session.adminMeta?.customTitle || (locale === 'fr' ? session.formation.title : (session.formation.titleEn || session.formation.title))
@@ -221,7 +221,7 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
               <div key={session.id} className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[var(--cj-blue)]/20">
                 <div>
                   <Link href={`/${locale}/formations/${session.formation.slug}`}>
-                    <div className="relative h-56 w-full overflow-hidden bg-slate-100">
+                    <div className="relative h-52 w-full overflow-hidden bg-slate-100">
                       <img
                         src={headerImage}
                         alt={title}
@@ -236,8 +236,8 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
                     </div>
                   </Link>
 
-                  <div className="p-6">
-                    <p className="mb-2 text-xs uppercase tracking-[0.18em] text-gray-400">
+                  <div className="p-5">
+                    <p className="mb-1.5 text-xs uppercase tracking-[0.18em] text-gray-400">
                       {formatDateRange(session.startDate, session.endDate, locale)}
                     </p>
 
@@ -247,12 +247,12 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
                           {locale === 'fr' ? session.formation.title : (session.formation.titleEn || session.formation.title)}
                         </p>
                       )}
-                      <h3 className="mb-3 line-clamp-2 text-xl font-bold text-slate-900 transition-colors hover:text-[var(--cj-blue)] font-montserrat">
+                      <h3 className="mb-2 line-clamp-2 text-lg font-bold text-slate-900 transition-colors hover:text-[var(--cj-blue)] font-montserrat">
                         {title}
                       </h3>
                     </Link>
 
-                    <div className="space-y-2 text-sm text-slate-600 mb-4 font-opensans">
+                    <div className="space-y-1.5 text-xs sm:text-sm text-slate-600 mb-3 font-opensans">
                       <p className="font-semibold">{locale === 'fr' ? session.location : (session.locationEn || session.location) || (locale === 'fr' ? 'À définir' : 'TBD')}</p>
                       <p>{formatLabel(session.format, locale)} · {session.startTime} - {session.endTime}</p>
                       <p className="text-emerald-700 font-medium">
@@ -260,17 +260,17 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
                       </p>
                     </div>
 
-                    <p className="line-clamp-3 text-sm text-gray-550">
+                    <p className="line-clamp-2 text-xs sm:text-sm text-gray-500">
                       {session.description || (locale === 'fr' ? session.formation.description : (session.formation.descriptionEn || session.formation.description)) || t.fallbackDescription}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-6 pt-0">
-                  <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4">
+                <div className="p-5 pt-0">
+                  <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
                     <div>
-                      <p className="text-xs text-gray-400 uppercase tracking-wider">{locale === 'fr' ? 'Tarif' : 'Price'}</p>
-                      <p className="text-xl font-extrabold text-cjblue">{formatPrice(session.price, locale)}</p>
+                      <p className="text-[11px] text-gray-400 uppercase tracking-wider">{locale === 'fr' ? 'Tarif' : 'Price'}</p>
+                      <p className="text-lg font-extrabold text-cjblue">{formatPrice(session.price, locale)}</p>
                     </div>
                     <Link
                       href={
@@ -278,7 +278,7 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
                           ? `/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formation.id}&sessionId=${session.id}`
                           : `/${locale}/auth/student-login?next=${encodeURIComponent(`/${locale}/espace-etudiants/confirm-inscription?formationId=${session.formation.id}&sessionId=${session.id}`)}`
                       }
-                      className="rounded-lg bg-[var(--cj-red)] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#bb111d] transition-colors"
+                      className="rounded-lg bg-[var(--cj-red)] px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-[#bb111d] transition-colors"
                     >
                       {locale === 'fr' ? "S'inscrire" : 'Register'}
                     </Link>
@@ -290,10 +290,10 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
         </div>
 
         {limit > 0 && (
-          <div className="mt-12 text-center">
+          <div className="mt-8 text-center">
             <Link
               href={`/${locale}/sessions`}
-              className="inline-block rounded-lg bg-[var(--cj-blue)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--cj-red)]"
+              className="inline-block rounded-lg bg-[var(--cj-blue)] px-7 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--cj-red)]"
             >
               {locale === 'fr' ? 'Voir plus' : 'See more'}
             </Link>

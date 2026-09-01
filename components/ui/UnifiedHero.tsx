@@ -192,7 +192,19 @@ export default function UnifiedHero({
 
   return (
     <section 
-      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${isHomeHero ? 'hero-home min-h-[460px] sm:min-h-[500px] lg:min-h-[660px] xl:min-h-[720px] py-10 sm:py-12 lg:py-16' : 'hero-page'} ${effectiveCompact ? (desktopExtraTall ? 'min-h-[300px] sm:min-h-[350px] lg:min-h-[620px] xl:min-h-[680px] py-6 sm:py-8 lg:py-10' : desktopTall ? 'min-h-[300px] sm:min-h-[350px] lg:min-h-[540px] xl:min-h-[600px] py-6 sm:py-8 lg:py-10' : 'min-h-[300px] sm:min-h-[350px] lg:min-h-[400px] py-6 sm:py-8 lg:py-10') : 'min-h-[340px] sm:min-h-[400px] lg:min-h-[450px] py-8 sm:py-10 lg:py-12'}`}
+      className={`hero-bg-unified relative overflow-hidden flex flex-col justify-center w-full ${
+        isHomeHero 
+          ? 'hero-home min-h-[420px] sm:min-h-[460px] lg:min-h-[540px] xl:min-h-[580px] py-8 sm:py-10 lg:py-12' 
+          : 'hero-page'
+      } ${
+        effectiveCompact 
+          ? (desktopExtraTall 
+              ? 'min-h-[260px] sm:min-h-[300px] lg:min-h-[440px] xl:min-h-[480px] py-5 sm:py-6 lg:py-8' 
+              : desktopTall 
+                ? 'min-h-[260px] sm:min-h-[300px] lg:min-h-[400px] xl:min-h-[440px] py-5 sm:py-6 lg:py-8' 
+                : 'min-h-[240px] sm:min-h-[280px] lg:min-h-[320px] py-5 sm:py-6 lg:py-8') 
+          : 'min-h-[260px] sm:min-h-[300px] lg:min-h-[360px] py-6 sm:py-8 lg:py-10'
+      }`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -278,7 +290,7 @@ export default function UnifiedHero({
           <motion.div 
             key={currentIndex}
             className={isHomeHero
-              ? 'grid gap-10 lg:grid-cols-12 lg:items-center'
+              ? 'grid gap-8 lg:grid-cols-12 lg:items-center'
               : 'flex flex-col items-center text-center'
             }
             initial="hidden"
@@ -286,7 +298,7 @@ export default function UnifiedHero({
             exit="exit"
           >
             {/* Left Column (Text & CTAs) */}
-            <div className={`space-y-6 ${
+            <div className={`space-y-4 sm:space-y-5 ${
               isHomeHero
                 ? isSlideshow && (currentSlide.badgeFr || currentSlide.badgeEn)
                   ? 'lg:col-span-7'

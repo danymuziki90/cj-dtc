@@ -11,14 +11,14 @@ export default function FinalCTA({ locale }: FinalCTAProps) {
   const isFr = locale === 'fr'
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10 lg:py-12 sm:px-6 lg:px-8">
       <div className="relative overflow-hidden rounded-3xl bg-[var(--cj-blue)] shadow-2xl">
         {/* Background Gradients */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(227,6,19,0.3),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.1),transparent_40%)]" />
         
-        <div className="relative z-10 px-6 py-12 text-center sm:px-12 sm:py-16 lg:px-20 lg:py-16 flex flex-col items-center">
-          <span className="inline-flex items-center rounded-full bg-white/10 backdrop-blur-md px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 border border-white/20 mb-4">
+        <div className="relative z-10 px-6 py-8 text-center sm:px-10 sm:py-10 lg:px-16 lg:py-12 flex flex-col items-center">
+          <span className="inline-flex items-center rounded-full bg-white/10 backdrop-blur-md px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 border border-white/20 mb-3">
             {isFr ? 'Passez à l\'action' : 'Take Action'}
           </span>
           
