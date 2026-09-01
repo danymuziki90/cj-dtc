@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import formationIOP from '@/app/img/Formation IOP.png'
 
 interface WhoWeAreProps {
   locale: string
@@ -66,7 +67,7 @@ export default function WhoWeAre({ locale }: WhoWeAreProps) {
           <div className="relative lg:ml-auto w-full max-w-lg">
             <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-2xl">
               <Image 
-                src="/img/Formation.jpeg" 
+                src={formationIOP}
                 alt="CJ Development Training"
                 fill
                 className="object-cover transition-transform duration-700 hover:scale-105"
