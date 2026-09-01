@@ -19,9 +19,10 @@ export default function StructuredData() {
       telephone: ['+243995136626', '+243999482140', '+224626146065'],
     },
     sameAs: [
-      'https://www.linkedin.com/company/CJDevelopmentCenter',
-      'https://www.facebook.com/CJDevelopmentCenter',
-      'https://x.com/CJDevelopmentCenter',
+      'https://cd.linkedin.com/company/coach-jimanel-development',
+      'https://web.facebook.com/CoachJimanel2021/?_rdc=1&_rdr#',
+      'https://x.com/CjDevelopmentTC',
+      'https://t.me/+ukOVkVi8tlA2ZTI0',
     ],
     foundingDate: '2018',
     areaServed: {

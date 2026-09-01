@@ -41,6 +41,10 @@ function IconX() {
   )
 }
 
+function IconTelegram() {
+  return <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.78 18.65 9.95 14l8.47-7.64c.37-.34-.08-.51-.57-.21L7.39 12.76 2.88 11.35c-.97-.29-.98-.96.22-1.44L20.7 3.13c.81-.3 1.59.2 1.33 1.44l-3 14.16c-.21 1-.82 1.24-1.65.77l-4.58-3.38-2.2 2.12c-.24.24-.45.45-.82.41z" /></svg>
+}
+
 function IconYouTube() {
   return (
     <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -103,11 +107,11 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 function SocialRow() {
   return (
     <div className="flex gap-2">
-      <a href="https://www.linkedin.com/company/CJDevelopmentCenter" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
+      <a href="https://cd.linkedin.com/company/coach-jimanel-development" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
         className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">
         <IconLinkedIn />
       </a>
-      <a href="https://www.facebook.com/CJDevelopmentCenter" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+      <a href="https://web.facebook.com/CoachJimanel2021/?_rdc=1&_rdr#" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
         className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">
         <IconFacebook />
       </a>
@@ -118,6 +122,10 @@ function SocialRow() {
       <a href="https://x.com/CJDevelopmentTC" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"
         className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">
         <IconX />
+      </a>
+      <a href="https://t.me/+ukOVkVi8tlA2ZTI0" target="_blank" rel="noopener noreferrer" aria-label="Telegram"
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">
+        <IconTelegram />
       </a>
       <a href="https://www.youtube.com/@CJDevelopmentCenter" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
         className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all duration-200 hover:scale-110 hover:bg-white/20">

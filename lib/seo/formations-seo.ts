@@ -89,9 +89,10 @@ export function generateFormationStructuredData(
       url: baseUrl,
       logo: `${baseUrl}/logo.png`,
       sameAs: [
-        'https://www.facebook.com/cjdevelopment',
-        'https://www.linkedin.com/company/cjdevelopment',
-        'https://twitter.com/cjdevelopment'
+        'https://web.facebook.com/CoachJimanel2021/?_rdc=1&_rdr#',
+        'https://cd.linkedin.com/company/coach-jimanel-development',
+        'https://x.com/CjDevelopmentTC',
+        'https://t.me/+ukOVkVi8tlA2ZTI0'
       ]
     },
     educationalLevel: formation.level,

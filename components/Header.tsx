@@ -500,7 +500,7 @@ export default function Header() {
 
             <div className="flex items-center gap-3">
               <a
-                href="https://facebook.com"
+                href="https://web.facebook.com/CoachJimanel2021/?_rdc=1&_rdr#"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook CJ DTC"
@@ -509,7 +509,7 @@ export default function Header() {
                 <Facebook className="h-3.5 w-3.5" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://cd.linkedin.com/company/coach-jimanel-development"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn CJ DTC"
@@ -832,7 +832,7 @@ export default function Header() {
               {/* Social Network Quick Icons */}
               <div className="flex items-center gap-2">
                 <a
-                  href="https://linkedin.com"
+                href="https://cd.linkedin.com/company/coach-jimanel-development"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="LinkedIn CJ DTC"
@@ -841,7 +841,7 @@ export default function Header() {
                   <Linkedin className="h-4 w-4" />
                 </a>
                 <a
-                  href="https://facebook.com"
+                href="https://web.facebook.com/CoachJimanel2021/?_rdc=1&_rdr#"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook CJ DTC"
