@@ -6,37 +6,69 @@ interface PartnersProps {
   locale: string
 }
 
+// Partner images served from /public/img/partenaires/
+const PARTNER_IMAGES = [
+  { src: '/img/partenaires/image0.png',  alt: 'Partenaire CJ Development 1' },
+  { src: '/img/partenaires/image1.jpeg', alt: 'Partenaire CJ Development 2' },
+  { src: '/img/partenaires/image2.png',  alt: 'Partenaire CJ Development 3' },
+  { src: '/img/partenaires/image3.png',  alt: 'Partenaire CJ Development 4' },
+  { src: '/img/partenaires/image4.jpeg', alt: 'Partenaire CJ Development 5' },
+  { src: '/img/partenaires/image5.png',  alt: 'Partenaire CJ Development 6' },
+]
+
 export default function Partners({ locale }: PartnersProps) {
   const isFr = locale === 'fr'
 
-  const partners = [
-    'World Bank Group',
-    'UNESCO',
-    'African Union',
-    'SHRM Member',
-    'Harvard Business Publishing',
-    'Microsoft'
-  ]
+  // Duplicate the list to create a seamless infinite marquee effect
+  const items = [...PARTNER_IMAGES, ...PARTNER_IMAGES]
 
   return (
-    <section className="bg-slate-50 py-16 sm:py-20 border-b border-slate-200 overflow-hidden">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500 mb-10 font-opensans">
-          {isFr ? 'Ils soutiennent nos initiatives et certifiés' : 'They support our initiatives and graduates'}
-        </h2>
-        
-        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 lg:gap-8">
-          {partners.map((partner) => (
-            <div 
-              key={partner} 
-              className="group flex h-20 w-[160px] sm:w-[180px] items-center justify-center rounded-2xl bg-white border border-slate-200 px-4 py-4 text-sm font-bold text-slate-400 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-md hover:-translate-y-1"
+    <section
+      className="relative bg-white py-12 sm:py-16 border-y border-slate-100 overflow-hidden"
+      aria-label={isFr ? 'Nos partenaires' : 'Our partners'}
+    >
+      {/* Subtle gradient top accent */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--cj-blue)]/20 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--cj-blue)]/20 to-transparent" />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center mb-8 sm:mb-10">
+        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+          <span className="block h-px w-6 bg-[var(--cj-blue)]/40 rounded-full" />
+          {isFr ? 'Nos partenaires' : 'Our partners'}
+          <span className="block h-px w-6 bg-[var(--cj-blue)]/40 rounded-full" />
+        </span>
+      </div>
+
+      {/* Fade masks on the sides */}
+      <div
+        className="absolute inset-y-0 left-0 w-20 sm:w-32 z-10 pointer-events-none"
+        style={{ background: 'linear-gradient(to right, white 0%, transparent 100%)' }}
+      />
+      <div
+        className="absolute inset-y-0 right-0 w-20 sm:w-32 z-10 pointer-events-none"
+        style={{ background: 'linear-gradient(to left, white 0%, transparent 100%)' }}
+      />
+
+      {/* Scrolling track */}
+      <div className="overflow-hidden" aria-hidden="true">
+        <ul className="partners-marquee-track flex items-center gap-8 sm:gap-12 lg:gap-16 w-max">
+          {items.map((partner, index) => (
+            <li
+              key={index}
+              className="flex-shrink-0 flex items-center justify-center h-16 sm:h-20 lg:h-24 w-28 sm:w-36 lg:w-44 select-none"
             >
-              <span className="text-center group-hover:text-slate-700 transition-colors">
-                {partner}
-              </span>
-            </div>
+              <Image
+                src={partner.src}
+                alt={partner.alt}
+                width={176}
+                height={96}
+                className="partners-logo"
+                draggable={false}
+                unoptimized
+              />
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   )

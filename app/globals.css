@@ -1234,6 +1234,61 @@ a:hover {
   letter-spacing: -0.02em;
 }
 
+/* ── Partners Marquee ────────────────────────────────────────────────────── */
+@keyframes partnersScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.partners-marquee-track {
+  animation: partnersScroll 28s linear infinite;
+  will-change: transform;
+}
+
+/* Pause on hover for accessibility / usability */
+.partners-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Partner logo: preserve aspect ratio, no stretch */
+.partners-logo {
+  max-height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: grayscale(20%);
+  opacity: 0.85;
+  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+.partners-logo:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .partners-marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: auto;
+  }
+
+  .partners-logo {
+    transition: none;
+  }
+}
+
+/* Mobile: slightly faster & smaller gap handled via Tailwind classes in component */
+@media (max-width: 640px) {
+  .partners-marquee-track {
+    animation-duration: 20s;
+  }
+}
+
 /* Print optimization for Admin tables */
 @media print {
   header,

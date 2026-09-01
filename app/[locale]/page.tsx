@@ -7,6 +7,7 @@ import ExpertiseServices from '@/components/home/ExpertiseServices'
 import RecentSessions from '@/components/RecentSessions'
 import WhyChooseUs from '@/components/home/WhyChooseUs'
 import TestimonialsAndResults from '@/components/home/TestimonialsAndResults'
+import Partners from '@/components/home/Partners'
 import NewsAndOpportunities from '@/components/home/NewsAndOpportunities'
 import FinalCTA from '@/components/home/FinalCTA'
 
@@ -42,6 +43,9 @@ export default async function HomePage({
 
       {/* 6. Témoignages / Réalisations */}
       <TestimonialsAndResults locale={locale} />
+
+      {/* 7. Nos partenaires */}
+      <Partners locale={locale} />
 
       {/* 8. Actualités et opportunités */}
       <NewsAndOpportunities locale={locale} />
