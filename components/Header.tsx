@@ -340,7 +340,6 @@ function FullscreenNavItem({
 export default function Header() {
   const params = useParams<{ locale?: string }>()
   const pathname = usePathname() || '/fr'
-  const isHome = /^\/(fr|en)\/?$/.test(pathname) || pathname === '/' || pathname === ''
 
   const searchParams = useSearchParams()
   const locale = resolveSiteLocale(params?.locale)
@@ -693,26 +692,21 @@ export default function Header() {
           ${open ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-95'}
         `}
       >
-        {isHome ? (
-          <div className="absolute inset-0 z-0 select-none overflow-hidden pointer-events-none">
-            <Image
-              src="/lor-de-formation.jpeg"
-              alt="Hero section background"
-              fill
-              priority
-              className="object-cover object-center scale-105 filter brightness-90"
-              sizes="100vw"
-            />
-            {/* Dark Glassmorphism Overlay gradient so all navigation content is crisp and readable */}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/92 via-slate-950/88 to-slate-950/95 backdrop-blur-xl z-10" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/30 via-transparent to-black/70 z-10 pointer-events-none" />
-          </div>
-        ) : (
-          <div className="absolute inset-0 z-0 bg-[var(--cj-blue)] pointer-events-none">
-            {/* Subtle gradient for depth on mobile */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[var(--cj-blue-700)]/30 to-black/20" />
-          </div>
-        )}
+        {/* Unified background: image + glassmorphism overlay on all pages */}
+        <div className="absolute inset-0 z-0 select-none overflow-hidden pointer-events-none">
+          <Image
+            src="/lor-de-formation.jpeg"
+            alt="Menu background"
+            fill
+            priority
+            className="object-cover object-center scale-105 filter brightness-90"
+            sizes="100vw"
+          />
+          {/* Dark Glassmorphism Overlay gradient so all navigation content is crisp and readable */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/92 via-slate-950/88 to-slate-950/95 backdrop-blur-xl z-10" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/30 via-transparent to-black/70 z-10 pointer-events-none" />
+        </div>
+
 
         {/* Content Container (Layered on top of background) */}
         <div className="relative z-20 flex flex-col h-full justify-between overflow-hidden">
