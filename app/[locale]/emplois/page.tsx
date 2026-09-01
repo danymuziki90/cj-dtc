@@ -23,7 +23,7 @@ type EmploiMeta = {
   excerpt: string; status: string
 }
 type Emploi = {
-  id: string; title: string; published: boolean
+  id: string; title: string; titleEn?: string | null; published: boolean
   publicationDate: string; imageDataUrl: string | null
   tags: string[]; metadata: EmploiMeta
 }
@@ -76,7 +76,7 @@ function EmploiCard({ e, locale }: { e: Emploi; locale: string }) {
       <div className="flex flex-col flex-1 p-5 space-y-3">
         <div>
           <h2 className="font-black text-slate-900 leading-snug line-clamp-2 group-hover:text-[var(--cj-blue)] transition-colors">
-            {e.title}
+            {locale === 'en' ? e.titleEn || e.title : e.title}
           </h2>
           {e.metadata.company && (
             <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-slate-600">

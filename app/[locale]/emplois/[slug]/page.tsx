@@ -19,7 +19,7 @@ type EmploiMeta = {
   missions: string; profile: string; skills: string; excerpt: string; status: string
 }
 type Emploi = {
-  id: string; title: string; content: string; published: boolean
+  id: string; title: string; titleEn?: string | null; content: string; contentEn?: string | null; published: boolean
   publicationDate: string; imageDataUrl: string | null
   tags: string[]; metadata: EmploiMeta
 }
@@ -90,21 +90,26 @@ export default function EmploiDetailPage() {
 
   if (loading) return (
     <div className="flex min-h-screen items-center justify-center text-slate-400 gap-2">
-      <Loader2 className="h-8 w-8 animate-spin" /> Chargement…
+      <Loader2 className="h-8 w-8 animate-spin" /> {locale === 'fr' ? 'Chargement…' : 'Loading…'}
     </div>
   )
 
   if (error || !emploi) return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 text-slate-600">
       <AlertCircle className="h-12 w-12 text-red-400" />
-      <p className="font-bold text-xl">{error || 'Offre introuvable.'}</p>
+      <p className="font-bold text-xl">{error || (locale === 'fr' ? 'Offre introuvable.' : 'Job offer not found.')}</p>
       <Link href={`/${locale}/emplois`} className="inline-flex items-center gap-2 rounded-xl bg-[var(--cj-blue)] px-5 py-2.5 text-sm font-bold text-white">
-        <ArrowLeft className="h-4 w-4" /> Retour aux offres
+        <ArrowLeft className="h-4 w-4" /> {locale === 'fr' ? 'Retour aux offres' : 'Back to jobs'}
       </Link>
     </div>
   )
 
   const m = emploi.metadata
+  const title = locale === 'en' ? emploi.titleEn || emploi.title : emploi.title
+  const content = locale === 'en' ? emploi.contentEn || emploi.content : emploi.content
+  const copy = locale === 'fr'
+    ? { back: 'Retour aux offres', deadline: 'Limite', description: 'Description du poste', missions: 'Missions principales', profile: 'Profil recherché', skills: 'Compétences requises', where: 'Où postuler', how: 'Comment postuler' }
+    : { back: 'Back to jobs', deadline: 'Deadline', description: 'Job description', missions: 'Key responsibilities', profile: 'Candidate profile', skills: 'Required skills', where: 'Where to apply', how: 'How to apply' }
   const days = m.deadline ? daysUntil(m.deadline) : null
   const urgent = days !== null && days <= 7 && days >= 0
   const expired = days !== null && days < 0
@@ -127,7 +132,7 @@ export default function EmploiDetailPage() {
             {urgent && <span className="rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold animate-pulse">⚡ Expire bientôt</span>}
             {expired && <span className="rounded-full bg-slate-500/80 px-3 py-1 text-xs font-bold">Expirée</span>}
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black leading-tight mb-3">{emploi.title}</h1>
+          <h1 className="text-3xl sm:text-4xl font-black leading-tight mb-3">{title}</h1>
           {m.company && (
             <p className="flex items-center gap-2 text-white/80 text-base font-semibold">
               <Building2 className="h-5 w-5" />{m.company}
@@ -136,7 +141,7 @@ export default function EmploiDetailPage() {
           <div className="mt-4 flex flex-wrap gap-4 text-sm text-white/70">
             {m.location && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-[var(--cj-red)]" />{m.location}</span>}
             {m.domain   && <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4" />{m.domain}</span>}
-            {m.deadline && <span className={`flex items-center gap-1.5 ${urgent ? 'text-red-300 font-semibold' : ''}`}><Calendar className="h-4 w-4" />Limite : {formatDate(m.deadline, locale)}</span>}
+            {m.deadline && <span className={`flex items-center gap-1.5 ${urgent ? 'text-red-300 font-semibold' : ''}`}><Calendar className="h-4 w-4" />{copy.deadline}: {formatDate(m.deadline, locale)}</span>}
           </div>
         </div>
       </div>
@@ -144,43 +149,43 @@ export default function EmploiDetailPage() {
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <Breadcrumbs items={[
           { label: "Offres d'emploi", href: `/${locale}/emplois` },
-          { label: emploi.title },
+          { label: title },
         ]} />
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* ── Left column: main content ── */}
           <div className="lg:col-span-2 space-y-5">
             {/* Description */}
-            <Section title="Description du poste" icon={Briefcase}>
-              <RichContent html={emploi.content} />
+            <Section title={copy.description} icon={Briefcase}>
+              <RichContent html={content} />
             </Section>
 
             {m.missions?.trim() && (
-              <Section title="Missions principales" icon={CheckCircle2}>
+              <Section title={copy.missions} icon={CheckCircle2}>
                 <RichContent html={m.missions} />
               </Section>
             )}
 
             {m.profile?.trim() && (
-              <Section title="Profil recherché" icon={Users}>
+              <Section title={copy.profile} icon={Users}>
                 <RichContent html={m.profile} />
               </Section>
             )}
 
             {m.skills?.trim() && (
-              <Section title="Compétences requises" icon={GraduationCap}>
+              <Section title={copy.skills} icon={GraduationCap}>
                 <RichContent html={m.skills} />
               </Section>
             )}
 
             {m.whereToApply?.trim() && (
-              <Section title="Où postuler" icon={MapPin}>
+              <Section title={copy.where} icon={MapPin}>
                 <p className="text-sm text-slate-600 leading-relaxed">{m.whereToApply}</p>
               </Section>
             )}
 
             {m.howToApply?.trim() && (
-              <Section title="Comment postuler" icon={ArrowRight}>
+              <Section title={copy.how} icon={ArrowRight}>
                 <RichContent html={m.howToApply} />
               </Section>
             )}

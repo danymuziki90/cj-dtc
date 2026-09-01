@@ -53,7 +53,9 @@ export type EmploiMetadata = z.infer<typeof emploiMetadataSchema>
 
 export const emploiWriteSchema = z.object({
   title:           z.string().trim().min(3).max(180),
+  titleEn:         z.string().trim().max(180).optional().nullable(),
   content:         z.string().trim().min(10),
+  contentEn:       z.string().trim().optional().nullable(),
   tags:            z.array(z.string().trim().min(1).max(40)).max(15).optional(),
   publicationDate: z.string().optional().nullable().or(z.literal('')),
   imageDataUrl:    z.string().trim().optional().nullable(),
@@ -166,7 +168,9 @@ export function mapEmploi(item: any) {
     id:              item.id,
     slug:            item.slug || generateSlug(item.title),
     title:           item.title,
+    titleEn:         item.titleEn || null,
     content:         item.content,
+    contentEn:       item.contentEn || null,
     published:       item.published,
     author:          item.author || 'Admin',
     tags:            parseTags(item.tags),
