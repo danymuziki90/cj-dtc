@@ -25,19 +25,29 @@ export default function Partners({ locale }: PartnersProps) {
 
   return (
     <section
-      className="relative bg-white py-6 sm:py-8 border-y border-slate-100 overflow-hidden"
-      aria-label={isFr ? 'Nos partenaires' : 'Our partners'}
+      className="relative bg-white py-8 sm:py-10 lg:py-14 border-y border-slate-100 overflow-hidden"
+      aria-labelledby="partners-section-title"
     >
       {/* Subtle gradient top accent */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--cj-blue)]/20 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--cj-blue)]/20 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center mb-4 sm:mb-5">
-        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
-          <span className="block h-px w-6 bg-[var(--cj-blue)]/40 rounded-full" />
-          {isFr ? 'Nos partenaires' : 'Our partners'}
-          <span className="block h-px w-6 bg-[var(--cj-blue)]/40 rounded-full" />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center mb-8 sm:mb-10 max-w-3xl">
+        <span className="inline-flex items-center rounded-full border border-[var(--cj-blue)]/20 bg-[var(--cj-blue-50)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cj-blue)] mb-3">
+          {isFr ? 'Réseau & Collaborations' : 'Network & Collaborations'}
         </span>
+        <h2
+          id="partners-section-title"
+          className="text-3xl font-black text-slate-950 sm:text-4xl lg:text-5xl font-montserrat leading-tight"
+        >
+          {isFr ? 'Nos Partenaires ' : 'Our Strategic '}
+          <span className="text-[var(--cj-blue)]">{isFr ? 'Stratégiques' : 'Partners'}</span>
+        </h2>
+        <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 font-opensans leading-relaxed">
+          {isFr
+            ? 'Ils font confiance à CJ Development Training Center pour accompagner la montée en compétences et la transformation de leurs équipes.'
+            : 'They trust CJ Development Training Center to empower their teams and elevate their professional skills.'}
+        </p>
       </div>
 
       {/* Fade masks on the sides */}
