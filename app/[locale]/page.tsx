@@ -38,7 +38,7 @@ export default async function HomePage({
       <ExpertiseServices locale={locale} />
 
       {/* 4. Nos formations / Sessions ouvertes */}
-      <RecentSessions />
+      <RecentSessions limit={3} />
 
       {/* 5. Pourquoi nous choisir ? */}
       <WhyChooseUs locale={locale} />

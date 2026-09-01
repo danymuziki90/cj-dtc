@@ -87,14 +87,18 @@ function selectSessions(data: SessionItem[], limit: number) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // Filtrer uniquement pour les sessions ouvertes (statut ouverte ou open)
+  // Aperçu public : uniquement les inscriptions encore ouvertes et non terminées.
+  // `createdAt` détermine les dernières sessions publiées sur l'accueil.
   const openSessions = data
     .filter((session) => {
       const status = (session.status || '').toLowerCase()
-      return status === 'ouverte' || status === 'open'
+      const endDate = new Date(session.endDate)
+      return (status === 'ouverte' || status === 'open') && !Number.isNaN(endDate.getTime()) && endDate >= today
     })
     .sort((a, b) => {
-      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+      return limit > 0
+        ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        : new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     })
 
   return limit > 0 ? openSessions.slice(0, limit) : openSessions
@@ -132,7 +136,7 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
       .then((res) => {
         if (res.ok) setIsLoggedIn(true)
       })
-  }, [])
+  }, [limit])
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -288,10 +292,10 @@ export default function RecentSessions({ limit = 6, hideHeader = false }: { limi
         {limit > 0 && (
           <div className="mt-12 text-center">
             <Link
-              href={`/${locale}/formations`}
+              href={`/${locale}/sessions`}
               className="inline-block rounded-lg bg-[var(--cj-blue)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--cj-red)]"
             >
-              {locale === 'fr' ? 'Voir toutes les sessions' : 'View all sessions'}
+              {locale === 'fr' ? 'Voir plus' : 'See more'}
             </Link>
           </div>
         )}
