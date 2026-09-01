@@ -377,7 +377,7 @@ export default function AdminWorkspace({ children }: AdminWorkspaceProps) {
       </nav>
 
       {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
-      <main className="relative mx-auto w-full max-w-screen-2xl flex-1 px-3 py-4 sm:px-4 sm:py-6 md:px-6 xl:px-8 xl:py-8">
+      <main className="relative mx-auto w-full min-w-0 max-w-screen-2xl flex-1 px-3 py-4 sm:px-4 sm:py-6 md:px-6 xl:px-8 xl:py-8">
         {children}
       </main>
 

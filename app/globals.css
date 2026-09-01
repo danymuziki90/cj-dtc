@@ -143,6 +143,54 @@ body:not(.admin-theme) main h3 {
   background: linear-gradient(180deg, #ffffff 0%, var(--admin-surface) 100%);
 }
 
+/* Responsive foundation for every Admin route.  Page-specific layouts retain
+   their desktop presentation while shared content remains usable in narrow
+   viewports, including dynamic tables and modal dialogs. */
+.admin-theme,
+.admin-theme main,
+.admin-theme main > * {
+  min-width: 0;
+}
+
+.admin-theme main :is(img, video, canvas) {
+  max-width: 100%;
+  height: auto;
+}
+
+.admin-theme main :is(input, select, textarea, [contenteditable='true']) {
+  max-width: 100%;
+}
+
+.admin-theme main :is(div, section, article):has(> table) {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-theme main :is(div, section, article):has(> table) > table {
+  min-width: 100%;
+  width: max-content;
+}
+
+.admin-theme main .overflow-x-auto {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  .admin-theme .fixed.inset-0 {
+    padding: 0.75rem;
+  }
+
+  .admin-theme .fixed.inset-0 > :not(.absolute) {
+    max-width: 100%;
+    max-height: calc(100dvh - 1.5rem);
+    overflow-y: auto;
+  }
+}
+
 .admin-theme .bg-blue-50 {
   background-color: var(--admin-primary-50) !important;
 }
