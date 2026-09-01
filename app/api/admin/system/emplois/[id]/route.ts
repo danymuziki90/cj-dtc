@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   if (!parsed.success)
     return NextResponse.json({ error: 'Données invalides.', details: parsed.error.flatten().fieldErrors }, { status: 400 })
 
-  const { title, content, tags, publicationDate, imageDataUrl, published, metadata } = parsed.data
+  const { title, titleEn, content, contentEn, tags, publicationDate, imageDataUrl, published, metadata } = parsed.data
 
   const sanitized = sanitizeHtml(content)
   if (sanitized.length < 10)
@@ -59,7 +59,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       where: { id },
       data: {
         title,
+        titleEn: titleEn || null,
         content: sanitized,
+        contentEn: contentEn ? sanitizeHtml(contentEn) : null,
         published: isPublished,
         author: (auth.admin as any).username || 'Admin',
         category: EMPLOIS_CATEGORY,
@@ -119,7 +121,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const newRow = await prisma.news.create({
       data: {
         title: `[Copie] ${existing.title}`,
+        titleEn: existing.titleEn ? `[Copy] ${existing.titleEn}` : null,
         content: existing.content,
+        contentEn: existing.contentEn,
         published: false,
         author: (auth.admin as any).username || 'Admin',
         category: EMPLOIS_CATEGORY,

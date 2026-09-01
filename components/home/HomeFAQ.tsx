@@ -79,18 +79,27 @@ export default function HomeFAQ({ locale }: HomeFAQProps) {
 
   useEffect(() => {
     let mounted = true
+    setItems(fallbackFaq[language])
+    setOpenIndex(0)
 
     fetch('/api/faq')
       .then((response) => (response.ok ? response.json() : []))
       .then((data) => {
-        if (mounted && Array.isArray(data) && data.length > 0) setItems(data)
+        if (!mounted || !Array.isArray(data)) return
+
+        // English must never silently display an untranslated French record.
+        const localizedItems = language === 'en'
+          ? data.filter((item: FAQItem) => item.questionEn?.trim() && item.answerEn?.trim())
+          : data
+
+        if (localizedItems.length > 0) setItems(localizedItems)
       })
       .catch(() => undefined)
 
     return () => {
       mounted = false
     }
-  }, [])
+  }, [language])
 
   const text =
     language === 'fr'
@@ -167,10 +176,8 @@ export default function HomeFAQ({ locale }: HomeFAQProps) {
           <div className="space-y-3">
             {items.map((item, index) => {
               const isOpen = openIndex === index
-              const question =
-                language === 'en' ? item.questionEn || item.question : item.question
-              const answer =
-                language === 'en' ? item.answerEn || item.answer : item.answer
+              const question = language === 'en' ? item.questionEn! : item.question
+              const answer = language === 'en' ? item.answerEn! : item.answer
               const icon = faqIcons[index % faqIcons.length]
 
               return (

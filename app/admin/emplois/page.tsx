@@ -18,7 +18,7 @@ type EmploiMeta = {
   missions: string; profile: string; skills: string; status: string; excerpt: string
 }
 type Emploi = {
-  id: string; title: string; content: string; published: boolean
+  id: string; title: string; titleEn?: string | null; content: string; contentEn?: string | null; published: boolean
   publicationDate: string; createdAt: string; imageDataUrl: string | null
   tags: string[]; metadata: EmploiMeta
 }
@@ -26,7 +26,7 @@ type Pagination = { page: number; pageSize: number; total: number; pageCount: nu
 
 // ─── Form state ───────────────────────────────────────────────────────────────
 type FormState = {
-  title: string; content: string; tagsInput: string
+  title: string; titleEn: string; content: string; contentEn: string; tagsInput: string
   publicationDate: string; imageDataUrl: string | null; published: boolean
   company: string; contractType: string; location: string; remote: string
   domain: string; educationLevel: string; experience: string; salary: string
@@ -46,7 +46,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 function emptyForm(): FormState {
   return {
-    title: '', content: '', tagsInput: '', published: false,
+    title: '', titleEn: '', content: '', contentEn: '', tagsInput: '', published: false,
     publicationDate: new Date().toISOString().slice(0, 10),
     imageDataUrl: null,
     company: '', contractType: '', location: '', remote: 'non',
@@ -60,7 +60,9 @@ function emptyForm(): FormState {
 function formToPayload(f: FormState, status: string) {
   return {
     title: f.title.trim(),
+    titleEn: f.titleEn.trim() || null,
     content: f.content.trim() || '<p>Description du poste.</p>',
+    contentEn: f.contentEn.trim() || null,
     tags: f.tagsInput.split(',').map(t => t.trim()).filter(Boolean),
     publicationDate: f.publicationDate,
     imageDataUrl: f.imageDataUrl,
@@ -152,7 +154,7 @@ export default function AdminEmploisPage() {
     setEditingId(e.id)
     setFormStatus(e.metadata.status || (e.published ? 'published' : 'draft'))
     setForm({
-      title: e.title, content: e.content,
+      title: e.title, titleEn: e.titleEn || '', content: e.content, contentEn: e.contentEn || '',
       tagsInput: e.tags.join(', '),
       publicationDate: e.publicationDate.slice(0, 10),
       imageDataUrl: e.imageDataUrl || null,
@@ -255,6 +257,9 @@ export default function AdminEmploisPage() {
               <Field label="Titre du poste" required>
                 <input className={inputCls} value={form.title} onChange={f('title')} required placeholder="Ex : Développeur Full Stack" />
               </Field>
+              <Field label="Job title (EN)">
+                <input className={inputCls} value={form.titleEn} onChange={f('titleEn')} placeholder="E.g. Full Stack Developer" />
+              </Field>
               <Field label="Entreprise">
                 <input className={inputCls} value={form.company} onChange={f('company')} placeholder="Nom de l'entreprise" />
               </Field>
@@ -307,6 +312,9 @@ export default function AdminEmploisPage() {
             </Field>
             <Field label="Description complète" required>
               <textarea className={textareaCls} value={form.content} onChange={f('content')} rows={5} required placeholder="Description complète du poste…" />
+            </Field>
+            <Field label="Full description (EN)">
+              <textarea className={textareaCls} value={form.contentEn} onChange={f('contentEn')} rows={5} placeholder="Full job description…" />
             </Field>
             <Field label="Missions principales">
               <textarea className={textareaCls} value={form.missions} onChange={f('missions')} rows={4} placeholder="• Mission 1&#10;• Mission 2…" />
