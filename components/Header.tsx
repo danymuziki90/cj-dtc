@@ -428,12 +428,6 @@ export default function Header() {
             description: locale === 'fr' ? 'Articles, guides et annonces officielles' : 'Articles, guides and announcements',
             icon: Newspaper,
           },
-          {
-            href: `/${locale}/partenaires`,
-            label: labels.partners,
-            description: locale === 'fr' ? 'Nos entreprises et institutions partenaires' : 'Our partner companies & institutions',
-            icon: Users,
-          },
         ],
       },
       {

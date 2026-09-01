@@ -226,17 +226,11 @@ export default function Footer() {
                     {t.links.studentSpace}
                   </Link>
                 </li>
-                <li>
-                  <Link href={`/${locale}/partenaires`} className="group inline-flex items-center gap-1.5 text-xs text-gray-300 transition-colors duration-200 hover:text-white">
-                    <IconChevronRight />
-                    {t.links.partners}
-                  </Link>
-                </li>
               </ul>
             </div>
 
             {/* Col 4 — Contact */}
-            <div>
+            <div className="lg:col-span-2">
               <SectionHeading>{t.sections.contact}</SectionHeading>
               <ul className="space-y-4">
                 <li>

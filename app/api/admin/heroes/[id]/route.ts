@@ -42,7 +42,6 @@ const REVALIDATE_PATHS: Record<string, string[]> = {
   contact:     ['/fr/contact', '/en/contact'],
   emplois:     ['/fr/emplois', '/en/emplois'],
   galerie:     ['/fr/galerie', '/en/galerie'],
-  partenaires: ['/fr/partenaires', '/en/partenaires'],
 }
 
 /** GET /api/admin/heroes/[id] — Détail d'un hero */
