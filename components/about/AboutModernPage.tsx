@@ -29,7 +29,7 @@ type AboutModernPageProps = {
 const PROOF_STATS = [
   { value: '8 500+', label: 'Apprenants formés',    labelEn: 'Learners trained',      icon: Users },
   { value: '10+',    label: 'Pays couverts',         labelEn: 'Countries reached',     icon: Globe2 },
-  { value: '2018',   label: 'Année de fondation',    labelEn: 'Founded',               icon: TargetIcon },
+  { value: '2018',   label: 'Année de création',    labelEn: 'Year of creation',       icon: TargetIcon },
   { value: '95%',    label: 'Taux de satisfaction',  labelEn: 'Satisfaction rate',     icon: Award },
   { value: '29+',    label: 'Promotions certifiées', labelEn: 'Certified cohorts',     icon: GraduationCap },
   { value: '85%',    label: "Taux d'insertion",      labelEn: 'Placement rate',        icon: TrendingUp },
