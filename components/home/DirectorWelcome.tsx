@@ -57,9 +57,11 @@ export default async function DirectorWelcome({ locale }: { locale: string }) {
               {/* Badge flottant */}
               <div className="absolute bottom-6 left-6 right-6">
                 <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-4 shadow-lg">
-                  <p className="text-white font-bold font-montserrat text-sm sm:text-base">
-                    {content.name}
-                  </p>
+                  {content.name && (
+                    <p className="text-white font-bold font-montserrat text-sm sm:text-base">
+                      {content.name}
+                    </p>
+                  )}
                   <p className="text-white/80 text-xs mt-0.5">
                     {role}
                   </p>
@@ -107,9 +109,11 @@ export default async function DirectorWelcome({ locale }: { locale: string }) {
             {/* Signature épurée */}
             <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
               <div>
-                <p className="font-montserrat text-sm font-bold text-slate-900">
-                  {content.name}
-                </p>
+                {content.name && (
+                  <p className="font-montserrat text-sm font-bold text-slate-900">
+                    {content.name}
+                  </p>
+                )}
                 <p className="text-xs font-semibold text-[var(--cj-blue)]">
                   {role}
                 </p>
