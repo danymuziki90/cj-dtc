@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Header from './Header'
 import Footer from './Footer'
+import PageTransition from './PageTransition'
 
 /**
  * Detect if the current route is strictly the Home Page.
@@ -31,7 +32,11 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
       <main className={isAdmin ? '' : 'pt-[70px] lg:pt-[108px]'}>
         {isAdmin || isEspaceEtudiant ? (
           children
-        ) : <div className="w-full flex-1">{children}</div>}
+        ) : (
+          <PageTransition>
+            <div className="w-full flex-1">{children}</div>
+          </PageTransition>
+        )}
       </main>
       {!isAdmin && <Footer />}
     </>

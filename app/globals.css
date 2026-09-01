@@ -40,6 +40,34 @@
 }
 
 
+/* ── Animation Transition de Page ───────────────────────────────────────────
+   Déclenchée à chaque changement de route via PageTransition.tsx.
+   Le contenu de la page apparaît avec un fade + légère translation vers le haut.
+──────────────────────────────────────────────────────────────────────────── */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.page-transition-enter {
+  animation: page-enter 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Accessibilité : désactive la transition de page si l'utilisateur le préfère */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter {
+    animation: none !important;
+  }
+}
+
+
+
 /* ── Typographie et Justification des Paragraphes Côté Client ─────────────────────── */
 body:not(.admin-theme) main p {
   text-align: justify;
