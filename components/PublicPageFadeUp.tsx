@@ -15,8 +15,14 @@ export default function PublicPageFadeUp({ children }: { children: ReactNode }) 
     const container = containerRef.current
     if (!container || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const sections = Array.from(container.querySelectorAll<HTMLElement>('section, article'))
-      .filter((element) => !element.matches('.hero-bg-unified, [data-no-fade-up]'))
+    const sections = Array.from(
+      container.querySelectorAll<HTMLElement>('section, article, [data-fade-up-target]')
+    ).filter((element) => {
+      // Le hero, l'en-tête et le footer conservent leurs propres comportements.
+      // Les autres sections et groupes marqués explicitement partagent cette animation.
+      return !element.matches('.hero-bg-unified, [data-no-fade-up]')
+        && !element.closest('header, footer, nav, [data-no-fade-up]')
+    })
 
     if (!sections.length) return
 
