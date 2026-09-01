@@ -14,6 +14,7 @@ const PARTNER_IMAGES = [
   { src: '/img/partenaires/image3.png',  alt: 'Partenaire CJ Development 4' },
   { src: '/img/partenaires/image4.jpeg', alt: 'Partenaire CJ Development 5' },
   { src: '/img/partenaires/image6.png',  alt: 'Partenaire CJ Development 6' },
+  { src: '/img/partenaires/image7.jpg',  alt: 'Partenaire CJ Development 7' },
 ]
 
 export default function Partners({ locale }: PartnersProps) {
