@@ -226,14 +226,14 @@ export function renderBrandedEmailLayout(options: BrandedEmailLayoutOptions) {
 
 export function resolveAppBaseUrl(requestUrl?: string) {
   const fromEnv =
-    process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_RES_URL || process.env.NEXTAUTH_URL
+    process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_RES_URL || process.env.NEXTAUTH_URL
 
   if (fromEnv) {
     return fromEnv.replace(/\/+$/, '')
   }
 
   if (process.env.NODE_ENV === 'production') {
-    throw new Error('APP_URL_MISSING: NEXT_PUBLIC_APP_URL (ou NEXTAUTH_URL) doit etre configuree en production.')
+    throw new Error('APP_URL_MISSING: APP_URL (ou NEXTAUTH_URL) doit etre configuree en production.')
   }
 
   if (requestUrl) {
@@ -657,7 +657,7 @@ export async function sendRejectionEmail(email: string, formationTitle: string, 
 }
 
 export async function sendAssignmentGradedEmail(email: string, assignmentTitle: string, grade: number, feedback?: string | null) {
-  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const appBaseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
   const safeAssignmentTitle = escapeHtml(assignmentTitle)
   const safeFeedback = feedback ? escapeHtml(feedback) : null
   const subject = `Votre travail "${assignmentTitle}" a ete note`

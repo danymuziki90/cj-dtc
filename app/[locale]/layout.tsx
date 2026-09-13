@@ -11,7 +11,7 @@ interface LayoutProps {
   params: Promise<{ locale: string }>
 }
 
-const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://www.cjdevelopmenttc.org').replace(/\/$/, '')
+const APP_URL = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.cjdevelopmenttc.org').replace(/\/$/, '')
 
 import { buildMetadata } from '@/lib/seo-config'
 

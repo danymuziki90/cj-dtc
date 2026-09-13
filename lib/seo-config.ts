@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-export const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://www.cjdevelopmenttc.org').replace(/\/$/, '')
+export const APP_URL = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.cjdevelopmenttc.org').replace(/\/$/, '')
 export const DEFAULT_SITE_NAME = 'CJ DEVELOPMENT TRAINING CENTER'
 export const DEFAULT_SITE_NAME_DISPLAY = 'CJ Development Training Center'
 export const DEFAULT_OG_IMAGE = `${APP_URL}/logo.png`
