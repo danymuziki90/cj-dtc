@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 
-export const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://cjdevelopmenttc.com').replace(/\/$/, '')
-export const DEFAULT_SITE_NAME = 'CJ Development Training Center'
+export const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://www.cjdevelopmenttc.org').replace(/\/$/, '')
+export const DEFAULT_SITE_NAME = 'CJ DEVELOPMENT TRAINING CENTER'
+export const DEFAULT_SITE_NAME_DISPLAY = 'CJ Development Training Center'
 export const DEFAULT_OG_IMAGE = `${APP_URL}/logo.png`
 
 export interface SEOProps {
@@ -53,9 +54,9 @@ export function buildMetadata({
     title: fullTitle,
     description: description.trim(),
     keywords: combinedKeywords,
-    authors: [{ name: DEFAULT_SITE_NAME }],
-    creator: DEFAULT_SITE_NAME,
-    publisher: DEFAULT_SITE_NAME,
+    authors: [{ name: DEFAULT_SITE_NAME_DISPLAY }],
+    creator: DEFAULT_SITE_NAME_DISPLAY,
+    publisher: DEFAULT_SITE_NAME_DISPLAY,
     metadataBase: new URL(APP_URL),
     alternates: {
       canonical: canonicalUrl,
@@ -65,6 +66,7 @@ export function buildMetadata({
       description: description.trim(),
       url: canonicalUrl,
       siteName: DEFAULT_SITE_NAME,
+      // og:site_name set to official brand name (replaces Vercel header on Google)
       images: [
         {
           url: imageUrl,

@@ -13,6 +13,38 @@ import NewsAndOpportunities from '@/components/home/NewsAndOpportunities'
 import HomeFAQ from '@/components/home/HomeFAQ'
 import FinalCTA from '@/components/home/FinalCTA'
 
+import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo-config'
+
+// Métadonnées spécifiques de la page d'accueil — priorité absolue sur Google
+export const metadata: Metadata = {
+  ...buildMetadata({
+    title: 'CJ Development Training Center | Formation Professionnelle Panafricaine',
+    description:
+      'Centre panafricain d\'excellence en formation professionnelle, RH, leadership et insertion. Formations certifiantes en ligne et présentiel depuis 2018.',
+    keywords: [
+      'CJ Development Training Center',
+      'CJ DTC',
+      'formation professionnelle',
+      'leadership',
+      'ressources humaines',
+      'employabilité',
+      'Afrique',
+      'certification',
+    ],
+    path: '/fr',
+    noIndex: false,
+  }),
+  alternates: {
+    canonical: 'https://www.cjdevelopmenttc.org/fr',
+    languages: {
+      fr: 'https://www.cjdevelopmenttc.org/fr',
+      en: 'https://www.cjdevelopmenttc.org/en',
+      'x-default': 'https://www.cjdevelopmenttc.org/fr',
+    },
+  },
+}
+
 export const revalidate = 60
 
 export default async function HomePage({

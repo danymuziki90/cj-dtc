@@ -9,14 +9,14 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 const inter = Inter({ subsets: ['latin'], fallback: ['system-ui', 'Arial', 'sans-serif'] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://cjdevelopmenttc.com'),
+  metadataBase: new URL('https://www.cjdevelopmenttc.org'),
   title: {
-    default: 'CJ DEVELOPMENT TRAINING CENTER',
+    default: 'CJ Development Training Center | Formation Professionnelle Panafricaine',
     template: '%s | CJ DTC',
   },
   description:
     'Centre panafricain de formation professionnelle en RH, leadership et employabilite. Formations certifiantes en ligne, hybride et presentiel depuis 2018.',
-  keywords: ['formation professionnelle', 'leadership', 'RH', 'emploi', 'Afrique', 'certification'],
+  keywords: ['formation professionnelle', 'leadership', 'RH', 'emploi', 'Afrique', 'certification', 'CJ Development Training Center', 'CJ DTC'],
   authors: [{ name: 'CJ Development Training Center' }],
   creator: 'CJ Development Training Center',
   publisher: 'CJ Development Training Center',
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    url: 'https://cjdevelopmenttc.com',
-    siteName: 'CJ Development Training Center',
-    title: 'CJ Development Training Center',
+    url: 'https://www.cjdevelopmenttc.org',
+    siteName: 'CJ DEVELOPMENT TRAINING CENTER',
+    title: 'CJ Development Training Center | Formation Professionnelle Panafricaine',
     description:
       'Formations certifiantes en RH, leadership et employabilite pour etudiants, professionnels et entreprises.',
     images: [
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CJ Development Training Center',
+    title: 'CJ Development Training Center | Formation Professionnelle Panafricaine',
     description: 'Batir des competences. Transformer des destins.',
     images: ['/logo.png'],
   },
@@ -54,11 +54,27 @@ export const metadata: Metadata = {
   },
 }
 
+// Schema.org WebSite — remplace l'en-tête Vercel sur Google par le nom de marque officiel
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'CJ DEVELOPMENT TRAINING CENTER',
+  alternateName: 'CJ DTC',
+  url: 'https://www.cjdevelopmenttc.org',
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   const gaId = process.env.NEXT_PUBLIC_GA_ID
 
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        {/* Schema.org WebSite — positionne le nom de marque officiel dans les résultats Google */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+      </head>
       <body className={inter.className}>
         {gaId && <GoogleAnalytics gaId={gaId} />}
         <PublicPageFadeUp>{children}</PublicPageFadeUp>

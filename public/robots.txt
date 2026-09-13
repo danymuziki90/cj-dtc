@@ -1,0 +1,17 @@
+# robots.txt — CJ Development Training Center
+# https://www.cjdevelopmenttc.org
+
+User-agent: *
+Allow: /
+
+# Exclure les routes d'authentification (connexion, inscription, réinitialisation)
+Disallow: /auth/
+Disallow: /fr/auth/
+Disallow: /en/auth/
+
+# Exclure l'administration et les APIs internes
+Disallow: /admin/
+Disallow: /api/
+
+# Sitemap officiel
+Sitemap: https://www.cjdevelopmenttc.org/sitemap.xml

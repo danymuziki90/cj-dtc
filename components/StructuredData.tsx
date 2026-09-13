@@ -2,10 +2,10 @@ export default function StructuredData() {
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'EducationalOrganization',
-    name: 'CJ Development Training Center',
+    name: 'CJ DEVELOPMENT TRAINING CENTER',
     alternateName: 'CJ DTC',
-    url: 'https://cjdevelopmenttc.com',
-    logo: 'https://cjdevelopmenttc.com/logo.png',
+    url: 'https://www.cjdevelopmenttc.org',
+    logo: 'https://www.cjdevelopmenttc.org/logo.png',
     description: 'Centre Panafricain de Formation Professionnelle, Leadership et Insertion',
     address: {
       '@type': 'PostalAddress',
@@ -34,13 +34,14 @@ export default function StructuredData() {
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'CJ Development Training Center',
-    url: 'https://cjdevelopmenttc.com',
+    name: 'CJ DEVELOPMENT TRAINING CENTER',
+    alternateName: 'CJ DTC',
+    url: 'https://www.cjdevelopmenttc.org',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://cjdevelopmenttc.com/search?q={search_term_string}',
+        urlTemplate: 'https://www.cjdevelopmenttc.org/search?q={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },

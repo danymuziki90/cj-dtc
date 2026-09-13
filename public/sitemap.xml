@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap.xml — CJ Development Training Center
+  URL officielle : https://www.cjdevelopmenttc.org
+  Ce fichier est un sitemap de référence statique.
+  Le sitemap dynamique complet (avec formations et actualités) est généré par Next.js : /sitemap.xml
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Page d'accueil — priorité maximale -->
+  <url>
+    <loc>https://www.cjdevelopmenttc.org/</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.cjdevelopmenttc.org/fr"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.cjdevelopmenttc.org/en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.cjdevelopmenttc.org/fr"/>
+  </url>
+
+  <!-- Version française de la page d'accueil -->
+  <url>
+    <loc>https://www.cjdevelopmenttc.org/fr</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Formations -->
+  <url>
+    <loc>https://www.cjdevelopmenttc.org/fr/formations</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Programmes -->
+  <url>
+    <loc>https://www.cjdevelopmenttc.org/fr/programmes</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- À propos -->
+  <url>
+    <loc>https://www.cjdevelopmenttc.org/fr/about</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Actualités -->
+  <url>
+    <loc>https://www.cjdevelopmenttc.org/fr/actualites</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Contact -->
+  <url>
+    <loc>https://www.cjdevelopmenttc.org/fr/contact</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Entreprises -->
+  <url>
+    <loc>https://www.cjdevelopmenttc.org/fr/entreprises</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- NOTE : Les routes /auth/* sont volontairement EXCLUES du sitemap -->
+  <!-- (Disallow dans robots.txt + noindex dans les layouts correspondants) -->
+
+</urlset>

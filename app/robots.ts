@@ -6,9 +6,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/api/'],
+        // Exclure les routes d'administration, API, et authentification de l'indexation
+        disallow: ['/admin/', '/api/', '/auth/', '/fr/auth/', '/en/auth/'],
       },
     ],
-    sitemap: 'https://cjdevelopmenttc.com/sitemap.xml',
+    sitemap: 'https://www.cjdevelopmenttc.org/sitemap.xml',
   }
 }

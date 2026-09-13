@@ -3,7 +3,7 @@ const path = require('path');
 
 const urls = [
   'http://localhost:3000/api/upload',
-  'https://cj-dtc-main.vercel.app/api/upload'
+  'https://www.cjdevelopmenttc.org/api/upload'
 ];
 
 async function testUrl(url) {

@@ -11,13 +11,13 @@ interface LayoutProps {
   params: Promise<{ locale: string }>
 }
 
-const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://cjdevelopmenttc.com').replace(/\/$/, '')
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://www.cjdevelopmenttc.org').replace(/\/$/, '')
 
 import { buildMetadata } from '@/lib/seo-config'
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: 'CJ Development Training Center - Formation Professionnelle Panafricaine',
+    title: 'CJ Development Training Center | Formation Professionnelle Panafricaine',
     description: 'Centre panafricain d\'excellence en formation professionnelle, RH, leadership et insertion. Formations certifiantes en ligne et présentiel depuis 2018.',
     keywords: [
       'formation professionnelle',
@@ -29,15 +29,16 @@ export const metadata: Metadata = {
       'certification',
       'insertion professionnelle',
       'CJ DTC',
+      'CJ Development Training Center',
     ],
     path: '/',
   }),
   title: {
-    default: 'CJ Development Training Center - Formation Professionnelle Panafricaine',
+    default: 'CJ Development Training Center | Formation Professionnelle Panafricaine',
     template: '%s | CJ DTC',
   },
   alternates: {
-    canonical: APP_URL,
+    canonical: `${APP_URL}/fr`,
     languages: {
       'fr': `${APP_URL}/fr`,
       'en': `${APP_URL}/en`,
