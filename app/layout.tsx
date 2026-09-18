@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import type { Metadata } from 'next'
 import GoogleAnalytics from '../components/GoogleAnalytics'
 import PublicPageFadeUp from '../components/PublicPageFadeUp'
+import ScrollToTop from '../components/ScrollToTop'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const inter = Inter({ subsets: ['latin'], fallback: ['system-ui', 'Arial', 'sans-serif'] })
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className={inter.className}>
         {gaId && <GoogleAnalytics gaId={gaId} />}
         <PublicPageFadeUp>{children}</PublicPageFadeUp>
+        <ScrollToTop />
         <SpeedInsights />
       </body>
     </html>
